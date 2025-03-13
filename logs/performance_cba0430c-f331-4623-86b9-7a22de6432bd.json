@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-03-12T15:28:15.242910",
+  "session_id": "cba0430c-f331-4623-86b9-7a22de6432bd",
+  "session_duration_hours": 1.3735890680555556,
+  "traders": {
+    "BTC_Futures_Omega": {
+      "trader_name": "BTC_Futures_Omega",
+      "trader_type": "strategic",
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "win_rate": 0.0,
+      "liquidation_events": 0,
+      "profit_factor": 0,
+      "avg_pnl": 0,
+      "avg_duration_minutes": 0,
+      "exit_types": {
+        "unknown": 9
+      },
+      "current_metrics": {
+        "total_trades": 3,
+        "winning_trades": 0,
+        "losing_trades": 0,
+        "liquidation_events": 0,
+        "initial_capital": 10000.0,
+        "current_capital": 7921.14694155993,
+        "pnl_percentage": -20.788530584400696,
+        "win_rate": 0.0
+      },
+      "pnl_history": [],
+      "current_capital": 7921.14694155993,
+      "initial_capital": 10000.0,
+      "return_percentage": -20.788530584400696
+    }
+  }
+}

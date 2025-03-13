@@ -1,0 +1,29 @@
+# Memory management
+maxmemory 4gb
+maxmemory-policy allkeys-lru
+maxmemory-samples 10
+lfu-decay-time 1
+lfu-log-factor 10
+
+# Performance settings
+io-threads 4
+io-threads-do-reads yes
+list-max-ziplist-size -2
+list-compress-depth 1
+zset-max-ziplist-entries 256
+zset-max-ziplist-value 128
+
+# Client connection settings
+timeout 300
+tcp-keepalive 60
+maxclients 10000
+
+# Background tasks
+hz 100
+dynamic-hz yes
+
+# Persistence (minimal for speed)
+save 900 1
+save 300 10
+appendfsync everysec
+no-appendfsync-on-rewrite yes
