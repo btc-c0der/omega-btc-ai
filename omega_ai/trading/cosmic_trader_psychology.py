@@ -20,7 +20,7 @@ import random
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Any
 from omega_ai.trading.cosmic_schumann import SchumannSimulator, update_trader_psychology_with_schumann
 
 # Terminal colors for spiritual output
@@ -548,36 +548,32 @@ class CosmicTraderPsychology:
             }
     
     def set_cosmic_conditions(self, 
-                             moon_phase: Optional[MoonPhase] = None,
-                             schumann_freq: Optional[SchumannFrequency] = None,
-                             market_liquidity: Optional[MarketLiquidity] = None,
-                             global_sentiment: Optional[GlobalSentiment] = None,
-                             mercury_retrograde: Optional[bool] = None,
-                             latitude: Optional[float] = None,
-                             longitude: Optional[float] = None):
-        """Update cosmic conditions affecting trader psychology"""
+                             moon_phase=None, 
+                             schumann_freq=None, 
+                             market_liquidity=None, 
+                             global_sentiment=None, 
+                             mercury_retrograde=None,
+                             apply_influences=True):
+        """Set cosmic conditions affecting trader psychology"""
+        # Update cosmic conditions
         if moon_phase is not None:
             self.cosmic.moon_phase = moon_phase
+            
         if schumann_freq is not None:
             self.cosmic.schumann_frequency = schumann_freq
+            
         if market_liquidity is not None:
             self.cosmic.market_liquidity = market_liquidity
+            
         if global_sentiment is not None:
             self.cosmic.global_sentiment = global_sentiment
+            
         if mercury_retrograde is not None:
             self.cosmic.mercury_retrograde = mercury_retrograde
-        if latitude is not None:
-            self.cosmic.trader_latitude = latitude
-        if longitude is not None:
-            self.cosmic.trader_longitude = longitude
             
-        # Update time cycles
-        now = datetime.datetime.now()
-        self.cosmic.day_of_week = now.weekday()
-        self.cosmic.hour_of_day = now.hour
-        
-        # Update psychological state based on new cosmic conditions
-        self._apply_cosmic_influences()
+        # Apply cosmic influences to trader psychology (if requested)
+        if apply_influences:
+            self._apply_cosmic_influences()
     
     def _apply_cosmic_influences(self):
         # Calculate cosmic influences
@@ -1179,9 +1175,10 @@ class CosmicTraderPsychology:
             
         return base
 
-    def to_dict(self) -> dict:
-        """Convert psychology state to dictionary for storage/analysis"""
-        return {
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert trader psychology to dictionary for divine persistence"""
+        # Core trader attributes
+        data = {
             "profile_type": self.profile_type,
             "emotional_state": self.emotional_state,
             "confidence": self.confidence,
@@ -1196,49 +1193,51 @@ class CosmicTraderPsychology:
             "patience": self.patience,
             "consecutive_wins": self.consecutive_wins,
             "consecutive_losses": self.consecutive_losses,
-            "cosmic_conditions": {
-                "moon_phase": self.cosmic.moon_phase.value,
-                "schumann_frequency": self.cosmic.schumann_frequency.value,
-                "market_liquidity": self.cosmic.market_liquidity.value,
-                "global_sentiment": self.cosmic.global_sentiment.value,
-                "mercury_retrograde": self.cosmic.mercury_retrograde
-            }
+            "fomo_threshold": self.fomo_threshold
         }
 
+        # Cosmic conditions
+        data["cosmic_conditions"] = {
+            "moon_phase": self.cosmic.moon_phase.value if hasattr(self.cosmic, "moon_phase") else None,
+            "schumann_frequency": self.cosmic.schumann_frequency.value if hasattr(self.cosmic, "schumann_frequency") else None,
+            "market_liquidity": self.cosmic.market_liquidity.value if hasattr(self.cosmic, "market_liquidity") else None,
+            "global_sentiment": self.cosmic.global_sentiment.value if hasattr(self.cosmic, "global_sentiment") else None,
+            "mercury_retrograde": self.cosmic.mercury_retrograde
+        }
+
+        return data
+
     @classmethod
-    def from_dict(cls, data: dict) -> 'CosmicTraderPsychology':
-        """Create a psychology object from dictionary data"""
-        psychology = cls(
-            profile_type=data.get("profile_type", "strategic"),
-            initial_state=data.get("emotional_state", "neutral")
-        )
+    def from_dict(cls, data: Dict[str, Any]) -> 'CosmicTraderPsychology':
+        """Recreate trader psychology from dictionary with divine accuracy"""
+        # Create base trader
+        trader = cls(profile_type=data["profile_type"])
         
-        # Load primary attributes
-        psychology.confidence = data.get("confidence", 0.5)
-        psychology.risk_appetite = data.get("risk_appetite", 0.5)
-        psychology.stress_level = data.get("stress_level", 0.0)
-        psychology.insight_level = data.get("insight_level", 0.5)
-        psychology.divine_connection = data.get("divine_connection", 0.5)
-        psychology.resilience = data.get("resilience", 0.5)
-        psychology.adaptability = data.get("adaptability", 0.5)
-        psychology.discipline = data.get("discipline", 0.5)
-        psychology.intuition = data.get("intuition", 0.5)
-        psychology.patience = data.get("patience", 0.5)
-        psychology.consecutive_wins = data.get("consecutive_wins", 0)
-        psychology.consecutive_losses = data.get("consecutive_losses", 0)
-        
-        # Load cosmic conditions if available
-        if "cosmic_conditions" in data:
-            cosmic = data["cosmic_conditions"]
-            psychology.set_cosmic_conditions(
-                moon_phase=MoonPhase(cosmic.get("moon_phase", MoonPhase.FULL_MOON.value)),
-                schumann_freq=SchumannFrequency(cosmic.get("schumann_frequency", SchumannFrequency.BASELINE.value)),
-                market_liquidity=MarketLiquidity(cosmic.get("market_liquidity", MarketLiquidity.NORMAL.value)),
-                global_sentiment=GlobalSentiment(cosmic.get("global_sentiment", GlobalSentiment.NEUTRAL.value)),
-                mercury_retrograde=cosmic.get("mercury_retrograde", False)
+        # Set cosmic conditions first, but don't apply influences yet
+        cosmic_data = data.get("cosmic_conditions", {})
+        if cosmic_data:
+            # Convert string values back to enums
+            moon_phase = MoonPhase(cosmic_data["moon_phase"]) if cosmic_data.get("moon_phase") else None
+            schumann_freq = SchumannFrequency(cosmic_data["schumann_frequency"]) if cosmic_data.get("schumann_frequency") else None
+            liquidity = MarketLiquidity(cosmic_data["market_liquidity"]) if cosmic_data.get("market_liquidity") else None
+            sentiment = GlobalSentiment(cosmic_data["global_sentiment"]) if cosmic_data.get("global_sentiment") else None
+            
+            # Set cosmic conditions without applying influences (key fix!)
+            trader.set_cosmic_conditions(
+                moon_phase=moon_phase,
+                schumann_freq=schumann_freq,
+                market_liquidity=liquidity,
+                global_sentiment=sentiment,
+                mercury_retrograde=cosmic_data.get("mercury_retrograde", False),
+                apply_influences=False  # Don't override psychological attributes
             )
         
-        return psychology
+        # Now set all psychological attributes directly
+        for key, value in data.items():
+            if key != "cosmic_conditions" and hasattr(trader, key):
+                setattr(trader, key, value)
+        
+        return trader
 
     def _update_emotional_state_for_enlightenment(self):
         """Update emotional state based on enlightened trading progress."""
