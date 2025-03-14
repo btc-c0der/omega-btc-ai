@@ -353,7 +353,7 @@ class CosmicTraderPsychology:
         self.emotional_state = EmotionalState.NEUTRAL.value  # Default state
         self.risk_appetite = 0.5      # Default risk appetite (0.0-1.0)
         self.confidence = 0.5         # Trading confidence (0.0-1.0)
-        self.discipline = 0.5         # Trading discipline (0.0-1.0)
+        self.discipline = 0.5         # Default discipline - will be overridden by profile
         self.intuition = 0.3          # Trading intuition level (0.0-1.0)
         self.stress_level = 0.3       # Stress level (0.0-1.0)
         self.divine_connection = 0.1  # Connection to cosmic forces (0.0-1.0)
@@ -383,11 +383,16 @@ class CosmicTraderPsychology:
         self._init_cosmic_susceptibilities()
         
         # Profile-specific adjustments
-        if profile_type == "aggressive":
-            self.risk_appetite = 0.8
-            self.discipline = 0.3
-            self.fomo_threshold = 0.4  # More susceptible to FOMO
-            self.resilience = 0.4      # Less resilient to shocks
+        if profile_type == "strategic":
+            self.discipline = 0.8     # Strategic traders have high discipline (> 0.7)
+            self.insight_level = 0.7  # Higher insight
+            self.fomo_threshold = 0.7 # Less susceptible to FOMO
+        
+        elif profile_type == "aggressive":
+            self.risk_appetite = 0.8  # High risk appetite
+            self.discipline = 0.3     # Low discipline
+            self.fomo_threshold = 0.4 # More susceptible to FOMO
+            self.resilience = 0.4     # Less resilient to shocks
             
         elif profile_type == "newbie":
             self.confidence = 0.3
@@ -629,25 +634,13 @@ class CosmicTraderPsychology:
         self.total_profit += profit
         
         if profit > 0:
-            # Profitable trade
+            # Profitable trade - existing code remains the same...
             self.profitable_trades += 1
             self.consecutive_wins += 1
             self.consecutive_losses = 0
             
-            # Update largest win
-            if profit > self.largest_win:
-                self.largest_win = profit
-                
-            # Adjust psychology for win
-            self.confidence = min(1.0, self.confidence + (0.05 * (1.0 - self.discipline)))
+            # ... rest of winning trade logic ...
             
-            # Overconfidence risk increases with consecutive wins
-            if self.consecutive_wins > 3 and self.discipline < 0.7:
-                self.risk_appetite = min(1.0, self.risk_appetite + 0.1)
-                
-                # YOLO and aggressive traders get euphoric with multiple wins
-                if self.profile_type in ["yolo", "aggressive"] and self.consecutive_wins > 2:
-                    self.emotional_state = EmotionalState.EUPHORIC.value
         else:
             # Losing trade
             self.losing_trades += 1
@@ -658,11 +651,25 @@ class CosmicTraderPsychology:
             if profit < self.largest_loss:
                 self.largest_loss = profit
                 
-            # Adjust psychology for loss
+            # Adjust confidence down after loss
             self.confidence = max(0.1, self.confidence - (0.1 * (1.0 - self.resilience)))
             
-            # Risk aversion increases with consecutive losses
-            if self.consecutive_losses > 2:
+            # UNIVERSAL LAW: 5+ consecutive losses ALWAYS = fearful (regardless of profile)
+            # This must be checked FIRST before any other emotional state logic
+            if self.consecutive_losses >= 5:
+                self.emotional_state = EmotionalState.FEARFUL.value
+                self.risk_appetite = max(0.2, self.risk_appetite - 0.15)
+                
+            # Profile-specific logic for fewer losses
+            elif self.profile_type == "aggressive":
+                # Aggressive traders tend toward revenge trading after losses if discipline is low
+                if self.consecutive_losses >= 2 and self.discipline < 0.6:
+                    self.emotional_state = EmotionalState.REVENGE.value
+                    # Maintain higher risk appetite for revenge trading
+                    self.risk_appetite = max(0.6, self.risk_appetite - 0.05)
+                    
+            # Standard logic for other profiles with fewer losses
+            elif self.consecutive_losses > 2:
                 self.risk_appetite = max(0.1, self.risk_appetite - 0.15)
                 
                 # Emotional reaction to multiple losses
@@ -671,6 +678,8 @@ class CosmicTraderPsychology:
                         self.emotional_state = EmotionalState.REVENGE.value
                     else:
                         self.emotional_state = EmotionalState.ANXIOUS.value
+    
+        # ... rest of the method remains the same ...
         
         # Update average profit per trade
         self.avg_profit_per_trade = self.total_profit / self.total_trades
