@@ -168,7 +168,8 @@ class CosmicInfluences:
             "risk_tolerance": -0.1 if is_winter else 0.2, # Winter = conservative, summer = risk-taking
             "patience": 0.2 if is_winter else -0.1,      # Winter increases patience, summer decreases it
             "focus": 0.1 if is_winter else -0.05,        # Better focus in winter
-            "social_trading": -0.1 if is_winter else 0.2  # More social trading in summer
+            "social_trading": -0.1 if is_winter else 0.2,  # More social trading in summer
+            "introspection": 0.3 if is_winter else -0.1   # Winter increases introspection, summer decreases it
         }
         
         # Longitude effect: different trading times relative to major markets
