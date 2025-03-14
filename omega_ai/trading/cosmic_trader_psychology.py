@@ -692,11 +692,23 @@ class CosmicTraderPsychology:
             EmotionalState.CALM.value,
             EmotionalState.FOCUSED.value
         ]:
-            # This was a mindful trade
+            # YOLO traders struggle significantly with enlightenment
+            if self.profile_type == "yolo":
+                # 70% chance of failing to recognize a mindful trade
+                if random.random() < 0.7:
+                    return {
+                        "confidence_change": self.confidence,
+                        "risk_appetite_change": self.risk_appetite,
+                        "emotional_state": self.emotional_state,
+                        "divine_connection": self.divine_connection
+                    }
+                
+            # This was a mindful trade for non-YOLO traders
             self.consecutive_enlightened_trades += 1
             
-            # Progress towards enlightenment
-            enlightenment_gain = 0.05 * (self.consecutive_enlightened_trades ** 0.5)
+            # Progress towards enlightenment - YOLO traders progress much slower
+            enlightenment_multiplier = 0.3 if self.profile_type == "yolo" else 1.0
+            enlightenment_gain = 0.05 * (self.consecutive_enlightened_trades ** 0.5) * enlightenment_multiplier
             self.divine_connection = min(1.0, self.divine_connection + enlightenment_gain)
             self.enlightenment_progress += enlightenment_gain
             
@@ -721,21 +733,23 @@ class CosmicTraderPsychology:
 
     def practice_mindful_trading(self):
         """Practice mindfulness to improve divine trading connection."""
-        # YOLO traders need extra divine boost to overcome their natural resistance
+        # YOLO traders need extra divine boost but have significant resistance
         if self.profile_type == "yolo":
-            # Increased divine boost for YOLO traders during mindful practice
-            divine_boost = 0.04  # Double the normal boost
+            # YOLO traders often struggle to maintain mindfulness
+            if random.random() < 0.6:  # 60% chance of mindfulness practice failing
+                return
+            
+            divine_boost = 0.02  # Smaller boost for YOLO
         else:
-            divine_boost = 0.02  # Normal boost for other profiles
+            divine_boost = 0.04  # Normal boost for other profiles
             
         # Increase divine connection with profile-specific boost
         self.divine_connection = min(0.99, self.divine_connection + divine_boost)
         
         # Decrease stress level
         self.stress_level = max(0.1, self.stress_level - 0.1)
-        
+
         # Chance to improve emotional state
-        import random
         if random.random() < 0.3:
             if self.emotional_state in [
                 EmotionalState.ANXIOUS.value,
@@ -749,7 +763,7 @@ class CosmicTraderPsychology:
                 EmotionalState.FOMO.value
             ]:
                 self.emotional_state = EmotionalState.MINDFUL.value
-        
+
         # Check for enlightened states after mindfulness practice
         self._update_emotional_state_for_enlightenment()
 
