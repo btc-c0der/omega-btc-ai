@@ -344,27 +344,28 @@ class CosmicTraderPsychology:
         """Initialize the cosmic trader psychology with divine attributes"""
         self.profile_type = profile_type
         
-        # Emotional state and divine metrics
+        # EXPLICIT DISCIPLINE SETTING BY PROFILE TYPE - MUST GO FIRST
+        # This ensures it won't get overridden by other initialization logic
+        if profile_type == "strategic":
+            self.discipline = 0.8  # Strategic traders have high discipline (> 0.7)
+        elif profile_type == "aggressive":
+            self.discipline = 0.3  # Aggressive traders have low discipline
+        elif profile_type == "newbie":
+            self.discipline = 0.2  # Newbies have very low discipline
+        elif profile_type == "scalper":
+            self.discipline = 0.7  # Scalpers have good discipline
+        elif profile_type == "yolo":
+            self.discipline = 0.1  # YOLO traders have minimal discipline
+        else:
+            self.discipline = 0.5  # Default discipline
+        
+        # Now continue with rest of initialization
         self.emotional_state = EmotionalState.NEUTRAL.value  # Default state
         self.risk_appetite = 0.5      # Default risk appetite (0.0-1.0)
         self.confidence = 0.5         # Trading confidence (0.0-1.0)
-        self.discipline = 0.5         # Default discipline
+        # self.discipline is already set above, don't set it again here
         self.intuition = 0.3          # Trading intuition level (0.0-1.0)
         self.stress_level = 0.3       # Stress level (0.0-1.0)
-        self.divine_connection = 0.1  # Connection to cosmic forces (0.0-1.0)
-        self.insight_level = 0.3      # Pattern recognition ability (0.0-1.0)
-        self.adaptability = 0.4       # Ability to adapt to changing conditions (0.0-1.0)
-        self.mental_fatigue = 0.0     # Mental fatigue level (0.0-1.0)
-        self.fomo_threshold = 0.5     # Default FOMO threshold (lower = more susceptible)
-        self.resilience = 0.5         # Ability to withstand market shocks (0.0-1.0)d
-        
-        # Trading metrics and history
-        self.total_trades = 0              # Total number of trades executed
-        self.profitable_trades = 0         # Number of profitable trades
-        self.losing_trades = 0             # Number of losing trades
-        self.consecutive_wins = 0          # Consecutive winning trades
-        self.consecutive_losses = 0        # Consecutive losing trades
-        self.consecutive_enlightened_trades = 0  # Trades made in a mindful state
         self.total_profit = 0.0            # Cumulative profit
         self.largest_win = 0.0             # Largest winning trade
         self.largest_loss = 0.0            # Largest losing trade
