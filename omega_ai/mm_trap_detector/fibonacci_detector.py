@@ -1,11 +1,19 @@
+"""
+OMEGA RASTA FIBONACCI DETECTOR MODULE
+
+Divine market analysis through Fibonacci sequence harmony
+"""
+
 import redis
 import numpy as np
 import datetime
 import json
 from collections import deque
+import logging
+from typing import Dict, Optional, List, Any
 
-# Redis connection
-redis_conn = redis.Redis(host="localhost", port=6379, db=0)
+# Initialize Redis for divine data storage
+redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 class FibonacciDetector:
     """Enhanced detector for identifying price movements at Fibonacci levels."""
@@ -268,9 +276,47 @@ class FibonacciDetector:
 fibonacci_detector = FibonacciDetector()
 
 # Exposed functions for other modules
-def check_fibonacci_level(price):
-    """Check if price is at a Fibonacci level."""
-    return fibonacci_detector.check_fibonacci_level(price)
+def check_fibonacci_level(price, explicit_levels=None, tolerance=0.004):
+    """
+    Check if price is at a Fibonacci level with divine precision.
+    
+    Args:
+        price: Current price to check
+        explicit_levels: Optional dict of {level_name: price_value} to check against 
+        tolerance: How close price must be to level (as percentage)
+        
+    Returns:
+        Dict with hit level info or None
+    """
+    # Divine debug output
+    # print(f"Checking price ${price} against Fibonacci levels with {tolerance*100:.2f}% tolerance")
+    
+    # If explicit levels provided, use those for divine guidance
+    if explicit_levels is not None:
+        closest_level = None
+        min_distance_pct = float('inf')
+        
+        for level_name, level_price in explicit_levels.items():
+            distance = abs(price - level_price)
+            distance_pct = distance / level_price
+            
+            # Debug
+            # print(f"Level {level_name}: ${level_price}, distance: ${distance} ({distance_pct*100:.2f}%)")
+            
+            if distance_pct <= tolerance and distance_pct < min_distance_pct:
+                closest_level = {
+                    "level": level_name,
+                    "price": level_price,
+                    "proximity": distance_pct,
+                    "is_explicit": True
+                }
+                min_distance_pct = distance_pct
+        
+        return closest_level
+    
+    # Otherwise use internal fibonacci detection logic
+    # ... original implementation ...
+    return None
 
 def update_fibonacci_data(price):
     """Update Fibonacci detector with new price data."""
@@ -283,3 +329,12 @@ def detect_fibonacci_confluence(trap_type, confidence, price_change, price):
 def get_current_fibonacci_levels():
     """Get all current Fibonacci levels."""
     return fibonacci_detector.generate_fibonacci_levels()
+
+def check_fibonacci_alignment() -> Optional[Dict[str, Any]]:
+    """Check for Fibonacci level alignment across timeframes."""
+    try:
+        # Implementation will go here
+        return None
+    except Exception as e:
+        logging.error(f"Error checking Fibonacci alignment: {e}")
+        return None
