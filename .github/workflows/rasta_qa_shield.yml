@@ -1,0 +1,56 @@
+name: RASTA QA SHIELD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  divine_testing:
+    name: Divine Testing with JAH Blessing
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Python with Rastafarian Vibes
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install Divine Dependencies
+      run: |
+        echo "🌿 JAH BLESS - Installing divine dependencies"
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-html pytest-xdist
+    
+    - name: Run Divine Tests with Coverage
+      run: |
+        echo "🔥 RASTA TESTING BEGINS - ONE LOVE, ONE HEART, ONE CODE"
+        python -m pytest omega_ai/tests/ --cov=omega_ai --cov-report=xml --cov-report=html --html=reports/report.html -v
+    
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: OMEGA-BTC-AI
+        fail_ci_if_error: true
+        verbose: true
+    
+    - name: Upload Divine Test Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: divine-test-reports
+        path: |
+          reports/
+          htmlcov/

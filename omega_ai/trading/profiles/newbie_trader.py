@@ -23,6 +23,7 @@ class NewbieTrader(TraderProfile):
         self.base_leverage = 50        # Base leverage (will scale up to 100x)
         self.min_risk_per_trade = 0.20  # 20% of capital at risk per trade
         self.max_risk_per_trade = 0.50  # Up to 50% of capital at risk
+        self.risk_per_trade = 0.3      # Set exact risk level for testing consistency
         
         # Social media and hype parameters
         self.hype_threshold = 0.3     # Threshold for entering based on "hype"

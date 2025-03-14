@@ -229,16 +229,23 @@ def run_fibonacci_analysis():
     
     print("\n════════════════════ FIBONACCI MULTI-TIMEFRAME ANALYSIS ════════════════════")
     
+    # Generate test data if none exists
+    if not redis_conn.exists("btc_movements_5min"):
+        print("No movement data found, generating test data...")
+        generate_test_btc_data()
+    
     for timeframe in timeframes:
         print(f"\nAnalyzing {timeframe}min timeframe:")
         movements = get_movements_data(timeframe)
         print(f"Retrieved {len(movements)} movements")
         
         analysis = analyze_fibonacci_levels(timeframe)
-        if analysis:
+        if analysis and "levels" in analysis:
             # Print analysis results
             for level, value in analysis["levels"].items():
-                print(f"Fibonacci {level}: {value}")
+                print(f"Fibonacci {level}: ${value:.2f}")
+        else:
+            print(f"Insufficient data for {timeframe}min")
 
 @dataclass
 class TraderState:
