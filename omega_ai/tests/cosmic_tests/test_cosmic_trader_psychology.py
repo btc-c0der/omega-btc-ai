@@ -600,7 +600,7 @@ def yolo_trader():
         "schumann": 0.9,
         "social_media": 1.0,
         "celebrity_tweets": 0.99,
-        "market_sentiment": 0.98,
+        "market_sentiment": 0.98,  # Key mismatch is here
         "mercury": 0.85
     }
     yolo.discipline = 0.1

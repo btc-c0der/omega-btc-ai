@@ -540,12 +540,12 @@ class CosmicTraderPsychology:
         self._apply_cosmic_influences()
     
     def _apply_cosmic_influences(self):
-        """Apply cosmic influences to trader psychology"""
         # Calculate cosmic influences
         influences = self.cosmic.calculate_total_cosmic_influence()
         
-        # Apply susceptibility factors to influences
-        risk_mod = influences["risk_appetite_mod"] * self.susceptibilities["sentiment"]
+        # Apply susceptibility factors to influences - use appropriate key names
+        risk_mod = influences["risk_appetite_mod"] * self.susceptibilities.get("sentiment", 
+                                                    self.susceptibilities.get("market_sentiment", 0.5))
         confidence_mod = influences["confidence_mod"] * self.susceptibilities["lunar"]
         mistake_prob = influences["mistake_probability"] * self.susceptibilities["mercury"]
         emotional_intensity = influences["emotional_intensity"] * self.susceptibilities["schumann"]
@@ -1652,3 +1652,64 @@ class CosmicTraderPsychology:
                  
         # Ensure clarity is within valid range
         return max(0.05, min(0.99, clarity))
+        
+    def get_preferred_leverage(self) -> float:
+        """Calculate the trader's preferred leverage based on psychology and cosmic alignment.
+        
+        Different trader profiles have different base leverage preferences,
+        and their current psychological state modifies this preference.
+        
+        Returns:
+            float: Preferred leverage multiplier (1.0-25.0)
+        """
+        # Base leverage by trader profile
+        base_leverage = {
+            "strategic": 2.0,    # Strategic traders use minimal leverage
+            "aggressive": 5.0,   # Aggressive traders use moderate leverage
+            "newbie": 3.0,       # Newbies shouldn't use high leverage but often do
+            "scalper": 7.0,      # Scalpers use higher leverage for quick moves
+            "yolo": 10.0         # YOLO traders use extreme leverage
+        }.get(self.profile_type, 3.0)
+        
+        # Risk appetite multiplier (0.2-2.0) - higher risk appetite = more leverage
+        risk_multiplier = 0.2 + (self.risk_appetite * 1.8)
+        
+        # Emotional state modifiers
+        emotion_multipliers = {
+            EmotionalState.FEARFUL.value: 0.5,      # Fear reduces leverage
+            EmotionalState.ANXIOUS.value: 0.7,      # Anxiety reduces leverage
+            EmotionalState.NEUTRAL.value: 1.0,      # Neutral emotion = normal leverage
+            EmotionalState.CONFIDENT.value: 1.2,    # Confidence increases leverage
+            EmotionalState.EUPHORIC.value: 1.5,     # Euphoria significantly increases leverage
+            EmotionalState.FOMO.value: 2.0,         # FOMO doubles leverage
+            EmotionalState.MANIC.value: 2.5,        # Mania leads to extreme leverage
+            EmotionalState.REVENGE.value: 3.0,      # Revenge trading uses maximum leverage
+            EmotionalState.MINDFUL.value: 0.8,      # Mindfulness reduces excessive leverage
+            EmotionalState.ZEN.value: 0.7,          # Zen state prefers lower leverage
+            EmotionalState.ENLIGHTENED.value: 0.6   # Enlightened traders use minimal leverage
+        }.get(self.emotional_state, 1.0)
+        
+        # Calculate final leverage preference
+        leverage = base_leverage * risk_multiplier * emotion_multipliers
+        
+        # YOLO traders in FOMO state with high risk appetite can go to extremes
+        if self.profile_type == "yolo" and self.emotional_state == EmotionalState.FOMO.value:
+            leverage *= 1.5  # Additional YOLO multiplier
+        
+        # Market condition modifiers
+        if hasattr(self, "cosmic") and hasattr(self.cosmic, "market_liquidity"):
+            if self.cosmic.market_liquidity == MarketLiquidity.DRY:
+                leverage *= 0.7  # Reduce leverage in low liquidity
+            elif self.cosmic.market_liquidity == MarketLiquidity.ABUNDANT:
+                leverage *= 1.2  # Increase leverage in high liquidity
+        
+        # Cap maximum leverage based on trader experience/profile
+        max_leverage = {
+            "strategic": 10.0,
+            "aggressive": 20.0,
+            "newbie": 15.0,
+            "scalper": 25.0,
+            "yolo": 50.0  # YOLO traders can go to extreme leverage
+        }.get(self.profile_type, 20.0)
+        
+        return min(max_leverage, max(1.0, leverage))  # Always between 1.0 and max_leverage
