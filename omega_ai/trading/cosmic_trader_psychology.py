@@ -345,7 +345,6 @@ class CosmicTraderPsychology:
         self.profile_type = profile_type
         
         # EXPLICIT DISCIPLINE SETTING BY PROFILE TYPE - MUST GO FIRST
-        # This ensures it won't get overridden by other initialization logic
         if profile_type == "strategic":
             self.discipline = 0.8  # Strategic traders have high discipline (> 0.7)
         elif profile_type == "aggressive":
@@ -359,13 +358,27 @@ class CosmicTraderPsychology:
         else:
             self.discipline = 0.5  # Default discipline
         
-        # Now continue with rest of initialization
+        # Emotional state and divine metrics
         self.emotional_state = EmotionalState.NEUTRAL.value  # Default state
         self.risk_appetite = 0.5      # Default risk appetite (0.0-1.0)
         self.confidence = 0.5         # Trading confidence (0.0-1.0)
-        # self.discipline is already set above, don't set it again here
         self.intuition = 0.3          # Trading intuition level (0.0-1.0)
+        self.insight_level = 0.3      # Pattern recognition ability (0.0-1.0)
         self.stress_level = 0.3       # Stress level (0.0-1.0)
+        self.divine_connection = 0.1  # Connection to cosmic forces (0.0-1.0)
+        self.adaptability = 0.4       # Ability to adapt to changing conditions (0.0-1.0)
+        self.mental_fatigue = 0.0     # Mental fatigue level (0.0-1.0)
+        self.fomo_threshold = 0.5     # Default FOMO threshold (lower = more susceptible)
+        self.resilience = 0.5         # Ability to withstand market shocks (0.0-1.0)
+        self.patience = 0.5           # Willingness to wait for optimal setups (0.0-1.0)
+        
+        # Trading metrics and history
+        self.total_trades = 0              # Total number of trades executed
+        self.profitable_trades = 0         # Number of profitable trades
+        self.losing_trades = 0             # Number of losing trades
+        self.consecutive_wins = 0          # Consecutive winning trades
+        self.consecutive_losses = 0        # Consecutive losing trades
+        self.consecutive_enlightened_trades = 0  # Trades made in a mindful state
         self.total_profit = 0.0            # Cumulative profit
         self.largest_win = 0.0             # Largest winning trade
         self.largest_loss = 0.0            # Largest losing trade
@@ -376,38 +389,46 @@ class CosmicTraderPsychology:
         self.cosmic = CosmicInfluences()
         
         # Initialize susceptibilities to cosmic influences
+        self.susceptibilities = {
+            "lunar": 0.5,
+            "schumann": 0.5,
+            "seasonal": 0.5,
+            "sentiment": 0.5,
+            "mercury": 0.5,
+            "market_sentiment": 0.5  # Include both versions for compatibility
+        }
         self._init_cosmic_susceptibilities()
         
         # Profile-specific adjustments
         if profile_type == "strategic":
-            self.discipline = 0.8     # Strategic traders have high discipline (> 0.7)
+            # Strategic traders are disciplined, analytical, less emotional
             self.insight_level = 0.7  # Higher insight
             self.fomo_threshold = 0.7 # Less susceptible to FOMO
             self.intuition = 0.5      # Better intuition
             
         elif profile_type == "aggressive":
+            # Aggressive traders take more risks, less patient
             self.risk_appetite = 0.8
-            self.discipline = 0.3
             self.fomo_threshold = 0.4  # More susceptible to FOMO
             self.resilience = 0.4      # Less resilient to shocks
             
         elif profile_type == "newbie":
+            # Newbies have higher emotional volatility, lower discipline
             self.confidence = 0.3
             self.insight_level = 0.1
             self.divine_connection = 0.0
             self.fomo_threshold = 0.3  # Highly susceptible to FOMO
-            self.discipline = 0.2      # Very low discipline
             self.resilience = 0.2      # Very low resilience
             
         elif profile_type == "scalper":
-            self.discipline = 0.7
+            # Scalpers are quick to act, moderate risk
             self.adaptability = 0.8
             self.fomo_threshold = 0.6  # Less susceptible to FOMO
             self.intuition = 0.6       # Good intuition for quick trades
             
         elif profile_type == "yolo":
+            # YOLO traders take extreme risks
             self.risk_appetite = 1.0
-            self.discipline = 0.1 
             self.confidence = 0.9
             self.divine_connection = 0.0
             self.fomo_threshold = 0.1  # Extremely susceptible to FOMO
@@ -424,7 +445,7 @@ class CosmicTraderPsychology:
                     if state.value == initial_state:
                         self.emotional_state = initial_state
                         break
-            
+        
         # Initialize hour_of_day attribute
         self.hour_of_day = 12  # Default to midday
         
