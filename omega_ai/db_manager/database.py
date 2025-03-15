@@ -338,33 +338,72 @@ class DatabaseManager:
 # Initialize a global instance
 db_manager = DatabaseManager()
 
-def fetch_recent_movements(timeframe: str = '1h', limit: int = 100) -> List[Dict[str, Any]]:
+# Keep ONE version of fetch_recent_movements that can handle both use cases
+def fetch_recent_movements(timeframe: str = '1h', limit: int = 100, minutes: int = None):
     """
     Fetch recent price movements from the database.
     
     Args:
         timeframe: Timeframe of data to fetch ('1m', '5m', '15m', '1h', '4h', '1d')
         limit: Maximum number of records to return
+        minutes: Optional filter for data within past X minutes
         
     Returns:
         List of price data dictionaries
     """
-    # Try to get data from Redis
     try:
-        # Key where we store BTC price data for this timeframe
-        key = f"btc_price_data:{timeframe}"
-        
-        # Get the latest data
-        data = db_manager.redis.lrange(key, -limit, -1)
-        
-        if not data:
-            # Fallback: If no data in Redis, return simulated data
-            return _generate_simulated_price_data(limit)
-        
-        # Parse JSON data
-        result = [json.loads(item) for item in data]
-        return result
-        
+        # If minutes is specified, use that logic (original second implementation)
+        if minutes is not None:
+            # Create Redis connection
+            redis_conn = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+            
+            # Get data from Redis 
+            movements = redis_conn.lrange("btc_movement_history", 0, -1)
+            if not movements:
+                return []
+                
+            # Convert string data to tuples
+            parsed_movements = []
+            current_time = datetime.datetime.now(datetime.UTC)
+            cutoff_time = current_time - datetime.timedelta(minutes=minutes)
+            
+            for movement in movements:
+                try:
+                    # Parse movement data
+                    movement_data = json.loads(movement)
+                    timestamp = datetime.datetime.fromisoformat(movement_data['timestamp'])
+                    
+                    if timestamp >= cutoff_time:
+                        parsed_movements.append((
+                            timestamp,
+                            float(movement_data['price']),
+                            float(movement_data.get('volume', 0)),
+                            float(movement_data.get('high', 0)),
+                            float(movement_data.get('low', 0)),
+                            float(movement_data.get('volume', 0))
+                        ))
+                except (json.JSONDecodeError, KeyError, ValueError) as e:
+                    print(f"Error parsing movement data: {e}")
+                    continue
+                    
+            return parsed_movements
+            
+        # Otherwise use the timeframe-based logic (original first implementation)
+        else:
+            # Key where we store BTC price data for this timeframe
+            key = f"btc_price_data:{timeframe}"
+            
+            # Get the latest data
+            data = db_manager.redis.lrange(key, -limit, -1)
+            
+            if not data:
+                # Fallback: If no data in Redis, return simulated data
+                return _generate_simulated_price_data(limit)
+            
+            # Parse JSON data
+            result = [json.loads(item) for item in data]
+            return result
+            
     except Exception as e:
         print(f"Error fetching recent price movements: {e}")
         # Return simulated data as fallback
@@ -452,6 +491,8 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
             db_manager.connect()
         
         # Create mm_traps table if it doesn't exist
+        if not db_manager.conn:
+            db_manager.connect()
         with db_manager.conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS mm_traps (
@@ -565,47 +606,6 @@ def get_recent_mm_traps(hours: int = 24, trap_type: Optional[str] = None) -> Lis
             return traps
         except:
             return []
-
-def fetch_recent_movements(minutes=15):
-    """Fetch recent price movements from Redis."""
-    try:
-        # Create Redis connection if not already defined
-        redis_conn = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
-        
-        # Get data from Redis (using redis_conn instead of undefined r)
-        movements = redis_conn.lrange("btc_movement_history", 0, -1)
-        if not movements:
-            return []
-            
-        # Convert string data to tuples
-        parsed_movements = []
-        current_time = datetime.datetime.now(datetime.UTC)
-        cutoff_time = current_time - datetime.timedelta(minutes=minutes)
-        
-        for movement in movements:
-            try:
-                # Parse movement data
-                movement_data = json.loads(movement)
-                timestamp = datetime.datetime.fromisoformat(movement_data['timestamp'])
-                
-                if timestamp >= cutoff_time:
-                    parsed_movements.append((
-                        timestamp,
-                        float(movement_data['price']),
-                        float(movement_data.get('volume', 0)),
-                        float(movement_data.get('high', 0)),
-                        float(movement_data.get('low', 0)),
-                        float(movement_data.get('volume', 0))
-                    ))
-            except (json.JSONDecodeError, KeyError, ValueError) as e:
-                print(f"Error parsing movement data: {e}")
-                continue
-                
-        return parsed_movements
-        
-    except Exception as e:
-        print(f"Error fetching movements: {e}")
-        return []
 
 def fetch_multi_interval_movements(interval: int = 5, limit: int = 100) -> tuple:
     """
@@ -743,6 +743,7 @@ def analyze_price_trend(minutes: int = 5) -> Tuple[str, float]:
         logger.error(f"Error analyzing price trend: {e}", exc_info=True)
         return "Error", 0.0
 
+# For the insert_mm_trap functions, rename the original one to avoid recursive calls
 def insert_possible_mm_trap(trap_data: Dict[str, Any]) -> bool:
     """
     Insert potential market maker trap data into Redis for later analysis.
@@ -784,3 +785,75 @@ def insert_possible_mm_trap(trap_data: Dict[str, Any]) -> bool:
         logger.error(f"Error recording MM trap: {e}", exc_info=True)
         return False
 
+# Then keep your existing wrapper function
+def insert_mm_trap(price, price_change_pct, trap_type, trap_confidence):
+    """
+    Insert a market maker trap detection into the database.
+    
+    Args:
+        price: BTC price at trap detection
+        price_change_pct: Percentage change that triggered the trap
+        trap_type: Type of trap detected (Liquidity Grab, Fake Pump, etc.)
+        trap_confidence: Confidence level (0.0-1.0)
+    """
+    # Convert parameters to the dictionary format expected by the implementation
+    trap_data = {
+        "timestamp": datetime.now(timezone.utc),
+        "trap_type": trap_type,
+        "price_level": price,
+        "direction": "up" if price_change_pct > 0 else "down",
+        "confidence_score": trap_confidence,
+        "volume_spike": 0,  # Not available from the parameters
+        "price_range": abs(price_change_pct * price),
+        "description": f"{trap_type} detected with {trap_confidence:.2f} confidence"
+    }
+    
+    # Log trap for debugging during tests
+    print(f"Storing MM trap: {trap_type} | Price: ${price:.2f} | Change: {price_change_pct:.2%} | Confidence: {trap_confidence:.2f}")
+    
+    try:
+        # Call the renamed function without risk of recursion
+        return insert_possible_mm_trap(trap_data)
+    except Exception as e:
+        print(f"Error storing MM trap: {e}")
+        return False
+    
+def insert_subtle_movement(timestamp, price, prev_price, abs_change, price_change, movement_tag, volume):
+    """Store subtle price movements for machine learning analysis."""
+    try:
+        # Create movement data dictionary
+        movement_data = {
+            "timestamp": timestamp.isoformat() if hasattr(timestamp, 'isoformat') else timestamp,
+            "price": price,
+            "prev_price": prev_price,
+            "abs_change": abs_change,
+            "price_change": price_change,
+            "movement_tag": movement_tag,
+            "volume": volume
+        }
+        
+        # Serialize to JSON
+        movement_json = json.dumps(movement_data)
+        
+        # Store in Redis in multiple timeframe buckets for different analysis windows
+        for minutes in [1, 5, 15, 60, 240]:  # 1min, 5min, 15min, 1hr, 4hr
+            key = f"btc_movements_{minutes}min"
+            redis_conn.lpush(key, movement_json)
+            redis_conn.ltrim(key, 0, 999)  # Keep last 1000 entries
+        
+        # Store in main history
+        redis_conn.lpush("btc_movement_history", movement_json)
+        redis_conn.ltrim("btc_movement_history", 0, 9999)  # Keep last 10000 entries
+        
+        # Store in tag-specific lists for easy retrieval of specific movement types
+        if movement_tag != "Stable":
+            redis_conn.lpush(f"movement_type:{movement_tag}", movement_json)
+            redis_conn.ltrim(f"movement_type:{movement_tag}", 0, 499)  # Keep last 500 entries
+        
+        # Log the stored movement
+        print(f"{CYAN}Storing {movement_tag} movement: ${abs_change:.2f} ({price_change:.2%}){RESET}")
+        return True
+        
+    except Exception as e:
+        print(f"{RED}Error storing subtle movement: {e}{RESET}")
+        return False
