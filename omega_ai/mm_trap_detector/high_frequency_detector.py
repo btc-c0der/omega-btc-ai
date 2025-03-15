@@ -267,7 +267,7 @@ class HighFrequencyTrapDetector:
         # Get current BTC price from Redis
         try:
             btc_price_bytes = redis_conn.get("last_btc_price")
-            btc_price = float(btc_price_bytes) if btc_price_bytes else 0.0
+            btc_price = float(btc_price_bytes.decode()) if btc_price_bytes else 0.0
         except (ValueError, TypeError):
             btc_price = 0.0
         
@@ -453,14 +453,23 @@ def check_high_frequency_mode(price=None, simulation_mode=False):
     """Check if high-frequency trap mode should be activated."""
     return hf_detector.detect_high_freq_trap_mode(price, simulation_mode=simulation_mode)
 
-def register_trap_detection(trap_type, confidence, price_change, btc_price):
-    """Register a trap detection event"""
+def register_trap_detection(trap_type, confidence, price_change):
+    """Register a trap detection event with the high-frequency detector."""
     try:
-        # Update detector state
+        # The existing function expects a btc_price parameter that the test doesn't provide
+        # Get current BTC price from Redis
+        redis_conn = redis.Redis(host="localhost", port=6379, db=0)
+        btc_price_bytes = redis_conn.get("last_btc_price")
+        btc_price = float(btc_price_bytes) if btc_price_bytes else 0.0
+        
+        # Use the existing detector's register method
         hf_detector.register_trap_event(trap_type, confidence, price_change, btc_price)
         
+        print(f"Registering trap with HF detector: {trap_type} | Confidence: {confidence:.2f} | Change: {price_change:.2%}")
+        return True
     except Exception as e:
         print(f"Error registering trap: {e}")
+        return False
 
 # Update the simulate_price_updates function for Fibonacci reporting:
 def simulate_price_updates():

@@ -1,6 +1,7 @@
 import datetime
 import numpy as np
 import redis
+import traceback  # Missing import for traceback.format_exc()
 from omega_ai.db_manager.database import fetch_recent_movements
 from omega_ai.mm_trap_detector.high_frequency_detector import check_high_frequency_mode, register_trap_detection
 
@@ -9,23 +10,21 @@ class OmegaAlgo:
 
     # ✅ Dynamic MM Detection Constants
     SCHUMANN_THRESHOLD = 10.0
-    VOLATILITY_MULTIPLIER = 2.5  # ✅ Adjusts dynamically with BTC market conditions
-    MIN_LIQUIDITY_GRAB_THRESHOLD = 250  # ✅ Minimum absolute price move to trigger detection
-    PRICE_DROP_THRESHOLD = -0.02  # ✅ 2% BTC price drop
-    PRICE_PUMP_THRESHOLD = 0.02  # ✅ 2% BTC price pump
-    CHECK_INTERVAL = 30  # ✅ Frequency of checks (in seconds)
-    ROLLING_WINDOW = 30  # ✅ Number of price points for volatility calculations
+    VOLATILITY_MULTIPLIER = 2.5
+    MIN_LIQUIDITY_GRAB_THRESHOLD = 250
+    PRICE_DROP_THRESHOLD = -0.02
+    PRICE_PUMP_THRESHOLD = 0.02
+    CHECK_INTERVAL = 30
+    ROLLING_WINDOW = 30
+    
+    # Terminal Colors (deduplicated)
     CYAN = "\033[96m"
     RESET = "\033[0m"
     WHITE = "\033[97m"
     GREEN = "\033[92m"
     BLUE = "\033[94m"
-    RESET = "\033[0m"
     RED = "\033[91m"
     YELLOW = "\033[93m"
-    GREEN = "\033[92m"
-    BLUE = "\033[94m"
-
 
     # ✅ Initialize Redis Connection
     redis_conn = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
@@ -372,7 +371,7 @@ class OmegaAlgo:
             distance = abs(latest_price - closest_level[1])
             
             print(f"📡 [DEBUG] Current Price ${latest_price} is ${distance:.2f} away from {closest_level[0]} level")
-            print(f"📡 [DEBUG] {tf.upper()} Fibonacci | Levels: {len(levels)}")
+            print(f"📡 [DEBUG] REALTIME Fibonacci | Levels: {len(realtime_fib_levels)}")
             
             # Store distance to closest Fib level for monitoring
             cls.redis_conn.set("distance_to_nearest_fib", distance)
