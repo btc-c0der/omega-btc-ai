@@ -13,6 +13,7 @@ from omega_ai.alerts.telegram_market_report import TelegramMarketReporter
 TEST_PRICE = 87654.32
 TEST_PREV_PRICE = 86543.21
 TEST_CHANGE_PCT = 1.28
+TEST_VOLUME = 0.00214
 TEST_CONFIG = {
     'telegram_token': 'test_token',
     'telegram_chat_id': '-1002510049870',
@@ -33,6 +34,19 @@ TEST_MARKET_TRENDS = {
     "15min": "Slightly Bearish",
     "1h": "Neutral",
     "4h": "Moderately Bearish"
+}
+
+# ✅ Test Movement Data
+TEST_MOVEMENT_DATA = {
+    "classification": "Stable",
+    "stored_price": 11.85,
+    "volume": TEST_VOLUME,
+    "bias": "Strongly Bullish",
+    "signals": {
+        "bullish": 3,
+        "bearish": 1,
+        "sideways": 12
+    }
 }
 
 # ✅ Divine Bio-Energy States
@@ -136,6 +150,8 @@ async def mock_redis():
             return json.dumps(TEST_MARKET_RHYTHM)
         elif key == "divine_patterns":
             return json.dumps(TEST_DIVINE_PATTERNS)
+        elif key == "movement_data":
+            return json.dumps(TEST_MOVEMENT_DATA)
         elif key.startswith("latest_trend_"):
             timeframe = key.replace("latest_trend_", "")
             return TEST_MARKET_TRENDS.get(timeframe, "Neutral")
@@ -202,6 +218,28 @@ class TestMarketReporterDataRetrieval:
         assert "1min" in trends
         assert "5min" in trends
         assert trends["1min"] == "Strongly Bullish"
+    
+    @pytest.mark.asyncio
+    async def test_movement_classification(self, market_reporter, mock_redis):
+        """Test movement classification and metrics."""
+        summary = await market_reporter.get_market_summary()
+        
+        # Check movement metrics are present
+        assert "Overall Market Bias: Strongly Bullish" in summary
+        assert "Signal Distribution: Bullish(3) Bearish(1) Sideways(12)" in summary
+        assert f"Stored Movement: Stable (${TEST_MOVEMENT_DATA['stored_price']:.2f})" in summary
+        assert f"Volume: {TEST_VOLUME:.5f} BTC" in summary
+        assert "Movement Classification: Stable" in summary
+    
+    @pytest.mark.asyncio
+    async def test_market_metrics_format(self, market_reporter, mock_redis):
+        """Test market metrics log format."""
+        summary = await market_reporter.get_market_summary()
+        
+        # Check log-style formatting
+        assert "$ tail -f /var/log/market-metrics.log" in summary
+        assert "[" in summary and "] Overall Market Bias:" in summary
+        assert "✅ [DEBUG]" in summary
     
     @pytest.mark.asyncio
     async def test_get_fibonacci_levels(self, market_reporter, mock_redis):
