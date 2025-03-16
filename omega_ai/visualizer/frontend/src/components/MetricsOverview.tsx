@@ -1,68 +1,52 @@
 import React from 'react';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Typography, CircularProgress } from '@mui/material';
 import ReactECharts from 'echarts-for-react';
-import { MetricsData } from '../types/types';
+import type { EChartsOption } from 'echarts';
+import useDataFeed from '../hooks/useDataFeed';
 
-// Mock data for development
-const mockMetrics: MetricsData = {
-    totalTraps: 157,
-    trapsByType: {
-        'FAKE_PUMP': 45,
-        'FAKE_DUMP': 38,
-        'LIQUIDITY_GRAB': 52,
-        'HALF_LIQUIDITY_GRAB': 22
-    },
-    averageConfidence: 0.87,
-    timeDistribution: {
-        '00-04': 15,
-        '04-08': 22,
-        '08-12': 45,
-        '12-16': 38,
-        '16-20': 25,
-        '20-24': 12
-    },
-    successRate: 0.92
-};
+const MetricsOverview: React.FC = () => {
+    const { metrics, loading, error } = useDataFeed();
 
-const MetricCard: React.FC<{ title: string; value: string | number; color: string }> = ({ title, value, color }) => (
-    <Paper
-        sx={{
-            p: 2,
-            height: '100%',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-        }}
-    >
-        <Typography variant="h6" color="text.secondary" gutterBottom>
-            {title}
-        </Typography>
-        <Typography variant="h4" color={color}>
-            {value}
-        </Typography>
-    </Paper>
-);
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
 
-const TrapDistributionChart: React.FC<{ data: Record<string, number> }> = ({ data }) => {
-    const options = {
+    if (error) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'error.main' }}>
+                {error}
+            </Box>
+        );
+    }
+
+    const pieChartOption: EChartsOption = {
         tooltip: {
             trigger: 'item',
             formatter: '{b}: {c} ({d}%)'
         },
         legend: {
             orient: 'vertical',
-            left: 'left',
-            textStyle: { color: '#fff' }
+            right: 10,
+            top: 'center',
+            textStyle: {
+                color: '#fff'
+            }
         },
         series: [
             {
+                name: 'Trap Types',
                 type: 'pie',
-                radius: ['50%', '70%'],
+                radius: ['40%', '70%'],
                 avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 10,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
                 label: {
                     show: false,
                     position: 'center'
@@ -70,116 +54,90 @@ const TrapDistributionChart: React.FC<{ data: Record<string, number> }> = ({ dat
                 emphasis: {
                     label: {
                         show: true,
-                        fontSize: '20',
+                        fontSize: 20,
                         fontWeight: 'bold'
                     }
                 },
                 labelLine: {
                     show: false
                 },
-                data: Object.entries(data).map(([name, value]) => ({
-                    name,
-                    value,
-                    itemStyle: {
-                        color: name === 'FAKE_PUMP' ? '#ff4d4f' :
-                            name === 'FAKE_DUMP' ? '#52c41a' :
-                                name === 'LIQUIDITY_GRAB' ? '#1890ff' :
-                                    '#722ed1'
-                    }
-                }))
+                data: [
+                    { value: metrics.trapsByType.bullish || 0, name: 'Bullish', itemStyle: { color: '#52c41a' } },
+                    { value: metrics.trapsByType.bearish || 0, name: 'Bearish', itemStyle: { color: '#ff4d4f' } }
+                ]
             }
         ]
     };
 
-    return (
-        <ReactECharts
-            option={options}
-            style={{ height: '200px', width: '100%' }}
-        />
-    );
-};
-
-const TimeDistributionChart: React.FC<{ data: Record<string, number> }> = ({ data }) => {
-    const options = {
+    const timelineOption: EChartsOption = {
         tooltip: {
             trigger: 'axis',
             axisPointer: {
                 type: 'shadow'
             }
         },
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
         xAxis: {
             type: 'category',
-            data: Object.keys(data),
-            axisLabel: { color: '#fff' }
+            data: Object.keys(metrics.timeDistribution),
+            axisLabel: {
+                rotate: 45,
+                color: '#fff'
+            }
         },
         yAxis: {
             type: 'value',
-            axisLabel: { color: '#fff' }
+            axisLabel: {
+                color: '#fff'
+            }
         },
         series: [
             {
-                data: Object.values(data),
+                name: 'Daily Traps',
                 type: 'bar',
+                data: Object.values(metrics.timeDistribution),
                 itemStyle: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#1890ff' },
-                        { offset: 1, color: '#722ed1' }
-                    ])
+                    color: '#1976d2'
                 }
             }
         ]
     };
 
     return (
-        <ReactECharts
-            option={options}
-            style={{ height: '200px', width: '100%' }}
-        />
-    );
-};
-
-const MetricsOverview: React.FC = () => {
-    return (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ p: 2 }}>
             <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <MetricCard
-                        title="Total Traps"
-                        value={mockMetrics.totalTraps}
-                        color="#1890ff"
-                    />
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 2, textAlign: 'center' }}>
+                        <Typography variant="subtitle2" color="text.secondary">
+                            Total Traps
+                        </Typography>
+                        <Typography variant="h4">
+                            {metrics.totalTraps}
+                        </Typography>
+                    </Box>
+                    <Box sx={{ mb: 2, textAlign: 'center' }}>
+                        <Typography variant="subtitle2" color="text.secondary">
+                            Success Rate
+                        </Typography>
+                        <Typography variant="h4">
+                            {(metrics.successRate * 100).toFixed(1)}%
+                        </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="subtitle2" color="text.secondary">
+                            Average Confidence
+                        </Typography>
+                        <Typography variant="h4">
+                            {(metrics.averageConfidence * 100).toFixed(1)}%
+                        </Typography>
+                    </Box>
                 </Grid>
-                <Grid item xs={6}>
-                    <MetricCard
-                        title="Success Rate"
-                        value={`${(mockMetrics.successRate * 100).toFixed(1)}%`}
-                        color="#52c41a"
-                    />
+                <Grid item xs={12} md={6}>
+                    <ReactECharts option={pieChartOption} style={{ height: '200px' }} theme="dark" />
                 </Grid>
                 <Grid item xs={12}>
-                    <MetricCard
-                        title="Average Confidence"
-                        value={`${(mockMetrics.averageConfidence * 100).toFixed(1)}%`}
-                        color="#722ed1"
-                    />
+                    <ReactECharts option={timelineOption} style={{ height: '200px' }} theme="dark" />
                 </Grid>
             </Grid>
-
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Trap Distribution
-            </Typography>
-            <TrapDistributionChart data={mockMetrics.trapsByType} />
-
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Time Distribution (UTC)
-            </Typography>
-            <TimeDistributionChart data={mockMetrics.timeDistribution} />
         </Box>
     );
 };

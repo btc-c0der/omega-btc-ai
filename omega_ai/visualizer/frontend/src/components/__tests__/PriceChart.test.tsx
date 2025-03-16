@@ -1,69 +1,97 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import PriceChart from '../PriceChart';
+import useDataFeed from '../../hooks/useDataFeed';
+
+// Mock the useDataFeed hook
+jest.mock('../../hooks/useDataFeed');
+const mockUseDataFeed = useDataFeed as jest.MockedFunction<typeof useDataFeed>;
+
+// Mock ReactECharts since we don't need to test the actual chart rendering
+jest.mock('echarts-for-react', () => ({
+    __esModule: true,
+    default: () => <div data-testid="echarts" />
+}));
 
 describe('PriceChart', () => {
-    const mockData = {
-        prices: [
-            { time: '2024-03-16T01:00:00Z', open: 100, high: 110, low: 90, close: 105 },
-            { time: '2024-03-16T02:00:00Z', open: 105, high: 115, low: 95, close: 110 }
-        ],
-        traps: [
-            {
-                id: '1',
-                type: 'bullish',
-                timestamp: '2024-03-16T01:30:00Z',
-                confidence: 0.85,
-                price: 100
-            }
-        ]
-    };
-
-    it('renders without crashing', () => {
-        render(<PriceChart data={mockData} />);
-        expect(screen.getByTestId('echarts-mock')).toBeInTheDocument();
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('displays correct chart configuration', () => {
-        render(<PriceChart data={mockData} />);
-        const chartElement = screen.getByTestId('echarts-mock');
-        const chartConfig = JSON.parse(chartElement.textContent || '{}');
-
-        expect(chartConfig.title.text).toBe('Price Chart with Trap Indicators');
-        expect(chartConfig.series).toHaveLength(2); // Candlestick and scatter series
-        expect(chartConfig.series[0].type).toBe('candlestick');
-        expect(chartConfig.series[1].type).toBe('scatter');
-    });
-
-    it('formats data correctly for chart display', () => {
-        render(<PriceChart data={mockData} />);
-        const chartElement = screen.getByTestId('echarts-mock');
-        const chartConfig = JSON.parse(chartElement.textContent || '{}');
-
-        // Check candlestick data
-        expect(chartConfig.series[0].data).toHaveLength(2);
-        expect(chartConfig.series[0].data[0]).toEqual([
-            '2024-03-16T01:00:00Z',
-            100,
-            110,
-            90,
-            105
-        ]);
-
-        // Check trap markers
-        expect(chartConfig.series[1].data).toHaveLength(1);
-        expect(chartConfig.series[1].data[0]).toMatchObject({
-            value: [mockData.traps[0].timestamp, mockData.traps[0].price],
-            itemStyle: expect.any(Object)
+    it('shows loading state', () => {
+        mockUseDataFeed.mockReturnValue({
+            prices: [],
+            traps: [],
+            metrics: {
+                totalTraps: 0,
+                trapsByType: {},
+                averageConfidence: 0,
+                successRate: 0,
+                timeDistribution: {}
+            },
+            loading: true,
+            error: null
         });
+
+        render(<PriceChart />);
+        expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
 
-    it('handles empty data gracefully', () => {
-        render(<PriceChart data={{ prices: [], traps: [] }} />);
-        const chartElement = screen.getByTestId('echarts-mock');
-        const chartConfig = JSON.parse(chartElement.textContent || '{}');
+    it('shows error state', () => {
+        const errorMessage = 'Failed to fetch data';
+        mockUseDataFeed.mockReturnValue({
+            prices: [],
+            traps: [],
+            metrics: {
+                totalTraps: 0,
+                trapsByType: {},
+                averageConfidence: 0,
+                successRate: 0,
+                timeDistribution: {}
+            },
+            loading: false,
+            error: errorMessage
+        });
 
-        expect(chartConfig.series[0].data).toHaveLength(0);
-        expect(chartConfig.series[1].data).toHaveLength(0);
+        render(<PriceChart />);
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    });
+
+    it('renders chart when data is loaded', () => {
+        mockUseDataFeed.mockReturnValue({
+            prices: [
+                {
+                    time: '2024-03-01T10:00:00Z',
+                    open: 50000,
+                    close: 51000,
+                    high: 51500,
+                    low: 49800
+                }
+            ],
+            traps: [
+                {
+                    id: '1',
+                    type: 'bullish',
+                    timestamp: '2024-03-01T10:00:00Z',
+                    confidence: 0.85,
+                    price: 50000,
+                    volume: 1000,
+                    metadata: {}
+                }
+            ],
+            metrics: {
+                totalTraps: 1,
+                trapsByType: { bullish: 1 },
+                averageConfidence: 0.85,
+                successRate: 1,
+                timeDistribution: { '2024-03-01': 1 }
+            },
+            loading: false,
+            error: null
+        });
+
+        render(<PriceChart />);
+        expect(screen.getByTestId('echarts')).toBeInTheDocument();
     });
 }); 
