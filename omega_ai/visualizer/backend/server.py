@@ -27,19 +27,27 @@ app.add_middleware(
 
 # Data models
 class TrapData(BaseModel):
+    id: str
     type: str
     timestamp: str
     confidence: float
-    price: Optional[float] = None
-    volume: Optional[float] = None
-    metadata: Optional[Dict] = None
+    price: float
+    volume: float
+    metadata: Dict
+
+class PriceData(BaseModel):
+    time: str
+    open: float
+    close: float
+    high: float
+    low: float
 
 class MetricsResponse(BaseModel):
-    total_traps: int
-    traps_by_type: Dict[str, int]
-    average_confidence: float
-    time_distribution: Dict[str, int]
-    success_rate: float
+    totalTraps: int
+    trapsByType: Dict[str, int]
+    averageConfidence: float
+    timeDistribution: Dict[str, int]
+    successRate: float
 
 class TimelineEvent(BaseModel):
     id: str
@@ -68,44 +76,44 @@ def calculate_metrics(data: Dict) -> MetricsResponse:
     traps = data.get('trap_detections', [])
     if not traps:
         return MetricsResponse(
-            total_traps=0,
-            traps_by_type={},
-            average_confidence=0.0,
-            time_distribution={},
-            success_rate=0.0
+            totalTraps=0,
+            trapsByType={},
+            averageConfidence=0.0,
+            timeDistribution={},
+            successRate=0.0
         )
     
     # Count traps by type
-    traps_by_type = {}
-    total_confidence = 0
-    success_count = 0
-    time_dist = {f"{i:02d}-{(i+4):02d}": 0 for i in range(0, 24, 4)}
+    trapsByType = {}
+    totalConfidence = 0
+    successCount = 0
+    timeDist = {f"{i:02d}-{(i+4):02d}": 0 for i in range(0, 24, 4)}
     
     for trap in traps:
         # Count by type
-        trap_type = trap.get('type', 'UNKNOWN')
-        traps_by_type[trap_type] = traps_by_type.get(trap_type, 0) + 1
+        trapType = trap.get('type', 'UNKNOWN')
+        trapsByType[trapType] = trapsByType.get(trapType, 0) + 1
         
         # Sum confidence
         confidence = trap.get('confidence', 0)
-        total_confidence += confidence
+        totalConfidence += confidence
         
         # Check success
         if confidence > 0.7:  # Consider high confidence as success
-            success_count += 1
+            successCount += 1
         
         # Time distribution
         timestamp = datetime.fromisoformat(trap.get('timestamp', '').replace('Z', '+00:00'))
         hour = timestamp.hour
-        time_slot = f"{(hour//4)*4:02d}-{((hour//4)*4+4):02d}"
-        time_dist[time_slot] += 1
+        timeSlot = f"{(hour//4)*4:02d}-{((hour//4)*4+4):02d}"
+        timeDist[timeSlot] += 1
     
     return MetricsResponse(
-        total_traps=len(traps),
-        traps_by_type=traps_by_type,
-        average_confidence=total_confidence / len(traps),
-        time_distribution=time_dist,
-        success_rate=success_count / len(traps)
+        totalTraps=len(traps),
+        trapsByType=trapsByType,
+        averageConfidence=totalConfidence / len(traps),
+        timeDistribution=timeDist,
+        successRate=successCount / len(traps)
     )
 
 @app.get("/")
@@ -117,7 +125,13 @@ async def root():
 async def get_metrics():
     """Get trap detection metrics."""
     data = load_latest_dump()
-    return calculate_metrics(data)
+    return data.get('metrics', {
+        'totalTraps': 0,
+        'trapsByType': {},
+        'averageConfidence': 0.0,
+        'timeDistribution': {},
+        'successRate': 0.0
+    })
 
 @app.get("/api/traps", response_model=List[TrapData])
 async def get_traps(
@@ -127,21 +141,27 @@ async def get_traps(
 ):
     """Get trap detections with optional filtering."""
     data = load_latest_dump()
-    traps = data.get('trap_detections', [])
+    traps = data.get('traps', [])
     
     # Apply filters
     if start_time:
-        start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
-        traps = [t for t in traps if datetime.fromisoformat(t['timestamp'].replace('Z', '+00:00')) >= start_dt]
+        startDt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+        traps = [t for t in traps if datetime.fromisoformat(t['timestamp'].replace('Z', '+00:00')) >= startDt]
     
     if end_time:
-        end_dt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
-        traps = [t for t in traps if datetime.fromisoformat(t['timestamp'].replace('Z', '+00:00')) <= end_dt]
+        endDt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+        traps = [t for t in traps if datetime.fromisoformat(t['timestamp'].replace('Z', '+00:00')) <= endDt]
     
     if trap_type:
         traps = [t for t in traps if t.get('type') == trap_type]
     
-    return [TrapData(**trap) for trap in traps]
+    return traps
+
+@app.get("/api/prices", response_model=List[PriceData])
+async def get_prices():
+    """Get price data."""
+    data = load_latest_dump()
+    return data.get('prices', [])
 
 @app.get("/api/timeline", response_model=List[TimelineEvent])
 async def get_timeline(last_hours: Optional[int] = 24):
