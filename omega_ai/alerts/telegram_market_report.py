@@ -593,14 +593,20 @@ ONE LOVE 🌿"""
             schumann = await self.check_schumann_market_alignment()
             
             # Calculate vibration metrics
-            frequency = energy["vibration_level"] * 10.0  # Scale to 0-10 Hz
-            amplitude = abs(schumann["market_harmony"] - 0.5) * 2.0  # Scale to 0-1
-            harmony = (energy["confidence_score"] + schumann["market_harmony"]) / 2.0
+            frequency = max(0.0, min(10.0, energy["vibration_level"] * 10.0))  # Scale to 0-10 Hz
+            
+            # Ensure market_harmony is between 0 and 1 before calculating amplitude
+            market_harmony = max(0.0, min(1.0, schumann["market_harmony"]))
+            amplitude = abs(market_harmony - 0.5) * 2.0  # Scale to 0-1
+            
+            # Ensure confidence_score is between 0 and 1
+            confidence = max(0.0, min(1.0, energy["confidence_score"]))
+            harmony = (confidence + market_harmony) / 2.0
 
             return {
                 "frequency": frequency,
-                "amplitude": amplitude,
-                "harmony_score": harmony
+                "amplitude": max(0.0, min(1.0, amplitude)),  # Ensure amplitude is between 0 and 1
+                "harmony_score": max(0.0, min(1.0, harmony))  # Ensure harmony score is between 0 and 1
             }
 
         except Exception as e:
@@ -621,9 +627,14 @@ ONE LOVE 🌿"""
             vibrations = await self.analyze_market_vibrations()
             
             # Calculate cycle alignment (0.0 to 1.0)
-            alignment = (schumann["market_harmony"] + vibrations["harmony_score"]) / 2.0
+            # Ensure both values are between 0 and 1 before averaging
+            schumann_harmony = max(0.0, min(1.0, schumann["market_harmony"]))
+            vibration_harmony = max(0.0, min(1.0, vibrations["harmony_score"]))
             
-            return alignment
+            alignment = (schumann_harmony + vibration_harmony) / 2.0
+            
+            # Ensure final result is between 0.0 and 1.0 
+            return max(0.0, min(1.0, alignment))
 
         except Exception as e:
             logger.error(f"{RED}❌ Error checking Schumann cycle alignment: {e}{RESET}")
