@@ -10,7 +10,7 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 
-// Components (to be created)
+// Components
 import PriceChart from './components/PriceChart';
 import TrapDetectionMap from './components/TrapDetectionMap';
 import MetricsOverview from './components/MetricsOverview';

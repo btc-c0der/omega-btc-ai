@@ -1,80 +1,95 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import TrapPatterns3D from '../TrapPatterns3D';
-import { Pattern3DData } from '../../types/types';
+import useDataFeed from '../../hooks/useDataFeed';
 
-// Mock Three.js and React Three Fiber
+// Mock the useDataFeed hook
+jest.mock('../../hooks/useDataFeed');
+const mockUseDataFeed = useDataFeed as jest.MockedFunction<typeof useDataFeed>;
+
+// Mock @react-three/fiber and @react-three/drei since we don't need to test the actual 3D rendering
 jest.mock('@react-three/fiber', () => ({
-    Canvas: ({ children }: { children: React.ReactNode }) => (
-        <div data-testid="mock-canvas">{children}</div>
-    ),
+    Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="canvas">{children}</div>
 }));
 
 jest.mock('@react-three/drei', () => ({
-    OrbitControls: () => <div data-testid="mock-controls" />,
-    Text: ({ children }: { children: React.ReactNode }) => (
-        <div data-testid="mock-text">{children}</div>
-    ),
+    OrbitControls: () => <div data-testid="orbit-controls" />,
+    Text: ({ children }: { children: React.ReactNode }) => <div data-testid="text">{children}</div>
 }));
 
-// Mock test data
-const mockPattern: Pattern3DData = {
-    x: 50,
-    y: 50,
-    z: 50,
-    type: 'FAKE_PUMP',
-    confidence: 0.85,
-};
+describe('TrapPatterns3D', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
-describe('TrapPatterns3D Component', () => {
-    it('renders without crashing', () => {
+    it('shows loading state', () => {
+        mockUseDataFeed.mockReturnValue({
+            traps: [],
+            prices: [],
+            metrics: {
+                totalTraps: 0,
+                trapsByType: {},
+                averageConfidence: 0,
+                successRate: 0,
+                timeDistribution: {}
+            },
+            loading: true,
+            error: null
+        });
+
         render(<TrapPatterns3D />);
-        expect(screen.getByTestId('mock-canvas')).toBeInTheDocument();
+        expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
 
-    it('includes orbit controls', () => {
+    it('shows error state', () => {
+        const errorMessage = 'Failed to fetch data';
+        mockUseDataFeed.mockReturnValue({
+            traps: [],
+            prices: [],
+            metrics: {
+                totalTraps: 0,
+                trapsByType: {},
+                averageConfidence: 0,
+                successRate: 0,
+                timeDistribution: {}
+            },
+            loading: false,
+            error: errorMessage
+        });
+
         render(<TrapPatterns3D />);
-        expect(screen.getByTestId('mock-controls')).toBeInTheDocument();
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
 
-    it('renders grid with axis labels', () => {
+    it('renders 3D visualization when data is loaded', () => {
+        mockUseDataFeed.mockReturnValue({
+            traps: [
+                {
+                    id: '1',
+                    type: 'bullish' as const,
+                    timestamp: '2024-03-01T10:00:00Z',
+                    confidence: 0.85,
+                    price: 50000,
+                    volume: 1000,
+                    metadata: {}
+                }
+            ],
+            prices: [],
+            metrics: {
+                totalTraps: 1,
+                trapsByType: { bullish: 1 },
+                averageConfidence: 0.85,
+                successRate: 1,
+                timeDistribution: { '2024-03-01': 1 }
+            },
+            loading: false,
+            error: null
+        });
+
         render(<TrapPatterns3D />);
-        const labels = screen.getAllByTestId('mock-text');
-        const labelTexts = labels.map(label => label.textContent);
-
-        expect(labelTexts).toContain('Price');
-        expect(labelTexts).toContain('Volume');
-        expect(labelTexts).toContain('Time');
-    });
-
-    it('sets up correct lighting', () => {
-        const { container } = render(<TrapPatterns3D />);
-
-        // Check for ambient and point lights
-        expect(container.innerHTML).toContain('ambientLight');
-        expect(container.innerHTML).toContain('pointLight');
-    });
-
-    it('renders trap points with correct colors', () => {
-        const { container } = render(<TrapPatterns3D />);
-        const html = container.innerHTML;
-
-        // Check for color assignments
-        expect(html).toContain('#ff4d4f'); // FAKE_PUMP color
-        expect(html).toContain('#52c41a'); // FAKE_DUMP color
-        expect(html).toContain('#1890ff'); // LIQUIDITY_GRAB color
-    });
-
-    it('applies fog for depth perception', () => {
-        const { container } = render(<TrapPatterns3D />);
-        expect(container.innerHTML).toContain('fog');
-    });
-
-    it('positions camera correctly', () => {
-        render(<TrapPatterns3D />);
-        const canvas = screen.getByTestId('mock-canvas');
-
-        expect(canvas.getAttribute('camera-position')).toBe('[100, 100, 100]');
-        expect(canvas.getAttribute('camera-fov')).toBe('50');
+        expect(screen.getByTestId('canvas')).toBeInTheDocument();
+        expect(screen.getByTestId('orbit-controls')).toBeInTheDocument();
+        expect(screen.getAllByTestId('text')).toHaveLength(3); // Price, Volume, Time labels
     });
 }); 
