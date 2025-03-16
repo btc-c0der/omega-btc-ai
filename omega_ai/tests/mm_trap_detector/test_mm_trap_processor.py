@@ -190,9 +190,17 @@ def setup_price_environment():
 
 class TestMMTrapDetector:
     """Divine tests for Market Maker Trap Detector."""
-    def test_liquidity_grab_detection(self, mock_sleep, mock_send_alert, mock_register_trap, 
-                                    mock_insert_subtle, mock_insert_trap, mock_omega_algo, 
-                                    mock_redis, setup_price_environment):
+    
+    @patch('time.sleep')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_liquidity_grab_detection(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                                    mock_insert_subtle, mock_register_trap, mock_send_alert,
+                                    mock_sleep):
         """🌿 Test divine detection of full liquidity grab manipulation."""
         print(f"\n{GREEN}Testing LIQUIDITY GRAB detection...{RESET}")
         
@@ -206,7 +214,16 @@ class TestMMTrapDetector:
         mock_omega_algo.calculate_dynamic_threshold.return_value = 500.0  # Set threshold below our change
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
         
-        setup_price_environment(current_price, prev_price)
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"1000"
+            return None
+        mock_redis.get.side_effect = get_side_effect
         
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
@@ -244,34 +261,43 @@ class TestMMTrapDetector:
         
         print(f"  • {CYAN}Full Liquidity Grab detection verified!{RESET}")
     
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
     @patch('time.sleep')
-    def test_half_liquidity_grab_detection(self, mock_sleep, mock_send_alert, mock_register_trap, 
-                                         mock_insert_subtle, mock_insert_trap, mock_omega_algo, 
-                                         mock_redis, setup_price_environment):
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_half_liquidity_grab_detection(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                                         mock_insert_subtle, mock_register_trap, mock_send_alert,
+                                         mock_sleep):
         """🌿 Test divine detection of half liquidity grab manipulation."""
         print(f"\n{GREEN}Testing HALF-LIQUIDITY GRAB detection...{RESET}")
-        
+    
         # Setup test data - medium price change to trigger half liquidity grab detection
         current_price = 100000.0
-        prev_price = 99500.0  # $600 change, between half and full threshold
+        prev_price = 99400.0  # $600 change, above half threshold of $500
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-        
+    
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 1000.0  # Full threshold
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
-        
-        setup_price_environment(current_price, prev_price)
-        
+    
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"1000"
+            return None
+        mock_redis.get.side_effect = get_side_effect
+    
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-        
+    
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
@@ -288,36 +314,60 @@ class TestMMTrapDetector:
         # Verify alert was sent
         mock_send_alert.assert_called_once()
         
+        # Verify data was stored in Redis for Grafana
+        mock_redis.hset.assert_called()
+        calls = mock_redis.hset.call_args_list
+        matched = False
+        for call_obj in calls:
+            key = call_obj[0][0]
+            if "mm_trap:" in key:
+                mapping = call_obj[1]["mapping"]
+                assert mapping["type"] == "Half-Liquidity Grab"
+                assert float(mapping["confidence"]) == 0.7
+                assert float(mapping["price"]) == current_price
+                matched = True
+                break
+        assert matched, "Should store trap data in Redis for Grafana"
+        
         print(f"  • {CYAN}Half-Liquidity Grab detection verified!{RESET}")
     
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
     @patch('time.sleep')
-    def test_fake_pump_detection(self, mock_sleep, mock_send_alert, mock_register_trap, 
-                              mock_insert_subtle, mock_insert_trap, mock_omega_algo, 
-                              mock_redis, setup_price_environment):
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_fake_pump_detection(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                               mock_insert_subtle, mock_register_trap, mock_send_alert,
+                               mock_sleep):
         """🌿 Test divine detection of fake pump manipulation."""
         print(f"\n{GREEN}Testing FAKE PUMP detection...{RESET}")
-        
+    
         # Setup test data - price increase above PRICE_PUMP_THRESHOLD (0.02 = 2%)
-        current_price = 60000.0
-        prev_price = 58800.0  # 2.04% increase
+        current_price = 30000.0
+        prev_price = 29400.0  # 2.04% increase but only $600 absolute change
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-        
+    
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
-        
-        setup_price_environment(current_price, prev_price)
-        
+    
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"1000"
+            return None
+        mock_redis.get.side_effect = get_side_effect
+    
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-        
+    
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
@@ -334,36 +384,60 @@ class TestMMTrapDetector:
         # Verify alert was sent
         mock_send_alert.assert_called_once()
         
+        # Verify data was stored in Redis for Grafana
+        mock_redis.hset.assert_called()
+        calls = mock_redis.hset.call_args_list
+        matched = False
+        for call_obj in calls:
+            key = call_obj[0][0]
+            if "mm_trap:" in key:
+                mapping = call_obj[1]["mapping"]
+                assert mapping["type"] == "Fake Pump"
+                assert float(mapping["confidence"]) == 0.85
+                assert float(mapping["price"]) == current_price
+                matched = True
+                break
+        assert matched, "Should store trap data in Redis for Grafana"
+        
         print(f"  • {CYAN}Fake Pump detection verified!{RESET}")
     
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
     @patch('time.sleep')
-    def test_fake_dump_detection(self, mock_sleep, mock_send_alert, mock_register_trap, 
-                             mock_insert_subtle, mock_insert_trap, mock_omega_algo, 
-                             mock_redis, setup_price_environment):
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_fake_dump_detection(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                               mock_insert_subtle, mock_register_trap, mock_send_alert,
+                               mock_sleep):
         """🌿 Test divine detection of fake dump manipulation."""
         print(f"\n{GREEN}Testing FAKE DUMP detection...{RESET}")
-        
+    
         # Setup test data - price decrease below PRICE_DROP_THRESHOLD (-0.02 = -2%)
-        current_price = 58800.0
-        prev_price = 60000.0  # -2% decrease
+        current_price = 29300.0
+        prev_price = 30000.0  # -2.33% decrease with $700 absolute change
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-        
+    
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
-        mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
-        
-        setup_price_environment(current_price, prev_price)
-        
+        mock_omega_algo.is_fibo_organic.return_value = "Manipulation Trap Pattern"
+    
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"1000"
+            return None
+        mock_redis.get.side_effect = get_side_effect
+    
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-        
+    
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
@@ -380,41 +454,65 @@ class TestMMTrapDetector:
         # Verify alert was sent
         mock_send_alert.assert_called_once()
         
+        # Verify data was stored in Redis for Grafana
+        mock_redis.hset.assert_called()
+        calls = mock_redis.hset.call_args_list
+        matched = False
+        for call_obj in calls:
+            key = call_obj[0][0]
+            if "mm_trap:" in key:
+                mapping = call_obj[1]["mapping"]
+                assert mapping["type"] == "Fake Dump"
+                assert float(mapping["confidence"]) == 0.85
+                assert float(mapping["price"]) == current_price
+                matched = True
+                break
+        assert matched, "Should store trap data in Redis for Grafana"
+        
         print(f"  • {CYAN}Fake Dump detection verified!{RESET}")
     
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
-    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
     @patch('time.sleep')
-    def test_half_fake_pump_detection(self, mock_sleep, mock_send_alert, mock_register_trap, 
-                                  mock_insert_subtle, mock_insert_trap, mock_omega_algo, 
-                                  mock_redis, setup_price_environment):
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_half_fake_pump_detection(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                                    mock_insert_subtle, mock_register_trap, mock_send_alert,
+                                    mock_sleep):
         """🌿 Test divine detection of half-fake pump manipulation."""
         print(f"\n{GREEN}Testing HALF-FAKE PUMP detection...{RESET}")
-        
+    
         # Setup test data - price increase between 1% and PRICE_PUMP_THRESHOLD (2%)
-        current_price = 60000.0
-        prev_price = 59400.0  # 1.01% increase
+        current_price = 30000.0
+        prev_price = 29700.0  # 1.01% increase but only $300 absolute change
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-        
+    
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
         mock_omega_algo.is_fibo_organic.return_value = "Mixed Pattern (Medium Confidence)"
-        
-        setup_price_environment(current_price, prev_price)
-        
+    
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"1000"
+            return None
+        mock_redis.get.side_effect = get_side_effect
+    
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-        
+    
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
         
-        # Divine assertions for half-fake pump
+        # Divine assertions for half fake pump
         assert trap_call[0] == current_price, "Trap should record current price"
         assert trap_call[1] == price_change_pct, "Trap should record correct price change percentage"
         assert trap_call[2] == "Half-Fake Pump", "Should detect as Half-Fake Pump"
@@ -425,6 +523,21 @@ class TestMMTrapDetector:
         
         # Verify alert was sent
         mock_send_alert.assert_called_once()
+        
+        # Verify data was stored in Redis for Grafana
+        mock_redis.hset.assert_called()
+        calls = mock_redis.hset.call_args_list
+        matched = False
+        for call_obj in calls:
+            key = call_obj[0][0]
+            if "mm_trap:" in key:
+                mapping = call_obj[1]["mapping"]
+                assert mapping["type"] == "Half-Fake Pump"
+                assert float(mapping["confidence"]) == 0.5
+                assert float(mapping["price"]) == current_price
+                matched = True
+                break
+        assert matched, "Should store trap data in Redis for Grafana"
         
         print(f"  • {CYAN}Half-Fake Pump detection verified!{RESET}")
     

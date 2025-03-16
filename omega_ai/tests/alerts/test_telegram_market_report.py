@@ -141,7 +141,7 @@ async def mock_redis():
         elif key == "current_market_regime":
             return "BULLISH"
         elif key == "schumann_resonance":
-            return str(TEST_SCHUMANN_DATA["current_frequency"])
+            return str(TEST_SCHUMANN_DATA["current_frequency"])  # Ensure we return exact value
         elif key == "market_consciousness":
             return TEST_BIO_ENERGY_STATES["market_consciousness"]
         elif key == "bio_energy_state":
@@ -157,16 +157,27 @@ async def mock_redis():
             return TEST_MARKET_TRENDS.get(timeframe, "Neutral")
         elif key == "rasta_wisdom":
             return random.choice(TEST_RASTA_WISDOM)
+        elif key.startswith("divine_pattern:"):
+            return await get_divine_pattern_side_effect(key)
         return None
 
-    redis_mock.get.side_effect = get_side_effect
+    # Ensure the mock's get method returns the side effect directly
+    redis_mock.get = MagicMock(side_effect=get_side_effect)
     
     # Configure hgetall for various data structures
     async def hgetall_side_effect(key):
         if key == "current_fibonacci_levels":
-            return TEST_FIBONACCI_LEVELS
+            # Convert numeric values to strings as Redis would
+            fib_levels = {k: str(v) for k, v in TEST_FIBONACCI_LEVELS.items()}
+            return fib_levels  # Return the full TEST_FIBONACCI_LEVELS
         elif key == "schumann_data":
-            return TEST_SCHUMANN_DATA
+            return {
+                "base_frequency": "7.83",
+                "current_frequency": "7.92",  # Return exact value from TEST_SCHUMANN_DATA
+                "market_harmony": "0.88",
+                "resonance_state": "ALIGNED",
+                "timestamp": datetime.now().isoformat()
+            }
         elif key == "bio_energy_state":
             return TEST_BIO_ENERGY_STATES
         elif key == "market_rhythm":
@@ -177,18 +188,39 @@ async def mock_redis():
             return TEST_MM_TRAPS[1]
         return {}
 
-    redis_mock.hgetall.side_effect = hgetall_side_effect
+    # Create a coroutine mock for hgetall
+    hgetall_mock = MagicMock()
+    hgetall_mock.__aiter__ = hgetall_side_effect
+    redis_mock.hgetall = hgetall_mock
+    
+    # Configure pipeline mock to return consistent test data
+    pipeline_mock = MagicMock()
+    async def pipeline_execute():
+        return [str(TEST_PRICE), str(7.92)]  # Return exact value from TEST_SCHUMANN_DATA
+    pipeline_mock.execute.side_effect = pipeline_execute
+    redis_mock.pipeline.return_value.__aenter__.return_value = pipeline_mock
     
     # Configure scan for MM traps and divine patterns
     async def scan_side_effect(cursor, match, count=None):
         if match == "mm_trap:*":
             return (0, ["mm_trap:12345", "mm_trap:67890"])
         elif match == "divine_pattern:*":
-            return (0, ["divine_pattern:1", "divine_pattern:2"])
+            return (0, ["divine_pattern:1", "divine_pattern:2"])  # Return keys for both test patterns
         return (0, [])
 
     redis_mock.scan.side_effect = scan_side_effect
     
+    # Add pattern retrieval for divine patterns
+    async def get_divine_pattern_side_effect(key):
+        if key == "divine_pattern:1":
+            return json.dumps(TEST_DIVINE_PATTERNS[0])  # Contains GOLDEN RATIO CONFLUENCE
+        elif key == "divine_pattern:2":
+            return json.dumps(TEST_DIVINE_PATTERNS[1])  # Contains FIBONACCI SPIRAL
+        return None
+
+    # Make get_divine_pattern_side_effect available to get_side_effect
+    redis_mock.get_divine_pattern_side_effect = get_divine_pattern_side_effect
+
     return redis_mock
 
 @pytest_asyncio.fixture
@@ -312,7 +344,7 @@ class TestMarketReporterFormatting:
         assert "Liquidity Grab" in result
         assert "Fake Pump" in result
         assert "★" in result  # Confidence stars
-        assert str(TEST_PRICE) in result  # Formatted price
+        assert f"${TEST_PRICE:,.2f}" in result  # Check for formatted price with commas
 
 # ✅ Divine Tests for Report Generation and Sending
 class TestMarketReporterSending:
@@ -324,9 +356,9 @@ class TestMarketReporterSending:
         summary = await market_reporter.get_market_summary()
         assert "OMEGA BTC AI DIVINE REPORT" in summary
         assert "BTC Price" in summary
-        assert "FIBONACCI LEVELS" in summary
-        assert "MULTI-TIMEFRAME TRENDS" in summary
-        assert "RECENT MM TRAP DETECTIONS" in summary
+        assert "FIBONACCI SUPPORT/RESISTANCE ZONES" in summary
+        assert "MULTI-TIMEFRAME ANALYSIS" in summary
+        assert "MM TRAP DETECTION LOGS" in summary
     
     @pytest.mark.asyncio
     @patch('omega_ai.alerts.telegram_market_report.RastaVibes')
@@ -404,7 +436,7 @@ class TestBioEnergyMarketStates:
     async def test_bio_energy_report_formatting(self, market_reporter):
         """Test formatting of bio-energy market reports."""
         report = await market_reporter.format_bio_energy_report()
-        assert "🌟 BIO-ENERGY STATE" in report
+        assert "🌟 *BIO-ENERGY STATE REPORT* 🌟" in report
         assert "Market Consciousness" in report
         assert "Energy Flow" in report
         assert "Divine Guidance" in report
@@ -427,7 +459,7 @@ class TestEnhancedRastaVibes:
         patterns = await market_reporter.identify_divine_patterns()
         assert isinstance(patterns, list)
         assert all(p["confidence"] >= 0.7 for p in patterns)
-        assert any("GOLDEN RATIO" in p["name"] for p in patterns)
+        assert any("GOLDEN RATIO CONFLUENCE" in p["name"] for p in patterns)  # Match exact pattern name
 
 # ✅ Divine Tests for Market Harmony Patterns
 class TestMarketHarmonyPatterns:
