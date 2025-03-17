@@ -1,0 +1,6437 @@
+[
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:25:32.944358",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:25:57.640885",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:31:12.276419",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:36:12.278212",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:41:12.282159",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:46:12.282704",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:51:12.288812",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-11T23:56:12.291319",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:01:12.294749",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:06:12.301996",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:11:12.309195",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:16:12.388020",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:21:12.400503",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:26:12.416410",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:31:12.430202",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:36:12.465449",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:41:12.476150",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:46:12.482579",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:51:12.494075",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T00:56:12.466538",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:01:12.470961",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:06:12.479376",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:11:12.486776",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:16:12.521069",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:21:12.529029",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:26:12.539618",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:31:12.555469",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:36:12.572186",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:41:12.581011",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:46:12.595136",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:51:12.607228",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T01:56:12.611044",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:01:12.618051",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:06:12.629481",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:11:12.637920",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:16:12.645902",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:21:12.650155",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:26:12.655698",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:31:12.669204",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:36:12.680341",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:41:12.641150",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:46:12.644106",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:51:12.654238",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T02:56:12.666293",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:01:12.691256",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:06:12.695019",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:11:12.703139",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:16:12.708003",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:21:12.703498",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:26:12.707604",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:31:12.711522",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:36:12.717334",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:41:12.720958",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:46:12.730731",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:51:12.739277",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T03:56:12.773590",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:01:12.782134",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:06:12.786838",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:11:12.785658",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:16:12.798021",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:21:12.811444",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:26:12.821452",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:31:12.827711",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:36:12.838345",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:41:12.848449",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:46:12.853849",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:51:12.859937",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T04:56:12.865811",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:01:12.872994",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:06:12.876885",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:11:12.884427",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:16:12.898033",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:21:12.894615",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:26:12.899519",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:31:12.910676",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:36:12.924513",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:41:12.943874",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:46:12.951072",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:51:12.964628",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T05:56:12.974060",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:01:12.988353",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:06:13.000943",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:11:13.007695",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:16:13.015928",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:21:13.029143",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:26:13.043600",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:31:13.058257",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:36:13.069784",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:41:13.082176",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:46:13.069876",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:51:13.078899",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T06:56:13.086051",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T07:01:13.089476",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T07:06:13.114686",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T07:11:13.124975",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T07:16:13.129653",
+    "metrics": {
+      "total_trades": 3,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7655.548730156419,
+      "pnl_percentage": -23.44451269843581,
+      "win_rate": 0.0
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:04:32.742087",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:09:32.752960",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:14:32.756248",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:19:32.769824",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:24:32.777779",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:29:32.782510",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:34:32.789751",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:39:32.800370",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:44:32.805018",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:49:32.815434",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:54:32.827904",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T13:59:32.843386",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:04:32.851310",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7720.982797004059,
+      "pnl_percentage": -22.790172029959415
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:05:50.322558",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:10:50.327307",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:15:50.345206",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:20:50.351954",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:25:50.364235",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:30:50.370011",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:35:50.298159",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:40:50.296076",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:45:50.294092",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:50:50.294819",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T14:55:50.331642",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:00:50.340231",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:05:50.348427",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:10:50.348818",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:15:50.385894",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:20:50.388557",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:25:50.395469",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T15:28:18.018081",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:24:12.877679",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:29:12.882483",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:34:12.892034",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:39:12.899533",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:44:12.915483",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:49:12.922118",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:54:12.933003",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T16:59:12.942377",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:04:12.940187",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:09:12.953374",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:14:12.962055",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:19:12.974387",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:24:12.996338",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:29:13.006324",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:34:13.023585",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:39:13.037063",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:44:13.047506",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:49:13.059848",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:54:13.073695",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T17:59:13.081386",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:04:13.088696",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:09:13.101652",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:14:13.117384",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:19:13.127529",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:24:13.127606",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:29:13.144695",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:34:13.156200",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:39:13.176614",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:44:13.163648",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:49:13.173957",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:54:13.184188",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T18:59:13.200410",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:04:13.225398",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:09:13.242158",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:14:13.250327",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:19:13.262523",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:24:13.259904",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:29:13.249084",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:34:13.267529",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:39:13.286681",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:44:13.320739",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:49:13.329959",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:54:13.349433",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T19:59:13.358674",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:04:13.334838",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:09:13.341057",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:14:13.357056",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:19:13.360167",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:24:13.387778",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:29:13.404051",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:34:13.418647",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:39:13.436972",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:44:13.500132",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:49:13.519352",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:54:13.531659",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T20:59:13.546863",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:04:13.551982",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:09:13.565179",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:14:13.578220",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:19:13.593731",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:24:13.605993",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:29:13.615870",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:34:13.635798",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:39:13.648204",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:44:13.660737",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:49:13.683770",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:54:13.703613",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T21:59:13.715192",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:04:13.727193",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:09:13.729729",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:14:13.769261",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:19:13.793857",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:24:13.811152",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:29:13.827695",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:34:13.837647",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:39:13.861122",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:44:13.875343",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:49:13.892138",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:54:13.928216",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T22:59:13.942020",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:04:13.948650",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:09:13.963611",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:14:13.955497",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:19:13.960501",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:24:13.968376",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:29:13.981234",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:34:13.994870",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:39:14.008475",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:44:14.019572",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:49:14.043677",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:54:14.033548",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-12T23:59:14.039342",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:04:14.049433",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:09:14.059342",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:14:14.066477",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:19:14.109760",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:24:07.937354",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:24:14.114602",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:29:07.947513",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:29:14.123430",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:34:07.970009",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:34:14.127477",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:39:07.991937",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:39:14.141598",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:44:08.015505",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:44:14.149371",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:49:08.034079",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:49:14.156742",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:54:08.047687",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:54:14.169610",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:59:08.043829",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T00:59:14.165476",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:04:08.056339",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:04:14.171296",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:09:08.071161",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:09:14.192402",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:14:08.088564",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:14:14.198608",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:19:08.116034",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:19:14.222043",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:24:08.124459",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:24:14.238926",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:29:08.139871",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:29:14.256517",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:34:08.165472",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:34:14.259664",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:39:08.178180",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:39:14.272475",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:44:08.213207",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:44:14.310972",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:49:08.228612",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:49:14.322226",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:54:08.248593",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:54:14.345839",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:59:08.266822",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T01:59:14.365395",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:04:08.300864",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:04:14.395766",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:09:08.323928",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:09:14.420386",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:14:08.339739",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:14:14.432986",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:19:08.350372",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:19:14.437729",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:24:08.352382",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:24:14.438918",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:29:08.373627",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:29:14.453803",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:34:08.388611",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:34:14.467831",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:39:08.399302",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:39:14.485608",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:44:08.383663",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:44:14.468242",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:49:08.401089",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:49:14.477196",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:54:08.418526",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:54:14.492584",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:59:08.439246",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T02:59:14.512377",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:04:08.483296",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:04:14.553827",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:09:08.505593",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:09:14.564363",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:14:08.519434",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:14:14.574198",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:19:08.549475",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:19:14.590762",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:24:08.587659",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:24:14.631904",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:29:08.610961",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:29:14.652314",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:34:08.628895",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:34:14.671607",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:39:08.651105",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:39:14.692994",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:44:08.665259",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:44:14.707503",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:49:08.685751",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:49:14.723373",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:54:08.696832",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:54:14.736785",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:59:08.715175",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T03:59:14.755883",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:04:08.733360",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:04:14.799502",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:09:08.766201",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:09:14.835079",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:14:08.787413",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:14:14.856851",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:19:08.807876",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:19:14.876755",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:24:08.826590",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:24:14.896233",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:29:08.848854",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:29:14.920277",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:34:08.871964",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:34:14.947054",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:39:08.894600",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:39:14.965267",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:44:08.920844",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:44:14.979394",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:49:08.918168",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:49:14.986596",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:54:08.939672",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:54:15.015653",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:59:08.969075",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T04:59:15.037397",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:04:08.979136",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:04:15.060911",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:09:09.013796",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:09:15.082649",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:14:09.034847",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:14:15.104930",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:19:09.049391",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:19:15.114632",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:24:09.061620",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:24:15.128548",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:29:09.082239",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:29:15.145468",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:34:09.107023",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:34:15.167231",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:39:09.131034",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:39:15.194055",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:44:09.151875",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:44:15.204366",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:49:09.160632",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:49:15.208666",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:54:09.172267",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:54:15.234793",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:59:09.197125",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T05:59:15.252842",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:04:09.211349",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:04:15.274888",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:09:09.231748",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:09:15.296595",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:14:09.254074",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:14:15.322024",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:19:09.287831",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:19:15.356089",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:24:09.319621",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:24:15.382217",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:29:09.341573",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:29:15.409045",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:34:09.360030",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:34:15.425755",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:39:09.369984",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:39:15.437798",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:44:09.395078",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:44:15.450003",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:49:09.433190",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:49:15.478806",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:54:09.451946",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:54:15.499619",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:59:09.470389",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T06:59:15.519295",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:04:09.501288",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:04:15.541754",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:09:09.515471",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:09:15.573075",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:14:09.541262",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:14:15.598914",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:19:09.566784",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:19:15.624995",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:24:09.592709",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:24:15.671241",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:29:09.565726",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:29:15.637021",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:34:09.587166",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:34:15.662996",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:39:09.615569",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:39:15.679795",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:44:09.632609",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:44:15.685993",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:49:09.632414",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:49:15.684535",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:54:09.642120",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:54:15.704618",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:59:09.666939",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T07:59:15.714718",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:04:09.686329",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:04:15.723725",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:09:09.684148",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:09:15.699236",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:14:09.704059",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:14:15.717291",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:19:09.723197",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:19:15.734042",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:24:09.768970",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:24:15.776203",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:29:09.776650",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:29:15.783297",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:34:09.797408",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:34:15.800658",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:39:09.803743",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:39:15.820441",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:44:09.879068",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:44:15.888917",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:49:09.886942",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:49:15.908857",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:54:09.898522",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:54:15.929428",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:59:09.920343",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T08:59:15.958342",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:04:09.967763",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:04:16.007536",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:09:09.989587",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:09:16.026210",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:14:09.999170",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:14:16.053709",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:19:10.011933",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:19:16.088876",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:24:10.049665",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:24:16.132047",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:29:10.087359",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:29:16.159508",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:34:10.121538",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:34:16.181478",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:39:10.136776",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:39:16.208759",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:44:10.146286",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:44:16.211615",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:49:10.158536",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:49:16.226786",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:54:10.175517",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  },
+  {
+    "trader_name": "BTC_Futures_Omega",
+    "trader_type": "strategic",
+    "timestamp": "2025-03-13T09:54:16.254277",
+    "metrics": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "liquidation_events": 0,
+      "initial_capital": 10000.0,
+      "current_capital": 7921.14694155993,
+      "pnl_percentage": -20.788530584400696
+    }
+  }
+]

@@ -1,0 +1,1905 @@
+{
+  "capital": 10000.0,
+  "open_positions": [
+    {
+      "id": "2ae71819-a754-4b4f-8916-e8915560a11d",
+      "direction": "SHORT",
+      "entry_price": 83889.0,
+      "size": 0.00803983,
+      "leverage": 17,
+      "entry_time": "2025-03-13T00:42:51.406722+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82630.66500000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81791.775,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80952.88500000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84727.89,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "e99e9099-dca2-4e77-a4d2-ed9cf830cf7b",
+      "direction": "SHORT",
+      "entry_price": 83837.64,
+      "size": 0.00854755,
+      "leverage": 16,
+      "entry_time": "2025-03-13T00:43:09.471275+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82580.0754,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81741.69900000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80903.32260000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84676.0164,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "cd30b5f6-9a85-4d4c-a2bd-ffe98f260a44",
+      "direction": "SHORT",
+      "entry_price": 83844.79,
+      "size": 0.03418729,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:43:26.518590+00:00",
+      "entry_reason": "SHORT - High confidence entry (70/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +5",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82587.11815,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81748.67025,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80910.22235,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84683.2379,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "1aff46ce-bd1b-4391-9526-6ecf80ea65d7",
+      "direction": "SHORT",
+      "entry_price": 83825.36,
+      "size": 0.01243462,
+      "leverage": 11,
+      "entry_time": "2025-03-13T00:43:44.614650+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82567.9796,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81729.72600000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80891.47240000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84663.6136,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "2c2ee70a-d11a-44c1-8593-06a4a0745766",
+      "direction": "SHORT",
+      "entry_price": 83833.35,
+      "size": 0.00976913,
+      "leverage": 14,
+      "entry_time": "2025-03-13T00:44:54.884629+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82575.84975000002,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81737.51625000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80899.18275000004,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84671.6835,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "2cb8dd42-7cc2-48f1-aab4-69a7b6c69949",
+      "direction": "SHORT",
+      "entry_price": 83727.77,
+      "size": 0.00855877,
+      "leverage": 16,
+      "entry_time": "2025-03-13T00:45:52.040015+00:00",
+      "entry_reason": "SHORT - High confidence entry (70/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +5",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82471.85345,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81634.57574999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80797.29804999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84565.04770000001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "eb671396-fe94-42d1-abe7-b15aa16b0364",
+      "direction": "SHORT",
+      "entry_price": 83696.0,
+      "size": 0.03424806,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:46:10.086138+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82440.56,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81603.59999999998,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80766.63999999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84532.96,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "1fe0d9d5-9caa-4415-bc0b-26210dfb28aa",
+      "direction": "SHORT",
+      "entry_price": 83713.17,
+      "size": 0.03424104,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:46:45.198937+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82457.47245,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81620.34075,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80783.20905,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84550.3017,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "29567136-dda3-4860-a824-f519c66fd394",
+      "direction": "SHORT",
+      "entry_price": 83717.29,
+      "size": 0.03423935,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:47:02.295141+00:00",
+      "entry_reason": "SHORT - High confidence entry (65/100): fibonacci_proximity: +35, direction_bias: +30",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82461.53064999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81624.35774999998,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80787.18484999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84554.4629,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "69aedffd-1008-46f9-82fe-d12f07819d27",
+      "direction": "SHORT",
+      "entry_price": 83685.85,
+      "size": 0.03425222,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:48:00.565464+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82430.56225,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81593.70375,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80756.84525,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84522.70850000001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "6e8d2096-0442-4f4a-a01f-70d956a5e1e7",
+      "direction": "SHORT",
+      "entry_price": 83600.0,
+      "size": 0.04571652,
+      "leverage": 3,
+      "entry_time": "2025-03-13T00:48:17.660665+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82346.0,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81510.0,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80674.0,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84436.0,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "320ea600-48bd-4dfc-ad65-32f7c1b8ad6b",
+      "direction": "SHORT",
+      "entry_price": 83597.49,
+      "size": 0.0457179,
+      "leverage": 3,
+      "entry_time": "2025-03-13T00:48:35.784250+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82343.52765,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81507.55275,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80671.57785,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84433.4649,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "e311bc45-0889-4f90-b030-6358fb4adc18",
+      "direction": "SHORT",
+      "entry_price": 83622.12,
+      "size": 0.01246484,
+      "leverage": 11,
+      "entry_time": "2025-03-13T00:49:28.007520+00:00",
+      "entry_reason": "SHORT - High confidence entry (65/100): fibonacci_proximity: +35, direction_bias: +30",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82367.7882,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81531.567,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80695.3458,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84458.3412,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "3dba8328-6940-41fe-95ef-a1ec6653d496",
+      "direction": "SHORT",
+      "entry_price": 83583.67,
+      "size": 0.03429409,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:50:43.432939+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82329.91495,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81494.07824999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80658.24155,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84419.5067,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "e0d27dd6-1541-42ab-bdf0-c0f0d67dacba",
+      "direction": "SHORT",
+      "entry_price": 83588.18,
+      "size": 0.03429224,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:51:01.514970+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82334.35729999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81498.47549999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80662.59369999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84424.0618,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "84e293a3-7fc2-492b-80fd-e26d3838fe8d",
+      "direction": "SHORT",
+      "entry_price": 83573.0,
+      "size": 0.01143282,
+      "leverage": 12,
+      "entry_time": "2025-03-13T00:51:18.602932+00:00",
+      "entry_reason": "SHORT - High confidence entry (65/100): fibonacci_proximity: +35, direction_bias: +30",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82319.405,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81483.67500000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80647.945,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84408.73,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "fc4d7ddb-9103-4a8e-9947-11e0d20e2630",
+      "direction": "SHORT",
+      "entry_price": 83569.94,
+      "size": 0.03429973,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:51:36.717818+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82316.3909,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81480.69150000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80644.9921,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84405.6394,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "254a6ea2-286f-4b59-9222-8feb5bb9b282",
+      "direction": "SHORT",
+      "entry_price": 83528.27,
+      "size": 0.01143895,
+      "leverage": 12,
+      "entry_time": "2025-03-13T00:52:11.892269+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82275.34595000002,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81440.06325,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80604.78055000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84363.5527,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "074328e7-9df3-41a8-82c9-ae357aef0e6a",
+      "direction": "SHORT",
+      "entry_price": 83513.13,
+      "size": 0.03432306,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:53:27.221614+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82260.43305000002,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81425.30175000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80590.17045000003,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84348.2613,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "f659b4fd-78d8-4430-a687-c0fcb484c231",
+      "direction": "SHORT",
+      "entry_price": 83533.47,
+      "size": 0.00807405,
+      "leverage": 17,
+      "entry_time": "2025-03-13T00:54:02.472119+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82280.46794999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81445.13324999998,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80609.79854999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84368.80470000001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "b65c2f04-ebe2-4025-8aa6-c66527caf310",
+      "direction": "SHORT",
+      "entry_price": 83504.36,
+      "size": 0.00686533,
+      "leverage": 20,
+      "entry_time": "2025-03-13T00:54:37.645400+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82251.7946,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81416.75099999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80581.70739999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84339.4036,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "29412dc7-fa45-4619-bc87-bab2cdc42039",
+      "direction": "SHORT",
+      "entry_price": 83497.93,
+      "size": 0.00762873,
+      "leverage": 18,
+      "entry_time": "2025-03-13T00:54:59.738566+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82245.46104999998,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81410.48174999998,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80575.50244999997,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84332.9093,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "471d163f-0d68-4dd7-ac29-28316bdb56a8",
+      "direction": "SHORT",
+      "entry_price": 83581.8,
+      "size": 0.03429486,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:55:34.880747+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82328.073,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81492.255,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80656.437,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84417.618,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "00a9490d-5db7-40b4-9f5f-e9716e937942",
+      "direction": "SHORT",
+      "entry_price": 83565.29,
+      "size": 0.0072214,
+      "leverage": 19,
+      "entry_time": "2025-03-13T00:55:53.001830+00:00",
+      "entry_reason": "SHORT - High confidence entry (65/100): fibonacci_proximity: +35, direction_bias: +30",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82311.81065,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81476.15774999998,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80640.50485,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84400.9429,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "4c2efccb-9c06-42f5-8160-c984418ca49e",
+      "direction": "SHORT",
+      "entry_price": 83557.02,
+      "size": 0.04574004,
+      "leverage": 3,
+      "entry_time": "2025-03-13T00:56:10.119283+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82303.6647,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81468.0945,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80632.52429999999,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84392.5902,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "28d66999-ae54-4e79-8568-d36fc43d1231",
+      "direction": "SHORT",
+      "entry_price": 83567.41,
+      "size": 0.04573435,
+      "leverage": 3,
+      "entry_time": "2025-03-13T00:56:28.244118+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82313.89885,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81478.22475,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80642.55064999999,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84403.08410000001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "db99b9e8-2d7e-475d-b3e3-66c4638c1aae",
+      "direction": "SHORT",
+      "entry_price": 83567.41,
+      "size": 0.03430076,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:56:45.329792+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82313.89885,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81478.22475,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80642.55064999999,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84403.08410000001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "207f3c0a-9f2b-4c3f-a8c7-c0fad8c557ed",
+      "direction": "SHORT",
+      "entry_price": 83572.48,
+      "size": 0.01247225,
+      "leverage": 11,
+      "entry_time": "2025-03-13T00:57:03.432646+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82318.8928,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81483.168,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80647.44320000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84408.20479999999,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "8a465096-990c-46af-989b-d917d8bad54b",
+      "direction": "SHORT",
+      "entry_price": 83521.49,
+      "size": 0.0457595,
+      "leverage": 3,
+      "entry_time": "2025-03-13T00:58:00.747097+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82268.66764999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81433.45275,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80598.23784999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84356.70490000001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "82371946-ed41-4cb8-84c5-de4dd3ebf869",
+      "direction": "SHORT",
+      "entry_price": 83480.0,
+      "size": 0.03433668,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:58:18.802669+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82227.79999999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81393.0,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80558.19999999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84314.8,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "821e34f3-56ba-41bd-a1e5-6e4c3c55a0fc",
+      "direction": "SHORT",
+      "entry_price": 83470.28,
+      "size": 0.03434068,
+      "leverage": 4,
+      "entry_time": "2025-03-13T00:58:54.017125+00:00",
+      "entry_reason": "SHORT - High confidence entry (65/100): fibonacci_proximity: +35, direction_bias: +30",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82218.2258,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81383.523,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80548.8202,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84304.9828,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "85c427f2-aaf1-4823-b9bf-da3152ce4405",
+      "direction": "SHORT",
+      "entry_price": 83465.92,
+      "size": 0.00763166,
+      "leverage": 18,
+      "entry_time": "2025-03-13T00:59:29.206856+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82213.9312,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81379.27200000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80544.61280000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84300.5792,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "ffae5623-9793-4d99-9bbd-0c813d524e6c",
+      "direction": "SHORT",
+      "entry_price": 83465.92,
+      "size": 0.04578996,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:00:09.437188+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82213.9312,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81379.27200000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80544.61280000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84300.5792,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "62b543ff-8430-4241-95de-3cbf0b2ef749",
+      "direction": "SHORT",
+      "entry_price": 83479.01,
+      "size": 0.03433709,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:00:26.591931+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82226.82485,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81392.03474999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80557.24465000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84313.8001,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "b4fa92c1-7d7a-449a-86aa-3e7b01d644a6",
+      "direction": "SHORT",
+      "entry_price": 83464.61,
+      "size": 0.01144767,
+      "leverage": 12,
+      "entry_time": "2025-03-13T01:01:01.800621+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82212.64085,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81377.99475000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80543.34865,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84299.2561,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "fe7a84a1-8623-423c-9d93-c324fe75fbf1",
+      "direction": "SHORT",
+      "entry_price": 83445.06,
+      "size": 0.01145035,
+      "leverage": 12,
+      "entry_time": "2025-03-13T01:01:55.093617+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82193.3841,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81358.93350000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80524.4829,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84279.5106,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "85ec8f26-8d5f-4aa1-92c1-226603beeb2f",
+      "direction": "SHORT",
+      "entry_price": 83440.0,
+      "size": 0.04580419,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:02:17.191478+00:00",
+      "entry_reason": "SHORT - High confidence entry (55/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +5",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82188.40000000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81354.00000000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80519.60000000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84274.4,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "0dbc52d7-d67c-4e2a-b3aa-5331ee9e43f0",
+      "direction": "SHORT",
+      "entry_price": 83455.68,
+      "size": 0.03434669,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:02:52.342368+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82203.84479999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81369.28799999997,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80534.73119999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84290.2368,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "71886127-043b-46d2-9f0c-d06e8217a738",
+      "direction": "SHORT",
+      "entry_price": 83500.0,
+      "size": 0.03432846,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:03:10.450613+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82247.5,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81412.5,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80577.5,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84335.0,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "06a917fb-3330-471e-9482-bfad830b232f",
+      "direction": "SHORT",
+      "entry_price": 83358.8,
+      "size": 0.0114622,
+      "leverage": 12,
+      "entry_time": "2025-03-13T01:03:45.568916+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82108.418,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81274.82999999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80441.242,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84192.388,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "e372f907-725b-42aa-988d-8bf2da9f04ef",
+      "direction": "SHORT",
+      "entry_price": 83334.55,
+      "size": 0.01375864,
+      "leverage": 10,
+      "entry_time": "2025-03-13T01:04:02.651300+00:00",
+      "entry_reason": "SHORT - High confidence entry (65/100): fibonacci_proximity: +35, direction_bias: +30",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82084.53175000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81251.18625000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80417.84075000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84167.8955,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "4cc92794-c180-47b6-a604-ab36a1edd90b",
+      "direction": "SHORT",
+      "entry_price": 83363.08,
+      "size": 0.04584645,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:04:20.755428+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82112.63380000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81279.003,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80445.37220000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84196.7108,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "0ce049cf-81c9-4660-b80b-f0075f42c730",
+      "direction": "SHORT",
+      "entry_price": 83361.28,
+      "size": 0.04584744,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:04:42.910946+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82110.8608,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81277.24799999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80443.63519999999,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84194.8928,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "4836c2e8-6c9c-48b6-9aac-a825284bc41c",
+      "direction": "SHORT",
+      "entry_price": 83377.5,
+      "size": 0.03437889,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:05:01.026895+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82126.83750000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81293.06250000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80459.28750000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84211.275,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "6da0c89d-a42f-4507-91ce-8eed875a002a",
+      "direction": "SHORT",
+      "entry_price": 83450.59,
+      "size": 0.03434878,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:05:36.204997+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82198.83114999998,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81364.32525,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80529.81934999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84285.0959,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "54b1104d-404c-451b-9d43-87728962830a",
+      "direction": "SHORT",
+      "entry_price": 83477.24,
+      "size": 0.03433781,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:05:53.349686+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82225.0814,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81390.30900000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80555.53659999999,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84312.0124,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "d51c6a6a-79aa-4912-a52c-461a39708bb2",
+      "direction": "SHORT",
+      "entry_price": 83495.4,
+      "size": 0.01144345,
+      "leverage": 12,
+      "entry_time": "2025-03-13T01:06:11.422569+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82242.969,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81408.015,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80573.061,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84330.35399999999,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "09485e42-c427-406c-b518-25cc21588e69",
+      "direction": "SHORT",
+      "entry_price": 83537.53,
+      "size": 0.04575071,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:06:28.523840+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82284.46705,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81449.09174999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80613.71645,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84372.9053,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "f0550f9a-41c5-4184-98d7-1de7b66a2cd1",
+      "direction": "SHORT",
+      "entry_price": 83575.24,
+      "size": 0.04573007,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:06:46.606892+00:00",
+      "entry_reason": "SHORT - High confidence entry (55/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +5",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82321.61140000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81485.85900000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80650.10660000001,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84410.9924,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "b67d3b42-1f3f-4108-88cb-63e0751a38a7",
+      "direction": "SHORT",
+      "entry_price": 83579.45,
+      "size": 0.01371833,
+      "leverage": 10,
+      "entry_time": "2025-03-13T01:08:02.022184+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82325.75824999998,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81489.96375,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80654.16924999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84415.2445,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "93e66775-2df7-4bfe-9c71-f3c51030a69d",
+      "direction": "SHORT",
+      "entry_price": 83584.9,
+      "size": 0.04572478,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:08:19.148966+00:00",
+      "entry_reason": "SHORT - High confidence entry (55/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +5",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82331.12649999998,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81495.2775,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80659.42849999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84420.749,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "de5e0499-af50-41df-82c5-ddb4b46746a1",
+      "direction": "SHORT",
+      "entry_price": 83568.05,
+      "size": 0.0343005,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:08:37.300340+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82314.52924999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81478.84875,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80643.16824999999,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84403.7305,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "12b63efa-8dc3-4f89-bd2b-2626a7e9bf48",
+      "direction": "SHORT",
+      "entry_price": 83566.1,
+      "size": 0.00762251,
+      "leverage": 18,
+      "entry_time": "2025-03-13T01:09:12.544958+00:00",
+      "entry_reason": "SHORT - High confidence entry (55/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +5",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82312.60850000002,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81476.94750000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80641.28650000003,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84401.761,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "bf7c6948-7793-4f8f-ad41-5033220d43fe",
+      "direction": "SHORT",
+      "entry_price": 83564.37,
+      "size": 0.03430201,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:09:34.658652+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82310.90445,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81475.26074999999,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80639.61705,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84400.0137,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "ac2718a1-9996-46da-9fff-871937f9725e",
+      "direction": "SHORT",
+      "entry_price": 83575.39,
+      "size": 0.03429749,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:10:09.941022+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82321.75915,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81486.00525000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80650.25135,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84411.1439,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "5cce69aa-bfb4-406c-8369-b4b98248474c",
+      "direction": "SHORT",
+      "entry_price": 83584.61,
+      "size": 0.03429371,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:10:28.042389+00:00",
+      "entry_reason": "SHORT - High confidence entry (60/100): fibonacci_proximity: +35, direction_bias: +15, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82330.84085000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81494.99475000001,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80659.14865000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84420.4561,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "ccda483f-fb64-4904-b018-e9db17ef2df3",
+      "direction": "SHORT",
+      "entry_price": 83571.19,
+      "size": 0.03429921,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:10:45.101459+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82317.62215000001,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81481.91025000002,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80646.19835000002,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84406.9019,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "03ec5a46-a8ff-41bc-b44f-923b35711d73",
+      "direction": "SHORT",
+      "entry_price": 83571.12,
+      "size": 0.03429924,
+      "leverage": 4,
+      "entry_time": "2025-03-13T01:11:20.309795+00:00",
+      "entry_reason": "SHORT - High confidence entry (75/100): fibonacci_proximity: +35, direction_bias: +30, market_regime: +10",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82317.5532,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81481.84199999998,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80646.13079999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84406.8312,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    },
+    {
+      "id": "78fc67e4-24e0-4d34-8631-f3520d733754",
+      "direction": "SHORT",
+      "entry_price": 83596.48,
+      "size": 0.04571845,
+      "leverage": 3,
+      "entry_time": "2025-03-13T01:11:38.430471+00:00",
+      "entry_reason": "SHORT - High confidence entry (50/100): fibonacci_proximity: +35, direction_bias: +15",
+      "exit_price": null,
+      "exit_time": null,
+      "exit_reason": null,
+      "take_profits": [
+        {
+          "price": 82342.53279999999,
+          "percentage": 0.4,
+          "hit": false
+        },
+        {
+          "price": 81506.568,
+          "percentage": 0.3,
+          "hit": false
+        },
+        {
+          "price": 80670.60319999998,
+          "percentage": 0.3,
+          "hit": false
+        }
+      ],
+      "stop_loss": 84432.4448,
+      "realized_pnl": 0.0,
+      "status": "OPEN"
+    }
+  ],
+  "trade_history": {
+    "trades": [],
+    "total_trades": 0,
+    "winning_trades": 0,
+    "losing_trades": 0,
+    "total_pnl": 0.0,
+    "win_rate": 0.0,
+    "average_win": 0.0,
+    "average_loss": 0.0,
+    "largest_win": 0.0,
+    "largest_loss": 0.0
+  }
+}

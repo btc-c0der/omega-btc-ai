@@ -1,0 +1,67 @@
+{
+  "panels": [
+    {
+      "title": "HF Trap Count",
+      "type": "stat",
+      "datasource": "Redis",
+      "targets": [
+        {
+          "command": "GET",
+          "key": "grafana:hf_trap_count",
+          "type": "command"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Liquidity Grabs vs Schumann Resonance",
+      "type": "timeseries",
+      "datasource": "Redis",
+      "targets": [
+        {
+          "command": "ZRANGE",
+          "key": "grafana:schumann_mm_correlation",
+          "type": "command",
+          "keyName": "schumann_correlation"
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    }
+  ]
+}
