@@ -1,161 +1,72 @@
-"""
-Redis Manager for OMEGA BTC AI
-=============================
-
-Provides a centralized Redis connection management with features like:
-- Connection pooling
-- Local caching with TTL
-- Data validation
-- Graceful shutdown
-- Automatic reconnection
-- SSL/TLS support
-"""
-
 import redis
-from redis.connection import ConnectionPool
+from redis.backoff import ExponentialBackoff
+from redis.retry import Retry
 import signal
 import sys
-from typing import Optional, Dict, Any, Union, Tuple, Type, List, cast
+from typing import Optional, Dict, Any
 import json
 import time
-import logging
-from functools import wraps
-
-logger = logging.getLogger(__name__)
-
-def retry_on_connection_error(max_retries: int = 3, delay: float = 1.0):
-    """Decorator for Redis operations with retry logic."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            last_error = None
-            for attempt in range(max_retries):
-                try:
-                    return func(*args, **kwargs)
-                except (redis.ConnectionError, redis.TimeoutError) as e:
-                    last_error = e
-                    if attempt < max_retries - 1:
-                        time.sleep(delay * (attempt + 1))
-            logger.error(f"Redis operation failed after {max_retries} attempts: {last_error}")
-            if last_error:
-                raise last_error
-            raise redis.ConnectionError("Max retries exceeded")
-        return wrapper
-    return decorator
 
 class RedisManager:
-    """Enhanced Redis Manager with support for managed Redis instances."""
-    
-    def __init__(
-        self,
-        host: str = 'localhost',
-        port: int = 6379,
-        password: Optional[str] = None,
-        db: int = 0,
-        ssl: bool = False,
-        ssl_cert_reqs: Optional[str] = None,
-        max_connections: int = 10,
-        socket_timeout: float = 5.0,
-        cache_ttl: int = 5  # seconds
-    ):
-        """Initialize Redis Manager with connection pooling."""
-        self.pool = ConnectionPool(
-            host=host,
-            port=port,
-            password=password,
-            db=db,
-            ssl=ssl,
-            ssl_cert_reqs=ssl_cert_reqs,
-            max_connections=max_connections,
-            socket_timeout=socket_timeout,
-            decode_responses=True
-        )
+    def __init__(self, host='localhost', port=6379, db=0):
+        # Initialize Redis connection without problematic parameters
+        connection_params = {
+            "host": host,
+            "port": port,
+            "db": db,
+            "retry_on_timeout": True,
+            "decode_responses": True
+        }
         
-        self.redis = redis.Redis(connection_pool=self.pool)
-        self._cache: Dict[str, Any] = {}
-        self._cache_ttl: Dict[str, float] = {}
-        self.CACHE_DURATION = cache_ttl
+        try:
+            self.redis = redis.Redis(**connection_params)
+            print(f"Redis Manager initialized - Host: {host}, Port: {port}")
+        except Exception as e:
+            print(f"Error initializing Redis connection: {e}")
+            raise
         
-        # Setup graceful shutdown
+        self._cache = {}
+        self._cache_ttl = {}
+        self.CACHE_DURATION = 5  # seconds
+        
+        # Register signal handlers
         signal.signal(signal.SIGINT, self._handle_shutdown)
         signal.signal(signal.SIGTERM, self._handle_shutdown)
-        
-        logger.info(f"Redis Manager initialized - Host: {host}, Port: {port}, SSL: {ssl}")
     
-    @retry_on_connection_error()
     def get_cached(self, key: str) -> Optional[Any]:
-        """Get value from cache or Redis with TTL-based caching."""
+        """Get value from cache or Redis with TTL-based caching"""
         now = time.time()
         
         # Check cache first
-        if key in self._cache and now < self._cache_ttl.get(key, 0):
+        if key in self._cache and now < self._cache_ttl[key]:
             return self._cache[key]
-        
+            
         # Get from Redis
         try:
             value = self.redis.get(key)
-            if value is not None:
-                try:
-                    # Handle bytes or string response
-                    if isinstance(value, bytes):
-                        value = value.decode('utf-8')
-                    # Attempt to parse as JSON
-                    parsed_value = json.loads(value)
-                    self._cache[key] = parsed_value
-                except json.JSONDecodeError:
-                    # If not JSON, store as is
-                    self._cache[key] = value
+            if value:
+                self._cache[key] = value
                 self._cache_ttl[key] = now + self.CACHE_DURATION
-                return self._cache[key]
+                return value
         except redis.RedisError as e:
-            logger.error(f"Redis error on get: {e}")
+            print(f"Redis error on get: {e}")
         return None
     
-    @retry_on_connection_error()
-    def set_cached(self, key: str, value: Any, expiry: Optional[int] = None) -> bool:
-        """Set value in Redis with optional expiry and automatic caching."""
+    def set_with_validation(self, key: str, data: Dict) -> bool:
+        """Set data with type validation"""
         try:
-            # Convert value to string if needed
-            if isinstance(value, (dict, list)):
-                str_value = json.dumps(value)
-            else:
-                str_value = str(value)
-            
-            # Store in Redis
-            if expiry is not None:
-                success = self.redis.setex(key, expiry, str_value)
-            else:
-                success = self.redis.set(key, str_value)
-            
-            if success:
-                # Update cache
-                self._cache[key] = value
-                self._cache_ttl[key] = time.time() + self.CACHE_DURATION
-                return True
-            return False
-            
-        except (redis.RedisError, ValueError) as e:
-            logger.error(f"Error storing data: {e}")
-            return False
-    
-    @retry_on_connection_error()
-    def set_with_validation(self, key: str, data: Union[Dict, str]) -> bool:
-        """Set data with type validation and automatic JSON serialization."""
-        try:
-            # Convert dict to JSON string
-            if isinstance(data, dict):
-                # Validate data structure based on key prefix
-                if key.startswith("omega:live_trader"):
-                    self._validate_trader_data(data)
-                elif key.startswith("omega:battle_state"):
-                    self._validate_battle_state(data)
+            # Validate data structure
+            if not isinstance(data, dict):
+                raise ValueError("Data must be a dictionary")
                 
-                value = json.dumps(data)
-            else:
-                value = str(data)
+            # Validate specific fields based on key
+            if "omega:live_trader_data" in key:
+                self._validate_trader_data(data)
+            elif "omega:live_battle_state" in key:
+                self._validate_battle_state(data)
             
             # Store in Redis
-            self.redis.set(key, value)
+            self.redis.set(key, json.dumps(data))
             
             # Update cache
             self._cache[key] = data
@@ -164,101 +75,12 @@ class RedisManager:
             return True
             
         except (redis.RedisError, ValueError) as e:
-            logger.error(f"Error storing data: {e}")
+            print(f"Error storing data: {e}")
             return False
     
-    @retry_on_connection_error()
-    def lpush(self, key: str, value: Union[str, Dict]) -> bool:
-        """Push a value to the head of a list."""
-        try:
-            # Convert value to string if needed
-            if isinstance(value, dict):
-                str_value = json.dumps(value)
-            else:
-                str_value = str(value)
-            
-            # Push to Redis list
-            return bool(self.redis.lpush(key, str_value))
-            
-        except redis.RedisError as e:
-            logger.error(f"Error pushing to list: {e}")
-            return False
-    
-    @retry_on_connection_error()
-    def ltrim(self, key: str, start: int, end: int) -> bool:
-        """Trim a list to the specified range."""
-        try:
-            self.redis.ltrim(key, start, end)
-            return True
-        except redis.RedisError as e:
-            logger.error(f"Error trimming list: {e}")
-            return False
-    
-    @retry_on_connection_error()
-    def lrange(self, key: str, start: int, end: int) -> List[str]:
-        """Get a range of elements from a list."""
-        try:
-            values = self.redis.lrange(key, start, end)
-            return [v.decode('utf-8') if isinstance(v, bytes) else v for v in values]
-        except redis.RedisError as e:
-            logger.error(f"Error getting list range: {e}")
-            return []
-    
-    @retry_on_connection_error()
-    def zadd(self, key: str, mapping: Dict[str, float]) -> int:
-        """Add one or more members to a sorted set.
-        
-        Returns:
-            int: The number of new elements added to the sorted set.
-        """
-        try:
-            return cast(int, self.redis.zadd(key, mapping))
-        except redis.RedisError as e:
-            logger.error(f"Error adding to sorted set: {e}")
-            return 0
-    
-    @retry_on_connection_error()
-    def zrange(self, key: str, start: int, stop: int, desc: bool = False, withscores: bool = False) -> List[Union[str, Tuple[str, float]]]:
-        """Get a range of elements from a sorted set."""
-        try:
-            result = self.redis.zrange(key, start, stop, desc=desc, withscores=withscores)
-            if withscores:
-                return [(item[0].decode('utf-8') if isinstance(item[0], bytes) else item[0], item[1]) for item in result]
-            return [item.decode('utf-8') if isinstance(item, bytes) else item for item in result]
-        except redis.RedisError as e:
-            logger.error(f"Error getting range from sorted set: {e}")
-            return []
-    
-    @retry_on_connection_error()
-    def zcard(self, key: str) -> int:
-        """Get the number of members in a sorted set."""
-        try:
-            return cast(int, self.redis.zcard(key))
-        except redis.RedisError as e:
-            logger.error(f"Error getting sorted set size: {e}")
-            return 0
-    
-    @retry_on_connection_error()
-    def zremrangebyrank(self, key: str, start: int, stop: int) -> bool:
-        """Remove elements from a sorted set by their rank range."""
-        try:
-            return bool(self.redis.zremrangebyrank(key, start, stop))
-        except redis.RedisError as e:
-            logger.error(f"Error removing range from sorted set: {e}")
-            return False
-    
-    @retry_on_connection_error()
-    def delete(self, key: str) -> bool:
-        """Delete a key."""
-        try:
-            return bool(self.redis.delete(key))
-        except redis.RedisError as e:
-            logger.error(f"Error deleting key: {e}")
-            return False
-    
-    def _validate_trader_data(self, data: Dict) -> None:
-        """Validate trader data structure."""
-        required_fields: Dict[str, Union[Type, Tuple[Type, ...]]] = {
+    def _validate_trader_data(self, data: Dict):
+        """Validate trader data structure"""
+        required_fields = {
             "name": str,
             "capital": (int, float),
             "pnl": (int, float),
@@ -270,18 +92,15 @@ class RedisManager:
         }
         
         for profile_data in data.values():
-            if not isinstance(profile_data, dict):
-                raise ValueError("Invalid trader profile data structure")
-            
             for field, field_type in required_fields.items():
                 if field not in profile_data:
                     raise ValueError(f"Missing required field: {field}")
                 if not isinstance(profile_data[field], field_type):
                     raise ValueError(f"Invalid type for {field}")
     
-    def _validate_battle_state(self, data: Dict) -> None:
-        """Validate battle state structure."""
-        required_fields: Dict[str, Union[Type, Tuple[Type, ...]]] = {
+    def _validate_battle_state(self, data: Dict):
+        """Validate battle state structure"""
+        required_fields = {
             "day": int,
             "session": int,
             "btc_price": (int, float),
@@ -295,51 +114,32 @@ class RedisManager:
             if not isinstance(data[field], field_type):
                 raise ValueError(f"Invalid type for {field}")
     
-    def _handle_shutdown(self, signum: int, frame: Any) -> None:
-        """Handle graceful shutdown."""
-        logger.warning("Shutdown signal received. Saving state...")
+    def _handle_shutdown(self, signum, frame):
+        """Handle graceful shutdown"""
+        print("\n⚠️ Shutdown signal received. Saving state...")
         
         try:
             # Save final state
             final_state = {
                 "shutdown_time": time.time(),
-                "clean_shutdown": True,
-                "cache_size": len(self._cache)
+                "clean_shutdown": True
             }
-            self.redis.set("omega:shutdown_state", json.dumps(final_state))
             
-            # Close Redis connections
-            self.pool.disconnect()
+            try:
+                # Use a new Redis connection for shutdown to avoid issues
+                shutdown_redis = redis.Redis(
+                    host=self.redis.connection_pool.connection_kwargs['host'],
+                    port=self.redis.connection_pool.connection_kwargs['port'],
+                    db=self.redis.connection_pool.connection_kwargs['db'],
+                    decode_responses=True
+                )
+                shutdown_redis.set("omega:shutdown_state", json.dumps(final_state))
+                print("✅ State saved successfully")
+            except Exception as e:
+                print(f"⚠️ Could not save shutdown state: {e}")
             
-            logger.info("State saved successfully")
             sys.exit(0)
             
         except Exception as e:
-            logger.error(f"Error saving shutdown state: {e}")
+            print(f"❌ Error saving shutdown state: {e}")
             sys.exit(1)
-    
-    def clear_cache(self) -> None:
-        """Clear the local cache."""
-        self._cache.clear()
-        self._cache_ttl.clear()
-    
-    @retry_on_connection_error()
-    def health_check(self) -> Tuple[bool, str]:
-        """Perform a health check on the Redis connection."""
-        try:
-            if self.redis.ping():
-                info = self.redis.info()
-                if isinstance(info, dict):
-                    version = info.get('redis_version', 'unknown')
-                    return True, f"Connected - Redis v{version}"
-                return True, "Connected - Version unknown"
-            return False, "Ping failed"
-        except redis.RedisError as e:
-            return False, str(e)
-    
-    def __del__(self) -> None:
-        """Cleanup on deletion."""
-        try:
-            self.pool.disconnect()
-        except Exception:
-            pass
