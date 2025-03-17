@@ -1,0 +1,81 @@
+{
+    "name": "mm-trap-visualizer",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@mui/icons-material": "^5.15.10",
+        "@mui/material": "^5.16.14",
+        "@react-three/drei": "^9.99.0",
+        "@types/d3": "^7.4.3",
+        "@types/echarts": "^4.9.22",
+        "@types/node": "^16.18.80",
+        "@types/react-dom": "^18.2.19",
+        "@types/three": "^0.161.2",
+        "d3": "^7.8.5",
+        "echarts": "^5.6.0",
+        "echarts-for-react": "^3.0.3",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-scripts": "5.0.1",
+        "react-three-fiber": "^6.0.13",
+        "three": "^0.161.0",
+        "typescript": "^4.9.5",
+        "web-vitals": "^2.1.4"
+    },
+    "devDependencies": {
+        "@testing-library/jest-dom": "^5.17.0",
+        "@testing-library/react": "^13.4.0",
+        "@testing-library/user-event": "^13.5.0",
+        "@types/jest": "^27.5.2",
+        "@types/react": "^18.3.18",
+        "@types/testing-library__jest-dom": "^5.14.9",
+        "jest-environment-jsdom": "^27.5.1",
+        "ts-jest": "^27.1.5"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "test:coverage": "react-scripts test --coverage --watchAll=false",
+        "test:ci": "react-scripts test --ci --passWithNoTests",
+        "eject": "react-scripts eject"
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.(ts|tsx)$": "ts-jest"
+        },
+        "moduleNameMapper": {
+            "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+        },
+        "testEnvironment": "jsdom",
+        "setupFilesAfterEnv": [
+            "@testing-library/jest-dom/extend-expect"
+        ],
+        "collectCoverageFrom": [
+            "src/**/*.{ts,tsx}",
+            "!src/index.tsx",
+            "!src/reportWebVitals.ts",
+            "!src/**/*.d.ts"
+        ]
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}
