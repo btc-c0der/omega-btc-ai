@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import React from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useTheme, CircularProgress } from '@mui/material';
 import { keyframes } from '@emotion/react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption, TooltipComponentOption } from 'echarts';
@@ -19,6 +19,12 @@ const pulse = keyframes`
   0% { transform: scale(1); opacity: 0.8; }
   50% { transform: scale(1.05); opacity: 0.4; }
   100% { transform: scale(1); opacity: 0.8; }
+`;
+
+const blink = keyframes`
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 `;
 
 // Note: The 'complex union type' warning from MUI's sx prop typing is a known issue
@@ -69,13 +75,67 @@ const createStatusOverlayStyles = (theme: Theme): SxProps<Theme> => ({
     animation: `${pulse} 2s ease-in-out infinite`,
 });
 
+const loadingContainerStyles: SxProps<Theme> = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
+};
+
+const loadingTextStyles: SxProps<Theme> = {
+    fontFamily: '"Share Tech Mono", monospace',
+    animation: `${blink} 1s ease-in-out infinite`,
+    color: 'primary.main',
+    fontSize: '0.9rem',
+};
+
 const PriceChart: React.FC = () => {
     const theme = useTheme();
     const { data, isLoading, error } = useDataFeed<PriceData[]>('/api/prices');
     const { data: traps } = useDataFeed<TrapData[]>('/api/traps');
 
-    if (isLoading) return <div>1N1T14L1Z1NG_CH4RT.exe</div>;
-    if (error) return <div>3RR0R: {error?.message || 'UNK0WN_3RR0R'}</div>;
+    if (isLoading) {
+        return (
+            <Box sx={containerStyles}>
+                <Box sx={loadingContainerStyles}>
+                    <CircularProgress
+                        size={40}
+                        thickness={4}
+                        sx={{
+                            color: theme.palette.primary.main,
+                            filter: 'drop-shadow(0 0 5px #00ff41)',
+                        }}
+                    />
+                    <Typography sx={loadingTextStyles}>
+                        1N1T14L1Z1NG_CH4RT.exe
+                    </Typography>
+                </Box>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box sx={containerStyles}>
+                <Box sx={loadingContainerStyles}>
+                    <Typography
+                        sx={{
+                            ...loadingTextStyles,
+                            color: theme.palette.error.main,
+                            animation: `${blink} 2s ease-in-out infinite`,
+                            textAlign: 'center',
+                        }}
+                    >
+                        3RR0R: {error?.message || 'UNK0WN_3RR0R'}
+                    </Typography>
+                </Box>
+            </Box>
+        );
+    }
 
     const chartOptions: EChartsOption = {
         backgroundColor: 'transparent',
