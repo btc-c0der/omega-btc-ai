@@ -5,6 +5,8 @@ These sacred tests verify that the Market Maker Trap Processor properly detects
 Babylon system manipulation tactics and protects traders with divine insight.
 
 JAH BLESS THE TRUTHFUL MARKET VISION! 🙏
+
+H4X0R M0D3 4CT1V4T3D - 3L1T3 TR4P D3T3CT10N 🎯
 """
 
 import pytest
@@ -27,6 +29,13 @@ from omega_ai.mm_trap_detector.mm_trap_processor import (
     process_mm_trap,  # Main function to test
     print_header, print_section, print_price_update, print_analysis_result,
     print_movement_tag, print_alert
+)
+
+from omega_ai.mm_trap_detector.high_frequency_detector import (
+    HighFrequencyTrapDetector,
+    SCHUMANN_THRESHOLD,
+    MIN_TRAPS_FOR_HF_MODE,
+    BACK_TO_BACK_WINDOW
 )
 
 # Terminal colors for divine test output
@@ -209,7 +218,7 @@ class TestMMTrapDetector:
         prev_price = 59000.0  # $1000 change, above threshold
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-        
+
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 500.0  # Set threshold below our change
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
@@ -698,4 +707,389 @@ class TestMMTrapDetector:
         """🌿 Test divine detection of potential fake pump with organic pattern."""
         print(f"\n{GREEN}Testing POTENTIAL FAKE PUMP detection...{RESET}")
         
-        # Setup test data - price increase above PRICE_PUMP_THRESHOLD (0.02 = 2
+        # Setup test data - price increase above PRICE_PUMP_THRESHOLD (0.02 = 2%)
+        current_price = 30000.0
+        prev_price = 29400.0  # 2.04% increase but only $600 absolute change
+        price_change_pct = (current_price - prev_price) / prev_price
+        abs_change = abs(current_price - prev_price)
+        
+        # Configure mocks
+        mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
+        mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
+        
+        setup_price_environment(current_price, prev_price)
+        
+        # Run one loop of the trap detector
+        _run_detector_once(mock_sleep)
+        
+        # Verify no trap was detected
+        mock_insert_trap.assert_not_called()
+        
+        # Verify high-frequency detector was not notified
+        mock_register_trap.assert_not_called()
+        
+        # Verify no alert was sent
+        mock_send_alert.assert_not_called()
+        
+        # Verify subtle movement was recorded
+        mock_insert_subtle.assert_called()
+        
+        # Verify organic data was stored in Redis
+        organic_stored = False
+        for call_obj in mock_redis.hset.call_args_list:
+            key = call_obj[0][0]
+            if "organic_move:" in key:
+                organic_stored = True
+                mapping = call_obj[1]["mapping"]
+                assert mapping["type"] == "Organic"
+                assert mapping["confidence"] == "0.8"  # High confidence
+                break
+                
+        assert organic_stored, "Should store organic movement data in Redis"
+        
+        print(f"  • {CYAN}Organic movement correctly identified (no false positives)!{RESET}")
+    
+    @patch('time.sleep')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_stealth_accumulation_pattern(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                                      mock_insert_subtle, mock_register_trap, mock_send_alert,
+                                      mock_sleep):
+        """🕵️ Test detection of stealth accumulation patterns by whales."""
+        print(f"\n{CYAN}Testing ST34LTH 4CCUMUL4T10N detection...{RESET}")
+        
+        # Setup test data - subtle price changes with increasing volume
+        current_price = 50000.0
+        prev_price = 49950.0  # Small price change
+        
+        # Configure mocks for stealth pattern
+        mock_omega_algo.calculate_dynamic_threshold.return_value = 100.0
+        mock_omega_algo.is_fibo_organic.return_value = "Potential Stealth Pattern"
+        mock_omega_algo.analyze_multi_timeframe_trends.return_value = {
+            "1min": "neutral",
+            "5min": "neutral",
+            "15min": "bullish",
+            "1h": "bullish"
+        }
+        
+        # Configure Redis mock with increasing volume pattern
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"5000"  # Higher than usual volume
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Run detector
+        _run_detector_once(mock_sleep)
+        
+        # Verify subtle movement was detected
+        mock_insert_subtle.assert_called_once()
+        movement_call = mock_insert_subtle.call_args[0]
+        
+        # Verify pattern characteristics
+        assert movement_call[0] == current_price, "Should record current price"
+        assert movement_call[2] == "Stealth Accumulation", "Should detect stealth pattern"
+        assert movement_call[3] >= 0.7, "Should have high confidence due to volume"
+
+    @patch('time.sleep')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_fractal_trap_pattern(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                               mock_insert_subtle, mock_register_trap, mock_send_alert,
+                               mock_sleep):
+        """🌀 Test detection of fractal trap patterns (self-similar price movements)."""
+        print(f"\n{MAGENTA}Testing FR4CT4L TR4P P4TT3RN detection...{RESET}")
+        
+        # Setup test data - fractal pattern (similar movements at different scales)
+        current_price = 55000.0
+        prev_price = 54500.0
+        
+        # Configure mocks for fractal analysis
+        mock_omega_algo.calculate_dynamic_threshold.return_value = 400.0
+        mock_omega_algo.is_fibo_organic.return_value = "Fractal Pattern Detected"
+        mock_omega_algo.analyze_multi_timeframe_trends.return_value = {
+            "1min": "bullish",
+            "5min": "bullish",
+            "15min": "bullish",
+            "1h": "neutral"
+        }
+        
+        # Configure Redis mock with fractal pattern data
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"2500"
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Run detector
+        _run_detector_once(mock_sleep)
+        
+        # Verify trap was detected
+        mock_insert_trap.assert_called_once()
+        trap_call = mock_insert_trap.call_args[0]
+        
+        # Verify fractal characteristics
+        assert trap_call[0] == current_price, "Should record current price"
+        assert trap_call[2] == "Fractal Trap", "Should detect fractal pattern"
+        assert trap_call[3] >= 0.85, "Should have high confidence for fractal pattern"
+
+    @patch('time.sleep')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.send_alert')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.register_trap_detection')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_subtle_movement')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.insert_mm_trap')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.OmegaAlgo')
+    @patch('omega_ai.mm_trap_detector.mm_trap_processor.redis_conn')
+    def test_time_dilation_trap(self, mock_redis, mock_omega_algo, mock_insert_trap,
+                             mock_insert_subtle, mock_register_trap, mock_send_alert,
+                             mock_sleep):
+        """⌛ Test detection of time-based manipulation (weekend/off-hours traps)."""
+        print(f"\n{YELLOW}Testing T1M3 D1L4T10N TR4P detection...{RESET}")
+        
+        # Setup test data - weekend movement
+        current_price = 52000.0
+        prev_price = 51500.0
+        
+        # Configure mocks for time-based analysis
+        mock_omega_algo.calculate_dynamic_threshold.return_value = 300.0
+        mock_omega_algo.is_fibo_organic.return_value = "Time-Based Pattern"
+        mock_omega_algo.analyze_multi_timeframe_trends.return_value = {
+            "1min": "bearish",
+            "5min": "neutral",
+            "15min": "bullish",
+            "1h": "neutral"
+        }
+        
+        # Configure Redis mock with weekend data
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "last_btc_volume":
+                return b"800"  # Lower weekend volume
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Simulate weekend timestamp
+        current_time = datetime.datetime.now()
+        if current_time.weekday() < 5:  # If not weekend
+            current_time = current_time + datetime.timedelta(days=(6 - current_time.weekday()))
+        
+        with patch('datetime.datetime') as mock_datetime:
+            mock_datetime.now.return_value = current_time
+            
+            # Run detector
+            _run_detector_once(mock_sleep)
+        
+        # Verify trap was detected
+        mock_insert_trap.assert_called_once()
+        trap_call = mock_insert_trap.call_args[0]
+        
+        # Verify time-based characteristics
+        assert trap_call[0] == current_price, "Should record current price"
+        assert trap_call[2] == "Time Dilation Trap", "Should detect time-based pattern"
+        assert trap_call[3] >= 0.75, "Should have good confidence for time pattern"
+
+class TestHighFrequencyTrapDetector:
+    """🌿 Divine tests for High Frequency Trap Detector."""
+    
+    @pytest.fixture
+    def hf_detector(self):
+        """Create a fresh HF detector instance for each test."""
+        return HighFrequencyTrapDetector()
+    
+    @patch('omega_ai.mm_trap_detector.high_frequency_detector.redis_conn')
+    def test_schumann_resonance_spike_detection(self, mock_redis, hf_detector):
+        """🌌 Test detection of Schumann resonance spikes during price movements."""
+        print(f"\n{MAGENTA}Testing SCHUM4NN R3S0N4NC3 SP1K3 detection...{RESET}")
+        
+        # Setup test data - high Schumann resonance with price movement
+        schumann_value = SCHUMANN_THRESHOLD + 5.0  # Above threshold
+        current_price = 50000.0
+        prev_price = 49900.0  # 0.2% change
+        
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "schumann_resonance":
+                return str(schumann_value).encode()
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Run detector
+        hf_mode_active = hf_detector.detect_high_freq_trap_mode(
+            latest_price=current_price,
+            schumann_resonance=schumann_value
+        )
+        
+        # Verify HF mode was activated
+        assert hf_mode_active, "HF mode should activate with Schumann spike"
+        
+        print(f"  • {CYAN}Schumann resonance spike detection verified!{RESET}")
+    
+    @patch('omega_ai.mm_trap_detector.high_frequency_detector.redis_conn')
+    def test_volatility_acceleration_detection(self, mock_redis, hf_detector):
+        """⚡ Test detection of volatility acceleration patterns."""
+        print(f"\n{YELLOW}Testing V0L4T1L1TY 4CC3L3R4T10N detection...{RESET}")
+        
+        # Setup test data - high short-term volatility
+        current_price = 55000.0
+        prev_price = 54000.0
+        
+        # Configure Redis mock with volatility data
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "volatility_1min":
+                return b"2.5"  # High 1-min volatility
+            elif key == "volatility_5min":
+                return b"1.0"  # Lower 5-min volatility
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Run detector
+        hf_mode_active = hf_detector.detect_high_freq_trap_mode(latest_price=current_price)
+        
+        # Verify HF mode was activated
+        assert hf_mode_active, "HF mode should activate with volatility acceleration"
+        
+        print(f"  • {CYAN}Volatility acceleration detection verified!{RESET}")
+    
+    @patch('omega_ai.mm_trap_detector.high_frequency_detector.redis_conn')
+    def test_back_to_back_trap_detection(self, mock_redis, hf_detector):
+        """🔄 Test detection of back-to-back trap patterns."""
+        print(f"\n{BLUE}Testing B4CK-2-B4CK TR4P detection...{RESET}")
+        
+        # Setup test data - multiple recent traps
+        current_time = datetime.datetime.now(datetime.UTC)
+        
+        # Register multiple traps within the window
+        for i in range(MIN_TRAPS_FOR_HF_MODE + 1):
+            trap_time = current_time - datetime.timedelta(seconds=i*10)
+            hf_detector.register_trap_event(
+                "Test Trap",
+                0.9,
+                0.02,
+                from_detector=False,
+                timestamp=trap_time
+            )
+        
+        # Configure Redis mock
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return b"50000.0"
+            elif key == "prev_btc_price":
+                return b"49900.0"
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Run detector
+        hf_mode_active = hf_detector.detect_high_freq_trap_mode()
+        
+        # Verify HF mode was activated
+        assert hf_mode_active, "HF mode should activate with multiple recent traps"
+        
+        print(f"  • {CYAN}Back-to-back trap detection verified!{RESET}")
+    
+    @patch('omega_ai.mm_trap_detector.high_frequency_detector.redis_conn')
+    def test_direct_liquidity_grab_detection(self, mock_redis, hf_detector):
+        """💧 Test detection of direct liquidity grabs."""
+        print(f"\n{RED}Testing D1R3CT L1QU1D1TY GR4B detection...{RESET}")
+        
+        # Setup test data - high volatility and acceleration
+        current_price = 60000.0
+        prev_price = 58800.0  # 2% change
+        
+        # Configure Redis mock with volatility data
+        def get_side_effect(key):
+            if key == "last_btc_price":
+                return str(current_price).encode()
+            elif key == "prev_btc_price":
+                return str(prev_price).encode()
+            elif key == "volatility_1min":
+                return b"0.5"  # High volatility
+            elif key == "volatility_acceleration":
+                return b"0.3"  # High acceleration
+            return None
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Run detector
+        hf_mode_active = hf_detector.detect_high_freq_trap_mode(latest_price=current_price)
+        
+        # Verify HF mode was activated
+        assert hf_mode_active, "HF mode should activate with direct liquidity grab"
+        
+        # Verify grab was detected with high confidence
+        grab_type, confidence = hf_detector.detect_liquidity_grabs(current_price)
+        assert grab_type == "Volatility Liquidity Grab"
+        assert confidence > 0.7
+        
+        print(f"  • {CYAN}Direct liquidity grab detection verified!{RESET}")
+    
+    @patch('omega_ai.mm_trap_detector.high_frequency_detector.redis_conn')
+    def test_simulation_mode_handling(self, mock_redis, hf_detector):
+        """🎮 Test handling of simulation mode data."""
+        print(f"\n{MAGENTA}Testing S1MUL4T10N M0D3 handling...{RESET}")
+    
+        # Setup test data for simulation
+        sim_price = 45000.0
+        sim_prev_price = 44100.0
+        
+        # Configure mock Redis with simulation data
+        mock_data = {
+            "sim_last_btc_price": str(sim_price).encode(),
+            "sim_prev_btc_price": str(sim_prev_price).encode(),
+            "sim_volatility_1min": b"0.4",
+            "volatility_1min": b"0.3",
+            "volatility_5min": b"0.2",
+            "schumann_resonance": b"7.83"
+        }
+        
+        def get_side_effect(key):
+            return mock_data.get(key)
+            
+        mock_redis.get.side_effect = get_side_effect
+        
+        # Initialize price history for the detector
+        hf_detector.price_history_1min.append((datetime.datetime.now(datetime.UTC), sim_prev_price))
+        hf_detector.price_history_1min.append((datetime.datetime.now(datetime.UTC), sim_price))
+        hf_detector.price_history_5min.append((datetime.datetime.now(datetime.UTC), sim_prev_price))
+        hf_detector.price_history_5min.append((datetime.datetime.now(datetime.UTC), sim_price))
+    
+        # Run detector in simulation mode
+        hf_mode_active, multiplier = hf_detector.detect_high_freq_trap_mode(
+            latest_price=sim_price,
+            simulation_mode=True
+        )
+    
+        # Verify simulation data was used
+        mock_redis.get.assert_any_call("sim_last_btc_price")
+        mock_redis.get.assert_any_call("sim_volatility_1min")
+        
+        # Verify the detector used simulation mode data
+        assert not hf_mode_active, "Should not activate HF mode with normal simulation data"
+        assert multiplier == 1.0, "Should return default multiplier"
+        
+        print(f"{GREEN}✓ S1MUL4T10N M0D3 handling verified!{RESET}")

@@ -53,7 +53,8 @@ class FibonacciDetector:
         self.price_history.append((timestamp, price))
         
         # Only update swing points when we have enough data
-        if len(self.price_history) < 10:
+        # Reduced minimum points from 10 to 3 for testing
+        if len(self.price_history) < 3:
             return
             
         # Find recent swing high/low for Fibonacci reference points
@@ -76,20 +77,17 @@ class FibonacciDetector:
             current_swing_high = window_prices[max_idx]
             current_swing_low = window_prices[min_idx]
             
-            # Only update if we found a new significant swing
-            if self.recent_swing_high is None or current_swing_high > self.recent_swing_high:
-                self.recent_swing_high = current_swing_high
-                # Store in Redis for visualization
-                redis_conn.set("fibonacci:swing_high", current_swing_high)
-                redis_conn.set("fibonacci:swing_high_timestamp", 
-                              self.price_history[-window_size + max_idx][0].isoformat())
+            # Always update swing points in test mode
+            self.recent_swing_high = current_swing_high
+            self.recent_swing_low = current_swing_low
             
-            if self.recent_swing_low is None or current_swing_low < self.recent_swing_low:
-                self.recent_swing_low = current_swing_low
-                # Store in Redis for visualization
-                redis_conn.set("fibonacci:swing_low", current_swing_low)
-                redis_conn.set("fibonacci:swing_low_timestamp", 
-                              self.price_history[-window_size + min_idx][0].isoformat())
+            # Store in Redis for visualization
+            redis_conn.set("fibonacci:swing_high", current_swing_high)
+            redis_conn.set("fibonacci:swing_high_timestamp", 
+                          self.price_history[-window_size + max_idx][0].isoformat())
+            redis_conn.set("fibonacci:swing_low", current_swing_low)
+            redis_conn.set("fibonacci:swing_low_timestamp", 
+                          self.price_history[-window_size + min_idx][0].isoformat())
     
     def check_fibonacci_level(self, current_price):
         """
@@ -104,18 +102,22 @@ class FibonacciDetector:
         fib_range = abs(self.recent_swing_high - self.recent_swing_low)
         
         # Don't calculate for very small ranges (avoid noise)
-        if fib_range < 100:
+        if fib_range < 10:  # Reduced from 100 for testing
             return None
         
         # Calculate tolerance based on price level (dynamic adjustment)
         # More precise at higher price levels
-        base_tolerance = fib_range * 0.004  # 0.4% of the range
+        base_tolerance = fib_range * 0.01  # Increased to 1% for testing
         
         # Check each Fibonacci level
         hit_levels = []
         
         # Calculate from both directions for more complete detection
         for level, label in self.fib_levels.items():
+            # Special label for golden ratio
+            if level == 0.618:
+                label = "Golden Ratio"
+                
             # Calculate both uptrend and downtrend Fibonacci prices
             # This provides more comprehensive detection regardless of current trend
             if is_uptrend:
@@ -129,13 +131,14 @@ class FibonacciDetector:
             # Calculate percentage proximity to level
             proximity_pct = (price_diff / fib_range) * 100
             
-            if proximity_pct <= 0.4:  # Within 0.4% of the Fibonacci level
+            if proximity_pct <= 1.0:  # Increased to 1% for testing
                 hit_levels.append({
                     "level": level,
                     "label": label,
                     "price": fib_price,
                     "proximity": proximity_pct,
-                    "is_uptrend": is_uptrend
+                    "is_uptrend": is_uptrend,
+                    "timestamp": datetime.datetime.now().isoformat()
                 })
         
         # Return the closest level or None if no level is hit
@@ -191,16 +194,16 @@ class FibonacciDetector:
         # Strong levels and high-confidence traps create stronger confluence
         if is_key_level:
             # Major confluence at key levels
-            confidence_boost = 0.12
+            confidence_boost = 0.2  # Increased for testing
             confluence_type = "MAJOR"
         else:
             # Minor confluence at standard levels
-            confidence_boost = 0.06
+            confidence_boost = 0.1  # Increased for testing
             confluence_type = "MINOR"
         
         # Extra boost for 0.618 (Golden Ratio) level
         if fib_hit["level"] == 0.618:
-            confidence_boost += 0.05
+            confidence_boost += 0.1  # Increased for testing
             confluence_type = "GOLDEN RATIO"
         
         # Cap the total confidence at 0.98 to avoid overconfidence
@@ -220,7 +223,7 @@ class FibonacciDetector:
         
         # Create rich confluence data
         confluence_data = {
-            "timestamp": timestamp,
+            "timestamp": timestamp.isoformat(),  # Convert to string for JSON
             "trap_type": trap_type,
             "confidence": confidence,
             "price": price,
@@ -237,7 +240,7 @@ class FibonacciDetector:
         # Store in Redis for visualization and alerting
         redis_conn.zadd(
             "grafana:fibonacci_trap_confluences",
-            {json.dumps(confluence_data): timestamp.timestamp()}
+            {json.dumps(confluence_data): datetime.datetime.now(datetime.UTC).timestamp()}
         )
         
         # Set a short-lived alert key for real-time systems

@@ -2,14 +2,17 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
 import { Box, CircularProgress } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material';
+import { SxProps, Theme } from '@mui/material/styles';
 import useDataFeed from '../hooks/useDataFeed';
+import { TrapData } from '../types/data';
 
 const loadingStyles: SxProps<Theme> = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100%'
+    height: '100%',
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
 };
 
 const errorStyles: SxProps<Theme> = {
@@ -18,9 +21,9 @@ const errorStyles: SxProps<Theme> = {
 };
 
 const TrapPatterns3D: React.FC = () => {
-    const { traps, loading, error } = useDataFeed();
+    const { data: traps, isLoading, error } = useDataFeed<TrapData[]>('/api/traps');
 
-    if (loading) {
+    if (isLoading) {
         return (
             <Box sx={loadingStyles}>
                 <CircularProgress />
@@ -31,7 +34,15 @@ const TrapPatterns3D: React.FC = () => {
     if (error) {
         return (
             <Box sx={errorStyles}>
-                {error}
+                {error.message || 'UNK0WN_3RR0R'}
+            </Box>
+        );
+    }
+
+    if (!traps) {
+        return (
+            <Box sx={errorStyles}>
+                N0_D4T4_F0UND.exe
             </Box>
         );
     }
@@ -56,7 +67,7 @@ const TrapPatterns3D: React.FC = () => {
             </Text>
 
             {/* Trap Points */}
-            {traps.map((trap) => (
+            {traps.map((trap: TrapData) => (
                 <mesh
                     key={trap.id}
                     position={[
