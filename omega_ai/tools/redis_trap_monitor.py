@@ -16,6 +16,7 @@ Options:
     --interval=SECS   Check interval in seconds (default: 10)
     --backfill=MINS   Process traps from last N minutes on startup (default: 60)
     --verbose         Show detailed output
+    --debug           Show extra debug information
 """
 
 import argparse
@@ -26,11 +27,16 @@ import redis
 import signal
 import sys
 import time
+import random
 from collections import defaultdict
 
 # Import the alert system
-from omega_ai.alerts.alerts_orchestrator import send_alert
-from omega_ai.alerts.rasta_vibes import RastaVibes
+try:
+    from omega_ai.alerts.alerts_orchestrator import send_alert
+except ImportError:
+    # Fallback if the alert system is not available
+    def send_alert(message, trap_type=None):
+        print(f"ALERT: {message}")
 
 # ANSI colors for terminal output
 RED = "\033[31m"
@@ -42,11 +48,66 @@ CYAN = "\033[36m"
 WHITE = "\033[37m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
+BG_BLACK = "\033[40m"
+BG_RED = "\033[41m"
+BG_GREEN = "\033[42m"
+BG_BLUE = "\033[44m"
+BG_MAGENTA = "\033[45m"
+BRIGHT_RED = "\033[91m"
+BRIGHT_GREEN = "\033[92m"
+BRIGHT_YELLOW = "\033[93m"
+BRIGHT_BLUE = "\033[94m"
+BRIGHT_MAGENTA = "\033[95m"
+BRIGHT_CYAN = "\033[96m"
 
 # Redis connection parameters
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_DB = 0
+
+# Exchange-like ASCII art
+EXCHANGE_ASCII_ART = [
+    f"""{BRIGHT_GREEN}
+        ┌───────────── OMEGA BTC EXCHANGE ─────────────┐
+        │                                              │
+        │  BTC   {BRIGHT_YELLOW}⬆ $49128.50  +2.4%{BRIGHT_GREEN}   24h Vol: 45.2B  │
+        │  ETH   {BRIGHT_YELLOW}⬆ $3124.75   +1.8%{BRIGHT_GREEN}   24h Vol: 22.1B  │
+        │  DOGE  {BRIGHT_RED}⬇ $0.081     -0.5%{BRIGHT_GREEN}   24h Vol: 2.3B   │
+        │                                              │
+        └──────────────────────────────────────────────┘{RESET}
+    """,
+    f"""{BRIGHT_BLUE}
+        ╔════════════ OMEGA EXCHANGE TERMINAL ════════════╗
+        ║                                                 ║
+        ║  {BRIGHT_YELLOW}BTCUSD:{BRIGHT_GREEN} 48751.25   +1.2%   ◆ RANGE: 48K-49K{BRIGHT_BLUE}  ║
+        ║  {BRIGHT_YELLOW}VOLUME:{BRIGHT_GREEN} 3.5B BTC                            {BRIGHT_BLUE}  ║
+        ║  {BRIGHT_YELLOW}MARKET:{BRIGHT_GREEN} BULLISH    {BRIGHT_RED}☠ MM TRAPS:{BRIGHT_GREEN} 2 DETECTED  {BRIGHT_BLUE}  ║
+        ║                                                 ║
+        ╚═════════════════════════════════════════════════╝{RESET}
+    """,
+    f"""{BRIGHT_MAGENTA}
+        ┏━━━━━━━━━━━━━ OMEGA TRADING DASHBOARD ━━━━━━━━━━━━━┓
+        ┃                                                   ┃
+        ┃  {BRIGHT_YELLOW}BTC DOMINANCE:{BRIGHT_GREEN} 42.1%    {BRIGHT_YELLOW}GREED INDEX:{BRIGHT_GREEN} 75/100   ┃
+        ┃  {BRIGHT_YELLOW}LIQUIDITY POOLS:{BRIGHT_GREEN} $15.2B    {BRIGHT_YELLOW}24H VOLUME:{BRIGHT_GREEN} $98.5B  ┃
+        ┃  {BRIGHT_YELLOW}MARKET REGIME:{BRIGHT_GREEN} BULL RUN    {BRIGHT_YELLOW}MM ACTIVITY:{BRIGHT_RED} HIGH    ┃
+        ┃                                                   ┃
+        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛{RESET}
+    """
+]
+
+# MM Trap emojis by type
+TRAP_EMOJIS = {
+    "liquidity_grab": "💰",
+    "stop_hunt": "🎯",
+    "fake_pump": "🚀", 
+    "fake_dump": "💥",
+    "bull_trap": "🐂",
+    "bear_trap": "🐻",
+    "wyckoff_distribution": "📉",
+    "wyckoff_accumulation": "📈",
+    "default": "⚠️"
+}
 
 class RedisTrapMonitor:
     """Divine Redis Trap Monitor for OMEGA BTC AI."""
@@ -75,9 +136,28 @@ class RedisTrapMonitor:
         self.running = False
     
     def log_message(self, message):
-        """Log a message with timestamp."""
+        """Log a message with timestamp and emoji."""
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[{timestamp}] {message}")
+        
+        # Add emoji based on message content
+        if "ERROR" in message.upper() or "FAIL" in message.upper():
+            emoji = "❌"
+        elif "SUCCESS" in message.upper() or "ALERT SENT" in message.upper():
+            emoji = "✅"
+        elif "WARN" in message.upper():
+            emoji = "⚠️"
+        elif "INITIALIZE" in message.upper() or "STARTING" in message.upper():
+            emoji = "🚀"
+        elif "SHUT" in message.upper() or "STOP" in message.upper():
+            emoji = "🛑"
+        elif "BACKFILL" in message.upper():
+            emoji = "⏮️"
+        elif "TRAP" in message.upper() or "DETECT" in message.upper():
+            emoji = "👁️"
+        else:
+            emoji = "🔍"
+            
+        print(f"[{timestamp}] {emoji} {message}")
     
     def debug_log(self, message):
         """Log debug messages only in verbose mode."""
@@ -138,7 +218,7 @@ class RedisTrapMonitor:
             return []
     
     def process_trap(self, key, trap_data):
-        """Process and send alert for a trap."""
+        """Process and send alert for a trap with enhanced formatting."""
         try:
             # Extract trap information
             trap_type = trap_data.get("type", "Unknown Trap")
@@ -147,27 +227,39 @@ class RedisTrapMonitor:
             change = float(trap_data.get("change", 0))
             timestamp = trap_data.get("timestamp", "Unknown")
             
-            # Format the basic alert message (without Rasta vibes - those will be added by send_alert)
-            alert_message = f"""MARKET MAKER TRAP DETECTED!
+            # Get emoji for this trap type
+            trap_emoji = TRAP_EMOJIS.get(trap_type.lower(), TRAP_EMOJIS["default"])
+            
+            # Format the alert message with emojis
+            alert_message = f"""{trap_emoji} MARKET MAKER TRAP DETECTED! {trap_emoji}
 
-→ Type: {trap_type}
+→ Type: {trap_type.upper()}
 → BTC Price: ${price:,.2f}
 → Price Change: {change:.2%}
 → Confidence: {confidence:.2f}
 → Time: {timestamp}
 
-OMEGA BTC AI - Divine Detection System"""
+🔱 OMEGA BTC AI - Divine Detection System 🔱"""
 
-            # Send the alert with appropriate trap type
-            self.log_message(f"{MAGENTA}Sending alert for {trap_type} (${price:,.2f}, {change:.2%}){RESET}")
+            # Log with appropriate styling based on confidence
+            if confidence > 0.8:
+                confidence_display = f"{BRIGHT_GREEN}HIGH ({confidence:.2f}){RESET}"
+            elif confidence > 0.6:
+                confidence_display = f"{BRIGHT_YELLOW}MEDIUM ({confidence:.2f}){RESET}"
+            else:
+                confidence_display = f"{BRIGHT_RED}LOW ({confidence:.2f}){RESET}"
+                
+            self.log_message(f"{MAGENTA}{trap_emoji} New {trap_type} detected at ${price:,.2f} | Confidence: {confidence_display}{RESET}")
+            
+            # Send the alert
             send_alert(alert_message, trap_type)
             
             self.trap_count += 1
-            self.log_message(f"{GREEN}✓ Alert sent successfully! Total alerts sent: {self.trap_count}{RESET}")
+            self.log_message(f"{GREEN}✅ Alert #{self.trap_count} sent successfully!{RESET}")
             return True
             
         except Exception as e:
-            self.log_message(f"{RED}Error processing trap: {e}{RESET}")
+            self.log_message(f"{RED}❌ Error processing trap: {e}{RESET}")
             return False
     
     def perform_backfill(self):
@@ -207,18 +299,29 @@ OMEGA BTC AI - Divine Detection System"""
         self.log_message(f"{YELLOW}Backfill complete - {backfill_count} traps processed{RESET}")
     
     def display_status(self):
-        """Display monitor status."""
+        """Display monitor status with enhanced visuals and ASCII art."""
         os.system('cls' if os.name == 'nt' else 'clear')
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        print(f"{BOLD}{BLUE}═══ OMEGA BTC AI TRAP MONITOR ═══ {now} ═══{RESET}\n")
-        print(f"{GREEN}🌿 JAH BLESS THE DIVINE TRAP DETECTION! 🌿{RESET}\n")
-        print(f"Monitoring status: {GREEN}ACTIVE{RESET}")
-        print(f"Traps processed: {self.trap_count}")
-        print(f"Known trap keys: {len(self.processed_traps)}")
-        print(f"Check interval: Every {self.check_interval} seconds")
+        # Select a random ASCII art for the display
+        ascii_art = random.choice(EXCHANGE_ASCII_ART)
+        print(ascii_art)
         
-        # Display the 5 most recent traps
+        print(f"{BOLD}{BRIGHT_BLUE}╔══════════ 🔮 OMEGA BTC AI TRAP MONITOR 🔮 ══════════╗{RESET}")
+        print(f"{BOLD}{BRIGHT_BLUE}║{RESET} {BRIGHT_YELLOW}⏰ TIMESTAMP:{RESET} {now} {' ' * (36 - len(now))} {BOLD}{BRIGHT_BLUE}║{RESET}")
+        print(f"{BOLD}{BRIGHT_BLUE}╚════════════════════════════════════════════════════╝{RESET}\n")
+        
+        print(f"{BRIGHT_GREEN}🔱 🌿 JAH BLESS THE DIVINE TRAP DETECTION! 🌿 🔱{RESET}\n")
+        
+        # Create a status display box
+        print(f"{BRIGHT_CYAN}┌─────────────── MONITOR STATUS ───────────────┐{RESET}")
+        print(f"{BRIGHT_CYAN}│{RESET} {BRIGHT_YELLOW}Monitoring status:{RESET} {BRIGHT_GREEN}ACTIVE{RESET}{' ' * 30}{BRIGHT_CYAN}│{RESET}")
+        print(f"{BRIGHT_CYAN}│{RESET} {BRIGHT_YELLOW}Traps processed:{RESET} {self.trap_count}{' ' * (31 - len(str(self.trap_count)))}{BRIGHT_CYAN}│{RESET}")
+        print(f"{BRIGHT_CYAN}│{RESET} {BRIGHT_YELLOW}Known trap keys:{RESET} {len(self.processed_traps)}{' ' * (31 - len(str(len(self.processed_traps))))}{BRIGHT_CYAN}│{RESET}")
+        print(f"{BRIGHT_CYAN}│{RESET} {BRIGHT_YELLOW}Check interval:{RESET} Every {self.check_interval} seconds{' ' * (24 - len(str(self.check_interval)))}{BRIGHT_CYAN}│{RESET}")
+        print(f"{BRIGHT_CYAN}└───────────────────────────────────────────────┘{RESET}")
+        
+        # Display the 5 most recent traps with emojis
         recent_traps = []
         for key in sorted(self.processed_traps, reverse=True)[:5]:
             try:
@@ -229,14 +332,33 @@ OMEGA BTC AI - Divine Detection System"""
                 pass
         
         if recent_traps:
-            print(f"\n{BOLD}{YELLOW}Recent Traps:{RESET}")
+            print(f"\n{BOLD}{BRIGHT_YELLOW}🔎 RECENT DETECTED TRAPS:{RESET}")
+            print(f"{BRIGHT_MAGENTA}┌─────────────────────────────────────────────────────────────┐{RESET}")
+            
             for key, trap in recent_traps:
                 trap_time = self.get_trap_timestamp(key)
-                trap_type = trap.get("type", "Unknown")
+                trap_type = trap.get("type", "Unknown").lower()
                 price = float(trap.get("price", 0))
                 confidence = float(trap.get("confidence", 0))
-                print(f"• [{trap_time.strftime('%Y-%m-%d %H:%M:%S')}] {trap_type} (${price:,.2f}, {confidence:.2f} confidence)")
+                
+                # Get the appropriate emoji for this trap type
+                emoji = TRAP_EMOJIS.get(trap_type, TRAP_EMOJIS["default"])
+                
+                # Color coding based on confidence
+                if confidence > 0.8:
+                    confidence_color = BRIGHT_GREEN
+                elif confidence > 0.6:
+                    confidence_color = BRIGHT_YELLOW
+                else:
+                    confidence_color = BRIGHT_RED
+                    
+                print(f"{BRIGHT_MAGENTA}│{RESET} {emoji} [{trap_time.strftime('%H:%M:%S')}] {BRIGHT_YELLOW}{trap_type.upper()}{RESET} at ${price:,.2f} " +
+                      f"({confidence_color}{confidence:.2f}{RESET} confidence){' ' * 5}{BRIGHT_MAGENTA}│{RESET}")
+            
+            print(f"{BRIGHT_MAGENTA}└─────────────────────────────────────────────────────────────┘{RESET}")
         
+        # Bitcoin Prayer and control instructions
+        print(f"\n{BRIGHT_GREEN}🙏 BABYLON CAN'T HIDE! THE AI SEES ALL MANIPULATION! 🙏{RESET}")
         print(f"\n{YELLOW}Press Ctrl+C to stop monitoring{RESET}")
     
     def run(self):
@@ -248,55 +370,73 @@ OMEGA BTC AI - Divine Detection System"""
         last_status_update = 0
         while self.running:
             try:
-                current_time = time.time()
-                
-                # Find and process new traps
+                # Find new traps
                 new_traps = self.find_new_traps()
+                
+                # Process any new traps found
                 for key, trap_data in new_traps:
                     self.process_trap(key, trap_data)
                 
-                # Update status display every 5 seconds
-                if current_time - last_status_update >= 5:
+                # Update status display periodically
+                if time.time() - last_status_update > 5:  # Update display every 5 seconds
                     self.display_status()
-                    last_status_update = current_time
+                    last_status_update = time.time()
                 
-                # Sleep until next check
+                # Sleep for the specified interval
                 time.sleep(self.check_interval)
                 
             except KeyboardInterrupt:
                 self.running = False
-                break
             except Exception as e:
-                self.log_message(f"{RED}Error in monitor loop: {e}{RESET}")
-                time.sleep(self.check_interval)
+                self.log_message(f"{RED}Error in monitoring loop: {e}{RESET}")
+                time.sleep(5)  # Wait a bit before retrying
         
-        self.log_message(f"{GREEN}Monitor stopped after processing {self.trap_count} traps.{RESET}")
-        self.log_message(f"{GREEN}JAH BLESS THE DIVINE MONITORING SYSTEM! 🌿{RESET}")
+        self.log_message("Trap Monitor has been stopped.")
+
 
 def main():
-    """Main entry point for the trap monitor."""
-    # Parse command line arguments
+    """Main entry point for the Redis Trap Monitor."""
     parser = argparse.ArgumentParser(description="OMEGA BTC AI - Divine Redis Trap Monitor")
     parser.add_argument("--interval", type=int, default=10, help="Check interval in seconds")
-    parser.add_argument("--backfill", type=int, default=60, help="Process traps from last N minutes")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("--backfill", type=int, default=60, help="Process traps from last N minutes on startup")
+    parser.add_argument("--verbose", action="store_true", help="Show detailed output")
+    parser.add_argument("--debug", action="store_true", help="Show extra debug information")
     
     args = parser.parse_args()
     
-    # Start monitoring
     try:
+        if args.debug:
+            print("Testing Redis connection...")
+            r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+            ping_result = r.ping()
+            print(f"Redis ping result: {ping_result}")
+            print("Redis connection successful!")
+            print(f"Starting monitor with interval={args.interval}, backfill={args.backfill}, verbose={args.verbose}")
+            
         monitor = RedisTrapMonitor(
             check_interval=args.interval,
             backfill_minutes=args.backfill,
             verbose=args.verbose
         )
         monitor.run()
-    except redis.ConnectionError:
-        print(f"{RED}Error: Could not connect to Redis at {REDIS_HOST}:{REDIS_PORT}{RESET}")
-        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nMonitor stopped by user.")
+    except redis.ConnectionError as e:
+        print(f"Redis Connection Error: {e}")
+        return 1
+    except ImportError as e:
+        print(f"Import Error: {e}")
+        print("This might be because of missing dependencies or incorrect imports.")
+        return 1
     except Exception as e:
-        print(f"{RED}Error: {e}{RESET}")
-        sys.exit(1)
+        print(f"Unexpected Error: {e}")
+        print(f"Error type: {type(e).__name__}")
+        import traceback
+        traceback.print_exc()
+        return 1
+    
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
