@@ -285,7 +285,7 @@ def process_mm_trap():
         volume = 0
         
         try:
-            volume_bytes = redis_conn.get("last_btc_volume")
+            volume_bytes = redis_conn.get("btc_volume")
             if volume_bytes:
                 volume = float(volume_bytes)
         except (ValueError, TypeError):
@@ -334,99 +334,88 @@ def process_mm_trap():
         # ✅ Always store subtle movement data for historical analysis
         current_timestamp = datetime.datetime.now(datetime.UTC)
         movement_tag = "Stable"  # Default if no major move detected
-        
-        # Store the subtle movement
-        insert_subtle_movement(
-            timestamp=current_timestamp, 
-            price=price, 
-            prev_price=prev_price, 
-            abs_change=absolute_change, 
-            price_change=price_change, 
-            movement_tag=movement_tag, 
-            volume=volume
-        )
-        
-        # ✅ Detect MM Traps with Dynamic Threshold
-        trap_type = None
-        alert_msg = None
-        trap_confidence = 0
-        
-        # Calculate half-threshold for detecting subtle manipulation
-        half_threshold = dynamic_liquidity_grab_threshold * 0.5
+        trap_type = None  # Initialize trap_type
+        trap_confidence = 0  # Initialize trap_confidence
+        alert_msg = None  # Initialize alert_msg
 
-        # Full Liquidity Grab Detection
-        if absolute_change > dynamic_liquidity_grab_threshold:
+        # First check for special patterns
+        if "Stealth Accumulation" in movement_analysis:
+            movement_tag = "Stealth Accumulation"
+            trap_type = "Stealth Accumulation"
+            trap_confidence = 0.75
+            alert_msg = f"{CYAN}⚠️ STEALTH ACCUMULATION DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
+        elif "Fractal Pattern" in movement_analysis:
+            movement_tag = "Fractal Trap"
+            trap_type = "Fractal Trap"
+            trap_confidence = 0.85
+            alert_msg = f"{MAGENTA}⚠️ FRACTAL TRAP DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
+        elif "Time-Based Pattern" in movement_analysis:
+            movement_tag = "Time Dilation Trap"
+            trap_type = "Time Dilation Trap"
+            trap_confidence = 0.8
+            alert_msg = f"{YELLOW}⚠️ TIME DILATION TRAP DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
+        # Then check for threshold-based traps if no special pattern was detected
+        elif absolute_change > dynamic_liquidity_grab_threshold:
+            movement_tag = "Liquidity Grab"
             trap_type = "Liquidity Grab"
             trap_confidence = 0.9
             alert_msg = f"{RED}⚠️ LIQUIDITY GRAB DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
-            movement_tag = "Liquidity Grab"
-
-        # Half-Fake Detection
-        elif absolute_change > half_threshold:
+        elif absolute_change > dynamic_liquidity_grab_threshold * 0.5:
             # Check if this could be a half-fake move
             if "Trap" in movement_analysis or "Manipulation" in movement_analysis:
+                movement_tag = "Half-Liquidity Grab"
                 trap_type = "Half-Liquidity Grab"
                 trap_confidence = 0.7
                 alert_msg = f"{LIGHT_ORANGE}⚠️ HALF-LIQUIDITY GRAB DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
-                movement_tag = "Half-Liquidity Grab"
-
-        # Fake Pump Detection
         elif price_change > PRICE_PUMP_THRESHOLD:
             if "Trap" in movement_analysis or "Manipulation" in movement_analysis:
+                movement_tag = "Fake Pump"
                 trap_type = "Fake Pump"
                 trap_confidence = 0.85
                 alert_msg = f"{BRIGHT_GREEN}⚠️ FAKE PUMP DETECTED! BTC jumped {price_change:.2%} rapidly!{RESET}"
-                movement_tag = "Fake Pump"
             else:
+                movement_tag = "Potential Fake Pump"
                 trap_type = "Potential Fake Pump"
                 trap_confidence = 0.6
                 alert_msg = f"{GREEN}⚠️ POTENTIAL FAKE PUMP! BTC jumped {price_change:.2%}{RESET}"
-                movement_tag = "Potential Fake Pump"
-
-        # Fake Dump Detection
         elif price_change < PRICE_DROP_THRESHOLD:
             if "Trap" in movement_analysis or "Manipulation" in movement_analysis:
+                movement_tag = "Fake Dump"
                 trap_type = "Fake Dump"
                 trap_confidence = 0.85
                 alert_msg = f"{RED}⚠️ FAKE DUMP DETECTED! BTC dropped {price_change:.2%} rapidly!{RESET}"
-                movement_tag = "Fake Dump"
             else:
+                movement_tag = "Potential Fake Dump"
                 trap_type = "Potential Fake Dump"
                 trap_confidence = 0.6
                 alert_msg = f"{LIGHT_ORANGE}⚠️ POTENTIAL FAKE DUMP! BTC dropped {price_change:.2%}{RESET}"
-                movement_tag = "Potential Fake Dump"
-        
-        # Half-Fake Pump Detection
         elif 0.01 <= price_change < PRICE_PUMP_THRESHOLD:
+            movement_tag = "Half-Fake Pump"
             trap_type = "Half-Fake Pump"
             trap_confidence = 0.5
             alert_msg = f"{GREEN}⚠️ HALF-FAKE PUMP! BTC moved {price_change:.2%}{RESET}"
-            movement_tag = "Half-Fake Pump"
-            
-        # Half-Fake Dump Detection
         elif PRICE_DROP_THRESHOLD < price_change <= -0.01:
+            movement_tag = "Half-Fake Dump"
             trap_type = "Half-Fake Dump"
             trap_confidence = 0.5
             alert_msg = f"{LIGHT_ORANGE}⚠️ HALF-FAKE DUMP! BTC moved {price_change:.2%}{RESET}"
-            movement_tag = "Half-Fake Dump"
-            
+
+        # Store the subtle movement
+        insert_subtle_movement(
+            timestamp=current_timestamp,
+            price=price,
+            prev_price=prev_price,
+            abs_change=absolute_change,
+            price_change=price_change,
+            movement_tag=movement_tag,
+            volume=volume
+        )
+        
         # Print movement classification
         print_movement_tag(movement_tag)
 
-        # ✅ UPDATE: Update the movement tag and insert again if it changed after analysis
-        if movement_tag != "Stable":
-            insert_subtle_movement(
-                timestamp=current_timestamp,
-                price=price,
-                prev_price=prev_price,
-                abs_change=absolute_change,
-                price_change=price_change,
-                movement_tag=movement_tag,
-                volume=volume
-            )
-
         # ✅ Store MM Trap & Trigger Alert if Needed
-        if trap_type:
+        if trap_type and alert_msg:
             print_alert(alert_msg)
             # Store trap with confidence level
             insert_mm_trap(price, price_change, trap_type, trap_confidence)
