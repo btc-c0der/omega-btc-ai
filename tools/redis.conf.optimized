@@ -1,0 +1,76 @@
+# OMEGA BTC AI - Optimized Redis Configuration
+# Copyright (c) 2024 OMEGA BTC AI Team
+# Licensed under MIT License
+# Optimized for Scaleway DEV1-S (2 vCPUs, 2GB RAM)
+
+# NETWORK
+bind 0.0.0.0
+protected-mode yes
+port 6379
+tcp-backlog 511
+timeout 0
+tcp-keepalive 300
+
+# GENERAL
+daemonize no
+supervised no
+pidfile /var/run/redis_6379.pid
+loglevel notice
+logfile ""
+databases 16
+
+# MEMORY MANAGEMENT
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+maxmemory-samples 5
+
+# SNAPSHOTTING
+save 60 1
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+dir /data
+
+# APPEND ONLY MODE
+appendonly yes
+appendfilename "appendonly.aof"
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+
+# SLOW LOG
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+
+# LATENCY MONITOR
+latency-monitor-threshold 25
+
+# KERNEL SETTINGS
+# Recommended when running Redis on same system as other services
+vm.overcommit_memory 1
+net.core.somaxconn 511
+
+# CLIENT MANAGEMENT
+maxclients 10000
+
+# THREADING AND CPU
+io-threads 2
+io-threads-do-reads yes
+
+# DEFRAGMENTATION
+activedefrag yes
+active-defrag-ignore-bytes 100mb
+active-defrag-threshold-lower 10
+active-defrag-threshold-upper 100
+active-defrag-cycle-min 25
+active-defrag-cycle-max 75
+
+# LUA SCRIPTING
+lua-time-limit 5000
+
+# SECURITY
+rename-command FLUSHALL ""
+rename-command FLUSHDB ""
+rename-command DEBUG "" 
