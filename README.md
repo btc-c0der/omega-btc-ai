@@ -29,6 +29,10 @@ The **Omega BTC AI** is an advanced cryptocurrency analysis and trading system t
    - Multiple trader psychological profiles
    - Real-time performance monitoring
 
+### **Repository Consolidation**
+
+> **Note:** As of March 2025, we've consolidated multiple repository versions into this single repository. If you previously worked with the `/Users/fsiqueira/Desktop/Code/omega_btc_ai` repository, please switch to this repository for all future development. See the [repository consolidation guide](./DOCS/repository_consolidation.md) for more details on the migration process.
+
 4. **Data Processing Pipeline**
    - WebSocket-based real-time data ingestion
    - Redis-backed caching and message queuing
