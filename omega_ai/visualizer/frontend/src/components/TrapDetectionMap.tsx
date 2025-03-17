@@ -1,15 +1,17 @@
 import React from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { SxProps, Theme } from '@mui/material/styles';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useDataFeed } from '../hooks/useDataFeed';
+import { useRealtimeDataFeed } from '../hooks/useRealtimeDataFeed';
 import { TrapData } from '../types/data';
 
 // Note: The 'complex union type' warning from MUI's sx prop typing is a known issue
 // and can be safely ignored as it doesn't affect runtime behavior
 const loadingStyles: SxProps<Theme> = {
     display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%',
@@ -26,28 +28,35 @@ const errorStyles: SxProps<Theme> = {
 };
 
 const TrapDetectionMap: React.FC = () => {
-    const { data: traps, isLoading, error } = useDataFeed<TrapData[]>('/api/traps');
+    const { data: traps, isConnected, error } = useRealtimeDataFeed<TrapData[]>('/ws/traps');
 
-    if (isLoading) {
+    if (!isConnected) {
         return (
             <Box sx={loadingStyles}>
                 <CircularProgress />
+                <Typography variant="body2" color="text.secondary">
+                    Connecting to real-time data feed...
+                </Typography>
             </Box>
         );
     }
 
     if (error) {
         return (
-            <Box sx={errorStyles}>
-                {error.message || 'UNK0WN_3RR0R'}
+            <Box sx={loadingStyles}>
+                <Typography color="error">
+                    {error.message || 'Failed to connect to real-time data feed'}
+                </Typography>
             </Box>
         );
     }
 
     if (!traps) {
         return (
-            <Box sx={errorStyles}>
-                N0_D4T4_F0UND.exe
+            <Box sx={loadingStyles}>
+                <Typography color="text.secondary">
+                    Waiting for trap detection data...
+                </Typography>
             </Box>
         );
     }
@@ -82,14 +91,8 @@ const TrapDetectionMap: React.FC = () => {
                 const value = params.data[2];
                 const day = days[params.data[1]];
                 const hour = params.data[0];
-                return `T1M3: ${day} ${hour.toString().padStart(2, '0')}:00\nTR4PS: ${value}`;
+                return `Time: ${day} ${hour.toString().padStart(2, '0')}:00\nTraps: ${value}`;
             },
-            textStyle: {
-                fontFamily: '"Share Tech Mono", monospace',
-                color: '#00ff41',
-            },
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            borderColor: '#00ff41',
         },
         grid: {
             top: '10%',
@@ -104,12 +107,11 @@ const TrapDetectionMap: React.FC = () => {
                 show: true,
             },
             axisLabel: {
-                color: '#00ff41',
-                fontFamily: '"Share Tech Mono", monospace',
+                color: '#fff',
             },
             axisLine: {
                 lineStyle: {
-                    color: '#00ff41',
+                    color: '#fff',
                 },
             },
         },
@@ -120,12 +122,11 @@ const TrapDetectionMap: React.FC = () => {
                 show: true,
             },
             axisLabel: {
-                color: '#00ff41',
-                fontFamily: '"Share Tech Mono", monospace',
+                color: '#fff',
             },
             axisLine: {
                 lineStyle: {
-                    color: '#00ff41',
+                    color: '#fff',
                 },
             },
         },
@@ -137,26 +138,24 @@ const TrapDetectionMap: React.FC = () => {
             left: 'center',
             bottom: '0%',
             textStyle: {
-                color: '#00ff41',
-                fontFamily: '"Share Tech Mono", monospace',
+                color: '#fff',
             },
             inRange: {
-                color: ['rgba(0, 255, 65, 0.2)', 'rgba(0, 255, 65, 1)'],
+                color: ['rgba(0, 146, 255, 0.2)', 'rgba(0, 146, 255, 1)'],
             },
         },
         series: [{
-            name: 'TR4P_D3T3CT10NS',
+            name: 'Trap Detections',
             type: 'heatmap',
             data: data,
             label: {
                 show: true,
-                color: '#000',
-                fontFamily: '"Share Tech Mono", monospace',
+                color: '#fff',
             },
             emphasis: {
                 itemStyle: {
                     shadowBlur: 10,
-                    shadowColor: 'rgba(0, 255, 65, 0.5)',
+                    shadowColor: 'rgba(0, 146, 255, 0.5)',
                 },
             },
         }],
@@ -169,22 +168,32 @@ const TrapDetectionMap: React.FC = () => {
                 style={{ height: '100%' }}
                 theme="dark"
             />
-            {/* Matrix grid overlay */}
+            {/* Connection status indicator */}
             <Box
                 sx={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    pointerEvents: 'none',
-                    background: `
-                        linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '20px 20px',
+                    top: 8,
+                    right: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    padding: '4px 8px',
+                    borderRadius: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
                 }}
-            />
+            >
+                <Box
+                    sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: isConnected ? '#52c41a' : '#ff4d4f',
+                    }}
+                />
+                <Typography variant="caption" color="text.secondary">
+                    {isConnected ? 'Live' : 'Disconnected'}
+                </Typography>
+            </Box>
         </Box>
     );
 };
