@@ -1,0 +1,69 @@
+{
+    "family": "omega-btc-ai",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "2048",
+    "memory": "4096",
+    "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "omega-btc-ai",
+            "image": "YOUR_ECR_REPO/omega-btc-ai:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 8050,
+                    "protocol": "tcp"
+                },
+                {
+                    "containerPort": 8765,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "NODE_ENV",
+                    "value": "production"
+                }
+            ],
+            "secrets": [
+                {
+                    "name": "REDIS_PASSWORD",
+                    "valueFrom": "arn:aws:ssm:REGION:ACCOUNT_ID:parameter/omega/redis_password"
+                },
+                {
+                    "name": "POSTGRES_PASSWORD",
+                    "valueFrom": "arn:aws:ssm:REGION:ACCOUNT_ID:parameter/omega/postgres_password"
+                },
+                {
+                    "name": "JWT_SECRET",
+                    "valueFrom": "arn:aws:ssm:REGION:ACCOUNT_ID:parameter/omega/jwt_secret"
+                },
+                {
+                    "name": "API_KEY",
+                    "valueFrom": "arn:aws:ssm:REGION:ACCOUNT_ID:parameter/omega/api_key"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/omega-btc-ai",
+                    "awslogs-region": "REGION",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:8050/health || exit 1"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 60
+            }
+        }
+    ]
+}

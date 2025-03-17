@@ -5,8 +5,9 @@ import { Box, Typography, useTheme, CircularProgress } from '@mui/material';
 import { keyframes } from '@emotion/react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
+import { useRealtimePriceData } from '../hooks/useRealtimePriceData';
+import { TrapData } from '../types';
 import { useDataFeed } from '../hooks/useDataFeed';
-import { PriceData, TrapData } from '../types';
 import { SxProps, Theme } from '@mui/material/styles';
 
 const fadeIn = keyframes`
@@ -38,7 +39,7 @@ const loadingContainerStyles: SxProps<Theme> = {
 
 const PriceChart: React.FC = () => {
     const theme = useTheme();
-    const { data, error, isLoading, isConnected } = useDataFeed<PriceData[]>('/api/prices', [], true);
+    const { data, error, isConnected } = useRealtimePriceData();
     const { data: traps } = useDataFeed<TrapData[]>('/api/traps');
 
     const latestPrice = useMemo(() => {
@@ -57,13 +58,13 @@ const PriceChart: React.FC = () => {
         };
     }, [data]);
 
-    if (isLoading) {
+    if (!data || data.length === 0) {
         return (
             <Box sx={containerStyles}>
                 <Box sx={loadingContainerStyles}>
                     <CircularProgress size={32} sx={{ color: theme.palette.primary.main }} />
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Loading market data...
+                        Connecting to market data...
                     </Typography>
                 </Box>
             </Box>
@@ -74,7 +75,7 @@ const PriceChart: React.FC = () => {
         return (
             <Box sx={containerStyles}>
                 <Box sx={loadingContainerStyles}>
-                    <Typography color="error.main">Failed to load market data</Typography>
+                    <Typography color="error.main">Failed to connect to market data</Typography>
                 </Box>
             </Box>
         );
