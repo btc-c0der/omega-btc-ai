@@ -7,28 +7,6 @@ version: '3.8'
 # SECURITY NOTICE: This system contains sensitive trading algorithms and should be deployed with appropriate security measures
 
 services:
-  redis:
-    image: redis:7-alpine
-    command: redis-server --save 60 1 --loglevel warning --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - ./redis_data:/data
-    ports:
-      - "127.0.0.1:6379:6379"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    restart: unless-stopped
-
   postgres:
     image: postgres:15-alpine
     environment:
@@ -36,9 +14,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-omega_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-omega_pass}
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
+    networks:
+      - omega_network
     deploy:
       resources:
         limits:
@@ -61,15 +41,18 @@ services:
       args:
         NODE_ENV: production
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
     environment:
       - NODE_ENV=production
-      - REDIS_HOST=redis
+      - REDIS_HOST=172.16.8.2
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
       - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
       - VISUALIZER_PORT=8050
       - FRONTEND_PORT=3000
     ports:
@@ -77,6 +60,8 @@ services:
       - "8050:8050" # Backend API
       - "3000:3000" # Frontend
       - "8080:8080" # Alternative Frontend Port
+    networks:
+      - omega_network
     deploy:
       resources:
         limits:
@@ -102,6 +87,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    networks:
+      - omega_network
     depends_on:
       - omega_btc_ai
     deploy:
@@ -120,12 +107,11 @@ services:
     restart: unless-stopped
 
 networks:
-  default:
+  omega_network:
     driver: bridge
     ipam:
       config:
         - subnet: 172.28.0.0/16
 
 volumes:
-  redis_data:
   postgres_data:
