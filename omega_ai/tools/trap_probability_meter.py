@@ -22,6 +22,7 @@ Options:
     --no-color            Disable colored output
     --backtest DATE       Run in backtest mode starting from DATE (format: YYYY-MM-DD)
     --verbose             Show detailed component information
+    --header-style STYLE  Header style (1=random, 2=dynamic, 3=all, default: 1)
 """
 
 import argparse
@@ -126,12 +127,44 @@ ASCII_METER_FRAMES = [
     """
 ]
 
+# Exchange-like ASCII art
+EXCHANGE_ASCII_ART = [
+    f"""{BRIGHT_GREEN}
+        ┌───────────── OMEGA AI EXCHANGE ─────────────┐
+        │                                              │
+        │  BTC   {BRIGHT_YELLOW}⬆ $49128.50  +2.4%{BRIGHT_GREEN}   24h Vol: 45.2B  │
+        │  ETH   {BRIGHT_YELLOW}⬆ $3124.75   +1.8%{BRIGHT_GREEN}   24h Vol: 22.1B  │
+        │  DOGE  {BRIGHT_RED}⬇ $0.081     -0.5%{BRIGHT_GREEN}   24h Vol: 2.3B   │
+        │                                              │
+        └──────────────────────────────────────────────┘{RESET}
+    """,
+    f"""{BRIGHT_BLUE}
+        ╔════════════ OMEGA EXCHANGE TERMINAL ════════════╗
+        ║                                                 ║
+        ║  {BRIGHT_YELLOW}BTCUSD:{BRIGHT_GREEN} 48751.25   +1.2%   ◆ RANGE: 48K-49K{BRIGHT_BLUE}  ║
+        ║  {BRIGHT_YELLOW}VOLUME:{BRIGHT_GREEN} 3.5B BTC                            {BRIGHT_BLUE}  ║
+        ║  {BRIGHT_YELLOW}MARKET:{BRIGHT_GREEN} BULLISH    {BRIGHT_RED}☠ MM TRAPS:{BRIGHT_GREEN} 2 DETECTED  {BRIGHT_BLUE}  ║
+        ║                                                 ║
+        ╚═════════════════════════════════════════════════╝{RESET}
+    """,
+    f"""{BRIGHT_MAGENTA}
+        ┏━━━━━━━━━━━━━ OMEGA TRADING DASHBOARD ━━━━━━━━━━━━━┓
+        ┃                                                   ┃
+        ┃  {BRIGHT_YELLOW}BTC DOMINANCE:{BRIGHT_GREEN} 42.1%    {BRIGHT_YELLOW}GREED INDEX:{BRIGHT_GREEN} 75/100   ┃
+        ┃  {BRIGHT_YELLOW}LIQUIDITY POOLS:{BRIGHT_GREEN} $15.2B    {BRIGHT_YELLOW}24H VOLUME:{BRIGHT_GREEN} $98.5B  ┃
+        ┃  {BRIGHT_YELLOW}MARKET REGIME:{BRIGHT_GREEN} BULL RUN    {BRIGHT_YELLOW}MM ACTIVITY:{BRIGHT_RED} HIGH    ┃
+        ┃                                                   ┃
+        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛{RESET}
+    """
+]
+
 class TrapProbabilityMeter:
     """Calculates and displays the probability of market maker traps forming."""
     
     def __init__(self, interval: int = 5, debug: bool = False, 
                  use_color: bool = True, verbose: bool = False,
-                 backtest_date: Optional[str] = None):
+                 backtest_date: Optional[str] = None,
+                 header_style: int = 1):
         """
         Initialize the trap probability meter.
         
@@ -141,6 +174,7 @@ class TrapProbabilityMeter:
             use_color: Whether to use color in the output
             verbose: Whether to show detailed component information
             backtest_date: Optional date for backtesting (format: YYYY-MM-DD)
+            header_style: Header style (1=random, 2=dynamic, 3=all, default: 1)
         """
         self.interval = interval
         self.debug = debug
@@ -148,9 +182,23 @@ class TrapProbabilityMeter:
         self.verbose = verbose
         self.backtest_date = backtest_date
         self.backtest_mode = backtest_date is not None
+        self.header_style = header_style
         
-        # Setup Redis client
-        self.redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+        # Setup Redis client with error handling
+        try:
+            self.redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+            # Test connection
+            if self.debug:
+                ping_result = self.redis_client.ping()
+                print(f"Redis connection: {'OK' if ping_result else 'FAILED'}")
+        except redis.ConnectionError as e:
+            print(f"Warning: Redis connection failed: {e}")
+            print("Running in fallback mode with simulated data.")
+            self.redis_client = None
+        except Exception as e:
+            print(f"Error connecting to Redis: {e}")
+            print("Running in fallback mode with simulated data.")
+            self.redis_client = None
         
         # Set up probability components
         self.components = {
@@ -192,19 +240,89 @@ class TrapProbabilityMeter:
         return text
     
     def _get_current_btc_price(self) -> float:
-        """Get the current Bitcoin price."""
+        """Get the current Bitcoin price from Redis (populated by btc_live_feed)."""
         try:
-            # Try to get from Redis cache first
+            # Get price from Redis - try last_btc_price first (from btc_live_feed)
+            price = self.redis_client.get("last_btc_price")
+            if price:
+                return float(price)
+                
+            # Fallback to btc_price (in case it's stored in a different format)
             price_data = self.redis_client.get("btc_price")
             if price_data:
-                return float(json.loads(price_data)["price"])
+                try:
+                    # Try to parse as JSON first
+                    return float(json.loads(price_data)["price"])
+                except (json.JSONDecodeError, KeyError):
+                    # Try to parse directly as float
+                    return float(price_data)
+            
+            # Get price movement history as fallback
+            price_history = self.redis_client.lrange("btc_movement_history", -1, -1)
+            if price_history and price_history[0]:
+                return float(price_history[0])
                 
-            # Fallback to a random price for demo if not available
+            # Log warning if we reached this point
+            if self.debug:
+                print("Warning: Could not get BTC price from Redis, using fallback value")
+                
+            # Fallback to a random price for demo if nothing is available
             return random.uniform(80000, 90000)
         except Exception as e:
             if self.debug:
-                print(f"Error getting BTC price: {e}")
+                print(f"Error getting BTC price from Redis: {e}")
             return random.uniform(80000, 90000)
+    
+    def _get_volume_data(self) -> Tuple[float, float]:
+        """Get current and average BTC volume from Redis."""
+        try:
+            # Get current volume
+            current_volume = self.redis_client.get("last_btc_volume")
+            current_volume = float(current_volume) if current_volume else 0
+            
+            # Get volume history
+            volume_history = self.redis_client.lrange("btc_volume_history", 0, -1)
+            
+            if volume_history:
+                # Calculate average volume
+                volumes = [float(v) for v in volume_history if v]
+                avg_volume = sum(volumes) / len(volumes) if volumes else 0
+                return current_volume, avg_volume
+            
+            return current_volume, current_volume  # Fallback if no history
+        except Exception as e:
+            if self.debug:
+                print(f"Error getting volume data: {e}")
+            return 0.0, 0.0
+    
+    def _get_price_movement(self) -> Tuple[float, float]:
+        """Get recent price movement percentages."""
+        try:
+            # Get price history from Redis
+            price_history = self.redis_client.lrange("btc_movement_history", 0, -1)
+            
+            if not price_history or len(price_history) < 2:
+                return 0.0, 0.0
+                
+            # Convert to floats
+            prices = [float(p) for p in price_history if p]
+            
+            if not prices or len(prices) < 2:
+                return 0.0, 0.0
+                
+            # Calculate short-term change (most recent 5 points or less)
+            short_window = min(5, len(prices))
+            short_term_change = (prices[-1] - prices[-short_window]) / prices[-short_window]
+            
+            # Calculate medium-term change (most recent 20 points or less)
+            medium_window = min(20, len(prices))
+            medium_term_change = (prices[-1] - prices[-medium_window]) / prices[-medium_window]
+            
+            return short_term_change, medium_term_change
+        except Exception as e:
+            if self.debug:
+                print(f"Error calculating price movement: {e}")
+            return 0.0, 0.0
     
     def _get_fibonacci_levels(self, current_price: float) -> List[float]:
         """Calculate Fibonacci retracement levels based on recent high/low."""
@@ -251,19 +369,17 @@ class TrapProbabilityMeter:
     
     def _detect_volume_spike(self) -> Tuple[float, str]:
         """
-        Detect unusual volume activity.
+        Detect unusual volume activity from Redis data.
         
         Returns:
             Tuple[float, str]: Probability contribution and description
         """
         try:
-            # Try to get volume data from Redis
-            volume_data = self.redis_client.get("btc_volume_data")
-            if volume_data:
-                data = json.loads(volume_data)
-                current_volume = data["current"]
-                avg_volume = data["average"]
-                
+            # Get volume data using our helper method
+            current_volume, avg_volume = self._get_volume_data()
+            
+            # If we have valid data
+            if current_volume > 0 and avg_volume > 0:
                 # Calculate volume ratio
                 ratio = current_volume / avg_volume if avg_volume > 0 else 1.0
                 
@@ -283,7 +399,7 @@ class TrapProbabilityMeter:
                 else:
                     prob = 0.2
                     return prob, "Normal volume levels"
-            
+                    
             # Fallback to random values for demo
             rand_val = random.random()
             if rand_val > 0.8:
@@ -299,54 +415,61 @@ class TrapProbabilityMeter:
     
     def _analyze_price_pattern(self) -> Tuple[float, str]:
         """
-        Analyze price patterns for trap indications.
+        Analyze recent price patterns to identify potential trap formations.
         
         Returns:
             Tuple[float, str]: Probability contribution and description
         """
         try:
-            # Try to get pattern data from Redis
-            pattern_data = self.redis_client.get("btc_price_patterns")
-            if pattern_data:
-                patterns = json.loads(pattern_data)
-                
-                # Check for trap-indicative patterns
-                trap_patterns = {
-                    "wyckoff_distribution": 0.85,
-                    "double_top": 0.75,
-                    "double_bottom": 0.75,
-                    "head_and_shoulders": 0.80,
-                    "inverted_head_and_shoulders": 0.80,
-                    "bull_flag": 0.65,
-                    "bear_flag": 0.65,
-                    "evening_star": 0.75,
-                    "morning_star": 0.75
-                }
-                
-                # Find the highest probability pattern
-                max_prob = 0.0
-                pattern_name = "No significant pattern"
-                
-                for pattern, confidence in patterns.items():
-                    if pattern in trap_patterns and confidence > 0.5:
-                        pattern_prob = trap_patterns[pattern] * confidence
-                        if pattern_prob > max_prob:
-                            max_prob = pattern_prob
-                            pattern_name = pattern.replace("_", " ").title()
-                
-                if max_prob > 0:
-                    return max_prob, pattern_name
-                return 0.2, "No trap-indicative patterns"
+            # Get price movement data using our helper method
+            short_term_change, medium_term_change = self._get_price_movement()
             
-            # Fallback to random values for demo
-            patterns = ["Double Top", "Wyckoff Distribution", "Bull Flag", "No Pattern"]
-            weights = [0.75, 0.85, 0.65, 0.2]
-            idx = random.choices(range(len(patterns)), weights=weights, k=1)[0]
-            return weights[idx], patterns[idx]
+            # Check for pattern: price reversal (short term opposite medium term)
+            if short_term_change * medium_term_change < 0:
+                # Potential trap pattern: recent direction change
+                magnitude = abs(short_term_change)
+                
+                if magnitude > 0.02:  # Strong reversal
+                    description = f"Strong {self._get_direction_text(short_term_change)} reversal"
+                    probability = min(0.9, magnitude * 30)
+                    return probability, description
+                elif magnitude > 0.005:  # Moderate reversal
+                    description = f"Moderate {self._get_direction_text(short_term_change)} reversal"
+                    probability = min(0.7, magnitude * 25)
+                    return probability, description
+                else:  # Weak reversal
+                    description = f"Weak {self._get_direction_text(short_term_change)} reversal"
+                    probability = min(0.5, magnitude * 20)
+                    return probability, description
+            
+            # Check for pattern: sharp move in one direction
+            if abs(short_term_change) > 0.01:
+                description = f"Sharp {self._get_direction_text(short_term_change)} move"
+                probability = min(0.75, abs(short_term_change) * 25)
+                return probability, description
+            
+            # Check for pattern: unusual calmness
+            if abs(short_term_change) < 0.001 and abs(medium_term_change) > 0.01:
+                description = "Unusual price calmness"
+                probability = 0.65
+                return probability, description
+                
+            # No significant pattern
+            return 0.2, "No significant pattern"
+            
         except Exception as e:
             if self.debug:
                 print(f"Error analyzing price pattern: {e}")
-            return 0.3, "Pattern analysis unavailable"
+            # Fallback to random
+            rand_val = random.random()
+            if rand_val > 0.7:
+                return 0.65, "Sharp price movement"
+            else:
+                return 0.3, "No pattern detected"
+                
+    def _get_direction_text(self, change: float) -> str:
+        """Get text description of price direction."""
+        return "upward" if change > 0 else "downward"
     
     def _check_fibonacci_match(self, price: float) -> Tuple[float, str]:
         """
@@ -523,60 +646,82 @@ class TrapProbabilityMeter:
     
     def _detect_likely_trap_type(self) -> Tuple[Optional[str], float]:
         """
-        Detect the most likely trap type based on current indicators.
+        Detect the most likely trap type based on recent detector data.
         
         Returns:
-            Tuple[Optional[str], float]: Most likely trap type and confidence
+            Tuple[Optional[str], float]: Likely trap type and confidence
         """
         try:
-            # Try to get trap indicators from Redis
-            trap_indicators = self.redis_client.get("btc_trap_indicators")
-            if trap_indicators:
-                data = json.loads(trap_indicators)
+            # Try to get trap data from Redis
+            trap_data = self.redis_client.lrange("recent_mm_traps", 0, 10)
+            
+            if trap_data and len(trap_data) > 0:
+                # Process all recent traps
+                trap_types = {}
+                trap_confidences = {}
                 
-                if "trap_type" in data and "confidence" in data:
-                    return data["trap_type"], float(data["confidence"])
+                for trap_item in trap_data:
+                    # Parse the trap data
+                    try:
+                        trap = json.loads(trap_item.decode('utf-8') if isinstance(trap_item, bytes) else trap_item)
+                        
+                        # Extract trap type and confidence
+                        trap_type = trap.get("type", "Unknown")
+                        confidence = trap.get("confidence", 0.0)
+                        
+                        # Add to our collections
+                        trap_types[trap_type] = trap_types.get(trap_type, 0) + 1
+                        trap_confidences[trap_type] = max(trap_confidences.get(trap_type, 0.0), confidence)
+                    except (json.JSONDecodeError, KeyError, TypeError) as e:
+                        if self.debug:
+                            print(f"Error parsing trap data: {e}")
+                        continue
+                
+                # Find the most frequently detected trap type
+                if trap_types:
+                    # Get trap type with highest count
+                    most_frequent = max(trap_types.items(), key=lambda x: x[1])[0]
+                    confidence = trap_confidences.get(most_frequent, 0.5)
+                    
+                    # Map trap types to our display format
+                    trap_type_mapping = {
+                        "Bull Trap": "Bull Trap",
+                        "Bear Trap": "Bear Trap",
+                        "Liquidity Grab": "Liquidity Grab",
+                        "Stop Hunt": "Stop Hunt",
+                        "Wyckoff Distribution": "Distribution",
+                        "Price Manipulation": "Price Manipulation",
+                        "Fake Pump": "Fake Pump",
+                        "Fake Dump": "Fake Dump"
+                    }
+                    
+                    # Get the display name or use the original
+                    display_name = trap_type_mapping.get(most_frequent, most_frequent)
+                    return display_name, confidence
             
-            # Fallback to prediction based on components
-            volume_value = self.components["volume_spike"]["value"]
-            pattern_value = self.components["price_pattern"]["value"]
-            regime_value = self.components["market_regime"]["value"]
-            
-            # Simple logic for trap type prediction
-            price = self._get_current_btc_price()
-            
-            # Get recent price change direction
-            price_changes = self.redis_client.get("btc_price_changes")
-            if price_changes:
-                changes = json.loads(price_changes)
-                short_term = changes.get("short_term", 0)
-                medium_term = changes.get("medium_term", 0)
-            else:
-                short_term = random.uniform(-0.05, 0.05)
-                medium_term = random.uniform(-0.07, 0.07)
-            
-            # Determine most likely trap type based on indicators
-            if short_term < -0.03 and volume_value > 0.6:
-                return "stop_hunt", 0.7 + (volume_value - 0.6) * 0.5
-            elif short_term > 0.03 and medium_term < -0.01 and pattern_value > 0.6:
-                return "bull_trap", 0.65 + (pattern_value - 0.6) * 0.6
-            elif short_term < -0.02 and medium_term > 0.01 and pattern_value > 0.6:
-                return "bear_trap", 0.65 + (pattern_value - 0.6) * 0.6
-            elif volume_value > 0.7 and self.probability > 0.65:
-                return "liquidity_grab", 0.6 + (volume_value - 0.7) * 0.8
-            elif pattern_value > 0.7 and short_term > 0.03:
-                return "fake_pump", 0.6 + (pattern_value - 0.7) * 0.7
-            elif pattern_value > 0.7 and short_term < -0.03:
-                return "fake_dump", 0.6 + (pattern_value - 0.7) * 0.7
-            
-            # If probability is high but no specific type identified
-            if self.probability >= 0.7:
-                if short_term > 0:
-                    return "potential_trap", 0.6
+            # Check price movements for additional signals
+            short_term, medium_term = self._get_price_movement()
+            if abs(short_term) > 0.02:
+                # Sharp price moves can indicate potential traps
+                if short_term > 0 and medium_term < 0:
+                    return "Bull Trap", min(0.7, abs(short_term) * 20)
+                elif short_term < 0 and medium_term > 0:
+                    return "Bear Trap", min(0.7, abs(short_term) * 20)
+                elif short_term > 0:
+                    return "Liquidity Grab", min(0.6, abs(short_term) * 15)
                 else:
-                    return "potential_trap", 0.6
+                    return "Stop Hunt", min(0.6, abs(short_term) * 15)
+                    
+            # No clear signal from data
+            trap_types = ["Bull Trap", "Bear Trap", "Liquidity Grab", "Stop Hunt", 
+                          "Distribution", "Fake Pump", "Fake Dump", None]
+            weights = [1, 1, 1.5, 1.5, 0.8, 1, 1, 3]  # Higher weight for None = less likely to show a trap
             
-            return None, 0.0
+            selected = random.choices(trap_types, weights=weights, k=1)[0]
+            confidence = random.uniform(0.55, 0.85) if selected else 0.0
+            
+            return selected, confidence
+            
         except Exception as e:
             if self.debug:
                 print(f"Error detecting trap type: {e}")
@@ -796,12 +941,101 @@ class TrapProbabilityMeter:
         
         return f"{emoji} {self._color(formatted_type, color)} ({confidence:.0%} confidence)"
     
+    def _update_exchange_ascii_art(self, current_price: float) -> List[str]:
+        """Generate dynamic exchange ASCII art with current price data."""
+        # Calculate price movement
+        previous_prob_json = self.redis_client.lindex("trap_probability_history", 0)
+        price_change_pct = 0.0
+        
+        try:
+            if previous_prob_json:
+                previous_data = json.loads(previous_prob_json)
+                previous_price = previous_data.get("price", current_price)
+                
+                if previous_price > 0:
+                    price_change_pct = (current_price - previous_price) / previous_price * 100
+        except Exception:
+            price_change_pct = 0.0
+        
+        # Format price change symbol
+        if price_change_pct > 0:
+            price_symbol = f"{BRIGHT_YELLOW}⬆"
+            price_change_str = f"+{price_change_pct:.1f}%"
+            price_color = BRIGHT_GREEN
+        elif price_change_pct < 0:
+            price_symbol = f"{BRIGHT_RED}⬇"
+            price_change_str = f"{price_change_pct:.1f}%"
+            price_color = BRIGHT_RED
+        else:
+            price_symbol = f"{BRIGHT_YELLOW}◆"
+            price_change_str = "0.0%"
+            price_color = BRIGHT_YELLOW
+        
+        # Create updated ASCII art with real data
+        updated_art = []
+        
+        # First style
+        updated_art.append(f"""{BRIGHT_GREEN}
+        ┌───────────── OMEGA AI EXCHANGE ─────────────┐
+        │                                              │
+        │  BTC   {price_symbol} ${current_price:.2f}  {price_color}{price_change_str}{BRIGHT_GREEN}   TRAP: {self.probability:.0%}  │
+        │  ETH   {BRIGHT_YELLOW}⬆ $3124.75   +1.8%{BRIGHT_GREEN}   24h Vol: 22.1B  │
+        │  DOGE  {BRIGHT_RED}⬇ $0.081     -0.5%{BRIGHT_GREEN}   24h Vol: 2.3B   │
+        │                                              │
+        └──────────────────────────────────────────────┘{RESET}
+        """)
+        
+        # Second style
+        updated_art.append(f"""{BRIGHT_BLUE}
+        ╔════════════ OMEGA EXCHANGE TERMINAL ════════════╗
+        ║                                                 ║
+        ║  {BRIGHT_YELLOW}BTCUSD:{BRIGHT_GREEN} ${current_price:.2f}   {price_color}{price_change_str}{BRIGHT_BLUE}   ◆ TRAP: {self.probability:.0%}  ║
+        ║  {BRIGHT_YELLOW}VOLUME:{BRIGHT_GREEN} 3.5B BTC                            {BRIGHT_BLUE}  ║
+        ║  {BRIGHT_YELLOW}MARKET:{BRIGHT_GREEN} BULLISH    {BRIGHT_RED}☠ MM TRAPS:{BRIGHT_GREEN} ACTIVE    {BRIGHT_BLUE}  ║
+        ║                                                 ║
+        ╚═════════════════════════════════════════════════╝{RESET}
+        """)
+        
+        # Third style
+        updated_art.append(f"""{BRIGHT_MAGENTA}
+        ┏━━━━━━━━━━━━━ OMEGA TRADING DASHBOARD ━━━━━━━━━━━━━┓
+        ┃                                                   ┃
+        ┃  {BRIGHT_YELLOW}BTC PRICE:{BRIGHT_GREEN} ${current_price:.2f}   {BRIGHT_YELLOW}TRAP PROB:{self._get_probability_color(self.probability)} {self.probability:.0%}   ┃
+        ┃  {BRIGHT_YELLOW}LIQUIDITY POOLS:{BRIGHT_GREEN} $15.2B    {BRIGHT_YELLOW}24H VOLUME:{BRIGHT_GREEN} $98.5B  ┃
+        ┃  {BRIGHT_YELLOW}MARKET REGIME:{BRIGHT_GREEN} BULL RUN    {BRIGHT_YELLOW}MM ACTIVITY:{BRIGHT_RED} HIGH    ┃
+        ┃                                                   ┃
+        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛{RESET}
+        """)
+        
+        return updated_art
+
     def display_probability(self):
         """Display the trap probability with a fancy progress bar."""
         # Clear screen
         os.system('cls' if os.name == 'nt' else 'clear')
         
-        # Select frame for ASCII art
+        # Get current BTC price
+        current_price = self._get_current_btc_price()
+        
+        # Update the ASCII art with current data
+        updated_art = self._update_exchange_ascii_art(current_price)
+        
+        # Display headers based on selected style
+        if self.header_style == 1:  # Random
+            # Select a random ASCII art for the display
+            ascii_art = random.choice(updated_art)
+            print(ascii_art)
+        elif self.header_style == 2:  # Dynamic (change on each refresh)
+            # Select based on frame counter
+            ascii_art = updated_art[self.frame_counter % len(updated_art)]
+            self.frame_counter += 1
+            print(ascii_art)
+        elif self.header_style == 3:  # All at once
+            # Show all headers
+            for art in updated_art:
+                print(art)
+        
+        # Select frame for meter
         frame = ASCII_METER_FRAMES[self.frame_counter % len(ASCII_METER_FRAMES)]
         self.frame_counter += 1
         
@@ -809,7 +1043,6 @@ class TrapProbabilityMeter:
         print(self._color(frame, BRIGHT_CYAN))
         
         # Show current price
-        current_price = self._get_current_btc_price()
         print(f"Current BTC price: {self._color(f'${current_price:,.2f}', BRIGHT_WHITE)}")
         
         # Display probability meter
@@ -867,72 +1100,178 @@ class TrapProbabilityMeter:
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"\nLast updated: {now}")
     
+    def _store_trap_prediction(self, trap_type: Optional[str], probability: float, confidence: float):
+        """
+        Store trap prediction in Redis for other components to use.
+        
+        Args:
+            trap_type: The detected trap type
+            probability: Overall trap probability
+            confidence: Confidence in the specific trap type
+        """
+        if not self.redis_client or not trap_type or probability < 0.65:
+            return
+            
+        try:
+            # Create trap prediction data
+            current_price = self._get_current_btc_price()
+            timestamp = datetime.now().isoformat()
+            
+            trap_data = {
+                "type": trap_type,
+                "probability": probability,
+                "confidence": confidence,
+                "price": current_price,
+                "timestamp": timestamp,
+                "components": {
+                    name: component["value"] 
+                    for name, component in self.components.items()
+                },
+                "detected_by": "trap_probability_meter"
+            }
+            
+            # Store in Redis
+            self.redis_client.lpush("trap_predictions", json.dumps(trap_data))
+            self.redis_client.ltrim("trap_predictions", 0, 49)  # Keep last 50
+            
+            # Store as latest prediction
+            self.redis_client.set("latest_trap_prediction", json.dumps(trap_data))
+            
+            if self.debug:
+                print(f"Stored trap prediction in Redis: {trap_type}")
+                
+        except Exception as e:
+            if self.debug:
+                print(f"Error storing trap prediction: {e}")
+    
     def run(self):
         """Run the trap probability meter."""
         try:
             print(f"Starting trap probability meter (update interval: {self.interval}s)")
             print("Press Ctrl+C to exit")
             
+            # Redis check
+            if self.redis_client is None:
+                print(f"Warning: Running with simulated data (no Redis connection)")
+                try:
+                    self.redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+                except Exception:
+                    pass  # Already tried and failed
+            
+            # Connection status
+            last_redis_check = 0
+            redis_connected = self.redis_client is not None
+            last_trap_count = 0
+            
             # Main loop
             while True:
+                # Try Redis reconnection if needed (every 30 seconds)
+                current_time = time.time()
+                if not redis_connected and current_time - last_redis_check > 30:
+                    try:
+                        self.redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+                        if self.redis_client.ping():
+                            redis_connected = True
+                            print("Successfully reconnected to Redis")
+                    except Exception:
+                        redis_connected = False
+                    last_redis_check = current_time
+                
+                # Check for new trap detections
+                if redis_connected:
+                    try:
+                        current_trap_count = self.redis_client.llen("recent_mm_traps") or 0
+                        if current_trap_count > last_trap_count:
+                            new_traps = current_trap_count - last_trap_count
+                            if self.debug:
+                                print(f"Detected {new_traps} new trap pattern(s) from mm_trap_detector")
+                            last_trap_count = current_trap_count
+                    except Exception as e:
+                        if self.debug:
+                            print(f"Error checking trap detections: {e}")
+                
                 # Calculate probability
                 self.probability = self._calculate_probability()
                 
                 # Check if a trap is probable
                 threshold = 0.75  # Threshold for trap probability
-                self.trap_probable = self.probability > threshold
+                self.trap_probable = self.probability >= threshold
+                
+                # Detect likely trap type if probability is high
+                if self.probability > 0.5 or self.trap_probable:
+                    self.detected_trap_type, self.confidence = self._detect_likely_trap_type()
+                else:
+                    self.detected_trap_type = None
+                    self.confidence = 0.0
+                
+                # Store probability data for trend analysis
+                self._store_probability_data(self.probability)
+                
+                # Update trend
+                self._update_trend(self.probability)
                 
                 # Display the probability
                 self.display_probability()
                 
+                # Store trap prediction
+                self._store_trap_prediction(self.detected_trap_type, self.probability, self.confidence)
+                
                 # Sleep until next update
                 time.sleep(self.interval)
-        except redis.ConnectionError:
-            print(f"{RED}Error: Could not connect to Redis server{RESET}")
-            print("Make sure Redis is running on localhost:6379")
-            return 1
+                
         except KeyboardInterrupt:
             print(f"\n{RESET}Exiting trap probability meter...")
-            return 0
         except Exception as e:
-            print(f"{RED}Error: {e}{RESET}")
+            print(f"\n{RED}Error: {e}{RESET}")
             if self.debug:
                 import traceback
                 traceback.print_exc()
             return 1
+        
+        return 0
 
 def main():
-    """Main entry point for the trap probability meter."""
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="OMEGA BTC AI - Trap Probability Meter")
-    parser.add_argument("--interval", type=int, default=5,
-                        help="Check interval in seconds (default: 5)")
-    parser.add_argument("--debug", action="store_true",
-                        help="Show debug information")
-    parser.add_argument("--no-color", action="store_true",
-                        help="Disable colored output")
-    parser.add_argument("--backtest", type=str,
-                        help="Run in backtest mode starting from DATE (format: YYYY-MM-DD)")
-    parser.add_argument("--verbose", action="store_true",
-                        help="Show detailed component information")
+    """Run the trap probability meter."""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="Trap Probability Meter")
+    parser.add_argument("--interval", type=int, default=5, help="Update interval in seconds")
+    parser.add_argument("--debug", action="store_true", help="Show debug information")
+    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+    parser.add_argument("--backtest", type=str, help="Run in backtest mode starting from DATE (format: YYYY-MM-DD)")
+    parser.add_argument("--verbose", action="store_true", help="Show detailed component information")
+    parser.add_argument("--header-style", type=int, default=1, help="Header style (1=random, 2=dynamic, 3=all, default: 1)")
     
     args = parser.parse_args()
     
-    # Check for numpy dependency
-    if not NUMPY_AVAILABLE and args.debug:
-        print("Warning: numpy not found, some features may be disabled")
+    # Check for btc_live_feed data
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    try:
+        if not r.exists("last_btc_price"):
+            print("\nWARNING: No BTC price data found in Redis.")
+            print("Make sure the btc_live_feed.py module is running to provide real-time data.")
+            print("Using simulated data for demonstration...\n")
+        else:
+            price = r.get("last_btc_price")
+            print(f"\nConnected to live BTC price feed (current price: ${float(price):.2f})")
+            history_length = r.llen("btc_movement_history")
+            print(f"Found {history_length} historical price points in Redis")
+            print(f"Using real-time market data for trap probability calculation...\n")
+    except Exception as e:
+        print(f"\nError checking Redis: {e}")
+        print("Using simulated data for demonstration...\n")
     
-    # Create and run the trap probability meter
+    # Create trap probability meter
     meter = TrapProbabilityMeter(
         interval=args.interval,
         debug=args.debug,
         use_color=not args.no_color,
         verbose=args.verbose,
-        backtest_date=args.backtest
+        backtest_date=args.backtest,
+        header_style=args.header_style
     )
     
-    # Run the meter
-    return meter.run()
+    # Run meter
+    meter.run()
 
 if __name__ == "__main__":
     sys.exit(main()) 

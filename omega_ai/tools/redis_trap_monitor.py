@@ -68,8 +68,8 @@ REDIS_DB = 0
 # Exchange-like ASCII art
 EXCHANGE_ASCII_ART = [
     f"""{BRIGHT_GREEN}
-        ┌───────────── OMEGA BTC EXCHANGE ─────────────┐
-        │                                              │
+        ┌───────────── OMEGA AI EXCHANGE ─────────────┐
+        │                                             │
         │  BTC   {BRIGHT_YELLOW}⬆ $49128.50  +2.4%{BRIGHT_GREEN}   24h Vol: 45.2B  │
         │  ETH   {BRIGHT_YELLOW}⬆ $3124.75   +1.8%{BRIGHT_GREEN}   24h Vol: 22.1B  │
         │  DOGE  {BRIGHT_RED}⬇ $0.081     -0.5%{BRIGHT_GREEN}   24h Vol: 2.3B   │
