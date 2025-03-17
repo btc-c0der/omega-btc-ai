@@ -10,70 +10,17 @@ import { useDataFeed } from '../hooks/useDataFeed';
 import { PriceData, TrapData } from '../types/data';
 import { SxProps, Theme } from '@mui/material/styles';
 
-const scan = keyframes`
-  0% { transform: translateY(-100%); opacity: 0.5; }
-  100% { transform: translateY(100%); opacity: 0; }
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
 `;
 
-const pulse = keyframes`
-  0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.05); opacity: 0.4; }
-  100% { transform: scale(1); opacity: 0.8; }
-`;
-
-const blink = keyframes`
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-`;
-
-// Note: The 'complex union type' warning from MUI's sx prop typing is a known issue
-// and can be safely ignored as it doesn't affect runtime behavior
 const containerStyles: SxProps<Theme> = {
     position: 'relative',
     height: '100%',
+    borderRadius: 2,
     overflow: 'hidden',
 };
-
-const matrixGridStyles: SxProps<Theme> = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: `
-        linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px)
-    `,
-    backgroundSize: '20px 20px',
-    pointerEvents: 'none',
-};
-
-const createScanningEffectStyles = (theme: Theme): SxProps<Theme> => ({
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '2px',
-    background: `linear-gradient(90deg, 
-        transparent 0%, 
-        ${theme.palette.primary.main} 50%, 
-        transparent 100%
-    )`,
-    animation: `${scan} 3s linear infinite`,
-    pointerEvents: 'none',
-});
-
-const createStatusOverlayStyles = (theme: Theme): SxProps<Theme> => ({
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    padding: '4px 8px',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    border: `1px solid ${theme.palette.primary.main}`,
-    borderRadius: '2px',
-    animation: `${pulse} 2s ease-in-out infinite`,
-});
 
 const loadingContainerStyles: SxProps<Theme> = {
     position: 'absolute',
@@ -83,14 +30,8 @@ const loadingContainerStyles: SxProps<Theme> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '1rem',
-};
-
-const loadingTextStyles: SxProps<Theme> = {
-    fontFamily: '"Share Tech Mono", monospace',
-    animation: `${blink} 1s ease-in-out infinite`,
-    color: 'primary.main',
-    fontSize: '0.9rem',
+    gap: 2,
+    animation: `${fadeIn} 0.3s ease-in-out`,
 };
 
 const PriceChart: React.FC = () => {
@@ -103,15 +44,20 @@ const PriceChart: React.FC = () => {
             <Box sx={containerStyles}>
                 <Box sx={loadingContainerStyles}>
                     <CircularProgress
-                        size={40}
-                        thickness={4}
+                        size={32}
+                        thickness={3}
                         sx={{
                             color: theme.palette.primary.main,
-                            filter: 'drop-shadow(0 0 5px #00ff41)',
                         }}
                     />
-                    <Typography sx={loadingTextStyles}>
-                        1N1T14L1Z1NG_CH4RT.exe
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: 'text.secondary',
+                            fontWeight: 500,
+                        }}
+                    >
+                        Loading market data...
                     </Typography>
                 </Box>
             </Box>
@@ -123,14 +69,14 @@ const PriceChart: React.FC = () => {
             <Box sx={containerStyles}>
                 <Box sx={loadingContainerStyles}>
                     <Typography
+                        variant="body1"
                         sx={{
-                            ...loadingTextStyles,
-                            color: theme.palette.error.main,
-                            animation: `${blink} 2s ease-in-out infinite`,
+                            color: 'error.main',
                             textAlign: 'center',
+                            fontWeight: 500,
                         }}
                     >
-                        3RR0R: {error?.message || 'UNK0WN_3RR0R'}
+                        {error?.message || 'Failed to load market data'}
                     </Typography>
                 </Box>
             </Box>
@@ -147,42 +93,40 @@ const PriceChart: React.FC = () => {
             containLabel: true,
         },
         xAxis: {
-            type: 'time' as const,
+            type: 'time',
             axisLine: {
-                lineStyle: { color: theme.palette.primary.main }
+                lineStyle: { color: theme.palette.divider }
             },
             splitLine: {
                 show: true,
                 lineStyle: {
-                    color: 'rgba(0, 255, 65, 0.1)',
+                    color: theme.palette.divider,
                     type: 'dashed'
                 }
             },
             axisLabel: {
                 formatter: (value: number) => {
                     const time = new Date(value);
-                    return `T1M3: ${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
+                    return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 },
-                color: theme.palette.primary.main,
-                fontFamily: '"Share Tech Mono", monospace',
+                color: theme.palette.text.secondary,
             }
         },
         yAxis: {
-            type: 'value' as const,
+            type: 'value',
             axisLine: {
-                lineStyle: { color: theme.palette.primary.main }
+                lineStyle: { color: theme.palette.divider }
             },
             splitLine: {
                 show: true,
                 lineStyle: {
-                    color: 'rgba(0, 255, 65, 0.1)',
+                    color: theme.palette.divider,
                     type: 'dashed'
                 }
             },
             axisLabel: {
-                color: theme.palette.primary.main,
-                fontFamily: '"Share Tech Mono", monospace',
-                formatter: (value: number) => `$${value.toFixed(0)}`
+                color: theme.palette.text.secondary,
+                formatter: (value: number) => `$${value.toLocaleString()}`
             }
         },
         series: [
@@ -200,21 +144,21 @@ const PriceChart: React.FC = () => {
                     color0: theme.palette.success.main,
                     borderColor: theme.palette.error.main,
                     borderColor0: theme.palette.success.main,
-                    borderWidth: 2,
+                    borderWidth: 1,
                 },
             },
             {
                 type: 'scatter',
                 data: traps?.map((trap: TrapData) => ({
                     value: [trap.timestamp, trap.price],
-                    symbolSize: 20,
+                    symbolSize: 16,
                     itemStyle: {
                         color: trap.type === 'bullish'
                             ? theme.palette.success.main
                             : theme.palette.error.main,
-                        borderColor: theme.palette.primary.main,
+                        borderColor: theme.palette.background.paper,
                         borderWidth: 2,
-                        shadowBlur: 10,
+                        shadowBlur: 8,
                         shadowColor: trap.type === 'bullish'
                             ? theme.palette.success.main
                             : theme.palette.error.main,
@@ -225,51 +169,33 @@ const PriceChart: React.FC = () => {
         animation: true,
         tooltip: {
             trigger: 'axis',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            borderColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.background.paper,
+            borderColor: theme.palette.divider,
             textStyle: {
-                color: theme.palette.primary.main,
-                fontFamily: '"Share Tech Mono", monospace',
+                color: theme.palette.text.primary,
             },
             formatter: ((params: unknown) => {
                 const paramArray = Array.isArray(params) ? params : [params];
                 if (!paramArray[0]?.value) return '';
                 const time = new Date(paramArray[0].value[0]);
-                return `T1M3: ${time.toLocaleTimeString()}\nPR1C3: $${paramArray[0].value[1]}`;
+                const price = paramArray[0].value[1];
+                return `
+                    <div style="padding: 4px 8px;">
+                        <div style="margin-bottom: 4px;">${time.toLocaleString()}</div>
+                        <div style="font-weight: 500;">$${price.toLocaleString()}</div>
+                    </div>
+                `;
             }) as TooltipFormatterCallback<EChartsOption['series']>,
         } as TooltipComponentOption,
     };
 
     return (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <Box sx={containerStyles}>
-            {/* Matrix grid background */}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            <Box sx={matrixGridStyles} />
-
-            {/* Scanning effect */}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            <Box sx={createScanningEffectStyles(theme)} />
-
             <ReactECharts
                 option={chartOptions}
                 style={{ height: '100%', width: '100%' }}
                 theme="dark"
             />
-
-            {/* Status overlay */}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            <Box sx={createStatusOverlayStyles(theme)}>
-                <Typography
-                    sx={{
-                        color: theme.palette.primary.main,
-                        fontFamily: '"Share Tech Mono", monospace',
-                        fontSize: '0.8rem',
-                    }}
-                >
-                    ST4TUS: 0NL1N3
-                </Typography>
-            </Box>
         </Box>
     );
 };
