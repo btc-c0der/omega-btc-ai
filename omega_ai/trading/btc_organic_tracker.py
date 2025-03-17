@@ -15,9 +15,11 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import List, Dict, Optional, Union, Tuple
+from typing import List, Dict, Optional, Union, Tuple, cast, Any, Sequence
 from dataclasses import dataclass
 import math
+import json
+from omega_ai.utils.redis_manager import RedisManager
 
 # Import Schumann simulator if available, otherwise provide placeholder
 try:
@@ -25,7 +27,7 @@ try:
 except ImportError:
     # Placeholder if module not available yet
     class SchumannSimulator:
-        def get_dominant_frequency(self):
+        def get_dominant_frequency(self) -> float:
             return 7.83  # Default Schumann frequency
 
 
@@ -59,34 +61,115 @@ class OrganicPeriod:
     bio_energy: BioEnergyLevel = BioEnergyLevel.GROUNDED
     fibo_alignments: int = 0
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert period to dictionary for Redis storage."""
+        return {
+            "start_date": self.start_date.isoformat(),
+            "end_date": self.end_date.isoformat() if self.end_date else None,
+            "avg_organic_score": self.avg_organic_score,
+            "max_organic_score": self.max_organic_score,
+            "avg_schumann_freq": self.avg_schumann_freq,
+            "bio_energy": self.bio_energy.value,
+            "fibo_alignments": self.fibo_alignments
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'OrganicPeriod':
+        """Create period from dictionary loaded from Redis."""
+        return cls(
+            start_date=datetime.fromisoformat(cast(str, data["start_date"])),
+            end_date=datetime.fromisoformat(cast(str, data["end_date"])) if data.get("end_date") else None,
+            avg_organic_score=float(data["avg_organic_score"]),
+            max_organic_score=float(data["max_organic_score"]),
+            avg_schumann_freq=float(data["avg_schumann_freq"]),
+            bio_energy=BioEnergyLevel(cast(str, data["bio_energy"])),
+            fibo_alignments=int(data["fibo_alignments"])
+        )
+
 
 class BTCOrganicTracker:
     """Divine tracker for Bitcoin's Earth-consciousness alignment"""
     
-    def __init__(self):
+    def __init__(self, redis_manager: Optional[RedisManager] = None):
         """Initialize the sacred tracker"""
-        self.current_state = OrganicState.UNKNOWN
-        self.bio_energy_level = BioEnergyLevel.GROUNDED
+        self.redis = redis_manager or RedisManager()
         self.schumann_simulator = SchumannSimulator()
         
-        # Record keeping
-        self.organic_periods: List[OrganicPeriod] = []
-        self.current_organic_period: Optional[OrganicPeriod] = None
-        self.longest_organic_period: Optional[OrganicPeriod] = None
-        self.highest_organic_score = 0.0
-        self.current_organic_streak_days = 0
-        self.record_organic_streak_days = 0
+        # Load state from Redis or initialize defaults
+        self._load_state()
+        self._load_periods()
         
-        # Fibonacci sequence and golden ratio
-        self.golden_ratio = 1.618
-        self.fibonacci_sequence = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987]
+    def _load_state(self) -> None:
+        """Load tracker state from Redis."""
+        state = self.redis.get_cached("omega:organic_tracker:state")
+        if state:
+            self.current_state = OrganicState(state["current_state"])
+            self.bio_energy_level = BioEnergyLevel(state["bio_energy_level"])
+            self.current_organic_streak_days = state["current_organic_streak_days"]
+            self.record_organic_streak_days = state["record_organic_streak_days"]
+            self.total_organic_days = state["total_organic_days"]
+            self.total_days_analyzed = state["total_days_analyzed"]
+            self.highest_organic_score = state["highest_organic_score"]
+            self.schumann_correlation = state["schumann_correlation"]
+            self.fibo_alignments_count = state["fibo_alignments_count"]
+        else:
+            # Initialize with defaults
+            self.current_state = OrganicState.UNKNOWN
+            self.bio_energy_level = BioEnergyLevel.GROUNDED
+            self.current_organic_streak_days = 0
+            self.record_organic_streak_days = 0
+            self.total_organic_days = 0
+            self.total_days_analyzed = 0
+            self.highest_organic_score = 0.0
+            self.schumann_correlation = 0.0
+            self.fibo_alignments_count = 0
+            
+        # Save initial state
+        self._save_state()
+            
+    def _load_periods(self) -> None:
+        """Load organic periods from Redis."""
+        self.organic_periods = []
+        self.current_organic_period = None
+        self.longest_organic_period = None
         
-        # Statistics
-        self.total_organic_days = 0
-        self.total_days_analyzed = 0
-        self.schumann_correlation = 0.0
-        self.fibo_alignments_count = 0
+        periods_data = self.redis.get_cached("omega:organic_tracker:periods")
+        if periods_data:
+            self.organic_periods = [OrganicPeriod.from_dict(p) for p in periods_data]
+            # Find longest period
+            if self.organic_periods:
+                self.longest_organic_period = max(
+                    self.organic_periods,
+                    key=lambda p: (p.end_date or datetime.now()) - p.start_date
+                )
+                # Find current period if exists
+                current = [p for p in self.organic_periods if not p.end_date]
+                if current:
+                    self.current_organic_period = current[0]
+                    
+    def _save_state(self) -> None:
+        """Save current state to Redis."""
+        state = {
+            "current_state": self.current_state.value,
+            "bio_energy_level": self.bio_energy_level.value,
+            "current_organic_streak_days": self.current_organic_streak_days,
+            "record_organic_streak_days": self.record_organic_streak_days,
+            "total_organic_days": self.total_organic_days,
+            "total_days_analyzed": self.total_days_analyzed,
+            "highest_organic_score": self.highest_organic_score,
+            "schumann_correlation": self.schumann_correlation,
+            "fibo_alignments_count": self.fibo_alignments_count
+        }
+        self.redis.set_with_validation("omega:organic_tracker:state", state)
         
+    def _save_periods(self) -> None:
+        """Save organic periods to Redis."""
+        periods_data = [p.to_dict() for p in self.organic_periods]
+        self.redis.set_with_validation(
+            "omega:organic_tracker:periods",
+            json.dumps(periods_data)  # Convert to JSON string for Redis storage
+        )
+
     def update_with_price_data(self, df: pd.DataFrame) -> Dict:
         """Update tracker with new price data
         
@@ -109,6 +192,9 @@ class BTCOrganicTracker:
         
         # Update statistics
         self._update_statistics(organic_score, schumann_alignment, fibo_alignment)
+        
+        # Save state to Redis
+        self._save_state()
         
         # Return current status
         return self.get_current_status()
@@ -315,7 +401,7 @@ class BTCOrganicTracker:
                 if wave1 > 0 and wave2 > 0:
                     ratio = max(wave1, wave2) / min(wave1, wave2)
                     # Check if close to golden ratio
-                    if abs(ratio - self.golden_ratio) < 0.2:
+                    if abs(ratio - 1.618) < 0.2:
                         golden_count += 1
                     total_checks += 1
                     
@@ -327,7 +413,7 @@ class BTCOrganicTracker:
                 if wave1 > 0 and wave2 > 0:
                     ratio = max(wave1, wave2) / min(wave1, wave2)
                     # Check if close to golden ratio
-                    if abs(ratio - self.golden_ratio) < 0.2:
+                    if abs(ratio - 1.618) < 0.2:
                         golden_count += 1
                     total_checks += 1
                     
@@ -448,59 +534,35 @@ class BTCOrganicTracker:
         if organic_score > self.highest_organic_score:
             self.highest_organic_score = organic_score
             
-    def _update_period_tracking(self):
-        """Update tracking of organic periods"""
-        now = datetime.now()
-        
-        # Check if we're currently in an organic period
-        if self.current_state in [OrganicState.ORGANIC, OrganicState.QUANTUM]:
-            # Increase organic streak
-            self.current_organic_streak_days += 1/24  # Assuming hourly updates
-            
-            # Update record if needed
-            if self.current_organic_streak_days > self.record_organic_streak_days:
-                self.record_organic_streak_days = self.current_organic_streak_days
-                
-            # Check if we need to start a new period
-            if self.current_organic_period is None:
+    def _update_period_tracking(self) -> None:
+        """Update organic period tracking."""
+        if self.current_state == OrganicState.ORGANIC:
+            if not self.current_organic_period:
+                # Start new organic period
                 self.current_organic_period = OrganicPeriod(
-                    start_date=now,
-                    avg_organic_score=0.0,
+                    start_date=datetime.now(),
                     bio_energy=self.bio_energy_level
                 )
                 self.organic_periods.append(self.current_organic_period)
-            else:
-                # Update existing period
-                self.current_organic_period.end_date = now
-                
-                # Update average score - simple method
-                if hasattr(self, 'current_organic_score'):
-                    self.current_organic_period.avg_organic_score = (
-                        self.current_organic_period.avg_organic_score * 0.95 + 
-                        self.current_organic_score * 0.05
-                    )
         else:
-            # Not in organic state, reset streak
-            self.current_organic_streak_days = 0
-            
-            # Close current period if it exists
-            if self.current_organic_period is not None:
-                # Calculate duration
-                duration = (
-                    self.current_organic_period.end_date - 
-                    self.current_organic_period.start_date
-                ).total_seconds() / 86400  # Convert to days
+            if self.current_organic_period:
+                # End current period
+                self.current_organic_period.end_date = datetime.now()
+                duration = self.current_organic_period.end_date - self.current_organic_period.start_date
                 
-                # Update longest period if applicable
-                if self.longest_organic_period is None or duration > (
-                    self.longest_organic_period.end_date - 
-                    self.longest_organic_period.start_date
-                ).total_seconds() / 86400:
+                # Update longest period if needed
+                if not self.longest_organic_period or duration > (
+                    self.longest_organic_period.end_date - self.longest_organic_period.start_date
+                    if self.longest_organic_period.end_date
+                    else timedelta()
+                ):
                     self.longest_organic_period = self.current_organic_period
                     
-                # Reset current period
                 self.current_organic_period = None
                 
+        # Save periods to Redis
+        self._save_periods()
+        
     def _update_statistics(self, organic_score: float, schumann_alignment: float, 
                           fibo_alignment: int):
         """Update tracker statistics"""
