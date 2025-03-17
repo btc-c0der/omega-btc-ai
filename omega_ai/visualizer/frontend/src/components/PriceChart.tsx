@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Typography, useTheme, CircularProgress } from '@mui/material';
 import { keyframes } from '@emotion/react';
 import ReactECharts from 'echarts-for-react';
-import type { EChartsOption, TooltipComponentOption } from 'echarts';
-import type { TooltipFormatterCallback } from 'echarts/types/dist/shared';
+import type { EChartsOption } from 'echarts';
 import { useDataFeed } from '../hooks/useDataFeed';
-import { PriceData, TrapData } from '../types/data';
+import { PriceData, TrapData } from '../types';
 import { SxProps, Theme } from '@mui/material/styles';
 
 const fadeIn = keyframes`
@@ -20,6 +19,9 @@ const containerStyles: SxProps<Theme> = {
     height: '100%',
     borderRadius: 2,
     overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
 };
 
 const loadingContainerStyles: SxProps<Theme> = {
@@ -36,27 +38,31 @@ const loadingContainerStyles: SxProps<Theme> = {
 
 const PriceChart: React.FC = () => {
     const theme = useTheme();
-    const { data, isLoading, error } = useDataFeed<PriceData[]>('/api/prices');
+    const { data, error, isLoading, isConnected } = useDataFeed<PriceData[]>('/api/prices', [], true);
     const { data: traps } = useDataFeed<TrapData[]>('/api/traps');
+
+    const latestPrice = useMemo(() => {
+        if (!data || data.length === 0) return null;
+        return data[data.length - 1];
+    }, [data]);
+
+    const priceChange = useMemo(() => {
+        if (!data || data.length < 2) return null;
+        const current = data[data.length - 1].close;
+        const previous = data[data.length - 2].close;
+        const change = ((current - previous) / previous) * 100;
+        return {
+            value: change,
+            isPositive: change >= 0
+        };
+    }, [data]);
 
     if (isLoading) {
         return (
             <Box sx={containerStyles}>
                 <Box sx={loadingContainerStyles}>
-                    <CircularProgress
-                        size={32}
-                        thickness={3}
-                        sx={{
-                            color: theme.palette.primary.main,
-                        }}
-                    />
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'text.secondary',
-                            fontWeight: 500,
-                        }}
-                    >
+                    <CircularProgress size={32} sx={{ color: theme.palette.primary.main }} />
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         Loading market data...
                     </Typography>
                 </Box>
@@ -68,16 +74,7 @@ const PriceChart: React.FC = () => {
         return (
             <Box sx={containerStyles}>
                 <Box sx={loadingContainerStyles}>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            color: 'error.main',
-                            textAlign: 'center',
-                            fontWeight: 500,
-                        }}
-                    >
-                        {error?.message || 'Failed to load market data'}
-                    </Typography>
+                    <Typography color="error.main">Failed to load market data</Typography>
                 </Box>
             </Box>
         );
@@ -85,67 +82,80 @@ const PriceChart: React.FC = () => {
 
     const chartOptions: EChartsOption = {
         backgroundColor: 'transparent',
-        grid: {
-            left: '3%',
-            right: '3%',
-            bottom: '3%',
-            top: '3%',
-            containLabel: true,
+        grid: [
+            {
+                left: '10%',
+                right: '10%',
+                top: '8%',
+                height: '60%'
+            },
+            {
+                left: '10%',
+                right: '10%',
+                top: '75%',
+                height: '15%'
+            }
+        ],
+        axisPointer: {
+            link: [{ xAxisIndex: [0, 1] }]
         },
-        xAxis: {
-            type: 'time',
-            axisLine: {
-                lineStyle: { color: theme.palette.divider }
+        xAxis: [
+            {
+                type: 'category',
+                data: data?.map(item => item.time) || [],
+                axisLine: { lineStyle: { color: '#303030' } },
+                axisLabel: { color: '#808080' },
+                axisTick: { show: false }
             },
-            splitLine: {
-                show: true,
-                lineStyle: {
-                    color: theme.palette.divider,
-                    type: 'dashed'
-                }
-            },
-            axisLabel: {
-                formatter: (value: number) => {
-                    const time = new Date(value);
-                    return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            {
+                type: 'category',
+                gridIndex: 1,
+                data: data?.map(item => item.time) || [],
+                axisLine: { lineStyle: { color: '#303030' } },
+                axisLabel: { show: false },
+                axisTick: { show: false }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                scale: true,
+                axisLine: { lineStyle: { color: '#303030' } },
+                axisLabel: {
+                    color: '#808080',
+                    formatter: (value: number) => `$${value.toLocaleString()}`
                 },
-                color: theme.palette.text.secondary,
-            }
-        },
-        yAxis: {
-            type: 'value',
-            axisLine: {
-                lineStyle: { color: theme.palette.divider }
+                splitLine: { lineStyle: { color: '#202020' } }
             },
-            splitLine: {
-                show: true,
-                lineStyle: {
-                    color: theme.palette.divider,
-                    type: 'dashed'
-                }
-            },
-            axisLabel: {
-                color: theme.palette.text.secondary,
-                formatter: (value: number) => `$${value.toLocaleString()}`
+            {
+                type: 'value',
+                gridIndex: 1,
+                axisLine: { show: false },
+                axisLabel: { show: false },
+                splitLine: { show: false }
             }
-        },
+        ],
         series: [
             {
                 type: 'candlestick',
-                data: data?.map((item: PriceData) => [
-                    item.time,
-                    item.open,
-                    item.close,
-                    item.low,
-                    item.high
-                ]) || [],
+                data: data?.map(item => [item.open, item.close, item.low, item.high]) || [],
                 itemStyle: {
-                    color: theme.palette.error.main,
-                    color0: theme.palette.success.main,
-                    borderColor: theme.palette.error.main,
-                    borderColor0: theme.palette.success.main,
-                    borderWidth: 1,
-                },
+                    color: '#02C076',
+                    color0: '#FF3B69',
+                    borderColor: '#02C076',
+                    borderColor0: '#FF3B69'
+                }
+            },
+            {
+                type: 'bar',
+                xAxisIndex: 1,
+                yAxisIndex: 1,
+                data: data?.map(item => ({
+                    value: Math.abs(item.close - item.open) * 100,
+                    itemStyle: {
+                        color: item.close >= item.open ? '#02C07644' : '#FF3B6944'
+                    }
+                })) || [],
             },
             {
                 type: 'scatter',
@@ -153,48 +163,98 @@ const PriceChart: React.FC = () => {
                     value: [trap.timestamp, trap.price],
                     symbolSize: 16,
                     itemStyle: {
-                        color: trap.type === 'bullish'
-                            ? theme.palette.success.main
-                            : theme.palette.error.main,
+                        color: trap.type === 'bullish' ? '#02C076' : '#FF3B69',
                         borderColor: theme.palette.background.paper,
                         borderWidth: 2,
                         shadowBlur: 8,
-                        shadowColor: trap.type === 'bullish'
-                            ? theme.palette.success.main
-                            : theme.palette.error.main,
+                        shadowColor: trap.type === 'bullish' ? '#02C07666' : '#FF3B6966',
                     }
                 })) || [],
             }
         ],
-        animation: true,
         tooltip: {
             trigger: 'axis',
-            backgroundColor: theme.palette.background.paper,
-            borderColor: theme.palette.divider,
-            textStyle: {
-                color: theme.palette.text.primary,
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#404040'
+                }
             },
-            formatter: ((params: unknown) => {
-                const paramArray = Array.isArray(params) ? params : [params];
-                if (!paramArray[0]?.value) return '';
-                const time = new Date(paramArray[0].value[0]);
-                const price = paramArray[0].value[1];
+            backgroundColor: 'rgba(28, 34, 48, 0.95)',
+            borderColor: '#303030',
+            textStyle: { color: '#fff' },
+            formatter: (params: any) => {
+                const item = params[0];
+                if (!item) return '';
+
+                const values = item.data;
+                const color = values[1] >= values[0] ? '#02C076' : '#FF3B69';
+                const change = ((values[1] - values[0]) / values[0] * 100).toFixed(2);
+
                 return `
-                    <div style="padding: 4px 8px;">
-                        <div style="margin-bottom: 4px;">${time.toLocaleString()}</div>
-                        <div style="font-weight: 500;">$${price.toLocaleString()}</div>
+                    <div style="padding: 8px;">
+                        <div style="margin-bottom: 8px; font-size: 12px; opacity: 0.7;">${item.name}</div>
+                        <div style="margin-bottom: 4px;">
+                            <span style="color: ${color}">
+                                ${change}%
+                            </span>
+                        </div>
+                        <div>O: $${values[0].toLocaleString()}</div>
+                        <div>H: $${values[2].toLocaleString()}</div>
+                        <div>L: $${values[3].toLocaleString()}</div>
+                        <div>C: $${values[1].toLocaleString()}</div>
                     </div>
                 `;
-            }) as TooltipFormatterCallback<EChartsOption['series']>,
-        } as TooltipComponentOption,
+            }
+        },
+        animation: true,
+        animationDuration: 300
     };
 
     return (
         <Box sx={containerStyles}>
+            {latestPrice && (
+                <Box
+                    position="absolute"
+                    top={16}
+                    left={16}
+                    zIndex={1}
+                    p={2}
+                    bgcolor="rgba(0,0,0,0.4)"
+                    borderRadius={1}
+                >
+                    <Typography variant="h6" color="text.primary">
+                        ${latestPrice.close.toLocaleString()}
+                    </Typography>
+                    {priceChange && (
+                        <Typography
+                            variant="body2"
+                            color={priceChange.isPositive ? 'success.main' : 'error.main'}
+                        >
+                            {priceChange.isPositive ? '▲' : '▼'} {Math.abs(priceChange.value).toFixed(2)}%
+                        </Typography>
+                    )}
+                </Box>
+            )}
+            {isConnected === false && (
+                <Box
+                    position="absolute"
+                    top={16}
+                    right={16}
+                    bgcolor="error.main"
+                    color="error.contrastText"
+                    px={2}
+                    py={0.5}
+                    borderRadius={1}
+                    zIndex={1}
+                >
+                    <Typography variant="caption">Reconnecting...</Typography>
+                </Box>
+            )}
             <ReactECharts
                 option={chartOptions}
-                style={{ height: '100%', width: '100%' }}
-                theme="dark"
+                style={{ height: '100%', minHeight: 400 }}
+                notMerge={true}
             />
         </Box>
     );

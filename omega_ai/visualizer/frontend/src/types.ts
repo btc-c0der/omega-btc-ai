@@ -8,12 +8,12 @@ export interface PriceData {
 
 export interface TrapData {
     id: string;
-    type: 'bullish' | 'bearish';
+    type: string;
     timestamp: string;
     confidence: number;
     price: number;
     volume: number;
-    metadata: Record<string, unknown>;
+    metadata: Record<string, any>;
 }
 
 export interface ChartData {
@@ -29,6 +29,15 @@ export interface MetricsData {
     totalTraps: number;
     trapsByType: Record<string, number>;
     averageConfidence: number;
-    successRate: number;
     timeDistribution: Record<string, number>;
+    successRate: number;
+}
+
+export interface TimelineEvent {
+    id: string;
+    type: string;
+    timestamp: string;
+    description: string;
+    confidence: number;
+    impact: string;
 } 

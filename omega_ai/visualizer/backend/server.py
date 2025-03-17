@@ -5,10 +5,10 @@ H4x0r-grade FastAPI server for monitoring BTC market manipulation traps.
 Implements advanced logging and security features for tracking suspicious activities.
 """
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Set
 import json
 import os
 import logging
@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 import hashlib
 import uuid
 from functools import wraps
+import asyncio
 
 # Initialize 1337 logging
 logging.basicConfig(
@@ -25,6 +26,44 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger("0m3g4_tr4pp3r")
+
+# WebSocket connection manager
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Set[WebSocket] = set()
+        self.last_data = {}
+        
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.add(websocket)
+        logger.info(f"🔌 WebSocket client connected. Total connections: {len(self.active_connections)}")
+        
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+        logger.info(f"🔌 WebSocket client disconnected. Total connections: {len(self.active_connections)}")
+        
+    async def broadcast(self, message: dict):
+        """Broadcast message to all connected clients."""
+        disconnected = set()
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except RuntimeError:
+                disconnected.add(connection)
+        
+        # Clean up disconnected clients
+        for connection in disconnected:
+            self.disconnect(connection)
+            
+    async def send_personal_message(self, message: dict, websocket: WebSocket):
+        """Send message to a specific client."""
+        try:
+            await websocket.send_json(message)
+        except RuntimeError:
+            self.disconnect(websocket)
+
+# Initialize connection manager
+manager = ConnectionManager()
 
 # Initialize the h4x0r API
 app = FastAPI(title="0M3G4 TR4P V1SU4L1Z3R API")
@@ -178,6 +217,67 @@ def calculate_metrics(data: Dict) -> MetricsResponse:
         timeDistribution=timeDist,
         successRate=successCount / len(traps)
     )
+
+async def broadcast_data_updates():
+    """Background task to broadcast data updates to connected clients."""
+    while True:
+        try:
+            data = load_latest_dump()
+            current_time = datetime.utcnow().isoformat() + "Z"
+            
+            # Prepare update message
+            update = {
+                "timestamp": current_time,
+                "prices": data.get("prices", [])[-100:],  # Last 100 price points
+                "traps": data.get("traps", [])[-50:],     # Last 50 traps
+                "metrics": calculate_metrics(data)
+            }
+            
+            # Only broadcast if there are active connections
+            if manager.active_connections:
+                await manager.broadcast(update)
+                logger.info(f"📡 Broadcasted update to {len(manager.active_connections)} clients")
+            
+            # Wait before next update
+            await asyncio.sleep(1)  # 1 second update interval
+            
+        except Exception as e:
+            logger.error(f"❌ Error in broadcast task: {str(e)}")
+            await asyncio.sleep(5)  # Wait longer on error
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background tasks on server startup."""
+    asyncio.create_task(broadcast_data_updates())
+    logger.info("🚀 Started real-time data broadcast task")
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """Main WebSocket endpoint for real-time data streaming."""
+    await manager.connect(websocket)
+    try:
+        # Send initial data
+        data = load_latest_dump()
+        initial_data = {
+            "type": "initial",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "prices": data.get("prices", [])[-100:],
+            "traps": data.get("traps", [])[-50:],
+            "metrics": calculate_metrics(data)
+        }
+        await manager.send_personal_message(initial_data, websocket)
+        
+        # Keep connection alive and handle incoming messages
+        while True:
+            data = await websocket.receive_text()
+            # Handle any client messages if needed
+            await manager.send_personal_message({"type": "ack", "message": "received"}, websocket)
+            
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+    except Exception as e:
+        logger.error(f"❌ WebSocket error: {str(e)}")
+        manager.disconnect(websocket)
 
 @app.get("/")
 async def root():
