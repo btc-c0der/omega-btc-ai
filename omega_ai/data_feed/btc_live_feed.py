@@ -11,6 +11,7 @@ from enum import Enum
 from typing import List, Dict
 import threading
 import random
+from omega_ai.visualizer.backend.ascii_art import display_omega_banner, print_status
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,8 +25,8 @@ RESET = "\033[0m"
 # Binance WebSocket API
 BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
 
-# MM WebSocket Server URL
-MM_WS_URL = "ws://localhost:8765"
+# MM WebSocket Server URL with updated port
+MM_WS_URL = "ws://localhost:8766"
 
 # PostgreSQL Database Connection
 DB_CONFIG = {
@@ -276,28 +277,9 @@ class BtcPriceFeed:
             logging.error(f"Error storing price in Redis: {e}")
             return False
 
-def display_omega_rasta_banner():
-    """Display OMEGA RASTA VIBES banner with emojis"""
-    banner = f"""
-{GREEN_RASTA}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥{RESET}
-{YELLOW_RASTA}
-       ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ 
-      ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗
-      ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║
-      ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║
-      ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
-       ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═╝  ╚═╝{RESET}
-                                          
-{RED_RASTA}         🌿  BTC LIVE FEED NOW STREAMING  🌿{RESET}
-{GREEN_RASTA}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥{RESET}
-
-{GREEN_RASTA}🚀 JAH BLESS THE BLOCKCHAIN 🚀{RESET}
-{YELLOW_RASTA}💰 HODL STRONG & PROSPER 💰{RESET}
-{RED_RASTA}🔮 ONE LOVE, ONE BITCOIN 🔮{RESET}
-
-"""
-    print(banner)
-    logging.info("🎵 OMEGA RASTA SYSTEM ACTIVATED - POSITIVE VIBRATIONS ONLY 🎵")
+def display_omega_banner(title):
+    """Display OMEGA ASCII art banner."""
+    display_omega_banner(title)
 
 def check_redis_health():
     """Perform a health check on Redis connection and data integrity."""
@@ -428,15 +410,17 @@ def on_close(ws, close_status_code, close_msg):
     start_btc_websocket()
 
 def on_open(ws):
-    display_omega_rasta_banner()
-    logging.info("🌴 Connected to Binance WebSocket - BTC PRICES FLOWING LIKE REGGAE BEATS 🎧")
+    display_omega_banner("BTC Live Price Feed")
+    print_status("Connected to Binance WebSocket - QUANTUM PRICE FEED ACTIVE", "success")
 
 def start_btc_websocket():
     """Start WebSocket connection to Binance BTC Live Feed."""
+    display_omega_banner("BTC Live Price Feed")
+    
     while True:
         try:
             if not check_redis_health():
-                logging.error("Redis health check failed. Retrying in 60 seconds...")
+                print_status("Redis health check failed. Retrying in 60 seconds...", "error")
                 time.sleep(60)
                 continue
 
@@ -449,10 +433,9 @@ def start_btc_websocket():
             )
             ws.run_forever()
         except Exception as e:
-            logging.error(f"Error in WebSocket connection: {e}")
+            print_status(f"Error in WebSocket connection: {e}", "error")
             time.sleep(5)
 
 if __name__ == "__main__":
-    print(f"{GREEN_RASTA}🌟 INITIALIZING OMEGA BTC LIVE FEED WITH RASTA VIBES 🌟{RESET}")
-    display_omega_rasta_banner()
+    print_status("INITIALIZING OMEGA BTC LIVE FEED", "info")
     start_btc_websocket()

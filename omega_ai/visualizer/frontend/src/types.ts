@@ -1,19 +1,25 @@
 export interface PriceData {
     time: string;
     open: number;
+    close: number;
     high: number;
     low: number;
-    close: number;
+    volume: number;
 }
 
 export interface TrapData {
     id: string;
-    type: string;
+    type: 'bullish' | 'bearish';
     timestamp: string;
-    confidence: number;
     price: number;
-    volume: number;
-    metadata: Record<string, any>;
+    confidence: number;
+    description: string;
+}
+
+export interface WebSocketMessage {
+    btc_price: number;
+    volume?: number;
+    timestamp?: string;
 }
 
 export interface ChartData {
