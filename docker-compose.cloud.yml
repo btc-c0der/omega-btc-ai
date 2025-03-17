@@ -70,6 +70,13 @@ services:
       - NODE_ENV=production
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres
+      - VISUALIZER_PORT=8050
+      - FRONTEND_PORT=3000
+    ports:
+      - "8765:8765" # WebSocket Server
+      - "8050:8050" # Backend API
+      - "3000:3000" # Frontend
+      - "8080:8080" # Alternative Frontend Port
     deploy:
       resources:
         limits:
