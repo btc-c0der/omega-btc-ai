@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 import datetime
 import logging
-from omega_ai.utils.redis_connection import RedisConnectionManager
+from omega_ai.utils.redis_manager import RedisManager
 
 @dataclass
 class SessionState:
@@ -12,11 +12,11 @@ class SessionState:
     start_time: datetime.datetime = field(default_factory=lambda: datetime.datetime.now())
 
 class TradingSessionManager:
-    def __init__(self, redis_manager: RedisConnectionManager):
+    def __init__(self, redis_manager: RedisManager):
         self.redis = redis_manager
         self.state = SessionState()
         
-    def update_battle_state(self, traders: Dict, current_price: float):
+    def update_battle_state(self, traders: Dict, current_price: float) -> bool:
         """Update battle state in Redis"""
         battle_state = {
             "day": self.state.day_counter,
@@ -27,7 +27,7 @@ class TradingSessionManager:
             "start_time": self.state.start_time.isoformat()
         }
         
-        return self.redis.set("omega:live_battle_state", battle_state)
+        return self.redis.set_with_validation("omega:battle_state", battle_state)
         
     def advance_session(self) -> None:
         """Advance to next trading session"""
@@ -44,7 +44,8 @@ class TradingSessionManager:
     def check_trading_status(self) -> bool:
         """Check if trading should be active"""
         try:
-            return self.redis.get("omega:start_trading") == "1"
+            value = self.redis.get_cached("omega:start_trading")
+            return value == "1" if value is not None else False
         except Exception as e:
             logging.error(f"Error checking trading status: {e}")
             return False

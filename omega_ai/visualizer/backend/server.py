@@ -8,16 +8,17 @@ Implements advanced logging and security features for tracking suspicious activi
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, List, Optional, Union, Set
+from typing import Dict, List, Optional, Union, Set, cast
 import json
 import os
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import hashlib
 import uuid
 from functools import wraps
 import asyncio
+from omega_ai.utils.redis_manager import RedisManager
 
 # Initialize 1337 logging
 logging.basicConfig(
@@ -27,11 +28,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger("0m3g4_tr4pp3r")
 
+# Initialize Redis Manager
+redis_manager = RedisManager()
+
 # WebSocket connection manager
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Set[WebSocket] = set()
-        self.last_data = {}
+        self.last_data: Dict = {}
         
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -72,14 +76,14 @@ app = FastAPI(title="0M3G4 TR4P V1SU4L1Z3R API")
 @app.middleware("http")
 async def track_requests(request: Request, call_next):
     request_id = str(uuid.uuid4())
-    ip = request.client.host
+    client_host = request.client.host if request.client else "unknown"
     path = request.url.path
     
     # Calculate request signature
     content = await request.body()
     request_hash = hashlib.sha256(content).hexdigest()
     
-    logger.info(f"[{request_id}] 🔥 Incoming request from {ip}")
+    logger.info(f"[{request_id}] 🔥 Incoming request from {client_host}")
     logger.info(f"[{request_id}] 🎯 Target: {path}")
     logger.info(f"[{request_id}] 🔒 Request signature: {request_hash[:8]}")
     
@@ -107,7 +111,7 @@ class TrapData(BaseModel):
     confidence: float
     price: float
     volume: float
-    metadata: Dict
+    metadata: Dict[str, Union[str, float, int, bool]]
 
     class Config:
         schema_extra = {
@@ -133,11 +137,11 @@ class PriceData(BaseModel):
     low: float
 
 class MetricsResponse(BaseModel):
-    totalTraps: int
-    trapsByType: Dict[str, int]
-    averageConfidence: float
-    timeDistribution: Dict[str, int]
-    successRate: float
+    total_traps: int
+    traps_by_type: Dict[str, int]
+    average_confidence: float
+    time_distribution: Dict[str, int]
+    success_rate: float
 
 class TimelineEvent(BaseModel):
     id: str
@@ -149,73 +153,76 @@ class TimelineEvent(BaseModel):
 
 def load_latest_dump() -> Dict:
     """Load the most recent dump with integrity verification."""
-    dumps_dir = "redis-dumps"
-    if not os.path.exists(dumps_dir):
-        logger.error("❌ No dumps directory found!")
-        raise HTTPException(status_code=404, detail="No dumps directory found")
-    
-    dump_files = [f for f in os.listdir(dumps_dir) if f.endswith('.json')]
-    if not dump_files:
-        logger.error("❌ No dump files found!")
-        raise HTTPException(status_code=404, detail="No dump files found")
-    
-    latest_dump = max(dump_files, key=lambda x: os.path.getmtime(os.path.join(dumps_dir, x)))
-    logger.info(f"🎯 Loading dump: {latest_dump}")
-    
     try:
-        with open(os.path.join(dumps_dir, latest_dump), 'r') as f:
-            data = json.load(f)
-            # Calculate data integrity hash
-            data_hash = hashlib.sha256(json.dumps(data).encode()).hexdigest()
-            logger.info(f"✅ Data integrity hash: {data_hash[:8]}")
-            return data
-    except json.JSONDecodeError:
-        logger.error("❌ Invalid JSON data detected!")
-        raise HTTPException(status_code=500, detail="Corrupted dump file")
+        # Get latest dump from Redis
+        data = redis_manager.get_cached("omega:latest_dump")
+        if not data:
+            logger.error("❌ No dump data found!")
+            raise HTTPException(status_code=404, detail="No dump data found")
+        
+        # If data is already a dict, use it directly
+        if isinstance(data, dict):
+            dump_data = data
+        else:
+            # Try to parse JSON string
+            try:
+                dump_data = json.loads(data)
+            except json.JSONDecodeError:
+                logger.error("❌ Invalid JSON data detected!")
+                raise HTTPException(status_code=500, detail="Corrupted dump data")
+        
+        # Calculate data integrity hash
+        data_hash = hashlib.sha256(json.dumps(dump_data).encode()).hexdigest()
+        logger.info(f"✅ Data integrity hash: {data_hash[:8]}")
+        return dump_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error loading dump: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 def calculate_metrics(data: Dict) -> MetricsResponse:
     """Calculate metrics from trap data."""
     traps = data.get('trap_detections', [])
     if not traps:
         return MetricsResponse(
-            totalTraps=0,
-            trapsByType={},
-            averageConfidence=0.0,
-            timeDistribution={},
-            successRate=0.0
+            total_traps=0,
+            traps_by_type={},
+            average_confidence=0.0,
+            time_distribution={},
+            success_rate=0.0
         )
     
     # Count traps by type
-    trapsByType = {}
-    totalConfidence = 0
-    successCount = 0
-    timeDist = {f"{i:02d}-{(i+4):02d}": 0 for i in range(0, 24, 4)}
+    traps_by_type = {}
+    total_confidence = 0
+    success_count = 0
+    time_dist = {f"{i:02d}-{(i+4):02d}": 0 for i in range(0, 24, 4)}
     
     for trap in traps:
         # Count by type
-        trapType = trap.get('type', 'UNKNOWN')
-        trapsByType[trapType] = trapsByType.get(trapType, 0) + 1
+        trap_type = trap.get('type', 'UNKNOWN')
+        traps_by_type[trap_type] = traps_by_type.get(trap_type, 0) + 1
         
         # Sum confidence
         confidence = trap.get('confidence', 0)
-        totalConfidence += confidence
+        total_confidence += confidence
         
         # Check success
         if confidence > 0.7:  # Consider high confidence as success
-            successCount += 1
+            success_count += 1
         
         # Time distribution
         timestamp = datetime.fromisoformat(trap.get('timestamp', '').replace('Z', '+00:00'))
         hour = timestamp.hour
-        timeSlot = f"{(hour//4)*4:02d}-{((hour//4)*4+4):02d}"
-        timeDist[timeSlot] += 1
+        time_slot = f"{(hour//4)*4:02d}-{((hour//4)*4+4):02d}"
+        time_dist[time_slot] += 1
     
     return MetricsResponse(
-        totalTraps=len(traps),
-        trapsByType=trapsByType,
-        averageConfidence=totalConfidence / len(traps),
-        timeDistribution=timeDist,
-        successRate=successCount / len(traps)
+        total_traps=len(traps),
+        traps_by_type=traps_by_type,
+        average_confidence=total_confidence / len(traps),
+        time_distribution=time_dist,
+        success_rate=success_count / len(traps)
     )
 
 async def broadcast_data_updates():
@@ -223,13 +230,19 @@ async def broadcast_data_updates():
     while True:
         try:
             data = load_latest_dump()
-            current_time = datetime.utcnow().isoformat() + "Z"
+            current_time = datetime.now(UTC).isoformat() + "Z"
+            
+            # Get the last N items safely
+            prices = data.get("prices", [])
+            traps = data.get("traps", [])
+            last_prices = prices[-100:] if prices else []
+            last_traps = traps[-50:] if traps else []
             
             # Prepare update message
             update = {
                 "timestamp": current_time,
-                "prices": data.get("prices", [])[-100:],  # Last 100 price points
-                "traps": data.get("traps", [])[-50:],     # Last 50 traps
+                "prices": last_prices,
+                "traps": last_traps,
                 "metrics": calculate_metrics(data)
             }
             
@@ -258,11 +271,14 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         # Send initial data
         data = load_latest_dump()
+        prices = data.get("prices", [])
+        traps = data.get("traps", [])
+        
         initial_data = {
             "type": "initial",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "prices": data.get("prices", [])[-100:],
-            "traps": data.get("traps", [])[-50:],
+            "timestamp": datetime.now(UTC).isoformat() + "Z",
+            "prices": prices[-100:] if prices else [],
+            "traps": traps[-50:] if traps else [],
             "metrics": calculate_metrics(data)
         }
         await manager.send_personal_message(initial_data, websocket)
@@ -287,17 +303,12 @@ async def root():
 @app.get("/api/metrics", response_model=MetricsResponse)
 async def get_metrics(request: Request):
     """Get trap metrics with advanced analytics."""
-    logger.info(f"📈 Metrics requested from {request.client.host}")
+    client_host = request.client.host if request.client else "unknown"
+    logger.info(f"📈 Metrics requested from {client_host}")
     data = load_latest_dump()
-    metrics = data.get('metrics', {
-        'totalTraps': 0,
-        'trapsByType': {},
-        'averageConfidence': 0.0,
-        'timeDistribution': {},
-        'successRate': 0.0
-    })
-    logger.info(f"🎯 Total traps analyzed: {metrics['totalTraps']}")
-    logger.info(f"📊 Success rate: {metrics['successRate']*100:.1f}%")
+    metrics = calculate_metrics(data)
+    logger.info(f"🎯 Total traps analyzed: {metrics.total_traps}")
+    logger.info(f"📊 Success rate: {metrics.success_rate*100:.1f}%")
     return metrics
 
 @app.get("/api/traps", response_model=List[TrapData])

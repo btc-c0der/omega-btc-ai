@@ -6,9 +6,8 @@ Base trader profile class for OmegaBTC AI
 This module provides the foundation for all trader profiles in the system.
 """
 
-import redis
 from typing import Dict, List, Tuple, Optional
-
+from omega_ai.utils.redis_manager import RedisManager
 from omega_ai.trading.trading_analyzer import TradingAnalyzer
 
 # Terminal colors for visual output
@@ -94,140 +93,134 @@ class TraderState:
 class TraderProfile:
     """Base class for trader profile simulations."""
     
-    def __init__(self, initial_capital: float = 10000.0, name: str = ""):
+    def __init__(self, initial_capital: float = 10000.0, name: str = "", redis_manager: Optional[RedisManager] = None):
         self.capital = initial_capital
         self.initial_capital = initial_capital
         self.name = name or self.__class__.__name__
-        self.type = self.__class__.__name__.lower().replace("trader", "")
+        self.redis = redis_manager or RedisManager()
+        self.state = TraderState()
+        self.analyzer = TradingAnalyzer()
         
-        # Common attributes
-        self.base_leverage = 5.0
-        self.base_stop_pct = 0.03  # 3% base stop loss
-        self.min_retest_waiting_period = 3600  # 1 hour in seconds
-        
-        # Initialize Redis connection
-        self.redis_conn = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
-        
-        # Key Fibonacci levels
-        self.key_fib_levels = [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618]
-        
-        # Discipline metrics tracking
-        self.discipline_metrics = {
-            "rules_followed": 0,
-            "rules_broken": 0,
-            "entries_skipped": 0,
-            "targets_reached": 0,
-            "early_exits": 0
-        }
-        
-        # Initialize analyzer and state
-        self.analyzer = self._initialize_analyzer()
-        self.state = self._initialize_state()
+        # Initialize trader state in Redis
+        self._initialize_state()
         
     def should_enter_trade(self, market_context: Dict) -> Tuple[bool, str, str, float]:
-        """Determine if the trader should enter a trade."""
-        raise NotImplementedError("Subclasses must implement this")
+        """Determine if we should enter a trade based on market context."""
+        raise NotImplementedError("Subclasses must implement should_enter_trade")
         
     def determine_position_size(self, direction: str, entry_price: float) -> float:
-        """Calculate position size based on risk parameters and emotional state."""
-        raise NotImplementedError("Subclasses must implement this")
-    
+        """Calculate position size based on risk appetite and capital."""
+        raise NotImplementedError("Subclasses must implement determine_position_size")
+        
     def set_stop_loss(self, direction: str, entry_price: float) -> float:
-        """Determine stop-loss level based on trading style."""
-        raise NotImplementedError("Subclasses must implement this")
-    
+        """Set stop loss level based on risk management rules."""
+        raise NotImplementedError("Subclasses must implement set_stop_loss")
+        
     def set_take_profit(self, direction: str, entry_price: float, stop_loss: float) -> List[Dict]:
-        """Determine take-profit levels based on trading style."""
-        raise NotImplementedError("Subclasses must implement this")
-    
+        """Set take profit targets based on risk/reward ratio."""
+        raise NotImplementedError("Subclasses must implement set_take_profit")
+        
     def process_trade_result(self, result: float, trade_duration: float) -> None:
-        """Process the outcome of a trade and update the trader state."""
+        """Process the result of a completed trade."""
         # Update capital
         self.capital += result
         
-        # Update trade statistics
-        self.state.total_trades += 1
+        # Update state
         if result > 0:
-            self.state.winning_trades += 1
             self.state.consecutive_wins += 1
             self.state.consecutive_losses = 0
+            self.state.winning_trades += 1
         else:
-            self.state.losing_trades += 1
             self.state.consecutive_losses += 1
             self.state.consecutive_wins = 0
-        
-        # Update emotional state
+            self.state.losing_trades += 1
+            
+        self.state.total_trades += 1
         self.state.total_pnl += result
-        import random
-        self.state.update_emotional_state(result, random)
         
         # Calculate drawdown
-        high_watermark = max(self.initial_capital, self.capital)
-        current_drawdown = (high_watermark - self.capital) / high_watermark * 100
-        self.state.drawdown = max(self.state.drawdown, current_drawdown)
+        drawdown = (self.initial_capital - self.capital) / self.initial_capital
+        self.state.drawdown = max(self.state.drawdown, drawdown)
+        
+        # Update emotional state
+        self.state.update_emotional_state(result, self.analyzer.random)
+        
+        # Update Redis state
+        self._update_redis_state()
         
     def print_status(self) -> None:
-        """Print current trader status and performance metrics."""
-        profit = self.capital - self.initial_capital
-        profit_pct = (profit / self.initial_capital) * 100
+        """Print current trader status with color formatting."""
+        win_rate = (self.state.winning_trades / self.state.total_trades * 100 
+                   if self.state.total_trades > 0 else 0)
+                   
+        pnl_color = GREEN if self.state.total_pnl >= 0 else RED
+        state_color = self._get_state_color()
+        risk_color = self._format_risk_level(self.state.risk_appetite)
+        confidence_color = self._format_confidence_level(self.state.confidence)
         
-        if profit >= 0:
-            profit_text = f"{GREEN}+${profit:.2f} ({profit_pct:.1f}%){RESET}"
-        else:
-            profit_text = f"{RED}-${abs(profit):.2f} ({profit_pct:.1f}%){RESET}"
+        print(f"\n{BOLD}{WHITE}Trader Profile: {self.name}{RESET}")
+        print(f"Capital: ${self.capital:,.2f}")
+        print(f"PnL: {pnl_color}${self.state.total_pnl:,.2f}{RESET}")
+        print(f"Win Rate: {win_rate:.1f}%")
+        print(f"Total Trades: {self.state.total_trades}")
+        print(f"Consecutive Wins: {self.state.consecutive_wins}")
+        print(f"Consecutive Losses: {self.state.consecutive_losses}")
+        print(f"Max Drawdown: {self.state.drawdown*100:.1f}%")
+        print(f"Emotional State: {state_color}{self.state.emotional_state}{RESET}")
+        print(f"Risk Level: {risk_color}")
+        print(f"Confidence: {confidence_color}\n")
         
-        win_rate = self.state.winning_trades / max(1, self.state.total_trades) * 100
-        
-        # Emotional state color coding
+    def _get_state_color(self) -> str:
+        """Get color code for emotional state."""
         state_colors = {
             "neutral": WHITE,
-            "greedy": YELLOW,
-            "fearful": RED,
+            "greedy": RED,
+            "fearful": YELLOW,
             "excited": GREEN,
-            "euphoric": MAGENTA,
-            "fomo": YELLOW,
-            "panic": RED,
-            "revenge": RED,
-            "fud": YELLOW,
-            "hype": GREEN
+            "cautious": CYAN
         }
-        emotion_color = state_colors.get(self.state.emotional_state, WHITE)
-        
-        print(f"\n{MAGENTA}══════════════════════════════════════{RESET}")
-        print(f"{CYAN}{BOLD}{self.name} Status Report{RESET}")
-        print(f"{MAGENTA}══════════════════════════════════════{RESET}")
-        print(f"Capital: ${self.capital:.2f} | P&L: {profit_text}")
-        print(f"Trades: {self.state.total_trades} | Win Rate: {win_rate:.1f}%")
-        print(f"Emotional State: {emotion_color}{self.state.emotional_state}{RESET}")
-        print(f"Risk Appetite: {self._format_risk_level(self.state.risk_appetite)}")
-        print(f"Confidence: {self._format_confidence_level(self.state.confidence)}")
-        print(f"Max Drawdown: {RED}{self.state.drawdown:.1f}%{RESET}")
+        return state_colors.get(self.state.emotional_state, WHITE)
         
     def _format_risk_level(self, risk: float) -> str:
         """Format risk level with color coding."""
         if risk < 0.3:
-            return f"{BLUE}Conservative ({risk:.1f}){RESET}"
+            return f"{BLUE}Low Risk ({risk:.2f}){RESET}"
         elif risk < 0.7:
-            return f"{WHITE}Moderate ({risk:.1f}){RESET}"
+            return f"{YELLOW}Medium Risk ({risk:.2f}){RESET}"
         else:
-            return f"{RED}Aggressive ({risk:.1f}){RESET}"
-    
+            return f"{RED}High Risk ({risk:.2f}){RESET}"
+            
     def _format_confidence_level(self, confidence: float) -> str:
         """Format confidence level with color coding."""
         if confidence < 0.3:
-            return f"{RED}Low ({confidence:.1f}){RESET}"
+            return f"{RED}Low Confidence ({confidence:.2f}){RESET}"
         elif confidence < 0.7:
-            return f"{WHITE}Moderate ({confidence:.1f}){RESET}"
+            return f"{YELLOW}Medium Confidence ({confidence:.2f}){RESET}"
         else:
-            return f"{GREEN}High ({confidence:.1f}){RESET}"
-
+            return f"{GREEN}High Confidence ({confidence:.2f}){RESET}"
+            
     def _initialize_analyzer(self):
-        """Initialize market analyzer for this trader."""
-        from omega_ai.trading.trading_analyzer import TradingAnalyzer
-        return TradingAnalyzer()
-
+        """Initialize trading analyzer component."""
+        self.analyzer = TradingAnalyzer()
+        
     def _initialize_state(self):
-        """Initialize trader state object."""
-        return TraderState()  # Just return an instance of the existing class
+        """Initialize trader state in Redis."""
+        state_data = {
+            "name": self.name,
+            "capital": self.capital,
+            "pnl": self.state.total_pnl,
+            "win_rate": (self.state.winning_trades / self.state.total_trades * 100 
+                        if self.state.total_trades > 0 else 0),
+            "trades": self.state.total_trades,
+            "emotional_state": self.state.emotional_state,
+            "confidence": self.state.confidence,
+            "risk_level": self.state.risk_appetite
+        }
+        
+        self.redis.set_with_validation(f"omega:live_trader:{self.name}", state_data)
+        
+    def _update_redis_state(self):
+        """Update trader state in Redis."""
+        self._initialize_state()  # Reuse initialization logic for updates
 
 BaseTrader = TraderProfile  # Create alias for backward compatibility
