@@ -40,6 +40,7 @@ class TestConfig:
     TEST_PRICE = 50000.0
     TEST_LEVERAGE = [3, 10, 20, 10]  # Expected default leverage by profile
     TEST_TIMEFRAME = "2025-03-15 12:00:00"
+    INITIAL_CAPITAL = 10000.0
 
 # Terminal colors for divine output
 RED = "\033[91m"
@@ -55,52 +56,18 @@ BOLD = "\033[1m"
 
 @pytest.fixture
 def mock_redis():
-    """Provide a blessed mock Redis connection."""
+    """Mock Redis for testing."""
     with patch('redis.StrictRedis') as mock_redis:
-        # Create a divine Redis instance that remembers its data
-        mock_instance = MagicMock()
-        mock_instance._hash_data = {}
-        mock_instance._list_data = {}
-        
-        # Mock hset to store data
-        def mock_hset(key, mapping=None, **kwargs):
-            if key not in mock_instance._hash_data:
-                mock_instance._hash_data[key] = {}
-            
-            if mapping:
-                mock_instance._hash_data[key].update(mapping)
-            else:
-                mock_instance._hash_data[key].update(kwargs)
-                
-        # Mock lpush to add items to lists
-        def mock_lpush(key, *values):
-            if key not in mock_instance._list_data:
-                mock_instance._list_data[key] = []
-            
-            # Prepend values to the list
-            for val in values:
-                mock_instance._list_data[key].insert(0, val)
-            
-            return len(mock_instance._list_data[key])
-            
-        # Mock ltrim to keep lists at a specific size
-        def mock_ltrim(key, start, end):
-            if key in mock_instance._list_data:
-                if end < 0:
-                    # Handle negative indices (e.g., -1 means last element)
-                    mock_instance._list_data[key] = mock_instance._list_data[key][start:len(mock_instance._list_data[key])+end+1]
-                else:
-                    mock_instance._list_data[key] = mock_instance._list_data[key][start:end+1]
-            
-            return True
-        
-        # Assign the mock methods
-        mock_instance.hset = mock_hset
-        mock_instance.lpush = mock_lpush
-        mock_instance.ltrim = mock_ltrim
-        
-        mock_redis.return_value = mock_instance
-        yield mock_instance
+        mock_client = MagicMock()
+        mock_redis.return_value = mock_client
+        yield mock_client
+
+@pytest.fixture
+def mock_redis_conn():
+    """Mock Redis connection for testing."""
+    with patch('omega_ai.trading.btc_futures_trader.redis_conn') as mock_conn:
+        mock_conn.get.return_value = str(TestConfig.TEST_PRICE)
+        yield mock_conn
 
 # =============== BLESSED TEST CASES ===============
 
@@ -527,6 +494,154 @@ def test_linus_torvalds_blessing():
     # Print divine confirmation
     print(f"\n{GREEN}✓ ProfiledFuturesTrader has received the divine blessing of Linus Torvalds{RESET}")
     print(f"{YELLOW}ONE LOVE, ONE HEART, ONE CODE{RESET}")
+
+@freeze_time(TestConfig.TEST_TIMEFRAME)
+@pytest.mark.parametrize("profile_type", TestConfig.TEST_PROFILES)
+def test_trader_edge_cases(profile_type):
+    """🌿 Test divine handling of extreme market conditions."""
+    # Create trader with specific profile
+    trader = ProfiledFuturesTrader(
+        profile_type=profile_type,
+        initial_capital=TestConfig.TEST_CAPITAL
+    )
+    
+    # Test extreme price movements
+    print(f"\n{GREEN}Testing {profile_type.upper()} edge cases{RESET}")
+    
+    # Test extreme volatility
+    trader.update_price(TestConfig.TEST_PRICE)
+    trader.open_position("LONG", "Test extreme volatility", 2)
+    
+    # Simulate extreme price movement
+    trader.update_price(TestConfig.TEST_PRICE * 1.5)  # 50% increase
+    trader.manage_open_positions()
+    
+    # Position should be closed with significant profit
+    assert len(trader.positions) == 0
+    assert trader.capital > TestConfig.TEST_CAPITAL
+    
+    # Test position size limits
+    max_position_size = trader.capital * trader.max_leverage
+    trader.open_position("LONG", "Test position size limit", max_position_size)
+    assert len(trader.positions) == 1
+    assert trader.positions[0].size <= max_position_size
+    
+    # Test multiple positions
+    for _ in range(3):
+        trader.open_position("LONG", "Test multiple positions", 1000.0)
+    
+    # Should respect max positions limit
+    assert len(trader.positions) <= trader.max_positions
+    
+    print(f"{GREEN}✓ {profile_type.capitalize()} trader handles edge cases with divine grace{RESET}")
+
+def update_price_safely(trader: ProfiledFuturesTrader, mock_redis_conn: MagicMock, price: float) -> None:
+    """Update price safely, ensuring it's never 0.0."""
+    if price <= 0:
+        raise ValueError(f"Price must be positive, got {price}")
+    mock_redis_conn.get.return_value = str(price)
+    result = trader.update_current_price()
+    if result <= 0:
+        raise ValueError(f"Failed to update price to {price}")
+    assert trader.current_price > 0, "Price update failed"
+
+@freeze_time(TestConfig.TEST_TIMEFRAME)
+def test_trader_performance_metrics(mock_redis_conn):
+    """Test trader performance metrics calculation."""
+    # Initialize trader with test configuration
+    trader = ProfiledFuturesTrader(profile_type="strategic", initial_capital=TestConfig.INITIAL_CAPITAL)
+    
+    # Set initial price in Redis mock
+    initial_price = float(TestConfig.TEST_PRICE)
+    update_price_safely(trader, mock_redis_conn, initial_price)
+    
+    # Open a long position
+    trader.open_position("LONG", "Test trade", leverage=1.0)
+    
+    # Simulate price movement up
+    new_price = initial_price * 1.02  # 2% increase
+    update_price_safely(trader, mock_redis_conn, new_price)
+    
+    # Close position with profit
+    for pos in trader.positions:
+        trader._close_position(pos, "Test close")  # Use internal method to handle TradingPosition
+    
+    # Open a short position
+    update_price_safely(trader, mock_redis_conn, new_price)
+    trader.open_position("SHORT", "Test trade", leverage=1.0)
+    
+    # Simulate price movement down
+    final_price = new_price * 0.98  # 2% decrease
+    update_price_safely(trader, mock_redis_conn, final_price)
+    
+    # Close position with profit
+    for pos in trader.positions:
+        trader._close_position(pos, "Test close")  # Use internal method to handle TradingPosition
+    
+    # Verify performance metrics
+    assert trader.win_rate > 0.0, "Win rate should be positive"
+    assert trader.total_pnl > 0.0, "Total PnL should be positive"
+    assert trader.calculate_sharpe_ratio() >= 0.0, "Sharpe ratio should be non-negative"
+    assert trader.calculate_max_drawdown() >= 0.0, "Max drawdown should be non-negative"
+
+@freeze_time(TestConfig.TEST_TIMEFRAME)
+def test_trader_error_handling(mock_redis_conn):
+    """Test trader error handling for invalid inputs."""
+    trader = ProfiledFuturesTrader(profile_type="strategic", initial_capital=TestConfig.INITIAL_CAPITAL)
+    
+    # Set initial price in Redis mock
+    initial_price = float(TestConfig.TEST_PRICE)
+    update_price_safely(trader, mock_redis_conn, initial_price)
+    
+    # Test invalid position size
+    with pytest.raises(Exception):
+        trader.open_position("LONG", "Invalid size", leverage=-1.0)
+    
+    # Test invalid direction
+    with pytest.raises(Exception):
+        trader.open_position("INVALID", "Invalid direction", leverage=1.0)
+    
+    # Test excessive leverage
+    with pytest.raises(Exception):
+        trader.open_position("LONG", "Excessive leverage", leverage=101.0)
+        
+    # Test invalid price update
+    with pytest.raises(ValueError):
+        update_price_safely(trader, mock_redis_conn, 0.0)
+        
+    # Test Redis error handling
+    mock_redis_conn.get.return_value = None
+    with pytest.raises(ValueError):
+        update_price_safely(trader, mock_redis_conn, initial_price)
+        
+    mock_redis_conn.get.side_effect = redis.RedisError("Connection error")
+    with pytest.raises(ValueError):
+        update_price_safely(trader, mock_redis_conn, initial_price)
+        
+    # Test price update with invalid string
+    mock_redis_conn.get.side_effect = None
+    mock_redis_conn.get.return_value = "invalid_price"
+    with pytest.raises(ValueError):
+        update_price_safely(trader, mock_redis_conn, initial_price)
+        
+    # Test direct price update
+    with pytest.raises(ValueError):
+        trader.update_price(0.0)
+        
+    with pytest.raises(ValueError):
+        trader.update_price(-1.0)
+        
+    # Test successful price update
+    trader.update_price(initial_price)
+    assert trader.current_price == initial_price, "Price update failed"
+    
+    # Test price update with None
+    with pytest.raises(ValueError):
+        trader.update_price(None)
+        
+    # Test price update with invalid type
+    with pytest.raises(ValueError):
+        trader.update_price("invalid_price")
 
 if __name__ == "__main__":
     # Running this file directly will execute the tests with divine energy

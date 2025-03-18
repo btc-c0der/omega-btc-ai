@@ -48,6 +48,8 @@ except Exception as e:
 BOLD = "\033[1m"
 MAGENTA = "\033[35m"
 RESET = "\033[0m"
+YELLOW = "\033[33m"
+RED = "\033[31m"
 
 def supports_color():
     """
@@ -61,7 +63,7 @@ def supports_color():
 
 # If color is not supported, set color codes to empty strings
 if not supports_color():
-    BOLD = MAGENTA = RESET = ""
+    BOLD = MAGENTA = RESET = YELLOW = RED = ""
 
 class RedisKeys:
     """Redis key constants to avoid typos and maintain consistency"""
@@ -323,34 +325,63 @@ def main():
                         if redis_manager.get("omega:start_trading") != "1":
                             break
                         
-                        # Get latest market data (shared across all trader profiles)
-                        current_price = traders['strategic'].update_current_price()
-                        price_history.append(current_price)
-                        
-                        # Each trader processes the same market conditions
-                        for profile, trader in traders.items():
-                            try:
-                                trader.current_price = current_price
-                                trader.manage_open_positions()
+                        # Get latest market data for each trader independently
+                        try:
+                            # Get price from Redis
+                            price_str = redis_manager.get("last_btc_price")
+                            if not price_str:
+                                print(f"{YELLOW}No price data in Redis, waiting...{RESET}")
+                                time.sleep(2)
+                                continue
                                 
-                                if i % 3 == 0:
-                                    should_open, reason, leverage = trader.should_open_position()
-                                    if should_open and "LONG" in reason:
-                                        trader.open_position("LONG", reason, leverage)
-                                    elif should_open and "SHORT" in reason:
-                                        trader.open_position("SHORT", reason, leverage)
-                            except Exception as e:
-                                logging.error(f"Error updating trader {profile}: {e}")
+                            current_price = float(price_str)
+                            if current_price <= 0:
+                                print(f"{YELLOW}Invalid price from Redis: {current_price}, waiting...{RESET}")
+                                time.sleep(2)
+                                continue
+                                
+                            price_history.append(current_price)
+                            
+                            # Each trader processes the same market conditions independently
+                            for profile, trader in traders.items():
+                                try:
+                                    # Update price for this trader
+                                    trader.update_price(current_price)
+                                    
+                                    # Manage existing positions
+                                    trader.manage_open_positions()
+                                    
+                                    # Check for new trade opportunities
+                                    if i % 3 == 0:  # Don't check too frequently
+                                        should_open, reason, leverage = trader.should_open_position()
+                                        if should_open and "LONG" in reason:
+                                            trader.open_position("LONG", reason, leverage)
+                                        elif should_open and "SHORT" in reason:
+                                            trader.open_position("SHORT", reason, leverage)
+                                except ValueError as e:
+                                    print(f"{RED}Error updating {profile} trader: {e}{RESET}")
+                                except Exception as e:
+                                    logging.error(f"Error updating {profile} trader: {e}")
+                            
+                            # Store updated trader data in Redis
+                            store_trader_data_in_redis(
+                                traders, 
+                                day_counter,
+                                session_counter,
+                                start_time,
+                                price_history
+                            )
+                            
+                        except ValueError as e:
+                            print(f"{YELLOW}Price update error: {e}, waiting...{RESET}")
+                            time.sleep(2)
+                            continue
+                        except Exception as e:
+                            logging.error(f"Unexpected error in price update loop: {e}")
+                            time.sleep(2)
+                            continue
                         
-                        store_trader_data_in_redis(
-                            traders, 
-                            day_counter,
-                            session_counter,
-                            start_time,
-                            price_history
-                        )
-                        
-                        time.sleep(2)
+                        time.sleep(2)  # Wait between updates
                     
                     if redis_manager.get("omega:start_trading") != "1":
                         break

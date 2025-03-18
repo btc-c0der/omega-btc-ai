@@ -1,0 +1,117 @@
+version: '3.8'
+
+# OMEGA BTC AI - Advanced Crypto Trading System
+# Optimized for Scaleway DEV1-S (2 vCPUs, 2GB RAM)
+# Copyright (c) 2024 OMEGA BTC AI Team
+# Licensed under MIT License - See LICENSE file for details
+# SECURITY NOTICE: This system contains sensitive trading algorithms and should be deployed with appropriate security measures
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-omega_db}
+      POSTGRES_USER: ${POSTGRES_USER:-omega_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-omega_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - omega_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-omega_user} -d ${POSTGRES_DB:-omega_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  omega_btc_ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=172.16.8.2
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - VISUALIZER_PORT=8050
+      - FRONTEND_PORT=3000
+    ports:
+      - "8765:8765" # WebSocket Server
+      - "8050:8050" # Backend API
+      - "3000:3000" # Frontend
+      - "8080:8080" # Alternative Frontend Port
+    networks:
+      - omega_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 768M
+        reservations:
+          cpus: '0.4'
+          memory: 512M
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8050/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - omega_network
+    depends_on:
+      - omega_btc_ai
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    healthcheck:
+      test: [ "CMD", "nginx", "-t" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  omega_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  postgres_data:

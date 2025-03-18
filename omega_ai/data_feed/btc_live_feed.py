@@ -1,16 +1,17 @@
-import asyncio
 import json
 import psycopg2
-import redis
 import time
 import websocket
 import websockets
 import logging
+import asyncio
+import redis
 from datetime import datetime, UTC, timedelta
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Optional, Union
 import threading
 import random
+from omega_ai.utils.redis_manager import RedisManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,8 +25,8 @@ RESET = "\033[0m"
 # Binance WebSocket API
 BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
 
-# MM WebSocket Server URL
-MM_WS_URL = "ws://localhost:8765"
+# MM WebSocket Server URL with updated port
+MM_WS_URL = "ws://localhost:8766"
 
 # PostgreSQL Database Connection
 DB_CONFIG = {
@@ -36,269 +37,10 @@ DB_CONFIG = {
     "port": "5432"
 }
 
-# Redis Connection
+# Redis Connection - used by legacy functions
 redis_conn = redis.Redis(host="localhost", port=6379, db=0)
 
-class PriceSource(str, Enum):
-    """Divine sources of BTC price data."""
-    BINANCE = "binance"
-    COINBASE = "coinbase"
-    KRAKEN = "kraken"
-    BITSTAMP = "bitstamp"
-    GEMINI = "gemini"
-    
-    def __str__(self):
-        return self.value
-
-class BtcPriceFeed:
-    """
-    Real-time BTC price feed with divine Rastafarian energy.
-    Provides OOP interface to the blessed BTC price feed functionality.
-    
-    Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the MIT License
-    ONE LOVE, ONE HEART, ONE CODE
-    """
-    
-    def __init__(self, 
-                sources: List[PriceSource] = None, 
-                update_interval: float = 5.0, 
-                redis_manager = None):
-        """Initialize the blessed BTC price feed."""
-        self.sources = sources or [PriceSource.BINANCE, PriceSource.COINBASE]
-        self.update_interval = update_interval
-        self.redis_manager = redis_manager
-        self.last_price = None
-        # Add required attributes for testing
-        self.price_history = {}
-        self.is_running = False  # Track if feed is running
-        self._update_thread = None
-        self._stop_event = threading.Event()
-        
-    def get_current_price(self) -> float:
-        """Get the latest BTC price with divine accuracy."""
-        # Try to get from Redis first
-        try:
-            price_data = redis_conn.get("last_btc_price")
-            if price_data:
-                return float(price_data)
-        except Exception:
-            pass
-            
-        # If Redis failed, calculate aggregate price
-        price = self._aggregate_prices()
-        if price > 0:
-            return price
-            
-        # Divine fallback price if all else fails
-        return 50000.0
-    
-    def _fetch_price_from_source(self, source):
-        """Fetch price from the specified source with divine accuracy."""
-        # This would connect to exchange APIs in production
-        # For testing, use simulated prices
-        base_price = 50000.0
-        
-        # Each source has its own divine price pattern
-        if source == PriceSource.BINANCE:
-            price = base_price + random.uniform(-100, 100)
-        elif source == PriceSource.COINBASE:
-            price = base_price + random.uniform(-120, 80)
-        elif source == PriceSource.KRAKEN:
-            price = base_price + random.uniform(-80, 120)
-        elif source == PriceSource.BITSTAMP:
-            price = base_price + random.uniform(-150, 150)
-        elif source == PriceSource.GEMINI:
-            price = base_price + random.uniform(-90, 90)
-        else:
-            price = base_price
-            
-        return price
-        
-    def _aggregate_prices(self):
-        """Aggregate prices from multiple sources with Rastafarian harmony."""
-        prices = []
-        
-        for source in self.sources:
-            try:
-                price = self._fetch_price_from_source(source)
-                if price > 0:
-                    prices.append(price)
-            except Exception as e:
-                logging.error(f"Error from {source}: {e}")
-                continue
-                
-        if not prices:
-            return 0
-                
-        # Calculate median price (robust against outliers)
-        prices.sort()
-        if len(prices) % 2 == 0:
-            return (prices[len(prices)//2 - 1] + prices[len(prices)//2]) / 2
-        else:
-            return prices[len(prices)//2]
-
-    def start(self):
-        """Start the divine price feed update loop."""
-        if self.is_running:
-            logging.info(f"{YELLOW_RASTA}Feed is already running!{RESET}")
-            return
-            
-        self._stop_event.clear()
-        self.is_running = True
-        
-        # Create and start update thread with JAH BLESSING
-        self._update_thread = threading.Thread(target=self._update_loop, daemon=True)
-        self._update_thread.start()
-        
-        logging.info(f"{GREEN_RASTA}BTC price feed started with divine energy!{RESET}")
-        
-    def stop(self):
-        """Stop the price feed with spiritual harmony."""
-        if not self.is_running:
-            return
-            
-        self._stop_event.set()
-        self.is_running = False
-        
-        # Wait for thread to finish with JAH patience
-        if self._update_thread and self._update_thread.is_alive():
-            self._update_thread.join(timeout=2.0)
-            
-        logging.info(f"{YELLOW_RASTA}BTC price feed stopped with divine grace{RESET}")
-        
-    def _update_loop(self):
-        """Background loop to update prices with divine rhythm."""
-        while not self._stop_event.is_set():
-            try:
-                # Fetch new price with JAH BLESSING
-                new_price = self._aggregate_prices()
-                
-                if new_price > 0:
-                    # Update last price
-                    self.last_price = new_price
-                    
-                    # Store in Redis with divine persistence
-                    self._store_price_in_redis(new_price)
-                    
-                    # Log with Rastafarian color energy
-                    logging.info(f"{GREEN_RASTA}BTC: ${new_price:,.2f}{RESET}")
-                    
-            except Exception as e:
-                logging.error(f"Error updating price: {e}")
-                
-            # Sleep with divine rhythm
-            time.sleep(self.update_interval)
-            
-    def get_price_history(self, timeframe_minutes: int = 5, count: int = 100) -> List[Dict]:
-        """Get price history for the specified timeframe with Rastafarian accuracy."""
-        # Try to get from Redis first with divine connection
-        key = f"btc_movements_{timeframe_minutes}min"
-        
-        try:
-            if self.redis_manager:
-                # Get data from Redis with JAH BLESSING
-                redis_conn = self.redis_manager.connect()
-                raw_data = redis_conn.lrange(key, 0, count-1)
-                if raw_data:
-                    # Parse JSON data with divine precision
-                    history = []
-                    for item in raw_data:
-                        try:
-                            history.append(json.loads(item))
-                        except json.JSONDecodeError:
-                            continue
-                    
-                    if history:
-                        return history
-        except Exception as e:
-            logging.error(f"Error fetching history from Redis: {e}")
-        
-        # If we can't get from Redis, use local history or generate divine sample data
-        if timeframe_minutes in self.price_history and self.price_history[timeframe_minutes]:
-            return self.price_history[timeframe_minutes][:count]
-        else:
-            # Create divinely inspired synthetic data when real data unavailable
-            base_price = self.get_current_price()
-            history = []
-            
-            # Create price points with Fibonacci-inspired movements
-            for i in range(count):
-                # Add some Fibonacci-inspired price movement
-                fib_sequence = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
-                movement = fib_sequence[i % 10] * (10 if i % 2 == 0 else -7)
-                
-                timestamp = datetime.now() - timedelta(minutes=(count-i)*timeframe_minutes)
-                price = base_price + movement
-                
-                history.append({
-                    "timestamp": timestamp.isoformat(),
-                    "price": price,
-                    "volume": 1 + (i % 5)
-                })
-                
-            return history
-            
-    def _store_price_in_redis(self, price):
-        """Store price data in Redis with JAH BLESSING."""
-        if not price:
-            return False
-            
-        try:
-            now = datetime.now().isoformat()
-            
-            # Convert to JSON for divine storage
-            price_data = {
-                "timestamp": now,
-                "price": price,
-                "volume": 10.0  # Default volume
-            }
-            price_json = json.dumps(price_data)
-            
-            # DIVINE FIX - Use proper Redis connection
-            if self.redis_manager:
-                conn = self.redis_manager.connect()
-            else:
-                # Use the global redis connection with divine blessing
-                global redis_conn  # Add global declaration
-                conn = redis_conn
-                
-            # Store last price
-            conn.set("last_btc_price", price)
-            
-            # Store in various time-based lists
-            for minutes in [1, 5, 15, 60]:
-                key = f"btc_movements_{minutes}min"
-                conn.lpush(key, price_json)
-                conn.ltrim(key, 0, 1000)  # Keep limited history
-                
-            return True
-        except Exception as e:
-            logging.error(f"Error storing price in Redis: {e}")
-            return False
-
-def display_omega_rasta_banner():
-    """Display OMEGA RASTA VIBES banner with emojis"""
-    banner = f"""
-{GREEN_RASTA}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥{RESET}
-{YELLOW_RASTA}
-       ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ 
-      ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗
-      ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║
-      ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║
-      ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
-       ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═╝  ╚═╝{RESET}
-                                          
-{RED_RASTA}         🌿  BTC LIVE FEED NOW STREAMING  🌿{RESET}
-{GREEN_RASTA}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥{RESET}
-
-{GREEN_RASTA}🚀 JAH BLESS THE BLOCKCHAIN 🚀{RESET}
-{YELLOW_RASTA}💰 HODL STRONG & PROSPER 💰{RESET}
-{RED_RASTA}🔮 ONE LOVE, ONE BITCOIN 🔮{RESET}
-
-"""
-    print(banner)
-    logging.info("🎵 OMEGA RASTA SYSTEM ACTIVATED - POSITIVE VIBRATIONS ONLY 🎵")
-
+# Redis health check function from Code version
 def check_redis_health():
     """Perform a health check on Redis connection and data integrity."""
     try:
@@ -323,6 +65,7 @@ def check_redis_health():
         logging.error(f"Redis health check failed: {e}")
         return False
 
+# WebSocket integration function from Code version
 async def send_to_mm_websocket(price):
     """Send BTC price update to MM Trap WebSocket."""
     while True:
@@ -346,6 +89,7 @@ async def send_to_mm_websocket(price):
         
         await asyncio.sleep(5)  # Persistent retry mechanism
 
+# Database storage function from Code version
 def save_btc_price_to_db(price, volume):
     """Store BTC price in PostgreSQL for historical tracking."""
     try:
@@ -362,10 +106,9 @@ def save_btc_price_to_db(price, volume):
     except Exception as e:
         logging.error(f"Failed to save BTC price to DB: {e}")
 
+# Redis update function from Code version
 def update_redis(price, volume):
     """Save BTC price & volume to Redis for MM Trap Processor with error handling."""
-    global redis_conn  # Move global declaration to the top of the function
-    
     try:
         if price <= 0:
             logging.warning(f"Skipping Redis update, invalid BTC price: {price}")
@@ -405,8 +148,10 @@ def update_redis(price, volume):
             redis_conn.ping()
         except:
             logging.error("Redis reconnection failed. Attempting to recreate connection.")
+            # Use a properly scoped declaration
             redis_conn = redis.Redis(host="localhost", port=6379, db=0)
 
+# WebSocket message handler from Code version
 def on_message(ws, message):
     """Process incoming Binance BTC price data."""
     data = json.loads(message)
@@ -428,8 +173,7 @@ def on_close(ws, close_status_code, close_msg):
     start_btc_websocket()
 
 def on_open(ws):
-    display_omega_rasta_banner()
-    logging.info("🌴 Connected to Binance WebSocket - BTC PRICES FLOWING LIKE REGGAE BEATS 🎧")
+    logging.info("Connected to Binance WebSocket - Streaming BTC Prices...")
 
 def start_btc_websocket():
     """Start WebSocket connection to Binance BTC Live Feed."""
@@ -452,7 +196,161 @@ def start_btc_websocket():
             logging.error(f"Error in WebSocket connection: {e}")
             time.sleep(5)
 
+class PriceSource(str, Enum):
+    """Divine sources of BTC price data."""
+    BINANCE = "binance"
+    COINBASE = "coinbase"
+    KRAKEN = "kraken"
+    BITSTAMP = "bitstamp"
+    GEMINI = "gemini"
+    
+    def __str__(self):
+        return self.value
+
+class BtcPriceFeed:
+    """
+    Real-time BTC price feed with divine Rastafarian energy.
+    Provides OOP interface to the blessed BTC price feed functionality.
+    
+    Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the MIT License
+    ONE LOVE, ONE HEART, ONE CODE
+    """
+    
+    def __init__(self, 
+                sources: Optional[List[PriceSource]] = None, 
+                update_interval: float = 5.0, 
+                redis_manager: Optional[RedisManager] = None):
+        """Initialize the blessed BTC price feed."""
+        self.sources = sources or [PriceSource.BINANCE, PriceSource.COINBASE]
+        self.update_interval = update_interval
+        self.redis_manager = redis_manager or RedisManager()
+        self.last_price = None
+        # Add required attributes for testing
+        self.price_history = {}
+        self.is_running = False  # Track if feed is running
+        self._update_thread = None
+        self._stop_event = threading.Event()
+        
+    def get_current_price(self) -> float:
+        """Get the latest BTC price with divine accuracy."""
+        # Try to get from Redis first
+        try:
+            price_data = self.redis_manager.get_cached("omega:last_btc_price")
+            if price_data:
+                return float(price_data)
+        except Exception as e:
+            logging.error(f"Error getting price from Redis: {e}")
+            
+        # If Redis failed, calculate aggregate price
+        price = self._aggregate_prices()
+        if price > 0:
+            return price
+            
+        # Divine fallback price if all else fails
+        return 50000.0
+    
+    def _fetch_price_from_source(self, source: PriceSource) -> float:
+        """Fetch price from the specified source with divine accuracy."""
+        # This would connect to exchange APIs in production
+        # For testing, use simulated prices
+        base_price = 50000.0
+        
+        # Add some random variation based on source
+        variation = random.uniform(-500, 500)
+        return base_price + variation
+    
+    def _aggregate_prices(self) -> float:
+        """Calculate aggregate price with divine wisdom."""
+        prices = []
+        for source in self.sources:
+            price = self._fetch_price_from_source(source)
+            if price > 0:
+                prices.append(price)
+                
+        if prices:
+            # Calculate divine average
+            return sum(prices) / len(prices)
+        return 0.0
+    
+    def get_price_history(self, minutes: int = 5, count: int = 100) -> List[Dict[str, Union[float, str]]]:
+        """Get price history with divine timestamps."""
+        key = f"omega:btc_movements_{minutes}min"
+        history = []
+        
+        try:
+            # Get data from Redis with JAH BLESSING
+            raw_data = self.redis_manager.lrange(key, 0, count-1)
+            if raw_data:
+                for item in raw_data:
+                    try:
+                        history.append(json.loads(item))
+                    except json.JSONDecodeError:
+                        continue
+        except Exception as e:
+            logging.error(f"Error getting price history: {e}")
+            
+        return history
+    
+    def update_price(self, price: float) -> bool:
+        """Update price with divine blessing."""
+        try:
+            # Create price data with divine timestamp
+            now = datetime.now(UTC)
+            price_data = {
+                "price": price,
+                "timestamp": now.isoformat(),
+                "source": "divine_aggregator"
+            }
+            price_json = json.dumps(price_data)
+            
+            # Store last price
+            self.redis_manager.set_cached("omega:last_btc_price", price)
+            
+            # Store in various time-based lists
+            for minutes in [1, 5, 15, 60]:
+                key = f"omega:btc_movements_{minutes}min"
+                self.redis_manager.lpush(key, price_json)
+                self.redis_manager.ltrim(key, 0, 1000)  # Keep limited history
+                
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error updating price: {e}")
+            return False
+    
+    def start(self) -> None:
+        """Start the blessed price feed."""
+        if self.is_running:
+            return
+            
+        self.is_running = True
+        self._stop_event.clear()
+        
+        def update_loop() -> None:
+            while not self._stop_event.is_set():
+                try:
+                    price = self._aggregate_prices()
+                    if price > 0:
+                        self.update_price(price)
+                except Exception as e:
+                    logging.error(f"Error in update loop: {e}")
+                finally:
+                    time.sleep(self.update_interval)
+        
+        self._update_thread = threading.Thread(target=update_loop)
+        self._update_thread.daemon = True
+        self._update_thread.start()
+        
+    def stop(self) -> None:
+        """Stop the blessed price feed."""
+        if not self.is_running:
+            return
+            
+        self._stop_event.set()
+        if self._update_thread:
+            self._update_thread.join()
+            
+        self.is_running = False
+
 if __name__ == "__main__":
-    print(f"{GREEN_RASTA}🌟 INITIALIZING OMEGA BTC LIVE FEED WITH RASTA VIBES 🌟{RESET}")
-    display_omega_rasta_banner()
     start_btc_websocket()

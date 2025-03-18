@@ -1,6 +1,11 @@
 import time
 import redis
 import logging
+import json
+from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime
+from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap
+from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -9,10 +14,6 @@ handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-from typing import Dict, List, Tuple, Optional
-from datetime import datetime
-from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap
-from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level
 
 # Initialize Redis connection
 redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -66,7 +67,7 @@ def format_trend_output(interval, trend, change_pct):
         if "Strongly" in trend:
             color_trend = f"{RED}{trend}{RESET}"
         else:
-            color_trend = f"{LIGHT_ORANGE}{trend}{RESET}"
+            color_trend = f"{YELLOW}{trend}{RESET}"
         sign = ""
         color_pct = RED
     else:
@@ -108,12 +109,12 @@ def detect_possible_mm_traps(
         logging.error(f"Error detecting MM traps: {e}")
         return None, 0.0
 
-def get_current_fibonacci_levels():
+def get_current_fibonacci_levels() -> Optional[Dict[str, float]]:
     """
     Calculate Fibonacci retracement/extension levels based on recent price movements.
     
     Returns:
-        Dict with Fibonacci levels as keys and prices as values
+        Dict with Fibonacci levels as keys and prices as values, or None if calculation fails
     """
     try:
         # Fetch recent price movements with divine guidance
@@ -121,7 +122,7 @@ def get_current_fibonacci_levels():
         
         if not movements or len(movements) < 2:
             print(f"{YELLOW}Insufficient data for Fibonacci calculations{RESET}")
-            return {}
+            return None
         
         # Extract prices from movements data
         prices = [float(m["price"]) for m in movements if "price" in m]
@@ -136,17 +137,17 @@ def get_current_fibonacci_levels():
         
         # Standard Fibonacci levels with divine proportions
         fib_ratios = {
-            "0": 0.0,        # Base level
-            "0.236": 0.236,  # First Fibonacci level
-            "0.382": 0.382,  # Second Fibonacci level
-            "0.500": 0.5,    # Midpoint
-            "0.618": 0.618,  # Golden Ratio - most spiritual level
-            "0.786": 0.786,  # Higher Fibonacci level
-            "1.0": 1.0       # Full retracement
+            "0%": 0.0,        # Base level
+            "23.6%": 0.236,  # First Fibonacci level
+            "38.2%": 0.382,  # Second Fibonacci level
+            "50%": 0.5,    # Midpoint
+            "61.8%": 0.618,  # Golden Ratio - most spiritual level
+            "78.6%": 0.786,  # Higher Fibonacci level
+            "100%": 1.0       # Full retracement
         }
         
         # Calculate levels based on uptrend/downtrend
-        fib_levels = {}
+        fib_levels: Dict[str, float] = {}
         
         if is_uptrend:
             # In uptrend, calculate retracement levels from low to high
@@ -159,7 +160,8 @@ def get_current_fibonacci_levels():
         
         # Store in Redis for future reference with JAH blessing
         try:
-            redis_conn.hset("current_fibonacci_levels", mapping=fib_levels)
+            # Store as JSON string for consistency with other Redis operations
+            redis_conn.set("current_fibonacci_levels", json.dumps(fib_levels))
             print(f"{GREEN}JAH BLESS - Fibonacci levels calculated and stored with divine energy{RESET}")
         except Exception as e:
             print(f"{RED}Error storing Fibonacci levels: {e}{RESET}")
@@ -168,9 +170,9 @@ def get_current_fibonacci_levels():
         
     except Exception as e:
         print(f"{RED}Error calculating Fibonacci levels: {e}{RESET}")
-        return {}
+        return None
 
-def check_fibonacci_level(current_price: float) -> Optional[Dict]:
+def check_fibonacci_level(price: float, explicit_levels: Optional[Dict[str, float]] = None, tolerance: float = 0.004) -> Optional[Dict[str, Any]]:
     """Check if price is at a Fibonacci level."""
     try:
         fib_levels = get_current_fibonacci_levels()
@@ -178,12 +180,12 @@ def check_fibonacci_level(current_price: float) -> Optional[Dict]:
             return None
             
         # Check each level with 0.1% tolerance
-        for level, price in fib_levels.items():
-            tolerance = price * 0.001
-            if abs(current_price - price) <= tolerance:
+        for level_name, level_price in fib_levels.items():
+            tolerance = level_price * 0.001
+            if abs(price - level_price) <= tolerance:
                 return {
-                    "level": level,
-                    "price": price
+                    "level": level_name,
+                    "price": level_price
                 }
                 
         return None
@@ -343,10 +345,98 @@ def print_schumann_influence():
     print(f"  {MAGENTA}Current resonance: {YELLOW}7.83 Hz{RESET} - {GREEN}Baseline Harmony{RESET}")
     print(f"  {MAGENTA}Market harmony: {GREEN}Aligned with planetary consciousness{RESET}")
 
-def check_fibonacci_alignment():
+def check_fibonacci_alignment() -> Optional[Dict[str, Any]]:
     """Check for alignment between price action and Fibonacci levels."""
-    # This will be implemented later with divine guidance
-    return None
+    try:
+        # Get current price and Fibonacci levels
+        price_str = redis_conn.get("last_btc_price")
+        if not price_str:
+            logger.warning(f"{YELLOW}No current price available for Fibonacci alignment check{RESET}")
+            return None
+            
+        current_price = float(price_str)
+        fib_levels = get_current_fibonacci_levels()
+        
+        if not fib_levels:
+            logger.warning(f"{YELLOW}No Fibonacci levels available for alignment check{RESET}")
+            return None
+            
+        # Validate price range (current BTC price is around 82.5k)
+        if current_price < 50000 or current_price > 100000:
+            logger.warning(f"{RED}Price ${current_price:,.2f} outside expected range for BTC{RESET}")
+            return None
+            
+        # Find closest Fibonacci level
+        closest_level: Optional[Dict[str, Any]] = None
+        min_distance = float('inf')
+        min_distance_pct = float('inf')
+        
+        for level_name, price in fib_levels.items():
+            try:
+                price_float = float(price)
+                distance = abs(current_price - price_float)
+                distance_pct = (distance / current_price) * 100
+                
+                if distance_pct < min_distance_pct:
+                    min_distance = distance
+                    min_distance_pct = distance_pct
+                    closest_level = {
+                        "level": level_name,
+                        "price": price_float,
+                        "distance": distance,
+                        "distance_pct": distance_pct
+                    }
+            except (ValueError, TypeError):
+                continue
+        
+        if not closest_level:
+            logger.warning(f"{YELLOW}No valid Fibonacci levels found for comparison{RESET}")
+            return None
+            
+        # Define alignment thresholds
+        if min_distance_pct <= 0.1:  # Very close (within 0.1%)
+            alignment_type = "STRONG"
+            confidence = 0.95
+        elif min_distance_pct <= 0.3:  # Close (within 0.3%)
+            alignment_type = "MODERATE"
+            confidence = 0.75
+        elif min_distance_pct <= 0.5:  # Somewhat close (within 0.5%)
+            alignment_type = "WEAK"
+            confidence = 0.5
+        else:
+            return None  # No significant alignment
+            
+        # Special handling for Golden Ratio (0.618)
+        if closest_level["level"] == "61.8%":  # Golden Ratio level
+            confidence += 0.1  # Boost confidence for Golden Ratio
+            alignment_type = "GOLDEN_RATIO"
+            
+        # Format output with colors
+        if alignment_type == "GOLDEN_RATIO":
+            level_color = f"{MAGENTA}"
+        elif alignment_type == "STRONG":
+            level_color = f"{GREEN}"
+        elif alignment_type == "MODERATE":
+            level_color = f"{YELLOW}"
+        else:
+            level_color = f"{BLUE}"
+            
+        logger.info(f"{level_color}Fibonacci Alignment: {alignment_type} at {closest_level['level']} "
+                   f"(${closest_level['price']:,.2f}) - {min_distance_pct:.2f}% away{RESET}")
+        
+        return {
+            "type": alignment_type,
+            "level": closest_level["level"],
+            "price": closest_level["price"],
+            "distance": closest_level["distance"],
+            "distance_pct": closest_level["distance_pct"],
+            "confidence": confidence,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"{RED}Error checking Fibonacci alignment: {e}{RESET}")
+        return None
 
 def analyze_price_trend(minutes: int = 5) -> Tuple[str, float]:
     """

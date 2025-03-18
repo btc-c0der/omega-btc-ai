@@ -218,7 +218,7 @@ class TestMMTrapDetector:
         prev_price = 59000.0  # $1000 change, above threshold
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-
+        
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 500.0  # Set threshold below our change
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
@@ -282,17 +282,17 @@ class TestMMTrapDetector:
                                          mock_sleep):
         """🌿 Test divine detection of half liquidity grab manipulation."""
         print(f"\n{GREEN}Testing HALF-LIQUIDITY GRAB detection...{RESET}")
-    
+        
         # Setup test data - medium price change to trigger half liquidity grab detection
         current_price = 100000.0
         prev_price = 99400.0  # $600 change, above half threshold of $500
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-    
+        
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 1000.0  # Full threshold
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
-    
+        
         # Configure Redis mock
         def get_side_effect(key):
             if key == "last_btc_price":
@@ -303,10 +303,10 @@ class TestMMTrapDetector:
                 return b"1000"
             return None
         mock_redis.get.side_effect = get_side_effect
-    
+        
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-    
+        
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
@@ -352,17 +352,17 @@ class TestMMTrapDetector:
                                mock_sleep):
         """🌿 Test divine detection of fake pump manipulation."""
         print(f"\n{GREEN}Testing FAKE PUMP detection...{RESET}")
-    
+        
         # Setup test data - price increase above PRICE_PUMP_THRESHOLD (0.02 = 2%)
         current_price = 30000.0
         prev_price = 29400.0  # 2.04% increase but only $600 absolute change
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-    
+        
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
         mock_omega_algo.is_fibo_organic.return_value = "Potential Manipulation Pattern"
-    
+        
         # Configure Redis mock
         def get_side_effect(key):
             if key == "last_btc_price":
@@ -373,10 +373,10 @@ class TestMMTrapDetector:
                 return b"1000"
             return None
         mock_redis.get.side_effect = get_side_effect
-    
+        
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-    
+        
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
@@ -422,13 +422,13 @@ class TestMMTrapDetector:
                                mock_sleep):
         """🌿 Test divine detection of fake dump manipulation."""
         print(f"\n{GREEN}Testing FAKE DUMP detection...{RESET}")
-    
+        
         # Setup test data - price decrease below PRICE_DROP_THRESHOLD (-0.02 = -2%)
         current_price = 29300.0
         prev_price = 30000.0  # -2.33% decrease with $700 absolute change
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-    
+        
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
         mock_omega_algo.is_fibo_organic.return_value = "Manipulation Trap Pattern"
@@ -443,10 +443,10 @@ class TestMMTrapDetector:
                 return b"1000"
             return None
         mock_redis.get.side_effect = get_side_effect
-    
+        
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-    
+        
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]
@@ -492,17 +492,17 @@ class TestMMTrapDetector:
                                     mock_sleep):
         """🌿 Test divine detection of half-fake pump manipulation."""
         print(f"\n{GREEN}Testing HALF-FAKE PUMP detection...{RESET}")
-    
+        
         # Setup test data - price increase between 1% and PRICE_PUMP_THRESHOLD (2%)
         current_price = 30000.0
         prev_price = 29700.0  # 1.01% increase but only $300 absolute change
         price_change_pct = (current_price - prev_price) / prev_price
         abs_change = abs(current_price - prev_price)
-    
+        
         # Configure mocks
         mock_omega_algo.calculate_dynamic_threshold.return_value = 2000.0  # Above our change
         mock_omega_algo.is_fibo_organic.return_value = "Mixed Pattern (Medium Confidence)"
-    
+        
         # Configure Redis mock
         def get_side_effect(key):
             if key == "last_btc_price":
@@ -513,10 +513,10 @@ class TestMMTrapDetector:
                 return b"1000"
             return None
         mock_redis.get.side_effect = get_side_effect
-    
+        
         # Run one loop of the trap detector
         _run_detector_once(mock_sleep)
-    
+        
         # Verify trap was detected
         mock_insert_trap.assert_called_once()
         trap_call = mock_insert_trap.call_args[0]

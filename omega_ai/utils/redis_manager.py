@@ -6,34 +6,63 @@ import sys
 from typing import Optional, Dict, Any
 import json
 import time
+import os
 
 class RedisManager:
-    def __init__(self, host='localhost', port=6379, db=0):
-        # Configure retry strategy
-        retry_strategy = Retry(
-            ExponentialBackoff(),
-            retries=5
-        )
+    def __init__(self, host='localhost', port=6379, db=0, 
+                 username=None, password=None, ssl=False, ssl_ca_certs=None):
+        """
+        Initialize Redis connection manager with optional SSL support
         
-        self.redis = redis.Redis(
-            host=host,
-            port=port,
-            db=db,
-            retry_on_timeout=True,
-            retry_on_error=[redis.exceptions.ConnectionError],
-            retry_strategy=retry_strategy,
-            decode_responses=True
-        )
+        Args:
+            host: Redis host (default: localhost)
+            port: Redis port (default: 6379)
+            db: Redis database number (default: 0)
+            username: Redis username for auth (default: None)
+            password: Redis password for auth (default: None)
+            ssl: Whether to use SSL/TLS (default: False)
+            ssl_ca_certs: Path to CA certificate file (default: None)
+        """
+        # Initialize Redis connection with flexible parameters
+        connection_params = {
+            "host": host,
+            "port": port,
+            "db": db,
+            "decode_responses": True
+        }
+        
+        # Add optional authentication if provided and not in development mode
+        if not os.environ.get('OMEGA_DEV_MODE', 'true').lower() == 'true':
+            if username:
+                connection_params["username"] = username
+            if password:
+                connection_params["password"] = password
+                
+            # Add SSL/TLS parameters if enabled
+            if ssl:
+                connection_params["ssl"] = True
+                if ssl_ca_certs:
+                    connection_params["ssl_ca_certs"] = ssl_ca_certs
+        
+        try:
+            self.redis = redis.Redis(**connection_params)
+            print(f"Redis Manager initialized - Host: {host}, Port: {port}, SSL: {ssl}")
+            # Test connection
+            self.redis.ping()
+            print("✅ Redis connection successful")
+        except Exception as e:
+            print(f"Error initializing Redis connection: {e}")
+            raise
         
         self._cache = {}
         self._cache_ttl = {}
         self.CACHE_DURATION = 5  # seconds
         
-        # Setup graceful shutdown
+        # Register signal handlers
         signal.signal(signal.SIGINT, self._handle_shutdown)
         signal.signal(signal.SIGTERM, self._handle_shutdown)
     
-    def get_cached(self, key: str) -> Optional[Any]:
+    def get_cached(self, key: str, default: Any = None) -> Optional[Any]:
         """Get value from cache or Redis with TTL-based caching"""
         now = time.time()
         
@@ -48,9 +77,10 @@ class RedisManager:
                 self._cache[key] = value
                 self._cache_ttl[key] = now + self.CACHE_DURATION
                 return value
+            return default
         except redis.RedisError as e:
             print(f"Redis error on get: {e}")
-        return None
+            return default
     
     def set_with_validation(self, key: str, data: Dict) -> bool:
         """Set data with type validation"""
@@ -124,11 +154,68 @@ class RedisManager:
                 "shutdown_time": time.time(),
                 "clean_shutdown": True
             }
-            self.redis.set("omega:shutdown_state", json.dumps(final_state))
             
-            print("✅ State saved successfully")
+            try:
+                # Use a new Redis connection for shutdown to avoid issues
+                shutdown_params = {
+                    "host": self.redis.connection_pool.connection_kwargs['host'],
+                    "port": self.redis.connection_pool.connection_kwargs['port'],
+                    "db": self.redis.connection_pool.connection_kwargs['db'],
+                    "decode_responses": True
+                }
+                
+                # Add username/password if in original connection
+                if 'username' in self.redis.connection_pool.connection_kwargs:
+                    shutdown_params["username"] = self.redis.connection_pool.connection_kwargs['username']
+                if 'password' in self.redis.connection_pool.connection_kwargs:
+                    shutdown_params["password"] = self.redis.connection_pool.connection_kwargs['password']
+                    
+                # Add SSL if in original connection
+                if 'ssl' in self.redis.connection_pool.connection_kwargs and self.redis.connection_pool.connection_kwargs['ssl']:
+                    shutdown_params["ssl"] = True
+                    if 'ssl_ca_certs' in self.redis.connection_pool.connection_kwargs:
+                        shutdown_params["ssl_ca_certs"] = self.redis.connection_pool.connection_kwargs['ssl_ca_certs']
+                
+                shutdown_redis = redis.Redis(**shutdown_params)
+                shutdown_redis.set("omega:shutdown_state", json.dumps(final_state))
+                print("✅ State saved successfully")
+            except Exception as e:
+                print(f"⚠️ Could not save shutdown state: {e}")
+            
             sys.exit(0)
             
         except Exception as e:
             print(f"❌ Error saving shutdown state: {e}")
             sys.exit(1)
+
+# Create a default config loader
+def get_redis_config():
+    """
+    Get Redis configuration from environment variables with fallback to defaults
+    
+    Returns:
+        dict: Redis connection parameters
+    """
+    # Check for environment variable to determine if we use cloud or local Redis
+    use_cloud = os.environ.get('OMEGA_USE_CLOUD_REDIS', 'false').lower() == 'true'
+    
+    if use_cloud:
+        # Cloud Redis configuration
+        return {
+            'host': os.environ.get('REDIS_HOST', '172.16.8.2'),
+            'port': int(os.environ.get('REDIS_PORT', '6379')),
+            'username': os.environ.get('REDIS_USERNAME', 'btc-omega-redis'),
+            'password': os.environ.get('REDIS_PASSWORD', ''),
+            'ssl': True,
+            'ssl_ca_certs': os.environ.get('REDIS_CA_CERT', 'SSL_redis-btc-omega-redis.pem')
+        }
+    else:
+        # Local Redis configuration
+        return {
+            'host': os.environ.get('REDIS_HOST', 'localhost'),
+            'port': int(os.environ.get('REDIS_PORT', '6379')),
+            'db': int(os.environ.get('REDIS_DB', '0')),
+            'username': os.environ.get('REDIS_USERNAME', None),
+            'password': os.environ.get('REDIS_PASSWORD', None),
+            'ssl': False
+        }
