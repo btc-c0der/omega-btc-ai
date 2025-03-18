@@ -134,10 +134,10 @@ rasta_theme = {
 }
 
 # Initialize Dash app with Rasta theme
-app = dash.Dash(
-    __name__, 
-    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
-)
+app = dash.Dash(__name__, 
+                meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+                assets_folder='assets',
+                assets_url_path='/assets')
 app.title = "OMEGA RASTA BTC DASHBOARD"
 
 # App Layout with Enhanced Rasta Design
@@ -151,9 +151,9 @@ app.layout = html.Div(style={
     # Banner with Rasta colors
     html.Div([
         html.Div([
-            html.Img(src="https://i.ibb.co/Cn5xnGz/rasta-lion.png", height="80px", style={"marginRight": "20px"}),
+            html.Img(src="/assets/rasta-lion.png", height="80px", style={"marginRight": "20px"}),
             html.H1("🔱 OMEGA RASTA BTC DASHBOARD 🔱", style={'color': rasta_theme["accent"]}),
-            html.Img(src="https://i.ibb.co/Cn5xnGz/rasta-lion.png", height="80px", style={"marginLeft": "20px", "transform": "scaleX(-1)"}),
+            html.Img(src="/assets/rasta-lion.png", height="80px", style={"marginLeft": "20px", "transform": "scaleX(-1)"}),
         ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}),
         
         # Inspiration quote
@@ -803,7 +803,7 @@ def update_battle_display(n_intervals):
         # Generate achievements
         achievements = html.Div([
             html.Div([
-                html.Img(src="https://i.ibb.co/Cn5xnGz/rasta-lion.png", height="30px", style={"marginRight": "10px"}),
+                html.Img(src="/assets/rasta-lion.png", height="30px", style={"marginRight": "10px"}),
                 html.Span("🌟 Fibonacci Master", style={'fontWeight': 'bold', 'color': rasta_theme["accent"]}),
             ], style={
                 'backgroundColor': rasta_theme["panel"],
@@ -814,7 +814,7 @@ def update_battle_display(n_intervals):
                 'alignItems': 'center'
             }),
             html.Div([
-                html.Img(src="https://i.ibb.co/Cn5xnGz/rasta-lion.png", height="30px", style={"marginRight": "10px"}),
+                html.Img(src="/assets/rasta-lion.png", height="30px", style={"marginRight": "10px"}),
                 html.Span("💰 Profit Prophet", style={'fontWeight': 'bold', 'color': rasta_theme["green"]}),
             ], style={
                 'backgroundColor': rasta_theme["panel"],
@@ -825,7 +825,7 @@ def update_battle_display(n_intervals):
                 'alignItems': 'center'
             }),
             html.Div([
-                html.Img(src="https://i.ibb.co/Cn5xnGz/rasta-lion.png", height="30px", style={"marginRight": "10px"}),
+                html.Img(src="/assets/rasta-lion.png", height="30px", style={"marginRight": "10px"}),
                 html.Span("🧘‍♂️ Zen Trader", style={'fontWeight': 'bold', 'color': rasta_theme["yellow"]}),
             ], style={
                 'backgroundColor': rasta_theme["panel"],
