@@ -73,17 +73,22 @@ Author: OmegaBTC Team
 Version: 1.0
 """
 
-import datetime
+from datetime import datetime, UTC
 import redis
 import time
 from rq import Queue
-
-import numpy as np
-
-from omega_ai.alerts.alerts_orchestrator import send_alert, send_mm_trap_alert
+import asyncio
+from influxdb_client.client.influxdb_client import InfluxDBClient
 from omega_ai.algos.omega_algorithms import OmegaAlgo
 from omega_ai.db_manager.database import insert_mm_trap, insert_subtle_movement
 from omega_ai.mm_trap_detector.high_frequency_detector import register_trap_detection
+from omega_ai.config import (
+    REDIS_HOST, REDIS_PORT, INFLUXDB_URL, INFLUXDB_TOKEN, 
+    INFLUXDB_ORG, INFLUXDB_BUCKET, MONITORING_INTERVAL, 
+    ERROR_RETRY_INTERVAL, PRICE_PUMP_THRESHOLD, PRICE_DROP_THRESHOLD,
+    BASE_TRAP_THRESHOLD
+)
+from typing import Optional, Dict, Any, Union
 
 # ✅ Enhanced Terminal Colors for better visualization
 RESET = "\033[0m"
@@ -105,17 +110,112 @@ YELLOW_BG = "\033[43m"
 BOLD = "\033[1m"
 
 # ✅ Redis Queue & Connection Setup
-redis_conn = redis.Redis(host="localhost", port=6379, db=0)
+redis_conn = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 mm_queue = Queue("mm_trap_queue", connection=redis_conn)
 
 # ✅ Dynamic MM Detection Thresholds
 SCHUMANN_THRESHOLD = 10.0
 VOLATILITY_MULTIPLIER = 2.5
 MIN_LIQUIDITY_GRAB_THRESHOLD = 250
-PRICE_DROP_THRESHOLD = -0.02
-PRICE_PUMP_THRESHOLD = 0.02
-CHECK_INTERVAL = 15
-ROLLING_WINDOW = 50
+
+# Initialize Redis connection
+redis_conn = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+
+def initialize_influxdb() -> None:
+    """Initialize InfluxDB connection."""
+    global influxdb_client
+    try:
+        influxdb_client = InfluxDBClient(
+            url=INFLUXDB_URL,
+            token=INFLUXDB_TOKEN,
+            org=INFLUXDB_ORG
+        )
+        # Test the connection
+        influxdb_client.ping()
+    except Exception as e:
+        print(f"❌ Error connecting to InfluxDB: {str(e)}")
+        raise
+
+def get_current_btc_price() -> float:
+    """Get the current BTC price from Redis."""
+    try:
+        price = redis_conn.get("last_btc_price")
+        if price is None:
+            raise ValueError("No BTC price available in Redis")
+        return float(price)
+    except (ValueError, TypeError) as e:
+        print(f"❌ Error getting BTC price: {str(e)}")
+        return 0.0
+
+def get_current_volume() -> float:
+    """Get the current trading volume from Redis."""
+    try:
+        volume = redis_conn.get("last_btc_volume")
+        if volume is None:
+            return 0.0
+        return float(volume)
+    except (ValueError, TypeError):
+        return 0.0
+
+def check_high_frequency_mode() -> bool:
+    """Check if high-frequency mode is active."""
+    try:
+        hf_mode = redis_conn.get("high_frequency_mode")
+        return bool(int(hf_mode)) if hf_mode is not None else False
+    except (ValueError, TypeError):
+        return False
+
+def calculate_dynamic_threshold(hf_mode: bool) -> float:
+    """Calculate dynamic threshold based on market conditions."""
+    try:
+        # Get rolling volatility from Redis
+        volatility = redis_conn.get("rolling_volatility")
+        base_threshold = float(volatility) if volatility else BASE_TRAP_THRESHOLD
+        
+        # Get market regime from Redis
+        market_regime = redis_conn.get("market_regime")
+        regime = str(market_regime) if market_regime else "normal"
+        
+        # Adjust threshold based on market regime
+        regime_multiplier = {
+            "trending": 1.5,
+            "volatile": 0.75,
+            "normal": 1.0
+        }.get(regime, 1.0)
+        
+        # Calculate directional strength
+        directional_strength_str = redis_conn.get("directional_strength")
+        directional_strength = float(directional_strength_str) if directional_strength_str else 0.5
+        
+        # Apply adjustments
+        adjusted_threshold = base_threshold * regime_multiplier
+        if hf_mode:
+            adjusted_threshold *= 0.5  # More sensitive in HF mode
+        
+        # Debug output
+        print(f"📡 [DEBUG] Rolling Volatility: ${base_threshold:.2f} | Market Regime: {regime} | HF Mode: {'active' if hf_mode else 'inactive'} ({regime_multiplier:.2f}x) | Adjusted Threshold: ${adjusted_threshold:.2f}")
+        
+        return adjusted_threshold
+        
+    except Exception as e:
+        print(f"❌ Error calculating dynamic threshold: {str(e)}")
+        return BASE_TRAP_THRESHOLD  # Default threshold
+
+def register_trap_detection(price: float, volume: float, price_change: float = 0.0) -> None:
+    """Register a trap detection event."""
+    try:
+        timestamp = datetime.now(UTC).isoformat()
+        redis_conn.hset(
+            f"trap_detection:{int(datetime.now(UTC).timestamp())}",
+            mapping={
+                "price": str(price),
+                "volume": str(volume),
+                "price_change": str(price_change),
+                "timestamp": timestamp
+            }
+        )
+    except Exception as e:
+        print(f"❌ Error registering trap detection: {str(e)}")
 
 # ✅ UI Helper Functions
 def print_header(text):
@@ -138,293 +238,101 @@ def print_price_update(price, prev_price, abs_change, pct_change):
     print(f"{WHITE}Abs Change:  {color}${abs_change:.2f}{RESET}")
     print(f"{WHITE}% Change:    {color}{pct_change:.4%}{RESET}")
 
-def print_analysis_result(analysis, threshold):
-    """Print analysis results in a formatted block."""
-    print_section("MOVEMENT ANALYSIS")
-    
-    if "Organic" in analysis:
-        confidence = "HIGH" if "High" in analysis else "MEDIUM"
-        print(f"{GREEN}✓ {analysis}{RESET}")
-        print(f"{GREEN}✓ Confidence: {confidence}{RESET}")
-    elif "Trap" in analysis or "Manipulation" in analysis:
-        print(f"{RED}⚠ {analysis}{RESET}")
-        print(f"{RED}⚠ Detection Threshold: ${threshold:.2f}{RESET}")
-    else:
-        print(f"{BLUE}ℹ {analysis}{RESET}")
-    
-def print_movement_tag(tag):
-    """Print movement classification tag with appropriate color."""
-    if "Grab" in tag:
-        tag_color = f"{RED_BG}{WHITE}{BOLD}"
-    elif "Pump" in tag:
-        tag_color = f"{GREEN_BG}{BLACK_BG}{BOLD}"
-    elif "Dump" in tag:
-        tag_color = f"{YELLOW_BG}{BLACK_BG}{BOLD}"
-    elif tag == "Stable":
-        tag_color = f"{BLUE_BG}{WHITE}{BOLD}"
-    else:
-        tag_color = f"{CYAN}"
-    
-    print(f"\n{WHITE}Movement Classification: {tag_color} {tag} {RESET}")
+async def analyze_movement(current_btc_price: float, prev_btc_price: float, volume: float) -> str:
+    """Analyze the current price movement for potential market manipulation."""
+    try:
+        # Get the analysis result from OmegaAlgo
+        analysis = await OmegaAlgo.is_fibo_organic(current_btc_price, prev_btc_price, volume)
+        return analysis
+    except Exception as e:
+        print(f"❌ Error in analyze_movement: {str(e)}")
+        return "Error in analysis"
 
-def print_alert(message):
-    """Print attention-grabbing alert."""
-    print(f"\n{RED_BG}{WHITE}{BOLD}⚠️  ALERT  ⚠️{RESET}")
-    print(f"{message}")
+async def print_analysis_result(analysis: str, threshold: float) -> None:
+    """Print the analysis result with appropriate formatting."""
+    try:
+        if "Organic" in analysis:
+            print(f"{GREEN}✅ ORGANIC MOVEMENT - No manipulation detected{RESET}")
+        elif "Insufficient" in analysis:
+            print(f"{YELLOW}⚠️  {analysis}{RESET}")
+        else:
+            print(f"{RED}⛔️ POTENTIAL MANIPULATION DETECTED - {analysis}{RESET}")
+            
+        print(f"\nCurrent Threshold: ${threshold:.2f}")
+    except Exception as e:
+        print(f"❌ Error in print_analysis_result: {str(e)}")
 
-# ✅ Start Worker
-if __name__ == "__main__":
-    print(f"\n{BLUE_BG}{WHITE}{BOLD} 🚀 MM TRAP DETECTOR v1.0 {RESET}")
-    print(f"{GOLD}Watching for market manipulation... Babylon can't hide! 🔱{RESET}\n")
-    
-    # ✅ Initialize Last BTC Price
-    last_stored_price = redis_conn.get("last_btc_price")
-    last_stored_price = float(last_stored_price) if last_stored_price else None
-
-    if last_stored_price:
-        print(f"{GOLD}🔰 Last Recorded BTC Price: ${last_stored_price:.2f}{RESET}")
-    else:
-        print(f"{GOLD}🔰 No BTC price data available yet. Waiting for first update...{RESET}")
-
-    # Same process_mm_trap function but with updated print statements
-    def process_mm_trap():
-        """Continuously pulls BTC price, checking for MM traps while storing subtle movements."""
-        global last_fluctuation_check, fluctuation_start_price
-
-        # Keep last seen price in memory to ensure we always have a different previous price
-        last_processed_price = None
-
+async def process_mm_trap() -> None:
+    """Main function to process market maker trap detection."""
+    try:
+        # Initialize InfluxDB connection
+        initialize_influxdb()
+        print("✅ Connected to InfluxDB\n")
+        
+        print("\n 🚀 MM TRAP DETECTOR v1.0 ")
+        print("Watching for market manipulation... Babylon can't hide! 🔱\n")
+        
+        # Get initial BTC price
+        current_btc_price = get_current_btc_price()
+        prev_btc_price = current_btc_price
+        print(f"🔰 Last Recorded BTC Price: ${current_btc_price:.2f}\n")
+        
         while True:
-            time.sleep(CHECK_INTERVAL)
-            timestamp = datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')
-            print_header(f"BTC CHECK | {timestamp}")
-
-            # ✅ Fetch latest BTC price & volume from Redis
-            latest_price = redis_conn.get("last_btc_price")
-            latest_volume = redis_conn.get("last_btc_volume")
-
-            if latest_price:
-                price = float(latest_price)
-                volume = float(latest_volume) if latest_volume else 0
-            else:
-                print(f"{BLUE}⏳ Waiting for first BTC price update...{RESET}")
-                continue  # Skip if no price data yet
-
-            # ✅ Use our last processed price as prev_price to ensure we always show changes
-            if last_processed_price:
-                prev_price = last_processed_price
-            else:
-                # Only get from Redis if we don't have a locally stored price
-                prev_price_redis = redis_conn.get("prev_btc_price")
+            try:
+                current_time = datetime.now(UTC)
+                print(f"\n BTC CHECK | {current_time.strftime('%Y-%m-%d %H:%M:%S')} \n")
+                print("═" * 17 + " PRICE UPDATE " + "═" * 17)
                 
-                if prev_price_redis is None:
-                    price_history = redis_conn.lrange("btc_movement_history", -2, -1)
-                    if len(price_history) >= 2:
-                        prev_price = float(price_history[0])
-                    else:
-                        prev_price = price * 0.999  # Slightly different to show initial change
-                else:
-                    prev_price = float(prev_price_redis)
-            
-            # ✅ Compute Price Changes
-            price_change = (price - prev_price) / prev_price if prev_price != 0 else 0
-            absolute_change = abs(price - prev_price)
-            
-            # Print formatted price update
-            print_price_update(price, prev_price, absolute_change, price_change)
-
-            # ✅ Update Redis with current price for other components to use
-            redis_conn.set("prev_btc_price", price)
-            print(f"{CYAN}ℹ Updating prev_btc_price: {prev_price:.2f} → {price:.2f}{RESET}")
-
-            # ✅ Store absolute price change history
-            redis_conn.rpush("abs_price_change_history", absolute_change)
-            redis_conn.ltrim("abs_price_change_history", -100, -1)
-
-            # ✅ Compute Dynamic Threshold with Market Regime Awareness
-            dynamic_liquidity_grab_threshold = OmegaAlgo.calculate_dynamic_threshold()
-            print(f"{WHITE}Current Threshold: ${dynamic_liquidity_grab_threshold:.2f}{RESET}")
-
-            # ✅ Run the Multi-Layer Fibo-Organic Check WITH Volume
-            movement_analysis = OmegaAlgo.is_fibo_organic(price, prev_price, volume)
-            print_analysis_result(movement_analysis, dynamic_liquidity_grab_threshold)
-
-            # ✅ NEW: Run Fibonacci multi-timeframe trend analysis
-            print(f"\n{MAGENTA}⏳ Running Fibonacci multi-timeframe trend analysis...{RESET}")
-            timeframe_trends = OmegaAlgo.analyze_multi_timeframe_trends(price)
-
-            # ✅ Store subtle price movements in DB regardless of movement type
-            movement_tag = "Stable"  # Default if no major move detected
-            
-            # ✅ NEW: Always store subtle movement data for historical analysis
-            current_timestamp = datetime.datetime.now(datetime.UTC)
-            insert_subtle_movement(
-                timestamp=current_timestamp, 
-                price=price, 
-                prev_price=prev_price, 
-                abs_change=absolute_change, 
-                price_change=price_change, 
-                movement_tag=movement_tag, 
-                volume=volume
-            )
-            
-            # ✅ Detect MM Fakeouts with Dynamic Threshold and Half-Trap Detection
-            trap_type = None
-            alert_msg = None
-            trap_confidence = 0
-            
-            # Calculate half-threshold for detecting subtle manipulation
-            half_threshold = dynamic_liquidity_grab_threshold * 0.5
-
-            # Full Liquidity Grab Detection
-            if absolute_change > dynamic_liquidity_grab_threshold:
-                trap_type = "Liquidity Grab"
-                trap_confidence = 0.9
-                alert_msg = f"{RED}⚠️ LIQUIDITY GRAB DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
-                movement_tag = "Liquidity Grab"
-
-            # Half-Fake Detection (new feature!)
-            elif absolute_change > half_threshold:
-                # Check if this could be a half-fake move
-                if "Trap" in movement_analysis or "Manipulation" in movement_analysis:
-                    trap_type = "Half-Liquidity Grab"
-                    trap_confidence = 0.7
-                    alert_msg = f"{LIGHT_ORANGE}⚠️ HALF-LIQUIDITY GRAB DETECTED! BTC moved ${absolute_change:.2f}{RESET}"
-                    movement_tag = "Half-Liquidity Grab"
-
-            # Fake Pump Detection with confidence levels
-            elif price_change > PRICE_PUMP_THRESHOLD:
-                if "Trap" in movement_analysis or "Manipulation" in movement_analysis:
-                    trap_type = "Fake Pump"
-                    trap_confidence = 0.85
-                    alert_msg = f"{BRIGHT_GREEN}⚠️ FAKE PUMP DETECTED! BTC jumped {price_change:.2%} rapidly!{RESET}"
-                    movement_tag = "Fake Pump"
-                else:
-                    trap_type = "Potential Fake Pump"
-                    trap_confidence = 0.6
-                    alert_msg = f"{GREEN}⚠️ POTENTIAL FAKE PUMP! BTC jumped {price_change:.2%}{RESET}"
-                    movement_tag = "Potential Fake Pump"
-
-            # Fake Dump Detection with confidence levels
-            elif price_change < PRICE_DROP_THRESHOLD:
-                if "Trap" in movement_analysis or "Manipulation" in movement_analysis:
-                    trap_type = "Fake Dump"
-                    trap_confidence = 0.85
-                    alert_msg = f"{RED}⚠️ FAKE DUMP DETECTED! BTC dropped {price_change:.2%} rapidly!{RESET}"
-                    movement_tag = "Fake Dump"
-                else:
-                    trap_type = "Potential Fake Dump"
-                    trap_confidence = 0.6
-                    alert_msg = f"{LIGHT_ORANGE}⚠️ POTENTIAL FAKE DUMP! BTC dropped {price_change:.2%}{RESET}"
-                    movement_tag = "Potential Fake Dump"
-
-            # Half-Fake Pump Detection (new feature!)
-            elif 0.01 <= price_change < PRICE_PUMP_THRESHOLD:
-                trap_type = "Half-Fake Pump"
-                trap_confidence = 0.5
-                alert_msg = f"{GREEN}⚠️ HALF-FAKE PUMP! BTC moved {price_change:.2%}{RESET}"
-                movement_tag = "Half-Fake Pump"
+                # Get current BTC price
+                current_btc_price = get_current_btc_price()
                 
-            # Half-Fake Dump Detection (new feature!)
-            elif PRICE_DROP_THRESHOLD < price_change <= -0.01:
-                trap_type = "Half-Fake Dump"
-                trap_confidence = 0.5
-                alert_msg = f"{LIGHT_ORANGE}⚠️ HALF-FAKE DUMP! BTC moved {price_change:.2%}{RESET}"
-                movement_tag = "Half-Fake Dump"
+                # Calculate price changes
+                abs_change = current_btc_price - prev_btc_price
+                pct_change = (abs_change / prev_btc_price) * 100 if prev_btc_price != 0 else 0
                 
-            # Print movement classification
-            print_movement_tag(movement_tag)
+                # Print price information
+                print(f"Current BTC: ${current_btc_price:.2f} {'↑' if abs_change > 0 else '↓' if abs_change < 0 else '→'}")
+                print(f"Previous:    ${prev_btc_price:.2f}")
+                print(f"Abs Change:  ${abs_change:.2f}")
+                print(f"% Change:    {pct_change:.4f}%")
                 
-            # ✅ UPDATE: Update the movement tag and insert again if it changed after analysis
-            if movement_tag != "Stable":
-                insert_subtle_movement(
-                    timestamp=current_timestamp,
-                    price=price,
-                    prev_price=prev_price,
-                    abs_change=absolute_change,
-                    price_change=price_change,
-                    movement_tag=movement_tag,
-                    volume=volume
-                )
+                print(f"ℹ Updating prev_btc_price: {prev_btc_price:.2f} → {current_btc_price:.2f}")
+                
+                # Update previous price for next iteration
+                prev_btc_price = current_btc_price
+                
+                # Get current volume
+                volume = get_current_volume()
+                
+                # Check for high-frequency mode
+                hf_mode = check_high_frequency_mode()
+                
+                # Calculate dynamic threshold based on market conditions
+                dynamic_liquidity_grab_threshold = calculate_dynamic_threshold(hf_mode)
+                
+                print("\n═" * 17 + " MOVEMENT ANALYSIS " + "═" * 17)
+                
+                # Analyze the movement
+                movement_analysis = await analyze_movement(current_btc_price, prev_btc_price, volume)
+                
+                # Print analysis result
+                await print_analysis_result(movement_analysis, dynamic_liquidity_grab_threshold)
+                
+                # Register trap detection if needed
+                if "TRAP" in movement_analysis:
+                    register_trap_detection(current_btc_price, volume, pct_change)
+                
+                # Sleep for the monitoring interval
+                await asyncio.sleep(MONITORING_INTERVAL)
+                
+            except Exception as e:
+                print(f"❌ Error in main loop: {str(e)}")
+                await asyncio.sleep(ERROR_RETRY_INTERVAL)
+                
+    except KeyboardInterrupt:
+        print("\n👋 Gracefully shutting down MM Trap Detector...")
+    except Exception as e:
+        print(f"❌ Fatal error: {str(e)}")
 
-            # ✅ Store MM Trap & Trigger Alert if Needed
-            if trap_type:
-                print_alert(alert_msg)
-                
-                # Create the trap data dictionary for database and alerts
-                trap_data = {
-                    "trap_type": trap_type.lower().replace("-", "_").replace(" ", "_"),
-                    "btc_price": price,
-                    "price_change": price_change,
-                    "confidence": trap_confidence,
-                    "liquidity_grabbed": volume if volume > 0 else absolute_change * 10,  # Estimate liquidity if no volume
-                    "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
-                }
-                
-                # Store trap with confidence level
-                insert_mm_trap(
-                    trap_data={
-                        "price_level": trap_data["btc_price"],
-                        "trap_type": trap_data["trap_type"],
-                        "direction": "up" if price_change > 0 else "down",
-                        "confidence_score": trap_data["confidence"],
-                        "volume_spike": trap_data["liquidity_grabbed"],
-                        "timeframe": "1h",  # Default timeframe
-                        "price_range": absolute_change,
-                        "description": alert_msg.replace(RED, "").replace(LIGHT_ORANGE, "").replace(GREEN, "").replace(BRIGHT_GREEN, "").replace(RESET, ""),
-                        "metadata": {"source": "mm_trap_processor", "detected_at": trap_data["timestamp"]}
-                    }
-                )
-                
-                # Send specialized MM trap alert with highlighted formatting
-                send_mm_trap_alert(trap_data)
-                
-                # ✅ NEW: Register this trap with the high-frequency detector
-                register_trap_detection(trap_type, trap_confidence, price_change)
-                
-                # Store for Grafana visualization
-                redis_conn.hset(
-                    f"mm_trap:{int(time.time())}", 
-                    mapping={
-                        "type": trap_type,
-                        "confidence": str(trap_confidence),
-                        "price": str(price),
-                        "change": str(price_change),
-                        "timestamp": timestamp
-                    }
-                )
-            else:
-                # Store organic movement data if no trap detected
-                if "Organic" in movement_analysis:
-                    redis_conn.hset(  # 👈 UPDATED: Changed from hmset to hset with mapping parameter
-                        f"organic_move:{int(time.time())}", 
-                        mapping={      # 👈 UPDATED: Added explicit mapping parameter
-                            "type": "Organic",
-                            "confidence": "0.8" if "High" in movement_analysis else "0.6",
-                            "price": str(price),
-                            "change": str(price_change),
-                            "timestamp": timestamp
-                        }
-                    )
-
-            # ✅ Store core metrics for Grafana Monitoring
-            redis_conn.rpush("liquidity_grab_history", absolute_change)
-            redis_conn.ltrim("liquidity_grab_history", -100, -1)
-
-            redis_conn.rpush("fib_match_history", 1 if "Organic" in movement_analysis else 0)
-            redis_conn.ltrim("fib_match_history", -100, -1)
-
-            redis_conn.rpush("price_volatility_history", dynamic_liquidity_grab_threshold)
-            redis_conn.ltrim("price_volatility_history", -100, -1)
-            
-            redis_conn.set("latest_movement_analysis", movement_analysis)
-            
-            # Footer with next check time
-            next_check = (datetime.datetime.now() + datetime.timedelta(seconds=CHECK_INTERVAL)).strftime('%H:%M:%S')
-            print(f"\n{BLUE}Next check at {next_check}{RESET}")
-            print(f"{BLUE}{'─' * 70}{RESET}")
-
-            # At the very end of the loop, store current price for next run
-            last_processed_price = price
-
-    process_mm_trap()
+if __name__ == "__main__":
+    asyncio.run(process_mm_trap())
