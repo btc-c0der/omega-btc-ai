@@ -62,7 +62,7 @@ class RedisManager:
         signal.signal(signal.SIGINT, self._handle_shutdown)
         signal.signal(signal.SIGTERM, self._handle_shutdown)
     
-    def get_cached(self, key: str) -> Optional[Any]:
+    def get_cached(self, key: str, default: Any = None) -> Optional[Any]:
         """Get value from cache or Redis with TTL-based caching"""
         now = time.time()
         
@@ -77,9 +77,10 @@ class RedisManager:
                 self._cache[key] = value
                 self._cache_ttl[key] = now + self.CACHE_DURATION
                 return value
+            return default
         except redis.RedisError as e:
             print(f"Redis error on get: {e}")
-        return None
+            return default
     
     def set_with_validation(self, key: str, data: Dict) -> bool:
         """Set data with type validation"""

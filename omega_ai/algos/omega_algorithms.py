@@ -4,6 +4,10 @@ import redis
 import traceback  # Missing import for traceback.format_exc()
 from omega_ai.db_manager.database import fetch_recent_movements
 from omega_ai.mm_trap_detector.high_frequency_detector import check_high_frequency_mode, register_trap_detection
+from typing import List, Dict, Union, Optional, Any
+import asyncio
+from datetime import datetime, UTC
+from omega_ai.config import REDIS_HOST, REDIS_PORT
 
 class OmegaAlgo:
     """🔥 OMEGA BTC AI - Market Maker Trap Detection & Fibonacci Validation 🔱"""
@@ -27,7 +31,7 @@ class OmegaAlgo:
     YELLOW = "\033[93m"
 
     # ✅ Initialize Redis Connection
-    redis_conn = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+    redis_conn = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
     @staticmethod
     def calculate_fibonacci_levels(high, low):
@@ -59,7 +63,7 @@ class OmegaAlgo:
         return levels
 
     @classmethod
-    def is_fibo_organic(cls, latest_price, previous_price, volume):
+    async def is_fibo_organic(cls, latest_price: float, previous_price: float, volume: Optional[float] = None) -> str:
         """Enhanced multi-layer Fibonacci analysis for advanced trap detection."""
         
         # Get existing historical data
@@ -67,7 +71,22 @@ class OmegaAlgo:
         if len(historical_prices) < 10:
             return "Insufficient Data"
         
-        historical_prices = [float(price) for price in historical_prices]
+        # Parse historical prices from Redis data
+        parsed_prices: List[float] = []
+        for data in historical_prices:
+            try:
+                if ',' in data:
+                    price, _ = map(float, data.split(','))
+                else:
+                    price = float(data)
+                parsed_prices.append(price)
+            except (ValueError, TypeError):
+                continue
+        
+        if not parsed_prices:
+            return "Insufficient Data"
+        
+        historical_prices = parsed_prices
 
         # Multi-timeframe Fibonacci analysis (using both retracements and extensions)
         try:
@@ -77,140 +96,77 @@ class OmegaAlgo:
             multi_fib_levels, confluence_zones = {}, []
         
         # Get recent movements for volume analysis
-        recent_movements = fetch_recent_movements(minutes=15)
-        if not recent_movements or len(recent_movements) < 5:
-            return "Insufficient Data"
-        
-        # Store multi-fib analysis results in Redis for Grafana monitoring
-        if confluence_zones:
-            cls.redis_conn.hset(
-                "latest_fibonacci_confluence",
-                mapping={
-                    "center": str(confluence_zones[0]["center"]),
-                    "strength": str(confluence_zones[0]["strength"]),
-                    "weighted_strength": str(confluence_zones[0].get("weighted_strength", 0)),
-                    "timeframe_diversity": str(confluence_zones[0].get("timeframe_diversity", 0)),
-                    "proximity": str(confluence_zones[0].get("proximity_score", 0)),
-                    "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
-                }
-            )
-        
-        # Enhanced volume analysis with anomaly detection - FIX: Convert Decimal to float
         try:
-            # Fix: Use correct index (5) for volume and convert to float
-            volumes = [float(row[5]) for row in recent_movements]  # Index 5 is volume
+            recent_movements = cls.redis_conn.lrange("btc_movement_history", -15, -1)
+            if not recent_movements or len(recent_movements) < 5:
+                return "Insufficient Data"
             
-            # Convert values to float to avoid type mismatches
-            volume = float(volume)
+            # Extract volume data safely
+            volumes: List[float] = []
+            prices: List[float] = []
+            for movement in recent_movements:
+                try:
+                    if ',' in movement:
+                        price, vol = map(float, movement.split(','))
+                        volumes.append(vol)
+                        prices.append(price)
+                    else:
+                        # Skip invalid data
+                        continue
+                except (ValueError, TypeError):
+                    continue
+            
+            # Ensure we have some valid data
+            if not volumes or not prices:
+                volumes = [0]
+                prices = [latest_price]
+            
+            # Convert current volume to float and handle None case
+            current_volume = float(volume) if volume is not None else 0
+            
+            # Calculate volume metrics
             avg_volume = float(np.mean(volumes))
             volume_std = float(np.std(volumes))
-            
-            # Now all values are floats
-            volume_z_score = (volume - avg_volume) / volume_std if volume_std > 0 else 0
+            volume_z_score = (current_volume - avg_volume) / volume_std if volume_std > 0 else 0
             
             # Store volume metrics in Redis for monitoring
             cls.redis_conn.hset(
                 "latest_volume_metrics",
                 mapping={
-                    "current_volume": str(volume),
+                    "current_volume": str(current_volume),
                     "avg_volume": str(avg_volume),
                     "volume_z_score": str(volume_z_score),
-                    "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
             )
             
             # Consider a volume spike if z-score > 2 (95th percentile)
             volume_spike = volume_z_score > 2
-        except (IndexError, ZeroDivisionError, TypeError) as e:
-            print(f"❌ Volume analysis error: {e}. Falling back to simple comparison.")
-            # Fallback if volume data is incomplete or type error occurs
-            avg_volume = float(sum(float(row[5]) for row in recent_movements) / len(recent_movements)) if recent_movements else 0
-            volume_spike = float(volume) > avg_volume * 2
+            
+        except Exception as e:
+            print(f"❌ Volume analysis error: {str(e)}. Using fallback logic.")
+            # Fallback to simple volume comparison with safe handling of empty volumes
+            volume_spike = False
+            if volumes:
+                current_volume = float(volume) if volume is not None else 0
+                avg_volume = sum(volumes) / len(volumes)
+                volume_spike = current_volume > (avg_volume * 2)
+
+        # Analyze price movement
+        price_change = (latest_price - previous_price) / previous_price if previous_price != 0 else 0
         
-        # Original functionality continues from here unchanged
-        # Enhanced decision logic with advanced scoring system
-        organic_score = 0
-        detailed_analysis = {}
+        # Check for potential manipulation
+        if abs(price_change) > 0.02:  # 2% price movement
+            if volume_spike:
+                return "TRAP: High volume spike with significant price movement"
+            elif "Trap" in str(multi_fib_levels):
+                return "TRAP: Fibonacci levels indicate potential manipulation"
         
-        if confluence_zones:
-            strongest_zone = confluence_zones[0]
-            
-            # Check if price is near the strongest confluence zone
-            proximity_threshold = 100
-            is_near_confluence = abs(latest_price - strongest_zone["center"]) < proximity_threshold
-            proximity_factor = 1.0 - min(abs(latest_price - strongest_zone["center"]) / proximity_threshold, 1.0)
-            
-            # Calculate score based on multiple factors with more nuance
-            organic_score += 2 * proximity_factor  # Up to 2 points based on proximity
-            organic_score += 2 if not volume_spike else -1.5  # Volume assessment
-            
-            # Add timeframe diversity bonus
-            timeframe_diversity = strongest_zone.get("timeframe_diversity", 0)
-            organic_score += timeframe_diversity * 1.5  # Up to 1.5 bonus points for timeframe diversity
-            
-            # Add weighted strength (confluence strength weighted by timeframe importance)
-            weighted_strength = strongest_zone.get("weighted_strength", strongest_zone["strength"])
-            organic_score += (weighted_strength / 5.0)  # Normalize to ~1-3 points
-            
-            # Store detailed analysis for debugging and monitoring
-            detailed_analysis = {
-                "proximity_score": proximity_factor * 2,
-                "volume_score": 2 if not volume_spike else -1.5,
-                "diversity_score": timeframe_diversity * 1.5,
-                "strength_score": weighted_strength / 5.0,
-                "final_score": organic_score
-            }
-            
-            # Store analysis in Redis for monitoring
-            cls.redis_conn.hset(
-                "latest_organic_analysis", 
-                mapping={k: str(v) for k, v in detailed_analysis.items()}
-            )
-            
-            print(f"📡 [DEBUG] Multi-Fibonacci Analysis: Organic Score = {organic_score:.2f}")
-            print(f"📡 [DEBUG] Strongest confluence at ${strongest_zone['center']:.2f} with strength {weighted_strength:.2f}")
-            print(f"📡 [DEBUG] Analysis Details: {detailed_analysis}")
-            
-            # Enhanced classification with more granular outcomes
-            if organic_score >= 4:
-                return "High-Confidence Organic Movement"
-            elif organic_score >= 3:
-                return "Multi-Fibonacci Organic"
-            elif organic_score >= 1.5:
-                return "Likely Organic"
-            else:
-                return "Complex MM Trap Pattern"
-        else:
-            # Fall back to single-timeframe analysis if no confluence zones found
-            prices = [float(row[1]) for row in recent_movements]  # Convert to float
-            high, low = max(prices), min(prices)
-            fib_levels = cls.calculate_fibonacci_levels(high, low)
-            
-            # Check for both retracement and extension levels
-            extended_fib_levels = cls.calculate_extended_fibonacci_levels(high, low)
-            all_levels = {}
-            all_levels.update(fib_levels)
-            
-            # Check if the price is near any Fibonacci level
-            fib_matches = [(level_name, abs(latest_price - level_value)) 
-                          for level_name, level_value in all_levels.items() 
-                          if abs(latest_price - level_value) < 50]
-            
-            if fib_matches:
-                closest_level, distance = min(fib_matches, key=lambda x: x[1])
-                proximity_factor = 1.0 - min(distance / 50.0, 1.0)
-                
-                basic_score = 1.5 * proximity_factor
-                basic_score += 1 if not volume_spike else -1
-                
-                print(f"📡 [DEBUG] Basic Fibonacci Analysis: Level={closest_level}, Distance=${distance:.2f}, Score={basic_score:.2f}")
-                
-                if basic_score >= 1.5:
-                    return "Fibonacci Organic"
-                else:
-                    return "Potential MM Trap"
-            else:
-                return "MM Manipulation"
+        # Check for organic movement
+        if 0.001 <= abs(price_change) <= 0.02 and not volume_spike:
+            return "Organic: Normal market movement"
+        
+        return "Insufficient Data"
 
     @classmethod
     def detect_market_regime(cls):
@@ -309,75 +265,57 @@ class OmegaAlgo:
             return cls.MIN_LIQUIDITY_GRAB_THRESHOLD  # ✅ Fail-safe to minimum threshold
 
     @classmethod
-    def get_multi_timeframe_fibonacci(cls, latest_price):
-        """Calculate Fibonacci levels across multiple timeframes for confluence detection."""
-        timeframes = {
-            "short": 15,     # 15 minutes
-            "medium": 60,    # 1 hour
-            "long": 240      # 4 hours
-        }
-        
-        # 🔥 NEW: Always recalculate using real-time Redis data first
-        latest_prices = cls.redis_conn.lrange("btc_movement_history", -100, -1)
-        realtime_fib_levels = {}
-        
-        if (latest_prices and len(latest_prices) >= 10):
-            # Convert string prices to float
-            latest_prices = [float(price) for price in latest_prices]
-            high, low = max(latest_prices), min(latest_prices)
+    def get_multi_timeframe_fibonacci(cls, price: float) -> tuple[Dict[str, float], List[float]]:
+        """Calculate Fibonacci levels across multiple timeframes."""
+        try:
+            # Get price history for different timeframes
+            timeframes = {
+                "1h": cls.redis_conn.lrange("btc_movement_history", -60, -1),
+                "4h": cls.redis_conn.lrange("btc_movement_history", -240, -1),
+                "1d": cls.redis_conn.lrange("btc_movement_history", -1440, -1)
+            }
             
-            # Calculate real-time Fibonacci levels
-            realtime_fib_levels = cls.calculate_fibonacci_levels(high, low)
+            fib_levels = {}
+            confluence_zones = []
             
-            # Add real-time levels as a special timeframe
-            print(f"📡 [DEBUG] Adjusted Fibonacci Levels | High: {high}, Low: {low}")
+            for timeframe, prices in timeframes.items():
+                try:
+                    # Convert prices to floats
+                    price_list = [float(p.split(',')[0]) for p in prices if ',' in p]
+                    if not price_list:
+                        continue
+                    
+                    high = max(price_list)
+                    low = min(price_list)
+                    
+                    # Calculate Fibonacci levels
+                    diff = high - low
+                    levels = {
+                        "0.0": low,
+                        "0.236": low + diff * 0.236,
+                        "0.382": low + diff * 0.382,
+                        "0.5": low + diff * 0.5,
+                        "0.618": low + diff * 0.618,
+                        "0.786": low + diff * 0.786,
+                        "1.0": high
+                    }
+                    
+                    fib_levels[timeframe] = levels
+                    
+                    # Check for confluence zones
+                    for level, value in levels.items():
+                        if abs(price - value) < diff * 0.01:  # 1% tolerance
+                            confluence_zones.append(value)
+                    
+                except Exception as e:
+                    print(f"Error calculating Fibonacci levels for {timeframe}: {e}")
+                    continue
             
-            # Store real-time Fibonacci levels in Redis for other components
-            for level, price in realtime_fib_levels.items():
-                cls.redis_conn.hset("realtime_fibonacci_levels", str(level), str(price))
-                
-            # Add timestamp for monitoring
-            cls.redis_conn.hset("realtime_fibonacci_levels", "timestamp", 
-                               datetime.datetime.now(datetime.UTC).isoformat())
-        
-        # Continue with standard multi-timeframe calculations
-        multi_fib_levels = {}
-        if realtime_fib_levels:
-            # Add real-time levels as highest priority timeframe
-            multi_fib_levels["realtime"] = realtime_fib_levels
-        
-        for timeframe_name, minutes in timeframes.items():
-            movements = fetch_recent_movements(minutes=minutes)
-            if movements and len(movements) >= 5:
-                prices = [float(row[1]) for row in movements]
-                high, low = max(prices), min(prices)
-                multi_fib_levels[timeframe_name] = cls.calculate_fibonacci_levels(high, low)
-        
-        # Find confluence zones where Fibonacci levels from multiple timeframes align
-        confluence_zones = cls.detect_fibonacci_confluence(multi_fib_levels, latest_price)
-
-        # Enhanced logging for all timeframes
-        for tf, levels in multi_fib_levels.items():
-            print(f"📡 [DEBUG] {tf.upper()} Fibonacci | Levels: {len(levels)}")
-        
-        print(f"📡 [DEBUG] Multi-Timeframe Fibonacci Levels: {multi_fib_levels}")
-        print(f"📡 [DEBUG] Confluence Zones: {confluence_zones}")
-        
-        # 🔥 NEW: Add real-time Fibonacci status check
-        if realtime_fib_levels:
-            # Find closest Fibonacci level to current price
-            closest_level = min(realtime_fib_levels.items(), 
-                               key=lambda x: abs(latest_price - x[1]))
-            distance = abs(latest_price - closest_level[1])
+            return fib_levels, confluence_zones
             
-            print(f"📡 [DEBUG] Current Price ${latest_price} is ${distance:.2f} away from {closest_level[0]} level")
-            print(f"📡 [DEBUG] REALTIME Fibonacci | Levels: {len(realtime_fib_levels)}")
-            
-            # Store distance to closest Fib level for monitoring
-            cls.redis_conn.set("distance_to_nearest_fib", distance)
-            cls.redis_conn.set("nearest_fib_level", closest_level[0])
-        
-        return multi_fib_levels, confluence_zones
+        except Exception as e:
+            print(f"Error in get_multi_timeframe_fibonacci: {e}")
+            return {}, []
 
     @classmethod
     def detect_fibonacci_confluence(cls, multi_fib_levels, latest_price, tolerance=50):
