@@ -35,10 +35,13 @@ import logging
 import random
 import redis
 from dataclasses import dataclass, field
-from datetime import datetime
-from omega_ai.trading.btc_futures_trader import BtcFuturesTrader
+from datetime import datetime, timezone
+from omega_ai.trading.btc_futures_trader import BtcFuturesTrader, TradeHistory, Position
 from omega_ai.trading.profiles import AggressiveTrader, NewbieTrader, ScalperTrader, StrategicTrader
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
+from omega_ai.utils.redis_connection import RedisConnectionManager
+from collections import deque
+import uuid
 
 # Terminal colors for output formatting
 RESET = "\033[0m"
@@ -60,16 +63,59 @@ MAGENTA_BG = "\033[45m"
 CYAN_BG = "\033[46m"
 WHITE_BG = "\033[47m"
 
+# Initialize Redis connection
+redis_manager = RedisConnectionManager()
+
+logger = logging.getLogger(__name__)
+
 @dataclass
-class TradingPosition:
-    direction: str
+class Position:
+    """Trading position data model."""
+    id: str
+    direction: str  # "LONG" or "SHORT"
     entry_price: float
-    size: float
-    leverage: float
+    size: float  # In BTC
+    leverage: int
     entry_time: datetime
+    entry_reason: str
+    exit_price: Optional[float] = None
+    exit_time: Optional[datetime] = None
+    exit_reason: Optional[str] = None
+    take_profits: List[Dict[str, float]] = field(default_factory=list)
     stop_loss: Optional[float] = None
-    take_profit: List[Dict] = field(default_factory=list)
-    unrealized_pnl: float = 0.0
+    realized_pnl: float = 0.0
+    status: str = "OPEN"  # OPEN, CLOSED, LIQUIDATED
+
+    def calculate_unrealized_pnl(self, current_price: float) -> Tuple[float, float]:
+        """Calculate unrealized profit/loss in USD and percentage."""
+        if self.direction == "LONG":
+            pnl_pct = (current_price - self.entry_price) / self.entry_price * 100 * self.leverage
+            pnl_usd = (current_price - self.entry_price) * self.size * self.leverage
+        else:  # SHORT
+            pnl_pct = (self.entry_price - current_price) / self.entry_price * 100 * self.leverage
+            pnl_usd = (self.entry_price - current_price) * self.size * self.leverage
+        
+        return pnl_usd, pnl_pct
+
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for serialization."""
+        result = {
+            "id": self.id,
+            "direction": self.direction,
+            "entry_price": self.entry_price,
+            "size": self.size,
+            "leverage": self.leverage,
+            "entry_time": self.entry_time.isoformat(),
+            "entry_reason": self.entry_reason,
+            "exit_price": self.exit_price,
+            "exit_time": self.exit_time.isoformat() if self.exit_time else None,
+            "exit_reason": self.exit_reason,
+            "take_profits": self.take_profits,
+            "stop_loss": self.stop_loss,
+            "realized_pnl": self.realized_pnl,
+            "status": self.status
+        }
+        return result
 
 class ProfiledFuturesTrader(BtcFuturesTrader):
     """BTC Futures Trader that behaves according to a specific trader profile."""
@@ -78,18 +124,21 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
                  profile_type: str = "strategic", 
                  initial_capital: float = 10000.0,
                  **kwargs):
-        """Initialize trader with a specific psychological profile.
-        
-        Args:
-            profile_type: The type of trader profile to use ("aggressive", 
-                         "strategic", "newbie", "scalper")
-            initial_capital: Starting capital
-            **kwargs: Additional arguments for BtcFuturesTrader
-        """
+        """Initialize trader with a specific psychological profile."""
         super().__init__(initial_capital=initial_capital, **kwargs)
         self.profile_type = profile_type
-        self.positions: List[TradingPosition] = []
-        self.current_price: float = 0.0
+        self.positions: List[Position] = []
+        self._current_price: float = 0.0
+        self._last_valid_price: float = 0.0
+        self._price_update_time = None
+        self._max_price_age = 60  # Maximum age of price data in seconds
+        
+        # Trading metrics
+        self.total_trades: int = 0
+        self.winning_trades: int = 0
+        self.losing_trades: int = 0
+        self.win_rate: float = 0.0
+        
         self.state = {
             "emotional_state": "neutral",  # neutral, greedy, fearful
             "confidence": 0.5,  # 0.0 to 1.0
@@ -98,93 +147,118 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
             "consecutive_wins": 0
         }
         
+        # Initialize profile and set risk parameters
+        self._initialize_profile(profile_type, initial_capital)
+        
+        self.trade_history = []
+        self.price_history = deque(maxlen=100)  # Keep last 100 prices
+        self.current_position: Optional[Position] = None
+        self.emotional_state = {
+            "confidence": 0.5,
+            "fear": 0.3,
+            "greed": 0.3
+        }
+        
+    def _initialize_profile(self, profile_type: str, initial_capital: float) -> None:
+        """Initialize the trader profile with proper risk parameters."""
         # Set risk_per_trade based on profile type - JAH BLESSED VALUES
         if profile_type == "aggressive":
-            # Aggressive traders take higher risks - living on the edge
             self.risk_per_trade = 0.4  # 40% risk - RASTA FIRE
             self.max_leverage = 20    # High leverage
             self.patience = 0.3       # Low patience
             self.fomo_factor = 0.8    # High FOMO
             self.trend_follow_threshold = 0.5  # Responsive to short-term trends
+            self.profile = AggressiveTrader(initial_capital)
             
         elif profile_type == "strategic":
-            # Strategic traders take calculated risks - wisdom of JAH
             self.risk_per_trade = 0.2  # 20% risk - BALANCED DIVINE ENERGY
             self.max_leverage = 5     # Moderate leverage
             self.patience = 0.8       # High patience
             self.fomo_factor = 0.2    # Low FOMO
             self.trend_follow_threshold = 0.8  # Requires stronger trend confirmation
+            self.profile = StrategicTrader(initial_capital)
             
         elif profile_type == "newbie":
-            # Newbies take random risks - seeking knowledge
             self.risk_per_trade = 0.3  # 30% risk - LEARNING THE PATH
             self.max_leverage = 50    # Excessive leverage
             self.patience = 0.2       # Very low patience
             self.fomo_factor = 0.9    # Extreme FOMO
             self.trend_follow_threshold = 0.3  # Easily affected by short-term movements
-        
+            self.profile = NewbieTrader(initial_capital)
+            
         elif profile_type == "scalper":
-            # Scalpers take precise, calculated risks - swift divine action
             self.risk_per_trade = 0.2  # 20% risk - CALCULATED PRECISION
             self.max_leverage = 15    # Higher leverage for small moves
             self.patience = 0.1       # Ultra-low patience (scalpers exit quickly)
             self.fomo_factor = 0.4    # Moderate FOMO
             self.trend_follow_threshold = 0.1  # Doesn't care much about trends
-        
-        # Set reasonable defaults if profile_type is unknown
+            self.profile = ScalperTrader(initial_capital)
+            
         else:
-            self.risk_per_trade = 0.2
+            self.risk_per_trade = 0.2  # Default values
             self.max_leverage = 5
             self.patience = 0.5
             self.fomo_factor = 0.5
             self.trend_follow_threshold = 0.5
-        
-        # Track psychological state
-        self.win_rate = 0.0
-        self.total_trades = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-    
-        # For profile-specific logic
-        if profile_type == "aggressive":
-            self.profile = AggressiveTrader(initial_capital)
-            # Force risk alignment between trader and profile
-            self.profile.risk_per_trade = self.risk_per_trade
-        elif profile_type == "strategic":
             self.profile = StrategicTrader(initial_capital)
-            self.profile.risk_per_trade = self.risk_per_trade
-        elif profile_type == "newbie":
-            self.profile = NewbieTrader(initial_capital)
-            # Ensure the NewbieTrader profile uses our desired risk level
-            self.profile.risk_per_trade = self.risk_per_trade
-        elif profile_type == "scalper":
-            self.profile = ScalperTrader(initial_capital)
-            self.profile.risk_per_trade = self.risk_per_trade
-        else:
-            self.profile = StrategicTrader(initial_capital)  # Default to strategic
-            self.profile.risk_per_trade = self.risk_per_trade
             
+        # Ensure profile uses our risk parameters
+        self.profile.risk_per_trade = self.risk_per_trade
         print(f"Initialized {self.profile_type.capitalize()} BTC Futures Trader with ${initial_capital:.2f}")
-    
-    @property
-    def risk_per_trade(self):
-        """Get the risk per trade with divine profile alignment."""
-        if hasattr(self, '_risk_per_trade'):
-            return self._risk_per_trade
         
-        # Return default values based on profile if not set
-        if self.profile_type == "aggressive":
-            return 0.4
-        elif self.profile_type == "newbie":
-            return 0.3
-        elif self.profile_type == "strategic" or self.profile_type == "scalper":
-            return 0.2
-        return 0.2  # Default
+    @property
+    def current_price(self) -> float:
+        """Get the current price with validation."""
+        if self._current_price <= 0:
+            if self._last_valid_price > 0:
+                return self._last_valid_price
+            raise ValueError("No valid price available")
+        
+        # Check if price is too old
+        if self._price_update_time:
+            age = (datetime.now() - self._price_update_time).total_seconds()
+            if age > self._max_price_age:
+                if self._last_valid_price > 0:
+                    return self._last_valid_price
+                raise ValueError(f"Price data is too old ({age:.1f} seconds)")
+        
+        return self._current_price
     
-    @risk_per_trade.setter
-    def risk_per_trade(self, value):
-        """Set the risk per trade with JAH BLESSING."""
-        self._risk_per_trade = value
+    @current_price.setter
+    def current_price(self, value: float) -> None:
+        """Set the current price with validation."""
+        if value <= 0:
+            raise ValueError(f"Invalid price value: {value}")
+        
+        self._last_valid_price = self._current_price if self._current_price > 0 else value
+        self._current_price = value
+        self._price_update_time = datetime.now()
+        
+        # Update profile's price as well
+        if hasattr(self, 'profile'):
+            self.profile.update_price(value)
+            
+    def update_current_price(self) -> float:
+        """Get latest BTC price from Redis with validation."""
+        try:
+            price_str = redis_manager.get("last_btc_price")
+            if not price_str:
+                raise ValueError("No price data in Redis")
+                
+            price = float(price_str)
+            if price <= 0:
+                raise ValueError(f"Invalid price from Redis: {price}")
+                
+            # Update both our price and profile's price
+            self.current_price = price
+            return price
+            
+        except Exception as e:
+            print(f"{RED}❌ Error getting current price: {e}{RESET}")
+            # Return last valid price if available, otherwise raise
+            if self._last_valid_price > 0:
+                return self._last_valid_price
+            raise ValueError("No valid price available")
     
     def should_open_position(self) -> Tuple[bool, str, float]:
         """Override to incorporate trader profile behavior."""
@@ -350,9 +424,11 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         self.current_price = price
         # Update unrealized PnL for open positions
         for pos in self.positions:
-            price_diff = self.current_price - pos.entry_price
-            multiplier = 1 if pos.direction == "LONG" else -1
-            pos.unrealized_pnl = price_diff * pos.size * pos.leverage * multiplier
+            pnl_usd, _ = pos.calculate_unrealized_pnl(price)
+            if pnl_usd > 0:
+                print(f"{GREEN}Position {pos.direction} showing profit: ${pnl_usd:.2f}{RESET}")
+            elif pnl_usd < 0:
+                print(f"{RED}Position {pos.direction} showing loss: ${pnl_usd:.2f}{RESET}")
     
     def execute_trading_logic(self):
         """Execute trading logic based on profile type"""
@@ -384,79 +460,47 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         # Implement scalper trading logic
         pass
 
-    def open_position(self, direction: str, reason: str, leverage: float = 1.0, stop_loss_pct: float = None) -> None:
-        """
-        Open a new trading position with JAH BLESS energy.
-        
-        Args:
-            direction: "LONG" or "SHORT"
-            reason: Why this position was opened
-            leverage: Leverage multiplier (1-100)
-            stop_loss_pct: Optional custom stop loss percentage (decimal, e.g., 0.02 for 2%)
-        """
-        if not direction in ["LONG", "SHORT"]:
-            print(f"{RED}Invalid position direction: {direction}. Must be 'LONG' or 'SHORT'.{RESET}")
-            return
-        
-        # Apply profile-specific risk management
-        position_size = self.capital * self.risk_per_trade
-        
-        # Adjust leverage based on trader profile
-        if self.profile_type == "newbie" and random.random() < 0.3:
-            # Newbies sometimes use excessive leverage
-            leverage = min(leverage * 2, self.max_leverage)
-        elif self.profile_type == "aggressive" and random.random() < 0.4:
-            # Aggressive traders often increase leverage
-            leverage = min(leverage * 1.5, self.max_leverage)
-        
-        # Cap leverage at the max allowed
-        leverage = min(leverage, self.max_leverage)
-        
-        # DIVINE FIX: Calculate stop loss based on provided percentage or default
-        stop_loss = None
-        if stop_loss_pct is not None:
-            if direction == "LONG":
-                stop_loss = self.current_price * (1 - stop_loss_pct)  # Stop below entry for longs
-            else:
-                stop_loss = self.current_price * (1 + stop_loss_pct)  # Stop above entry for shorts
-            print(f"{YELLOW}Using custom stop loss at ${stop_loss:.2f} ({stop_loss_pct*100:.1f}%){RESET}")
-        else:
-            stop_loss = self._calculate_stop_loss(direction, self.current_price)
-        
-        # Create the position with divine Rastafarian energy
-        position = TradingPosition(
-            direction=direction,
-            entry_price=self.current_price,
-            size=position_size,
-            leverage=leverage,
-            entry_time=datetime.now(),
-            stop_loss=stop_loss,
-            take_profit=self._calculate_take_profit_levels(direction, self.current_price)
-        )
-        
-        # Add to positions list with JAH BLESSING
-        self.positions.append(position)
-        
-        # Apply psychological effects
-        if self.state["emotional_state"] == "greedy":
-            # When greedy, traders often skip proper position sizing
-            print(f"{YELLOW}⚠️ Greed affected position sizing! Using higher risk.{RESET}")
-        
-        # Log the trade with divine color
-        direction_color = GREEN if direction == "LONG" else RED
-        print(f"\n{direction_color}📊 OPENED {direction} POSITION with {leverage}x leverage{RESET}")
-        print(f"Entry Price: ${self.current_price:,.2f}")
-        print(f"Position Size: ${position_size:,.2f}")
-        print(f"Reason: {reason}")
-        
-        # Update state
-        self._update_psychological_state()
-        
-        # Check if we should update Redis with position data
+    def open_position(self, direction: str, reason: str, leverage: int = 1) -> Optional[Position]:
+        """Open a new trading position."""
+        if direction not in ["LONG", "SHORT"]:
+            logger.error(f"Invalid position direction: {direction}")
+            return None
+
         try:
+            # Calculate stop loss
+            stop_loss = self._calculate_stop_loss(direction, self.current_price)
+
+            # Create position
+            position = Position(
+                id=str(uuid.uuid4()),
+                direction=direction,
+                entry_price=self.current_price,
+                size=self.capital * self.risk_per_trade,
+                leverage=leverage,
+                entry_time=datetime.now(timezone.utc),
+                entry_reason=reason,
+                stop_loss=stop_loss,
+                take_profits=self._calculate_take_profit_levels(direction, self.current_price)
+            )
+
+            # Store position data
             self._store_position_in_redis(position)
+            self.positions.append(position)
+            
+            # Log the trade
+            logger.info(f"Opened {direction} position with {leverage}x leverage")
+            logger.info(f"Entry Price: ${self.current_price:,.2f}")
+            logger.info(f"Position Size: ${position.size:,.2f}")
+            logger.info(f"Reason: {reason}")
+            
+            # Update state
+            self._update_psychological_state()
+            
+            return position
+
         except Exception as e:
-            print(f"{YELLOW}Cannot store position in Redis: {e}{RESET}")
+            logger.error(f"Error opening position: {e}")
+            return None
 
     def _calculate_stop_loss(self, direction: str, entry_price: float) -> float:
         """Calculate appropriate stop-loss based on trader profile."""
@@ -464,11 +508,16 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         volatility_factor = 0.02  # Default 2% volatility assumption
         
         try:
-            # Try to get actual recent volatility
-            volatility = self.analyzer.get_recent_volatility() / entry_price
-            volatility_factor = max(0.005, min(0.05, volatility))  # Cap between 0.5% and 5%
-        except:
-            pass
+            # Try to calculate volatility from recent price history
+            if hasattr(self, 'price_history') and len(self.price_history) > 0:
+                # Calculate simple volatility as standard deviation of returns
+                prices = list(self.price_history)[-20:]  # Use last 20 prices
+                returns = [(prices[i] - prices[i-1])/prices[i-1] for i in range(1, len(prices))]
+                if returns:
+                    std_dev = (sum((r - sum(returns)/len(returns))**2 for r in returns) / len(returns))**0.5
+                    volatility_factor = max(0.005, min(0.05, std_dev))  # Cap between 0.5% and 5%
+        except Exception as e:
+            logger.warning(f"Error calculating volatility: {e}. Using default value.")
         
         # Profile-specific stop-loss multipliers
         stop_multipliers = {
@@ -539,19 +588,12 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         
         return take_profits
 
-    def _store_position_in_redis(self, position: TradingPosition) -> None:
+    def _store_position_in_redis(self, position: Position) -> None:
         """Store position data in Redis for analysis."""
         try:
             # Convert position to serializable dictionary
-            position_data = {
-                "direction": position.direction,
-                "entry_price": position.entry_price,
-                "size": position.size,
-                "leverage": position.leverage,
-                "entry_time": position.entry_time.isoformat(),
-                "stop_loss": position.stop_loss,
-                "trader_profile": self.profile_type
-            }
+            position_data = position.to_dict()
+            position_data["trader_profile"] = self.profile_type
             
             # Store in Redis
             redis_key = f"trader:positions:{self.profile_type}:{datetime.now().timestamp()}"
@@ -603,28 +645,18 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         for position, reason in positions_to_close:
             self._close_position(position, reason)
 
-    def _update_position_pnl(self, position):
-        """Calculate unrealized profit/loss for a position with divine precision."""
-        # Skip if no current price
-        if not self.current_price or position.entry_price == 0:
+    def _update_position_pnl(self, position: Position) -> None:
+        """Update position's PnL."""
+        if not self.current_price:
             return
-            
-        # Calculate price difference
-        price_diff = self.current_price - position.entry_price
-        
-        # P&L calculation depends on direction
-        if position.direction == "LONG":
-            # For long positions, profit when price goes up
-            position.unrealized_pnl = (price_diff / position.entry_price) * position.size * position.leverage
-        else:
-            # For short positions, profit when price goes down
-            position.unrealized_pnl = (-price_diff / position.entry_price) * position.size * position.leverage
-        
+
+        position.update_pnl(self.current_price)
+
         # Add divine PnL status with cosmic colors
-        if position.unrealized_pnl > 0:
-            print(f"{GREEN}Position {position.direction} showing profit: ${position.unrealized_pnl:.2f}{RESET}")
-        elif position.unrealized_pnl < 0:
-            print(f"{RED}Position {position.direction} showing loss: ${position.unrealized_pnl:.2f}{RESET}")
+        if position.calculate_unrealized_pnl(self.current_price)[0] > 0:
+            print(f"{GREEN}Position {position.direction} showing profit: ${position.calculate_unrealized_pnl(self.current_price)[0]:.2f}{RESET}")
+        elif position.calculate_unrealized_pnl(self.current_price)[0] < 0:
+            print(f"{RED}Position {position.direction} showing loss: ${position.calculate_unrealized_pnl(self.current_price)[0]:.2f}{RESET}")
 
     def _check_stop_loss_hit(self, position):
         """Check if a position's stop loss has been triggered with divine protection."""
@@ -640,10 +672,10 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
 
     def _check_take_profit_hit(self, position):
         """Check if any take profit level has been hit with divine blessing."""
-        if not position.take_profit:
+        if not position.take_profits:
             return False
             
-        for tp in position.take_profit:
+        for tp in position.take_profits:
             price_level = tp.get("price")
             if price_level is None:
                 continue
@@ -795,3 +827,92 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         except Exception as e:
             # Don't let Redis errors disrupt trading
             print(f"{YELLOW}Redis error storing trade result: {e}{RESET}")
+
+    def calculate_sharpe_ratio(self) -> float:
+        """Calculate the Sharpe ratio for the trader's performance."""
+        if not hasattr(self, 'trade_history') or not self.trade_history:
+            return 0.0
+            
+        # Get returns from trade history
+        returns = []
+        if isinstance(self.trade_history, list):
+            returns = [trade.get("pnl", 0.0) / trade.get("entry_value", 1.0) * 100 for trade in self.trade_history]
+        else:
+            # Handle TradeHistory object
+            for trade in self.trade_history.trades:
+                if hasattr(trade, 'realized_pnl') and hasattr(trade, 'entry_price') and hasattr(trade, 'size'):
+                    entry_value = trade.entry_price * trade.size
+                    returns.append((trade.realized_pnl / entry_value) * 100)
+            
+        if not returns:
+            return 0.0
+            
+        # Calculate average return and standard deviation
+        avg_return = sum(returns) / len(returns)
+        std_dev = (sum((r - avg_return) ** 2 for r in returns) / len(returns)) ** 0.5
+        
+        # Risk-free rate assumed to be 0% for simplicity
+        risk_free_rate = 0.0
+        
+        # Calculate Sharpe ratio
+        if std_dev == 0:
+            return 0.0
+            
+        sharpe = (avg_return - risk_free_rate) / std_dev
+        return sharpe
+
+    def calculate_max_drawdown(self) -> float:
+        """Calculate the maximum drawdown from peak capital."""
+        if not hasattr(self, 'trade_history') or not self.trade_history:
+            return 0.0
+            
+        # Track peak capital and current drawdown
+        peak_capital = self.initial_capital
+        max_drawdown = 0.0
+        current_capital = self.initial_capital
+        
+        # Get trades from trade history
+        trades = []
+        if isinstance(self.trade_history, list):
+            trades = self.trade_history
+        else:
+            # Handle TradeHistory object
+            trades = self.trade_history.trades
+            
+        for trade in trades:
+            if isinstance(trade, dict):
+                pnl = trade.get("pnl", 0.0)
+            else:
+                # Get PnL from trade object
+                pnl = trade.realized_pnl if hasattr(trade, 'realized_pnl') else 0.0
+                
+            current_capital += pnl
+            peak_capital = max(peak_capital, current_capital)
+            drawdown = (peak_capital - current_capital) / peak_capital
+            max_drawdown = max(max_drawdown, drawdown)
+            
+        return max_drawdown
+
+    @property
+    def total_pnl(self) -> float:
+        """Calculate total profit/loss from all trades."""
+        if not hasattr(self, 'trade_history') or not self.trade_history:
+            return 0.0
+            
+        # Get trades from trade history
+        trades = []
+        if isinstance(self.trade_history, list):
+            trades = self.trade_history
+        else:
+            # Handle TradeHistory object
+            trades = self.trade_history.trades
+            
+        total = 0.0
+        for trade in trades:
+            if isinstance(trade, dict):
+                total += trade.get("pnl", 0.0)
+            else:
+                # Get PnL from trade object
+                total += trade.realized_pnl if hasattr(trade, 'realized_pnl') else 0.0
+                
+        return total
