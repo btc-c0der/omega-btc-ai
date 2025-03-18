@@ -31,17 +31,18 @@ class RedisManager:
             "decode_responses": True
         }
         
-        # Add optional authentication if provided
-        if username:
-            connection_params["username"] = username
-        if password:
-            connection_params["password"] = password
-            
-        # Add SSL/TLS parameters if enabled
-        if ssl:
-            connection_params["ssl"] = True
-            if ssl_ca_certs:
-                connection_params["ssl_ca_certs"] = ssl_ca_certs
+        # Add optional authentication if provided and not in development mode
+        if not os.environ.get('OMEGA_DEV_MODE', 'true').lower() == 'true':
+            if username:
+                connection_params["username"] = username
+            if password:
+                connection_params["password"] = password
+                
+            # Add SSL/TLS parameters if enabled
+            if ssl:
+                connection_params["ssl"] = True
+                if ssl_ca_certs:
+                    connection_params["ssl_ca_certs"] = ssl_ca_certs
         
         try:
             self.redis = redis.Redis(**connection_params)
