@@ -3,10 +3,17 @@
 # Navigate to the omega_ai directory
 cd "$(dirname "$0")"
 
-# Start the dashboard in the background
-echo "Starting the OMEGA BTC AI Dashboard..."
-python omega_ai/visualization/omega_dashboard.py &
+# Default mode is "full"
+MODE=${1:-full}
 
-# Start the BtcFuturesTrader with the OmegaSuggestionsModule
-echo "Starting the BTC Futures Trading Simulation..."
-python omega_ai/trading/btc_futures_trader.py
+# Start the OMEGA BTC AI system with the specified mode
+echo "Starting OMEGA BTC AI in $MODE mode..."
+python omega_ai/omega_runner.py --mode $MODE
+
+# If the script exits with an error, show the logs
+if [ $? -ne 0 ]; then
+    echo "Error: OMEGA BTC AI failed to start properly"
+    echo "Checking logs..."
+    tail -n 50 omega_runner.log
+    tail -n 50 omega_service.log
+fi
