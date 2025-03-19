@@ -53,7 +53,7 @@ class RiskParameters:
 class TraderProfile(ABC):
     """Base class for all trader profiles."""
     
-    def __init__(self, initial_capital: float = 10000.0):
+    def __init__(self, initial_capital: float = 10000.0, btc_last_price: float = 0.0):
         """Initialize the trader profile with common attributes."""
         self.name = "Base Trader"  # Default name, should be overridden by subclasses
         self.capital = initial_capital
@@ -81,10 +81,11 @@ class TraderProfile(ABC):
         self.trend_strength = 0.0
         self.volatility = 0.0
         
-        self._current_price = 0.0  # Current market price (private)
-        self._last_valid_price = 0.0  # Last known valid price
-        self._price_update_time = None  # Last price update timestamp
-        self._max_price_age = 60  # Maximum age of price data in seconds
+        # Initialize current price with a valid value
+        self._current_price = btc_last_price if btc_last_price > 0 else 1.0
+        self._last_valid_price = self._current_price
+        self._price_update_time = None
+        self._max_price_age = 300  # Max age in seconds for a price to be considered valid
     
     @property
     def risk_per_trade(self) -> float:
@@ -120,6 +121,9 @@ class TraderProfile(ABC):
     def current_price(self, value: float) -> None:
         """Set the current price with validation."""
         if value <= 0:
+            if self._last_valid_price > 0:
+                self._current_price = self._last_valid_price
+                return
             raise ValueError(f"Invalid price value: {value}")
         
         self._last_valid_price = self._current_price if self._current_price > 0 else value

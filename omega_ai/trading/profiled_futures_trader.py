@@ -84,6 +84,7 @@ class Position:
     take_profits: List[Dict[str, float]] = field(default_factory=list)
     stop_loss: Optional[float] = None
     realized_pnl: float = 0.0
+    unrealized_pnl: float = 0.0  # Add unrealized PnL field
     status: str = "OPEN"  # OPEN, CLOSED, LIQUIDATED
 
     def calculate_unrealized_pnl(self, current_price: float) -> Tuple[float, float]:
@@ -113,6 +114,7 @@ class Position:
             "take_profits": self.take_profits,
             "stop_loss": self.stop_loss,
             "realized_pnl": self.realized_pnl,
+            "unrealized_pnl": self.unrealized_pnl,
             "status": self.status
         }
         return result
@@ -125,11 +127,11 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
                  initial_capital: float = 10000.0,
                  **kwargs):
         """Initialize trader with a specific psychological profile."""
+        self._current_price = kwargs.get('btc_last_price', 1.0) if kwargs.get('btc_last_price', 1.0) > 0 else 1.0
         super().__init__(initial_capital=initial_capital, **kwargs)
         self.profile_type = profile_type
         self.positions: List[Position] = []
-        self._current_price: float = 0.0
-        self._last_valid_price: float = 0.0
+        self._last_valid_price = self._current_price
         self._price_update_time = None
         self._max_price_age = 60  # Maximum age of price data in seconds
         
@@ -460,15 +462,22 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         # Implement scalper trading logic
         pass
 
-    def open_position(self, direction: str, reason: str, leverage: int = 1) -> Optional[Position]:
+    def open_position(self, direction: str, reason: str, leverage: int = 1, stop_loss_pct: float = None) -> Optional[Position]:
         """Open a new trading position."""
         if direction not in ["LONG", "SHORT"]:
             logger.error(f"Invalid position direction: {direction}")
             return None
+            
+        # Validate leverage
+        if leverage <= 0 or leverage > self.max_leverage:
+            raise ValueError(f"Invalid leverage value: {leverage}. Must be between 1 and {self.max_leverage}")
 
         try:
-            # Calculate stop loss
-            stop_loss = self._calculate_stop_loss(direction, self.current_price)
+            # Calculate stop loss using provided percentage or default calculation
+            if stop_loss_pct is not None:
+                stop_loss = self.current_price * (1 - stop_loss_pct) if direction == "LONG" else self.current_price * (1 + stop_loss_pct)
+            else:
+                stop_loss = self._calculate_stop_loss(direction, self.current_price)
 
             # Create position
             position = Position(
@@ -491,6 +500,7 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
             logger.info(f"Opened {direction} position with {leverage}x leverage")
             logger.info(f"Entry Price: ${self.current_price:,.2f}")
             logger.info(f"Position Size: ${position.size:,.2f}")
+            logger.info(f"Stop Loss: ${stop_loss:,.2f}")
             logger.info(f"Reason: {reason}")
             
             # Update state
@@ -650,13 +660,15 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         if not self.current_price:
             return
 
-        position.update_pnl(self.current_price)
+        # Calculate unrealized PnL
+        pnl_usd, pnl_pct = position.calculate_unrealized_pnl(self.current_price)
+        position.unrealized_pnl = pnl_usd  # Update the position's unrealized PnL
 
         # Add divine PnL status with cosmic colors
-        if position.calculate_unrealized_pnl(self.current_price)[0] > 0:
-            print(f"{GREEN}Position {position.direction} showing profit: ${position.calculate_unrealized_pnl(self.current_price)[0]:.2f}{RESET}")
-        elif position.calculate_unrealized_pnl(self.current_price)[0] < 0:
-            print(f"{RED}Position {position.direction} showing loss: ${position.calculate_unrealized_pnl(self.current_price)[0]:.2f}{RESET}")
+        if pnl_usd > 0:
+            print(f"{GREEN}Position {position.direction} showing profit: ${pnl_usd:.2f}{RESET}")
+        elif pnl_usd < 0:
+            print(f"{RED}Position {position.direction} showing loss: ${pnl_usd:.2f}{RESET}")
 
     def _check_stop_loss_hit(self, position):
         """Check if a position's stop loss has been triggered with divine protection."""
@@ -691,34 +703,35 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
                     
         return False
 
-    def _close_position(self, position, reason=""):
-        """Close a position with JAH BLESSING and record results."""
-        # Calculate realized profit/loss
-        price_diff = self.current_price - position.entry_price
+    def _close_position(self, position: Position, reason: str) -> None:
+        """Close a position and update PnL."""
+        position.exit_price = self.current_price
+        position.exit_time = datetime.now(timezone.utc)  # Use timezone-aware datetime
+        position.exit_reason = reason
+        position.status = "CLOSED"
         
-        if position.direction == "SHORT":
-            # For shorts, profit is inverse
-            price_diff = -price_diff
-            
-        # Calculate P&L with leverage
-        pnl = (price_diff / position.entry_price) * position.size * position.leverage
+        # Calculate PnL
+        price_diff = position.exit_price - position.entry_price if position.direction == "LONG" else position.entry_price - position.exit_price
+        pnl = price_diff * position.size * position.leverage
+        roi_pct = (pnl / (position.size * position.entry_price)) * 100
         
-        # Update trader capital with realized profit/loss
+        # Update position PnL
+        position.realized_pnl = pnl
+        
+        # Update trader's capital
         self.capital += pnl
         
-        # Get divine color for P&L
-        color = GREEN if pnl > 0 else RED if pnl < 0 else YELLOW
-        
-        # Calculate ROI percentage
-        roi_pct = (pnl / position.size) * 100
-        
-        # Print spiritual closing message
-        print(f"\n{color}🔒 CLOSED {position.direction} POSITION with {position.leverage}x leverage{RESET}")
+        # Print position summary with color coding
+        color = '\x1b[92m' if pnl >= 0 else '\x1b[91m'  # Green for profit, Red for loss
+        print(f"\n{color}🔒 CLOSED {position.direction} POSITION with {position.leverage}x leverage")
         print(f"Entry Price: ${position.entry_price:,.2f}")
-        print(f"Exit Price: ${self.current_price:,.2f}")
-        print(f"P&L: {color}${pnl:,.2f} ({roi_pct:+.2f}%){RESET}")
-        print(f"Reason: {reason}")
-        print(f"Position Lifetime: {(datetime.now() - position.entry_time).total_seconds()/60:.1f} minutes")
+        print(f"Exit Price: ${position.exit_price:,.2f}")
+        print(f"P&L: ${pnl:,.2f} ({roi_pct:+.2f}%)")
+        print(f"Reason: {reason}\x1b[0m")
+        
+        # Print position lifetime
+        lifetime_minutes = (position.exit_time - position.entry_time).total_seconds() / 60
+        print(f"Position Lifetime: {lifetime_minutes:.1f} minutes")
         
         # Update trader state based on outcome
         if pnl > 0:
@@ -761,14 +774,15 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
         # Calculate win rate
         if self.total_trades > 0:
             self.win_rate = self.winning_trades / self.total_trades
+            print(f"{GREEN}Win rate updated: {self.win_rate:.2%}{RESET}")
         
         # Store trade result in trade history
         trade_result = {
             "direction": position.direction,
             "entry_price": position.entry_price,
-            "exit_price": self.current_price,
+            "exit_price": position.exit_price,
             "entry_time": position.entry_time,
-            "exit_time": datetime.now(),
+            "exit_time": position.exit_time,
             "size": position.size,
             "leverage": position.leverage,
             "pnl": pnl,
@@ -823,6 +837,11 @@ class ProfiledFuturesTrader(BtcFuturesTrader):
             }
             
             redis_conn.hset(f"trader:metrics:{self.profile_type}", mapping=metrics)
+            
+            # Add to local trade history
+            if not hasattr(self, 'trade_history'):
+                self.trade_history = []
+            self.trade_history.append(trade_data)
             
         except Exception as e:
             # Don't let Redis errors disrupt trading
