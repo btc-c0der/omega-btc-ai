@@ -69,7 +69,7 @@ class BitGetOrderExecutor:
             logger.info(f"{GREEN}API credentials loaded successfully.{RESET}")
             logger.info(f"{CYAN}Using {'TESTNET' if use_testnet else 'MAINNET'} environment.{RESET}")
     
-    def get_signature(self, timestamp: str, method: str, request_path: str, body: str = "") -> str:
+    def get_signature(self, timestamp: str, method: str, request_path: str, body: str = "", params: dict = {}) -> str:
         """
         Generate BitGet API signature.
         
@@ -78,11 +78,29 @@ class BitGetOrderExecutor:
             method: HTTP method (GET, POST, etc.)
             request_path: API endpoint path
             body: Request body as JSON string (for POST requests)
+            params: Query parameters for GET requests (default: empty dict)
             
         Returns:
             Base64 encoded signature
         """
-        message = timestamp + method + request_path + body
+        # Start with timestamp + method + request_path
+        message = timestamp + method + request_path
+        
+        # Add query parameters if present for GET requests
+        if method == "GET" and params:
+            # Sort parameters by key
+            sorted_params = sorted(params.items())
+            # Create query string
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            # Add to message with question mark
+            message += "?" + query_string
+            
+        # Add body for POST requests
+        if method == "POST" and body:
+            message += body
+            
+        logger.debug(f"Signing message: {message}")
+        
         return base64.b64encode(
             hmac.new(self.secret_key.encode(), message.encode(), hashlib.sha256).digest()
         ).decode()
@@ -108,14 +126,25 @@ class BitGetOrderExecutor:
         # Current time for API signature
         timestamp = str(int(time.time() * 1000))
         
+        # Map side to BitGet's expected format
+        side_mapping = {
+            "buy": "open_long",
+            "sell": "open_short"
+        }
+        mapped_side = side_mapping.get(side.lower(), "open_long")
+        
         # Define order parameters
         order_payload = {
             "symbol": formatted_symbol,
-            "size": size,  # Quantity to buy/sell
-            "side": side,  # "buy" or "sell"
-            "orderType": "market",  # Market order
-            "price": "",  # Not used for market orders
-            "force": "gtc"  # Good-Till-Cancelled
+            "marginCoin": "USDT",
+            "size": size,
+            "side": mapped_side,
+            "orderType": "market",
+            "timeInForceValue": "normal",
+            "clientOid": f"omega_{int(time.time() * 1000)}",  # Unique client order ID
+            "reduceOnly": False,
+            "presetTakeProfitPrice": "",
+            "presetStopLossPrice": ""
         }
         
         # Convert payload to JSON string for signature
@@ -125,7 +154,7 @@ class BitGetOrderExecutor:
         request_path = "/api/mix/v1/order/placeOrder"
         
         # Generate signature
-        signature = self.get_signature(timestamp, "POST", request_path, payload_json)
+        signature = self.get_signature(timestamp, "POST", request_path, body=payload_json)
         
         # Prepare headers
         headers = {
@@ -137,7 +166,7 @@ class BitGetOrderExecutor:
         }
         
         # Log order details before sending
-        logger.info(f"{BLUE}Placing {'BUY' if side == 'buy' else 'SELL'} order for {size} {symbol}{RESET}")
+        logger.info(f"{BLUE}Placing {mapped_side.upper()} order for {size} {symbol}{RESET}")
         logger.info(f"{CYAN}Order payload: {payload_json}{RESET}")
         
         # Execute API request
@@ -176,10 +205,16 @@ class BitGetOrderExecutor:
             Account balance information
         """
         timestamp = str(int(time.time() * 1000))
-        request_path = "/api/mix/v1/account/accounts"
+        request_path = "/api/mix/v1/account/account"
         
-        # Generate signature
-        signature = self.get_signature(timestamp, "GET", request_path)
+        # Add required parameters
+        params = {
+            "productType": "umcbl",  # USDT Margined Contracts
+            "marginCoin": "USDT"     # Margin currency
+        }
+        
+        # Generate signature with params
+        signature = self.get_signature(timestamp, "GET", request_path, params=params)
         
         # Prepare headers
         headers = {
@@ -190,12 +225,16 @@ class BitGetOrderExecutor:
             "Content-Type": "application/json",
         }
         
+        # Build URL with query parameters
+        url = self.base_url + request_path
+        if params:
+            sorted_params = sorted(params.items())
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            url += "?" + query_string
+        
         # Execute API request
         try:
-            response = requests.get(
-                self.base_url + request_path, 
-                headers=headers
-            )
+            response = requests.get(url, headers=headers)
             
             # Parse response
             response_data = response.json()
@@ -205,15 +244,15 @@ class BitGetOrderExecutor:
                 logger.info(f"{GREEN}Account balance retrieved successfully!{RESET}")
                 
                 # Format and display balance information
-                if 'data' in response_data and isinstance(response_data['data'], list):
-                    for account in response_data['data']:
-                        symbol = account.get('marginCoin', 'UNKNOWN')
-                        available = account.get('available', '0')
-                        equity = account.get('equity', '0')
-                        
-                        logger.info(f"{CYAN}{symbol} Balance:{RESET}")
-                        logger.info(f"{CYAN}  Available: {available}{RESET}")
-                        logger.info(f"{CYAN}  Equity: {equity}{RESET}")
+                if 'data' in response_data:
+                    account = response_data['data']
+                    symbol = account.get('marginCoin', 'UNKNOWN')
+                    available = account.get('available', '0')
+                    equity = account.get('equity', '0')
+                    
+                    logger.info(f"{CYAN}{symbol} Balance:{RESET}")
+                    logger.info(f"{CYAN}  Available: {available}{RESET}")
+                    logger.info(f"{CYAN}  Equity: {equity}{RESET}")
             else:
                 logger.error(f"{RED}Failed to retrieve account balance!{RESET}")
                 logger.error(f"{RED}Status code: {response.status_code}{RESET}")
@@ -241,10 +280,17 @@ class BitGetOrderExecutor:
         formatted_symbol = f"{symbol}_UMCBL"
         
         timestamp = str(int(time.time() * 1000))
-        request_path = f"/api/mix/v1/position/singlePosition?symbol={formatted_symbol}"
+        request_path = "/api/mix/v1/position/singlePosition"
         
-        # Generate signature
-        signature = self.get_signature(timestamp, "GET", request_path)
+        # Add required parameters
+        params = {
+            "symbol": formatted_symbol,
+            "marginCoin": "USDT",
+            "productType": "umcbl"
+        }
+        
+        # Generate signature with params
+        signature = self.get_signature(timestamp, "GET", request_path, params=params)
         
         # Prepare headers
         headers = {
@@ -255,12 +301,16 @@ class BitGetOrderExecutor:
             "Content-Type": "application/json",
         }
         
+        # Build URL with query parameters
+        url = self.base_url + request_path
+        if params:
+            sorted_params = sorted(params.items())
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            url += "?" + query_string
+        
         # Execute API request
         try:
-            response = requests.get(
-                self.base_url + request_path, 
-                headers=headers
-            )
+            response = requests.get(url, headers=headers)
             
             # Parse response
             response_data = response.json()
@@ -270,15 +320,15 @@ class BitGetOrderExecutor:
                 logger.info(f"{GREEN}Positions for {symbol} retrieved successfully!{RESET}")
                 
                 # Format and display position information
-                if 'data' in response_data and isinstance(response_data['data'], list):
-                    for position in response_data['data']:
-                        side = position.get('holdSide', 'UNKNOWN')
-                        size = position.get('total', '0')
-                        avg_price = position.get('averageOpenPrice', '0')
-                        unrealized_pnl = position.get('unrealizedPL', '0')
-                        
-                        logger.info(f"{CYAN}Position: {side} {size} {symbol} @ {avg_price}{RESET}")
-                        logger.info(f"{CYAN}  Unrealized PnL: {unrealized_pnl}{RESET}")
+                if 'data' in response_data:
+                    position = response_data['data']
+                    side = position.get('holdSide', 'UNKNOWN')
+                    size = position.get('total', '0')
+                    avg_price = position.get('averageOpenPrice', '0')
+                    unrealized_pnl = position.get('unrealizedPL', '0')
+                    
+                    logger.info(f"{CYAN}Position: {side} {size} {symbol} @ {avg_price}{RESET}")
+                    logger.info(f"{CYAN}  Unrealized PnL: {unrealized_pnl}{RESET}")
             else:
                 logger.error(f"{RED}Failed to retrieve positions!{RESET}")
                 logger.error(f"{RED}Status code: {response.status_code}{RESET}")

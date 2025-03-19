@@ -391,14 +391,16 @@ class BitGetTrader:
                 formatted_symbol = self.format_symbol(symbol, self.api_version)
                 params: Dict[str, Any] = {
                     "symbol": formatted_symbol,
-                    "side": side.upper(),
+                    "marginCoin": "USDT",  # Required for v1 API
+                    "side": side,  # Already mapped to open_long/open_short by caller
                     "orderType": order_type.upper(),
                     "marginMode": margin_mode.upper(),
                     "leverage": leverage,
-                    "timeInForce": time_in_force.upper(),
+                    "timeInForceValue": time_in_force,  # Changed from timeInForce to timeInForceValue
                     "reduceOnly": str(reduce_only).lower(),
                     "postOnly": str(post_only).lower(),
-                    "productType": self.PRODUCT_TYPE_PARAM
+                    "productType": self.PRODUCT_TYPE_PARAM,
+                    "clientOid": f"omega_{int(time.time() * 1000)}"  # Required unique client order ID
                 }
                 
                 if order_type.lower() == "limit":
@@ -419,7 +421,7 @@ class BitGetTrader:
                 return None
         
         # Use internal implementation if no external client
-        endpoint = f"{self.api_base}/order/place-order"
+        endpoint = f"{self.api_base}/order/placeOrder"
         method = "POST"
         timestamp = str(int(time.time() * 1000))
         
@@ -428,14 +430,16 @@ class BitGetTrader:
         
         params: Dict[str, Any] = {
             "symbol": formatted_symbol,
-            "side": side.upper(),
+            "marginCoin": "USDT",  # Required for v1 API
+            "side": side,  # Already mapped to open_long/open_short by caller
             "orderType": order_type.upper(),
             "marginMode": margin_mode.upper(),
             "leverage": leverage,
-            "timeInForce": time_in_force.upper(),
+            "timeInForceValue": time_in_force,  # Changed from timeInForce to timeInForceValue
             "reduceOnly": str(reduce_only).lower(),
             "postOnly": str(post_only).lower(),
-            "productType": self.PRODUCT_TYPE_PARAM
+            "productType": self.PRODUCT_TYPE_PARAM,
+            "clientOid": f"omega_{int(time.time() * 1000)}"  # Required unique client order ID
         }
         
         if order_type.lower() == "limit":
@@ -577,16 +581,21 @@ class BitGetTrader:
             logger.error("Invalid position size calculated")
             return None
         
-        # Format symbol properly for the API version
-        formatted_symbol = self.format_symbol("BTCUSDT", self.api_version)
+        # Map direction to BitGet's expected format
+        side_mapping = {
+            "LONG": "open_long",
+            "SHORT": "open_short"
+        }
+        mapped_side = side_mapping.get(direction, "open_long")
         
-        # Place the order
+        # Place the order with correct side mapping
         order_response = self.place_order(
-            symbol=formatted_symbol,
-            side="BUY" if direction == "LONG" else "SELL",
+            symbol=self.symbol,
+            side=mapped_side,  # Use mapped side instead of BUY/SELL
             order_type="MARKET",
             quantity=position_size,
-            time_in_force="normal"
+            time_in_force="normal",
+            leverage=str(leverage)
         )
         
         if not order_response or order_response.get("code") != "00000":
