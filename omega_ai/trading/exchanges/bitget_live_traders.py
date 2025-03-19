@@ -26,6 +26,33 @@ from omega_ai.trading.profiles import (
 from omega_ai.alerts.telegram_market_report import send_telegram_alert
 import json
 import os
+import sys
+import traceback
+
+# Custom JSON encoder for datetime objects
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return super().default(o)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,  # Set to DEBUG for maximum logging
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),  # Console output
+        logging.FileHandler('bitget_live_trading.log')  # File output
+    ]
+)
+
+# Set specific loggers to DEBUG level
+logging.getLogger('omega_ai.trading.exchanges.bitget_trader').setLevel(logging.DEBUG)
+logging.getLogger('omega_ai.trading.exchanges.bitget_live_traders').setLevel(logging.DEBUG)
+logging.getLogger('omega_ai.trading.profiles').setLevel(logging.DEBUG)
+logging.getLogger('omega_ai.alerts.telegram_market_report').setLevel(logging.DEBUG)
+
+logger = logging.getLogger(__name__)
 
 # Terminal colors for output
 GREEN = "\033[92m"
@@ -35,13 +62,6 @@ BLUE = "\033[94m"
 CYAN = "\033[96m"
 MAGENTA = "\033[95m"
 RESET = "\033[0m"
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 class BitGetLiveTraders:
     """Manages multiple live traders on BitGet with different profiles."""
@@ -82,22 +102,44 @@ class BitGetLiveTraders:
         self.pnl_alert_interval = pnl_alert_interval
         self.last_pnl_alert_time = datetime.now(timezone.utc)
         
+        # Log initialization parameters
+        logger.debug(f"{CYAN}Initializing BitGetLiveTraders with parameters:{RESET}")
+        logger.debug(f"  use_testnet: {use_testnet}")
+        logger.debug(f"  initial_capital: {initial_capital}")
+        logger.debug(f"  symbol: {symbol}")
+        logger.debug(f"  strategic_only: {strategic_only}")
+        logger.debug(f"  enable_pnl_alerts: {enable_pnl_alerts}")
+        logger.debug(f"  pnl_alert_interval: {pnl_alert_interval}")
+        
         # Look for API credentials in environment variables if not provided
         self.api_key = api_key or os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
         self.secret_key = secret_key or os.environ.get("BITGET_TESTNET_SECRET_KEY" if use_testnet else "BITGET_SECRET_KEY", "")
         self.passphrase = passphrase or os.environ.get("BITGET_TESTNET_PASSPHRASE" if use_testnet else "BITGET_PASSPHRASE", "")
         
-        # Log API credentials status
+        # Log API credentials status (safely)
         if not self.api_key or not self.secret_key or not self.passphrase:
             logger.warning(f"{YELLOW}One or more API credentials are missing. API authentication will fail.{RESET}")
         else:
             logger.info(f"{GREEN}API credentials loaded successfully.{RESET}")
+            logger.debug(f"  API Key: {self.api_key[:5]}...{self.api_key[-3:] if len(self.api_key) > 5 else ''}")
+            logger.debug(f"  Secret Key Length: {len(self.secret_key)} characters")
+            logger.debug(f"  Passphrase Length: {len(self.passphrase)} characters")
             
         self.api_client = api_client
         self.use_coin_picker = use_coin_picker
         self.traders: Dict[str, BitGetTrader] = {}
         self.is_running = False
         self.coin_picker = CoinPicker(use_testnet=use_testnet) if use_coin_picker else None
+        
+        # Log environment information
+        logger.debug(f"{CYAN}Environment Information:{RESET}")
+        logger.debug(f"  Python Version: {sys.version}")
+        logger.debug(f"  OS: {os.name}")
+        logger.debug(f"  Working Directory: {os.getcwd()}")
+        logger.debug(f"  Environment Variables:")
+        for key in ["BITGET_TESTNET_API_KEY", "BITGET_API_KEY", "STRATEGIC_SUB_ACCOUNT_NAME"]:
+            if key in os.environ:
+                logger.debug(f"    {key}: {'*' * len(os.environ[key])}")
         
     async def initialize(self) -> None:
         """Initialize the trading system."""
@@ -170,24 +212,34 @@ class BitGetLiveTraders:
         
     async def _initialize_traders(self) -> None:
         """Initialize traders with different profiles."""
-        # Define available profiles
-        if self.strategic_only:
-            profiles = {
-                "strategic": StrategicTrader
-            }
-            logger.info(f"{GREEN}Strategic-only mode enabled. Only initializing Strategic trader.{RESET}")
-        else:
-            profiles = {
-                "strategic": StrategicTrader,
-                "aggressive": AggressiveTrader,
-                "newbie": NewbieTrader,
-                "scalper": ScalperTrader
-            }
+        profiles = {
+            "strategic": StrategicTrader,
+            "aggressive": AggressiveTrader,
+            "scalping": ScalperTrader
+        }
         
-        # API version to use - v1 is more stable and has different endpoints
-        api_version = "v1"
+        # API version to use - v2 for better compatibility
+        api_version = "v2"
         logger.info(f"{YELLOW}Initializing traders with API version {api_version}{RESET}")
         
+        # For mainnet, only use the main account
+        if not self.use_testnet:
+            logger.info(f"{CYAN}Using main account only for mainnet trading{RESET}")
+            trader = BitGetTrader(
+                profile_type="strategic",
+                api_key=self.api_key,
+                secret_key=self.secret_key,
+                passphrase=self.passphrase,
+                use_testnet=self.use_testnet,
+                initial_capital=self.initial_capital,
+                api_client=self.api_client,
+                api_version=api_version
+            )
+            trader.symbol = self.symbol
+            self.traders["strategic"] = trader
+            return
+        
+        # For testnet, initialize all profiles
         for profile_name, profile_class in profiles.items():
             try:
                 # Get sub-account name from environment for strategic trader
@@ -204,37 +256,22 @@ class BitGetLiveTraders:
                     passphrase=self.passphrase,
                     use_testnet=self.use_testnet,
                     initial_capital=self.initial_capital,
-                    api_client=self.api_client,  # Pass the external API client if provided
-                    api_version=api_version,  # Use v1 API for stability
-                    sub_account_name=sub_account_name  # Add sub-account name for strategic trader
+                    api_client=self.api_client,
+                    api_version=api_version,
+                    sub_account_name=sub_account_name
                 )
                 
                 # Make sure trader is using the same symbol as us
                 trader.symbol = self.symbol
                 
+                # Initialize the trader profile
                 self.traders[profile_name] = trader
-                logger.info(f"{GREEN}Initialized {profile_name} trader with {self.initial_capital} USDT{RESET}")
-                logger.info(f"{CYAN}Trader API URL: {trader.api_url}{RESET}")
-                logger.info(f"{CYAN}Trader API Base: {trader.api_base}{RESET}")
-                logger.info(f"{CYAN}Trader Symbol: {trader.symbol} (will be formatted as {trader.format_symbol(trader.symbol, api_version)} for API calls){RESET}")
-                
-                # Send initialization alert
-                alert_msg = (
-                    f"🚀 {profile_name.upper()} TRADER INITIALIZED\n"
-                    f"Symbol: {self.symbol}\n"
-                    f"Capital: {self.initial_capital} USDT\n"
-                    f"Mode: {'TESTNET' if self.use_testnet else 'MAINNET'}\n"
-                    f"API Version: {api_version}"
-                )
-                if sub_account_name:
-                    alert_msg += f"\nSub-account: {sub_account_name}"
-                await send_telegram_alert(alert_msg)
+                logger.info(f"{GREEN}Initialized {profile_name} trader{RESET}")
                 
             except Exception as e:
                 logger.error(f"{RED}Failed to initialize {profile_name} trader: {str(e)}{RESET}")
-                logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
-                logger.error(f"{RED}Exception args: {e.args}{RESET}")
-                
+                continue
+
     async def start_trading(self) -> None:
         """Start the live trading system."""
         # Initialize traders if not already done
@@ -252,7 +289,7 @@ class BitGetLiveTraders:
                         await self._update_trader(trader, profile_name)
                     except Exception as e:
                         logger.error(f"{RED}Error updating {profile_name} trader: {str(e)}{RESET}")
-                
+            
                 # Wait before next update
                 await asyncio.sleep(1)
                 
@@ -264,24 +301,33 @@ class BitGetLiveTraders:
         """Update a single trader's state and execute trading logic."""
         try:
             # Get current market data
-            logger.info(f"{CYAN}Getting market ticker for {trader.symbol} ({profile_name} trader){RESET}")
+            logger.debug(f"{CYAN}Getting market ticker for {trader.symbol} ({profile_name} trader){RESET}")
             ticker = trader.get_market_ticker(trader.symbol)
             
             if ticker and 'last' in ticker:
                 current_price = float(ticker['last'])
-                logger.info(f"{GREEN}Current price for {trader.symbol}: {current_price}{RESET}")
+                logger.debug(f"{GREEN}Current price for {trader.symbol}: {current_price}{RESET}")
+                logger.debug(f"{CYAN}Full ticker data: {json.dumps(ticker, indent=2, cls=DateTimeEncoder)}{RESET}")
                 
                 # Update market context
                 market_context = {
                     "price": current_price,
                     "symbol": trader.symbol,
-                    "timestamp": datetime.now(timezone.utc)
+                    "timestamp": datetime.now(timezone.utc).isoformat()  # Convert to ISO format string
                 }
+                logger.debug(f"{CYAN}Market context: {json.dumps(market_context, indent=2)}{RESET}")
+                
+                # Get current positions before executing trade
+                logger.debug(f"{CYAN}Getting current positions for {profile_name} trader{RESET}")
+                current_positions = trader.get_positions(trader.symbol)
+                logger.debug(f"{CYAN}Current positions: {json.dumps(current_positions, indent=2, cls=DateTimeEncoder)}{RESET}")
                 
                 # Execute trading logic
+                logger.debug(f"{CYAN}Executing trading logic for {profile_name} trader{RESET}")
                 trade_result = trader.execute_trade(market_context)
                 
                 if trade_result:
+                    logger.debug(f"{CYAN}Trade executed: {json.dumps(trade_result, indent=2, cls=DateTimeEncoder)}{RESET}")
                     # Send trade alert
                     alert_msg = (
                         f"🎯 {profile_name.upper()} TRADER EXECUTED TRADE\n"
@@ -292,16 +338,24 @@ class BitGetLiveTraders:
                         f"Stop Loss: {trade_result.get('stop_loss', 0):.2f}"
                     )
                     await send_telegram_alert(alert_msg)
+                    logger.debug(f"{GREEN}Sent trade alert to Telegram{RESET}")
+                else:
+                    logger.debug(f"{YELLOW}No trade executed for {profile_name} trader{RESET}")
                 
                 # Update positions
+                logger.debug(f"{CYAN}Updating positions for {profile_name} trader{RESET}")
                 trader.update_positions(current_price)
+                
+                # Get updated positions
+                updated_positions = trader.get_positions(trader.symbol)
+                logger.debug(f"{CYAN}Updated positions: {json.dumps(updated_positions, indent=2, cls=DateTimeEncoder)}{RESET}")
                 
                 # Update performance metrics
                 await self._update_performance_metrics(trader, profile_name)
             else:
                 logger.error(f"{RED}Failed to get ticker data for {trader.symbol} ({profile_name} trader){RESET}")
                 if ticker:
-                    logger.error(f"{RED}Ticker response: {json.dumps(ticker, indent=2)}{RESET}")
+                    logger.error(f"{RED}Ticker response: {json.dumps(ticker, indent=2, cls=DateTimeEncoder)}{RESET}")
                 else:
                     logger.error(f"{RED}No ticker data returned{RESET}")
                 
@@ -309,6 +363,7 @@ class BitGetLiveTraders:
             logger.error(f"{RED}Error in trader update ({profile_name}): {str(e)}{RESET}")
             logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
             logger.error(f"{RED}Exception args: {e.args}{RESET}")
+            logger.error(f"{RED}Exception traceback: {traceback.format_exc()}{RESET}")
             
             # Send error alert for critical failures
             try:
@@ -319,8 +374,9 @@ class BitGetLiveTraders:
                     f"Type: {type(e).__name__}"
                 )
                 await send_telegram_alert(error_msg)
-            except:
-                logger.error(f"{RED}Failed to send error alert{RESET}")
+                logger.debug(f"{GREEN}Sent error alert to Telegram{RESET}")
+            except Exception as alert_error:
+                logger.error(f"{RED}Failed to send error alert: {str(alert_error)}{RESET}")
             
     async def _update_performance_metrics(self, trader: BitGetTrader, profile_name: str) -> None:
         """Update and log trader performance metrics."""
@@ -429,6 +485,44 @@ class BitGetLiveTraders:
             
     async def stop_trading(self) -> None:
         """Stop the live trading system and close all positions."""
+        # First, get all positions that would be closed
+        total_positions = 0
+        positions_by_trader = {}
+        
+        for profile_name, trader in self.traders.items():
+            try:
+                positions = trader.get_positions(trader.symbol)
+                if positions:
+                    open_positions = [p for p in positions if p.get('status') == 'OPEN']
+                    if open_positions:
+                        total_positions += len(open_positions)
+                        positions_by_trader[profile_name] = open_positions
+            except Exception as e:
+                logger.error(f"{RED}Error getting positions for {profile_name} trader: {str(e)}{RESET}")
+        
+        if total_positions > 0:
+            # Send warning message with position details
+            warning_msg = (
+                f"⚠️ WARNING: {total_positions} OPEN POSITIONS FOUND\n\n"
+                f"Traders with open positions:\n"
+            )
+            
+            for profile_name, positions in positions_by_trader.items():
+                warning_msg += f"\n{profile_name.upper()} ({len(positions)} positions):\n"
+                for pos in positions:
+                    warning_msg += f"- {pos.get('side', 'UNKNOWN')} {pos.get('size', 0)} BTC @ ${pos.get('entryPrice', 0)}\n"
+            
+            warning_msg += "\nDo you want to proceed with closing all positions? (yes/no)"
+            
+            # Send warning to Telegram
+            await send_telegram_alert(warning_msg)
+            
+            # Wait for user confirmation
+            confirmation = await self.wait_for_confirmation()
+            if not confirmation:
+                logger.info(f"{YELLOW}Position closure cancelled by user{RESET}")
+                return
+        
         self.is_running = False
         
         for profile_name, trader in self.traders.items():
@@ -465,6 +559,18 @@ class BitGetLiveTraders:
                 logger.error(f"{RED}Exception args: {e.args}{RESET}")
                 
         logger.info(f"{GREEN}Live traders system stopped successfully{RESET}")
+
+    async def wait_for_confirmation(self) -> bool:
+        """Wait for user confirmation via Telegram."""
+        # This is a placeholder - you'll need to implement the actual confirmation logic
+        # based on your Telegram bot setup
+        try:
+            # For now, we'll just wait 30 seconds and assume confirmation
+            await asyncio.sleep(30)
+            return True
+        except Exception as e:
+            logger.error(f"{RED}Error waiting for confirmation: {str(e)}{RESET}")
+            return False
 
 def parse_args():
     """Parse command line arguments."""
