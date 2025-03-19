@@ -32,6 +32,19 @@ from omega_ai.visualization.hyper_dimension import (
     create_4d_trader_energy_field
 )
 
+__all__ = [
+    'app',
+    'RedisKeys',
+    'update_schumann_gauge',
+    'update_trader_psychology',
+    'update_rasta_quote',
+    'update_battle_display',
+    'handle_battle_controls',
+    'update_3d_scatter_plot',
+    'update_fibonacci_sphere',
+    'update_trader_energy_field'
+]
+
 # Setup enhanced debug logging
 # Configure logging with detailed formatting and terminal colors
 class ColoredFormatter(logging.Formatter):
@@ -1165,6 +1178,126 @@ def update_trader_energy_field(n_intervals):
         logger.error(f"Error updating trader energy field: {e}")
         # Return empty figure on error
         return go.Figure()
+
+def update_schumann_gauge(schumann_data):
+    """Update the Schumann resonance gauge with divine cosmic data."""
+    try:
+        if isinstance(schumann_data, str):
+            schumann_data = json.loads(schumann_data)
+        
+        value = schumann_data.get('value', 7.83)  # Default to Earth's natural frequency
+        timestamp = schumann_data.get('timestamp', datetime.now().isoformat())
+        
+        # Create gauge figure with Rasta theme
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=value,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "🌍 SCHUMANN RESONANCE"},
+            gauge={
+                'axis': {'range': [0, 15]},
+                'bar': {'color': rasta_theme["green"]},
+                'steps': [
+                    {'range': [0, 7.83], 'color': rasta_theme["darkgreen"]},
+                    {'range': [7.83, 10], 'color': rasta_theme["yellow"]},
+                    {'range': [10, 15], 'color': rasta_theme["red"]}
+                ],
+                'threshold': {
+                    'line': {'color': rasta_theme["accent"], 'width': 4},
+                    'thickness': 0.75,
+                    'value': value
+                }
+            }
+        ))
+        
+        fig.update_layout(
+            paper_bgcolor=rasta_theme["paper"],
+            font={'color': rasta_theme["text"]},
+            height=300,
+            margin={'t': 25, 'b': 25, 'l': 25, 'r': 25}
+        )
+        
+        return fig
+        
+    except Exception as e:
+        logger.error(f"Error updating Schumann gauge: {str(e)}")
+        return None
+
+def update_trader_psychology(trader_data):
+    """Update the trader psychology visualization with divine emotional data."""
+    try:
+        if isinstance(trader_data, str):
+            trader_data = json.loads(trader_data)
+        
+        # Extract emotional states and confidence levels
+        emotional_states = []
+        confidence_levels = []
+        stress_levels = []
+        divine_connections = []
+        
+        for profile, data in trader_data.items():
+            emotional_states.append(data.get('emotional_state', 'neutral'))
+            confidence_levels.append(data.get('confidence', 0.5))
+            stress_levels.append(data.get('stress_level', 0.5))
+            divine_connections.append(data.get('divine_connection', 0.5))
+        
+        # Create radar chart for emotional states
+        fig = go.Figure()
+        
+        fig.add_trace(go.Scatterpolar(
+            r=confidence_levels,
+            theta=list(trader_data.keys()),
+            fill='toself',
+            name='Confidence',
+            line=dict(color=rasta_theme["green"])
+        ))
+        
+        fig.add_trace(go.Scatterpolar(
+            r=stress_levels,
+            theta=list(trader_data.keys()),
+            fill='toself',
+            name='Stress',
+            line=dict(color=rasta_theme["red"])
+        ))
+        
+        fig.add_trace(go.Scatterpolar(
+            r=divine_connections,
+            theta=list(trader_data.keys()),
+            fill='toself',
+            name='Divine Connection',
+            line=dict(color=rasta_theme["yellow"])
+        ))
+        
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 1],
+                    tickfont=dict(color=rasta_theme["text"]),
+                    gridcolor=rasta_theme["panel"]
+                ),
+                angularaxis=dict(
+                    tickfont=dict(color=rasta_theme["text"]),
+                    gridcolor=rasta_theme["panel"]
+                ),
+                bgcolor=rasta_theme["paper"]
+            ),
+            showlegend=True,
+            legend=dict(
+                font=dict(color=rasta_theme["text"]),
+                bgcolor=rasta_theme["paper"]
+            ),
+            paper_bgcolor=rasta_theme["paper"],
+            font={'color': rasta_theme["text"]},
+            height=400,
+            margin={'t': 25, 'b': 25, 'l': 25, 'r': 25}
+        )
+        
+        return fig
+        
+    except Exception as e:
+        logger.error(f"Error updating trader psychology: {str(e)}")
+        return None
 
 # Main entry point with initialization logging
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # Import OMEGA components
 from omega_ai.mm_trap_detector.mm_websocket_server import start_server as start_mm_ws
 from omega_ai.data_feed.btc_live_feed import start_btc_websocket
-from omega_ai.mm_trap_detector.mm_trap_processor import process_mm_trap
+from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
 from omega_ai.visualizer.backend.server import app as visualizer_app
 
 def display_banner():
@@ -71,7 +71,8 @@ async def start_all_components():
         # Start components
         mm_ws_task = loop.create_task(start_mm_ws())
         btc_feed_task = loop.run_in_executor(executor, start_btc_websocket)
-        trap_processor_task = loop.run_in_executor(executor, process_mm_trap)
+        detector = MMTrapDetector()
+        trap_processor_task = loop.create_task(detector.run())
         visualizer_task = loop.create_task(start_visualizer())
         
         # Wait for all components

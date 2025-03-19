@@ -14,7 +14,7 @@ from omega_ai.orchestrator.service_manager import ServiceManager
 from omega_ai.db_manager.database import setup_database
 from omega_ai.data_feed.schumann_monitor import start_schumann_monitor, stop_schumann_monitor
 from omega_ai.data_feed.btc_live_feed import start_btc_websocket, stop_btc_websocket
-from omega_ai.mm_trap_detector.mm_trap_processor import process_mm_trap, stop_mm_trap
+from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
 from omega_ai.monitor.monitor_market_trends import monitor_market_trends, stop_market_monitor
 from omega_ai.visualization.omega_dashboard import start_dashboard, stop_dashboard
 from omega_ai.trading.btc_futures_trader import start_trader, stop_trader
@@ -78,8 +78,8 @@ async def setup_services(service_manager: ServiceManager) -> None:
     # MM Trap Detector
     service_manager.register_service(
         name="mm_trap_detector",
-        start_func=process_mm_trap,
-        stop_func=stop_mm_trap,
+        start_func=lambda: MMTrapDetector().run(),
+        stop_func=lambda: None,  # No explicit stop needed, will stop when event loop stops
         dependencies={"database", "btc_feed", "market_monitor"}
     )
     
