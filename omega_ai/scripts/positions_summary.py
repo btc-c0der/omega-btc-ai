@@ -39,7 +39,8 @@ class PositionsSummary:
     def __init__(self, 
                  use_testnet: bool = False,
                  symbol: str = "",
-                 target_profit_pct: float = 2.0):
+                 target_profit_pct: float = 2.0,
+                 strategic_only: bool = False):
         """
         Initialize the positions summary.
         
@@ -47,11 +48,13 @@ class PositionsSummary:
             use_testnet: Whether to use testnet (default: False)
             symbol: Trading symbol (default: empty string, which means all symbols)
             target_profit_pct: Target profit percentage for positions (default: 2.0%)
+            strategic_only: Whether to only use the strategic trader profile (default: False)
         """
         self.use_testnet = use_testnet
         self.symbol = symbol
         self.target_profit_pct = target_profit_pct
         self.wallet_target = 1000.0  # Default target of 1000 USDT
+        self.strategic_only = strategic_only
         
         # Get API credentials from environment variables
         self.api_key = os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
@@ -71,41 +74,47 @@ class PositionsSummary:
         else:
             print(f"{Fore.GREEN}API credentials loaded. API Key: {self.api_key[:5]}...{self.api_key[-3:] if len(self.api_key) > 5 else ''}{Style.RESET_ALL}")
         
-        # Create BitGet trader instances for each profile
-        self.traders = {
-            "strategic": BitGetTrader(
-                profile_type="strategic",
-                api_key=self.api_key,
-                secret_key=self.secret_key,
-                passphrase=self.passphrase,
-                use_testnet=self.use_testnet,
-                api_version="v1"
-            ),
-            "aggressive": BitGetTrader(
-                profile_type="aggressive",
-                api_key=self.api_key,
-                secret_key=self.secret_key,
-                passphrase=self.passphrase,
-                use_testnet=self.use_testnet,
-                api_version="v1"
-            ),
-            "newbie": BitGetTrader(
-                profile_type="newbie",
-                api_key=self.api_key,
-                secret_key=self.secret_key,
-                passphrase=self.passphrase,
-                use_testnet=self.use_testnet,
-                api_version="v1"
-            ),
-            "scalper": BitGetTrader(
-                profile_type="scalper",
-                api_key=self.api_key,
-                secret_key=self.secret_key,
-                passphrase=self.passphrase,
-                use_testnet=self.use_testnet,
-                api_version="v1"
-            )
-        }
+        # Create BitGet trader instances based on strategic_only flag
+        self.traders = {}
+        
+        # Always include strategic trader
+        self.traders["strategic"] = BitGetTrader(
+            profile_type="strategic",
+            api_key=self.api_key,
+            secret_key=self.secret_key,
+            passphrase=self.passphrase,
+            use_testnet=self.use_testnet,
+            api_version="v1"
+        )
+        
+        # Only add other traders if not in strategic_only mode
+        if not strategic_only:
+            self.traders.update({
+                "aggressive": BitGetTrader(
+                    profile_type="aggressive",
+                    api_key=self.api_key,
+                    secret_key=self.secret_key,
+                    passphrase=self.passphrase,
+                    use_testnet=self.use_testnet,
+                    api_version="v1"
+                ),
+                "newbie": BitGetTrader(
+                    profile_type="newbie",
+                    api_key=self.api_key,
+                    secret_key=self.secret_key,
+                    passphrase=self.passphrase,
+                    use_testnet=self.use_testnet,
+                    api_version="v1"
+                ),
+                "scalper": BitGetTrader(
+                    profile_type="scalper",
+                    api_key=self.api_key,
+                    secret_key=self.secret_key,
+                    passphrase=self.passphrase,
+                    use_testnet=self.use_testnet,
+                    api_version="v1"
+                )
+            })
     
     def _create_progress_bar(self, current, target, width=40):
         """Create a colorful progress bar showing progress towards target."""
@@ -474,6 +483,8 @@ def parse_args():
                       help='Target profit percentage (default: 2.0)')
     parser.add_argument('--debug', action='store_true', 
                       help='Enable detailed API debugging (default: False)')
+    parser.add_argument('--strategic-only', action='store_true',
+                      help='Only use the strategic fibonacci trader (default: False)')
     
     args = parser.parse_args()
     
@@ -501,7 +512,8 @@ async def main():
     summary = PositionsSummary(
         use_testnet=use_testnet,
         symbol=args.symbol,
-        target_profit_pct=args.target
+        target_profit_pct=args.target,
+        strategic_only=args.strategic_only
     )
     
     await summary.run()

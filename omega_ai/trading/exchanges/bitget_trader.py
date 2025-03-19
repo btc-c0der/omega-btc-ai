@@ -931,8 +931,35 @@ class BitGetTrader:
             return None
     
     def get_total_pnl(self) -> float:
-        """Calculate total profit/loss from all trades."""
-        return sum(trade["pnl"] for trade in self.trade_history)
+        """Calculate total profit/loss from all trades and open positions."""
+        # Get realized PnL from trade history
+        realized_pnl = sum(trade["pnl"] for trade in self.trade_history if "pnl" in trade)
+        
+        # Get unrealized PnL from open positions
+        unrealized_pnl = 0.0
+        
+        try:
+            if self.symbol:
+                positions = self.get_positions(self.symbol)
+                if positions:
+                    for position in positions:
+                        if position and "unrealizedPL" in position:
+                            unrealized_pnl += float(position.get("unrealizedPL", 0))
+                        # Also include achievedProfits (realized PnL for open positions)
+                        if position and "achievedProfits" in position:
+                            realized_pnl += float(position.get("achievedProfits", 0))
+        except Exception as e:
+            logger.error(f"Error calculating unrealized PnL: {str(e)}")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception args: {e.args}")
+        
+        # Return total PnL (realized + unrealized)
+        total_pnl = realized_pnl + unrealized_pnl
+        
+        # Log PnL breakdown for debugging
+        logger.debug(f"PnL Breakdown - Realized: {realized_pnl:.2f}, Unrealized: {unrealized_pnl:.2f}, Total: {total_pnl:.2f}")
+        
+        return total_pnl
     
     def get_market_ticker(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Get current market ticker data."""

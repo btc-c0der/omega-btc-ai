@@ -55,7 +55,9 @@ class BitGetLiveTraders:
                  passphrase: str = "",
                  api_client: Optional[Any] = None,
                  use_coin_picker: bool = False,
-                 strategic_only: bool = False):
+                 strategic_only: bool = False,
+                 enable_pnl_alerts: bool = True,
+                 pnl_alert_interval: int = 1):
         """
         Initialize the live traders system.
         
@@ -69,11 +71,16 @@ class BitGetLiveTraders:
             api_client: Optional external API client for testing (default: None)
             use_coin_picker: Whether to use CoinPicker for symbol verification (default: False)
             strategic_only: Whether to only use the strategic trader profile (default: False)
+            enable_pnl_alerts: Whether to enable PnL alerts (default: True)
+            pnl_alert_interval: Minute interval for PnL alerts (default: 1, sends every minute)
         """
         self.use_testnet = use_testnet
         self.initial_capital = initial_capital
         self.symbol = symbol
         self.strategic_only = strategic_only
+        self.enable_pnl_alerts = enable_pnl_alerts
+        self.pnl_alert_interval = pnl_alert_interval
+        self.last_pnl_alert_time = datetime.now(timezone.utc)
         
         # Look for API credentials in environment variables if not provided
         self.api_key = api_key or os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
@@ -321,15 +328,89 @@ class BitGetLiveTraders:
                 f"Active Positions: {len(positions) if positions else 0}{RESET}"
             )
             
-            # Send performance update every hour
-            if datetime.now(timezone.utc).minute == 0:
-                alert_msg = (
-                    f"📊 {profile_name.upper()} HOURLY PERFORMANCE\n"
-                    f"Symbol: {trader.symbol}\n"
-                    f"PnL: {total_pnl:.2f} USDT\n"
-                    f"Active Positions: {len(positions) if positions else 0}"
-                )
-                await send_telegram_alert(alert_msg)
+            # Get current time
+            current_time = datetime.now(timezone.utc)
+            
+            # Check if PnL alerts are enabled and if it's time to send an alert
+            if self.enable_pnl_alerts:
+                # Determine if we should send an alert based on the interval
+                time_since_last_alert = (current_time - self.last_pnl_alert_time).total_seconds() / 60
+                
+                # Send alert if we've reached the specified interval and we're in the first 5 seconds of a minute
+                if time_since_last_alert >= self.pnl_alert_interval and current_time.second < 5:
+                    # Get detailed position information
+                    positions_info = ""
+                    unrealized_pnl = 0
+                    realized_pnl = 0
+                    
+                    # Calculate PnL values with detailed breakdown
+                    unrealized_pnl_by_symbol = {}
+                    realized_pnl_by_symbol = {}
+                    
+                    if positions:
+                        for pos in positions:
+                            symbol = pos.get('symbol', 'UNKNOWN')
+                            side = pos.get('holdSide', 'UNKNOWN').upper()
+                            size = float(pos.get('total', 0))
+                            price = float(pos.get('averageOpenPrice', 0))
+                            unreal_pnl = float(pos.get('unrealizedPL', 0))
+                            real_pnl = float(pos.get('achievedProfits', 0))
+                            
+                            # Track by symbol
+                            if symbol not in unrealized_pnl_by_symbol:
+                                unrealized_pnl_by_symbol[symbol] = 0
+                                realized_pnl_by_symbol[symbol] = 0
+                                
+                            unrealized_pnl_by_symbol[symbol] += unreal_pnl
+                            realized_pnl_by_symbol[symbol] += real_pnl
+                            unrealized_pnl += unreal_pnl
+                            realized_pnl += real_pnl
+                            
+                            positions_info += f"• {side}: {size:.4f} @ {price:.2f} USD | Unreal: {unreal_pnl:+.2f} | Real: {real_pnl:+.2f}\n"
+                    
+                    # Calculate total PnL
+                    total_combined_pnl = unrealized_pnl + realized_pnl
+                    
+                    # Format the position status emoji based on PnL
+                    status_emoji = "🟢" if total_combined_pnl >= 0 else "🔴"
+                    
+                    # Create alert message with a detailed breakdown table format
+                    alert_msg = (
+                        f"{status_emoji} {profile_name.upper()} TRADER PNL UPDATE\n\n"
+                        f"📊 *SUMMARY*\n"
+                        f"Symbol: {trader.symbol}\n"
+                        f"Time: {current_time.strftime('%H:%M:%S UTC')}\n"
+                        f"Active Positions: {len(positions) if positions else 0}\n\n"
+                    )
+                    
+                    # Add PnL breakdown by symbol if available
+                    if unrealized_pnl_by_symbol:
+                        alert_msg += f"💰 *PNL BREAKDOWN*\n"
+                        # Add header row
+                        alert_msg += f"Symbol | Unrealized | Realized | Total\n"
+                        alert_msg += f"-------|------------|----------|------\n"
+                        
+                        # Add data rows for each symbol
+                        for symbol in sorted(unrealized_pnl_by_symbol.keys()):
+                            unreal = unrealized_pnl_by_symbol[symbol]
+                            real = realized_pnl_by_symbol[symbol]
+                            total = unreal + real
+                            alert_msg += f"{symbol} | {unreal:+.2f} | {real:+.2f} | {total:+.2f}\n"
+                        
+                        # Add totals row
+                        alert_msg += f"-------|------------|----------|------\n"
+                        alert_msg += f"TOTAL | {unrealized_pnl:+.2f} | {realized_pnl:+.2f} | {total_combined_pnl:+.2f}\n\n"
+                    
+                    # Add position details if available
+                    if positions_info:
+                        alert_msg += f"📈 *POSITION DETAILS*\n{positions_info}"
+                        
+                    # Send the alert
+                    await send_telegram_alert(alert_msg)
+                    logger.info(f"{GREEN}Sent PnL update to Telegram{RESET}")
+                    
+                    # Update the last alert time
+                    self.last_pnl_alert_time = current_time
                 
         except Exception as e:
             logger.error(f"{RED}Error updating performance metrics for {profile_name}: {str(e)}{RESET}")
@@ -396,6 +477,10 @@ def parse_args():
                       help='Use CoinPicker for symbol verification (default: False)')
     parser.add_argument('--strategic-only', action='store_true',
                       help='Only use the strategic fibonacci trader (default: False)')
+    parser.add_argument('--no-pnl-alerts', action='store_true',
+                      help='Disable PnL alerts (default: False)')
+    parser.add_argument('--pnl-alert-interval', type=int, default=1,
+                      help='Interval in minutes for PnL alerts (default: 1)')
     
     return parser.parse_args()
 
@@ -406,6 +491,13 @@ async def main():
     # Determine if we should use testnet
     use_testnet = args.testnet or not args.mainnet
     
+    # Allow debug option to be set from environment
+    debug_mode = os.environ.get("BITGET_DEBUG", "").lower() in ("1", "true", "yes")
+    if debug_mode:
+        print(f"{YELLOW}Debug mode enabled - will show detailed API information{RESET}")
+        # Set debug environment variable for BitGetTrader
+        os.environ["BITGET_DEBUG"] = "true"
+    
     # Initialize with command line arguments
     live_traders = BitGetLiveTraders(
         use_testnet=use_testnet,
@@ -415,7 +507,9 @@ async def main():
         secret_key=args.secret_key,
         passphrase=args.passphrase,
         use_coin_picker=args.use_coin_picker,
-        strategic_only=args.strategic_only
+        strategic_only=args.strategic_only,
+        enable_pnl_alerts=not args.no_pnl_alerts,
+        pnl_alert_interval=args.pnl_alert_interval
     )
     
     try:
