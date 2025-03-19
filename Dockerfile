@@ -14,6 +14,7 @@ ENV OMEGA_ENV="production"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     redis-server \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -23,8 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Expose port
-EXPOSE 8051
+# Expose ports
+EXPOSE 8050 8765
 
 # Start Redis and the dashboard
-CMD service redis-server start && python -m omega_ai.visualization.dashboard
+CMD service redis-server start && python -m omega_ai.mm_trap_detector.run_dashboard

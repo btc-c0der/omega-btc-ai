@@ -13,6 +13,7 @@ import threading
 import random
 from omega_ai.utils.redis_manager import RedisManager
 import rel
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -30,7 +31,11 @@ BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
 MM_WS_URL = "ws://localhost:8766"
 
 # Redis Connection - used by legacy functions
-redis_conn = redis.Redis(host="localhost", port=6379, db=0)
+redis_conn = redis.Redis(
+    host=os.getenv('REDIS_HOST', 'redis'),
+    port=int(os.getenv('REDIS_PORT', '6379')),
+    db=0
+)
 
 # Redis health check function from Code version
 def check_redis_health():
@@ -86,6 +91,44 @@ def on_error(ws, error):
     """Handle WebSocket errors with divine grace."""
     logging.error(f"WebSocket Error: {error}")
     time.sleep(5)  # Add delay before reconnect
+
+def on_message(ws, message):
+    """Process incoming Binance BTC price data."""
+    try:
+        data = json.loads(message)
+        price = float(data["p"])
+        volume = float(data["q"])
+
+        logging.info(f"LIVE BTC PRICE UPDATE: ${price:.2f}")
+        
+        # Update Redis values using the RedisManager
+        redis_manager = RedisManager()
+        prev_price = redis_manager.get_cached("prev_btc_price")
+        prev_price = float(prev_price) if prev_price else None
+
+        if prev_price is None or price != prev_price:
+            redis_manager.set_cached("last_btc_price", str(price))
+            redis_manager.set_cached("last_btc_volume", str(volume if volume else 0))
+            redis_manager.lpush("btc_movement_history", str(price))
+            redis_manager.lpush("btc_volume_history", str(volume))
+            redis_manager.ltrim("btc_movement_history", -100, -1)
+            redis_manager.ltrim("btc_volume_history", -100, -1)
+            
+            abs_change = abs(price - prev_price) if prev_price is not None else 0
+            abs_change_scaled = abs_change * 100
+            redis_manager.lpush("abs_price_change_history", str(abs_change_scaled))
+            redis_manager.ltrim("abs_price_change_history", -100, -1)
+            redis_manager.set_cached("prev_btc_price", str(price))
+            
+            # Add last update time
+            redis_manager.set_cached("last_btc_update_time", str(time.time()))
+            
+            logging.info(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}")
+        else:
+            logging.debug(f"Price Unchanged, Skipping Redis Update: {price}")
+
+    except Exception as e:
+        logging.error(f"Error processing message: {e}")
 
 def on_close(ws, close_status_code, close_msg):
     """Handle WebSocket closure with Rastafarian resilience."""

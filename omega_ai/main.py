@@ -13,12 +13,18 @@ import time
 from datetime import datetime
 
 # Database initialization
-from omega_ai.db_manager.database import setup_database
+try:
+    from omega_ai.db_manager.database import setup_database
+except ImportError:
+    print("Warning: Could not import setup_database. Database initialization will be skipped.")
+    def setup_database():
+        """Dummy function when database module is not available."""
+        pass
 
 # Component imports
 from omega_ai.data_feed.schumann_monitor import start_schumann_monitor, stop_schumann_monitor
 from omega_ai.data_feed.btc_live_feed import start_btc_websocket
-from omega_ai.mm_trap_detector.mm_trap_processor import process_mm_trap
+from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
 from omega_ai.monitor.monitor_market_trends import monitor_market_trends
 
 # Terminal colors for beautiful console output
@@ -31,6 +37,7 @@ GOLD = "\033[93m"
 YELLOW = "\033[93m"
 CYAN = "\033[96m"
 WHITE = "\033[97m"
+BLACK = "\033[30m"
 BOLD = "\033[1m"
 BLUE_BG = "\033[44m"
 GREEN_BG = "\033[42m"
@@ -108,7 +115,8 @@ def start_market_monitor():
 
 def start_trap_processor():
     """Start the MM trap processor in a separate thread."""
-    return run_thread(process_mm_trap, "MM-Trap-Processor")
+    detector = MMTrapDetector()
+    return run_thread(detector.run, "MM-Trap-Processor")
 
 def check_component_status():
     """Check and display the status of all system components."""

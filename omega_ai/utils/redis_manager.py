@@ -9,20 +9,24 @@ import time
 import os
 
 class RedisManager:
-    def __init__(self, host='localhost', port=6379, db=0, 
+    def __init__(self, host=None, port=None, db=0, 
                  username=None, password=None, ssl=False, ssl_ca_certs=None):
         """
         Initialize Redis connection manager with optional SSL support
         
         Args:
-            host: Redis host (default: localhost)
-            port: Redis port (default: 6379)
+            host: Redis host (default: from env or localhost)
+            port: Redis port (default: from env or 6379)
             db: Redis database number (default: 0)
             username: Redis username for auth (default: None)
             password: Redis password for auth (default: None)
             ssl: Whether to use SSL/TLS (default: False)
             ssl_ca_certs: Path to CA certificate file (default: None)
         """
+        # Get Redis connection details from environment variables or use defaults
+        host = host or os.getenv('REDIS_HOST', 'localhost')
+        port = port or int(os.getenv('REDIS_PORT', '6379'))
+        
         # Initialize Redis connection with flexible parameters
         connection_params = {
             "host": host,

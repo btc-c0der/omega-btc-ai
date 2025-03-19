@@ -306,6 +306,8 @@ The system can be started in different modes:
 
 ## **🧪 Testing**
 
+For comprehensive information about our testing approach, test suite organization, and QA processes, please refer to our [QA Documentation](omega_ai/tests/README.md).
+
 ### **Testing Philosophy**
 
 Our testing approach is guided by these divine principles:
@@ -425,6 +427,8 @@ The divine QA dashboard is generated with each test run and shows:
 - Areas needing divine attention
 
 View the latest dashboard at `qa_reports/qa_visualization.png`
+
+For more detailed information about our testing infrastructure, CI/CD pipeline, and quality assurance processes, please visit our [QA Documentation](omega_ai/tests/README.md).
 
 ## **📊 Visualization**
 
