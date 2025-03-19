@@ -62,6 +62,17 @@ class RedisManager:
         signal.signal(signal.SIGINT, self._handle_shutdown)
         signal.signal(signal.SIGTERM, self._handle_shutdown)
     
+    def connect(self):
+        """Get a blessed Redis connection."""
+        if not self.redis:
+            self.redis = redis.Redis(
+                host=self.redis.connection_pool.connection_kwargs['host'],
+                port=self.redis.connection_pool.connection_kwargs['port'],
+                db=self.redis.connection_pool.connection_kwargs['db'],
+                decode_responses=True
+            )
+        return self.redis
+    
     def get_cached(self, key: str, default: Any = None) -> Optional[Any]:
         """Get value from cache or Redis with TTL-based caching"""
         now = time.time()
@@ -81,6 +92,51 @@ class RedisManager:
         except redis.RedisError as e:
             print(f"Redis error on get: {e}")
             return default
+    
+    def set_cached(self, key: str, value: Any) -> bool:
+        """Set a value in Redis with divine energy."""
+        try:
+            self.redis.set(key, value)
+            self._cache[key] = value
+            self._cache_ttl[key] = time.time() + self.CACHE_DURATION
+            return True
+        except redis.RedisError as e:
+            print(f"Redis error on set: {e}")
+            return False
+    
+    def lpush(self, key: str, value: Any) -> bool:
+        """Push to a list in Redis with Rastafarian rhythm."""
+        try:
+            self.redis.lpush(key, value)
+            return True
+        except redis.RedisError as e:
+            print(f"Redis error on lpush: {e}")
+            return False
+    
+    def ltrim(self, key: str, start: int, end: int) -> bool:
+        """Trim a list in Redis with cosmic precision."""
+        try:
+            self.redis.ltrim(key, start, end)
+            return True
+        except redis.RedisError as e:
+            print(f"Redis error on ltrim: {e}")
+            return False
+    
+    def lrange(self, key: str, start: int, end: int) -> Optional[list]:
+        """Get a range from a list in Redis with divine harmony."""
+        try:
+            return self.redis.lrange(key, start, end)
+        except redis.RedisError as e:
+            print(f"Redis error on lrange: {e}")
+            return None
+    
+    def ping(self) -> bool:
+        """Check Redis connection with JAH blessing."""
+        try:
+            return self.redis.ping()
+        except redis.RedisError as e:
+            print(f"Redis error on ping: {e}")
+            return False
     
     def set_with_validation(self, key: str, data: Dict) -> bool:
         """Set data with type validation"""
@@ -187,6 +243,26 @@ class RedisManager:
         except Exception as e:
             print(f"❌ Error saving shutdown state: {e}")
             sys.exit(1)
+
+    def zcard(self, name: str) -> int:
+        """Return the number of elements in the sorted set at key `name`."""
+        return self.redis.zcard(name)
+
+    def zadd(self, name: str, mapping: dict) -> int:
+        """Add all the specified members with the specified scores to the sorted set stored at key `name`."""
+        return self.redis.zadd(name, mapping)
+
+    def zrange(self, name: str, start: int, end: int, desc: bool = False, withscores: bool = False) -> list:
+        """Return a range of elements from the sorted set at key `name`."""
+        return self.redis.zrange(name, start, end, desc=desc, withscores=withscores)
+
+    def zremrangebyrank(self, name: str, start: int, end: int) -> int:
+        """Remove all elements in the sorted set stored at key `name` with rank between `start` and `end`."""
+        return self.redis.zremrangebyrank(name, start, end)
+
+    def delete(self, *names: str) -> int:
+        """Delete a key from the Redis database."""
+        return self.redis.delete(*names)
 
 # Create a default config loader
 def get_redis_config():

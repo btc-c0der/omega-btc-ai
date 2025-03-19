@@ -338,9 +338,9 @@ def test_get_current_fibonacci_levels(mock_redis, setup_mock_redis_data):
             levels = get_current_fibonacci_levels()
             
             assert isinstance(levels, dict)
-            assert "61.8%" in levels  # Golden ratio should be present
-            assert levels["61.8%"] > min(TestConfig.MOCK_PRICE_HISTORY)
-            assert levels["61.8%"] < max(TestConfig.MOCK_PRICE_HISTORY)
+            assert "0.618" in levels  # Golden ratio should be present
+            assert levels["0.618"] > min(TestConfig.MOCK_PRICE_HISTORY)
+            assert levels["0.618"] < max(TestConfig.MOCK_PRICE_HISTORY)
 
 
 def test_check_fibonacci_level(mock_redis, setup_mock_redis_data):
