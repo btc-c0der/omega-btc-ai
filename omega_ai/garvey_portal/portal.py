@@ -1,13 +1,17 @@
 import streamlit as st
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
+from .quantum_testing import QuantumMarketAnalyzer
 
 # Constants
 DATA_DIR = Path(__file__).parent / "data"
+
+# Initialize quantum analyzer
+quantum_analyzer = QuantumMarketAnalyzer()
 
 # Set page config
 st.set_page_config(
@@ -200,6 +204,33 @@ def show_cosmic_insights():
     
     st.plotly_chart(fig, use_container_width=True)
     
+    # Add quantum analysis section
+    st.markdown("### 🌌 Quantum Market Analysis")
+    
+    # Load sample data for demonstration
+    start_date = datetime.now() - timedelta(days=7)
+    end_date = datetime.now()
+    
+    price_data = pd.DataFrame({
+        'timestamp': pd.date_range(start=start_date, end=end_date, freq='H'),
+        'close': [random.uniform(40000, 50000) for _ in range(169)],  # 7 days * 24 hours + 1
+        'volume': [random.uniform(100, 1000) for _ in range(169)]
+    })
+    
+    schumann_data = quantum_analyzer.load_schumann_data(start_date, end_date)
+    
+    # Calculate quantum states
+    quantum_states = quantum_analyzer.calculate_quantum_state(price_data, schumann_data)
+    
+    # Display quantum states
+    st.markdown("#### Quantum Market States")
+    for state, prob in quantum_states.items():
+        st.progress(prob, text=f"{state.title()}: {prob:.2%}")
+    
+    # Calculate emotional entropy
+    emotional_entropy = quantum_analyzer.analyze_emotional_entropy(price_data)
+    st.markdown(f"#### Market Emotional Entropy: {emotional_entropy:.2f}")
+    
     # Add cosmic wisdom submission
     st.markdown("### 🌌 Share Your Cosmic Insight")
     cosmic_insight = st.text_area("What cosmic wisdom has been revealed to you?")
@@ -209,7 +240,9 @@ def show_cosmic_insights():
             wisdom.append({
                 "insight": cosmic_insight,
                 "timestamp": datetime.now().isoformat(),
-                "type": "cosmic_insight"
+                "type": "cosmic_insight",
+                "quantum_state": quantum_states,
+                "emotional_entropy": emotional_entropy
             })
             save_community_wisdom(wisdom)
             st.success("Your cosmic insight has been recorded! 🌟")
