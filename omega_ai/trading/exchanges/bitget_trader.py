@@ -183,7 +183,9 @@ class BitGetTrader:
                  initial_capital: float = 10000.0,
                  margin_mode: str = "fixed",  # "fixed" or "crossed"
                  api_client: Optional[Any] = None,
-                 api_version: str = "v1"
+                 api_version: str = "v1",
+                 sub_account_name: Optional[str] = None,  # Name of the sub-account to use
+                 sub_account_id: Optional[str] = None,    # ID of the sub-account to use
                 ):
         """
         Initialize the BitGet trader with the specified settings.
@@ -198,12 +200,26 @@ class BitGetTrader:
             margin_mode: Margin mode (fixed or crossed) (default: fixed)
             api_client: Optional external API client for testing
             api_version: API version to use (v1 or v2) (default: v1)
+            sub_account_name: Name of the sub-account to use (optional)
+            sub_account_id: ID of the sub-account to use (optional)
         """
         # API configuration
         self.use_testnet = use_testnet
         self.is_shutting_down = False
         self.symbol = "BTCUSDT"  # Default to BTCUSDT
         self.api_version = api_version
+        
+        # Sub-account configuration
+        if not sub_account_name and profile_type:
+            # Try to get sub-account name from environment variables based on profile type
+            env_prefix = profile_type.upper()
+            self.sub_account_name = os.environ.get(f"{env_prefix}_SUB_ACCOUNT_NAME")
+            if self.sub_account_name:
+                logger.info(f"{CYAN}Using sub-account from environment: {self.sub_account_name}{RESET}")
+        else:
+            self.sub_account_name = sub_account_name
+            
+        self.sub_account_id = sub_account_id
         
         # Look for API credentials in environment variables if not provided
         self.api_key = api_key or os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
@@ -234,6 +250,8 @@ class BitGetTrader:
         logger.info(f"{CYAN}Initialized BitGetTrader with API {api_version}{RESET}")
         logger.info(f"{CYAN}API Base: {self.api_base}{RESET}")
         logger.info(f"{CYAN}Product Type Param: {self.PRODUCT_TYPE_PARAM}{RESET}")
+        if self.sub_account_name:
+            logger.info(f"{CYAN}Using sub-account: {self.sub_account_name}{RESET}")
         
         # Initialize the appropriate trader profile
         self.profile = self._initialize_profile(profile_type, initial_capital)
@@ -276,46 +294,40 @@ class BitGetTrader:
         return base64.b64encode(hmac_obj.digest()).decode('utf-8')
     
     def _get_auth_headers(self, timestamp: str, method: str, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
-        """Generate authentication headers for API requests."""
-        # For v2 API, the signature is calculated differently
-        message = timestamp + method + endpoint
+        """Generate authentication headers for API requests.
         
-        # Add query params or request body to message
-        if params:
-            if method == "GET":
-                # For GET requests, add query parameters in alphabetical order
-                query_params = []
-                for key in sorted(params.keys()):
-                    query_params.append(f"{key}={params[key]}")
-                if query_params:
-                    query_string = "&".join(query_params)
-                    message += "?" + query_string
-            else:
-                # For POST requests, add JSON string of body
-                message += json.dumps(params)
-                
-        # Log the exact message being used for signature
-        logger.debug(f"Signature message: {message}")
-                
-        # Calculate signature using base64 encoding
-        signature = base64.b64encode(
-            hmac.new(
-                self.secret_key.encode('utf-8'),
-                message.encode('utf-8'),
-                hashlib.sha256
-            ).digest()
-        ).decode('utf-8')
+        Args:
+            timestamp: Current timestamp in milliseconds
+            method: HTTP method (GET, POST, etc.)
+            endpoint: API endpoint path
+            params: Optional query parameters
+            
+        Returns:
+            Dictionary of authentication headers
+        """
+        # Add sub-account parameters if configured
+        if self.sub_account_name:
+            if params is None:
+                params = {}
+            params["subAccountName"] = self.sub_account_name
+        elif self.sub_account_id:
+            if params is None:
+                params = {}
+            params["subAccountId"] = self.sub_account_id
+            
+        # Generate signature
+        signature = self.generate_signature(timestamp, method, endpoint, params)
         
-        logger.debug(f"Calculated signature: {signature}")
-        
-        # Return headers exactly as specified in BitGet documentation
-        return {
+        # Build headers
+        headers = {
             "ACCESS-KEY": self.api_key,
             "ACCESS-SIGN": signature,
             "ACCESS-TIMESTAMP": timestamp,
             "ACCESS-PASSPHRASE": self.passphrase,
             "Content-Type": "application/json"
         }
+        
+        return headers
     
     def get_account_balance(self, symbol: str = "BTCUSDT") -> Optional[float]:
         """Get current account balance for the specified symbol."""
@@ -1458,4 +1470,195 @@ class BitGetTrader:
             logger.error(f"\033[91mERROR: Error getting historical positions: {str(e)}\033[0m")
             logger.error(f"Exception type: {type(e).__name__}")
             logger.error(f"Exception args: {e.args}")
-            return None 
+            return None
+
+    def create_sub_account(self, sub_account_name: str, password: str) -> Optional[Dict[str, Any]]:
+        """Create a new sub-account.
+        
+        Args:
+            sub_account_name: Name for the new sub-account
+            password: Password for the sub-account
+            
+        Returns:
+            Dictionary containing sub-account details if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account"
+        timestamp = str(int(time.time() * 1000))
+        
+        data = {
+            "subAccountName": sub_account_name,
+            "password": password
+        }
+        
+        headers = self._get_auth_headers(timestamp, "POST", endpoint)
+        
+        try:
+            response = _make_request("POST", f"{self.api_url}{endpoint}", 
+                                  headers=headers, json=data)
+            return response.json()
+        except Exception as e:
+            logger.error(f"{RED}Failed to create sub-account: {str(e)}{RESET}")
+            return None
+
+    def get_sub_accounts(self) -> Optional[List[Dict[str, Any]]]:
+        """Get list of all sub-accounts.
+        
+        Returns:
+            List of sub-account dictionaries if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-accounts"
+        timestamp = str(int(time.time() * 1000))
+        
+        headers = self._get_auth_headers(timestamp, "GET", endpoint)
+        
+        try:
+            response = _make_request("GET", f"{self.api_url}{endpoint}", 
+                                  headers=headers)
+            return response.json().get("data", [])
+        except Exception as e:
+            logger.error(f"{RED}Failed to get sub-accounts: {str(e)}{RESET}")
+            return None
+
+    def get_sub_account_balance(self, sub_account_name: str) -> Optional[Dict[str, Any]]:
+        """Get balance for a specific sub-account.
+        
+        Args:
+            sub_account_name: Name of the sub-account
+            
+        Returns:
+            Dictionary containing sub-account balance if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account-balance"
+        timestamp = str(int(time.time() * 1000))
+        
+        params = {"subAccountName": sub_account_name}
+        headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+        
+        try:
+            response = _make_request("GET", f"{self.api_url}{endpoint}", 
+                                  headers=headers, params=params)
+            return response.json().get("data")
+        except Exception as e:
+            logger.error(f"{RED}Failed to get sub-account balance: {str(e)}{RESET}")
+            return None
+
+    def transfer_to_sub_account(self, sub_account_name: str, amount: float, coin: str = "USDT") -> Optional[Dict[str, Any]]:
+        """Transfer funds to a sub-account.
+        
+        Args:
+            sub_account_name: Name of the sub-account
+            amount: Amount to transfer
+            coin: Coin to transfer (default: USDT)
+            
+        Returns:
+            Dictionary containing transfer details if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account-transfer"
+        timestamp = str(int(time.time() * 1000))
+        
+        data = {
+            "subAccountName": sub_account_name,
+            "amount": str(amount),
+            "coin": coin
+        }
+        
+        headers = self._get_auth_headers(timestamp, "POST", endpoint)
+        
+        try:
+            response = _make_request("POST", f"{self.api_url}{endpoint}", 
+                                  headers=headers, json=data)
+            return response.json()
+        except Exception as e:
+            logger.error(f"{RED}Failed to transfer to sub-account: {str(e)}{RESET}")
+            return None
+
+    def transfer_from_sub_account(self, sub_account_name: str, amount: float, coin: str = "USDT") -> Optional[Dict[str, Any]]:
+        """Transfer funds from a sub-account.
+        
+        Args:
+            sub_account_name: Name of the sub-account
+            amount: Amount to transfer
+            coin: Coin to transfer (default: USDT)
+            
+        Returns:
+            Dictionary containing transfer details if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account-transfer"
+        timestamp = str(int(time.time() * 1000))
+        
+        data = {
+            "subAccountName": sub_account_name,
+            "amount": str(amount),
+            "coin": coin,
+            "fromSubAccount": True
+        }
+        
+        headers = self._get_auth_headers(timestamp, "POST", endpoint)
+        
+        try:
+            response = _make_request("POST", f"{self.api_url}{endpoint}", 
+                                  headers=headers, json=data)
+            return response.json()
+        except Exception as e:
+            logger.error(f"{RED}Failed to transfer from sub-account: {str(e)}{RESET}")
+            return None
+
+    @classmethod
+    def setup_sub_accounts(cls, use_testnet: bool = True) -> Dict[str, 'BitGetTrader']:
+        """Set up sub-accounts using environment variables.
+        
+        Args:
+            use_testnet: Whether to use testnet (default: True)
+            
+        Returns:
+            Dictionary of trader instances keyed by profile type
+        """
+        traders = {}
+        profile_types = ["strategic", "aggressive", "scalping"]
+        
+        # Initialize main account trader
+        main_trader = cls(
+            profile_type="strategic",
+            use_testnet=use_testnet,
+            api_version="v2"
+        )
+        
+        for profile_type in profile_types:
+            env_prefix = profile_type.upper()
+            sub_account_name = os.environ.get(f"{env_prefix}_SUB_ACCOUNT_NAME")
+            sub_account_password = os.environ.get(f"{env_prefix}_SUB_ACCOUNT_PASSWORD")
+            initial_balance = float(os.environ.get(f"{env_prefix}_SUB_ACCOUNT_INITIAL_BALANCE", "0.0"))
+            
+            if sub_account_name and sub_account_password:
+                # Create sub-account if it doesn't exist
+                sub_accounts = main_trader.get_sub_accounts()
+                if not sub_accounts or not any(acc["subAccountName"] == sub_account_name for acc in sub_accounts):
+                    logger.info(f"{CYAN}Creating sub-account: {sub_account_name}{RESET}")
+                    result = main_trader.create_sub_account(sub_account_name, sub_account_password)
+                    if result and result.get("code") == "00000":
+                        logger.info(f"{GREEN}Successfully created sub-account: {sub_account_name}{RESET}")
+                    else:
+                        logger.error(f"{RED}Failed to create sub-account: {sub_account_name}{RESET}")
+                        continue
+                
+                # Transfer initial balance if specified
+                if initial_balance > 0:
+                    logger.info(f"{CYAN}Transferring initial balance to {sub_account_name}{RESET}")
+                    result = main_trader.transfer_to_sub_account(sub_account_name, initial_balance)
+                    if result and result.get("code") == "00000":
+                        logger.info(f"{GREEN}Successfully transferred initial balance{RESET}")
+                    else:
+                        logger.error(f"{RED}Failed to transfer initial balance{RESET}")
+                
+                # Create trader instance for this sub-account
+                traders[profile_type] = cls(
+                    profile_type=profile_type,
+                    use_testnet=use_testnet,
+                    api_version="v2",
+                    sub_account_name=sub_account_name
+                )
+                logger.info(f"{GREEN}Created trader instance for {sub_account_name}{RESET}")
+            else:
+                logger.warning(f"{YELLOW}Missing environment variables for {profile_type} sub-account{RESET}")
+        
+        return traders 
