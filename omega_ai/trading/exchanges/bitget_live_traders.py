@@ -190,6 +190,13 @@ class BitGetLiveTraders:
         
         for profile_name, profile_class in profiles.items():
             try:
+                # Get sub-account name from environment for strategic trader
+                sub_account_name = None
+                if profile_name == "strategic":
+                    sub_account_name = os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME")
+                    if sub_account_name:
+                        logger.info(f"{GREEN}Using sub-account: {sub_account_name}{RESET}")
+                
                 trader = BitGetTrader(
                     profile_type=profile_name,
                     api_key=self.api_key,
@@ -198,7 +205,8 @@ class BitGetLiveTraders:
                     use_testnet=self.use_testnet,
                     initial_capital=self.initial_capital,
                     api_client=self.api_client,  # Pass the external API client if provided
-                    api_version=api_version  # Use v1 API for stability
+                    api_version=api_version,  # Use v1 API for stability
+                    sub_account_name=sub_account_name  # Add sub-account name for strategic trader
                 )
                 
                 # Make sure trader is using the same symbol as us
@@ -218,6 +226,8 @@ class BitGetLiveTraders:
                     f"Mode: {'TESTNET' if self.use_testnet else 'MAINNET'}\n"
                     f"API Version: {api_version}"
                 )
+                if sub_account_name:
+                    alert_msg += f"\nSub-account: {sub_account_name}"
                 await send_telegram_alert(alert_msg)
                 
             except Exception as e:
