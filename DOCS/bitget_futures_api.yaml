@@ -1,0 +1,131 @@
+openapi: 3.0.0
+info:
+  title: Bitget Futures Trading API
+  description: API documentation for Bitget Futures Trading operations
+  version: 1.0.0
+servers:
+  - url: https://api.bitget.com
+    description: Bitget Mainnet API
+paths:
+  /api/v2/account/sub-account-assets:
+    get:
+      summary: Get Sub-Account Assets
+      description: Retrieve the asset balance of a sub-account
+      parameters:
+        - name: productType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [USDT-FUTURES]
+        - name: subAccountName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  msg:
+                    type: string
+                  data:
+                    type: object
+                    additionalProperties: true
+        "404":
+          description: Sub-account not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  msg:
+                    type: string
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  msg:
+                    type: string
+  /api/v2/mix/order/placeOrder:
+    post:
+      summary: Place Futures Order
+      description: Place an order in the Bitget futures market
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                symbol:
+                  type: string
+                  example: BTCUSDT
+                marginCoin:
+                  type: string
+                  example: USDT
+                side:
+                  type: string
+                  enum: [open_long, open_short]
+                orderType:
+                  type: string
+                  enum: [limit, market]
+                price:
+                  type: number
+                  example: 40000
+                size:
+                  type: number
+                  example: 0.1
+                leverage:
+                  type: string
+                  example: "20"
+      responses:
+        "200":
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  msg:
+                    type: string
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  msg:
+                    type: string
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  msg:
+                    type: string 
