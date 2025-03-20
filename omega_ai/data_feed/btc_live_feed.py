@@ -69,7 +69,7 @@ MM_WS_URL = "ws://localhost:8765"
 
 # Redis Connection - used by legacy functions
 redis_conn = redis.Redis(
-    host=os.getenv('REDIS_HOST', 'redis'),
+    host=os.getenv('REDIS_HOST', 'localhost'),
     port=int(os.getenv('REDIS_PORT', '6379')),
     db=0
 )
@@ -78,22 +78,45 @@ redis_conn = redis.Redis(
 def check_redis_health():
     """Perform a health check on Redis connection and data integrity."""
     try:
-        # Check Redis connection
-        redis_manager = RedisManager()
+        # Check Redis connection using the same host as the global connection
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        redis_port = int(os.getenv('REDIS_PORT', '6379'))
+        redis_manager = RedisManager(host=redis_host, port=redis_port)
         redis_manager.ping()
-        log_rasta("Redis connection: OK", GREEN_RASTA, "success")
+        log_rasta(f"Redis connection: OK (Host: {redis_host}, Port: {redis_port})", GREEN_RASTA, "success")
 
         # Check if essential keys exist
         essential_keys = ["last_btc_price", "prev_btc_price", "btc_movement_history"]
         for key in essential_keys:
-            if not redis_manager.get_cached(key):
+            if not redis_manager.get_cached(key) and key != "btc_movement_history":
                 log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
+            elif key == "btc_movement_history":
+                # For list type, we need to check differently
+                history = redis_manager.lrange(key, 0, 0)
+                if not history:
+                    log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
+                else:
+                    log_rasta(f"Essential key present: {key}", GREEN_RASTA, "success")
             else:
                 log_rasta(f"Essential key present: {key}", GREEN_RASTA, "success")
 
         # Check data integrity
         btc_movement_history = redis_manager.lrange("btc_movement_history", 0, -1)
         log_rasta(f"BTC movement history length: {len(btc_movement_history) if btc_movement_history else 0}", BLUE_RASTA)
+        
+        # Check data format
+        if btc_movement_history:
+            sample = btc_movement_history[0]
+            if "," in sample:
+                try:
+                    price_str, volume_str = sample.split(",")
+                    price = float(price_str)
+                    volume = float(volume_str)
+                    log_rasta(f"Data format OK - Sample: Price=${price:.2f}, Volume={volume}", GREEN_RASTA, "success")
+                except Exception as e:
+                    log_rasta(f"Invalid data format in btc_movement_history: {e}", YELLOW_RASTA, "warning")
+            else:
+                log_rasta("Data format missing volume information", YELLOW_RASTA, "warning")
 
         return True
     except Exception as e:
@@ -136,20 +159,24 @@ def on_message(ws, message):
         price = float(data["p"])
         volume = float(data["q"])
 
-        log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f}", BLUE_RASTA)
+        log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
         
-        # Update Redis values using the RedisManager
-        redis_manager = RedisManager()
+        # Update Redis values using the RedisManager with consistent connection parameters
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        redis_port = int(os.getenv('REDIS_PORT', '6379'))
+        redis_manager = RedisManager(host=redis_host, port=redis_port)
         prev_price = redis_manager.get_cached("prev_btc_price")
         prev_price = float(prev_price) if prev_price else None
 
         if prev_price is None or price != prev_price:
+            # Store both price and volume values separately
             redis_manager.set_cached("last_btc_price", str(price))
-            redis_manager.set_cached("last_btc_volume", str(volume if volume else 0))
-            redis_manager.lpush("btc_movement_history", str(price))
-            redis_manager.lpush("btc_volume_history", str(volume))
+            redis_manager.set_cached("last_btc_volume", str(volume))
+            
+            # Store combined price and volume data in history
+            combined_data = f"{price},{volume}"
+            redis_manager.lpush("btc_movement_history", combined_data)
             redis_manager.ltrim("btc_movement_history", -100, -1)
-            redis_manager.ltrim("btc_volume_history", -100, -1)
             
             abs_change = abs(price - prev_price) if prev_price is not None else 0
             abs_change_scaled = abs_change * 100
@@ -225,8 +252,14 @@ class BtcPriceFeed:
         """Initialize the blessed BTC price feed."""
         self.sources = sources or [PriceSource.BINANCE, PriceSource.COINBASE]
         self.update_interval = update_interval
-        self.redis_manager = RedisManager()
+        
+        # Use consistent Redis connection parameters
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        redis_port = int(os.getenv('REDIS_PORT', '6379'))
+        self.redis_manager = RedisManager(host=redis_host, port=redis_port)
+        
         self.last_price = None
+        self.last_volume = None
         self.is_running = False
         self._ws = None
         
@@ -268,8 +301,9 @@ class BtcPriceFeed:
             price = float(data["p"])
             volume = float(data["q"])
 
-            log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f}", BLUE_RASTA)
+            log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
             self.last_price = price
+            self.last_volume = volume
             self.update_redis(price, volume)
         except Exception as e:
             log_rasta(f"Error processing message: {e}", RED_RASTA, "error")
@@ -300,10 +334,11 @@ class BtcPriceFeed:
                 # Update Redis values using the RedisManager's methods
                 self.redis_manager.set_cached("last_btc_price", str(price))
                 self.redis_manager.set_cached("last_btc_volume", str(volume if volume else 0))
-                self.redis_manager.lpush("btc_movement_history", str(price))
-                self.redis_manager.lpush("btc_volume_history", str(volume))
+                
+                # Store combined price and volume data
+                combined_data = f"{price},{volume}"
+                self.redis_manager.lpush("btc_movement_history", combined_data)
                 self.redis_manager.ltrim("btc_movement_history", -100, -1)
-                self.redis_manager.ltrim("btc_volume_history", -100, -1)
                 
                 abs_change = abs(price - prev_price) if prev_price is not None else 0
                 abs_change_scaled = abs_change * 100
@@ -394,12 +429,43 @@ class BtcPriceFeed:
         try:
             # Get data from Redis with JAH BLESSING
             raw_data = self.redis_manager.lrange(key, 0, count-1)
+            if not raw_data:
+                # Try the main btc_movement_history key
+                raw_data = self.redis_manager.lrange("btc_movement_history", 0, count-1)
+                
             if raw_data:
                 for item in raw_data:
                     try:
-                        history.append(json.loads(item))
+                        # Try to parse as JSON first (for formatted data)
+                        data_item = json.loads(item)
+                        history.append(data_item)
                     except json.JSONDecodeError:
-                        continue
+                        # Handle raw format "price,volume"
+                        if "," in item:
+                            try:
+                                price_str, volume_str = item.split(",")
+                                price = float(price_str)
+                                volume = float(volume_str)
+                                timestamp = datetime.now(UTC).isoformat()
+                                history.append({
+                                    "price": price,
+                                    "volume": volume,
+                                    "timestamp": timestamp
+                                })
+                            except Exception:
+                                # Fallback to just price
+                                price = float(item)
+                                history.append({
+                                    "price": price,
+                                    "timestamp": datetime.now(UTC).isoformat()
+                                })
+                        else:
+                            # Simple price format
+                            price = float(item)
+                            history.append({
+                                "price": price,
+                                "timestamp": datetime.now(UTC).isoformat()
+                            })
         except Exception as e:
             log_rasta(f"Error getting price history: {e}", RED_RASTA, "error")
             
@@ -463,5 +529,6 @@ class BtcPriceFeed:
 if __name__ == "__main__":
     display_rasta_banner()
     log_rasta("Initializing Rasta Price Feed...", GREEN_RASTA)
+    log_rasta(f"Redis Host: {os.getenv('REDIS_HOST', 'localhost')}", BLUE_RASTA)
     log_rasta("Connecting to Binance WebSocket...", BLUE_RASTA)
     start_btc_websocket()
