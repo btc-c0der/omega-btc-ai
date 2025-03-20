@@ -8,7 +8,7 @@ follows rules-based approaches with moderate risk management.
 """
 
 import random
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 import time
 
 from .trader_base import TraderProfile, RiskParameters
@@ -35,13 +35,20 @@ class StrategicTrader(TraderProfile):
         self.overbought_threshold = 0.8  # RSI-like threshold
         self.oversold_threshold = 0.2  # RSI-like threshold
         self.market_regime_accuracy = 0.7  # How accurate is regime identification
+        
+        # Fibonacci trading parameters
+        self.primary_entry_level = 0.618  # Primary Fibonacci entry level
+        self.secondary_entry_level = 0.786  # Secondary Fibonacci entry level
+        self.stop_loss_level = 1.0  # Stop loss Fibonacci level
+        self.take_profit_levels = [0.382, 0.236, 0.0]  # Take profit Fibonacci levels
+        self.extension_take_profit = 1.618  # Extension target
     
     def _get_risk_parameters(self) -> RiskParameters:
         """Get risk parameters specific to strategic trader profile."""
         return RiskParameters(
             max_risk_per_trade=0.02,  # 2% risk per trade
-            base_leverage=3.0,        # Moderate leverage
-            max_leverage=5.0,         # Max leverage
+            base_leverage=11.0,       # High leverage setting (was 3.0)
+            max_leverage=15.0,        # Increased max leverage (was 5.0) 
             min_risk_reward_ratio=random.uniform(1.5, 3.0),  # Minimum R:R to enter
             position_sizing_volatility_factor=0.7,  # Reduce size in high volatility
             stop_loss_multiplier=2.0,  # Wide stops based on market structure
@@ -226,3 +233,182 @@ class StrategicTrader(TraderProfile):
         
         # Cap at max leverage
         return min(leverage, self.risk_params.max_leverage)
+    
+    # ======== Fibonacci-specific methods for integration with FibonacciProfileTrader ========
+    
+    def determine_entry_level(self, fib_levels: Dict[str, float], pattern_type: str) -> float:
+        """
+        Determine entry price level based on Fibonacci levels and pattern type.
+        
+        Args:
+            fib_levels: Dictionary of calculated Fibonacci levels
+            pattern_type: Type of pattern detected (e.g., "Bullish Gartley")
+            
+        Returns:
+            Entry price level
+        """
+        # Primary entry is at 0.618 retracement for most patterns
+        if 'bullish' in pattern_type.lower():
+            # For bullish patterns, enter at 0.618 retracement
+            return fib_levels.get('0.618', fib_levels.get('0.5', list(fib_levels.values())[0]))
+        else:
+            # For bearish patterns, enter at 0.618 retracement
+            return fib_levels.get('0.618', fib_levels.get('0.5', list(fib_levels.values())[0]))
+    
+    def determine_stop_loss(self, fib_levels: Dict[str, float], pattern_type: str, entry_price: float) -> float:
+        """
+        Determine stop loss price based on Fibonacci levels and pattern type.
+        
+        Args:
+            fib_levels: Dictionary of calculated Fibonacci levels
+            pattern_type: Type of pattern detected
+            entry_price: Entry price level
+            
+        Returns:
+            Stop loss price level
+        """
+        # Stop loss at 1.0 level for retracement patterns
+        if 'bullish' in pattern_type.lower():
+            # For bullish patterns, stop below 1.0 level
+            stop_level = fib_levels.get('1.0', fib_levels.get('0.786', entry_price * 0.95))
+            # Add a small buffer
+            return stop_level * 1.01
+        else:
+            # For bearish patterns, stop above 1.0 level
+            stop_level = fib_levels.get('1.0', fib_levels.get('0.786', entry_price * 1.05))
+            # Add a small buffer
+            return stop_level * 0.99
+    
+    def determine_take_profit(self, fib_levels: Dict[str, float], pattern_type: str, entry_price: float) -> float:
+        """
+        Determine take profit price based on Fibonacci levels and pattern type.
+        
+        Args:
+            fib_levels: Dictionary of calculated Fibonacci levels
+            pattern_type: Type of pattern detected
+            entry_price: Entry price level
+            
+        Returns:
+            Take profit price level
+        """
+        # Take profit at extension level
+        if 'bullish' in pattern_type.lower():
+            # For bullish patterns, target 1.618 extension
+            return fib_levels.get('1.618', entry_price * 1.05)
+        else:
+            # For bearish patterns, target 1.618 extension
+            return fib_levels.get('1.618', entry_price * 0.95)
+    
+    def calculate_risk_levels(self, entry_price: float, risk_percent: float, account_size: float) -> Dict[str, float]:
+        """
+        Calculate comprehensive risk levels for a trade.
+        
+        Args:
+            entry_price: Entry price level
+            risk_percent: Risk percentage for the trade
+            account_size: Current account size
+            
+        Returns:
+            Dictionary with position size, stop loss, and take profit levels
+        """
+        # Get risk parameters
+        risk_params = self._get_risk_parameters()
+        
+        # Calculate stop distance (2% of entry price by default)
+        stop_distance = entry_price * 0.02 * risk_params.stop_loss_multiplier
+        
+        # Calculate stop loss
+        stop_loss = entry_price - stop_distance  # For long position
+        
+        # Calculate take profit levels
+        take_profit_distance = stop_distance * risk_params.min_risk_reward_ratio
+        take_profit = entry_price + take_profit_distance  # For long position
+        
+        # Calculate position size based on risk
+        risk_amount = account_size * (risk_percent / 100)
+        position_size = risk_amount / stop_distance
+        
+        return {
+            "position_size": position_size,
+            "stop_loss": stop_loss,
+            "take_profit": take_profit,
+            "risk_amount": risk_amount
+        }
+    
+    def validate_trade_signal(self, signal: Any) -> bool:
+        """
+        Validate a trading signal based on strategic trader criteria.
+        
+        Args:
+            signal: Trading signal object
+            
+        Returns:
+            True if signal is valid, False otherwise
+        """
+        # Calculate risk-reward ratio
+        risk = abs(signal.entry_price - signal.stop_loss)
+        reward = abs(signal.take_profit - signal.entry_price)
+        risk_reward_ratio = reward / risk if risk > 0 else 0
+        
+        # Validate pattern confidence
+        min_confidence = 0.65  # Strategic traders want high confidence
+        if signal.confidence < min_confidence:
+            return False
+        
+        # Validate risk-reward ratio
+        min_rr = self._get_risk_parameters().min_risk_reward_ratio
+        if risk_reward_ratio < min_rr:
+            return False
+        
+        # Validate risk percent
+        max_risk = self._get_risk_parameters().max_risk_per_trade * 100
+        if signal.risk_percent > max_risk:
+            return False
+        
+        return True
+    
+    def calculate_trailing_stop(self, position: Dict[str, Any], current_price: float) -> float:
+        """
+        Calculate trailing stop price based on position and current price.
+        
+        Args:
+            position: Position data including entry price and side
+            current_price: Current market price
+            
+        Returns:
+            Updated stop loss price
+        """
+        entry_price = float(position.get('entryPrice', 0))
+        position_side = position.get('side', '')
+        
+        # No trailing stop until 1.5% profit
+        min_profit_percent = 0.015  # 1.5%
+        
+        if position_side == 'long':
+            profit_percent = (current_price - entry_price) / entry_price
+            if profit_percent < min_profit_percent:
+                return 0  # No trailing stop yet
+                
+            # Move stop to breakeven + 0.5% when 1.5% in profit
+            if profit_percent >= min_profit_percent and profit_percent < 0.03:
+                return entry_price * 1.005
+                
+            # Trail at 50% of profit when >3% in profit
+            if profit_percent >= 0.03:
+                trail_distance = (current_price - entry_price) * 0.5
+                return current_price - trail_distance
+        else:  # short
+            profit_percent = (entry_price - current_price) / entry_price
+            if profit_percent < min_profit_percent:
+                return 0  # No trailing stop yet
+                
+            # Move stop to breakeven + 0.5% when 1.5% in profit
+            if profit_percent >= min_profit_percent and profit_percent < 0.03:
+                return entry_price * 0.995
+                
+            # Trail at 50% of profit when >3% in profit
+            if profit_percent >= 0.03:
+                trail_distance = (entry_price - current_price) * 0.5
+                return current_price + trail_distance
+        
+        return 0  # Default fallback
