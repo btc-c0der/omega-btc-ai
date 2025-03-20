@@ -70,9 +70,10 @@ RESET = "\033[0m"
 class FibonacciDetector:
     """Enhanced detector for identifying price movements at Fibonacci levels."""
     
-    def __init__(self, symbol: str = "BTCUSDT"):
+    def __init__(self, symbol: str = "BTCUSDT", test_mode: bool = False):
         """Initialize the Fibonacci detector."""
         self.symbol = symbol
+        self.test_mode = test_mode
         self.price_history = []  # List of (timestamp, price) tuples
         
         # Swing points
@@ -110,6 +111,24 @@ class FibonacciDetector:
                 raise ValueError("Timestamp cannot be None")
             if not isinstance(timestamp, datetime):
                 raise ValueError("Invalid timestamp type")
+            
+            # Convert naive datetime to UTC if needed
+            if timestamp.tzinfo is None:
+                timestamp = timestamp.replace(tzinfo=timezone.utc)
+            
+            # Convert to UTC for consistent comparison
+            timestamp = timestamp.astimezone(timezone.utc)
+            
+            # Get current time in UTC for comparison
+            current_time = datetime.now(timezone.utc)
+            
+            # Unix epoch start in UTC
+            epoch_start = datetime(1970, 1, 1, tzinfo=timezone.utc)
+            
+            if timestamp < epoch_start:  # Unix epoch start
+                raise ValueError("Invalid timestamp: cannot be before Unix epoch")
+            if not self.test_mode and timestamp > current_time:
+                raise ValueError("Invalid timestamp: cannot be in the future")
             if not isinstance(current_price, (int, float)) or math.isnan(current_price) or math.isinf(current_price):
                 raise ValueError("Invalid price value")
             if current_price <= 0:
@@ -330,7 +349,7 @@ class FibonacciDetector:
                 if p["confirmation_count"] > 0 and p["timestamp"] >= cutoff_time
             ]
     
-    def check_fibonacci_level(self, current_price: float) -> Optional[Dict]:
+    def check_fibonacci_level(self, current_price: float, levels: Optional[Dict] = None) -> Optional[Dict]:
         """Check if current price is at a Fibonacci level."""
         try:
             # Validate current price
@@ -342,19 +361,20 @@ class FibonacciDetector:
                 raise ValueError("Invalid price: must be a positive number")
             
             # Get current Fibonacci levels
-            levels_str = redis_conn.get("fibonacci_levels")
-            if levels_str is None:
-                return None
-                
-            # Handle mock objects in tests
-            if 'pytest' in sys.modules and isinstance(levels_str, dict):
-                levels = levels_str
-            else:
-                levels = json.loads(levels_str)
+            if levels is None:
+                levels_str = redis_conn.get("fibonacci_levels")
+                if levels_str is None:
+                    return None
+                    
+                # Handle mock objects in tests
+                if 'pytest' in sys.modules and isinstance(levels_str, dict):
+                    levels = levels_str
+                else:
+                    levels = json.loads(levels_str)
             
             # Validate levels format
             if not isinstance(levels, dict):
-                raise ValueError("Invalid Fibonacci levels format in Redis")
+                raise ValueError("Invalid Fibonacci levels format")
             
             # Check for valid swing points
             if self.recent_swing_high is None or self.recent_swing_low is None:
