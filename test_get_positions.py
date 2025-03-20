@@ -1,55 +1,69 @@
 #!/usr/bin/env python3
+"""
+Test script to validate the get_positions method.
+"""
 
-import requests
-import json
+import os
+import sys
 import time
-import hmac
-import hashlib
-import base64
+from omega_ai.trading.exchanges.bitget_trader import BitGetTrader
 
-# API credentials
-api_key = 'bg_c1b989edd804f4b3d06e3faca31be313'
-secret_key = 'd6a94d146ae504f68b7d0f8f9acefb41cd991aeb110608ad16526d752fc0138a'
-passphrase = 'aa03d3d008af2e989'
+def main():
+    """Main entry point for the test script."""
+    print("Testing BitGet get_positions method with sub-account...")
+    
+    # Get API credentials from environment variables
+    api_key = os.environ.get("BITGET_API_KEY", "")
+    secret_key = os.environ.get("BITGET_SECRET_KEY", "")
+    passphrase = os.environ.get("BITGET_PASSPHRASE", "")
+    
+    # Verify API credentials are available
+    if not api_key or not secret_key or not passphrase:
+        print("Error: API credentials are missing. Please set environment variables.")
+        return
+    
+    print(f"Using API key: {api_key[:5]}...")
+    
+    # Create trader with sub-account name
+    sub_account_name = "sub_7739509698" 
+    
+    trader = BitGetTrader(
+        profile_type="strategic",
+        api_key=api_key,
+        secret_key=secret_key,
+        passphrase=passphrase,
+        use_testnet=False,  # Use mainnet
+        sub_account_name=sub_account_name
+    )
+    
+    print(f"Trader initialized with sub-account: {sub_account_name}")
+    
+    # Test get_positions method
+    print("Testing get_positions for BTCUSDT...")
+    positions = trader.get_positions("BTCUSDT")
+    
+    if positions:
+        print(f"Successfully retrieved {len(positions)} positions:")
+        for position in positions:
+            print(f"- Symbol: {position.get('symbol', 'Unknown')}")
+            print(f"  Side: {position.get('holdSide', 'Unknown')}")
+            print(f"  Size: {position.get('total', '0')}")
+            print(f"  Entry Price: {position.get('averageOpenPrice', '0')}")
+            print(f"  Mark Price: {position.get('marketPrice', '0')}")
+            print(f"  Unrealized PnL: {position.get('unrealizedPL', '0')}")
+    else:
+        print("No positions found or error retrieving positions.")
+    
+    # Test get all positions method
+    print("\nTesting get_positions with no symbol (all positions)...")
+    all_positions = trader.get_positions()
+    
+    if all_positions:
+        print(f"Successfully retrieved {len(all_positions)} positions:")
+        for position in all_positions:
+            print(f"- Symbol: {position.get('symbol', 'Unknown')}")
+    else:
+        print("No positions found or error retrieving positions.")
 
-# Generate timestamp
-timestamp = str(int(time.time() * 1000))
-
-# Endpoint details
-method = 'GET'
-request_path = '/api/mix/v1/position/allPosition'
-query_string = '?marginCoin=USDT&productType=umcbl&symbol=BTCUSDT_UMCBL'
-url = 'https://api.bitget.com' + request_path + query_string
-
-# Create message to sign
-message = timestamp + method + request_path + query_string
-
-# Generate signature (base64-encoded)
-signature = base64.b64encode(
-    hmac.new(
-        secret_key.encode('utf-8'),
-        message.encode('utf-8'),
-        hashlib.sha256
-    ).digest()
-).decode('utf-8')
-
-# Headers with complete authentication
-headers = {
-    'ACCESS-KEY': api_key,
-    'ACCESS-SIGN': signature,
-    'ACCESS-TIMESTAMP': timestamp,
-    'ACCESS-PASSPHRASE': passphrase,
-    'Content-Type': 'application/json'
-}
-
-print(f'Testing API Key: {api_key}')
-print(f'Secret Key: {secret_key[:5]}...{secret_key[-5:]}')  # Show first and last 5 chars
-print(f'Passphrase: {passphrase}')
-print(f'Timestamp: {timestamp}')
-print(f'Message to sign: {message}')
-print(f'Generated signature: {signature}')
-print(f'Making request to: {url}')
-response = requests.get(url, headers=headers)
-
-print(f'Status code: {response.status_code}')
-print(f'Response: {json.dumps(response.json(), indent=2) if response.content else "No content"}') 
+if __name__ == "__main__":
+    main() 

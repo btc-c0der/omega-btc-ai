@@ -15,7 +15,7 @@ import logging
 import argparse
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
-from omega_ai.trading.exchanges.bitget_trader import BitGetTrader
+from omega_ai.trading.exchanges.bitget_ccxt import BitGetCCXT
 from omega_ai.trading.exchanges.coin_picker import CoinPicker, CoinType, CoinInfo
 from omega_ai.trading.profiles import (
     StrategicTrader,
@@ -73,11 +73,11 @@ class BitGetLiveTraders:
                  api_key: str = "",
                  secret_key: str = "",
                  passphrase: str = "",
-                 api_client: Optional[Any] = None,
                  use_coin_picker: bool = False,
                  strategic_only: bool = False,
                  enable_pnl_alerts: bool = True,
-                 pnl_alert_interval: int = 1):
+                 pnl_alert_interval: int = 1,
+                 leverage: int = 11):
         """
         Initialize the live traders system.
         
@@ -88,11 +88,11 @@ class BitGetLiveTraders:
             api_key: BitGet API key
             secret_key: BitGet secret key
             passphrase: BitGet API passphrase
-            api_client: Optional external API client for testing (default: None)
             use_coin_picker: Whether to use CoinPicker for symbol verification (default: False)
             strategic_only: Whether to only use the strategic trader profile (default: False)
             enable_pnl_alerts: Whether to enable PnL alerts (default: True)
             pnl_alert_interval: Minute interval for PnL alerts (default: 1, sends every minute)
+            leverage: Trading leverage (default: 11)
         """
         self.use_testnet = use_testnet
         self.initial_capital = initial_capital
@@ -101,6 +101,7 @@ class BitGetLiveTraders:
         self.enable_pnl_alerts = enable_pnl_alerts
         self.pnl_alert_interval = pnl_alert_interval
         self.last_pnl_alert_time = datetime.now(timezone.utc)
+        self.leverage = leverage
         
         # Log initialization parameters
         logger.debug(f"{CYAN}Initializing BitGetLiveTraders with parameters:{RESET}")
@@ -110,6 +111,7 @@ class BitGetLiveTraders:
         logger.debug(f"  strategic_only: {strategic_only}")
         logger.debug(f"  enable_pnl_alerts: {enable_pnl_alerts}")
         logger.debug(f"  pnl_alert_interval: {pnl_alert_interval}")
+        logger.debug(f"  leverage: {leverage}")
         
         # Look for API credentials in environment variables if not provided
         self.api_key = api_key or os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
@@ -125,9 +127,8 @@ class BitGetLiveTraders:
             logger.debug(f"  Secret Key Length: {len(self.secret_key)} characters")
             logger.debug(f"  Passphrase Length: {len(self.passphrase)} characters")
             
-        self.api_client = api_client
         self.use_coin_picker = use_coin_picker
-        self.traders: Dict[str, BitGetTrader] = {}
+        self.traders: Dict[str, BitGetCCXT] = {}
         self.is_running = False
         self.coin_picker = CoinPicker(use_testnet=use_testnet) if use_coin_picker else None
         
@@ -140,7 +141,14 @@ class BitGetLiveTraders:
         for key in ["BITGET_TESTNET_API_KEY", "BITGET_API_KEY", "STRATEGIC_SUB_ACCOUNT_NAME"]:
             if key in os.environ:
                 logger.debug(f"    {key}: {'*' * len(os.environ[key])}")
-        
+                
+    def _format_symbol(self, symbol: str) -> str:
+        """Format symbol for CCXT use."""
+        # Remove USDT suffix if present
+        base = symbol.replace('USDT', '')
+        # Format for BitGet futures: BTC/USDT:USDT
+        return f"{base}/USDT:USDT"
+
     async def initialize(self) -> None:
         """Initialize the trading system."""
         # Verify symbol exists and is valid
@@ -156,16 +164,22 @@ class BitGetLiveTraders:
             # Skip verification if CoinPicker is disabled
             if not self.use_coin_picker or not self.coin_picker:
                 logger.info(f"{YELLOW}CoinPicker disabled, skipping symbol verification{RESET}")
-                # Instead, use BitGetTrader to verify the symbol
-                test_trader = BitGetTrader(
-                    profile_type="strategic",
+                # Instead, use CCXT to verify the symbol
+                test_exchange = BitGetCCXT(
                     api_key=self.api_key,
                     secret_key=self.secret_key,
                     passphrase=self.passphrase,
-                    use_testnet=self.use_testnet,
-                    api_version="v1"  # Use v1 API for now since we're experiencing issues with v2
+                    use_testnet=self.use_testnet
                 )
-                return test_trader.verify_symbol(self.symbol)
+                await test_exchange.initialize()
+                try:
+                    formatted_symbol = self._format_symbol(self.symbol)
+                    await test_exchange.get_market_ticker(formatted_symbol)
+                    await test_exchange.close()
+                    return True
+                except Exception as e:
+                    logger.error(f"{RED}Symbol verification failed: {str(e)}{RESET}")
+                    return False
                 
             # Update coin picker cache
             if not self.coin_picker.update_coins_cache():
@@ -218,58 +232,61 @@ class BitGetLiveTraders:
             "scalping": ScalperTrader
         }
         
-        # API version to use - v2 for better compatibility
-        api_version = "v2"
-        logger.info(f"{YELLOW}Initializing traders with API version {api_version}{RESET}")
-        
         # For mainnet, only use the main account
         if not self.use_testnet:
             logger.info(f"{CYAN}Using main account only for mainnet trading{RESET}")
-            trader = BitGetTrader(
-                profile_type="strategic",
-                api_key=self.api_key,
-                secret_key=self.secret_key,
-                passphrase=self.passphrase,
-                use_testnet=self.use_testnet,
-                initial_capital=self.initial_capital,
-                api_client=self.api_client,
-                api_version=api_version
-            )
-            trader.symbol = self.symbol
-            self.traders["strategic"] = trader
-            return
-        
-        # For testnet, initialize all profiles
-        for profile_name, profile_class in profiles.items():
+            trader = None
             try:
-                # Get sub-account name from environment for strategic trader
-                sub_account_name = None
-                if profile_name == "strategic":
-                    sub_account_name = os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME")
-                    if sub_account_name:
-                        logger.info(f"{GREEN}Using sub-account: {sub_account_name}{RESET}")
-                
-                trader = BitGetTrader(
-                    profile_type=profile_name,
+                # Get sub-account name from environment or use empty string
+                strategic_sub_account = os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME", "")
+                trader = BitGetCCXT(
                     api_key=self.api_key,
                     secret_key=self.secret_key,
                     passphrase=self.passphrase,
                     use_testnet=self.use_testnet,
-                    initial_capital=self.initial_capital,
-                    api_client=self.api_client,
-                    api_version=api_version,
-                    sub_account_name=sub_account_name
+                    sub_account=strategic_sub_account
+                )
+                await trader.initialize()
+                # Set up trading configuration with current leverage
+                await trader.setup_trading_config(self.symbol, self.leverage)
+                self.traders["strategic"] = trader
+                logger.info(f"{GREEN}Initialized strategic trader{RESET}")
+            except Exception as e:
+                logger.error(f"{RED}Failed to initialize strategic trader: {str(e)}{RESET}")
+                if trader:
+                    await trader.close()
+                raise
+            return
+        
+        # For testnet, initialize all profiles
+        for profile_name, profile_class in profiles.items():
+            trader = None
+            try:
+                # Get sub-account name from environment for strategic trader
+                sub_account = ""
+                if profile_name == "strategic":
+                    sub_account = os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME", "")
+                    if sub_account:
+                        logger.info(f"{GREEN}Using sub-account: {sub_account}{RESET}")
+                
+                trader = BitGetCCXT(
+                    api_key=self.api_key,
+                    secret_key=self.secret_key,
+                    passphrase=self.passphrase,
+                    use_testnet=self.use_testnet,
+                    sub_account=sub_account
                 )
                 
-                # Make sure trader is using the same symbol as us
-                trader.symbol = self.symbol
-                
-                # Initialize the trader profile
+                await trader.initialize()
+                # Set up trading configuration with current leverage
+                await trader.setup_trading_config(self.symbol, self.leverage)
                 self.traders[profile_name] = trader
                 logger.info(f"{GREEN}Initialized {profile_name} trader{RESET}")
                 
             except Exception as e:
                 logger.error(f"{RED}Failed to initialize {profile_name} trader: {str(e)}{RESET}")
+                if trader:
+                    await trader.close()
                 continue
 
     async def start_trading(self) -> None:
@@ -297,63 +314,75 @@ class BitGetLiveTraders:
             logger.info(f"{YELLOW}Shutting down live traders system...{RESET}")
             await self.stop_trading()
             
-    async def _update_trader(self, trader: BitGetTrader, profile_name: str) -> None:
+    async def _update_trader(self, trader: BitGetCCXT, profile_name: str) -> None:
         """Update a single trader's state and execute trading logic."""
         try:
             # Get current market data
-            logger.debug(f"{CYAN}Getting market ticker for {trader.symbol} ({profile_name} trader){RESET}")
-            ticker = trader.get_market_ticker(trader.symbol)
+            formatted_symbol = self._format_symbol(self.symbol)
+            logger.debug(f"{CYAN}Getting market ticker for {formatted_symbol} ({profile_name} trader){RESET}")
+            ticker = await trader.get_market_ticker(formatted_symbol)
             
             if ticker and 'last' in ticker:
                 current_price = float(ticker['last'])
-                logger.debug(f"{GREEN}Current price for {trader.symbol}: {current_price}{RESET}")
+                logger.debug(f"{GREEN}Current price for {self.symbol}: {current_price}{RESET}")
                 logger.debug(f"{CYAN}Full ticker data: {json.dumps(ticker, indent=2, cls=DateTimeEncoder)}{RESET}")
                 
                 # Update market context
                 market_context = {
                     "price": current_price,
-                    "symbol": trader.symbol,
-                    "timestamp": datetime.now(timezone.utc).isoformat()  # Convert to ISO format string
+                    "symbol": formatted_symbol,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 logger.debug(f"{CYAN}Market context: {json.dumps(market_context, indent=2)}{RESET}")
                 
                 # Get current positions before executing trade
                 logger.debug(f"{CYAN}Getting current positions for {profile_name} trader{RESET}")
-                current_positions = trader.get_positions(trader.symbol)
+                current_positions = await trader.get_positions(formatted_symbol)
                 logger.debug(f"{CYAN}Current positions: {json.dumps(current_positions, indent=2, cls=DateTimeEncoder)}{RESET}")
                 
-                # Execute trading logic
-                logger.debug(f"{CYAN}Executing trading logic for {profile_name} trader{RESET}")
-                trade_result = trader.execute_trade(market_context)
+                # Check for open positions
+                open_positions = [p for p in current_positions if p.get('contracts', 0) > 0]
                 
-                if trade_result:
-                    logger.debug(f"{CYAN}Trade executed: {json.dumps(trade_result, indent=2, cls=DateTimeEncoder)}{RESET}")
-                    # Send trade alert
-                    alert_msg = (
-                        f"🎯 {profile_name.upper()} TRADER EXECUTED TRADE\n"
-                        f"Symbol: {trader.symbol}\n"
-                        f"Direction: {trade_result.get('direction', 'UNKNOWN')}\n"
-                        f"Size: {trade_result.get('size', 0):.4f}\n"
-                        f"Entry Price: {trade_result.get('entry_price', 0):.2f}\n"
-                        f"Stop Loss: {trade_result.get('stop_loss', 0):.2f}"
-                    )
-                    await send_telegram_alert(alert_msg)
-                    logger.debug(f"{GREEN}Sent trade alert to Telegram{RESET}")
-                else:
-                    logger.debug(f"{YELLOW}No trade executed for {profile_name} trader{RESET}")
+                if open_positions:
+                    # Handle existing positions
+                    for position in open_positions:
+                        # Check if position should be closed based on strategy
+                        should_close = await self._check_position_close(trader, position, current_price)
+                        if should_close:
+                            logger.info(f"{YELLOW}Closing position for {profile_name} trader{RESET}")
+                            await trader.close_position(formatted_symbol, position)
+                            # Wait for position to be fully closed
+                            await asyncio.sleep(2)
+                            # Update positions after closing
+                            current_positions = await trader.get_positions(formatted_symbol)
+                            open_positions = [p for p in current_positions if p.get('contracts', 0) > 0]
+                
+                # If no open positions, check for new entry
+                if not open_positions:
+                    # Check if we should enter a new position
+                    should_enter = await self._check_new_entry(trader, current_price)
+                    if should_enter:
+                        # Calculate position size based on leverage and capital
+                        position_size = (self.initial_capital * self.leverage) / current_price
+                        # Place new order
+                        side = "buy" if should_enter.get('side') == "long" else "sell"
+                        logger.info(f"{GREEN}Placing new {side} order for {profile_name} trader{RESET}")
+                        await trader.place_order(
+                            symbol=formatted_symbol,
+                            side=side,
+                            amount=position_size,
+                            order_type="market"
+                        )
                 
                 # Update positions
                 logger.debug(f"{CYAN}Updating positions for {profile_name} trader{RESET}")
-                trader.update_positions(current_price)
-                
-                # Get updated positions
-                updated_positions = trader.get_positions(trader.symbol)
+                updated_positions = await trader.get_positions(formatted_symbol)
                 logger.debug(f"{CYAN}Updated positions: {json.dumps(updated_positions, indent=2, cls=DateTimeEncoder)}{RESET}")
                 
                 # Update performance metrics
                 await self._update_performance_metrics(trader, profile_name)
             else:
-                logger.error(f"{RED}Failed to get ticker data for {trader.symbol} ({profile_name} trader){RESET}")
+                logger.error(f"{RED}Failed to get ticker data for {self.symbol} ({profile_name} trader){RESET}")
                 if ticker:
                     logger.error(f"{RED}Ticker response: {json.dumps(ticker, indent=2, cls=DateTimeEncoder)}{RESET}")
                 else:
@@ -369,7 +398,7 @@ class BitGetLiveTraders:
             try:
                 error_msg = (
                     f"⚠️ ERROR IN {profile_name.upper()} TRADER\n"
-                    f"Symbol: {trader.symbol}\n"
+                    f"Symbol: {self.symbol}\n"
                     f"Error: {str(e)}\n"
                     f"Type: {type(e).__name__}"
                 )
@@ -377,21 +406,93 @@ class BitGetLiveTraders:
                 logger.debug(f"{GREEN}Sent error alert to Telegram{RESET}")
             except Exception as alert_error:
                 logger.error(f"{RED}Failed to send error alert: {str(alert_error)}{RESET}")
+                
+    async def _check_position_close(self, trader: BitGetCCXT, position: Dict[str, Any], current_price: float) -> bool:
+        """
+        Check if a position should be closed based on strategy.
+        
+        Args:
+            trader: BitGetCCXT instance
+            position: Current position information
+            current_price: Current market price
             
-    async def _update_performance_metrics(self, trader: BitGetTrader, profile_name: str) -> None:
+        Returns:
+            bool: True if position should be closed, False otherwise
+        """
+        try:
+            # Get position details
+            entry_price = float(position.get('entryPrice', 0))
+            side = position.get('side', '')
+            contracts = float(position.get('contracts', 0))
+            
+            if not entry_price or not side or not contracts:
+                return False
+                
+            # Calculate PnL percentage
+            if side == "long":
+                pnl_percentage = ((current_price - entry_price) / entry_price) * 100
+            else:
+                pnl_percentage = ((entry_price - current_price) / entry_price) * 100
+                
+            # Implement your position close logic here
+            # For example, close if PnL is above 2% or below -1%
+            if pnl_percentage >= 2.0 or pnl_percentage <= -1.0:
+                logger.info(f"{YELLOW}Position close signal: PnL {pnl_percentage:.2f}%{RESET}")
+                return True
+                
+            return False
+            
+        except Exception as e:
+            logger.error(f"{RED}Error checking position close: {str(e)}{RESET}")
+            return False
+            
+    async def _check_new_entry(self, trader: BitGetCCXT, current_price: float) -> Optional[Dict[str, str]]:
+        """
+        Check if we should enter a new position based on strategy.
+        
+        Args:
+            trader: BitGetCCXT instance
+            current_price: Current market price
+            
+        Returns:
+            Optional[Dict[str, str]]: Dict with 'side' key if should enter, None otherwise
+        """
+        try:
+            # Implement your entry logic here
+            # For example, use Fibonacci levels, moving averages, etc.
+            
+            # This is a simple example - you should replace with your actual strategy
+            # For now, we'll just alternate between long and short positions
+            last_side = getattr(self, f"_last_{trader.sub_account}_side", None)
+            new_side = "short" if last_side == "long" else "long"
+            setattr(self, f"_last_{trader.sub_account}_side", new_side)
+            
+            logger.info(f"{GREEN}New entry signal: {new_side}{RESET}")
+            return {"side": new_side}
+            
+        except Exception as e:
+            logger.error(f"{RED}Error checking new entry: {str(e)}{RESET}")
+            return None
+            
+    async def _update_performance_metrics(self, trader: BitGetCCXT, profile_name: str) -> None:
         """Update and log trader performance metrics."""
         try:
-            # Calculate metrics
-            total_pnl = trader.get_total_pnl()
-            logger.info(f"{CYAN}Getting positions for {trader.symbol} ({profile_name} trader){RESET}")
-            positions = trader.get_positions(trader.symbol)
+            # Get positions and balance
+            positions = await trader.get_positions(f"{self.symbol}/USDT:USDT")
+            balance = await trader.get_balance()
+            
+            # Calculate total PnL
+            total_pnl = 0
+            for position in positions:
+                if position['symbol'] == f"{self.symbol}/USDT:USDT":
+                    total_pnl += float(position.get('unrealizedPnl', 0))
             
             # Log performance
             logger.info(
                 f"{BLUE}{profile_name.upper()} Performance:\n"
-                f"Symbol: {trader.symbol}\n"
+                f"Symbol: {self.symbol}\n"
                 f"Total PnL: {total_pnl:.2f} USDT\n"
-                f"Active Positions: {len(positions) if positions else 0}{RESET}"
+                f"Active Positions: {len(positions)}{RESET}"
             )
             
             # Get current time
@@ -416,11 +517,11 @@ class BitGetLiveTraders:
                     if positions:
                         for pos in positions:
                             symbol = pos.get('symbol', 'UNKNOWN')
-                            side = pos.get('holdSide', 'UNKNOWN').upper()
-                            size = float(pos.get('total', 0))
-                            price = float(pos.get('averageOpenPrice', 0))
-                            unreal_pnl = float(pos.get('unrealizedPL', 0))
-                            real_pnl = float(pos.get('achievedProfits', 0))
+                            side = pos.get('side', 'UNKNOWN').upper()
+                            size = float(pos.get('contracts', 0))
+                            price = float(pos.get('entryPrice', 0))
+                            unreal_pnl = float(pos.get('unrealizedPnl', 0))
+                            real_pnl = float(pos.get('realizedPnl', 0))
                             
                             # Track by symbol
                             if symbol not in unrealized_pnl_by_symbol:
@@ -444,9 +545,10 @@ class BitGetLiveTraders:
                     alert_msg = (
                         f"{status_emoji} {profile_name.upper()} TRADER PNL UPDATE\n\n"
                         f"📊 *SUMMARY*\n"
-                        f"Symbol: {trader.symbol}\n"
+                        f"Symbol: {self.symbol}\n"
                         f"Time: {current_time.strftime('%H:%M:%S UTC')}\n"
-                        f"Active Positions: {len(positions) if positions else 0}\n\n"
+                        f"Active Positions: {len(positions)}\n"
+                        f"Leverage: {self.leverage}x\n\n"
                     )
                     
                     # Add PnL breakdown by symbol if available
@@ -491,9 +593,9 @@ class BitGetLiveTraders:
         
         for profile_name, trader in self.traders.items():
             try:
-                positions = trader.get_positions(trader.symbol)
+                positions = await trader.get_positions(f"{self.symbol}/USDT:USDT")
                 if positions:
-                    open_positions = [p for p in positions if p.get('status') == 'OPEN']
+                    open_positions = [p for p in positions if p.get('contracts', 0) > 0]
                     if open_positions:
                         total_positions += len(open_positions)
                         positions_by_trader[profile_name] = open_positions
@@ -510,7 +612,7 @@ class BitGetLiveTraders:
             for profile_name, positions in positions_by_trader.items():
                 warning_msg += f"\n{profile_name.upper()} ({len(positions)} positions):\n"
                 for pos in positions:
-                    warning_msg += f"- {pos.get('side', 'UNKNOWN')} {pos.get('size', 0)} BTC @ ${pos.get('entryPrice', 0)}\n"
+                    warning_msg += f"- {pos.get('side', 'UNKNOWN')} {pos.get('contracts', 0)} BTC @ ${pos.get('entryPrice', 0)}\n"
             
             warning_msg += "\nDo you want to proceed with closing all positions? (yes/no)"
             
@@ -530,26 +632,23 @@ class BitGetLiveTraders:
                 logger.info(f"{YELLOW}Shutting down {profile_name} trader...{RESET}")
                 
                 # Close all open positions
-                logger.info(f"{CYAN}Getting positions for {trader.symbol} ({profile_name} trader) before shutdown{RESET}")
-                positions = trader.get_positions(trader.symbol)
+                logger.info(f"{CYAN}Getting positions for {self.symbol} ({profile_name} trader) before shutdown{RESET}")
+                positions = await trader.get_positions(f"{self.symbol}/USDT:USDT")
                 
                 if positions:
                     logger.info(f"{CYAN}Found {len(positions)} positions to close for {profile_name} trader{RESET}")
                     for position in positions:
-                        if position.get('status') == 'OPEN':
-                            logger.info(f"{YELLOW}Closing position for {trader.symbol} ({profile_name} trader){RESET}")
-                            trader.close_position(
-                                symbol=trader.symbol,
-                                side=position.get('side', 'LONG')
-                            )
+                        if position.get('contracts', 0) > 0:
+                            logger.info(f"{YELLOW}Closing position for {self.symbol} ({profile_name} trader){RESET}")
+                            await trader.close_position(f"{self.symbol}/USDT:USDT", position)
                 else:
                     logger.info(f"{GREEN}No open positions to close for {profile_name} trader{RESET}")
                             
                 # Send shutdown alert
                 alert_msg = (
                     f"🛑 {profile_name.upper()} TRADER SHUTDOWN\n"
-                    f"Symbol: {trader.symbol}\n"
-                    f"Final PnL: {trader.get_total_pnl():.2f} USDT"
+                    f"Symbol: {self.symbol}\n"
+                    f"Final PnL: {sum(float(p.get('unrealizedPnl', 0)) for p in positions if p.get('symbol') == f'{self.symbol}/USDT:USDT'):.2f} USDT"
                 )
                 await send_telegram_alert(alert_msg)
                 
@@ -597,6 +696,8 @@ def parse_args():
                       help='Disable PnL alerts (default: False)')
     parser.add_argument('--pnl-alert-interval', type=int, default=1,
                       help='Interval in minutes for PnL alerts (default: 1)')
+    parser.add_argument('--leverage', type=int, default=11,
+                      help='Trading leverage (default: 11)')
     
     return parser.parse_args()
 
@@ -625,7 +726,8 @@ async def main():
         use_coin_picker=args.use_coin_picker,
         strategic_only=args.strategic_only,
         enable_pnl_alerts=not args.no_pnl_alerts,
-        pnl_alert_interval=args.pnl_alert_interval
+        pnl_alert_interval=args.pnl_alert_interval,
+        leverage=args.leverage
     )
     
     try:

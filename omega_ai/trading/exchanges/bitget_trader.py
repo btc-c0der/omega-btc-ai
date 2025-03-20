@@ -388,7 +388,8 @@ class BitGetTrader:
         method = method.upper()
         
         # Start with timestamp + method + requestPath
-        message = str(timestamp) + method + request_path
+        # Add a space between method and request_path as per BitGet requirements
+        message = str(timestamp) + method + " " + request_path
         
         # Add query string if present (for GET requests)
         if params and method == "GET":
@@ -396,8 +397,9 @@ class BitGetTrader:
             sorted_params = sorted(params.items())
             # Create query string
             query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
-            # Add to message with question mark
-            message += "?" + query_string
+            # Add to message with question mark only if not already in request_path
+            if query_string and "?" not in request_path:
+                message += "?" + query_string
         
         # Add body for POST requests
         if body and method == "POST":
@@ -443,6 +445,18 @@ class BitGetTrader:
             params["subAccountName"] = self.sub_account_name
         elif self.sub_account_id and not any(x in endpoint for x in ["/position/", "/market/"]):
             params["subAccountId"] = self.sub_account_id
+        
+        # For v2 API, we need to handle parameters differently
+        if self.api_version == "v2":
+            # Sort parameters by key as required by BitGet
+            sorted_params = sorted(params.items())
+            # Create query string
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            # Add to endpoint with question mark if there are parameters
+            if query_string:
+                # Only add query string if it's not already in the endpoint
+                if "?" not in endpoint:
+                    endpoint = f"{endpoint}?{query_string}"
         
         # Generate signature with params and body
         signature = self.generate_signature(timestamp, method, endpoint, body, params)
@@ -858,11 +872,11 @@ class BitGetTrader:
             # If a specific symbol is requested, try singlePosition first
             if symbol:
                 try:
-                    endpoint = "/api/mix/v1/position/singlePosition"
+                    endpoint = "/api/v2/mix/position/single-position"
                     params = {
                         "symbol": symbol,
                         "marginCoin": "USDT",
-                        "productType": "umcbl"
+                        "productType": "USDT-FUTURES"
                     }
                     
                     # Get fresh timestamp
@@ -891,10 +905,10 @@ class BitGetTrader:
                     # Fall through to try the allPosition endpoint
             
             # Define endpoint for all positions or fallback from single position error
-            endpoint = "/api/mix/v1/position/allPosition"
+            endpoint = "/api/v2/mix/position/all-position"
             params = {
                 "marginCoin": "USDT",
-                "productType": "umcbl"
+                "productType": "USDT-FUTURES"
             }
             
             # Loop for retries, generating new timestamp each time
@@ -1132,7 +1146,7 @@ class BitGetTrader:
         if self.api_version == "v1":
             endpoint = f"{self.api_base}/market/ticker"  # Endpoint for v1
         else:
-            endpoint = f"{self.api_base}/market/ticker"  # Endpoint for v2
+            endpoint = "/api/v2/mix/market/ticker"  # Endpoint for v2
             
         method = "GET"
         timestamp = str(int(time.time() * 1000))
@@ -1150,59 +1164,60 @@ class BitGetTrader:
                 "productType": self.PRODUCT_TYPE_PARAM
             }
         else:
-            # For v2, just symbol
+            # For v2, we need symbol and productType
             params = {
-                "symbol": formatted_symbol
+                "symbol": formatted_symbol,
+                "productType": "USDT-FUTURES"
             }
         
-        # For proper debugging, log exactly what we're using
-        logger.info(f"{CYAN}=== Ticker Request Debug ==={RESET}")
-        logger.info(f"API URL: {self.api_url}")
-        logger.info(f"Endpoint: {endpoint}")
-        logger.info(f"Method: {method}")
-        logger.info(f"Timestamp: {timestamp}")
-        logger.info(f"Symbol: Original={symbol}, Formatted={formatted_symbol}")
-        logger.info(f"API Version: {self.api_version}")
-        logger.info(f"Query Params: {params}")
-        
-        # Generate signed headers
-        headers = self._get_auth_headers(timestamp, method, endpoint, params)
-        logger.info(f"Headers: {headers}")
-        
-        # Calculate signature directly for validation
-        message = timestamp + method + endpoint
-        query_params = []
-        for key in sorted(params.keys()):
-            query_params.append(f"{key}={params[key]}")
-        if query_params:
-            query_string = "&".join(query_params)
-            message += "?" + query_string
-            
-        manual_signature = self.generate_signature(timestamp, method, endpoint)
-        
-        logger.info(f"Manual signature calculation:")
-        logger.info(f"Message: {message}")
-        logger.info(f"Calculated signature: {manual_signature}")
-        
         try:
+            # Get headers with authentication
+            headers = self._get_auth_headers(timestamp, method, endpoint, params)
+            
+            # Make the request
             response = _make_request(method, self.api_url + endpoint, headers=headers, params=params)
             data = response.json()
             
             if data.get("code") == "00000" and data.get("data"):
-                logger.info(f"{GREEN}Successfully retrieved ticker{RESET}")
-                return data["data"]
+                # Handle different response formats based on API version
+                if self.api_version == "v1":
+                    ticker_data = data.get("data", {})
+                else:
+                    # For v2, data is a list of tickers
+                    tickers = data.get("data", [])
+                    # Find the ticker for our symbol
+                    ticker_data = next((t for t in tickers if t.get("symbol") == formatted_symbol), {})
+                
+                # Map the response fields to a consistent format
+                mapped_ticker = {
+                    "last": float(ticker_data.get("lastPr", 0)),
+                    "ask": float(ticker_data.get("askPr", 0)),
+                    "bid": float(ticker_data.get("bidPr", 0)),
+                    "high": float(ticker_data.get("high24h", 0)),
+                    "low": float(ticker_data.get("low24h", 0)),
+                    "volume": float(ticker_data.get("baseVolume", 0)),
+                    "quoteVolume": float(ticker_data.get("quoteVolume", 0)),
+                    "change": float(ticker_data.get("change24h", 0)),
+                    "markPrice": float(ticker_data.get("markPrice", 0)),
+                    "indexPrice": float(ticker_data.get("indexPrice", 0)),
+                    "fundingRate": float(ticker_data.get("fundingRate", 0)),
+                    "timestamp": int(ticker_data.get("ts", 0))
+                }
+                
+                logger.info("Successfully retrieved ticker")
+                return mapped_ticker
             else:
                 error_msg = data.get("msg", "Unknown error")
-                logger.error(f"\033[91mERROR: Error fetching ticker: {error_msg}\033[0m")
-                logger.error(f"Full response: {json.dumps(data, indent=2)}")
+                logger.error(f"Failed to get ticker data: {error_msg}")
+                logger.error(f"Response: {json.dumps(data, indent=2)}")
                 return None
                 
         except Exception as e:
-            logger.error(f"\033[91mERROR: Error getting ticker: {str(e)}\033[0m")
+            logger.error(f"Error getting ticker data: {str(e)}")
             logger.error(f"Exception type: {type(e).__name__}")
             logger.error(f"Exception args: {e.args}")
             return None
-            
+    
     def get_orderbook(self, symbol: str, limit: int = 100) -> Optional[Dict[str, Any]]:
         """Get order book data."""
         endpoint = f"{self.api_base}/market/orderbook"
