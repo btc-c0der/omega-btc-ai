@@ -95,7 +95,8 @@ class BitGetCCXT:
     def _format_symbol(self, symbol: str) -> str:
         """Format symbol for BitGet futures trading."""
         if not symbol:
-            raise ValueError("Symbol cannot be None or empty")
+            logger.warning(f"{YELLOW}Empty or None symbol provided, using default BTCUSDT{RESET}")
+            return "BTC/USDT:USDT"
             
         # Remove any existing formatting
         base = symbol.replace('USDT', '').replace('/', '').replace(':', '')
@@ -194,18 +195,26 @@ class BitGetCCXT:
         try:
             # Ensure symbol is properly formatted
             formatted_symbol = self._format_symbol(symbol)
-            positions = await self.exchange.fetch_positions(formatted_symbol)
+            logger.debug(f"{CYAN}Fetching positions for symbol: {formatted_symbol}{RESET}")
+            
+            # Fetch all positions first
+            all_positions = await self.exchange.fetch_positions()
             
             # Filter positions for the requested symbol
             filtered_positions = []
-            for position in positions:
-                if position.get('symbol') == formatted_symbol:
+            for position in all_positions:
+                if position and position.get('symbol') == formatted_symbol:
                     filtered_positions.append(position)
+            
+            if not filtered_positions:
+                logger.debug(f"{YELLOW}No positions found for symbol {formatted_symbol}{RESET}")
             
             return filtered_positions
             
         except Exception as e:
             logger.error(f"{RED}Error fetching positions: {str(e)}{RESET}")
+            logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
+            logger.error(f"{RED}Exception args: {e.args}{RESET}")
             return []
             
     async def get_balance(self) -> Dict[str, Any]:
@@ -245,12 +254,9 @@ class BitGetCCXT:
             # Prepare order parameters
             params = {
                 "timeInForce": "GTC" if order_type == "limit" else "IOC",
-                "reduceOnly": reduce_only
+                "reduceOnly": reduce_only,
+                "positionSide": "long" if side == "buy" else "short"  # Add position side for unilateral mode
             }
-            
-            # Only add holdSide for hedge mode
-            if self.is_hedge_mode:
-                params["holdSide"] = "long" if side == "buy" else "short"
             
             # Add sub-account if specified
             if self.sub_account:
