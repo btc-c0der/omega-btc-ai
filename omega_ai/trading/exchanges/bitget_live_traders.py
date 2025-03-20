@@ -28,6 +28,7 @@ import json
 import os
 import sys
 import traceback
+from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
 
 # Custom JSON encoder for datetime objects
 class DateTimeEncoder(json.JSONEncoder):
@@ -351,11 +352,141 @@ class BitGetLiveTraders:
                         if should_close:
                             logger.info(f"{YELLOW}Closing position for {profile_name} trader{RESET}")
                             await trader.close_position(formatted_symbol, position)
+                            
+                            # Reset position additions count when position is closed
+                            position_additions_count = getattr(self, f"_{profile_name}_position_additions_count", {})
+                            if formatted_symbol in position_additions_count:
+                                logger.info(f"{YELLOW}Resetting position additions count for {profile_name} trader on {formatted_symbol}{RESET}")
+                                position_additions_count[formatted_symbol] = 0
+                                setattr(self, f"_{profile_name}_position_additions_count", position_additions_count)
+                            
                             # Wait for position to be fully closed
                             await asyncio.sleep(2)
                             # Update positions after closing
                             current_positions = await trader.get_positions(formatted_symbol)
                             open_positions = [p for p in current_positions if p.get('contracts', 0) > 0]
+                            
+                    # Add position scaling logic for strategic trader
+                    if profile_name == "strategic" and open_positions:
+                        # Import trap detection for market maker trap checking
+                        from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
+                        
+                        # Check if we should scale the position
+                        try:
+                            # Get market data for volume confirmation
+                            klines = await trader.get_market_candles(formatted_symbol)
+                            market_data = {
+                                "volume": float(klines[-1][5]) if klines and len(klines) > 0 else 0,
+                                "prev_volume": float(klines[-2][5]) if klines and len(klines) > 1 else 0,
+                                "price": current_price,
+                                "symbol": self.symbol
+                            }
+                            
+                            # Initialize MM Trap Detector for checking traps
+                            mm_detector = MMTrapDetector()
+                            
+                            # Track position additions count
+                            position_additions_count = getattr(self, f"_{profile_name}_position_additions_count", {})
+                            if formatted_symbol not in position_additions_count:
+                                position_additions_count[formatted_symbol] = 0
+                            
+                            # Maximum allowed additions (from strategic_trader.py)
+                            max_additions = 3
+                            
+                            # Check if we've reached max additions
+                            if position_additions_count[formatted_symbol] < max_additions:
+                                # Get the first open position
+                                position = open_positions[0]
+                                entry_price = float(position.get('entryPrice', 0))
+                                side = position.get('side', '')
+                                
+                                # Define Fibonacci scaling levels
+                                scaling_fib_levels = [1.618, 2.618, 4.236]
+                                scale_proximity_threshold = 0.01  # 1% proximity
+                                
+                                # Check if current price is near a Fibonacci scaling level
+                                for fib_level in scaling_fib_levels:
+                                    target_level = None
+                                    if side == "long":
+                                        # For longs, we scale on dips (entry_price / fib_level)
+                                        target_level = entry_price * (1 - 1/fib_level)
+                                        price_diff_pct = abs((current_price - target_level) / target_level)
+                                        
+                                        if price_diff_pct <= scale_proximity_threshold:
+                                            # Check for volume confirmation
+                                            volume_confirmed = market_data["volume"] > market_data["prev_volume"] * 1.2
+                                            
+                                            # Check for market maker traps
+                                            trap_detected = await mm_detector.analyze_movement(
+                                                current_price, entry_price, market_data["volume"]
+                                            )
+                                            no_trap = "Organic" in trap_detected
+                                            
+                                            if volume_confirmed and no_trap:
+                                                logger.info(f"{GREEN}Position scaling triggered for {profile_name} trader at {fib_level}x Fibonacci level{RESET}")
+                                                
+                                                # Calculate additional position size (50% of original)
+                                                original_contracts = float(position.get('contracts', 0))
+                                                additional_contracts = original_contracts * 0.5
+                                                
+                                                # Place scaling order
+                                                logger.info(f"{GREEN}Adding {additional_contracts} contracts to {side} position for {profile_name} trader{RESET}")
+                                                await trader.place_order(
+                                                    symbol=formatted_symbol,
+                                                    side="buy",  # For longs we're adding on dips
+                                                    amount=additional_contracts,
+                                                    order_type="market"
+                                                )
+                                                
+                                                # Increment additions count
+                                                position_additions_count[formatted_symbol] += 1
+                                                setattr(self, f"_{profile_name}_position_additions_count", position_additions_count)
+                                                
+                                                # Wait for order to process
+                                                await asyncio.sleep(2)
+                                                break
+                                    elif side == "short":
+                                        # For shorts, we scale on pumps (entry_price * fib_level)
+                                        target_level = entry_price * (1 + 1/fib_level)
+                                        price_diff_pct = abs((current_price - target_level) / target_level)
+                                        
+                                        if price_diff_pct <= scale_proximity_threshold:
+                                            # Check for volume confirmation
+                                            volume_confirmed = market_data["volume"] > market_data["prev_volume"] * 1.2
+                                            
+                                            # Check for market maker traps
+                                            trap_detected = await mm_detector.analyze_movement(
+                                                current_price, entry_price, market_data["volume"]
+                                            )
+                                            no_trap = "Organic" in trap_detected
+                                            
+                                            if volume_confirmed and no_trap:
+                                                logger.info(f"{GREEN}Position scaling triggered for {profile_name} trader at {fib_level}x Fibonacci level{RESET}")
+                                                
+                                                # Calculate additional position size (50% of original)
+                                                original_contracts = float(position.get('contracts', 0))
+                                                additional_contracts = original_contracts * 0.5
+                                                
+                                                # Place scaling order
+                                                logger.info(f"{GREEN}Adding {additional_contracts} contracts to {side} position for {profile_name} trader{RESET}")
+                                                await trader.place_order(
+                                                    symbol=formatted_symbol,
+                                                    side="sell",  # For shorts we're adding on pumps
+                                                    amount=additional_contracts,
+                                                    order_type="market"
+                                                )
+                                                
+                                                # Increment additions count
+                                                position_additions_count[formatted_symbol] += 1
+                                                setattr(self, f"_{profile_name}_position_additions_count", position_additions_count)
+                                                
+                                                # Wait for order to process
+                                                await asyncio.sleep(2)
+                                                break
+                            else:
+                                logger.debug(f"{YELLOW}Max position additions reached for {profile_name} trader on {formatted_symbol}{RESET}")
+                        except Exception as e:
+                            logger.error(f"{RED}Error in position scaling for {profile_name} trader: {str(e)}{RESET}")
                 
                 # If no open positions, check for new entry
                 if not open_positions:
