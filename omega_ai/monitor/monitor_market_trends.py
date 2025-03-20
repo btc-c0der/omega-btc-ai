@@ -34,6 +34,55 @@ MAGENTA = "\033[95m"        # Special emphasis
 LIGHT_ORANGE = "\033[38;5;214m"  # Warning/moderate negative
 RESET = "\033[0m"           # Reset color
 
+def describe_movement(change_pct, abs_change):
+    """Describe the price movement characteristics based on percentage and absolute change."""
+    # Determine intensity of movement
+    if abs(change_pct) > 2.0:
+        intensity = f"{RED}EXTREMELY AGGRESSIVE{RESET}"
+    elif abs(change_pct) > 1.0:
+        intensity = f"{LIGHT_ORANGE}VERY AGGRESSIVE{RESET}"
+    elif abs(change_pct) > 0.5:
+        intensity = f"{YELLOW}AGGRESSIVE{RESET}"
+    elif abs(change_pct) > 0.2:
+        intensity = f"{CYAN}MODERATE{RESET}"
+    elif abs(change_pct) > 0.1:
+        intensity = f"{BLUE}MILD{RESET}"
+    else:
+        intensity = f"{RESET}SUBTLE{RESET}"
+        
+    # Determine direction with arrow
+    if change_pct > 0:
+        direction = f"{GREEN}↑ UP{RESET}"
+    elif change_pct < 0:
+        direction = f"{RED}↓ DOWN{RESET}"
+    else:
+        direction = f"{RESET}→ FLAT{RESET}"
+        
+    return f"{direction} | {intensity} | ${abs_change:.2f} absolute"
+
+def format_trend_output(interval, trend, change_pct):
+    """Format trend output with colors based on direction and intensity."""
+    if "Bullish" in trend:
+        if "Strongly" in trend:
+            color_trend = f"{GREEN}{trend}{RESET}"
+        else:
+            color_trend = f"{BLUE}{trend}{RESET}"
+        sign = "+"
+        color_pct = GREEN
+    elif "Bearish" in trend:
+        if "Strongly" in trend:
+            color_trend = f"{RED}{trend}{RESET}"
+        else:
+            color_trend = f"{LIGHT_ORANGE}{trend}{RESET}"
+        sign = ""
+        color_pct = RED
+    else:
+        color_trend = f"{CYAN}{trend}{RESET}"
+        sign = "" if change_pct < 0 else "+"
+        color_pct = BLUE if change_pct > 0 else YELLOW if change_pct < 0 else RESET
+        
+    return f"📈 {MAGENTA}{interval}{RESET} Trend: {color_trend} ({color_pct}{sign}{change_pct:.2f}%{RESET})"
+
 class MarketTrendAnalyzer:
     """Analyzes market trends with multiple indicators and timeframes."""
     
@@ -42,7 +91,7 @@ class MarketTrendAnalyzer:
         self.timeframes = [1, 5, 15]  # minutes
         self.consecutive_errors = 0
         self.last_analysis_time = None
-        self.analysis_interval = 60  # seconds
+        self.analysis_interval = 5  # seconds
         
     def analyze_trends(self) -> Dict[str, Any]:
         """Analyze market trends across multiple timeframes."""
@@ -96,12 +145,16 @@ class MarketTrendAnalyzer:
         """Display analysis results with enhanced formatting."""
         print(f"\n{YELLOW}════════════════ {GREEN}OMEGA RASTA{YELLOW} MARKET TREND ANALYSIS ════════════════{RESET}")
         
-        # Display trends for each timeframe
+        # Display trends for each timeframe with enhanced formatting
         for timeframe, data in results.items():
             if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment":
                 trend = data["trend"]
                 change = data["change"]
-                print(f"{timeframe}: {self.get_colored_trend(trend)} ({self.get_colored_change(change)}%)")
+                print(format_trend_output(timeframe, trend, change))
+                
+                # Add movement description
+                abs_change = abs(change)
+                print(f"   {describe_movement(change, abs_change)}")
         
         # Display Fibonacci analysis if available
         if "fibonacci_alignment" in results:
@@ -114,6 +167,9 @@ class MarketTrendAnalyzer:
         
         # Display market conditions
         self.display_market_conditions()
+        
+        # Display Schumann resonance influence
+        self.print_schumann_influence()
     
     def display_market_conditions(self) -> None:
         """Display current market conditions and indicators."""
@@ -194,31 +250,11 @@ class MarketTrendAnalyzer:
             logger.error(f"Error determining market regime: {e}")
             return None
     
-    @staticmethod
-    def get_colored_trend(trend: str) -> str:
-        """Return trend with appropriate color coding."""
-        if "Bullish" in trend:
-            if "Strongly" in trend:
-                return f"{GREEN}{trend}{RESET}"
-            return f"{BLUE}{trend}{RESET}"
-        elif "Bearish" in trend:
-            if "Strongly" in trend:
-                return f"{RED}{trend}{RESET}"
-            return f"{YELLOW}{trend}{RESET}"
-        return f"{CYAN}{trend}{RESET}"
-    
-    @staticmethod
-    def get_colored_change(change: float) -> str:
-        """Return price change with appropriate color coding."""
-        if change > 1.0:
-            return f"{GREEN}+{change:.2f}{RESET}"
-        elif change > 0:
-            return f"{BLUE}+{change:.2f}{RESET}"
-        elif change < -1.0:
-            return f"{RED}{change:.2f}{RESET}"
-        elif change < 0:
-            return f"{YELLOW}{change:.2f}{RESET}"
-        return f"{RESET}0.00{RESET}"
+    def print_schumann_influence(self):
+        """Print the current Schumann resonance influence on market energy."""
+        print(f"\n{CYAN}🌍 SCHUMANN RESONANCE INFLUENCE:{RESET}")
+        print(f"  {MAGENTA}Current resonance: {YELLOW}7.83 Hz{RESET} - {GREEN}Baseline Harmony{RESET}")
+        print(f"  {MAGENTA}Market harmony: {GREEN}Aligned with planetary consciousness{RESET}")
 
 def detect_possible_mm_traps(
     timeframe: str,
@@ -376,6 +412,9 @@ def monitor_market_trends():
                         )
                         if trap_type:
                             print(f"\n{RED}⚠️ MM TRAP DETECTED: {trap_type} (Confidence: {confidence:.2f}){RESET}")
+                
+                # Sleep for a minute before next analysis with JAH BLESSING
+                print(f"\n{GREEN}JAH BLESS THE CODE - Waiting for next analysis cycle...{RESET}")
             
             # Sleep for a short interval
             time.sleep(1)
