@@ -226,6 +226,30 @@ class BitGetCCXT:
             logger.error(f"{RED}Error fetching balance: {str(e)}{RESET}")
             raise
             
+    async def get_market_candles(self, symbol: str, timeframe: str = "1m", limit: int = 100) -> List[Any]:
+        """
+        Get historical candle data for a symbol.
+        
+        Args:
+            symbol: Trading symbol (e.g., "BTC/USDT:USDT")
+            timeframe: Timeframe for candles (default: "1m")
+            limit: Number of candles to fetch (default: 100)
+            
+        Returns:
+            List of OHLCV candles data
+        """
+        try:
+            # Format symbol
+            formatted_symbol = self._format_symbol(symbol)
+            
+            # Fetch candle data
+            ohlcv = await self.exchange.fetch_ohlcv(formatted_symbol, timeframe=timeframe, limit=limit)
+            
+            return ohlcv
+        except Exception as e:
+            logger.error(f"{RED}Error fetching candles for {symbol}: {str(e)}{RESET}")
+            return []
+            
     async def place_order(self, 
                          symbol: str,
                          side: str,
