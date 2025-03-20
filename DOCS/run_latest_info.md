@@ -1,3 +1,25 @@
+Thank you for the kind words! I'll help you create a new branch to restore the OMEGA BTC AI flow after all our changes. Let's do this systematically:
+
+1. First, let's create a new branch:
+
+```bash
+git checkout -b feature/back_to_omega_ai_btc_flow
+```
+
+Now, let's check what files we need to restore or modify:
+
+Ran tool
+Let's check the main runner file to see what we need to restore:
+
+Read file: omega_ai/omega_runner.py
+Let's also check the main trading file:
+
+Read file: omega_ai/trading/btc_futures_trader.py
+Based on the code review, we need to make several changes to restore the OMEGA BTC AI flow. Let's do this step by step:
+
+1. First, let's update the `omega_runner.py` to properly integrate with our new BitGet implementation:
+
+```python:omega_ai/omega_runner.py
 """
 OMEGA BTC AI Consolidated Runner
 
@@ -176,4 +198,156 @@ async def main():
         raise
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
+```
+
+2. Now, let's create a new script to run the OMEGA BTC AI system:
+
+```shell script:omega_ai/run_omega_btc_ai.sh
+#!/bin/bash
+
+# OMEGA BTC AI Runner Script
+# This script starts the OMEGA BTC AI system with the specified mode
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Display banner
+echo -e "${GREEN}"
+echo "  ___  __  __ _____ ____    _      ____ _____ ____      _    ___ "
+echo " / _ \|  \/  | ____/ ___|  / \    | __ )_   _/ ___|    / \  |_ _|"
+echo "| | | | |\/| |  _|| |  _  / _ \   |  _ \ | || |       / _ \  | | "
+echo "| |_| | |  | | |__| |_| |/ ___ \  | |_) || || |___   / ___ \ | | "
+echo " \___/|_|  |_|_____\____/_/   \_\ |____/ |_| \____| /_/   \_\___|"
+echo -e "${NC}"
+
+# Function to display usage
+display_usage() {
+    echo "Usage: $0 [mode] [options]"
+    echo "Modes:"
+    echo "  full       - Start all services (default)"
+    echo "  trading    - Start only trading services"
+    echo "  monitoring - Start only monitoring services"
+    echo "  dashboard  - Start only dashboard"
+    echo "Options:"
+    echo "  --testnet  - Use testnet instead of mainnet"
+    echo "  --help     - Display this help message"
+}
+
+# Default mode
+MODE="full"
+TESTNET=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        full|trading|monitoring|dashboard)
+            MODE="$1"
+            shift
+            ;;
+        --testnet)
+            TESTNET="--testnet"
+            shift
+            ;;
+        --help)
+            display_usage
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${NC}"
+            display_usage
+            exit 1
+            ;;
+    esac
+done
+
+# Activate virtual environment if it exists
+if [ -d "venv" ]; then
+    echo -e "${YELLOW}Activating virtual environment...${NC}"
+    source venv/bin/activate
+fi
+
+# Check if Redis is running
+if ! redis-cli ping > /dev/null 2>&1; then
+    echo -e "${RED}Redis is not running. Starting Redis...${NC}"
+    redis-server --daemonize yes
+    sleep 2
+fi
+
+# Run the OMEGA BTC AI system
+echo -e "${GREEN}Starting OMEGA BTC AI in $MODE mode...${NC}"
+python -m omega_ai.omega_runner --mode $MODE $TESTNET
+
+# Deactivate virtual environment if it was activated
+if [ -d "venv" ]; then
+    deactivate
+fi
+```
+
+3. Let's make the script executable:
+
+```bash
+chmod +x omega_ai/run_omega_btc_ai.sh
+```
+
+Now you can run the OMEGA BTC AI system in different modes:
+
+1. Full mode (all services):
+
+```bash
+./omega_ai/run_omega_btc_ai.sh
+```
+
+2. Trading mode only:
+
+```bash
+./omega_ai/run_omega_btc_ai.sh trading
+```
+
+3. Monitoring mode:
+
+```bash
+./omega_ai/run_omega_btc_ai.sh monitoring
+```
+
+4. Dashboard mode:
+
+```bash
+./omega_ai/run_omega_btc_ai.sh dashboard
+```
+
+5. Testnet mode:
+
+```bash
+./omega_ai/run_omega_btc_ai.sh --testnet
+```
+
+The changes I've made:
+
+1. Updated `omega_runner.py`:
+   - Integrated with our new BitGet implementation
+   - Added support for testnet/mainnet switching
+   - Configured the strategic trader with proper parameters
+   - Added better error handling and logging
+
+2. Created `run_omega_btc_ai.sh`:
+   - Added a beautiful banner
+   - Implemented different running modes
+   - Added virtual environment handling
+   - Added Redis server check
+   - Added proper error handling and color output
+
+3. The system now:
+   - Uses the strategic sub-account
+   - Runs with 11x leverage
+   - Has PnL alerts enabled
+   - Integrates with all OMEGA BTC AI services
+
+Would you like me to:
+
+1. Run the system in a specific mode to test it?
+2. Make any adjustments to the configuration?
+3. Add any additional features to the runner?

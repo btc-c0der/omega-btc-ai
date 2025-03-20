@@ -10,17 +10,31 @@ import datetime
 import json
 from collections import deque
 import logging
-from typing import Dict, Optional, List, Any
+from typing import Dict, Optional, List, Any, Tuple
+from datetime import datetime, timezone
 
 # Initialize Redis for divine data storage
 redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Terminal colors for enhanced visibility
+BLUE = "\033[94m"           # Price up
+YELLOW = "\033[93m"         # Price down
+GREEN = "\033[92m"          # Strongly positive
+RED = "\033[91m"            # Strongly negative
+CYAN = "\033[96m"           # Info highlight
+MAGENTA = "\033[95m"        # Special emphasis
+RESET = "\033[0m"
 
 class FibonacciDetector:
     """Enhanced detector for identifying price movements at Fibonacci levels."""
     
     def __init__(self):
         # Store recent price history for Fibonacci analysis
-        self.price_history = deque(maxlen=500)
+        self.price_history = deque(maxlen=1000)
         
         # Track important price points for Fibonacci calculations
         self.recent_swing_high = None
@@ -44,236 +58,311 @@ class FibonacciDetector:
         
         # Track fib confluences with traps
         self.trap_fib_confluences = deque(maxlen=50)
+        
+        # Minimum price range for Fibonacci calculations
+        self.min_price_range = 100
+        
+        # Minimum 0.5% difference for swing points
+        self.min_swing_diff = 0.005
     
-    def update_price_data(self, price, timestamp=None):
-        """Add new price data and update swing points."""
-        if timestamp is None:
-            timestamp = datetime.datetime.now(datetime.UTC)
-        
-        self.price_history.append((timestamp, price))
-        
-        # Only update swing points when we have enough data
-        # Reduced minimum points from 10 to 3 for testing
-        if len(self.price_history) < 3:
-            return
+    def update_price_data(self, price: float, timestamp: datetime) -> None:
+        """Update price data with validation."""
+        if price is None or price <= 0:
+            raise ValueError("Invalid price: must be a positive number")
             
-        # Find recent swing high/low for Fibonacci reference points
+        self.price_history.append((timestamp, price))
         self._update_swing_points()
     
-    def _update_swing_points(self):
-        """Identify swing high and low points for Fibonacci calculations."""
-        prices = [p[1] for p in self.price_history]
-        
-        # Use a rolling window to detect swings
-        window_size = min(30, len(prices))
-        
-        if len(prices) >= window_size:
-            # Look for swing high (peak in the window)
-            window_prices = prices[-window_size:]
-            max_idx = np.argmax(window_prices)
-            min_idx = np.argmin(window_prices)
+    def _update_swing_points(self) -> None:
+        """Update swing points based on price movement."""
+        try:
+            # Need at least 3 prices for swing detection
+            if len(self.price_history) < 3:
+                return
             
-            # Current swing high and low for this window
-            current_swing_high = window_prices[max_idx]
-            current_swing_low = window_prices[min_idx]
+            # Get last 3 prices with timestamps
+            price_points = list(self.price_history)[-3:]
+            prices = [point[1] for point in price_points]  # Extract just the prices
+            timestamps = [point[0] for point in price_points]  # Extract timestamps
             
-            # Always update swing points in test mode
-            self.recent_swing_high = current_swing_high
-            self.recent_swing_low = current_swing_low
+            # Calculate price changes
+            changes = [prices[i] - prices[i-1] for i in range(1, len(prices))]
             
-            # Store in Redis for visualization
-            redis_conn.set("fibonacci:swing_high", current_swing_high)
-            redis_conn.set("fibonacci:swing_high_timestamp", 
-                          self.price_history[-window_size + max_idx][0].isoformat())
-            redis_conn.set("fibonacci:swing_low", current_swing_low)
-            redis_conn.set("fibonacci:swing_low_timestamp", 
-                          self.price_history[-window_size + min_idx][0].isoformat())
-    
-    def check_fibonacci_level(self, current_price):
-        """
-        Check if current price is near a significant Fibonacci retracement level.
-        Returns: Dictionary with level info, None if no level is hit
-        """
-        if self.recent_swing_high is None or self.recent_swing_low is None:
-            return None
-            
-        # Determine if we're in an uptrend or downtrend for proper Fibonacci calculation
-        is_uptrend = self.recent_swing_high > self.recent_swing_low
-        fib_range = abs(self.recent_swing_high - self.recent_swing_low)
-        
-        # Don't calculate for very small ranges (avoid noise)
-        if fib_range < 10:  # Reduced from 100 for testing
-            return None
-        
-        # Calculate tolerance based on price level (dynamic adjustment)
-        # More precise at higher price levels
-        base_tolerance = fib_range * 0.01  # Increased to 1% for testing
-        
-        # Check each Fibonacci level
-        hit_levels = []
-        
-        # Calculate from both directions for more complete detection
-        for level, label in self.fib_levels.items():
-            # Special label for golden ratio
-            if level == 0.618:
-                label = "Golden Ratio"
+            # Detect swing high
+            if changes[0] > 0 and changes[1] < 0:
+                # Price went up then down = swing high
+                if self.recent_swing_high is None or prices[1] > self.recent_swing_high:
+                    self.recent_swing_high = prices[1]
+                    logger.info(f"New swing high detected: ${self.recent_swing_high:,.2f}")
+                    # Store in Redis
+                    try:
+                        redis_conn.set("fibonacci:swing_high", self.recent_swing_high)
+                        redis_conn.set("fibonacci:swing_high_timestamp", timestamps[1].isoformat())
+                    except redis.RedisError as e:
+                        logger.error(f"Redis error storing swing high: {str(e)}")
                 
-            # Calculate both uptrend and downtrend Fibonacci prices
-            # This provides more comprehensive detection regardless of current trend
-            if is_uptrend:
-                fib_price = self.recent_swing_low + (fib_range * level)
-            else:
-                fib_price = self.recent_swing_high - (fib_range * level)
+            # Detect swing low
+            if changes[0] < 0 and changes[1] > 0:
+                # Price went down then up = swing low
+                if self.recent_swing_low is None or prices[1] < self.recent_swing_low:
+                    self.recent_swing_low = prices[1]
+                    logger.info(f"New swing low detected: ${self.recent_swing_low:,.2f}")
+                    # Store in Redis
+                    try:
+                        redis_conn.set("fibonacci:swing_low", self.recent_swing_low)
+                        redis_conn.set("fibonacci:swing_low_timestamp", timestamps[1].isoformat())
+                    except redis.RedisError as e:
+                        logger.error(f"Redis error storing swing low: {str(e)}")
             
-            # Check if current price is within tolerance of this level
-            price_diff = abs(current_price - fib_price)
+            # Initialize swing points if not set
+            if self.recent_swing_high is None:
+                self.recent_swing_high = max(prices)
+                logger.info(f"Initializing swing high: ${self.recent_swing_high:,.2f}")
             
-            # Calculate percentage proximity to level
-            proximity_pct = (price_diff / fib_range) * 100
+            if self.recent_swing_low is None:
+                self.recent_swing_low = min(prices)
+                logger.info(f"Initializing swing low: ${self.recent_swing_low:,.2f}")
             
-            if proximity_pct <= 1.0:  # Increased to 1% for testing
-                hit_levels.append({
-                    "level": level,
-                    "label": label,
-                    "price": fib_price,
-                    "proximity": proximity_pct,
-                    "is_uptrend": is_uptrend,
-                    "timestamp": datetime.datetime.now().isoformat()
-                })
-        
-        # Return the closest level or None if no level is hit
-        if hit_levels:
-            # Sort by proximity (closest first)
-            hit_levels.sort(key=lambda x: x["proximity"])
-            hit_level = hit_levels[0]
+            # Log swing points
+            if self.recent_swing_high is not None and self.recent_swing_low is not None:
+                logger.info(f"Updated Fibonacci swing points: High=${self.recent_swing_high:,.2f}, Low=${self.recent_swing_low:,.2f}")
             
-            # Record this hit for confluence detection
-            self._record_fibonacci_hit(current_price, hit_level)
+        except Exception as e:
+            logger.error(f"Error updating swing points: {str(e)}")
+            # Don't reset swing points on error to maintain state
+            pass
+    
+    def check_fibonacci_level(self, current_price: float) -> Optional[Dict]:
+        """Check if current price hits any Fibonacci level."""
+        try:
+            if not self.recent_swing_high or not self.recent_swing_low:
+                return None
             
-            return hit_level
-        else:
+            # Calculate price range
+            price_range = abs(self.recent_swing_high - self.recent_swing_low)
+            min_range = min(self.recent_swing_high, self.recent_swing_low) * 0.001  # 0.1% minimum range
+            
+            if price_range < min_range:
+                logger.debug(f"Price range {price_range:.2f} too small for Fibonacci analysis")
+                return None
+            
+            # Calculate Fibonacci levels
+            levels = self.generate_fibonacci_levels()
+            if not levels:
+                return None
+            
+            # Find closest level
+            closest_hit = None
+            min_distance_pct = float('inf')
+            
+            for level_str, level_price in levels.items():
+                distance = abs(current_price - level_price)
+                distance_pct = distance / level_price
+                
+                # Consider it a hit if within 0.5% of level
+                if distance_pct <= 0.005:
+                    if distance_pct < min_distance_pct:
+                        min_distance_pct = distance_pct
+                        # Convert level string to float (e.g. "61.8%" -> 0.618)
+                        level_float = float(level_str.strip('%')) / 100
+                        # Special label for Golden Ratio
+                        label = "Golden Ratio" if level_str == "61.8%" else f"Fibonacci {level_str}"
+                        closest_hit = {
+                            "level": level_float,
+                            "price": level_price,
+                            "label": label,
+                            "proximity": distance_pct,  # Raw distance percentage
+                            "is_uptrend": current_price > self.recent_swing_low
+                        }
+                        
+            if closest_hit:
+                self._record_fibonacci_hit(current_price, closest_hit)
+                
+            return closest_hit
+            
+        except Exception as e:
+            logger.error(f"Error checking Fibonacci level: {str(e)}")
             return None
     
-    def _record_fibonacci_hit(self, current_price, hit_level):
-        """Record when price hits a Fibonacci level."""
-        timestamp = datetime.datetime.now(datetime.UTC)
-        
-        # Create record of the hit
-        hit_data = {
-            "price": current_price,
-            "level": hit_level["level"],
-            "label": hit_level["label"],
-            "timestamp": timestamp.isoformat(),  # Convert to ISO format string instead of datetime object
-            "is_uptrend": hit_level["is_uptrend"]
-        }
-        
-        # Store in Redis as a time-series event
-        redis_conn.zadd(
-            "fibonacci:hits", 
-            {json.dumps(hit_data): timestamp.timestamp()}
-        )
-        
-        # Also store the most recent hit
-        redis_conn.set("fibonacci:last_hit", json.dumps(hit_data))
+    def _record_fibonacci_hit(self, current_price: float, hit_data: Dict) -> None:
+        """Record a Fibonacci level hit in Redis."""
+        try:
+            redis_conn.zadd(
+                "fibonacci:hits",
+                {json.dumps({
+                    "price": current_price,
+                    "level": hit_data["level"],
+                    "label": hit_data.get("label", ""),
+                    "proximity": hit_data.get("proximity", 0),
+                    "is_uptrend": hit_data.get("is_uptrend", True),
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }): current_price}
+            )
+            logger.info(f"Recorded Fibonacci hit at level {hit_data['level']}")
+        except redis.RedisError as e:
+            logger.error(f"Redis error recording Fibonacci hit: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error recording Fibonacci hit: {str(e)}")
     
     def detect_fibonacci_confluence(self, trap_type, confidence, price_change, current_price):
         """
         Check if a detected trap coincides with a Fibonacci level.
         Returns enhanced confidence if confluence is detected.
         """
-        # Check if current price hits a Fibonacci level
-        fib_hit = self.check_fibonacci_level(current_price)
-        
-        if not fib_hit:
+        try:
+            # Check if current price hits a Fibonacci level
+            fib_hit = self.check_fibonacci_level(current_price)
+            
+            if not fib_hit:
+                return confidence, None
+            
+            # Determine if this is a key Fibonacci level (the most significant ones)
+            is_key_level = fib_hit["level"] in [0.382, 0.5, 0.618, 0.786]
+            
+            # Calculate confluence confidence boost
+            # Strong levels and high-confidence traps create stronger confluence
+            if is_key_level:
+                # Major confluence at key levels
+                confidence_boost = 0.2  # Increased for testing
+                confluence_type = "MAJOR"
+            else:
+                # Minor confluence at standard levels
+                confidence_boost = 0.1  # Increased for testing
+                confluence_type = "MINOR"
+            
+            # Extra boost for 0.618 (Golden Ratio) level
+            if fib_hit["level"] == 0.618:
+                confidence_boost += 0.1  # Increased for testing
+                confluence_type = "GOLDEN RATIO"
+            
+            # Cap the total confidence at 0.98 to avoid overconfidence
+            enhanced_confidence = min(0.98, confidence + confidence_boost)
+            
+            # Record the confluence event
+            self._record_trap_fibonacci_confluence(trap_type, enhanced_confidence, 
+                                                  price_change, current_price,
+                                                  fib_hit, confluence_type)
+            
+            return enhanced_confidence, fib_hit
+            
+        except Exception as e:
+            logger.error(f"Error in detect_fibonacci_confluence: {str(e)}")
             return confidence, None
-        
-        # Determine if this is a key Fibonacci level (the most significant ones)
-        is_key_level = fib_hit["level"] in [0.382, 0.5, 0.618, 0.786]
-        
-        # Calculate confluence confidence boost
-        # Strong levels and high-confidence traps create stronger confluence
-        if is_key_level:
-            # Major confluence at key levels
-            confidence_boost = 0.2  # Increased for testing
-            confluence_type = "MAJOR"
-        else:
-            # Minor confluence at standard levels
-            confidence_boost = 0.1  # Increased for testing
-            confluence_type = "MINOR"
-        
-        # Extra boost for 0.618 (Golden Ratio) level
-        if fib_hit["level"] == 0.618:
-            confidence_boost += 0.1  # Increased for testing
-            confluence_type = "GOLDEN RATIO"
-        
-        # Cap the total confidence at 0.98 to avoid overconfidence
-        enhanced_confidence = min(0.98, confidence + confidence_boost)
-        
-        # Record the confluence event
-        self._record_trap_fibonacci_confluence(trap_type, enhanced_confidence, 
-                                              price_change, current_price,
-                                              fib_hit, confluence_type)
-        
-        return enhanced_confidence, fib_hit
     
     def _record_trap_fibonacci_confluence(self, trap_type, confidence, price_change, 
                                          price, fib_hit, confluence_type):
         """Record when a trap aligns with a Fibonacci level."""
-        timestamp = datetime.datetime.now(datetime.UTC)
-        
-        # Create rich confluence data
-        confluence_data = {
-            "timestamp": timestamp.isoformat(),  # Convert to string for JSON
-            "trap_type": trap_type,
-            "confidence": confidence,
-            "price": price,
-            "price_change": price_change,
-            "fibonacci_level": fib_hit["label"],
-            "fib_price": fib_hit["price"],
-            "is_uptrend": fib_hit["is_uptrend"],
-            "confluence_type": confluence_type
-        }
-        
-        # Store in local queue
-        self.trap_fib_confluences.append(confluence_data)
-        
-        # Store in Redis for visualization and alerting
-        redis_conn.zadd(
-            "grafana:fibonacci_trap_confluences",
-            {json.dumps(confluence_data): datetime.datetime.now(datetime.UTC).timestamp()}
-        )
-        
-        # Set a short-lived alert key for real-time systems
-        alert_key = f"alert:fibonacci_confluence:{int(timestamp.timestamp())}"
-        redis_conn.setex(alert_key, 300, json.dumps(confluence_data))  # 5-minute TTL
-        
-        # Log to console with enhanced formatting
-        print(f"\n🔥 {confluence_type} FIBONACCI CONFLUENCE DETECTED 🔥")
-        print(f"⚠️ {trap_type} at ${price:.2f} aligned with {fib_hit['label']} Fibonacci level")
-        print(f"📈 Enhanced confidence: {confidence:.2f} (Fibonacci confluence boost applied)")
-    
-    def generate_fibonacci_levels(self):
-        """Generate all current Fibonacci levels for visualization."""
-        if self.recent_swing_high is None or self.recent_swing_low is None:
-            return None
+        try:
+            timestamp = datetime.now(timezone.utc)
             
-        is_uptrend = self.recent_swing_high > self.recent_swing_low
-        fib_range = abs(self.recent_swing_high - self.recent_swing_low)
-        
-        # Generate all levels
-        levels = {}
-        for level, label in self.fib_levels.items():
-            if is_uptrend:
-                price = self.recent_swing_low + (fib_range * level)
-            else:
-                price = self.recent_swing_high - (fib_range * level)
+            # Create rich confluence data
+            confluence_data = {
+                "timestamp": timestamp.isoformat(),  # Convert to string for JSON
+                "trap_type": trap_type,
+                "confidence": confidence,
+                "price": price,
+                "price_change": price_change,
+                "fibonacci_level": fib_hit["label"],
+                "fib_price": fib_hit["price"],
+                "is_uptrend": fib_hit["is_uptrend"],
+                "confluence_type": confluence_type
+            }
+            
+            # Store in local queue
+            self.trap_fib_confluences.append(confluence_data)
+            
+            # Store in Redis for visualization and alerting
+            try:
+                redis_conn.zadd(
+                    "grafana:fibonacci_trap_confluences",
+                    {json.dumps(confluence_data): datetime.now(timezone.utc).timestamp()}
+                )
                 
-            levels[label] = price
-        
-        # Store in Redis for reference
-        redis_conn.set("fibonacci:current_levels", json.dumps(levels))
-        
-        return levels
+                # Set a short-lived alert key for real-time systems
+                alert_key = f"alert:fibonacci_confluence:{int(timestamp.timestamp())}"
+                redis_conn.setex(alert_key, 300, json.dumps(confluence_data))  # 5-minute TTL
+            except redis.RedisError as e:
+                logger.error(f"Redis error recording trap confluence: {str(e)}")
+            
+            # Log to console with enhanced formatting
+            print(f"\n🔥 {confluence_type} FIBONACCI CONFLUENCE DETECTED 🔥")
+            print(f"⚠️ {trap_type} at ${price:.2f} aligned with {fib_hit['label']} Fibonacci level")
+            print(f"📈 Enhanced confidence: {confidence:.2f} (Fibonacci confluence boost applied)")
+            
+        except Exception as e:
+            logger.error(f"Error recording trap confluence: {str(e)}")
+    
+    def generate_fibonacci_levels(self) -> Optional[Dict]:
+        """Generate all current Fibonacci levels for visualization."""
+        try:
+            if self.recent_swing_high is None or self.recent_swing_low is None:
+                return None
+                
+            is_uptrend = self.recent_swing_high > self.recent_swing_low
+            fib_range = abs(self.recent_swing_high - self.recent_swing_low)
+            
+            # Don't generate levels for very small ranges
+            if fib_range < self.min_price_range:
+                return None
+            
+            # Generate all levels
+            levels = {}
+            for level, label in self.fib_levels.items():
+                if is_uptrend:
+                    price = self.recent_swing_low + (fib_range * level)
+                else:
+                    price = self.recent_swing_high - (fib_range * level)
+                    
+                levels[label] = price
+            
+            try:
+                # Store in Redis for reference
+                redis_conn.set("fibonacci:current_levels", json.dumps(levels))
+            except redis.RedisError as e:
+                logger.error(f"Redis connection error: {str(e)}")
+                # Continue without Redis storage
+            
+            return levels
+            
+        except Exception as e:
+            logger.error(f"Error generating Fibonacci levels: {str(e)}")
+            return None
+
+    def detect_fractal_harmony(self, timeframe: str = "1h") -> List[Dict]:
+        """Detect fractal harmony patterns in price movement."""
+        try:
+            if not self.recent_swing_high or not self.recent_swing_low:
+                return []
+            
+            harmonics = []
+            price_range = self.recent_swing_high - self.recent_swing_low
+            
+            # Define Fibonacci ratios for fractal analysis
+            ratios = [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618, 2.618]
+            
+            for ratio in ratios:
+                projected_level = self.recent_swing_low + (price_range * ratio)
+                
+                # Check recent price history for hits near this level
+                for timestamp, price in self.price_history:
+                    distance_pct = abs(price - projected_level) / projected_level
+                    
+                    if distance_pct <= 0.005:  # Within 0.5%
+                        harmonic = {
+                            "ratio": ratio,
+                            "level": projected_level,
+                            "price": price,
+                            "timeframe": timeframe,
+                            "confidence": 1.0 - (distance_pct / 0.005),
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                        harmonics.append(harmonic)
+                        
+            return harmonics
+            
+        except Exception as e:
+            logger.error(f"Error detecting fractal harmony: {str(e)}")
+            return []
 
 # Create singleton instance
 fibonacci_detector = FibonacciDetector()
@@ -291,53 +380,143 @@ def check_fibonacci_level(price, explicit_levels=None, tolerance=0.004):
     Returns:
         Dict with hit level info or None
     """
-    # Divine debug output
-    # print(f"Checking price ${price} against Fibonacci levels with {tolerance*100:.2f}% tolerance")
-    
-    # If explicit levels provided, use those for divine guidance
-    if explicit_levels is not None:
-        closest_level = None
-        min_distance_pct = float('inf')
-        
-        for level_name, level_price in explicit_levels.items():
-            distance = abs(price - level_price)
-            distance_pct = distance / level_price
+    try:
+        # If explicit levels provided, use those for divine guidance
+        if explicit_levels is not None:
+            closest_level = None
+            min_distance_pct = float('inf')
             
-            # Debug
-            # print(f"Level {level_name}: ${level_price}, distance: ${distance} ({distance_pct*100:.2f}%)")
+            for level_name, level_price in explicit_levels.items():
+                distance = abs(price - level_price)
+                distance_pct = distance / level_price
+                
+                if distance_pct <= tolerance and distance_pct < min_distance_pct:
+                    closest_level = {
+                        "level": level_name,
+                        "price": level_price,
+                        "proximity": distance_pct,
+                        "is_explicit": True
+                    }
+                    min_distance_pct = distance_pct
             
-            if distance_pct <= tolerance and distance_pct < min_distance_pct:
-                closest_level = {
-                    "level": level_name,
-                    "price": level_price,
-                    "proximity": distance_pct,
-                    "is_explicit": True
-                }
-                min_distance_pct = distance_pct
+            return closest_level
         
-        return closest_level
-    
-    # Otherwise use internal fibonacci detection logic
-    # ... original implementation ...
-    return None
+        # Otherwise use internal fibonacci detection logic
+        return fibonacci_detector.check_fibonacci_level(price)
+        
+    except Exception as e:
+        logger.error(f"Error in check_fibonacci_level: {str(e)}")
+        return None
 
-def update_fibonacci_data(price):
-    """Update Fibonacci detector with new price data."""
-    fibonacci_detector.update_price_data(price)
-    
+def update_fibonacci_data(current_price: float) -> None:
+    """Update Fibonacci data with the current price."""
+    try:
+        # Create detector instance
+        detector = FibonacciDetector()
+        
+        # Update price data
+        detector.update_price_data(current_price, datetime.now(timezone.utc))
+        
+        # Check for Fibonacci level hits
+        fib_hit = detector.check_fibonacci_level(current_price)
+        if fib_hit:
+            # Record the hit
+            detector._record_fibonacci_hit(current_price, fib_hit)
+            
+            # Store hit data in Redis
+            try:
+                redis_conn.zadd(
+                    "fibonacci:hits",
+                    {json.dumps({
+                        "price": current_price,
+                        "level": fib_hit["level"],
+                        "label": fib_hit["label"],
+                        "proximity": fib_hit["proximity"],
+                        "is_uptrend": fib_hit["is_uptrend"],
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }): current_price}
+                )
+            except redis.RedisError as e:
+                logger.error(f"Redis error updating Fibonacci data: {str(e)}")
+            
+    except ValueError as e:
+        logger.error(f"Error updating Fibonacci data: {str(e)}")
+        raise
+    except Exception as e:
+        logger.error(f"Error updating Fibonacci data: {str(e)}")
+
 def detect_fibonacci_confluence(trap_type, confidence, price_change, price):
     """Check if trap aligns with Fibonacci level and get enhanced confidence."""
-    return fibonacci_detector.detect_fibonacci_confluence(trap_type, confidence, price_change, price)
+    try:
+        return fibonacci_detector.detect_fibonacci_confluence(trap_type, confidence, price_change, price)
+    except Exception as e:
+        logger.error(f"Error in detect_fibonacci_confluence: {str(e)}")
+        return confidence, None
 
 def get_current_fibonacci_levels():
     """Get all current Fibonacci levels."""
-    return fibonacci_detector.generate_fibonacci_levels()
-
-def check_fibonacci_alignment() -> Optional[Dict[str, Any]]:
-    """Check for Fibonacci level alignment across timeframes."""
     try:
-        # Implementation will go here
+        return fibonacci_detector.generate_fibonacci_levels()
+    except Exception as e:
+        logger.error(f"Error getting Fibonacci levels: {str(e)}")
+        return None
+
+def check_fibonacci_alignment() -> Optional[Dict]:
+    """Check if current price aligns with any Fibonacci level."""
+    try:
+        # Get current price from Redis
+        current_price = float(redis_conn.get("last_btc_price") or 0)
+        if current_price == 0:
+            logger.warning("No price data available for Fibonacci alignment check")
+            return None
+            
+        # Get current Fibonacci levels
+        levels = get_current_fibonacci_levels()
+        if not levels:
+            logger.warning("No Fibonacci levels available for alignment check")
+            return None
+            
+        # Find closest Fibonacci level
+        closest_level = None
+        min_distance_pct = float('inf')
+        
+        for level_name, level_price in levels.items():
+            distance = abs(current_price - level_price)
+            distance_pct = distance / level_price
+            
+            if distance_pct < min_distance_pct:
+                min_distance_pct = distance_pct
+                closest_level = {
+                    "level": level_name,
+                    "price": level_price,
+                    "distance_pct": distance_pct
+                }
+        
+        if not closest_level:
+            return None
+            
+        # Calculate confidence based on distance
+        confidence = 1.0 - min(min_distance_pct, 0.05) / 0.05  # Max 5% distance
+        
+        # Special handling for Golden Ratio
+        if "61.8%" in closest_level["level"]:
+            confidence = min(confidence * 1.2, 1.0)  # 20% boost for Golden Ratio
+            
+        # Log alignment details
+        logger.info(f"Fibonacci Alignment: {closest_level['level']} at {closest_level['price']:.2f} - {min_distance_pct:.2%} away")
+        
+        return {
+            "type": "GOLDEN_RATIO" if "61.8%" in closest_level["level"] else "STANDARD",
+            "level": closest_level["level"],
+            "price": closest_level["price"],
+            "distance_pct": closest_level["distance_pct"],
+            "confidence": confidence,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except ValueError as e:
+        logger.error(f"Error checking Fibonacci alignment: {str(e)}")
         return None
     except Exception as e:
-        logging.error(f"Error checking Fibonacci alignment: {e}")
+        logger.error(f"Error checking Fibonacci alignment: {str(e)}")
         return None

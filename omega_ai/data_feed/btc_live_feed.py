@@ -1,7 +1,7 @@
 import json
 import websocket
 import time
-import websockets.client
+import websockets
 import websockets.exceptions
 import logging
 import asyncio
@@ -15,20 +15,57 @@ from omega_ai.utils.redis_manager import RedisManager
 import rel
 import os
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configure logging with Rasta colors
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
-# Add Rasta color constants
-GREEN_RASTA = "\033[92m"
-YELLOW_RASTA = "\033[93m"
-RED_RASTA = "\033[91m"
+# Rasta color constants
+GREEN_RASTA = "\033[92m"  # Jah Green
+YELLOW_RASTA = "\033[93m"  # Gold
+RED_RASTA = "\033[91m"    # Babylon Red
+BLUE_RASTA = "\033[94m"   # Zion Blue
+MAGENTA_RASTA = "\033[95m"  # Royal Purple
+CYAN_RASTA = "\033[96m"   # Ocean Blue
 RESET = "\033[0m"
+BOLD = "\033[1m"
+
+# Rasta logging functions
+def log_rasta(message: str, color: str = GREEN_RASTA, level: str = "info"):
+    """Log with Rasta style and colors."""
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    if level == "error":
+        print(f"{RED_RASTA}[{timestamp}] ❌ {message}{RESET}")
+    elif level == "warning":
+        print(f"{YELLOW_RASTA}[{timestamp}] ⚠️  {message}{RESET}")
+    elif level == "success":
+        print(f"{GREEN_RASTA}[{timestamp}] ✅ {message}{RESET}")
+    else:
+        print(f"{color}[{timestamp}] ℹ️  {message}{RESET}")
+
+def display_rasta_banner():
+    """Display the Rasta-style banner."""
+    banner = f"""
+{GREEN_RASTA}╔══════════════════════════════════════════════════════════╗
+     ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ 
+    ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗
+    ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║
+    ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║
+    ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
+     ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
+                {YELLOW_RASTA}BTC AI SYSTEM v1.0
+              [ Rasta Price Feed - One Love ]{GREEN_RASTA}
+╚══════════════════════════════════════════════════════════╝{RESET}
+"""
+    print(banner)
 
 # Binance WebSocket API
 BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
 
 # MM WebSocket Server URL with updated port
-MM_WS_URL = "ws://localhost:8766"
+MM_WS_URL = "ws://localhost:8765"
 
 # Redis Connection - used by legacy functions
 redis_conn = redis.Redis(
@@ -44,23 +81,23 @@ def check_redis_health():
         # Check Redis connection
         redis_manager = RedisManager()
         redis_manager.ping()
-        logging.info("Redis connection: OK")
+        log_rasta("Redis connection: OK", GREEN_RASTA, "success")
 
         # Check if essential keys exist
         essential_keys = ["last_btc_price", "prev_btc_price", "btc_movement_history"]
         for key in essential_keys:
             if not redis_manager.get_cached(key):
-                logging.warning(f"Essential key missing: {key}")
+                log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
             else:
-                logging.info(f"Essential key present: {key}")
+                log_rasta(f"Essential key present: {key}", GREEN_RASTA, "success")
 
         # Check data integrity
         btc_movement_history = redis_manager.lrange("btc_movement_history", 0, -1)
-        logging.info(f"BTC movement history length: {len(btc_movement_history) if btc_movement_history else 0}")
+        log_rasta(f"BTC movement history length: {len(btc_movement_history) if btc_movement_history else 0}", BLUE_RASTA)
 
         return True
     except Exception as e:
-        logging.error(f"Redis health check failed: {e}")
+        log_rasta(f"Redis health check failed: {e}", RED_RASTA, "error")
         return False
 
 # WebSocket integration function from Code version
@@ -68,28 +105,28 @@ async def send_to_mm_websocket(price):
     """Send BTC price update to MM WebSocket."""
     while True:
         try:
-            async with websockets.client.connect(
+            async with websockets.connect(
                 MM_WS_URL,
                 max_size=2**20,
                 ping_interval=30,
                 ping_timeout=10
             ) as ws:
-                logging.info(f"Connected to MM WebSocket")
+                log_rasta(f"Connected to MM WebSocket", GREEN_RASTA, "success")
                 await ws.send(json.dumps({"btc_price": price}))
-                logging.info(f"BTC Price Sent: ${price:.2f}")
+                log_rasta(f"BTC Price Sent: ${price:.2f}", BLUE_RASTA)
                 return  # Exit loop on success
         except websockets.exceptions.ConnectionClosedOK:
-            logging.info(f"WebSocket Closed Normally, reconnecting...")
+            log_rasta(f"WebSocket Closed Normally, reconnecting...", YELLOW_RASTA, "warning")
         except websockets.exceptions.ConnectionClosedError as e:
-            logging.error(f"WebSocket Disconnected (Error {e.code}), retrying...")
+            log_rasta(f"WebSocket Disconnected (Error {e.code}), retrying...", RED_RASTA, "error")
         except Exception as e:
-            logging.error(f"WebSocket Error: {e}, retrying...")
+            log_rasta(f"WebSocket Error: {e}, retrying...", RED_RASTA, "error")
         
         await asyncio.sleep(5)  # Persistent retry mechanism
 
 def on_error(ws, error):
     """Handle WebSocket errors with divine grace."""
-    logging.error(f"WebSocket Error: {error}")
+    log_rasta(f"WebSocket Error: {error}", RED_RASTA, "error")
     time.sleep(5)  # Add delay before reconnect
 
 def on_message(ws, message):
@@ -99,7 +136,7 @@ def on_message(ws, message):
         price = float(data["p"])
         volume = float(data["q"])
 
-        logging.info(f"LIVE BTC PRICE UPDATE: ${price:.2f}")
+        log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f}", BLUE_RASTA)
         
         # Update Redis values using the RedisManager
         redis_manager = RedisManager()
@@ -123,29 +160,32 @@ def on_message(ws, message):
             # Add last update time
             redis_manager.set_cached("last_btc_update_time", str(time.time()))
             
-            logging.info(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}")
+            log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
+            
+            # Send price update to MM WebSocket server
+            asyncio.run(send_to_mm_websocket(price))
         else:
-            logging.debug(f"Price Unchanged, Skipping Redis Update: {price}")
+            log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
 
     except Exception as e:
-        logging.error(f"Error processing message: {e}")
+        log_rasta(f"Error processing message: {e}", RED_RASTA, "error")
 
 def on_close(ws, close_status_code, close_msg):
     """Handle WebSocket closure with Rastafarian resilience."""
-    logging.warning(f"WebSocket Closed: {close_status_code} - {close_msg}")
+    log_rasta(f"WebSocket Closed: {close_status_code} - {close_msg}", YELLOW_RASTA, "warning")
     time.sleep(5)  # Add delay before reconnect
     start_btc_websocket()
 
 def on_open(ws):
     """Handle WebSocket opening with divine blessing."""
-    logging.info("Connected to Binance WebSocket - Streaming BTC Prices...")
+    log_rasta("Connected to Binance WebSocket - Streaming BTC Prices...", GREEN_RASTA, "success")
 
 def start_btc_websocket():
     """Start WebSocket connection to Binance BTC Live Feed."""
     while True:
         try:
             if not check_redis_health():
-                logging.error("Redis health check failed. Retrying in 60 seconds...")
+                log_rasta("Redis health check failed. Retrying in 60 seconds...", RED_RASTA, "error")
                 time.sleep(60)
                 continue
 
@@ -158,7 +198,7 @@ def start_btc_websocket():
             )
             ws.run_forever()
         except Exception as e:
-            logging.error(f"Error in WebSocket connection: {e}")
+            log_rasta(f"Error in WebSocket connection: {e}", RED_RASTA, "error")
             time.sleep(5)
 
 class PriceSource(str, Enum):
@@ -218,7 +258,7 @@ class BtcPriceFeed:
                     rel.signal(2, rel.abort)  # Keyboard Interrupt
                     rel.dispatch()
             except Exception as e:
-                logging.error(f"WebSocket connection error: {e}")
+                log_rasta(f"WebSocket connection error: {e}", RED_RASTA, "error")
                 time.sleep(5)  # Wait before reconnecting
     
     def _on_message(self, ws: websocket.WebSocket, message: Any) -> None:
@@ -228,29 +268,29 @@ class BtcPriceFeed:
             price = float(data["p"])
             volume = float(data["q"])
 
-            logging.info(f"LIVE BTC PRICE UPDATE: ${price:.2f}")
+            log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f}", BLUE_RASTA)
             self.last_price = price
             self.update_redis(price, volume)
         except Exception as e:
-            logging.error(f"Error processing message: {e}")
+            log_rasta(f"Error processing message: {e}", RED_RASTA, "error")
 
     def _on_error(self, ws: websocket.WebSocket, error: Any) -> None:
         """Handle WebSocket errors with divine grace."""
-        logging.error(f"WebSocket Error: {error}")
+        log_rasta(f"WebSocket Error: {error}", RED_RASTA, "error")
 
     def _on_close(self, ws: websocket.WebSocket, close_status_code: Any, close_msg: Any) -> None:
         """Handle WebSocket closure with Rastafarian resilience."""
-        logging.warning(f"WebSocket Closed: {close_status_code} - {close_msg}")
+        log_rasta(f"WebSocket Closed: {close_status_code} - {close_msg}", YELLOW_RASTA, "warning")
 
     def _on_open(self, ws: websocket.WebSocket) -> None:
         """Handle WebSocket opening with divine blessing."""
-        logging.info("Connected to Binance WebSocket - Streaming BTC Prices...")
+        log_rasta("Connected to Binance WebSocket - Streaming BTC Prices...", GREEN_RASTA, "success")
     
     def update_redis(self, price: float, volume: float) -> None:
         """Save BTC price & volume to Redis for MM Trap Processor with error handling."""
         try:
             if price <= 0:
-                logging.warning(f"Skipping Redis update, invalid BTC price: {price}")
+                log_rasta(f"Skipping Redis update, invalid BTC price: {price}", YELLOW_RASTA)
                 return
 
             prev_price = self.redis_manager.get_cached("prev_btc_price")
@@ -274,18 +314,18 @@ class BtcPriceFeed:
                 # Add last update time
                 self.redis_manager.set_cached("last_btc_update_time", str(time.time()))
                 
-                logging.info(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}")
+                log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
             else:
-                logging.debug(f"Price Unchanged, Skipping Redis Update: {price}")
+                log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
 
         except Exception as e:
-            logging.error(f"Redis Update Failed: {e}")
+            log_rasta(f"Redis Update Failed: {e}", RED_RASTA, "error")
             # Attempt to reconnect
             try:
                 self.redis_manager = RedisManager()
                 self.redis_manager.ping()
             except:
-                logging.error("Redis reconnection failed.")
+                log_rasta("Redis reconnection failed.", RED_RASTA, "error")
 
     def get_current_price(self) -> float:
         """Get the latest BTC price with divine accuracy."""
@@ -295,7 +335,7 @@ class BtcPriceFeed:
             if price_data:
                 return float(price_data)
         except Exception as e:
-            logging.error(f"Error getting price from Redis: {e}")
+            log_rasta(f"Error getting price from Redis: {e}", RED_RASTA, "error")
         
         # If Redis failed, ensure WebSocket is running
         self.connect_websocket()
@@ -307,7 +347,7 @@ class BtcPriceFeed:
             if price_data:
                 return float(price_data)
         except Exception as e:
-            logging.error(f"Error getting price after WebSocket update: {e}")
+            log_rasta(f"Error getting price after WebSocket update: {e}", RED_RASTA, "error")
         
         return 0.0
     
@@ -330,7 +370,7 @@ class BtcPriceFeed:
             return 0.0
             
         except Exception as e:
-            logging.error(f"Error fetching price from {source}: {e}")
+            log_rasta(f"Error fetching price from {source}: {e}", RED_RASTA, "error")
             return 0.0
     
     def _aggregate_prices(self) -> float:
@@ -361,7 +401,7 @@ class BtcPriceFeed:
                     except json.JSONDecodeError:
                         continue
         except Exception as e:
-            logging.error(f"Error getting price history: {e}")
+            log_rasta(f"Error getting price history: {e}", RED_RASTA, "error")
             
         return history
     
@@ -389,7 +429,7 @@ class BtcPriceFeed:
             return True
             
         except Exception as e:
-            logging.error(f"Error updating price: {e}")
+            log_rasta(f"Error updating price: {e}", RED_RASTA, "error")
             return False
     
     def start(self) -> None:
@@ -406,7 +446,7 @@ class BtcPriceFeed:
                     if price > 0:
                         self.update_price(price)
                 except Exception as e:
-                    logging.error(f"Error in update loop: {e}")
+                    log_rasta(f"Error in update loop: {e}", RED_RASTA, "error")
                 finally:
                     time.sleep(self.update_interval)
         
@@ -421,4 +461,7 @@ class BtcPriceFeed:
             self._ws_thread.join()
 
 if __name__ == "__main__":
+    display_rasta_banner()
+    log_rasta("Initializing Rasta Price Feed...", GREEN_RASTA)
+    log_rasta("Connecting to Binance WebSocket...", BLUE_RASTA)
     start_btc_websocket()
