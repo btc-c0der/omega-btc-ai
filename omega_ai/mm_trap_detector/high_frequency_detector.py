@@ -473,90 +473,78 @@ def register_trap_detection(trap_type, confidence, price_change):
 
 # Update the simulate_price_updates function for Fibonacci reporting:
 def simulate_price_updates():
-    """Simulate price updates for testing the HF detector without affecting real data."""
+    """Simulate BTC price updates for testing."""
     print("▶️ Starting price simulation with isolated Redis keys...")
     
-    # Initial BTC price
-    price = 83000.0
+    # Get last BTC price from Redis, or use default if not available
+    try:
+        last_price_bytes = redis_conn.get("last_btc_price")
+        price = float(last_price_bytes.decode()) if last_price_bytes else 83000.0
+        print(f"✅ Starting simulation with current BTC price: ${price:.2f}")
+    except Exception as e:
+        price = 83000.0
+        print(f"⚠️ Could not get last BTC price from Redis: {e}")
+        print(f"✅ Using default price: ${price:.2f}")
     
-    # Initialize simulation keys
-    redis_conn.set("sim_last_btc_price", price)
-    redis_conn.set("sim_prev_btc_price", price * 0.99)  # Initial previous price
+    # Initialize Fibonacci detector with some initial swing points
+    fibonacci_detector.recent_swing_high = price * 1.02  # 2% above current price
+    fibonacci_detector.recent_swing_low = price * 0.98   # 2% below current price
     
-    # Track simulation statistics
-    all_prices = [price]
-    min_price = price
-    max_price = price
-    start_price = price
+    # Generate initial Fibonacci levels
+    fib_levels = fibonacci_detector.generate_fibonacci_levels()
+    if fib_levels:
+        print("📊 Generated Fibonacci levels:")
+        for level, price in fib_levels.items():
+            print(f"  {level}: ${price:.2f}")
     
-    # Simulate price updates
+    # Run simulation loop
     for i in range(20):
         # Update price with some randomness
         change = np.random.normal(0, 100)  # Normal distribution with std dev of $100
         price += change
         
-        # Track statistics
-        all_prices.append(price)
-        min_price = min(min_price, price)
-        max_price = max(max_price, price)
+        # Store in Redis with simulation prefix
+        redis_conn.set("sim_last_btc_price", str(price))
+        redis_conn.set("sim_prev_btc_price", str(price - change))
         
-        # Add to detector
-        hf_detector.update_price_data(price)
+        # Update Fibonacci detector with new price
+        fibonacci_detector.update_price_data(price, datetime.datetime.now(datetime.UTC))
         
-        # Store in Redis using simulation-specific keys
-        redis_conn.set("sim_prev_btc_price", redis_conn.get("sim_last_btc_price"))
-        redis_conn.set("sim_last_btc_price", price)
-        
-        # Simulate a trap event occasionally
+        # Simulate different types of trap events
         if i % 5 == 0:
-            trap_type = ["Liquidity Grab", "Stop Hunt", "Liquidity Accumulation (up)"][i % 3]
-            confidence = 0.8
-            # FIX: Pass the current price as btc_price parameter
-            register_trap_detection(trap_type, confidence, 1.2, price)
+            # Check for Fibonacci level hits
+            fib_hit = fibonacci_detector.check_fibonacci_level(price)
+            
+            if fib_hit:
+                # Enhanced trap types based on Fibonacci confluence
+                trap_type = f"Golden Ratio Trap ({fib_hit['label']})" if fib_hit['level'] == 0.618 else f"Fibonacci Trap ({fib_hit['label']})"
+                confidence = 0.8 + (0.1 if fib_hit['level'] == 0.618 else 0.05)  # Higher confidence for Golden Ratio
+                
+                # Register the trap with enhanced confidence
+                hf_detector.register_trap_event(trap_type, confidence, change/price, from_detector=True)
+                print(f"🎯 Fibonacci Trap Detected: {trap_type} at ${price:.2f}")
+            else:
+                # Standard trap types
+                trap_types = [
+                    "Liquidity Grab",
+                    "Stop Hunt",
+                    "Liquidity Accumulation (up)",
+                    "Volatility Liquidity Grab"
+                ]
+                trap_type = trap_types[i % len(trap_types)]
+                confidence = 0.8
+                hf_detector.register_trap_event(trap_type, confidence, change/price, from_detector=True)
             
         # Check HF mode with simulation flag
         hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price, simulation_mode=True)
         
-        # Check if price is at a Fibonacci level
-        fib_hit = check_fibonacci_level(price)
-        fib_indicator = f"| 🔄 FIB: {fib_hit['label']}" if fib_hit else ""
+        # Check for fractal harmony patterns
+        harmonics = fibonacci_detector.detect_fractal_harmony()
+        if harmonics:
+            print(f"🎵 Fractal Harmony Detected: {len(harmonics)} patterns")
         
-        print(f"Price: ${price:.2f} | HF Mode: {'✅' if hf_active else '❌'} | Multiplier: {multiplier:.2f} {fib_indicator}")
-        time.sleep(2)
-    
-    # Calculate and display simulation statistics
-    print("\n📊 SIMULATION STATISTICS:")
-    price_range = max_price - min_price
-    print(f"Price Range: ${min_price:.2f} - ${max_price:.2f} (${price_range:.2f})")
-    print(f"Total Movement: ${price - start_price:.2f} ({((price - start_price) / start_price * 100):.2f}%)")
-    
-    # Calculate standard statistical measures
-    mean_price = sum(all_prices) / len(all_prices)
-    std_dev = np.std(all_prices)
-    print(f"Mean Price: ${mean_price:.2f}")
-    print(f"Standard Deviation: ${std_dev:.2f}")
-    
-    # Display Fibonacci retracement levels based on simulation range
-    print("\n🔄 FIBONACCI RETRACEMENT LEVELS:")
-    fib_levels = get_current_fibonacci_levels()
-    
-    if fib_levels:
-        for label, price in fib_levels.items():
-            print(f"{label} Level: ${price:.2f}")
-    else:
-        print("No Fibonacci levels calculated yet")
-    
-    # Report on Fibonacci hits during simulation
-    confluences = fibonacci_detector.trap_fib_confluences
-    if confluences:
-        print("\n🎯 FIBONACCI CONFLUENCE EVENTS:")
-        for event in confluences:
-            print(f"- {event['trap_type']} aligned with {event['fibonacci_level']} level at ${event['price']:.2f}")
-            print(f"  Confidence: {event['confidence']:.2f} | Type: {event['confluence_type']}")
-    
-    # Clean up simulation keys when done
-    print("\n🧹 Cleaning up simulation data...")
-    redis_conn.delete("sim_last_btc_price", "sim_prev_btc_price")
+        print(f"Price: ${price:.2f} | HF Mode: {'✅' if hf_active else '❌'} | Multiplier: {multiplier:.2f} ")
+        time.sleep(2)  # Simulate 2-second intervals
 
 # # Update test function
 # def test_hf_detector():
