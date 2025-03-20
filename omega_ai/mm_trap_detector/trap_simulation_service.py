@@ -1,28 +1,8 @@
 #!/usr/bin/env python3
 
-"""
-MIT License
-
-Copyright (c) 2024 OMEGA BTC AI Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-"""
+# Copyright (c) 2024 OMEGA BTC AI Team
+# Licensed under the GNU Affero General Public License v3.0
+# See https://www.gnu.org/licenses/ for more details
 
 """
 Market Maker Trap Simulation Service
@@ -56,6 +36,13 @@ import argparse
 import datetime
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Any
+from omega_ai.mm_trap_detector.redis_time_series import (
+    store_time_series_data,
+    compress_historical_data,
+    get_time_series_data,
+    TimeSeriesGranularity,
+    cleanup_old_data
+)
 
 # Terminal Colors
 RESET = "\033[0m"
@@ -254,15 +241,14 @@ class TrapSimulator:
         redis_conn.set("sim_price_change_pct", movement_pct * 100)
         redis_conn.set("sim_timestamp", timestamp)
         
-        # Store price history for visualization
-        history_key = f"sim_price_history:{current_time.date().isoformat()}"
-        redis_conn.rpush(history_key, json.dumps({
+        # Store price history using time series storage
+        price_data = {
             "timestamp": timestamp,
             "price": self.price,
             "change_pct": movement_pct * 100,
             "regime": self.current_regime[0]
-        }))
-        redis_conn.expire(history_key, 86400 * 3)  # Expire after 3 days
+        }
+        store_time_series_data("price_history", price_data, current_time)
         
         # Log basic status every 5 iterations
         if self.iteration % 5 == 0:
@@ -276,6 +262,15 @@ class TrapSimulator:
         # Periodically report simulation statistics
         if self.iteration % 60 == 0:  # Every ~minute
             self._report_statistics()
+            
+            # Compress historical data if needed
+            if self.iteration % 3600 == 0:  # Every hour
+                compress_historical_data(
+                    "price_history",
+                    current_time.date(),
+                    TimeSeriesGranularity.MINUTE,
+                    TimeSeriesGranularity.HOURLY
+                )
     
     def _maybe_generate_trap(self, movement_pct: float, timestamp: str):
         """
@@ -320,9 +315,8 @@ class TrapSimulator:
             }
             self.trap_history.append(trap_data)
             
-            # Store in Redis for external systems
-            redis_conn.lpush("sim_trap_history", json.dumps(trap_data))
-            redis_conn.ltrim("sim_trap_history", 0, 999)  # Keep last 1000 traps
+            # Store trap event using time series storage
+            store_time_series_data("trap_history", trap_data, datetime.datetime.now(datetime.UTC))
             
             # Log the trap
             print(f"\n{RED}{BOLD} 🚨 SIMULATED TRAP DETECTED #{self.trap_count} {RESET}")
@@ -351,19 +345,18 @@ class TrapSimulator:
         current_time = datetime.datetime.now(datetime.UTC)
         window_start = current_time - datetime.timedelta(minutes=3)
         
-        # Convert each trap's timestamp string to datetime
-        recent_traps = []
-        for trap in self.trap_history:
-            try:
-                trap_time = datetime.datetime.strptime(
-                    trap["timestamp"], 
-                    "%Y-%m-%d %H:%M:%S"
-                ).replace(tzinfo=datetime.UTC)
-                
-                if trap_time > window_start:
-                    recent_traps.append(trap)
-            except ValueError:
-                continue
+        # Get recent traps using time series storage
+        recent_traps = get_time_series_data(
+            "trap_history",
+            current_time.date(),
+            TimeSeriesGranularity.MINUTE
+        )
+        
+        # Filter traps within the window
+        recent_traps = [
+            trap for trap in recent_traps
+            if datetime.datetime.strptime(trap["timestamp"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=datetime.UTC) > window_start
+        ]
         
         # Check for HF mode activation - need at least 2 traps in window
         if len(recent_traps) >= 2:
@@ -376,7 +369,7 @@ class TrapSimulator:
             print(f"{MAGENTA}Recent traps: {len(recent_traps)}{RESET}")
             print(f"{MAGENTA}Multiplier: {multiplier:.2f}x{RESET}")
             
-            # Store HF mode activation event
+            # Store HF mode activation event using time series storage
             activation_data = {
                 "timestamp": trap_data["timestamp"],
                 "multiplier": multiplier,
@@ -385,9 +378,7 @@ class TrapSimulator:
                 "traps_in_window": len(recent_traps),
                 "trap_types": [t["trap_type"] for t in recent_traps]
             }
-            
-            redis_conn.lpush("sim_hf_activations", json.dumps(activation_data))
-            redis_conn.ltrim("sim_hf_activations", 0, 99)  # Keep last 100 activations
+            store_time_series_data("hf_activations", activation_data, current_time)
             
             # Store current HF mode state in Redis
             redis_conn.set("sim_hf_mode_active", "1")
