@@ -17,7 +17,7 @@ logger.addHandler(handler)
 
 # Initialize Redis connection with error handling
 try:
-    redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
+    redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
     redis_conn.ping()
     logger.info("Successfully connected to Redis")
 except redis.ConnectionError as e:
@@ -93,7 +93,7 @@ class MarketTrendAnalyzer:
     
     def __init__(self):
         """Initialize the market trend analyzer."""
-        self.timeframes = [1, 5, 15]  # minutes
+        self.timeframes = [1, 5, 15, 30, 60, 240, 720, 1444]  # minutes - extended to include up to 1444 minutes
         self.consecutive_errors = 0
         self.last_analysis_time = None
         self.analysis_interval = 5  # seconds
@@ -108,6 +108,9 @@ class MarketTrendAnalyzer:
             if current_price == 0:
                 logger.warning("No current price available for analysis")
                 return {}
+            
+            # Store current price in results
+            results["current_price"] = current_price
             
             # Update Fibonacci data with current price
             update_fibonacci_data(current_price)
@@ -148,11 +151,15 @@ class MarketTrendAnalyzer:
     
     def display_results(self, results: Dict[str, Any]) -> None:
         """Display analysis results with enhanced formatting."""
+        # Display current BTC price prominently at the top
+        current_price = results.get("current_price", 0)
+        print(f"\n{BLUE_BG}{WHITE}{BOLD} 💰 CURRENT BTC PRICE: ${current_price:,.2f} 💰 {RESET}")
+        
         print(f"\n{YELLOW}════════════════ {GREEN}OMEGA RASTA{YELLOW} MARKET TREND ANALYSIS ════════════════{RESET}")
         
         # Display trends for each timeframe with enhanced formatting
         for timeframe, data in results.items():
-            if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment":
+            if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment" and timeframe != "current_price":
                 trend = data["trend"]
                 change = data["change"]
                 print(format_trend_output(timeframe, trend, change))
@@ -434,11 +441,58 @@ def monitor_market_trends():
                 
                 # Provide Fibonacci section header if available
                 if "fibonacci_levels" in results:
-                    print(f"\n{BLUE_BG}{WHITE}{BOLD} FIBONACCI ANALYSIS {RESET}")
-                    print(f"{YELLOW}{'─' * 50}{RESET}")
-                    print(f"{CYAN}Current Fibonacci Levels:{RESET}")
-                    for level, price in results["fibonacci_levels"].items():
-                        print(f"{MAGENTA}{level}: ${price:,.2f}{RESET}")
+                    print(f"\n{BLUE_BG}{WHITE}{BOLD} EXTENDED FIBONACCI ANALYSIS {RESET}")
+                    print(f"{YELLOW}{'─' * 80}{RESET}")
+                    print(f"{CYAN}🌟 CURRENT FIBONACCI LEVELS FOR ALL TIMEFRAMES (UP TO 1444 MIN):{RESET}")
+                    
+                    # Group Fibonacci levels by type for better organization
+                    fib_types = {
+                        "EXTENSION": [],
+                        "RETRACEMENT": [],
+                        "KEY": []
+                    }
+                    
+                    # Get current price for reference
+                    current_price = float(redis_conn.get("last_btc_price") or 0)
+                    
+                    # Sort and categorize Fibonacci levels
+                    for level, price in sorted(results["fibonacci_levels"].items(), key=lambda x: float(x[1])):
+                        # Calculate percentage difference from current price
+                        pct_diff = ((price - current_price) / current_price) * 100
+                        
+                        # Determine level color based on distance from current price
+                        if abs(pct_diff) < 1.0:
+                            level_color = f"{RED_BG}{WHITE}"  # Very close - highlight
+                        elif abs(pct_diff) < 2.5:
+                            level_color = f"{YELLOW}"  # Somewhat close
+                        else:
+                            level_color = f"{CYAN}"  # Far
+                        
+                        # Determine category
+                        if "0." in level:
+                            fib_types["RETRACEMENT"].append((level, price, pct_diff, level_color))
+                        elif level.replace("fib", "").strip().replace(".", "", 1).isdigit() and float(level.replace("fib", "").strip()) > 1.0:
+                            fib_types["EXTENSION"].append((level, price, pct_diff, level_color))
+                        else:
+                            fib_types["KEY"].append((level, price, pct_diff, level_color))
+                    
+                    # Print each category
+                    for category, levels in fib_types.items():
+                        if levels:
+                            print(f"\n{MAGENTA}{category} LEVELS:{RESET}")
+                            for level, price, pct_diff, color in levels:
+                                direction = "↑" if pct_diff > 0 else "↓"
+                                print(f"  {color}{level}: ${price:,.2f} ({direction} {abs(pct_diff):.2f}% from current){RESET}")
+                    
+                    # Store Fibonacci levels in Redis for the dashboard
+                    try:
+                        redis_conn.set("fibonacci:current_levels", json.dumps(results["fibonacci_levels"]))
+                        # Also store each timeframe trend data
+                        for timeframe, data in results.items():
+                            if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment" and timeframe != "current_price":
+                                redis_conn.set(f"btc_trend_{timeframe}", json.dumps(data))
+                    except Exception as e:
+                        logger.error(f"Error storing Fibonacci data in Redis: {e}")
                 
                 # Check for potential MM traps
                 print(f"\n{BLUE_BG}{WHITE}{BOLD} MARKET MAKER TRAP DETECTION {RESET}")

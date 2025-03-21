@@ -660,10 +660,28 @@ def fetch_multi_interval_movements(interval: int = 5, limit: int = 100) -> tuple
         movements = []
         for item in movements_data:
             try:
+                # First try standard JSON parsing
                 movement = json.loads(item)
                 if isinstance(movement, dict) and "price" in movement:
                     movements.append(movement)
-            except (json.JSONDecodeError, TypeError) as e:
+                continue  # Successfully processed this item
+            except json.JSONDecodeError:
+                # If JSON parsing fails, try the format "price,volume"
+                try:
+                    if "," in item:
+                        price_str, volume_str = item.split(",", 1)
+                        price = float(price_str.strip())
+                        volume = float(volume_str.strip())
+                        now = datetime.now(timezone.utc).isoformat()
+                        movements.append({
+                            "timestamp": now,
+                            "price": price,
+                            "volume": volume
+                        })
+                        continue  # Successfully processed this item
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error parsing alternative format: {e}")
+            except (TypeError) as e:
                 logger.warning(f"Error parsing movement data: {e}")
         
         # Create summary dictionary with divine Rastafarian energy
