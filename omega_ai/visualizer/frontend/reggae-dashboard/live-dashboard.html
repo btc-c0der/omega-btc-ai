@@ -737,8 +737,14 @@
             <h1><i class="fa-brands fa-bitcoin"></i> OMEGA BTC AI REGGAE DASHBOARD</h1>
             <div class="price-ticker">
                 <i class="btc-logo fa-brands fa-bitcoin"></i>
-                <div class="btc-price" id="btc-price">$65,432.10</div>
-                <div class="price-change positive" id="price-change">+1.23%</div>
+                <div id="btcPrice"></div>
+                <div id="priceChanges">
+                    <span id="shortTermChange"></span>
+                    <span id="mediumTermChange"></span>
+                </div>
+                <div id="dominantPattern"></div>
+                <div id="dataSource"></div>
+                <div id="lastUpdated"></div>
             </div>
         </div>
 
@@ -964,8 +970,8 @@
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         const dataSource = document.getElementById('data-source').querySelector('span');
-        const btcPrice = document.getElementById('btc-price');
-        const priceChange = document.getElementById('price-change');
+        const btcPrice = document.getElementById('btcPrice');
+        const priceChange = document.getElementById('priceChanges');
         const trapTime = document.getElementById('trap-time');
         const positionTime = document.getElementById('position-time');
         const refreshButton = document.getElementById('refresh-data');
@@ -1022,14 +1028,39 @@
 
         // Update the connection status
         const updateConnectionStatus = (connected, message = null) => {
+            console.log(`Connection status update: connected=${connected}, message=${message}`);
+
+            const statusElement = document.getElementById('connection-status');
+            const statusIndicator = document.getElementById('status-indicator');
+
             if (connected) {
-                statusDot.classList.remove('disconnected');
-                statusDot.classList.add('connected');
-                statusText.textContent = message || 'Connected to Redis';
+                statusIndicator.className = 'status-indicator connected';
+                statusElement.textContent = 'Connected to Redis';
+                statusElement.className = 'status connected';
+                console.log('UI updated to show connected status');
+
+                // Add timestamp to show when connected
+                const timestamp = new Date().toLocaleTimeString();
+                document.getElementById('status-timestamp').textContent = `Connected at ${timestamp}`;
             } else {
-                statusDot.classList.remove('connected');
-                statusDot.classList.add('disconnected');
-                statusText.textContent = message || 'Disconnected from Redis';
+                statusIndicator.className = 'status-indicator disconnected';
+                statusElement.className = 'status disconnected';
+
+                // Show custom message if provided
+                if (message) {
+                    statusElement.textContent = message;
+                    console.log(`Displaying custom status message: ${message}`);
+                } else {
+                    statusElement.textContent = 'Connecting to Redis...';
+                    console.log('Displaying default connecting message');
+                }
+
+                // Update timestamp for connection attempt
+                const timestamp = new Date().toLocaleTimeString();
+                document.getElementById('status-timestamp').textContent = `Last attempt: ${timestamp}`;
+
+                // Show reconnection instructions
+                document.getElementById('reconnect-instructions').style.display = 'block';
             }
         };
 
@@ -1185,17 +1216,47 @@
                 priceChange.textContent = '0.00%';
                 priceChange.className = 'price-change neutral';
             }
+
+            // Update price changes
+            const shortTermChangeElement = document.getElementById('shortTermChange');
+            const mediumTermChangeElement = document.getElementById('mediumTermChange');
+            shortTermChangeElement.textContent = `Short Term: ${data.changes.short_term}%`;
+            mediumTermChangeElement.textContent = `Medium Term: ${data.changes.medium_term}%`;
+
+            // Determine dominant pattern
+            const dominantPatternElement = document.getElementById('dominantPattern');
+            const dominantPattern = Object.keys(data.patterns).reduce((a, b) =>
+                data.patterns[a] > data.patterns[b] ? a : b
+            );
+            dominantPatternElement.textContent = `Dominant Pattern: ${dominantPattern}`;
+
+            // Update data source
+            const dataSourceElement = document.getElementById('dataSource');
+            dataSourceElement.textContent = `Data Source: ${data.source}`;
+
+            // Update last updated timestamp
+            const lastUpdatedElement = document.getElementById('lastUpdated');
+            const formattedTimestamp = new Date(data.timestamp).toLocaleString();
+            lastUpdatedElement.textContent = `Last Updated: ${formattedTimestamp}`;
         };
 
         // Fetch data from endpoints
         const fetchData = async () => {
+            console.log('Fetching data...');
             try {
                 // Check health first
                 const healthResponse = await fetch(HEALTH_ENDPOINT);
+                console.log('Health check response status:', healthResponse.status);
                 if (!healthResponse.ok) throw new Error('Health check failed');
 
                 const healthData = await healthResponse.json();
+                console.log('Health check response data:', healthData);
                 const redisConnected = healthData.redis === 'connected';
+
+                console.log('Redis connected:', redisConnected);
+                if (!redisConnected) {
+                    console.log('Redis connection is not established');
+                }
 
                 updateConnectionStatus(redisConnected);
                 dataSource.textContent = `Data Source: ${redisConnected ? 'Redis (Live)' : 'Fallback (Simulated)'}`;
