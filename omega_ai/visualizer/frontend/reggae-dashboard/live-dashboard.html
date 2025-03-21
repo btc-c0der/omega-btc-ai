@@ -1291,6 +1291,275 @@
             margin: 15px 0;
             border-radius: 3px;
         }
+
+        /* Market Trends Analysis Panel Styles */
+        .trends-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .trends-pane {
+            background: linear-gradient(145deg, #1a1a1a, #262626);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trends-pane::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #76b852, #ffeb3b, #ff6d00);
+            z-index: 1;
+        }
+
+        .trends-pane h3 {
+            background: linear-gradient(to right, #76b852, #ffeb3b, #ff6d00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .trends-pane h3 i {
+            margin-right: 8px;
+        }
+
+        .trend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .trend-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .trend-timeframe {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--muted-color);
+            margin-bottom: 5px;
+        }
+
+        .trend-value {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .trend-value.bullish {
+            color: var(--green-color);
+        }
+
+        .trend-value.bearish {
+            color: var(--red-color);
+        }
+
+        .trend-value.neutral {
+            color: var(--yellow-color);
+        }
+
+        .trend-pct {
+            font-size: 0.8rem;
+            float: right;
+        }
+
+        .trend-description {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .fib-level {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            margin-bottom: 5px;
+            border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+        }
+
+        .fib-level-name {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .fib-level-price {
+            font-size: 0.85rem;
+        }
+
+        .fib-level.active {
+            background: rgba(76, 175, 80, 0.15);
+            border-radius: 5px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .trap-indicator {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .trap-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .trap-dot.bull {
+            background-color: var(--green-color);
+            box-shadow: 0 0 5px var(--green-color);
+        }
+
+        .trap-dot.bear {
+            background-color: var(--red-color);
+            box-shadow: 0 0 5px var(--red-color);
+        }
+
+        .trap-info {
+            flex: 1;
+        }
+
+        .trap-type {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .trap-confidence {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .trap-timeframe {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+        }
+
+        .market-regime {
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(30, 30, 30, 0.3));
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .regime-label {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+            margin-bottom: 5px;
+        }
+
+        .regime-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .regime-value.high-volatility {
+            color: var(--red-color);
+        }
+
+        .regime-value.moderate-volatility {
+            color: var(--yellow-color);
+        }
+
+        .regime-value.low-volatility {
+            color: var(--green-color);
+        }
+
+        .schumann-resonance {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(30, 30, 30, 0.3));
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .schumann-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--yellow-color);
+            margin: 10px 0;
+        }
+
+        .schumann-description {
+            font-size: 0.8rem;
+            color: var(--muted-color);
+        }
+
+        /* Full-width timeframe bar chart */
+        .timeframe-chart {
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .timeframe-bars {
+            display: flex;
+            height: 40px;
+            margin-bottom: 5px;
+        }
+
+        .timeframe-bar {
+            flex: 1;
+            height: 100%;
+            margin: 0 2px;
+            position: relative;
+        }
+
+        .timeframe-bar-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-radius: 3px 3px 0 0;
+            transition: height 0.3s ease;
+        }
+
+        .timeframe-bar-fill.positive {
+            background-color: var(--green-color);
+        }
+
+        .timeframe-bar-fill.negative {
+            background-color: var(--red-color);
+        }
+
+        .timeframe-labels {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .timeframe-label {
+            font-size: 0.7rem;
+            color: var(--muted-color);
+            text-align: center;
+            flex: 1;
+        }
     </style>
 </head>
 
@@ -1536,6 +1805,140 @@
 
                 <!-- Timestamp -->
                 <div class="bitget-timestamp" id="bg-position-timestamp">Updated: Mar 21, 2025 09:38:51 UTC</div>
+            </div>
+
+            <!-- Market Trends Analysis Panel -->
+            <div class="bitget-card">
+                <h2>
+                    <span><i class="fas fa-chart-line"></i> MARKET TRENDS ANALYSIS</span>
+                    <span class="refresh-time" id="trends-timestamp">--</span>
+                </h2>
+
+                <div class="trends-panel">
+                    <!-- Timeframe Trends Pane -->
+                    <div class="trends-pane">
+                        <h3><i class="fas fa-hourglass-half"></i> Timeframe Trends</h3>
+                        <div class="trend-grid" id="timeframe-trends">
+                            <!-- Trend cards will be added dynamically -->
+                            <div class="trend-card">
+                                <div class="trend-timeframe">1min</div>
+                                <div class="trend-value neutral">Neutral <span class="trend-pct">0.00%</span></div>
+                                <div class="trend-description">Waiting for data...</div>
+                            </div>
+                            <div class="trend-card">
+                                <div class="trend-timeframe">5min</div>
+                                <div class="trend-value neutral">Neutral <span class="trend-pct">0.00%</span></div>
+                                <div class="trend-description">Waiting for data...</div>
+                            </div>
+                            <div class="trend-card">
+                                <div class="trend-timeframe">15min</div>
+                                <div class="trend-value neutral">Neutral <span class="trend-pct">0.00%</span></div>
+                                <div class="trend-description">Waiting for data...</div>
+                            </div>
+                            <div class="trend-card">
+                                <div class="trend-timeframe">1h</div>
+                                <div class="trend-value neutral">Neutral <span class="trend-pct">0.00%</span></div>
+                                <div class="trend-description">Waiting for data...</div>
+                            </div>
+                        </div>
+
+                        <!-- Timeframe Bar Chart -->
+                        <div class="timeframe-chart">
+                            <div class="timeframe-bars" id="timeframe-bars">
+                                <!-- Bars will be added dynamically -->
+                            </div>
+                            <div class="timeframe-labels" id="timeframe-labels">
+                                <!-- Labels will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fibonacci Levels Pane -->
+                    <div class="trends-pane">
+                        <h3><i class="fas fa-project-diagram"></i> Fibonacci Levels</h3>
+                        <div id="fibonacci-levels">
+                            <!-- Fibonacci levels will be added dynamically -->
+                            <div class="fib-level">
+                                <div class="fib-level-name">0.236</div>
+                                <div class="fib-level-price">$--</div>
+                            </div>
+                            <div class="fib-level">
+                                <div class="fib-level-name">0.382</div>
+                                <div class="fib-level-price">$--</div>
+                            </div>
+                            <div class="fib-level active">
+                                <div class="fib-level-name">0.5</div>
+                                <div class="fib-level-price">$--</div>
+                            </div>
+                            <div class="fib-level">
+                                <div class="fib-level-name">0.618</div>
+                                <div class="fib-level-price">$--</div>
+                            </div>
+                            <div class="fib-level">
+                                <div class="fib-level-name">0.786</div>
+                                <div class="fib-level-price">$--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Maker Traps Pane -->
+                    <div class="trends-pane">
+                        <h3><i class="fas fa-spider"></i> Market Maker Traps</h3>
+                        <div id="mm-traps">
+                            <!-- Trap indicators will be added dynamically -->
+                            <div class="trap-indicator">
+                                <div class="trap-dot bull"></div>
+                                <div class="trap-info">
+                                    <span class="trap-type">Bull Trap</span>
+                                    <span class="trap-confidence">70%</span>
+                                    <div class="trap-timeframe">15min timeframe</div>
+                                </div>
+                            </div>
+                            <div class="trap-indicator">
+                                <div class="trap-dot bear"></div>
+                                <div class="trap-info">
+                                    <span class="trap-type">Bear Trap</span>
+                                    <span class="trap-confidence">85%</span>
+                                    <div class="trap-timeframe">1h timeframe</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="no-traps-message" style="display: none;">
+                            <p class="trend-description">No market maker traps detected at this time.</p>
+                        </div>
+                    </div>
+
+                    <!-- Market Conditions Pane -->
+                    <div class="trends-pane">
+                        <h3><i class="fas fa-tachometer-alt"></i> Market Conditions</h3>
+
+                        <!-- Market Regime -->
+                        <div class="market-regime">
+                            <div class="regime-label">MARKET REGIME</div>
+                            <div class="regime-value moderate-volatility" id="market-regime">Moderate Volatility Bullish
+                            </div>
+                        </div>
+
+                        <!-- Volatility -->
+                        <div class="market-regime">
+                            <div class="regime-label">VOLATILITY</div>
+                            <div class="regime-value" id="market-volatility">0.85%</div>
+                        </div>
+
+                        <!-- Schumann Resonance -->
+                        <div class="schumann-resonance">
+                            <div class="regime-label">SCHUMANN RESONANCE</div>
+                            <div class="schumann-value" id="schumann-value">7.83 Hz</div>
+                            <div class="schumann-description" id="schumann-desc">Aligned with planetary consciousness
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="bitget-actions">
+                    <div class="bitget-action-btn edit" id="refresh-trends">REFRESH ANALYSIS</div>
+                </div>
             </div>
 
             <!-- Redis Debug Module -->
@@ -3974,111 +4377,345 @@
         const setupRefreshTimer = () => {
             // Refresh trap probability data initially and every 15 seconds
             updateTrapProbability();
+            setInterval(updateTrapProbability, 15000);
+
+            // Refresh position data initially and every 5 seconds
+            updatePositionInfo();
+            setInterval(updatePositionInfo, 5000);
+
+            // Refresh position targets initially and every 10 seconds
+            updatePositionTargets();
+            setInterval(updatePositionTargets, 10000);
+
+            // Refresh market trends data initially and every 30 seconds
+            updateMarketTrends();
+            setInterval(updateMarketTrends, 30000);
+
+            // Refresh other panels...
+            updateBTCPriceDisplay();
+            fetchRedisData();
+
+            setInterval(updateBTCPriceDisplay, 10000);
+            setInterval(fetchRedisData, 20000);
         };
 
-        // Function to set up BitGet trader action buttons
-        const setupBitGetTraderUI = () => {
-            debug('INIT', 'Setting up BitGet trader UI components');
+        // Function to update Market Trends Analysis panel
+        const updateMarketTrends = async () => {
+            debug('TRENDS', 'Updating market trends analysis panel');
 
-            // Set up BitGet trader action buttons
-            document.getElementById('bg-close-position').addEventListener('click', async function () {
-                debug('BITGET', 'Close position button clicked');
+            const timestampElement = document.getElementById('trends-timestamp');
 
-                // Get position side
-                const sideElement = document.getElementById('bg-position-badge');
-                if (sideElement.textContent.includes('NO POSITION') || sideElement.classList.contains('neutral')) {
-                    showToast('No active position to close', 'warning');
-                    return;
+            try {
+                // Show updating indicator
+                if (timestampElement) {
+                    timestampElement.textContent = 'Updating...';
                 }
 
-                if (confirm('Are you sure you want to close this position?')) {
+                // Fetch timeframe trends
+                await updateTimeframeTrends();
+
+                // Fetch Fibonacci levels
+                await updateFibonacciLevels();
+
+                // Fetch Market Maker traps
+                await updateMarketMakerTraps();
+
+                // Fetch Market Conditions
+                await updateMarketConditions();
+
+                // Update timestamp
+                if (timestampElement) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    timestampElement.textContent = timestamp;
+                }
+
+            } catch (error) {
+                console.error('Error updating market trends:', error);
+
+                if (timestampElement) {
+                    timestampElement.textContent = `Error: ${new Date().toLocaleTimeString()}`;
+                }
+            }
+        };
+
+        // Function to update timeframe trends
+        const updateTimeframeTrends = async () => {
+            debug('TRENDS', 'Updating timeframe trends');
+
+            try {
+                // Get container elements
+                const trendsContainer = document.getElementById('timeframe-trends');
+                const barsContainer = document.getElementById('timeframe-bars');
+                const labelsContainer = document.getElementById('timeframe-labels');
+
+                // Clear existing content
+                trendsContainer.innerHTML = '';
+                barsContainer.innerHTML = '';
+                labelsContainer.innerHTML = '';
+
+                // Define timeframes to display prominently in cards
+                const displayTimeframes = ['1min', '5min', '15min', '60min'];
+
+                // Define all timeframes for bar chart
+                const allTimeframes = ['1min', '5min', '15min', '30min', '60min', '240min', '720min', '1444min'];
+
+                // Track the trend data for all timeframes for the bar chart
+                const allTrendData = [];
+
+                // Fetch trend data for each timeframe
+                for (const timeframe of allTimeframes) {
                     try {
-                        // Show loading state
-                        this.textContent = 'CLOSING...';
-                        this.style.opacity = '0.7';
+                        const data = await fetchRedisKey(`btc_trend_${timeframe}`);
 
-                        // Make API call to close position
-                        const response = await fetch(`${API_BASE}/position/close`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                close_all: true
-                            })
-                        });
+                        if (data) {
+                            // Add to all trend data array
+                            allTrendData.push({
+                                timeframe: timeframe,
+                                trend: data.trend,
+                                change: data.change
+                            });
 
-                        if (response.ok) {
-                            const result = await response.json();
-                            showToast('Position closed successfully!', 'success');
-
-                            // Force refresh position data
-                            await updatePositionInfo();
-                        } else {
-                            const error = await response.json();
-                            showToast(`Failed to close position: ${error.message || 'Unknown error'}`, 'error');
+                            // Create trend card for display timeframes
+                            if (displayTimeframes.includes(timeframe)) {
+                                const cardHTML = createTrendCard(timeframe, data.trend, data.change);
+                                trendsContainer.innerHTML += cardHTML;
+                            }
                         }
                     } catch (error) {
-                        console.error('Error closing position:', error);
-                        showToast(`Error closing position: ${error.message || 'Unknown error'}`, 'error');
-                    } finally {
-                        // Reset button state
-                        this.textContent = 'CLOSE POSITION';
-                        this.style.opacity = '1';
+                        console.error(`Error fetching trend data for ${timeframe}:`, error);
                     }
                 }
-            });
 
-            document.getElementById('bg-edit-position').addEventListener('click', function () {
-                debug('BITGET', 'Edit position button clicked');
+                // Create bar chart
+                if (allTrendData.length > 0) {
+                    // Create bars
+                    for (const data of allTrendData) {
+                        const barHTML = createTimeframeBar(data.timeframe, data.change);
+                        barsContainer.innerHTML += barHTML;
 
-                // Get position side
-                const sideElement = document.getElementById('bg-position-badge');
-                if (sideElement.textContent.includes('NO POSITION') || sideElement.classList.contains('neutral')) {
-                    showToast('No active position to edit', 'warning');
+                        // Create label
+                        const labelHTML = `<div class="timeframe-label">${data.timeframe.replace('min', '')}</div>`;
+                        labelsContainer.innerHTML += labelHTML;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error updating timeframe trends:', error);
+                throw error;
+            }
+        };
+
+        // Helper function to create a trend card
+        const createTrendCard = (timeframe, trend, change) => {
+            // Determine trend class
+            let trendClass = 'neutral';
+            if (trend.includes('Bullish')) {
+                trendClass = 'bullish';
+            } else if (trend.includes('Bearish')) {
+                trendClass = 'bearish';
+            }
+
+            // Format change with sign
+            const changeSign = change > 0 ? '+' : '';
+
+            // Generate description based on trend and change
+            let description = '';
+            if (Math.abs(change) > 2) {
+                description = 'Strong price movement';
+            } else if (Math.abs(change) > 1) {
+                description = 'Moderate price action';
+            } else if (Math.abs(change) > 0.5) {
+                description = 'Mild price fluctuation';
+            } else {
+                description = 'Sideways movement';
+            }
+
+            return `
+                <div class="trend-card">
+                    <div class="trend-timeframe">${timeframe}</div>
+                    <div class="trend-value ${trendClass}">${trend} <span class="trend-pct">${changeSign}${change.toFixed(2)}%</span></div>
+                    <div class="trend-description">${description}</div>
+                </div>
+            `;
+        };
+
+        // Helper function to create a timeframe bar
+        const createTimeframeBar = (timeframe, change) => {
+            // Determine bar class and height
+            const barClass = change >= 0 ? 'positive' : 'negative';
+            const heightPct = Math.min(Math.abs(change) * 10, 100); // 10% change = 100% height
+
+            return `
+                <div class="timeframe-bar">
+                    <div class="timeframe-bar-fill ${barClass}" style="height: ${heightPct}%;"></div>
+                </div>
+            `;
+        };
+
+        // Function to update Fibonacci levels
+        const updateFibonacciLevels = async () => {
+            debug('TRENDS', 'Updating Fibonacci levels');
+
+            try {
+                // Get container element
+                const fibContainer = document.getElementById('fibonacci-levels');
+
+                // Clear existing content
+                fibContainer.innerHTML = '';
+
+                // Fetch Fibonacci levels
+                const fibLevels = await fetchRedisKey('fibonacci:current_levels');
+                if (!fibLevels) {
+                    fibContainer.innerHTML = '<p class="trend-description">No Fibonacci data available.</p>';
                     return;
                 }
 
-                // Show modal or form to edit position
-                const side = sideElement.classList.contains('long') ? 'long' : 'short';
-
-                // For this example, we'll just show a prompt to set a new take profit
-                const currentTp = document.getElementById('bg-take-profit').textContent;
-                const newTp = prompt(`Enter new take profit price (current: ${currentTp}):`, currentTp.replace('$', ''));
-
-                if (newTp !== null && !isNaN(parseFloat(newTp))) {
-                    // Show loading state
-                    this.textContent = 'UPDATING...';
-                    this.style.opacity = '0.7';
-
-                    // Make API call to update position
-                    fetch(`${API_BASE}/position/update`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            take_profit: parseFloat(newTp)
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(result => {
-                            showToast('Position updated successfully!', 'success');
-
-                            // Force refresh position data
-                            updatePositionInfo();
-                        })
-                        .catch(error => {
-                            console.error('Error updating position:', error);
-                            showToast(`Error updating position: ${error.message || 'Unknown error'}`, 'error');
-                        })
-                        .finally(() => {
-                            // Reset button state
-                            this.textContent = 'EDIT POSITION';
-                            this.style.opacity = '1';
-                        });
+                // Get current price
+                const currentPrice = parseFloat(await fetchRedisKey('last_btc_price') || 0);
+                if (currentPrice === 0) {
+                    fibContainer.innerHTML = '<p class="trend-description">Cannot determine current price.</p>';
+                    return;
                 }
-            });
+
+                // Find closest Fibonacci level
+                let closestLevel = null;
+                let minDistance = Number.MAX_VALUE;
+
+                // Sort levels and create HTML
+                for (const [level, price] of Object.entries(fibLevels).sort((a, b) => parseFloat(a[1]) - parseFloat(b[1]))) {
+                    const distance = Math.abs(currentPrice - price);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestLevel = level;
+                    }
+
+                    const isActive = closestLevel === level;
+                    const distancePct = ((price - currentPrice) / currentPrice * 100).toFixed(2);
+                    const directionIcon = price > currentPrice ? '↑' : '↓';
+
+                    fibContainer.innerHTML += `
+                        <div class="fib-level ${isActive ? 'active' : ''}">
+                            <div class="fib-level-name">${level}</div>
+                            <div class="fib-level-price">$${parseFloat(price).toLocaleString()} <span style="opacity: 0.7; font-size: 0.75rem;">${directionIcon} ${Math.abs(distancePct)}%</span></div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error updating Fibonacci levels:', error);
+                throw error;
+            }
+        };
+
+        // Function to update Market Maker traps
+        const updateMarketMakerTraps = async () => {
+            debug('TRENDS', 'Updating Market Maker traps');
+
+            try {
+                // Get container elements
+                const trapsContainer = document.getElementById('mm-traps');
+                const noTrapsMessage = document.getElementById('no-traps-message');
+
+                // Clear existing content
+                trapsContainer.innerHTML = '';
+
+                // Fetch trap data
+                let trapData = await fetchRedisKey('mm_traps:current_traps');
+                if (!trapData) {
+                    // Try alternative key
+                    trapData = await fetchRedisKey('mm_trap_detection');
+                }
+
+                if (!trapData || trapData.length === 0) {
+                    // No traps detected
+                    trapsContainer.innerHTML = '';
+                    noTrapsMessage.style.display = 'block';
+                    return;
+                }
+
+                // Display traps
+                noTrapsMessage.style.display = 'none';
+
+                // Either trapData is an array or a single object
+                const traps = Array.isArray(trapData) ? trapData : [trapData];
+
+                for (const trap of traps) {
+                    const trapType = trap.type || trap.trap_type;
+                    const confidence = trap.confidence || 0.5;
+                    const timeframe = trap.timeframe || 'recent';
+
+                    // Create trap indicator
+                    trapsContainer.innerHTML += `
+                        <div class="trap-indicator">
+                            <div class="trap-dot ${trapType.toLowerCase().includes('bull') ? 'bull' : 'bear'}"></div>
+                            <div class="trap-info">
+                                <span class="trap-type">${trapType}</span>
+                                <span class="trap-confidence">${Math.round(confidence * 100)}%</span>
+                                <div class="trap-timeframe">${timeframe} timeframe</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error updating Market Maker traps:', error);
+                throw error;
+            }
+        };
+
+        // Function to update Market Conditions
+        const updateMarketConditions = async () => {
+            debug('TRENDS', 'Updating Market Conditions');
+
+            try {
+                // Fetch market regime
+                const marketRegime = await fetchRedisKey('market_regime');
+                if (marketRegime) {
+                    const regimeElement = document.getElementById('market-regime');
+                    regimeElement.textContent = marketRegime;
+
+                    // Set appropriate class
+                    regimeElement.className = 'regime-value';
+                    if (marketRegime.includes('High Volatility')) {
+                        regimeElement.classList.add('high-volatility');
+                    } else if (marketRegime.includes('Moderate Volatility')) {
+                        regimeElement.classList.add('moderate-volatility');
+                    } else {
+                        regimeElement.classList.add('low-volatility');
+                    }
+                }
+
+                // Fetch volatility
+                const volatility = await fetchRedisKey('market_volatility');
+                if (volatility) {
+                    document.getElementById('market-volatility').textContent = `${parseFloat(volatility).toFixed(2)}%`;
+                }
+
+                // Update Schumann resonance (this is more for fun/theme - could be dynamic but static is fine)
+                const schumannValue = document.getElementById('schumann-value');
+                const schumannDesc = document.getElementById('schumann-desc');
+
+                // Randomly vary the value slightly for visual effect
+                const baseValue = 7.83;
+                const variation = (Math.random() * 0.2) - 0.1; // +/- 0.1
+                schumannValue.textContent = `${(baseValue + variation).toFixed(2)} Hz`;
+
+                // Update description based on market trend
+                const overallTrend = await fetchRedisKey('btc_trend_15min');
+                if (overallTrend && overallTrend.trend) {
+                    if (overallTrend.trend.includes('Bullish')) {
+                        schumannDesc.textContent = 'Harmonizing with cosmic bullish energy';
+                    } else if (overallTrend.trend.includes('Bearish')) {
+                        schumannDesc.textContent = 'Aligning with planetary correction waves';
+                    } else {
+                        schumannDesc.textContent = 'Balanced harmonic equilibrium state';
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error updating Market Conditions:', error);
+                throw error;
+            }
         };
 
         // Load all dashboard modules on page load
