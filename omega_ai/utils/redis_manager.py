@@ -24,7 +24,8 @@ class RedisManager:
             ssl_ca_certs: Path to CA certificate file (default: None)
         """
         # Get Redis connection details from environment variables or use defaults
-        host = host or os.getenv('REDIS_HOST', 'localhost')
+        # Force use of localhost unless explicitly overridden
+        host = host or 'localhost'  # Default to localhost first
         port = port or int(os.getenv('REDIS_PORT', '6379'))
         
         # Initialize Redis connection with flexible parameters
