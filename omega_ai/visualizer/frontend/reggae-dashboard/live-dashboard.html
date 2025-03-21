@@ -1090,6 +1090,96 @@
                     <i class="fas fa-sync-alt"></i> Refresh Redis Info
                 </button>
             </div>
+
+            <!-- Trap-Aware Dual Traders Control Card -->
+            <div class="card">
+                <h2>
+                    <i class="fas fa-robot"></i> Trading Control
+                    <span class="refresh-time" id="trading-control-timestamp">--</span>
+                </h2>
+
+                <div class="trading-status">
+                    <div class="data-row">
+                        <span class="label">System Status:</span>
+                        <div class="status-indicator">
+                            <div class="status-dot disconnected" id="trading-status-dot"></div>
+                            <span class="value neutral" id="trading-status-text">Inactive</span>
+                        </div>
+                    </div>
+
+                    <div class="data-row">
+                        <span class="label">Long Trader:</span>
+                        <span class="value neutral" id="long-trader-status">Inactive</span>
+                    </div>
+
+                    <div class="data-row">
+                        <span class="label">Short Trader:</span>
+                        <span class="value neutral" id="short-trader-status">Inactive</span>
+                    </div>
+
+                    <div class="data-row">
+                        <span class="label">Combined PnL:</span>
+                        <span class="value neutral" id="combined-pnl">$0.00</span>
+                    </div>
+
+                    <div class="data-row">
+                        <span class="label">Last Action:</span>
+                        <span class="value" id="last-trading-action">--</span>
+                    </div>
+                </div>
+
+                <h3>Trap Protection Settings</h3>
+                <div class="settings-grid"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                    <div class="setting-item">
+                        <div class="setting-label">Trap Protection:</div>
+                        <div class="setting-control">
+                            <label class="toggle"
+                                style="position: relative; display: inline-block; width: 60px; height: 28px;">
+                                <input type="checkbox" id="trap-protection-toggle" checked
+                                    style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider round"
+                                    style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2196F3; transition: .4s; border-radius: 34px;"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Trap Threshold:</div>
+                        <div class="setting-control">
+                            <input type="range" id="trap-threshold" min="0.5" max="0.9" step="0.05" value="0.7"
+                                style="width: 100%;">
+                            <span id="trap-threshold-value">0.7</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Long Risk:</div>
+                        <div class="setting-control">
+                            <input type="range" id="long-risk" min="0.1" max="2.0" step="0.1" value="1.0"
+                                style="width: 100%;">
+                            <span id="long-risk-value">1.0</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Short Risk:</div>
+                        <div class="setting-control">
+                            <input type="range" id="short-risk" min="0.1" max="2.0" step="0.1" value="1.0"
+                                style="width: 100%;">
+                            <span id="short-risk-value">1.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-buttons" style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button id="start-trading-btn" class="refresh-button"
+                        style="background-color: var(--green-color); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-play"></i> Start Trading
+                    </button>
+                    <button id="stop-trading-btn" class="refresh-button"
+                        style="background-color: var(--red-color); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-stop"></i> Stop Trading
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="footer">
@@ -1204,22 +1294,68 @@
             }
         };
 
-        // Format helpers
-        const formatPrice = (num) => {
-            if (num === undefined || num === null) return 'N/A';
-            return new Intl.NumberFormat('en-US', {
+        // Helper function to format a price as USD
+        const formatPrice = (price) => {
+            if (price === null || price === undefined || isNaN(price)) {
+                return '$0.00';
+            }
+
+            // Format with comma separators and fixed decimal places
+            const formatter = new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
-            }).format(num);
+            });
+
+            return formatter.format(price);
         };
 
-        const formatPercent = (value) => {
-            if (value === undefined || value === null) return 'N/A';
-            // Convert decimal (0.024) to percentage (2.44%)
-            const percent = value * 100;
-            return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
+        // Helper function to format a value as USD with variable decimal places
+        const formatUsd = (value) => {
+            if (value === null || value === undefined || isNaN(value)) {
+                return '$0.00';
+            }
+
+            // Determine appropriate decimal places based on value
+            const absValue = Math.abs(value);
+            let decimalPlaces = 2;
+
+            if (absValue < 1) {
+                decimalPlaces = 4;
+            } else if (absValue < 0.01) {
+                decimalPlaces = 6;
+            }
+
+            // Format with comma separators and appropriate decimal places
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: decimalPlaces,
+                maximumFractionDigits: decimalPlaces
+            });
+
+            return formatter.format(value);
+        };
+
+        // Helper function to format a percentage
+        const formatPercent = (percent) => {
+            if (percent === null || percent === undefined || isNaN(percent)) {
+                return '0.00%';
+            }
+
+            // Add a plus sign for positive values
+            const sign = percent >= 0 ? '+' : '';
+
+            // Format with appropriate decimal places
+            const absPercent = Math.abs(percent);
+            let decimalPlaces = 2;
+
+            if (absPercent < 0.1) {
+                decimalPlaces = 4;
+            }
+
+            return `${sign}${absPercent.toFixed(decimalPlaces)}%`;
         };
 
         // Helper function to fetch Redis key value with retries
@@ -1833,14 +1969,18 @@
             const positionSizeElement = document.getElementById('position-size');
             const leverageElement = document.getElementById('position-leverage');
             const riskMultiElement = document.getElementById('risk-multiplier');
-            const pnlElement = document.getElementById('position-pnl');
+            const pnlPercentElement = document.getElementById('pnl-percent');
+            const pnlUsdElement = document.getElementById('pnl-usd');
+            const stopLossElement = document.getElementById('stop-loss');
+            const takeProfitsElement = document.getElementById('take-profits');
             const entryTimeElement = document.getElementById('entry-time');
-            const positionTimeElement = document.getElementById('position-time');
+            const sourceElement = document.getElementById('position-source');
+            const timestampElement = document.getElementById('position-timestamp');
 
             try {
                 // Show updating indicator
-                if (positionTimeElement) {
-                    positionTimeElement.textContent = 'Updating...';
+                if (timestampElement) {
+                    timestampElement.textContent = 'Updating...';
                 }
 
                 // Try to get position data from Redis
@@ -1870,29 +2010,33 @@
                     }
                 }
 
-                // Get current BTC price for calculations
-                let currentPrice = null;
-                try {
-                    for (const priceKey of ['btc_price', 'last_btc_price', 'sim_last_btc_price']) {
-                        const price = await fetchRedisKey(priceKey);
-                        if (price !== null) {
-                            if (typeof price === 'number') {
-                                currentPrice = price;
-                            } else if (typeof price === 'string') {
-                                currentPrice = parseFloat(price);
-                            } else if (typeof price === 'object' && price.hasOwnProperty('price')) {
-                                currentPrice = parseFloat(price.price);
-                            }
+                // Get current BTC price for calculations or use the one from position data
+                let currentPrice = positionData && positionData.current_price ? parseFloat(positionData.current_price) : null;
 
-                            if (!isNaN(currentPrice) && currentPrice > 0) {
-                                break;
-                            } else {
-                                currentPrice = null;
+                // If no current price in position data, try to get from Redis
+                if (!currentPrice) {
+                    try {
+                        for (const priceKey of ['btc_price', 'last_btc_price', 'sim_last_btc_price']) {
+                            const price = await fetchRedisKey(priceKey);
+                            if (price !== null) {
+                                if (typeof price === 'number') {
+                                    currentPrice = price;
+                                } else if (typeof price === 'string') {
+                                    currentPrice = parseFloat(price);
+                                } else if (typeof price === 'object' && price.hasOwnProperty('price')) {
+                                    currentPrice = parseFloat(price.price);
+                                }
+
+                                if (!isNaN(currentPrice) && currentPrice > 0) {
+                                    break;
+                                } else {
+                                    currentPrice = null;
+                                }
                             }
                         }
+                    } catch (priceError) {
+                        debug('POSITION', 'Error getting current price:', priceError);
                     }
-                } catch (priceError) {
-                    debug('POSITION', 'Error getting current price:', priceError);
                 }
 
                 // Use fallback price if we couldn't get a real one
@@ -1905,18 +2049,36 @@
                     // Format timestamps
                     let updateTime = new Date().toLocaleTimeString();
                     let entryTime = 'Unknown';
+                    let dataSource = positionData.source || 'API';
 
+                    // Handle timestamp conversion - could be milliseconds timestamp or ISO string
                     if (positionData.timestamp) {
-                        updateTime = new Date(positionData.timestamp).toLocaleTimeString();
+                        const timestamp = typeof positionData.timestamp === 'number'
+                            ? positionData.timestamp
+                            : new Date(positionData.timestamp).getTime();
+
+                        // If timestamp is in milliseconds since epoch
+                        if (timestamp > 1000000000000) {
+                            updateTime = new Date(timestamp).toLocaleTimeString();
+                        } else {
+                            // If timestamp is in seconds since epoch
+                            updateTime = new Date(timestamp * 1000).toLocaleTimeString();
+                        }
                     }
 
+                    // Handle entry time conversion - could be milliseconds timestamp or ISO string
                     if (positionData.entry_time) {
-                        entryTime = new Date(positionData.entry_time).toLocaleTimeString();
-                    }
+                        const entryTimestamp = typeof positionData.entry_time === 'number'
+                            ? positionData.entry_time
+                            : new Date(positionData.entry_time).getTime();
 
-                    // Add source indicator if needed
-                    if (positionData.source === 'mock' || positionData.source === 'fallback') {
-                        updateTime += ` (${positionData.source})`;
+                        // If timestamp is in milliseconds since epoch
+                        if (entryTimestamp > 1000000000000) {
+                            entryTime = new Date(entryTimestamp).toLocaleTimeString();
+                        } else {
+                            // If timestamp is in seconds since epoch
+                            entryTime = new Date(entryTimestamp * 1000).toLocaleTimeString();
+                        }
                     }
 
                     // Safely extract position data
@@ -1925,17 +2087,31 @@
                     const positionSize = parseFloat(positionData.position_size) || 0;
                     const leverage = parseInt(positionData.leverage) || 1;
                     const riskMultiplier = parseFloat(positionData.risk_multiplier) || 1;
+                    const stopLoss = parseFloat(positionData.stop_loss) || 0;
+                    const takeProfit = positionData.take_profits || [];
+
+                    // Get PnL data
+                    let pnlPercent = positionData.pnl_percent !== undefined
+                        ? parseFloat(positionData.pnl_percent)
+                        : 0;
+
+                    let pnlUsd = positionData.pnl_usd !== undefined
+                        ? parseFloat(positionData.pnl_usd)
+                        : 0;
 
                     // Calculate PnL if needed
-                    let pnlPercent = 0;
-                    if (positionData.pnl_percent !== undefined) {
-                        pnlPercent = parseFloat(positionData.pnl_percent);
-                    } else if (entryPrice > 0 && currentPrice > 0) {
+                    if ((pnlPercent === 0 || isNaN(pnlPercent)) && entryPrice > 0 && currentPrice > 0) {
                         // Calculate PnL based on side
                         if (side.toLowerCase() === 'long') {
-                            pnlPercent = ((currentPrice - entryPrice) / entryPrice) * 100;
+                            pnlPercent = ((currentPrice - entryPrice) / entryPrice) * 100 * leverage;
+                            if (positionSize > 0) {
+                                pnlUsd = (currentPrice - entryPrice) * positionSize * leverage;
+                            }
                         } else if (side.toLowerCase() === 'short') {
-                            pnlPercent = ((entryPrice - currentPrice) / entryPrice) * 100;
+                            pnlPercent = ((entryPrice - currentPrice) / entryPrice) * 100 * leverage;
+                            if (positionSize > 0) {
+                                pnlUsd = (entryPrice - currentPrice) * positionSize * leverage;
+                            }
                         }
                     }
 
@@ -1983,15 +2159,54 @@
                     }
 
                     // Update PnL with color coding
-                    if (pnlElement) {
-                        pnlElement.textContent = `${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`;
+                    if (pnlPercentElement) {
+                        pnlPercentElement.textContent = `${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`;
 
                         if (pnlPercent >= 1) {
-                            pnlElement.className = 'value positive';
+                            pnlPercentElement.className = 'value positive';
                         } else if (pnlPercent < 0) {
-                            pnlElement.className = 'value negative';
+                            pnlPercentElement.className = 'value negative';
                         } else {
-                            pnlElement.className = 'value neutral';
+                            pnlPercentElement.className = 'value neutral';
+                        }
+                    }
+
+                    // Update USD PnL
+                    if (pnlUsdElement) {
+                        pnlUsdElement.textContent = `${pnlUsd >= 0 ? '+' : ''}${formatUsd(pnlUsd)}`;
+
+                        if (pnlUsd >= 1) {
+                            pnlUsdElement.className = 'value positive';
+                        } else if (pnlUsd < 0) {
+                            pnlUsdElement.className = 'value negative';
+                        } else {
+                            pnlUsdElement.className = 'value neutral';
+                        }
+                    }
+
+                    // Update stop loss
+                    if (stopLossElement) {
+                        stopLossElement.textContent = stopLoss > 0 ? formatPrice(stopLoss) : 'Not Set';
+                    }
+
+                    // Update take profits
+                    if (takeProfitsElement) {
+                        if (Array.isArray(takeProfit) && takeProfit.length > 0) {
+                            // Format take profits as a string
+                            const takeProfitText = takeProfit.map(tp => {
+                                if (typeof tp === 'object' && tp.price) {
+                                    const price = parseFloat(tp.price);
+                                    const pct = tp.percentage ? parseFloat(tp.percentage) * 100 : '';
+                                    return `${formatPrice(price)}${pct ? ` (${pct.toFixed(0)}%)` : ''}`;
+                                } else if (typeof tp === 'number') {
+                                    return formatPrice(tp);
+                                }
+                                return '';
+                            }).join(', ');
+
+                            takeProfitsElement.textContent = takeProfitText || 'Not Set';
+                        } else {
+                            takeProfitsElement.textContent = 'Not Set';
                         }
                     }
 
@@ -2000,8 +2215,14 @@
                         entryTimeElement.textContent = entryTime;
                     }
 
-                    if (positionTimeElement) {
-                        positionTimeElement.textContent = updateTime;
+                    // Update source
+                    if (sourceElement) {
+                        sourceElement.textContent = dataSource;
+                    }
+
+                    // Update timestamp
+                    if (timestampElement) {
+                        timestampElement.textContent = updateTime;
                     }
 
                 } else {
@@ -2020,13 +2241,17 @@
                     if (positionSizeElement) positionSizeElement.textContent = 'N/A';
                     if (leverageElement) leverageElement.textContent = 'N/A';
                     if (riskMultiElement) riskMultiElement.textContent = 'N/A';
-                    if (pnlElement) pnlElement.textContent = 'N/A';
+                    if (pnlPercentElement) pnlPercentElement.textContent = '0.00%';
+                    if (pnlUsdElement) pnlUsdElement.textContent = '$0.00';
+                    if (stopLossElement) stopLossElement.textContent = '$0.00';
+                    if (takeProfitsElement) takeProfitsElement.textContent = '--';
                     if (entryTimeElement) entryTimeElement.textContent = 'N/A';
+                    if (sourceElement) sourceElement.textContent = '--';
 
-                    // Update time
-                    if (positionTimeElement) {
+                    // Update timestamp
+                    if (timestampElement) {
                         const timestamp = new Date().toLocaleTimeString();
-                        positionTimeElement.textContent = timestamp;
+                        timestampElement.textContent = timestamp;
                     }
                 }
 
@@ -2041,11 +2266,15 @@
                 if (positionSizeElement) positionSizeElement.textContent = 'ERROR';
                 if (leverageElement) leverageElement.textContent = 'ERROR';
                 if (riskMultiElement) riskMultiElement.textContent = 'ERROR';
-                if (pnlElement) pnlElement.textContent = 'ERROR';
+                if (pnlPercentElement) pnlPercentElement.textContent = 'ERROR';
+                if (pnlUsdElement) pnlUsdElement.textContent = 'ERROR';
+                if (stopLossElement) stopLossElement.textContent = 'ERROR';
+                if (takeProfitsElement) takeProfitsElement.textContent = 'ERROR';
                 if (entryTimeElement) entryTimeElement.textContent = 'ERROR';
+                if (sourceElement) sourceElement.textContent = 'ERROR';
 
-                if (positionTimeElement) {
-                    positionTimeElement.textContent = `Error: ${new Date().toLocaleTimeString()}`;
+                if (timestampElement) {
+                    timestampElement.textContent = `Error: ${new Date().toLocaleTimeString()}`;
                 }
             }
         };
@@ -2558,6 +2787,350 @@
                 }
             }
         };
+
+        // Trap-Aware Dual Trader functionality
+        const updateTraderStatus = async () => {
+            debug('TRADER', 'Updating trader status');
+            const statusDot = document.getElementById('trading-status-dot');
+            const statusText = document.getElementById('trading-status-text');
+            const longTraderStatus = document.getElementById('long-trader-status');
+            const shortTraderStatus = document.getElementById('short-trader-status');
+            const combinedPnL = document.getElementById('combined-pnl');
+            const lastAction = document.getElementById('last-trading-action');
+            const timestamp = document.getElementById('trading-control-timestamp');
+
+            try {
+                // Get trader status from Redis
+                const traderStatus = await fetchRedisKey('trader_status');
+
+                if (!traderStatus) {
+                    // No status found, show inactive
+                    if (statusDot) statusDot.className = 'status-dot disconnected';
+                    if (statusText) statusText.textContent = 'Inactive';
+                    if (timestamp) timestamp.textContent = new Date().toLocaleTimeString();
+                    return;
+                }
+
+                debug('TRADER', 'Received trader status:', traderStatus);
+
+                // Update status based on data
+                const status = traderStatus.status || 'unknown';
+
+                if (statusDot) {
+                    statusDot.className = status === 'running'
+                        ? 'status-dot connected'
+                        : 'status-dot disconnected';
+                }
+
+                if (statusText) {
+                    statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                    statusText.className = 'value';
+
+                    if (status === 'running') {
+                        statusText.classList.add('positive');
+                    } else if (status === 'stopping' || status === 'starting') {
+                        statusText.classList.add('neutral');
+                    } else {
+                        statusText.classList.add('negative');
+                    }
+                }
+
+                // Update long trader status
+                if (longTraderStatus) {
+                    const longStatus = traderStatus.long_trader_status || 'inactive';
+                    longTraderStatus.textContent = longStatus.charAt(0).toUpperCase() + longStatus.slice(1);
+                    longTraderStatus.className = 'value';
+
+                    if (longStatus === 'active') {
+                        longTraderStatus.classList.add('positive');
+                    } else if (longStatus === 'error') {
+                        longTraderStatus.classList.add('negative');
+                    } else {
+                        longTraderStatus.classList.add('neutral');
+                    }
+                }
+
+                // Update short trader status
+                if (shortTraderStatus) {
+                    const shortStatus = traderStatus.short_trader_status || 'inactive';
+                    shortTraderStatus.textContent = shortStatus.charAt(0).toUpperCase() + shortStatus.slice(1);
+                    shortTraderStatus.className = 'value';
+
+                    if (shortStatus === 'active') {
+                        shortTraderStatus.classList.add('positive');
+                    } else if (shortStatus === 'error') {
+                        shortTraderStatus.classList.add('negative');
+                    } else {
+                        shortTraderStatus.classList.add('neutral');
+                    }
+                }
+
+                // Update combined PnL
+                if (combinedPnL) {
+                    const pnl = traderStatus.combined_pnl || 0;
+                    combinedPnL.textContent = formatPrice(pnl);
+                    combinedPnL.className = 'value';
+
+                    if (pnl > 0) {
+                        combinedPnL.classList.add('positive');
+                    } else if (pnl < 0) {
+                        combinedPnL.classList.add('negative');
+                    } else {
+                        combinedPnL.classList.add('neutral');
+                    }
+                }
+
+                // Update last action
+                if (lastAction && traderStatus.last_action) {
+                    lastAction.textContent = traderStatus.last_action;
+                }
+
+                // Update timestamp
+                if (timestamp) {
+                    let timeStr = 'Unknown';
+
+                    if (traderStatus.timestamp) {
+                        try {
+                            const date = new Date(traderStatus.timestamp);
+                            timeStr = date.toLocaleTimeString();
+                        } catch (e) {
+                            timeStr = 'Invalid timestamp';
+                        }
+                    } else {
+                        timeStr = new Date().toLocaleTimeString();
+                    }
+
+                    timestamp.textContent = timeStr;
+                }
+
+            } catch (error) {
+                console.error('Error updating trader status:', error);
+
+                // Show error state
+                if (statusDot) statusDot.className = 'status-dot disconnected';
+                if (statusText) {
+                    statusText.textContent = 'Error';
+                    statusText.className = 'value negative';
+                }
+                if (timestamp) timestamp.textContent = `Error: ${new Date().toLocaleTimeString()}`;
+            }
+        };
+
+        const updateTraderConfig = async () => {
+            debug('TRADER', 'Updating trader configuration');
+            try {
+                // Get config values from UI
+                const trapProtection = document.getElementById('trap-protection-toggle').checked;
+                const trapThreshold = parseFloat(document.getElementById('trap-threshold').value);
+                const longRisk = parseFloat(document.getElementById('long-risk').value);
+                const shortRisk = parseFloat(document.getElementById('short-risk').value);
+
+                // Build config object
+                const config = {
+                    trap_protection: trapProtection,
+                    trap_threshold: trapThreshold,
+                    long_risk_multiplier: longRisk,
+                    short_risk_multiplier: shortRisk,
+                    timestamp: new Date().toISOString()
+                };
+
+                debug('TRADER', 'Sending config to Redis:', config);
+
+                // Set config in Redis
+                try {
+                    const response = await fetch(`${API_BASE}/trading/config`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(config)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to update config: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    debug('TRADER', 'Config update result:', result);
+                    animateElement('trading-control-timestamp');
+
+                } catch (fetchError) {
+                    console.error('Error sending config to API:', fetchError);
+                    // Fallback - try to set directly in Redis
+                    try {
+                        await fetch(`${API_BASE}/redis-key?key=trader_config`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ value: config })
+                        });
+                    } catch (redisError) {
+                        console.error('Fallback also failed:', redisError);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error updating trader config:', error);
+            }
+        };
+
+        const sendTraderCommand = async (command) => {
+            debug('TRADER', `Sending trader command: ${command}`);
+            try {
+                // Build command object
+                const commandData = {
+                    command: command,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Send command to API
+                try {
+                    const response = await fetch(`${API_BASE}/trading/${command}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to send command: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    debug('TRADER', `Command ${command} result:`, result);
+
+                    // Update status immediately
+                    await updateTraderStatus();
+
+                } catch (fetchError) {
+                    console.error(`Error sending ${command} command to API:`, fetchError);
+                    // Fallback - try to set directly in Redis
+                    try {
+                        await fetch(`${API_BASE}/redis-key?key=trader_commands`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ value: commandData })
+                        });
+                        await updateTraderStatus();
+                    } catch (redisError) {
+                        console.error('Fallback also failed:', redisError);
+                    }
+                }
+
+            } catch (error) {
+                console.error(`Error in sendTraderCommand(${command}):`, error);
+            }
+        };
+
+        // Set up UI event handlers
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hook up control buttons
+            const startTradingBtn = document.getElementById('start-trading-btn');
+            const stopTradingBtn = document.getElementById('stop-trading-btn');
+
+            if (startTradingBtn) {
+                startTradingBtn.addEventListener('click', () => {
+                    debug('TRADER', 'Start trading button clicked');
+                    sendTraderCommand('start');
+                });
+            }
+
+            if (stopTradingBtn) {
+                stopTradingBtn.addEventListener('click', () => {
+                    debug('TRADER', 'Stop trading button clicked');
+                    sendTraderCommand('stop');
+                });
+            }
+
+            // Hook up range sliders
+            const trapThresholdSlider = document.getElementById('trap-threshold');
+            const trapThresholdValue = document.getElementById('trap-threshold-value');
+            const longRiskSlider = document.getElementById('long-risk');
+            const longRiskValue = document.getElementById('long-risk-value');
+            const shortRiskSlider = document.getElementById('short-risk');
+            const shortRiskValue = document.getElementById('short-risk-value');
+
+            if (trapThresholdSlider && trapThresholdValue) {
+                trapThresholdSlider.addEventListener('input', () => {
+                    trapThresholdValue.textContent = trapThresholdSlider.value;
+                });
+
+                trapThresholdSlider.addEventListener('change', () => {
+                    updateTraderConfig();
+                });
+            }
+
+            if (longRiskSlider && longRiskValue) {
+                longRiskSlider.addEventListener('input', () => {
+                    longRiskValue.textContent = longRiskSlider.value;
+                });
+
+                longRiskSlider.addEventListener('change', () => {
+                    updateTraderConfig();
+                });
+            }
+
+            if (shortRiskSlider && shortRiskValue) {
+                shortRiskSlider.addEventListener('input', () => {
+                    shortRiskValue.textContent = shortRiskSlider.value;
+                });
+
+                shortRiskSlider.addEventListener('change', () => {
+                    updateTraderConfig();
+                });
+            }
+
+            // Hook up toggle
+            const trapProtectionToggle = document.getElementById('trap-protection-toggle');
+            if (trapProtectionToggle) {
+                trapProtectionToggle.addEventListener('change', () => {
+                    updateTraderConfig();
+                });
+            }
+
+            // Initial load of trader config
+            const loadTraderConfig = async () => {
+                try {
+                    const config = await fetchRedisKey('trader_config');
+                    if (config) {
+                        debug('TRADER', 'Loaded trader config from Redis:', config);
+
+                        // Update UI with config values
+                        if (trapProtectionToggle && config.trap_protection !== undefined) {
+                            trapProtectionToggle.checked = config.trap_protection;
+                        }
+
+                        if (trapThresholdSlider && trapThresholdValue && config.trap_threshold !== undefined) {
+                            trapThresholdSlider.value = config.trap_threshold;
+                            trapThresholdValue.textContent = config.trap_threshold;
+                        }
+
+                        if (longRiskSlider && longRiskValue && config.long_risk_multiplier !== undefined) {
+                            longRiskSlider.value = config.long_risk_multiplier;
+                            longRiskValue.textContent = config.long_risk_multiplier;
+                        }
+
+                        if (shortRiskSlider && shortRiskValue && config.short_risk_multiplier !== undefined) {
+                            shortRiskSlider.value = config.short_risk_multiplier;
+                            shortRiskValue.textContent = config.short_risk_multiplier;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading trader config:', error);
+                }
+            };
+
+            loadTraderConfig();
+            updateTraderStatus();
+
+            // Add trader status to auto-refresh
+            setInterval(() => {
+                updateTraderStatus();
+            }, 5000); // Every 5 seconds
+        });
     </script>
 </body>
 
