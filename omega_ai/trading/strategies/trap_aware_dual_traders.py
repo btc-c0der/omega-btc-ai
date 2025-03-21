@@ -418,6 +418,35 @@ async def main():
         enable_trap_protection=not args.no_trap_protection
     )
     
+    # Check current trap probability
+    try:
+        probability = get_current_trap_probability()
+        is_likely, trap_type, confidence = is_trap_likely()
+        
+        print(f"\n{YELLOW}==== CURRENT MARKET CONDITIONS ===={RESET}")
+        print(f"{YELLOW}Trap Probability: {probability * 100:.1f}%{RESET}")
+        
+        if is_likely and trap_type:
+            print(f"{RED}WARNING: Likely {trap_type.upper()} detected (Confidence: {confidence * 100:.1f}%){RESET}")
+        else:
+            print(f"{GREEN}No traps currently detected{RESET}")
+        
+        components = get_probability_components()
+        if components:
+            print(f"\n{CYAN}Component Analysis:{RESET}")
+            for name, value in components.items():
+                if value > 0.7:
+                    color = RED
+                elif value > 0.5:
+                    color = YELLOW
+                else:
+                    color = GREEN
+                print(f"{CYAN}- {name.replace('_', ' ').title()}: {color}{value * 100:.1f}%{RESET}")
+        
+        print(f"\n{CYAN}==== STARTING TRADING SYSTEM ===={RESET}")
+    except Exception as e:
+        print(f"{RED}Error getting trap probability: {e}{RESET}")
+    
     # Handle shutdown signals
     def signal_handler(sig, frame):
         logger.info(f"{YELLOW}Received shutdown signal{RESET}")
@@ -427,14 +456,21 @@ async def main():
     signal.signal(signal.SIGTERM, signal_handler)
     
     try:
+        # Print status marker for the shell script to pick up
+        print(f"{MAGENTA}STATUS:STARTING{RESET}")
+        
         # Start the trading system
         await trap_aware_traders.start_trading()
     except KeyboardInterrupt:
         logger.info(f"{YELLOW}Keyboard interrupt received{RESET}")
+        print(f"{MAGENTA}STATUS:STOPPING{RESET}")
     except Exception as e:
         logger.error(f"{RED}Error in main: {e}{RESET}")
+        print(f"{MAGENTA}STATUS:ERROR:{str(e)}{RESET}")
     finally:
+        print(f"{MAGENTA}STATUS:STOPPING{RESET}")
         await trap_aware_traders.stop_trading()
+        print(f"{MAGENTA}STATUS:STOPPED{RESET}")
 
 if __name__ == "__main__":
     asyncio.run(main()) 
