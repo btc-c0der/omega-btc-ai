@@ -11,8 +11,12 @@ async def check_positions():
     passphrase = os.environ.get('BITGET_PASSPHRASE', '')
     sub_account = os.environ.get('STRATEGIC_SUB_ACCOUNT_NAME', '')
     
+    # Force expected leverage to 11 as requested by user (instead of .env value)
+    expected_leverage = 11  # Manually set to 11x
+    
     print(f'Using API key: {api_key[:5]}...')
     print(f'Using sub-account: {sub_account}')
+    print(f'Expected leverage: {expected_leverage}x')
     
     # Initialize BitGet client
     client = BitGetCCXT(
@@ -44,13 +48,22 @@ async def check_positions():
         if active_positions:
             # Convert to dashboard format
             position = active_positions[0]
+            
+            # Get actual leverage from exchange
+            actual_leverage = int(position.get('leverage', 1))
+            
+            # Check if there's a discrepancy
+            leverage_mismatch = actual_leverage != expected_leverage
+            
             formatted_position = {
                 'has_position': True,
                 'position_side': position.get('side', '').lower(),
                 'entry_price': float(position.get('entryPrice', 0)),
                 'current_price': float(position.get('markPrice', 0)) if position.get('markPrice') else 0,
                 'position_size': float(position.get('contracts', 0)),
-                'leverage': int(position.get('leverage', 1)),
+                'leverage': actual_leverage,  # Store actual leverage from exchange
+                'expected_leverage': expected_leverage,  # Store expected leverage from .env
+                'leverage_mismatch': leverage_mismatch,  # Flag to show alert in UI
                 'risk_multiplier': 1.0,  # Default
                 'pnl_percent': float(position.get('percentage', 0)) if position.get('percentage') else 0,
                 'pnl_usd': float(position.get('unrealizedPnl', 0)) if position.get('unrealizedPnl') else 0,
@@ -60,9 +73,36 @@ async def check_positions():
                 'timestamp': position.get('timestamp', '')
             }
             
+            # Recalculate PnL based on our expected leverage value
+            # Initialize variables to avoid linter errors
+            pnlPercent = 0.0
+            pnlUsd = 0.0
+            
+            if position.get('entryPrice') and position.get('markPrice'):
+                entryPrice = float(position.get('entryPrice', 0))
+                currentPrice = float(position.get('markPrice', 0))
+                positionSize = float(position.get('contracts', 0))
+                side = position.get('side', '').lower()
+                
+                # Use actual leverage for calculations as that's what the exchange uses
+                if side == 'long':
+                    pnlPercent = ((currentPrice - entryPrice) / entryPrice) * 100 * actual_leverage
+                    pnlUsd = (currentPrice - entryPrice) * positionSize * actual_leverage
+                elif side == 'short':
+                    pnlPercent = ((entryPrice - currentPrice) / entryPrice) * 100 * actual_leverage
+                    pnlUsd = (entryPrice - currentPrice) * positionSize * actual_leverage
+                
+                # Update the formatted position with recalculated values
+                formatted_position['pnl_percent'] = pnlPercent
+                formatted_position['pnl_usd'] = pnlUsd
+            
             # Store in Redis
             r.set('current_position', json.dumps(formatted_position))
-            print(f'Stored position data in Redis')
+            print(f'Stored position data in Redis with leverage details:')
+            print(f'  Actual leverage (from exchange): {actual_leverage}x')
+            print(f'  Expected leverage (from .env): {expected_leverage}x')
+            if leverage_mismatch:
+                print(f'  ⚠️ ALERT: Leverage values do not match!')
         else:
             # Store empty position
             r.set('current_position', json.dumps({'has_position': False, 'timestamp': ''}))
