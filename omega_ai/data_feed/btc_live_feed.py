@@ -11,9 +11,13 @@ from enum import Enum
 from typing import List, Dict, Optional, Union, Any
 import threading
 import random
+import os
+
+# Set Redis host environment variable
+os.environ['REDIS_HOST'] = 'localhost'
+
 from omega_ai.utils.redis_manager import RedisManager
 import rel
-import os
 
 # Configure logging with Rasta colors
 logging.basicConfig(
@@ -78,8 +82,8 @@ redis_conn = redis.Redis(
 def check_redis_health():
     """Perform a health check on Redis connection and data integrity."""
     try:
-        # Check Redis connection using the same host as the global connection
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        # Check Redis connection using localhost directly
+        redis_host = 'localhost'  # Use localhost directly
         redis_port = int(os.getenv('REDIS_PORT', '6379'))
         redis_manager = RedisManager(host=redis_host, port=redis_port)
         redis_manager.ping()
@@ -161,8 +165,8 @@ def on_message(ws, message):
 
         log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
         
-        # Update Redis values using the RedisManager with consistent connection parameters
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        # Update Redis values using the RedisManager with localhost connection
+        redis_host = 'localhost'  # Use localhost directly
         redis_port = int(os.getenv('REDIS_PORT', '6379'))
         redis_manager = RedisManager(host=redis_host, port=redis_port)
         prev_price = redis_manager.get_cached("prev_btc_price")
@@ -191,6 +195,24 @@ def on_message(ws, message):
             
             # Send price update to MM WebSocket server
             asyncio.run(send_to_mm_websocket(price))
+            
+            # Notify the high frequency detector about price update
+            try:
+                # Import here to avoid circular import issues
+                from omega_ai.mm_trap_detector.high_frequency_detector import hf_detector
+                
+                # Update the detector with the new price
+                timestamp = datetime.now(UTC)
+                hf_detector.update_price_data(price, timestamp)
+                
+                # Check for high frequency mode activation
+                hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
+                if hf_active:
+                    log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
+            except ImportError:
+                log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
+            except Exception as e:
+                log_rasta(f"Error notifying MM Trap Detector: {e}", YELLOW_RASTA, "warning")
         else:
             log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
 
@@ -253,8 +275,8 @@ class BtcPriceFeed:
         self.sources = sources or [PriceSource.BINANCE, PriceSource.COINBASE]
         self.update_interval = update_interval
         
-        # Use consistent Redis connection parameters
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        # Use direct localhost connection for Redis
+        redis_host = 'localhost'
         redis_port = int(os.getenv('REDIS_PORT', '6379'))
         self.redis_manager = RedisManager(host=redis_host, port=redis_port)
         
@@ -350,6 +372,24 @@ class BtcPriceFeed:
                 self.redis_manager.set_cached("last_btc_update_time", str(time.time()))
                 
                 log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
+                
+                # Notify the high frequency detector about price update
+                try:
+                    # Import here to avoid circular import issues
+                    from omega_ai.mm_trap_detector.high_frequency_detector import hf_detector
+                    
+                    # Update the detector with the new price
+                    timestamp = datetime.now(UTC)
+                    hf_detector.update_price_data(price, timestamp)
+                    
+                    # Check for high frequency mode activation
+                    hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
+                    if hf_active:
+                        log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
+                except ImportError:
+                    log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
+                except Exception as e:
+                    log_rasta(f"Error notifying MM Trap Detector: {e}", YELLOW_RASTA, "warning")
             else:
                 log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
 
