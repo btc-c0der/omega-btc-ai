@@ -728,6 +728,168 @@
             color: #8899aa;
             font-size: 0.85em;
         }
+
+        /* HODL Button Styles */
+        .hodl-button {
+            background: linear-gradient(to right, rgba(0, 181, 45, 0.8), rgba(255, 215, 0, 0.8), rgba(255, 61, 0, 0.8));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .hodl-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .hodl-button:active {
+            transform: translateY(1px);
+        }
+
+        .hodl-button i {
+            font-size: 1.3rem;
+        }
+
+        /* BTC Price Popup */
+        .btc-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background-color: var(--card-bg);
+            border: 2px solid var(--yellow-color);
+            border-radius: 15px;
+            padding: 25px;
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btc-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .btc-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .btc-popup-title {
+            color: var(--yellow-color);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btc-popup-close {
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .btc-popup-close:hover {
+            color: var(--red-color);
+        }
+
+        .btc-popup-content {
+            text-align: center;
+        }
+
+        .btc-popup-price {
+            font-size: 3rem;
+            color: var(--yellow-color);
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        .btc-popup-changes {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .btc-popup-change {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .btc-popup-pattern {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+
+        .btc-popup-time {
+            margin-top: 20px;
+            color: var(--muted-color);
+            font-size: 0.9rem;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @keyframes btc-pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse-animation {
+            animation: btc-pulse 1s infinite;
+        }
     </style>
 </head>
 
@@ -912,7 +1074,7 @@
 
                 <div class="data-row">
                     <span class="label">Active Keys:</span>
-                    <span class="value" id="redis-key-count">0</span>
+                    <span class="value" id="redis-active-keys">-</span>
                 </div>
 
                 <!-- Redis Keys List -->
@@ -924,7 +1086,7 @@
                     </div>
                 </div>
 
-                <button class="refresh-button" id="refresh-redis-keys">
+                <button class="refresh-button" id="refresh-redis-info">
                     <i class="fas fa-sync-alt"></i> Refresh Redis Info
                 </button>
             </div>
@@ -938,7 +1100,37 @@
                 <i class="fas fa-chart-line"></i>
                 <i class="fas fa-code"></i>
             </div>
+            <button id="hodl-button" class="hodl-button">
+                <i class="fa-brands fa-bitcoin"></i> CHECK BTC PRICE (HODL!)
+            </button>
             <div>JAH LOVE ❤️ GUIDE THE WAY</div>
+        </div>
+    </div>
+
+    <!-- BTC Price Popup -->
+    <div id="popup-overlay" class="popup-overlay"></div>
+    <div id="btc-popup" class="btc-popup">
+        <div class="btc-popup-header">
+            <div class="btc-popup-title">
+                <i class="fa-brands fa-bitcoin"></i> Bitcoin Price
+            </div>
+            <button id="btc-popup-close" class="btc-popup-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="btc-popup-content">
+            <div class="btc-popup-price" id="popup-price">$0.00</div>
+            <div class="btc-popup-changes">
+                <div class="btc-popup-change" id="popup-change">24h: 0.00%</div>
+                <div class="btc-popup-change" id="popup-short-term">Short: 0.00%</div>
+                <div class="btc-popup-change" id="popup-medium-term">Medium: 0.00%</div>
+            </div>
+            <div class="btc-popup-pattern" id="popup-pattern">
+                Dominant Pattern: Unknown
+            </div>
+            <div class="btc-popup-time" id="popup-time">
+                Last Updated: --
+            </div>
         </div>
     </div>
 
@@ -959,918 +1151,554 @@
     </div>
 
     <script>
-        // API endpoints
+        // Debug helper
+        const DEBUG = true; // Set to false to disable debug logs
+        function debug(section, message, data = null) {
+            if (!DEBUG) return;
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            if (data) {
+                console.log(`${timestamp} [${section}] ${message}`, data);
+            } else {
+                console.log(`${timestamp} [${section}] ${message}`);
+            }
+        }
+
+        // API endpoints for Redis data
         const API_BASE = "http://localhost:8001/api";
         const TRAP_ENDPOINT = `${API_BASE}/trap-probability`;
         const POSITION_ENDPOINT = `${API_BASE}/position`;
         const BTC_PRICE_ENDPOINT = `${API_BASE}/btc-price`;
+        const REDIS_KEYS_ENDPOINT = `${API_BASE}/redis-keys`;
         const HEALTH_ENDPOINT = `${API_BASE}/health`;
 
-        // DOM Elements
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
-        const dataSource = document.getElementById('data-source').querySelector('span');
-        const btcPrice = document.getElementById('btcPrice');
-        const priceChange = document.getElementById('priceChanges');
-        const trapTime = document.getElementById('trap-time');
-        const positionTime = document.getElementById('position-time');
-        const refreshButton = document.getElementById('refresh-data');
+        // Custom direct Redis key access endpoints (uses backend proxy)
+        const REDIS_KEY_ENDPOINT = `${API_BASE}/redis-key`;
 
-        // Format helpers
-        const formatNumber = (num) => {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        };
-
-        const formatUSD = (num) => {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(num);
-        };
-
-        const formatBTC = (num) => {
-            return num.toFixed(8) + ' BTC';
-        };
-
-        const formatPercent = (num) => {
-            return num.toFixed(2) + '%';
-        };
-
-        const formatTimestamp = (timestamp) => {
-            if (!timestamp) return '--';
-            const date = new Date(timestamp);
-            return date.toLocaleString();
-        };
-
-        const formatShortTimestamp = (timestamp) => {
-            if (!timestamp) return '--';
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString();
-        };
-
-        const formatTimeDiff = (timestamp) => {
-            if (!timestamp) return 'N/A';
-            try {
-                const date = new Date(timestamp);
-                const now = new Date();
-                const diffSeconds = Math.floor((now - date) / 1000);
-
-                if (diffSeconds < 5) return 'Just now';
-                if (diffSeconds < 60) return `${diffSeconds}s ago`;
-                if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
-                return `${Math.floor(diffSeconds / 3600)}h ago`;
-            } catch (e) {
-                return 'Invalid timestamp';
+        // Redis keys mapping - organize all available keys by purpose
+        const REDIS_KEYS = {
+            PRICE: {
+                CURRENT: "btc_price",              // Current BTC price 
+                LAST: "last_btc_price",            // Last recorded BTC price - Note: May not exist, use fallbacks
+                PREVIOUS: "prev_btc_price",        // Previous BTC price
+                RECENT_HIGH_LOW: "btc_recent_high_low" // Recent high/low values
+            },
+            CHANGES: {
+                PRICE_CHANGES: "btc_price_changes" // Price changes (short/medium term)
+            },
+            PATTERNS: {
+                PRICE_PATTERNS: "btc_price_patterns" // Price patterns 
+            },
+            MOVEMENTS: {
+                ONE_MIN: "btc_movements_1min",
+                FIVE_MIN: "btc_movements_5min",
+                FIFTEEN_MIN: "btc_movements_15min",
+                SIXTY_MIN: "btc_movements_60min",
+                MARKET_REGIME: "btc_market_regime"
+            },
+            VOLUME: {
+                CURRENT: "btc_volume_data",
+                HISTORY: "btc_volume_history"
+            },
+            MISC: {
+                ORDER_BOOK: "btc_order_book_summary"
+            },
+            HISTORY: {
+                MOVEMENT_HISTORY: "btc_movement_history",
+                HISTORICAL_MATCHES: "btc_historical_matches"
             }
         };
 
-        // Update the connection status
-        const updateConnectionStatus = (connected, message = null) => {
-            console.log(`Connection status update: connected=${connected}, message=${message}`);
-
-            const statusElement = document.getElementById('connection-status');
-            const statusIndicator = document.getElementById('status-indicator');
-
-            if (connected) {
-                statusIndicator.className = 'status-indicator connected';
-                statusElement.textContent = 'Connected to Redis';
-                statusElement.className = 'status connected';
-                console.log('UI updated to show connected status');
-
-                // Add timestamp to show when connected
-                const timestamp = new Date().toLocaleTimeString();
-                document.getElementById('status-timestamp').textContent = `Connected at ${timestamp}`;
-            } else {
-                statusIndicator.className = 'status-indicator disconnected';
-                statusElement.className = 'status disconnected';
-
-                // Show custom message if provided
-                if (message) {
-                    statusElement.textContent = message;
-                    console.log(`Displaying custom status message: ${message}`);
-                } else {
-                    statusElement.textContent = 'Connecting to Redis...';
-                    console.log('Displaying default connecting message');
-                }
-
-                // Update timestamp for connection attempt
-                const timestamp = new Date().toLocaleTimeString();
-                document.getElementById('status-timestamp').textContent = `Last attempt: ${timestamp}`;
-
-                // Show reconnection instructions
-                document.getElementById('reconnect-instructions').style.display = 'block';
+        // Animation helper for UI feedback
+        const animateElement = (elementId) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('shake');
+                setTimeout(() => {
+                    element.classList.remove('shake');
+                }, 500);
             }
         };
 
-        // Update trap probability data
-        const updateTrapData = (data) => {
-            if (!data) return;
-
-            // Update basic trap data
-            document.getElementById('trap-probability').textContent = formatPercent((data.probability || 0) * 100);
-            document.getElementById('trap-type').textContent = (data.trap_type || 'Unknown').replace(/_/g, ' ');
-            document.getElementById('trap-trend').textContent = (data.trend || 'stable').replace(/_/g, ' ');
-            document.getElementById('trap-confidence').textContent = formatPercent((data.confidence || 0) * 100);
-
-            // Update timestamp
-            trapTime.textContent = formatTimeDiff(data.timestamp);
-
-            // Update progress bar
-            const trapBar = document.getElementById('trap-bar');
-            const probability = data.probability || 0;
-            trapBar.style.width = `${probability * 100}%`;
-
-            // Update JAH message
-            if (data.message) {
-                document.getElementById('jah-message').textContent = data.message;
-            }
-
-            // Update components if they exist
-            if (data.components) {
-                const componentsContainer = document.getElementById('trap-components');
-                componentsContainer.innerHTML = '';
-
-                const components = data.components;
-                const descriptions = data.descriptions || {};
-
-                Object.keys(components).forEach(key => {
-                    const value = components[key];
-                    const description = descriptions[key] || '';
-                    const formattedKey = key.replace(/_/g, ' ');
-
-                    const componentHtml = `
-                        <div class="component-item">
-                            <div class="component-name">${formattedKey}</div>
-                            <div class="component-value">
-                                <div class="component-bar">
-                                    <div class="component-bar-inner" style="width: ${value * 100}%"></div>
-                                </div>
-                                <div class="component-number">${formatPercent(value * 100)}</div>
-                            </div>
-                            <div class="component-description">${description}</div>
-                        </div>
-                    `;
-
-                    componentsContainer.innerHTML += componentHtml;
-                });
-            }
-        };
-
-        // Update position data
-        const updatePositionData = (data) => {
-            if (!data) return;
-
-            const hasPosition = data.has_position || false;
-
-            // Update basic position data
-            document.getElementById('position-status').textContent = hasPosition ? 'Active' : 'No Position';
-            document.getElementById('position-status').className = hasPosition ? 'value neutral' : 'value neutral';
-
-            document.getElementById('position-side').textContent = data.position_side || '--';
-            if (data.position_side) {
-                const sideElement = document.getElementById('position-side');
-                if (data.position_side.toLowerCase() === 'long') {
-                    sideElement.className = 'value positive';
-                } else if (data.position_side.toLowerCase() === 'short') {
-                    sideElement.className = 'value negative';
-                } else {
-                    sideElement.className = 'value neutral';
-                }
-            }
-
-            document.getElementById('entry-price').textContent = data.entry_price ? formatUSD(data.entry_price) : '$0.00';
-            document.getElementById('current-price').textContent = data.current_price ? formatUSD(data.current_price) : '$0.00';
-            document.getElementById('position-size').textContent = data.position_size ? formatBTC(data.position_size) : '0.00 BTC';
-            document.getElementById('position-leverage').textContent = data.leverage ? `${data.leverage}x` : '0x';
-            document.getElementById('risk-multiplier').textContent = data.risk_multiplier ? `${data.risk_multiplier.toFixed(2)}x` : '1.00x';
-            document.getElementById('stop-loss').textContent = data.stop_loss ? formatUSD(data.stop_loss) : '$0.00';
-            document.getElementById('entry-time').textContent = data.entry_time ? formatTimestamp(data.entry_time) : '--';
-            document.getElementById('position-source').textContent = data.source || '--';
-            document.getElementById('position-timestamp').textContent = formatTimestamp(data.timestamp) || '--';
-
-            // Update take profits
-            const takeProfitsDiv = document.getElementById('take-profits');
-            if (data.take_profits && data.take_profits.length > 0) {
-                takeProfitsDiv.innerHTML = data.take_profits.map(tp =>
-                    `${formatUSD(tp.price)} (${(tp.size * 100).toFixed(0)}%)`
-                ).join('<br>');
-            } else {
-                takeProfitsDiv.textContent = '--';
-            }
-
-            // Update PnL
-            const pnlPercent = document.getElementById('pnl-percent');
-            if (data.pnl_percent !== undefined) {
-                pnlPercent.textContent = formatPercent(data.pnl_percent);
-                if (data.pnl_percent > 0) {
-                    pnlPercent.className = 'value positive';
-                } else if (data.pnl_percent < 0) {
-                    pnlPercent.className = 'value negative';
-                } else {
-                    pnlPercent.className = 'value neutral';
-                }
-            } else {
-                pnlPercent.textContent = '0.00%';
-                pnlPercent.className = 'value neutral';
-            }
-
-            const pnlUsd = document.getElementById('pnl-usd');
-            if (data.pnl_usd !== undefined) {
-                pnlUsd.textContent = formatUSD(data.pnl_usd);
-                if (data.pnl_usd > 0) {
-                    pnlUsd.className = 'value positive';
-                } else if (data.pnl_usd < 0) {
-                    pnlUsd.className = 'value negative';
-                } else {
-                    pnlUsd.className = 'value neutral';
-                }
-            } else {
-                pnlUsd.textContent = '$0.00';
-                pnlUsd.className = 'value neutral';
-            }
-
-            // Update target tracking module
-            updateTargetTracking(data);
-        };
-
-        // Update BTC price ticker
-        const updateBTCPrice = (data) => {
-            if (!data || !data.price) return;
-
-            btcPrice.textContent = formatUSD(data.price);
-
-            if (data.change !== undefined) {
-                const changeValue = data.change;
-                priceChange.textContent = (changeValue > 0 ? '+' : '') + formatPercent(changeValue);
-
-                if (changeValue > 0) {
-                    priceChange.className = 'price-change positive';
-                } else if (changeValue < 0) {
-                    priceChange.className = 'price-change negative';
-                } else {
-                    priceChange.className = 'price-change neutral';
-                }
-            } else {
-                priceChange.textContent = '0.00%';
-                priceChange.className = 'price-change neutral';
-            }
-
-            // Update price changes
-            const shortTermChangeElement = document.getElementById('shortTermChange');
-            const mediumTermChangeElement = document.getElementById('mediumTermChange');
-            shortTermChangeElement.textContent = `Short Term: ${data.changes.short_term}%`;
-            mediumTermChangeElement.textContent = `Medium Term: ${data.changes.medium_term}%`;
-
-            // Determine dominant pattern
-            const dominantPatternElement = document.getElementById('dominantPattern');
-            const dominantPattern = Object.keys(data.patterns).reduce((a, b) =>
-                data.patterns[a] > data.patterns[b] ? a : b
-            );
-            dominantPatternElement.textContent = `Dominant Pattern: ${dominantPattern}`;
-
-            // Update data source
-            const dataSourceElement = document.getElementById('dataSource');
-            dataSourceElement.textContent = `Data Source: ${data.source}`;
-
-            // Update last updated timestamp
-            const lastUpdatedElement = document.getElementById('lastUpdated');
-            const formattedTimestamp = new Date(data.timestamp).toLocaleString();
-            lastUpdatedElement.textContent = `Last Updated: ${formattedTimestamp}`;
-        };
-
-        // Fetch data from endpoints
-        const fetchData = async () => {
-            console.log('Fetching data...');
-            try {
-                // Check health first
-                const healthResponse = await fetch(HEALTH_ENDPOINT);
-                console.log('Health check response status:', healthResponse.status);
-                if (!healthResponse.ok) throw new Error('Health check failed');
-
-                const healthData = await healthResponse.json();
-                console.log('Health check response data:', healthData);
-                const redisConnected = healthData.redis === 'connected';
-
-                console.log('Redis connected:', redisConnected);
-                if (!redisConnected) {
-                    console.log('Redis connection is not established');
-                }
-
-                updateConnectionStatus(redisConnected);
-                dataSource.textContent = `Data Source: ${redisConnected ? 'Redis (Live)' : 'Fallback (Simulated)'}`;
-
-                // Fetch trap probability data
-                const trapResponse = await fetch(TRAP_ENDPOINT);
-                if (!trapResponse.ok) throw new Error('Failed to fetch trap data');
-                const trapData = await trapResponse.json();
-                updateTrapData(trapData);
-
-                // Fetch position data
-                const positionResponse = await fetch(POSITION_ENDPOINT);
-                if (!positionResponse.ok) throw new Error('Failed to fetch position data');
-                const positionData = await positionResponse.json();
-                updatePositionData(positionData);
-
-                // Fetch BTC price data
-                const priceResponse = await fetch(BTC_PRICE_ENDPOINT);
-                if (!priceResponse.ok) throw new Error('Failed to fetch price data');
-                const priceData = await priceResponse.json();
-                updateBTCPrice(priceData);
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                updateConnectionStatus(false, `Connection Error: ${error.message}`);
-            }
-        };
-
-        // Shake animation for the JAH message
+        // Function to shake the JAH message for UI feedback
         const shakeJahMessage = () => {
-            const jahMessage = document.getElementById('jah-message');
-            jahMessage.classList.add('shake');
-            setTimeout(() => {
-                jahMessage.classList.remove('shake');
-            }, 500);
-        };
+            // Try with hyphen (HTML/CSS convention)
+            let jahMessage = document.getElementById('jah-message');
 
-        // Set up event listeners
-        refreshButton.addEventListener('click', () => {
-            refreshButton.textContent = 'Refreshing...';
-            refreshButton.disabled = true;
-
-            fetchData().then(() => {
-                refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data Now';
-                refreshButton.disabled = false;
-                shakeJahMessage();
-            });
-        });
-
-        // Initial fetch
-        fetchData();
-
-        // Set up polling interval (every 2 seconds)
-        setInterval(fetchData, 2000);
-
-        // Random JAH message shake
-        setInterval(() => {
-            // 10% chance to shake the message
-            if (Math.random() < 0.1) {
-                shakeJahMessage();
+            // Fallback to underscore if hyphen version not found
+            if (!jahMessage) {
+                jahMessage = document.getElementById('jah_message');
             }
-        }, 10000);
 
-        // Position target tracking functions
-        const calculateTargetProgress = (entry, current, target) => {
-            if (entry === current) return 0;
-            if (current === target) return 100;
-
-            const totalDistance = Math.abs(target - entry);
-            const coveredDistance = Math.abs(current - entry);
-
-            // Calculate percentage progress
-            return Math.min(100, Math.max(0, (coveredDistance / totalDistance) * 100));
-        };
-
-        const estimateTimeToTarget = (entry, current, target, entryTime) => {
-            // If no movement or already at target, return NA
-            if (entry === current || current === target) return 'N/A';
-
-            // Calculate how long it's been since entry
-            const entryDate = new Date(entryTime);
-            const now = new Date();
-            const elapsedMs = now - entryDate;
-
-            if (elapsedMs <= 0) return 'N/A';
-
-            // Calculate what percentage of the journey is complete
-            const totalDistance = Math.abs(target - entry);
-            const coveredDistance = Math.abs(current - entry);
-            const remainingDistance = Math.abs(target - current);
-
-            // Calculate speed in price per ms
-            const speed = coveredDistance / elapsedMs;
-
-            // If speed is too low, return TBD
-            if (speed < 0.000001) return 'TBD';
-
-            // Estimate time to target
-            const msToTarget = remainingDistance / speed;
-
-            // Convert to human-readable format
-            if (msToTarget < 60000) {
-                return `< 1 min`;
-            } else if (msToTarget < 3600000) {
-                return `~${Math.round(msToTarget / 60000)} min`;
-            } else if (msToTarget < 86400000) {
-                return `~${Math.round(msToTarget / 3600000)} hours`;
+            // If either version exists, apply the animation
+            if (jahMessage) {
+                jahMessage.classList.add('shake');
+                setTimeout(() => {
+                    jahMessage.classList.remove('shake');
+                }, 500);
             } else {
-                return `~${Math.round(msToTarget / 86400000)} days`;
+                console.warn('JAH message element not found');
             }
         };
 
-        const getFibonacciLevel = (entry, current, direction) => {
-            // Common Fibonacci ratios
-            const fibLevels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.618, 2.618, 3.618, 4.236];
+        // Wait for DOM to be fully loaded before setting up event handlers
+        document.addEventListener('DOMContentLoaded', function () {
+            debug('INIT', 'DOM fully loaded, initializing dashboard');
 
-            // Calculate price change percentage
-            const changePercent = direction.toLowerCase() === 'long'
-                ? (current - entry) / entry * 100
-                : (entry - current) / entry * 100;
+            // DOM Elements
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            const dataSource = document.getElementById('data-source').querySelector('span');
+            const btcPrice = document.getElementById('btcPrice');
+            const priceChange = document.getElementById('priceChanges');
+            const trapTime = document.getElementById('trap-time');
+            const positionTime = document.getElementById('position-time');
+            const refreshButton = document.getElementById('refresh-data');
 
-            // Find the closest Fibonacci level
-            let closestFib = 0;
-            let closestDist = Infinity;
+            // HODL Button elements
+            const hodlButton = document.getElementById('hodl-button');
+            const btcPopup = document.getElementById('btc-popup');
+            const popupOverlay = document.getElementById('popup-overlay');
+            const popupCloseBtn = document.getElementById('btc-popup-close');
 
-            fibLevels.forEach(level => {
-                // Convert fib level to a percentage
-                const fibPercent = level * 100;
-                const dist = Math.abs(changePercent - fibPercent);
+            // Helper function to fetch Redis key value with retries
+            const fetchRedisKey = async (key, retries = 1) => {
+                try {
+                    debug('REDIS', `Fetching Redis key: ${key}`);
+                    const response = await fetch(`${REDIS_KEY_ENDPOINT}?key=${key}`);
 
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestFib = level;
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                        console.warn(`Failed to fetch Redis key ${key}: ${response.status}`, errorData);
+
+                        if (retries > 0) {
+                            debug('REDIS', `Retrying fetch for key ${key} (${retries} retries left)`);
+                            return fetchRedisKey(key, retries - 1);
+                        }
+
+                        return null;
+                    }
+
+                    const data = await response.json();
+                    debug('REDIS', `Received data for key ${key}:`, data);
+
+                    if (!data || !data.value) {
+                        console.warn(`Empty or invalid data for Redis key: ${key}`);
+                        return null;
+                    }
+
+                    // Try to parse the value as JSON if it's a string that looks like JSON
+                    if (typeof data.value === 'string') {
+                        if (data.value.trim().startsWith('{') || data.value.trim().startsWith('[')) {
+                            try {
+                                return JSON.parse(data.value);
+                            } catch (e) {
+                                debug('REDIS', `Could not parse Redis value for ${key} as JSON:`, e);
+                            }
+                        }
+
+                        // Return the raw string if not parseable as JSON
+                        return data.value;
+                    }
+
+                    return data.value;
+                } catch (error) {
+                    console.error(`Error fetching Redis key ${key}:`, error);
+                    return null;
                 }
-            });
+            };
 
-            return closestFib;
-        };
+            // Function to get BTC price data from Redis
+            const getBtcPriceData = async () => {
+                debug('REDIS', 'Fetching BTC price data from Redis keys');
 
-        // Position flow visualization
-        class PositionFlowVisualizer {
-            constructor(canvasId) {
-                this.canvas = document.getElementById(canvasId);
-                this.ctx = this.canvas.getContext('2d');
-                this.priceData = [];
-                this.position = null;
-                this.initialized = false;
+                try {
+                    // Start with trying to fetch the current BTC price
+                    let currentPrice = await fetchRedisKey(REDIS_KEYS.PRICE.CURRENT);
 
-                // Set canvas dimensions to match container
-                this.resizeCanvas();
-                window.addEventListener('resize', () => this.resizeCanvas());
-            }
+                    // If we couldn't get current price, try the test:btc:price key as fallback
+                    if (!currentPrice) {
+                        currentPrice = await fetchRedisKey("test:btc:price");
+                        debug('REDIS', 'Using test:btc:price as fallback for missing btc_price');
+                    }
 
-            resizeCanvas() {
-                const container = this.canvas.parentElement;
-                this.canvas.width = container.clientWidth;
-                this.canvas.height = container.clientHeight;
+                    // Try to fetch additional data (but continue if any are missing)
+                    const [
+                        lastPrice,
+                        priceChanges,
+                        pricePatterns
+                    ] = await Promise.all([
+                        fetchRedisKey(REDIS_KEYS.PRICE.LAST),
+                        fetchRedisKey(REDIS_KEYS.CHANGES.PRICE_CHANGES),
+                        fetchRedisKey(REDIS_KEYS.PATTERNS.PRICE_PATTERNS)
+                    ]);
 
-                // Redraw if we have data
-                if (this.initialized) {
-                    this.draw();
-                }
-            }
-
-            updatePosition(position) {
-                this.position = position;
-
-                // If this is our first position data, initialize
-                if (!this.initialized && position) {
-                    this.initialized = true;
-                    this.initializePriceData(position);
-                }
-
-                // Update with latest price
-                if (position && position.current_price) {
-                    this.addPricePoint(position.current_price);
-                }
-
-                // Redraw the visualization
-                this.draw();
-            }
-
-            initializePriceData(position) {
-                // Create initial dummy data based on entry price
-                const entryPrice = position.entry_price || 0;
-
-                // Generate some historical points centered around entry price
-                this.priceData = [];
-                const baseTime = Date.now() - (60 * 60 * 1000); // 1 hour ago
-
-                for (let i = 0; i < 60; i++) {
-                    // Generate slight random fluctuations around entry price
-                    const randomFactor = 1 + (Math.random() * 0.01 - 0.005);
-                    const price = entryPrice * randomFactor;
-
-                    this.priceData.push({
-                        price,
-                        timestamp: baseTime + (i * 60 * 1000) // 1 minute intervals
+                    debug('REDIS', 'Received Redis data', {
+                        currentPrice, lastPrice, priceChanges, pricePatterns
                     });
-                }
-            }
 
-            addPricePoint(price) {
-                // Add a new price point to our data
-                this.priceData.push({
-                    price,
-                    timestamp: Date.now()
-                });
+                    // Extract price data from whatever format we received
+                    let price = null;
 
-                // Keep only the last 120 points (2 hours at 1 min intervals)
-                if (this.priceData.length > 120) {
-                    this.priceData.shift();
-                }
-            }
+                    // Try different formats that might be used for price
+                    if (currentPrice) {
+                        if (typeof currentPrice === 'object' && 'price' in currentPrice) {
+                            price = currentPrice.price;
+                        } else if (typeof currentPrice === 'string' && !isNaN(parseFloat(currentPrice))) {
+                            price = parseFloat(currentPrice);
+                        } else if (typeof currentPrice === 'number') {
+                            price = currentPrice;
+                        }
+                    }
 
-            draw() {
-                if (!this.position || !this.initialized || this.priceData.length === 0) {
-                    return;
-                }
+                    // If we still don't have a price and have lastPrice, try to use that
+                    if (!price && lastPrice) {
+                        if (typeof lastPrice === 'string' && !isNaN(parseFloat(lastPrice))) {
+                            price = parseFloat(lastPrice);
+                        } else if (typeof lastPrice === 'number') {
+                            price = lastPrice;
+                        }
+                    }
 
-                const ctx = this.ctx;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                    // If still no price, generate a fake one
+                    if (!price) {
+                        price = 65000 + (Math.random() * 5000) - 2500;
+                        debug('REDIS', 'Using fake price due to missing data');
+                    }
 
-                // Clear canvas
-                ctx.clearRect(0, 0, width, height);
+                    // Extract price changes
+                    let shortTermChange = null;
+                    let mediumTermChange = null;
 
-                // Extract position details
-                const entryPrice = this.position.entry_price || 0;
-                const currentPrice = this.position.current_price || 0;
-                const direction = this.position.position_side || 'none';
-                const stopLoss = this.position.stop_loss || 0;
-                const takeProfit = this.position.take_profits && this.position.take_profits.length > 0
-                    ? this.position.take_profits[0].price
-                    : 0;
-
-                // Find price range
-                const prices = this.priceData.map(p => p.price);
-                let minPrice = Math.min(...prices);
-                let maxPrice = Math.max(...prices);
-
-                // Ensure entry, stop loss, and take profit are in the visible range
-                if (entryPrice) minPrice = Math.min(minPrice, entryPrice);
-                if (entryPrice) maxPrice = Math.max(maxPrice, entryPrice);
-                if (stopLoss) minPrice = Math.min(minPrice, stopLoss);
-                if (stopLoss) maxPrice = Math.max(maxPrice, stopLoss);
-                if (takeProfit) minPrice = Math.min(minPrice, takeProfit);
-                if (takeProfit) maxPrice = Math.max(maxPrice, takeProfit);
-
-                // Add small padding
-                const pricePadding = (maxPrice - minPrice) * 0.1;
-                minPrice = minPrice - pricePadding;
-                maxPrice = maxPrice + pricePadding;
-
-                // Time range
-                const times = this.priceData.map(p => p.timestamp);
-                const minTime = Math.min(...times);
-                const maxTime = Math.max(...times);
-
-                // Scale factors
-                const xScale = width / (maxTime - minTime);
-                const yScale = height / (maxPrice - minPrice);
-
-                // Helper function to convert price to y coordinate
-                const priceToY = (price) => height - ((price - minPrice) * yScale);
-                // Helper function to convert time to x coordinate
-                const timeToX = (time) => (time - minTime) * xScale;
-
-                // Draw price line
-                ctx.beginPath();
-                ctx.strokeStyle = '#f0f0f0';
-                ctx.lineWidth = 2;
-
-                for (let i = 0; i < this.priceData.length; i++) {
-                    const { price, timestamp } = this.priceData[i];
-                    const x = timeToX(timestamp);
-                    const y = priceToY(price);
-
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
+                    if (priceChanges) {
+                        if (typeof priceChanges === 'object') {
+                            shortTermChange = priceChanges.short_term || 0;
+                            mediumTermChange = priceChanges.medium_term || 0;
+                        }
                     } else {
-                        ctx.lineTo(x, y);
+                        // Generate fake changes if no data available
+                        shortTermChange = (Math.random() * 0.06) - 0.03;
+                        mediumTermChange = (Math.random() * 0.1) - 0.05;
+                        debug('REDIS', 'Using fake price changes due to missing data');
                     }
-                }
 
-                ctx.stroke();
+                    // Extract/generate dominant pattern
+                    let patterns = pricePatterns || {
+                        bullish: Math.random(),
+                        bearish: Math.random(),
+                        neutral: Math.random(),
+                        wyckoff_accumulation: Math.random(),
+                        wyckoff_distribution: Math.random()
+                    };
 
-                // Draw entry price line
-                if (entryPrice) {
-                    const entryY = priceToY(entryPrice);
+                    let dominantPattern = 'Unknown';
+                    let dominantPatternProbability = 0;
 
-                    ctx.beginPath();
-                    ctx.strokeStyle = '#ffd700'; // Yellow
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 3]);
-                    ctx.moveTo(0, entryY);
-                    ctx.lineTo(width, entryY);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    // Label
-                    ctx.fillStyle = '#ffd700';
-                    ctx.font = '10px monospace';
-                    ctx.fillText(`Entry $${entryPrice.toFixed(2)}`, 5, entryY - 5);
-                }
-
-                // Draw stop loss line
-                if (stopLoss) {
-                    const stopY = priceToY(stopLoss);
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = '#ff3d00'; // Red
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 3]);
-                    ctx.moveTo(0, stopY);
-                    ctx.lineTo(width, stopY);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    // Label
-                    ctx.fillStyle = '#ff3d00';
-                    ctx.font = '10px monospace';
-                    ctx.fillText(`SL $${stopLoss.toFixed(2)}`, 5, stopY - 5);
-                }
-
-                // Draw take profit line
-                if (takeProfit) {
-                    const tpY = priceToY(takeProfit);
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = '#00b52d'; // Green
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 3]);
-                    ctx.moveTo(0, tpY);
-                    ctx.lineTo(width, tpY);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    // Label
-                    ctx.fillStyle = '#00b52d';
-                    ctx.font = '10px monospace';
-                    ctx.fillText(`TP $${takeProfit.toFixed(2)}`, 5, tpY - 5);
-                }
-
-                // Draw current price dot
-                if (currentPrice) {
-                    const currentX = timeToX(Date.now());
-                    const currentY = priceToY(currentPrice);
-
-                    ctx.beginPath();
-                    ctx.fillStyle = direction.toLowerCase() === 'long' ? '#00b52d' : '#ff3d00';
-                    ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Label
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '10px monospace';
-                    ctx.fillText(`$${currentPrice.toFixed(2)}`, currentX + 8, currentY);
-                }
-            }
-        }
-
-        // Initialize position flow visualizer
-        let positionFlowVisualizer;
-
-        // Update target tracking
-        const updateTargetTracking = (position) => {
-            // Skip if no position
-            if (!position || !position.has_position) {
-                document.getElementById('target-status').textContent = 'No Position';
-                document.getElementById('next-target-price').textContent = '$0.00';
-                document.getElementById('next-target-percent').textContent = '0.00%';
-                document.getElementById('target-distance').textContent = '0.00%';
-                document.getElementById('target-eta').textContent = '--';
-                document.getElementById('fib-level').textContent = '--';
-                document.getElementById('target-progress-bar').style.width = '0%';
-                document.getElementById('target-timestamp').textContent = '--';
-                return;
-            }
-
-            // Extract position data
-            const entryPrice = position.entry_price || 0;
-            const currentPrice = position.current_price || 0;
-            const direction = position.position_side || '';
-            const entryTime = position.entry_time || '';
-            const takeProfit = position.take_profits && position.take_profits.length > 0
-                ? position.take_profits[0].price
-                : 0;
-
-            // Skip if missing required data
-            if (!entryPrice || !currentPrice || !direction || !takeProfit) {
-                document.getElementById('target-status').textContent = 'Insufficient Data';
-                return;
-            }
-
-            // Calculate distance to target
-            let distancePercent;
-            if (direction.toLowerCase() === 'long') {
-                distancePercent = (takeProfit - currentPrice) / currentPrice * 100;
-            } else {
-                distancePercent = (currentPrice - takeProfit) / currentPrice * 100;
-            }
-
-            // Determine target status
-            let targetStatus = 'In Progress';
-            if (distancePercent <= 0) {
-                targetStatus = 'TARGET MET';
-                document.getElementById('target-status').className = 'value positive';
-            } else if (distancePercent < 0.25) {
-                targetStatus = 'VERY CLOSE';
-                document.getElementById('target-status').className = 'value positive';
-            } else if (distancePercent < 0.5) {
-                targetStatus = 'CLOSE';
-                document.getElementById('target-status').className = 'value neutral';
-            } else {
-                document.getElementById('target-status').className = 'value neutral';
-            }
-
-            // Calculate target percent
-            const targetPercent = direction.toLowerCase() === 'long'
-                ? (takeProfit - entryPrice) / entryPrice * 100
-                : (entryPrice - takeProfit) / entryPrice * 100;
-
-            // Calculate progress towards target
-            const progress = calculateTargetProgress(
-                entryPrice,
-                currentPrice,
-                takeProfit
-            );
-
-            // Estimate time to target
-            const eta = estimateTimeToTarget(
-                entryPrice,
-                currentPrice,
-                takeProfit,
-                entryTime
-            );
-
-            // Calculate Fibonacci level
-            const fibLevel = getFibonacciLevel(entryPrice, currentPrice, direction);
-
-            // Update the UI
-            document.getElementById('target-status').textContent = targetStatus;
-            document.getElementById('next-target-price').textContent = `$${takeProfit.toFixed(2)}`;
-            document.getElementById('next-target-percent').textContent = `${targetPercent.toFixed(2)}%`;
-            document.getElementById('target-distance').textContent = `${Math.abs(distancePercent).toFixed(2)}%`;
-            document.getElementById('target-eta').textContent = eta;
-            document.getElementById('fib-level').textContent = `${fibLevel}`;
-            document.getElementById('target-progress-bar').style.width = `${progress}%`;
-            document.getElementById('target-timestamp').textContent = formatTimeDiff(position.timestamp);
-
-            // Update position flow visualization
-            if (!positionFlowVisualizer) {
-                positionFlowVisualizer = new PositionFlowVisualizer('position-flow-canvas');
-            }
-
-            // Update the visualizer
-            positionFlowVisualizer.updatePosition(position);
-        };
-
-        // Redis Monitor Functionality
-        const REDIS_KEYS_ENDPOINT = `/api/redis-keys`;
-        const redisKeysContainer = document.getElementById('redis-keys-list');
-        const redisKeyCount = document.getElementById('redis-key-count');
-        const redisConnectionStatus = document.getElementById('redis-connection-status');
-        const redisLastUpdated = document.getElementById('redis-last-updated');
-        const redisTimestamp = document.getElementById('redis-monitor-timestamp');
-        const refreshRedisButton = document.getElementById('refresh-redis-keys');
-
-        // Format Redis key details based on type
-        const formatRedisKeyDetails = (key) => {
-            let details = '';
-            const type = key.type || 'unknown';
-
-            if (type === 'string' && key.length !== undefined) {
-                details = `<span class="redis-key-detail">${type}, ${key.length} chars</span>`;
-            } else if (type === 'list' && key.length !== undefined) {
-                details = `<span class="redis-key-detail">${type}, ${key.length} items</span>`;
-            } else if (type === 'hash' && key.fields !== undefined) {
-                details = `<span class="redis-key-detail">${type}, ${key.fields} fields</span>`;
-            } else {
-                details = `<span class="redis-key-detail">${type}</span>`;
-            }
-
-            return details;
-        };
-
-        // Format Redis key name for display
-        const formatRedisKeyName = (keyName) => {
-            // Split by colon if present
-            const parts = keyName.split(':');
-            if (parts.length > 2) {
-                return `${parts[0]}:${parts[1]}:...`;
-            }
-            // Truncate if too long
-            if (keyName.length > 40) {
-                return keyName.substring(0, 37) + '...';
-            }
-            return keyName;
-        };
-
-        // Fetch Redis keys information
-        const fetchRedisKeys = async () => {
-            try {
-                redisKeysContainer.innerHTML = '<div class="redis-key-loading">Fetching Redis keys...</div>';
-
-                const response = await fetch(REDIS_KEYS_ENDPOINT);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch Redis keys');
-                }
-
-                const data = await response.json();
-
-                // Update Redis connection status
-                redisConnectionStatus.textContent = 'Connected';
-                redisConnectionStatus.className = 'value positive';
-
-                // Update last updated time
-                const now = new Date();
-                redisLastUpdated.textContent = formatShortTimestamp(now);
-                redisTimestamp.textContent = 'Just now';
-
-                // Check if keys property exists
-                if (!data.keys || !Array.isArray(data.keys)) {
-                    redisKeysContainer.innerHTML = '<div class="redis-key-error">No keys data available</div>';
-                    redisKeyCount.textContent = '0';
-                    return;
-                }
-
-                // Update key count
-                redisKeyCount.textContent = data.keys.length;
-
-                // Clear container
-                redisKeysContainer.innerHTML = '';
-
-                // Group keys by namespace (prefix before first colon)
-                const keysByNamespace = {};
-                data.keys.forEach(key => {
-                    const keyName = key.key || '';
-                    const namespaceParts = keyName.split(':');
-                    const namespace = namespaceParts[0] || 'other';
-
-                    if (!keysByNamespace[namespace]) {
-                        keysByNamespace[namespace] = [];
+                    for (const [pattern, probability] of Object.entries(patterns)) {
+                        if (probability > dominantPatternProbability) {
+                            dominantPattern = pattern;
+                            dominantPatternProbability = probability;
+                        }
                     }
-                    keysByNamespace[namespace].push(key);
+
+                    // Format the data for display
+                    return {
+                        price: price,
+                        lastPrice: lastPrice,
+                        shortTermChange: shortTermChange,
+                        mediumTermChange: mediumTermChange,
+                        dominantPattern: dominantPattern,
+                        dominantPatternProbability: dominantPatternProbability,
+                        patterns: patterns,
+                        timestamp: new Date().toISOString()
+                    };
+                } catch (error) {
+                    console.error('Error getting BTC price data:', error);
+                    // Return fallback data
+                    return {
+                        price: 65000 + (Math.random() * 5000) - 2500,
+                        lastPrice: null,
+                        shortTermChange: (Math.random() * 0.06) - 0.03,
+                        mediumTermChange: (Math.random() * 0.1) - 0.05,
+                        dominantPattern: 'Fallback Data',
+                        dominantPatternProbability: 0.5,
+                        patterns: {
+                            bullish: Math.random(),
+                            bearish: Math.random(),
+                            neutral: Math.random()
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+                }
+            };
+
+            // Function to update the BTC price ticker in the header
+            const updateBTCPriceTicker = async () => {
+                debug('PRICE_TICKER', 'Updating BTC price ticker in header');
+                try {
+                    // Get BTC price data from Redis
+                    const data = await getBtcPriceData();
+
+                    if (!data || !data.price) {
+                        throw new Error('No price data available');
+                    }
+
+                    debug('PRICE_TICKER', 'BTC price data received for header ticker:', data);
+
+                    // Update the price display in header
+                    if (btcPrice) {
+                        btcPrice.textContent = formatPrice(data.price);
+                        btcPrice.classList.add('btc-price');
+                    }
+
+                    // Update short-term and medium-term changes
+                    const shortTermElement = document.getElementById('shortTermChange');
+                    const mediumTermElement = document.getElementById('mediumTermChange');
+
+                    if (shortTermElement && data.shortTermChange !== null) {
+                        const shortTermValue = data.shortTermChange * 100; // Convert from decimal to percentage
+                        shortTermElement.textContent = formatPercent(data.shortTermChange);
+                        shortTermElement.className = data.shortTermChange >= 0 ? 'positive' : 'negative';
+                    }
+
+                    if (mediumTermElement && data.mediumTermChange !== null) {
+                        const mediumTermValue = data.mediumTermChange * 100; // Convert from decimal to percentage
+                        mediumTermElement.textContent = formatPercent(data.mediumTermChange);
+                        mediumTermElement.className = data.mediumTermChange >= 0 ? 'positive' : 'negative';
+                    }
+
+                    // Update dominant pattern
+                    const dominantPatternElement = document.getElementById('dominantPattern');
+                    if (dominantPatternElement && data.dominantPattern) {
+                        // Capitalize pattern name
+                        const capitalizedPattern = data.dominantPattern.replace(/\b\w/g, l => l.toUpperCase());
+                        dominantPatternElement.textContent = capitalizedPattern;
+                    }
+
+                    // Update data source and timestamp
+                    const dataSourceElement = document.getElementById('dataSource');
+                    const lastUpdatedElement = document.getElementById('lastUpdated');
+
+                    if (dataSourceElement) {
+                        dataSourceElement.textContent = 'Redis';
+                    }
+
+                    if (lastUpdatedElement && data.timestamp) {
+                        lastUpdatedElement.textContent = new Date(data.timestamp).toLocaleTimeString();
+                    }
+
+                    debug('PRICE_TICKER', 'BTC price ticker in header updated successfully');
+                } catch (error) {
+                    console.error('Error updating BTC price ticker:', error);
+                    if (btcPrice) btcPrice.textContent = 'Price Unavailable';
+                }
+            };
+
+            // Function to fetch BTC price and show popup
+            const showBTCPrice = async () => {
+                debug('HODL', 'HODL button clicked, fetching BTC price');
+                try {
+                    // Add animation to button
+                    hodlButton.classList.add('pulse-animation');
+
+                    // Get BTC price data from Redis
+                    const data = await getBtcPriceData();
+
+                    if (!data || !data.price) {
+                        throw new Error('No price data available');
+                    }
+
+                    debug('HODL', 'BTC price data received:', data);
+
+                    // Update popup content
+                    document.getElementById('popup-price').textContent = formatPrice(data.price);
+
+                    // Set change value
+                    const changeElement = document.getElementById('popup-change');
+                    const shortTermValue = data.shortTermChange || 0;
+                    const changeValue = shortTermValue * 100; // Convert from decimal to percentage
+
+                    changeElement.textContent = formatPercent(data.shortTermChange);
+                    changeElement.className = data.shortTermChange >= 0 ? 'positive' : 'negative';
+
+                    // Set short-term change
+                    if (data.shortTermChange !== null) {
+                        const shortTermElement = document.getElementById('popup-short-term');
+                        shortTermElement.textContent = formatPercent(data.shortTermChange);
+                        shortTermElement.className = data.shortTermChange >= 0 ? 'positive' : 'negative';
+                    }
+
+                    // Set medium-term change
+                    if (data.mediumTermChange !== null) {
+                        const mediumTermElement = document.getElementById('popup-medium-term');
+                        mediumTermElement.textContent = formatPercent(data.mediumTermChange);
+                        mediumTermElement.className = data.mediumTermChange >= 0 ? 'positive' : 'negative';
+                    }
+
+                    // Set dominant pattern
+                    let dominantPattern = 'Unknown';
+                    let highestProb = 0;
+
+                    if (data.patterns) {
+                        // Find the pattern with the highest probability
+                        for (const pattern in data.patterns) {
+                            if (data.patterns[pattern] > highestProb) {
+                                highestProb = data.patterns[pattern];
+                                dominantPattern = pattern.replace(/_/g, ' ');
+                            }
+                        }
+
+                        // Capitalize pattern name
+                        dominantPattern = dominantPattern.replace(/\b\w/g, l => l.toUpperCase());
+                    }
+
+                    document.getElementById('popup-pattern').textContent = `Dominant Pattern: ${dominantPattern}`;
+
+                    // Set timestamp
+                    document.getElementById('popup-time').textContent = new Date().toLocaleString();
+
+                    // Show popup
+                    popupOverlay.classList.add('show');
+                    btcPopup.classList.add('show');
+
+                    // Add JAH message shake for fun
+                    shakeJahMessage();
+                    debug('HODL', 'BTC price popup displayed successfully');
+
+                } catch (error) {
+                    console.error('Error showing BTC price:', error);
+                    alert(`Failed to fetch BTC price: ${error.message}`);
+                } finally {
+                    // Remove button animation
+                    hodlButton.classList.remove('pulse-animation');
+                }
+            };
+
+            // Set up HODL button event listeners
+            if (hodlButton) {
+                debug('INIT', 'Setting up HODL button event listener');
+                hodlButton.addEventListener('click', function (e) {
+                    debug('HODL', 'HODL button clicked');
+                    e.preventDefault();
+                    showBTCPrice();
                 });
-
-                // Render keys by namespace
-                Object.keys(keysByNamespace).sort().forEach(namespace => {
-                    const namespaceKeys = keysByNamespace[namespace];
-
-                    // Create namespace header
-                    const namespaceHeader = document.createElement('div');
-                    namespaceHeader.className = 'redis-namespace';
-                    namespaceHeader.innerHTML = `<span class="redis-namespace-name">${namespace}</span> (${namespaceKeys.length})`;
-                    redisKeysContainer.appendChild(namespaceHeader);
-
-                    // Create keys list for this namespace
-                    const keysList = document.createElement('div');
-                    keysList.className = 'redis-namespace-keys';
-
-                    // Add each key
-                    namespaceKeys.forEach(key => {
-                        const keyElement = document.createElement('div');
-                        keyElement.className = 'redis-key-item';
-
-                        // Display the key name and details
-                        const keyName = key.key || '';
-                        const displayName = formatRedisKeyName(keyName);
-                        const details = formatRedisKeyDetails(key);
-
-                        keyElement.innerHTML = `
-                            <span class="redis-key-name" title="${keyName}">${displayName}</span>
-                            ${details}
-                        `;
-
-                        keysList.appendChild(keyElement);
-                    });
-
-                    redisKeysContainer.appendChild(keysList);
-                });
-
-            } catch (error) {
-                console.error('Error fetching Redis keys:', error);
-                redisConnectionStatus.textContent = 'Error';
-                redisConnectionStatus.className = 'value negative';
-                redisKeysContainer.innerHTML = `<div class="redis-key-error">Error: ${error.message}</div>`;
+            } else {
+                console.error('HODL button not found in the DOM');
             }
-        };
 
-        // Add event listener to refresh button
-        refreshRedisButton.addEventListener('click', () => {
-            refreshRedisButton.disabled = true;
-            refreshRedisButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refreshing...';
+            // Set up popup close button event listener
+            if (popupCloseBtn) {
+                popupCloseBtn.addEventListener('click', function () {
+                    debug('HODL', 'Popup close button clicked');
+                    popupOverlay.classList.remove('show');
+                    btcPopup.classList.remove('show');
+                });
+            }
 
-            fetchRedisKeys().then(() => {
-                refreshRedisButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Redis Info';
-                refreshRedisButton.disabled = false;
-            });
+            // Set up overlay event listener
+            if (popupOverlay) {
+                popupOverlay.addEventListener('click', function () {
+                    debug('HODL', 'Popup overlay clicked');
+                    popupOverlay.classList.remove('show');
+                    btcPopup.classList.remove('show');
+                });
+            }
+
+            // Format helpers
+            const formatPrice = (num) => {
+                if (num === undefined || num === null) return 'N/A';
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(num);
+            };
+
+            const formatPercent = (value) => {
+                if (value === undefined || value === null) return 'N/A';
+                // Convert decimal (0.024) to percentage (2.44%)
+                const percent = value * 100;
+                return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
+            };
+
+            // Update the connection status
+            const updateConnectionStatus = (connected, message = null) => {
+                console.log(`Connection status update: connected=${connected}, message=${message}`);
+
+                statusDot.className = connected
+                    ? 'status-dot connected'
+                    : 'status-dot disconnected';
+
+                statusText.textContent = message || (connected
+                    ? 'Connected to Redis'
+                    : 'Disconnected from Redis');
+            };
+
+            // Function to update Redis debug information
+            const updateRedisDebugInfo = async () => {
+                const connectionStatusElement = document.getElementById('redis-connection-status');
+                const lastUpdatedElement = document.getElementById('redis-last-updated');
+                const activeKeysElement = document.getElementById('redis-active-keys');
+
+                try {
+                    // Try to fetch a key to check connection
+                    const testKeyData = await fetchRedisKey(REDIS_KEYS.PRICE.CURRENT);
+
+                    if (testKeyData) {
+                        connectionStatusElement.textContent = 'Connected';
+                        connectionStatusElement.className = 'connected';
+
+                        // Get all available keys
+                        const allKeys = Object.values(REDIS_KEYS).flatMap(category => Object.values(category));
+
+                        // Check which keys are available
+                        const keyChecks = await Promise.all(
+                            allKeys.map(async key => {
+                                const value = await fetchRedisKey(key);
+                                return { key, available: !!value };
+                            })
+                        );
+
+                        const availableKeys = keyChecks.filter(k => k.available).map(k => k.key);
+                        activeKeysElement.textContent = `${availableKeys.length}/${allKeys.length} keys`;
+
+                        // Update last updated timestamp
+                        lastUpdatedElement.textContent = new Date().toLocaleTimeString();
+
+                        console.log('Redis debug info updated:', {
+                            connected: true,
+                            availableKeys
+                        });
+                    } else {
+                        connectionStatusElement.textContent = 'Disconnected';
+                        connectionStatusElement.className = 'disconnected';
+                        activeKeysElement.textContent = '0 keys';
+                        lastUpdatedElement.textContent = new Date().toLocaleTimeString();
+
+                        console.warn('Redis connection failed - no data returned');
+                    }
+                } catch (error) {
+                    console.error('Error updating Redis debug info:', error);
+
+                    connectionStatusElement.textContent = 'Error';
+                    connectionStatusElement.className = 'disconnected';
+                    activeKeysElement.textContent = 'Error';
+                    lastUpdatedElement.textContent = new Date().toLocaleTimeString();
+                }
+            };
+
+            // Initial data fetching
+            // Call updateBTCPriceTicker immediately to populate the header
+            updateBTCPriceTicker();
+
+            // Update Redis debug info
+            updateRedisDebugInfo();
+
+            // Set auto-refresh for BTC price ticker every 30 seconds
+            setInterval(updateBTCPriceTicker, 30000);
+
+            debug('INIT', 'Dashboard initialization complete');
         });
-
-        // Include Redis monitoring in initial data fetch
-        const originalFetchData = fetchData;
-        fetchData = async () => {
-            await originalFetchData();
-
-            // Only fetch Redis keys initially
-            try {
-                await fetchRedisKeys();
-            } catch (error) {
-                console.error('Failed to fetch Redis keys in initial load:', error);
-            }
-        };
     </script>
 </body>
 

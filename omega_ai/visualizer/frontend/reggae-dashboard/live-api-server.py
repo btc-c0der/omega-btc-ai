@@ -7,6 +7,7 @@ Serves the HTML/static assets and proxies API requests to the backend
 import logging
 import os
 import requests
+import json
 from flask import Flask, jsonify, send_from_directory, request, Response
 from flask_cors import CORS
 from datetime import datetime, timezone
@@ -80,6 +81,65 @@ def serve_node_modules(filename):
     """Serve files from node_modules directory."""
     logger.info(f"🔍 GET /node_modules/{filename} - Serving node module file")
     return send_from_directory('node_modules', filename)
+
+# Direct Redis key access endpoint
+@app.route('/api/redis-key')
+def redis_key():
+    """Access a specific Redis key directly (proxied to backend redis-get endpoint)."""
+    key = request.args.get('key')
+    if not key:
+        return jsonify({"error": "Missing key parameter"}), 400
+    
+    logger.info(f"🔍 GET /api/redis-key?key={key} - Direct Redis key access")
+    
+    # Forward the request to the backend using the correct endpoint
+    # Note: Backend expects /api/redis-get?key={key} format
+    backend_url = f"{BACKEND_URL}/api/redis-get?key={key}"
+    logger.info(f"🔗 Forwarding Redis request to backend: {backend_url}")
+    
+    try:
+        resp = requests.get(
+            url=backend_url,
+            headers={k: v for (k, v) in request.headers if k != 'Host'},
+            cookies=request.cookies,
+            allow_redirects=False,
+            verify=False
+        )
+        
+        if resp.status_code == 200:
+            logger.info(f"✅ Redis key {key} successfully retrieved")
+            
+            try:
+                # Try to parse response text as JSON
+                return jsonify({
+                    "key": key,
+                    "value": resp.text,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                })
+            except json.JSONDecodeError:
+                # Return as plain text if not JSON
+                return jsonify({
+                    "key": key,
+                    "value": resp.text,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                })
+        else:
+            logger.error(f"❌ Redis key access failed with status: {resp.status_code}")
+            logger.error(f"❌ Response content: {resp.text}")
+            return jsonify({
+                "error": f"Redis key access failed: {resp.status_code}",
+                "key": key,
+                "details": resp.text,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }), resp.status_code
+            
+    except Exception as e:
+        logger.error(f"❌ Error accessing Redis key: {e}")
+        return jsonify({
+            "error": f"Error accessing Redis key: {str(e)}",
+            "key": key,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }), 500
 
 # Proxy all API requests to the backend server
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
