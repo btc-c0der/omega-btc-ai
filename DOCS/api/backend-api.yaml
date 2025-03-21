@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: OMEGA BTC AI - Reggae Dashboard API
+  version: 1.0.0
+  description: Real-time dashboard server that provides trap probability and trading position data
+  contact:
+    name: OMEGA BTC AI Team
+    email: support@omegabtcai.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.omegabtcai.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Trap Data
+    description: Trap probability and detection endpoints
+  - name: Position Data
+    description: Trading position endpoints
+  - name: System
+    description: System information endpoints
+  - name: WebSocket
+    description: Real-time data streaming endpoints
+
+paths:
+  /:
+    get:
+      tags:
+        - System
+      summary: Root endpoint
+      description: Displays server information and available endpoints
+      responses:
+        '200':
+          description: HTML page with API documentation
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /api/health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: Check the health status of the server and Redis connection
+      responses:
+        '200':
+          description: Health status information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  redis:
+                    type: string
+                    example: "connected"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/trap-probability:
+    get:
+      tags:
+        - Trap Data
+      summary: Get trap probability data
+      description: Retrieve current trap probability information
+      responses:
+        '200':
+          description: Trap probability data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  probability:
+                    type: number
+                    example: 0.5
+                  trap_type:
+                    type: string
+                    example: "unknown"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  message:
+                    type: string
+                    example: "JAH GUIDES THE TRADING PATH!"
+
+  /api/position:
+    get:
+      tags:
+        - Position Data
+      summary: Get position data
+      description: Retrieve current trading position information
+      responses:
+        '200':
+          description: Position data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_position:
+                    type: boolean
+                    example: false
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/redis-keys:
+    get:
+      tags:
+        - System
+      summary: List Redis keys
+      description: Get a list of recently updated Redis keys
+      responses:
+        '200':
+          description: List of Redis keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        type:
+                          type: string
+                        length:
+                          type: integer
+                        fields:
+                          type: integer
+                  total_keys:
+                    type: integer
+                  displayed_keys:
+                    type: integer
+
+  /ws:
+    websocket:
+      tags:
+        - WebSocket
+      summary: WebSocket endpoint
+      description: Real-time updates for trap probability and position data
+      responses:
+        '101':
+          description: WebSocket connection established 
