@@ -229,9 +229,23 @@ class ReggaeDashboardServer:
                 if not self.redis_client:
                     return {"error": "Redis not connected"}
                 
-                # Get recently updated keys
+                # Get a limited set of keys to prevent timeouts
+                all_keys = self.redis_client.keys("*")
+                logger.info(f"Found {len(all_keys)} total Redis keys")
+                
+                # Prioritize certain patterns and limit to 20 keys max
+                test_keys = [k for k in all_keys if k.startswith("test:")]
+                other_keys = [k for k in all_keys if not k.startswith("test:")]
+                
+                # Prioritize test: keys first, then add others
+                sample_keys = test_keys[:10]  # Up to 10 test keys
+                if len(sample_keys) < 20:
+                    # Add other keys to fill up to 20
+                    sample_keys.extend(other_keys[:20-len(sample_keys)])
+                
+                # Process this limited set
                 recent_keys = []
-                for key in self.redis_client.keys("*"):
+                for key in sample_keys:
                     try:
                         # Get key type and add some metadata
                         key_type = self.redis_client.type(key)
@@ -255,10 +269,12 @@ class ReggaeDashboardServer:
                     except Exception as e:
                         logger.error(f"Error processing Redis key {key}: {e}")
                 
-                # Sort by key name
-                recent_keys.sort(key=lambda x: x["key"])
-                
-                return {"keys": recent_keys[:100]}  # Limit to 100 keys
+                # Add total count info
+                return {
+                    "keys": recent_keys,
+                    "total_keys": len(all_keys),
+                    "displayed_keys": len(recent_keys)
+                }
             except Exception as e:
                 logger.error(f"Error getting Redis keys: {e}")
                 return {"error": str(e)}

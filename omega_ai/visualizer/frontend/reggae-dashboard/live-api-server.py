@@ -17,6 +17,7 @@ from pathlib import Path
 import argparse
 from dotenv import load_dotenv
 import numpy as np
+import requests
 
 # Add parent directory to Python path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
@@ -628,17 +629,34 @@ def btc_price():
 
 @app.route('/api/data')
 def combined_data():
-    """Get combined data for all endpoints"""
-    trap_data = get_data_from_redis("trap_probability", get_fallback_trap_data())
-    position_data = get_data_from_redis("position", get_fallback_position_data())
+    """Get combined data for the dashboard."""
+    # Get all data elements
     price_data = get_btc_price_data()
+    trap_data = trap_probability()
+    position_data = get_position()
     
+    # Combine all data
     return jsonify({
-        "trap_probability": trap_data,
-        "position": position_data,
-        "btc_price": price_data,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "price": price_data,
+        "trap": trap_data,
+        "position": position_data
     })
+
+@app.route('/api/redis-keys')
+def redis_keys():
+    """Proxy to Redis monitor server for redis keys."""
+    try:
+        # Proxy the request to the Redis monitor server
+        logger.info("Proxying request to Redis monitor server on port 5002")
+        response = requests.get('http://localhost:5002/api/redis-keys')
+        return response.json(), response.status_code
+    except Exception as e:
+        logger.error(f"Error proxying to Redis monitor server: {e}")
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to connect to Redis monitor server: {str(e)}",
+            "keys": []
+        }), 500
 
 if __name__ == "__main__":
     # Parse command line arguments
