@@ -115,7 +115,7 @@ class ReggaeDashboardServer:
         @self.app.get("/")
         async def root():
             """Root endpoint that displays server information and available endpoints."""
-            # Create a simpler HTML response
+            # Create a more interactive HTML response with clickable links
             html_content = """
             <!DOCTYPE html>
             <html>
@@ -128,24 +128,84 @@ class ReggaeDashboardServer:
                         font-family: 'Courier New', monospace;
                         margin: 0;
                         padding: 20px;
+                        line-height: 1.6;
                     }
                     h1 {
                         color: #4CAF50;
                         border-bottom: 2px solid #FFD700;
+                        text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+                        padding-bottom: 10px;
+                    }
+                    h2 {
+                        color: #FFD700;
+                        margin-top: 20px;
                     }
                     .container {
                         max-width: 800px;
                         margin: 0 auto;
+                        background-color: #1E1E1E;
+                        padding: 30px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+                    }
+                    .endpoints-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 15px;
+                        margin-top: 20px;
                     }
                     .endpoint {
-                        background-color: #1E1E1E;
+                        background-color: rgba(30, 30, 30, 0.7);
                         border-left: 4px solid #FFD700;
-                        padding: 10px;
+                        padding: 15px;
                         margin: 10px 0;
+                        border-radius: 4px;
+                        transition: transform 0.2s, box-shadow 0.2s;
+                    }
+                    .endpoint:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+                        background-color: rgba(40, 40, 40, 0.9);
                     }
                     .method {
                         color: #4CAF50;
                         font-weight: bold;
+                        display: inline-block;
+                        width: 80px;
+                    }
+                    .websocket {
+                        color: #9C27B0;
+                    }
+                    a {
+                        color: #64B5F6;
+                        text-decoration: none;
+                        transition: color 0.2s;
+                    }
+                    a:hover {
+                        color: #2196F3;
+                        text-decoration: underline;
+                    }
+                    .description {
+                        color: #AAAAAA;
+                        font-size: 0.9em;
+                        margin-top: 5px;
+                    }
+                    .footer {
+                        margin-top: 30px;
+                        text-align: center;
+                        color: #AAAAAA;
+                        font-size: 0.9em;
+                        border-top: 1px solid rgba(255, 215, 0, 0.2);
+                        padding-top: 15px;
+                    }
+                    .tag {
+                        display: inline-block;
+                        background-color: rgba(255, 215, 0, 0.2);
+                        color: #FFD700;
+                        padding: 2px 8px;
+                        border-radius: 12px;
+                        font-size: 0.8em;
+                        margin-right: 5px;
                     }
                 </style>
             </head>
@@ -154,45 +214,95 @@ class ReggaeDashboardServer:
                     <h1>OMEGA BTC AI - Reggae Dashboard API</h1>
                     
                     <h2>Available Endpoints</h2>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/health - Health check endpoint</div>
+                    <div class="endpoints-grid">
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/health">Health Check</a>
+                            <div class="description">Check system and Redis health status</div>
+                            <span class="tag">Health</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/trap-probability">Trap Probability</a>
+                            <div class="description">Get current trap probability data</div>
+                            <span class="tag">Trap Data</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/position">Position Data</a>
+                            <div class="description">Get current trading position information</div>
+                            <span class="tag">Position</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/btc-price">BTC Price</a>
+                            <div class="description">Get current BTC price with metrics</div>
+                            <span class="tag">Price</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/redis-keys">Redis Keys</a>
+                            <div class="description">List available Redis keys</div>
+                            <span class="tag">System</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/redis-key?key=btc_price">Redis Key Value</a>
+                            <div class="description">Get a specific Redis key value (example: btc_price)</div>
+                            <span class="tag">System</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/data">Combined Data</a>
+                            <div class="description">Get all dashboard data in one request</div>
+                            <span class="tag">Combined</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/metrics">Metrics</a>
+                            <div class="description">Get trap metrics with analytics</div>
+                            <span class="tag">Analytics</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/traps">Trap Detections</a>
+                            <div class="description">Get trap detections with filters</div>
+                            <span class="tag">Trap Data</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/prices">Price History</a>
+                            <div class="description">Get price data with verification</div>
+                            <span class="tag">Price</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method">GET</div>
+                            <a href="/api/timeline">Timeline</a>
+                            <div class="description">Get timeline of trap detections</div>
+                            <span class="tag">Trap Data</span>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <div class="method websocket">WebSocket</div>
+                            <span>ws://[host]/ws</span>
+                            <div class="description">Real-time data updates</div>
+                            <span class="tag">Real-time</span>
+                        </div>
                     </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/trap-probability - Get trap probability data</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/position - Get position data</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/redis-keys - List Redis keys</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/data - Get combined data</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/metrics - Get trap metrics with advanced analytics</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/traps - Get trap detections with optional filters</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/prices - Get price data with integrity verification</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">GET</div>
-                        <div>/api/timeline - Get timeline of trap detections</div>
-                    </div>
-                    <div class="endpoint">
-                        <div class="method">WebSocket</div>
-                        <div>/ws - Real-time updates</div>
+                    
+                    <div class="footer">
+                        <p>OMEGA BTC AI - Reggae Dashboard API © 2024</p>
+                        <p>Powered by Rastafarian wisdom & Modern AI</p>
                     </div>
                 </div>
             </body>
@@ -371,6 +481,61 @@ class ReggaeDashboardServer:
             except Exception as e:
                 logger.error(f"Error getting Redis keys: {e}")
                 return {"error": str(e)}
+        
+        @self.app.get("/api/redis-key")
+        async def get_redis_key(key: str):
+            """Get a specific Redis key value."""
+            try:
+                if not self.redis_client:
+                    return {"error": "Redis not connected", "status": "error"}
+                
+                # Check if key exists
+                if not self.redis_client.exists(key):
+                    return {"error": f"Key '{key}' not found", "status": "error"}
+                
+                # Get key type
+                key_type = self.redis_client.type(key)
+                
+                # Return key value based on type
+                if key_type == "string":
+                    value = self.redis_client.get(key)
+                    if value is None:
+                        return {"key": key, "type": key_type, "value": None, "status": "success"}
+                    
+                    try:
+                        # Try to parse as JSON
+                        parsed_value = json.loads(value)
+                        return {"key": key, "type": key_type, "value": parsed_value, "status": "success"}
+                    except (json.JSONDecodeError, TypeError):
+                        # Return as string if not valid JSON
+                        try:
+                            # Try to parse as float
+                            float_value = float(value)
+                            return {"key": key, "type": key_type, "value": float_value, "status": "success"}
+                        except (ValueError, TypeError):
+                            # Return as plain string
+                            return {"key": key, "type": key_type, "value": value, "status": "success"}
+                elif key_type == "list":
+                    # Get all list items
+                    values = self.redis_client.lrange(key, 0, -1)
+                    return {"key": key, "type": key_type, "value": values, "status": "success"}
+                elif key_type == "hash":
+                    # Get all hash fields
+                    values = self.redis_client.hgetall(key)
+                    return {"key": key, "type": key_type, "value": values, "status": "success"}
+                elif key_type == "set":
+                    # Get all set members
+                    values = list(self.redis_client.smembers(key))
+                    return {"key": key, "type": key_type, "value": values, "status": "success"}
+                elif key_type == "zset":
+                    # Get all sorted set members with scores
+                    values = self.redis_client.zrange(key, 0, -1, withscores=True)
+                    return {"key": key, "type": key_type, "value": dict(values), "status": "success"}
+                else:
+                    return {"key": key, "type": key_type, "value": None, "error": f"Unsupported key type: {key_type}", "status": "error"}
+            except Exception as e:
+                logger.error(f"Error getting Redis key '{key}': {e}")
+                return {"key": key, "error": str(e), "status": "error"}
         
         @self.app.get("/api/data")
         async def get_combined_data():
