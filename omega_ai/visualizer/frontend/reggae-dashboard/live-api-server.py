@@ -18,6 +18,13 @@ import argparse
 from dotenv import load_dotenv
 import numpy as np
 import requests
+import uvicorn
+
+# ANSI color codes for terminal output
+GREEN = "\033[92m"
+GOLD = "\033[93m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
 
 # Add parent directory to Python path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
@@ -89,7 +96,11 @@ os.environ['REDIS_PASSWORD'] = ''  # No password for local Redis
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("reggae_dashboard.log")
+    ]
 )
 logger = logging.getLogger("live_api_server")
 
@@ -303,26 +314,53 @@ def enhance_position_data(position_data):
 # Get data from Redis with fallback
 def get_data_from_redis(key_type, fallback_data):
     """Get data from Redis with fallback data if not available"""
+    logger.info(f"🔍 Starting Redis data retrieval for key_type: {key_type}")
+    logger.info(f"📊 Fallback data type: {type(fallback_data)}")
+    
     redis_client = get_redis_client()
     if redis_client:
         try:
             # Try each possible key for this data type
             for key in REDIS_KEYS.get(key_type, []):
-                data = redis_client.get(key)
-                if data:
-                    try:
-                        return json.loads(data)
-                    except json.JSONDecodeError:
-                        # If it's not JSON, try to convert it to a number
+                logger.info(f"🔑 Attempting to get Redis key: {key}")
+                logger.info(f"🔍 Checking if key exists: {key}")
+                exists = redis_client.exists(key)
+                logger.info(f"📊 Key exists: {exists}")
+                
+                if exists:
+                    data = redis_client.get(key)
+                    if data is not None:  # Check for None explicitly
+                        logger.info(f"✅ Successfully retrieved data for key: {key}")
+                        logger.info(f"📊 Data type: {type(data)}")
+                        logger.info(f"📊 Data length: {len(data)}")
+                        
                         try:
-                            return {"value": float(data)}
-                        except ValueError:
-                            continue
-            logger.warning(f"No valid data found for {key_type}")
+                            parsed_data = json.loads(data)
+                            logger.info(f"✅ Successfully parsed JSON data for key: {key}")
+                            logger.info(f"📊 Parsed data type: {type(parsed_data)}")
+                            return parsed_data
+                        except json.JSONDecodeError:
+                            # If it's not JSON, try to convert it to a number
+                            try:
+                                logger.info(f"🔄 Attempting to convert non-JSON data to float for key: {key}")
+                                float_value = float(data)
+                                logger.info(f"✅ Successfully converted to float: {float_value}")
+                                return {"value": float_value}
+                            except ValueError:
+                                logger.warning(f"❌ Failed to convert data to float for key: {key}")
+                                continue
+                    else:
+                        logger.info(f"ℹ️ No data found for key: {key}")
+                else:
+                    logger.info(f"ℹ️ Key does not exist: {key}")
+            logger.warning(f"⚠️ No valid data found for {key_type}")
         except Exception as e:
-            logger.error(f"Error getting {key_type} data from Redis: {e}")
+            logger.error(f"❌ Error getting {key_type} data from Redis: {e}")
+            logger.error(f"❌ Exception type: {type(e)}")
+            logger.error(f"❌ Exception args: {e.args}")
     
-    logger.info(f"Using fallback data for {key_type}")
+    logger.info(f"ℹ️ Using fallback data for {key_type}")
+    logger.info(f"📊 Fallback data: {fallback_data}")
     return fallback_data
 
 # Fallback data
@@ -488,41 +526,90 @@ def get_fallback_position_data():
 
 def get_btc_price_data():
     """Get BTC price data from Redis with fallback to generated data"""
+    logger.info("🔍 Starting BTC price data retrieval")
     redis_client = get_redis_client()
+    
     if redis_client:
         try:
             # Get current price
             price_data = None
             for key in REDIS_KEYS['btc_price']:
-                price = redis_client.get(key)
-                if price:
-                    try:
-                        price_data = {
-                            "price": float(price),
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "source": key
-                        }
-                        break
-                    except ValueError:
-                        continue
+                logger.info(f"🔑 Attempting to get BTC price from key: {key}")
+                logger.info(f"🔍 Checking if key exists: {key}")
+                exists = redis_client.exists(key)
+                logger.info(f"📊 Key exists: {exists}")
+                
+                if exists:
+                    price = redis_client.get(key)
+                    if price is not None:  # Check for None explicitly
+                        logger.info(f"✅ Successfully retrieved BTC price from key: {key}")
+                        logger.info(f"📊 Price value: {price}")
+                        
+                        try:
+                            float_price = float(price)
+                            logger.info(f"✅ Successfully converted price to float: {float_price}")
+                            price_data = {
+                                "price": float_price,
+                                "timestamp": datetime.now(timezone.utc).isoformat(),
+                                "source": key
+                            }
+                            logger.info(f"📊 Created price data object: {price_data}")
+                            break
+                        except ValueError:
+                            logger.warning(f"❌ Failed to convert price to float for key: {key}")
+                            continue
+                    else:
+                        logger.info(f"ℹ️ No price data found for key: {key}")
+                else:
+                    logger.info(f"ℹ️ Key does not exist: {key}")
 
             # Get price changes
+            logger.info("🔍 Attempting to get BTC price changes")
+            changes_key = 'btc_price_changes'
+            logger.info(f"🔍 Checking if changes key exists: {changes_key}")
+            changes_exists = redis_client.exists(changes_key)
+            logger.info(f"📊 Changes key exists: {changes_exists}")
+            
             changes_data = None
-            changes = redis_client.get('btc_price_changes')
-            if changes:
-                try:
-                    changes_data = json.loads(changes)
-                except json.JSONDecodeError:
-                    pass
+            if changes_exists:
+                changes = redis_client.get(changes_key)
+                if changes is not None:  # Check for None explicitly
+                    logger.info(f"✅ Successfully retrieved price changes")
+                    try:
+                        changes_data = json.loads(changes)
+                        logger.info(f"✅ Successfully parsed price changes JSON")
+                        logger.info(f"📊 Changes data: {changes_data}")
+                    except json.JSONDecodeError:
+                        logger.warning("❌ Failed to parse BTC price changes JSON")
+                        pass
+                else:
+                    logger.info("ℹ️ No price changes data found")
+            else:
+                logger.info("ℹ️ Price changes key does not exist")
 
             # Get price patterns
+            logger.info("🔍 Attempting to get BTC price patterns")
+            patterns_key = 'btc_price_patterns'
+            logger.info(f"🔍 Checking if patterns key exists: {patterns_key}")
+            patterns_exists = redis_client.exists(patterns_key)
+            logger.info(f"📊 Patterns key exists: {patterns_exists}")
+            
             patterns_data = None
-            patterns = redis_client.get('btc_price_patterns')
-            if patterns:
-                try:
-                    patterns_data = json.loads(patterns)
-                except json.JSONDecodeError:
-                    pass
+            if patterns_exists:
+                patterns = redis_client.get(patterns_key)
+                if patterns is not None:  # Check for None explicitly
+                    logger.info(f"✅ Successfully retrieved price patterns")
+                    try:
+                        patterns_data = json.loads(patterns)
+                        logger.info(f"✅ Successfully parsed price patterns JSON")
+                        logger.info(f"📊 Patterns data: {patterns_data}")
+                    except json.JSONDecodeError:
+                        logger.warning("❌ Failed to parse BTC price patterns JSON")
+                        pass
+                else:
+                    logger.info("ℹ️ No price patterns data found")
+            else:
+                logger.info("ℹ️ Price patterns key does not exist")
 
             if price_data:
                 result = price_data
@@ -530,14 +617,17 @@ def get_btc_price_data():
                     result["changes"] = changes_data
                 if patterns_data:
                     result["patterns"] = patterns_data
+                logger.info(f"📊 Final combined BTC price data: {result}")
                 return result
 
         except Exception as e:
-            logger.error(f"Error getting BTC price data from Redis: {e}")
+            logger.error(f"❌ Error getting BTC price data from Redis: {e}")
+            logger.error(f"❌ Exception type: {type(e)}")
+            logger.error(f"❌ Exception args: {e.args}")
     
     # Fallback to generated price data
-    logger.warning("Using fallback BTC price data")
-    return {
+    logger.warning("⚠️ Using fallback BTC price data")
+    fallback_data = {
         "price": random.uniform(60000, 70000),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "source": "fallback",
@@ -552,146 +642,281 @@ def get_btc_price_data():
             "bull_flag": random.uniform(0, 1)
         }
     }
+    logger.info(f"📊 Generated fallback data: {fallback_data}")
+    return fallback_data
 
-# API routes
-@app.route('/')
-def index():
-    """Serve the live dashboard HTML file"""
-    return send_from_directory('.', 'live-dashboard.html')
-
-@app.route('/backup')
-def backup_dashboard():
-    """Serve the backup dashboard HTML file"""
-    return send_from_directory('.', 'backup-dashboard.html')
-
-@app.route('/api/health')
-def health_check():
-    """Health check endpoint"""
-    redis_client = get_redis_client()
-    return jsonify({
-        "status": "healthy",
-        "redis": "connected" if redis_client else "disconnected",
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    })
-
-@app.route('/api/trap-probability')
-def trap_probability():
-    """Get trap probability data from Redis"""
-    fallback_data = get_fallback_trap_data()
-    data = get_data_from_redis("trap_probability", fallback_data)
-    return jsonify(data)
-
-@app.route('/api/position')
-def get_position():
-    """Return current position data with enhanced position flow tracking."""
+def get_position_data():
+    """Get the current trading position data."""
+    logger.info("🔍 Starting position data retrieval")
     try:
         redis_client = get_redis_client()
         
         # Attempt to fetch from Redis
         if redis_client:
             for key in REDIS_KEYS['position']:
-                if redis_client.exists(key):
+                logger.info(f"🔑 Attempting to get position data from key: {key}")
+                logger.info(f"🔍 Checking if key exists: {key}")
+                exists = redis_client.exists(key)
+                logger.info(f"📊 Key exists: {exists}")
+                
+                if exists:
                     try:
                         position_json = redis_client.get(key)
-                        if position_json:  # Check that it's not None
+                        if position_json is not None:  # Check for None explicitly
+                            logger.info(f"✅ Successfully retrieved position data from key: {key}")
+                            logger.info(f"📊 Position JSON length: {len(position_json)}")
+                            
                             position_data = json.loads(position_json)
+                            logger.info(f"✅ Successfully parsed position JSON data")
+                            logger.info(f"📊 Position data type: {type(position_data)}")
                             
                             # Add source and timestamp if missing
                             position_data.setdefault('source', 'redis')
                             position_data.setdefault('timestamp', datetime.now(timezone.utc).isoformat())
+                            logger.info(f"📊 Added source and timestamp to position data")
                             
                             # Enhance with position flow tracking data
+                            logger.info("🔄 Enhancing position data with flow tracking")
                             enhanced_data = enhance_position_data(position_data)
+                            logger.info("✅ Successfully enhanced position data")
+                            logger.info(f"📊 Enhanced data type: {type(enhanced_data)}")
                             
-                            return jsonify(enhanced_data)
+                            return enhanced_data
+                        else:
+                            logger.info(f"ℹ️ No position data found for key: {key}")
                     except json.JSONDecodeError:
-                        logger.warning(f"Invalid JSON in Redis key {key}")
+                        logger.warning(f"❌ Invalid JSON in Redis key {key}")
                     except Exception as e:
-                        logger.error(f"Error processing Redis key {key}: {e}")
+                        logger.error(f"❌ Error processing Redis key {key}: {e}")
+                        logger.error(f"❌ Exception type: {type(e)}")
+                        logger.error(f"❌ Exception args: {e.args}")
+                else:
+                    logger.info(f"ℹ️ Position key does not exist: {key}")
         
         # If we get here, use fallback data
-        logger.info("Using fallback position data")
+        logger.info("ℹ️ Using fallback position data")
+        logger.info("🔄 Generating fallback position data")
         fallback_data = get_fallback_position_data()
+        logger.info(f"📊 Generated fallback data type: {type(fallback_data)}")
+        
+        logger.info("🔄 Enhancing fallback position data")
         enhanced_fallback = enhance_position_data(fallback_data)
-        return jsonify(enhanced_fallback)
+        logger.info("✅ Successfully enhanced fallback data")
+        logger.info(f"📊 Enhanced fallback data type: {type(enhanced_fallback)}")
+        
+        return enhanced_fallback
         
     except Exception as e:
-        logger.error(f"Error getting position data: {e}")
+        logger.error(f"❌ Error getting position data: {e}")
+        logger.error(f"❌ Exception type: {type(e)}")
+        logger.error(f"❌ Exception args: {e.args}")
+        
+        logger.info("ℹ️ Using fallback data due to error")
+        logger.info("🔄 Generating fallback position data")
         fallback_data = get_fallback_position_data()
+        logger.info(f"📊 Generated fallback data type: {type(fallback_data)}")
+        
+        logger.info("🔄 Enhancing fallback position data")
         enhanced_fallback = enhance_position_data(fallback_data)
-        return jsonify(enhanced_fallback)
+        logger.info("✅ Successfully enhanced fallback data")
+        logger.info(f"📊 Enhanced fallback data type: {type(enhanced_fallback)}")
+        
+        return enhanced_fallback
+
+# API routes
+@app.route('/')
+def index():
+    """Serve the dashboard HTML."""
+    logger.info("🔍 GET / - Serving dashboard HTML")
+    return send_from_directory('.', 'live-dashboard.html')
+
+@app.route('/backup')
+def backup_dashboard():
+    """Backup endpoint for data recovery."""
+    logger.info("🔍 GET /backup - Backup request received")
+    return send_from_directory('.', 'backup-dashboard.html')
+
+# Add route for static files in the src directory
+@app.route('/src/<path:filename>')
+def serve_static(filename):
+    """Serve static files from the src directory."""
+    logger.info(f"🔍 GET /src/{filename} - Serving static file")
+    return send_from_directory('src', filename)
+
+# Add route for node_modules
+@app.route('/node_modules/<path:filename>')
+def serve_node_modules(filename):
+    """Serve files from node_modules directory."""
+    logger.info(f"🔍 GET /node_modules/{filename} - Serving node module file")
+    return send_from_directory('node_modules', filename)
+
+@app.route('/api/health')
+def health_check():
+    """Health check endpoint."""
+    logger.info("🔍 GET /api/health - Health check request")
+    redis_status = "disconnected"
+    
+    # Try to connect to Redis directly
+    try:
+        # Create a new Redis client for testing
+        r = redis.Redis(
+            host="localhost",
+            port=6379,
+            decode_responses=True
+        )
+        # Get trap probability data
+        test_data = r.get("current_trap_probability")
+        if test_data:
+            redis_status = "connected"
+            logger.info("✅ Redis connection test successful")
+        else:
+            if r.ping():
+                redis_status = "connected"
+                logger.info("✅ Redis ping successful but no data found")
+    except Exception as e:
+        logger.error(f"❌ Redis health check failed: {e}")
+    
+    return {
+        "status": "healthy",
+        "redis": redis_status,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@app.route('/api/trap-probability')
+def trap_probability():
+    """Get the current trap probability data."""
+    logger.info("🔍 GET /api/trap-probability - Trap probability request")
+    data = get_data_from_redis('trap_probability', get_fallback_trap_data())
+    logger.info("✅ Trap probability data retrieved")
+    return jsonify(data)
+
+@app.route('/api/position')
+def get_position():
+    """Get the current trading position data."""
+    logger.info("🔍 GET /api/position - Position data request")
+    data = get_position_data()
+    logger.info("✅ Position data retrieved")
+    return jsonify(data)
 
 @app.route('/api/btc-price')
 def btc_price():
     """Get current BTC price with additional market data"""
+    logger.info("🔍 GET /api/btc-price - BTC price request")
     data = get_btc_price_data()
+    logger.info("✅ BTC price data retrieved")
     return jsonify(data)
 
 @app.route('/api/data')
 def combined_data():
     """Get combined data for the dashboard."""
+    logger.info("🔍 GET /api/data - Combined data request")
     # Get all data elements
     price_data = get_btc_price_data()
     trap_data = trap_probability()
     position_data = get_position()
     
-    # Combine all data
-    return jsonify({
+    # Combine into a single response
+    combined = {
         "price": price_data,
-        "trap": trap_data,
-        "position": position_data
-    })
+        "trap_probability": trap_data,
+        "position": position_data,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    logger.info("✅ Combined data retrieved")
+    return jsonify(combined)
 
 @app.route('/api/redis-keys')
 def redis_keys():
-    """Proxy to Redis monitor server for redis keys."""
+    """Get a list of recently updated Redis keys."""
+    logger.info("🔍 GET /api/redis-keys - Redis keys request")
     try:
-        # Proxy the request to the Redis monitor server
-        logger.info("Proxying request to Redis monitor server on port 5002")
-        response = requests.get('http://localhost:5002/api/redis-keys')
-        return response.json(), response.status_code
+        redis_client = get_redis_client()
+        if not redis_client:
+            logger.error("❌ Redis not connected")
+            return {"error": "Redis not connected"}
+        
+        # Get a limited set of keys to prevent timeouts
+        logger.info("🔍 Retrieving all Redis keys")
+        all_keys = redis_client.keys("*")
+        logger.info(f"📊 Found {len(all_keys)} total Redis keys")
+        
+        # Prioritize certain patterns and limit to 20 keys max
+        test_keys = [k for k in all_keys if k.startswith("test:")]
+        other_keys = [k for k in all_keys if not k.startswith("test:")]
+        logger.info(f"📊 Found {len(test_keys)} test keys and {len(other_keys)} other keys")
+        
+        # Prioritize test: keys first, then add others
+        sample_keys = test_keys[:10]  # Up to 10 test keys
+        if len(sample_keys) < 20:
+            # Add other keys to fill up to 20
+            sample_keys.extend(other_keys[:20-len(sample_keys)])
+        logger.info(f"📊 Selected {len(sample_keys)} keys for processing")
+        
+        # Process this limited set
+        recent_keys = []
+        for key in sample_keys:
+            try:
+                logger.info(f"🔍 Processing key: {key}")
+                # Get key type and add some metadata
+                key_type = redis_client.type(key)
+                logger.info(f"📊 Key type: {key_type}")
+                
+                key_info = {
+                    "key": key,
+                    "type": key_type,
+                }
+                
+                # Add additional info based on type
+                if key_type == "string":
+                    # Get string length
+                    value = redis_client.get(key)
+                    if value is not None:
+                        key_info["length"] = len(value)
+                        logger.info(f"📊 String key length: {key_info['length']}")
+                    else:
+                        logger.info(f"ℹ️ String key has no value: {key}")
+                elif key_type == "list":
+                    # Get list length
+                    key_info["length"] = redis_client.llen(key)
+                    logger.info(f"📊 List key length: {key_info['length']}")
+                elif key_type == "hash":
+                    # Get hash field count
+                    key_info["fields"] = len(redis_client.hkeys(key))
+                    logger.info(f"📊 Hash key field count: {key_info['fields']}")
+                
+                recent_keys.append(key_info)
+                logger.info(f"✅ Successfully processed key: {key}")
+            except Exception as e:
+                logger.error(f"❌ Error processing Redis key {key}: {e}")
+                logger.error(f"❌ Exception type: {type(e)}")
+                logger.error(f"❌ Exception args: {e.args}")
+        
+        response = {
+            "keys": recent_keys,
+            "total_keys": len(all_keys),
+            "displayed_keys": len(recent_keys)
+        }
+        logger.info(f"📊 Final Redis keys response: {response}")
+        return response
     except Exception as e:
-        logger.error(f"Error proxying to Redis monitor server: {e}")
-        return jsonify({
-            "status": "error",
-            "message": f"Failed to connect to Redis monitor server: {str(e)}",
-            "keys": []
-        }), 500
+        logger.error(f"❌ Error getting Redis keys: {e}")
+        logger.error(f"❌ Exception type: {type(e)}")
+        logger.error(f"❌ Exception args: {e.args}")
+        return {"error": str(e)}
 
 if __name__ == "__main__":
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Live API Server for OMEGA BTC AI Dashboard")
-    parser.add_argument("--port", type=int, default=5000, help="Port to run the server on")
-    parser.add_argument("--no-reload", action="store_true", help="Disable Flask auto-reloader")
-    args = parser.parse_args()
+    # Start the server
+    logger.info(f"Starting Reggae Dashboard server on 0.0.0.0:5001")
     
-    # Determine directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(script_dir)
+    # Print colorful banner
+    print(f"\n{GREEN}{BOLD}==============================================={RESET}")
+    print(f"{GREEN}{BOLD}    OMEGA BTC AI - REGGAE DASHBOARD SERVER    {RESET}")
+    print(f"{GREEN}{BOLD}==============================================={RESET}")
+    print(f"{GOLD}    JAH BLESS YOUR TRADING JOURNEY    {RESET}")
+    print(f"{GREEN}{BOLD}==============================================={RESET}\n")
     
-    # Check if necessary HTML files exist
-    if not os.path.exists("live-dashboard.html"):
-        logger.warning("live-dashboard.html not found, will use backup if available")
-        if not os.path.exists("backup-dashboard.html"):
-            logger.error("No dashboard HTML files found in the current directory")
-            sys.exit(1)
-    
-    # Log found dashboard files
-    available_dashboards = []
-    if os.path.exists("live-dashboard.html"):
-        available_dashboards.append("live-dashboard.html")
-    if os.path.exists("backup-dashboard.html"):
-        available_dashboards.append("backup-dashboard.html")
-    
-    logger.info(f"Found dashboard files: {', '.join(available_dashboards)}")
-    
-    # Run the app
-    logger.info(f"Starting Live API Server on http://localhost:{args.port}")
-    logger.info(f"Access the dashboard at http://localhost:{args.port}/")
-    
-    app.run(
-        host="0.0.0.0",
-        port=args.port,
-        debug=True,
-        use_reloader=not args.no_reload
-    ) 
+    # Run the app with Flask's development server on port 5001
+    app.run(host="0.0.0.0", port=5001)
+else:
+    # For imported usage, we already have the app instance created above
+    pass 
