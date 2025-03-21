@@ -2193,7 +2193,16 @@
                     }
 
                     if (leverageElement) {
-                        leverageElement.textContent = `${leverage}x`;
+                        // Check if there's expected_leverage data
+                        if (positionData.expected_leverage !== undefined && positionData.leverage_mismatch) {
+                            // Display both values with a warning if they don't match
+                            leverageElement.innerHTML = `${leverage}x <span class="warning" title="Expected: ${positionData.expected_leverage}x">⚠️</span>`;
+                            leverageElement.style.color = '#ff9900'; // Warning color
+                        } else {
+                            // Just display the actual leverage
+                            leverageElement.textContent = `${leverage}x`;
+                            leverageElement.style.color = ''; // Reset color
+                        }
                     }
 
                     if (riskMultiElement) {
