@@ -46,6 +46,10 @@ BITGET_API_KEY = os.getenv('BITGET_API_KEY')
 BITGET_SECRET_KEY = os.getenv('BITGET_SECRET_KEY')
 BITGET_PASSPHRASE = os.getenv('BITGET_PASSPHRASE')
 
+# Fibonacci levels from .env or default
+FIBONACCI_LEVELS_STR = os.getenv('FIBONACCI_LEVELS', '0,0.236,0.382,0.5,0.618,0.786,1,1.618,2.618,4.236')
+FIBONACCI_LEVELS = [float(level) for level in FIBONACCI_LEVELS_STR.split(',')]
+
 # Redis connection details (from .env or defaults)
 REDIS_HOST = 'localhost'  # Overriding to use localhost since that's working
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
@@ -410,7 +414,61 @@ def get_simulated_position():
     log_color(f"Entry time: {entry_time.strftime('%Y-%m-%d %H:%M:%S')}", GREEN)
     return position_data
 
-async def track_position_flow_2d(position=None, hours_back=24, symbol="BTC/USDT:USDT", redis_client=None):
+def calculate_fibonacci_targets(entry_price, direction, current_price=None):
+    """
+    Calculate Fibonacci take profit targets based on the entry price.
+    
+    Args:
+        entry_price: The position entry price
+        direction: 'long' or 'short'
+        current_price: Current price (optional) to highlight the closest level
+    
+    Returns:
+        Dictionary of Fibonacci levels and their price values
+    """
+    targets = {}
+    
+    # Long targets are above entry price, short targets are below
+    if direction.lower() == 'long':
+        # For longs, we primarily use extension levels (1.0+)
+        extension_levels = [level for level in FIBONACCI_LEVELS if level >= 1.0]
+        
+        # Calculate the base move using average historical volatility
+        # For simplicity, using a fixed percentage of the entry price
+        base_move = entry_price * 0.03  # 3% of entry price
+        
+        for level in extension_levels:
+            target_price = entry_price + (base_move * level)
+            targets[str(level)] = target_price
+            
+    else:  # Short
+        # For shorts, we primarily use extension levels (1.0+) but in reverse
+        extension_levels = [level for level in FIBONACCI_LEVELS if level >= 1.0]
+        
+        # Calculate the base move
+        base_move = entry_price * 0.03  # 3% of entry price
+        
+        for level in extension_levels:
+            target_price = entry_price - (base_move * level)
+            targets[str(level)] = target_price
+    
+    # Add the closest level to current price indicator
+    if current_price:
+        min_diff = float('inf')
+        closest_level = None
+        
+        for level, price in targets.items():
+            diff = abs(price - current_price)
+            if diff < min_diff:
+                min_diff = diff
+                closest_level = level
+                
+        if closest_level:
+            targets['closest_level'] = closest_level
+    
+    return targets
+
+async def track_position_flow_2d(position=None, hours_back=24, redis_client=None):
     """Track and visualize the price flow of a position in traditional 2D."""
     # Get position data from API if not provided
     if position is None:
@@ -438,7 +496,7 @@ async def track_position_flow_2d(position=None, hours_back=24, symbol="BTC/USDT:
     
     # Fetch historical prices
     df = await fetch_historical_prices(
-        symbol,
+        position['symbol'],
         since_time,
         until_time,
         redis_client=redis_client
@@ -448,9 +506,16 @@ async def track_position_flow_2d(position=None, hours_back=24, symbol="BTC/USDT:
         log_color("No price data available for this time range.", RED)
         return
     
-    # Create plot
-    plt.figure(figsize=(12, 8))
-    plt.style.use('dark_background')
+    # Calculate Fibonacci targets
+    fib_targets = calculate_fibonacci_targets(
+        entry_price, 
+        direction,
+        df['close'].iloc[-1]
+    )
+    
+    # Create the plot
+    plt.figure(figsize=(14, 8), facecolor='#121212')
+    ax = plt.axes()
     
     # Plot price movement
     plt.plot(df['timestamp'], df['close'], label='BTC Price', color='#f0f0f0', linewidth=2)
@@ -544,6 +609,44 @@ async def track_position_flow_2d(position=None, hours_back=24, symbol="BTC/USDT:
     # Adjust layout
     plt.tight_layout(rect=(0, 0.03, 1, 0.97))
     
+    # Add Fibonacci take profit targets
+    for level, target_price in fib_targets.items():
+        if level == 'closest_level':
+            continue
+            
+        # Skip levels that are outside the chart range
+        if target_price < min(df['close']) or target_price > max(df['close']):
+            continue
+            
+        # Different colors for different Fibonacci levels
+        fib_color = CYAN
+        if float(level) >= 2.618:
+            fib_color = MAGENTA
+        elif float(level) >= 1.618:
+            fib_color = YELLOW
+        elif float(level) >= 1.0:
+            fib_color = GREEN
+            
+        # Draw the Fibonacci level line
+        plt.axhline(
+            y=target_price, 
+            color=fib_color, 
+            linestyle='--', 
+            alpha=0.8,
+            linewidth=1.5
+        )
+        
+        # Add a label for the Fibonacci level
+        plt.text(
+            x=df.index[0], 
+            y=target_price * 1.0005, 
+            s=f"TP {level}x: {target_price:.2f}", 
+            color=fib_color, 
+            fontsize=10, 
+            ha='left', 
+            va='bottom'
+        )
+    
     # Save the figure
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"position_flow_2d_{timestamp}.png"
@@ -552,7 +655,7 @@ async def track_position_flow_2d(position=None, hours_back=24, symbol="BTC/USDT:
     log_color(f"2D position flow visualization saved as {filename}", GREEN)
     plt.show()
 
-async def track_position_flow_3d(position=None, hours_back=24, symbol="BTC/USDT:USDT", redis_client=None):
+async def track_position_flow_3d(position=None, hours_back=24, redis_client=None):
     """Track and visualize the price flow of a position in 3D with momentum/velocity on z-axis."""
     # Get position data from API if not provided
     if position is None:
@@ -580,7 +683,7 @@ async def track_position_flow_3d(position=None, hours_back=24, symbol="BTC/USDT:
     
     # Fetch historical prices
     df = await fetch_historical_prices(
-        symbol,
+        position['symbol'],
         since_time,
         until_time,
         redis_client=redis_client
@@ -747,6 +850,57 @@ async def track_position_flow_3d(position=None, hours_back=24, symbol="BTC/USDT:
     
     # Add grid for better depth perception
     ax.grid(True, alpha=0.2)
+    
+    # Calculate Fibonacci targets
+    fib_targets = calculate_fibonacci_targets(
+        entry_price, 
+        direction,
+        current_price
+    )
+    
+    # Add Fibonacci targets as horizontal planes in 3D space
+    for level, target_price in fib_targets.items():
+        if level == 'closest_level':
+            continue
+            
+        # Skip levels that are outside the chart range
+        if target_price < min(df['close']) or target_price > max(df['close']):
+            continue
+            
+        # Different colors for different Fibonacci levels
+        fib_color = 'cyan'
+        if float(level) >= 2.618:
+            fib_color = 'magenta'
+        elif float(level) >= 1.618:
+            fib_color = 'yellow'
+        elif float(level) >= 1.0:
+            fib_color = 'green'
+            
+        # Create a plane at the Fibonacci level
+        x_range = np.array([0, len(df.index) - 1])
+        y_range = np.array([min(z), max(z)])
+        X, Y = np.meshgrid(x_range, y_range)
+        Z = np.ones(X.shape) * target_price
+        
+        # Plot the semi-transparent plane
+        ax.plot_surface(
+            X, Y, Z, 
+            color=fib_color, 
+            alpha=0.2, 
+            linewidth=0,
+            antialiased=True
+        )
+        
+        # Add a line at the edge of the plane for better visibility
+        ax.plot(
+            x_range, 
+            [min(z)] * 2, 
+            [target_price] * 2, 
+            color=fib_color, 
+            linewidth=2, 
+            linestyle='--',
+            label=f"TP {level}x: {target_price:.2f}"
+        )
     
     # Adjust viewing angle if the method exists
     if hasattr(ax, 'view_init'):
