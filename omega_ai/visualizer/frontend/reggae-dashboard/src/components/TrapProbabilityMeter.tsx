@@ -133,7 +133,7 @@ const TrapProbabilityMeter: React.FC<TrapProbabilityMeterProps> = ({ trapData })
             )}
 
             {/* JAH JAH alert message */}
-            {trapData.jah_message && (
+            {trapData.message && (
                 <motion.div
                     className="mt-4 p-3 bg-gradient-to-r from-reggae-green/20 via-reggae-yellow/20 to-reggae-red/20 rounded-lg border border-reggae-gold/30"
                     initial={{ scale: 0.95, opacity: 0 }}
@@ -141,7 +141,7 @@ const TrapProbabilityMeter: React.FC<TrapProbabilityMeterProps> = ({ trapData })
                     transition={{ duration: 0.5 }}
                 >
                     <p className="text-center text-reggae-gold font-display tracking-wide">
-                        {trapData.jah_message}
+                        {trapData.message}
                     </p>
                 </motion.div>
             )}

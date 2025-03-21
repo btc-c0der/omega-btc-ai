@@ -64,8 +64,8 @@ const CandlestickChart: React.FC<CandlestickChartProps> = ({ positionData }) => 
         let currentTime = new Date();
         currentTime.setHours(currentTime.getHours() - 24); // Start 24 hours ago
 
-        // Current price around 65000
-        let price = 65000;
+        // Current price around 83000 (Updated to current BTC price)
+        let price = 83000;
 
         // Generate 24 hourly candles
         for (let i = 0; i < 24; i++) {
