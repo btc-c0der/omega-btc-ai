@@ -1082,3 +1082,139 @@ REDIS_PASSWORD=  # Leave empty for local development
 ```
 
 JAH BLESS! ONE LOVE! 🦁
+
+# OMEGA BTC AI - Advanced Bitcoin market analysis system with real-time trend tracking, market maker trap detection, and automated trading strategies
+
+## Key Features
+
+- Real-time BTC price feed integration
+- Market maker trap detection
+- Trend analysis with Fibonacci retracement levels
+- Reggae Dashboard for visualization
+- Enhanced Market Trend Analyzer with extended Fibonacci levels
+- Fibonacci Dashboard Connector for real-time visualization
+- Auto-healing system capabilities with continuous health monitoring
+- Support for both foreground and background execution modes
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8 or higher
+- Redis server
+- Node.js and npm (for the dashboard)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/omega-btc-ai.git
+cd omega-btc-ai
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install UI dependencies
+cd omega_ai/visualizer/ui
+npm install
+```
+
+## Running the System
+
+Use the automated system launcher to start all components:
+
+```bash
+# Run all components in foreground mode (default)
+python run_omega_system.py
+
+# Run with auto-healing enabled in background mode
+python run_omega_system.py --auto-heal --background
+
+# Start UI components first, then add other components
+python run_omega_system.py --ui-first
+```
+
+### Available Command Line Options
+
+- `--no-reggae`: Don't start Reggae UI Dashboard
+- `--no-backend`: Don't start Reggae Backend Server
+- `--no-cleanup`: Don't kill existing processes
+- `--no-fibonacci`: Don't start the Fibonacci Dashboard Connector
+- `--no-market-analyzer`: Don't start the Enhanced Market Trend Analyzer
+- `--background`: Run components in background mode (logs to files only)
+- `--foreground`: Run components in foreground mode with console output (default)
+- `--auto-heal`: Enable auto-healing for system components
+- `--ui-first`: Start UI components first, then add other components
+
+### Execution Modes
+
+#### Foreground Mode (Default)
+
+In foreground mode, all component outputs are displayed in the terminal. This mode is useful for:
+
+- Debugging issues
+- Development and testing
+- Getting real-time feedback from all components
+
+#### Background Mode
+
+In background mode, components run silently with outputs directed to log files. This mode is suitable for:
+
+- Production environments
+- Running the system as a service
+- Reducing terminal clutter
+
+### Auto-Healing Capabilities
+
+The auto-healing system provides:
+
+1. **Component Health Monitoring**
+   - Continuous checking of all components
+   - Port availability verification
+   - Log file analysis
+   - Process status monitoring
+
+2. **Redis Connection Management**
+   - Automatic reconnection on failure
+   - Data consistency validation
+   - Key restoration for critical data
+
+3. **Automatic Recovery**
+   - Component restart on failure
+   - Intelligent restart with cooldown periods
+   - Smart log rotation and backup
+
+4. **Health Status Reporting**
+   - Periodic health status updates
+   - Component-level status details
+   - Automatic log analysis
+
+## Access Points
+
+- Reggae Frontend Dashboard: <http://localhost:5001/>
+- Reggae Backend Dashboard: <http://localhost:8000/>
+- WebSocket Server: ws://localhost:8765/
+- Enhanced Market Analyzer: Check logs/market_trend_analyzer.log
+- Fibonacci Dashboard: Check logs/fibonacci_dashboard_connector.log
+
+## Components
+
+### Enhanced Market Trend Analyzer
+
+Real-time market trend analysis with extended Fibonacci levels and trader sentiment indicators.
+
+### Fibonacci Dashboard Connector
+
+Connects the market trend analyzer to the Reggae Dashboard, providing real-time visualization of Fibonacci levels and market sentiment.
+
+### System Health Monitor
+
+When running with `--auto-heal`, the system maintains continuous health monitoring of all components and Redis connections, automatically recovering from failures and providing status updates.
+
+# Run with only Fibonacci Dashboard and Live API components (for local development)
+
+python run_omega_system.py --no-market-analyzer --ui-first --no-cleanup
+
+# Run with just the essential services for the dashboard
+
+python run_omega_system.py --no-market-analyzer --no-backend --ui-first
