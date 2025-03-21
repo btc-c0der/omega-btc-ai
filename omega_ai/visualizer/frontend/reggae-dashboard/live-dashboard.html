@@ -518,6 +518,44 @@
             height: 100%;
         }
 
+        /* Enhanced TP/SL styles */
+        .tp-sl-value {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tp-sl-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .tp-indicator {
+            background-color: var(--green-color);
+        }
+
+        .sl-indicator {
+            background-color: var(--red-color);
+        }
+
+        .tp-sl-distance {
+            font-size: 0.85em;
+            opacity: 0.85;
+            margin-left: 8px;
+        }
+
+        .tp-sl-active {
+            animation: pulse-target 1.5s infinite;
+        }
+
+        .tp-sl-close {
+            font-weight: bold;
+        }
+
+        /* Existing target indicator styles */
         .target-indicator {
             display: flex;
             align-items: center;
@@ -2237,12 +2275,66 @@
 
                     // Update stop loss
                     if (stopLossElement) {
-                        stopLossElement.textContent = stopLoss > 0 ? formatPrice(stopLoss) : 'Not Set';
+                        if (stopLoss > 0) {
+                            // Enhanced SL display with distance indicator
+                            let slDistance = '';
+                            let slClass = '';
+
+                            // Add distance information if available
+                            if (positionData.stop_loss_distance !== undefined && positionData.stop_loss_distance !== null) {
+                                const distance = parseFloat(positionData.stop_loss_distance);
+                                slDistance = `<span class="tp-sl-distance">(${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%)</span>`;
+
+                                // Add visual indicators based on distance
+                                if (distance < 1) {
+                                    slClass = 'tp-sl-close tp-sl-active';
+                                } else if (distance < 3) {
+                                    slClass = 'tp-sl-close';
+                                }
+                            }
+
+                            stopLossElement.innerHTML = `
+                                <span class="tp-sl-value">
+                                    <span class="tp-sl-indicator sl-indicator ${slClass}"></span>
+                                    ${formatPrice(stopLoss)}
+                                    ${slDistance}
+                                </span>
+                            `;
+                        } else {
+                            stopLossElement.textContent = 'Not Set';
+                        }
                     }
 
                     // Update take profits
                     if (takeProfitsElement) {
-                        if (Array.isArray(takeProfit) && takeProfit.length > 0) {
+                        const takeProfit = positionData.take_profit || 0;
+
+                        if (takeProfit > 0) {
+                            // Enhanced TP display with distance indicator
+                            let tpDistance = '';
+                            let tpClass = '';
+
+                            // Add distance information if available
+                            if (positionData.take_profit_distance !== undefined && positionData.take_profit_distance !== null) {
+                                const distance = parseFloat(positionData.take_profit_distance);
+                                tpDistance = `<span class="tp-sl-distance">(${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%)</span>`;
+
+                                // Add visual indicators based on distance
+                                if (distance < 0.5) {
+                                    tpClass = 'tp-sl-close tp-sl-active';
+                                } else if (distance < 2) {
+                                    tpClass = 'tp-sl-close';
+                                }
+                            }
+
+                            takeProfitsElement.innerHTML = `
+                                <span class="tp-sl-value">
+                                    <span class="tp-sl-indicator tp-indicator ${tpClass}"></span>
+                                    ${formatPrice(takeProfit)}
+                                    ${tpDistance}
+                                </span>
+                            `;
+                        } else if (Array.isArray(takeProfit) && takeProfit.length > 0) {
                             // Format take profits as a string
                             const takeProfitText = takeProfit.map(tp => {
                                 if (typeof tp === 'object' && tp.price) {
@@ -2278,8 +2370,6 @@
 
                 } else {
                     // No active position - show "No Position" state
-
-                    // Update status
                     if (statusElement) {
                         statusElement.textContent = 'NO POSITION';
                         statusElement.className = 'value neutral';
