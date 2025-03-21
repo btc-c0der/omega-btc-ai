@@ -451,6 +451,30 @@
             margin-right: 8px;
             color: var(--yellow-color);
         }
+
+        /* Add styles for the license disclaimer */
+        .license-disclaimer {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        .license-disclaimer p {
+            margin: 0.5rem 0;
+        }
+
+        .license-disclaimer a {
+            color: rgba(255, 215, 0, 0.7);
+            text-decoration: none;
+        }
+
+        .license-disclaimer a:hover {
+            color: rgba(255, 215, 0, 1);
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -523,7 +547,7 @@
                 </div>
                 <div class="data-row">
                     <span class="label">Side:</span>
-                    <span id="position-side" class="value neutral">N/A</span>
+                    <span id="position-side" class="value neutral">--</span>
                 </div>
                 <div class="data-row">
                     <span class="label">Entry Price:</span>
@@ -539,7 +563,7 @@
                 </div>
                 <div class="data-row">
                     <span class="label">Leverage:</span>
-                    <span id="position-leverage" class="value neutral">1x</span>
+                    <span id="position-leverage" class="value neutral">0x</span>
                 </div>
                 <div class="data-row">
                     <span class="label">PnL (%):</span>
@@ -559,21 +583,19 @@
                 </div>
                 <div class="data-row">
                     <span class="label">Take Profits:</span>
-                    <div id="take-profits" class="value neutral">
-                        <!-- Take profits will be inserted here -->
-                    </div>
+                    <div id="take-profits" class="value neutral">--</div>
                 </div>
                 <div class="data-row">
                     <span class="label">Entry Time:</span>
-                    <span id="entry-time" class="value neutral">N/A</span>
+                    <span id="entry-time" class="value neutral">--</span>
                 </div>
                 <div class="data-row">
                     <span class="label">Source:</span>
-                    <span id="position-source" class="value neutral">N/A</span>
+                    <span id="position-source" class="value neutral">--</span>
                 </div>
                 <div class="data-row">
                     <span class="label">Last Updated:</span>
-                    <span id="position-timestamp" class="value neutral">N/A</span>
+                    <span id="position-timestamp" class="value neutral">--</span>
                 </div>
 
                 <div id="trap-awareness" style="display: none;">
@@ -608,6 +630,22 @@
             </div>
             <div>JAH LOVE ❤️ GUIDE THE WAY</div>
         </div>
+    </div>
+
+    <!-- GNU License Disclaimer -->
+    <div class="license-disclaimer">
+        <p>OMEGA BTC AI - Copyright (C) 2024 OMEGA BTC AI Team</p>
+        <p>This program is free software: you can redistribute it and/or modify
+            it under the terms of the GNU General Public License as published by
+            the Free Software Foundation, either version 3 of the License, or
+            (at your option) any later version.</p>
+        <p>This program is distributed in the hope that it will be useful,
+            but WITHOUT ANY WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+            GNU General Public License for more details.</p>
+        <p>You should have received a copy of the GNU General Public License
+            along with this program. If not, see <a href="https://www.gnu.org/licenses/"
+                target="_blank">https://www.gnu.org/licenses/</a></p>
     </div>
 
     <script>
@@ -651,13 +689,15 @@
         };
 
         const formatTimestamp = (timestamp) => {
-            if (!timestamp) return 'N/A';
-            try {
-                const date = new Date(timestamp);
-                return date.toLocaleTimeString();
-            } catch (e) {
-                return 'Invalid timestamp';
-            }
+            if (!timestamp) return '--';
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        };
+
+        const formatShortTimestamp = (timestamp) => {
+            if (!timestamp) return '--';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
         };
 
         const formatTimeDiff = (timestamp) => {
@@ -753,7 +793,7 @@
             document.getElementById('position-status').textContent = hasPosition ? 'Active' : 'No Position';
             document.getElementById('position-status').className = hasPosition ? 'value neutral' : 'value neutral';
 
-            document.getElementById('position-side').textContent = data.position_side || 'N/A';
+            document.getElementById('position-side').textContent = data.position_side || '--';
             if (data.position_side) {
                 const sideElement = document.getElementById('position-side');
                 if (data.position_side.toLowerCase() === 'long') {
@@ -765,15 +805,15 @@
                 }
             }
 
-            document.getElementById('entry-price').textContent = data.entry_price ? formatUSD(data.entry_price) : 'N/A';
-            document.getElementById('current-price').textContent = data.current_price ? formatUSD(data.current_price) : 'N/A';
-            document.getElementById('position-size').textContent = data.position_size ? formatBTC(data.position_size) : 'N/A';
-            document.getElementById('position-leverage').textContent = data.leverage ? `${data.leverage}x` : 'N/A';
-            document.getElementById('risk-multiplier').textContent = data.risk_multiplier ? `${data.risk_multiplier.toFixed(2)}x` : 'N/A';
-            document.getElementById('stop-loss').textContent = data.stop_loss ? formatUSD(data.stop_loss) : 'N/A';
-            document.getElementById('entry-time').textContent = data.entry_time ? formatTimestamp(data.entry_time) : 'N/A';
-            document.getElementById('position-source').textContent = data.source || 'Unknown';
-            document.getElementById('position-timestamp').textContent = formatTimestamp(data.timestamp);
+            document.getElementById('entry-price').textContent = data.entry_price ? formatUSD(data.entry_price) : '$0.00';
+            document.getElementById('current-price').textContent = data.current_price ? formatUSD(data.current_price) : '$0.00';
+            document.getElementById('position-size').textContent = data.position_size ? formatBTC(data.position_size) : '0.00 BTC';
+            document.getElementById('position-leverage').textContent = data.leverage ? `${data.leverage}x` : '0x';
+            document.getElementById('risk-multiplier').textContent = data.risk_multiplier ? `${data.risk_multiplier.toFixed(2)}x` : '1.00x';
+            document.getElementById('stop-loss').textContent = data.stop_loss ? formatUSD(data.stop_loss) : '$0.00';
+            document.getElementById('entry-time').textContent = data.entry_time ? formatTimestamp(data.entry_time) : '--';
+            document.getElementById('position-source').textContent = data.source || '--';
+            document.getElementById('position-timestamp').textContent = formatTimestamp(data.timestamp) || '--';
 
             // Update take profits
             const takeProfitsDiv = document.getElementById('take-profits');
@@ -782,7 +822,7 @@
                     `${formatUSD(tp.price)} (${(tp.size * 100).toFixed(0)}%)`
                 ).join('<br>');
             } else {
-                takeProfitsDiv.textContent = 'N/A';
+                takeProfitsDiv.textContent = '--';
             }
 
             // Update PnL
@@ -797,7 +837,7 @@
                     pnlPercent.className = 'value neutral';
                 }
             } else {
-                pnlPercent.textContent = 'N/A';
+                pnlPercent.textContent = '0.00%';
                 pnlPercent.className = 'value neutral';
             }
 
@@ -812,7 +852,7 @@
                     pnlUsd.className = 'value neutral';
                 }
             } else {
-                pnlUsd.textContent = 'N/A';
+                pnlUsd.textContent = '$0.00';
                 pnlUsd.className = 'value neutral';
             }
 
