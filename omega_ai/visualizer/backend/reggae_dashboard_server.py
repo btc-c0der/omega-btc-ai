@@ -24,10 +24,36 @@ from pathlib import Path
 import logging
 import os
 
-# Configure logging
+# ANSI color codes for Reggae-themed colorful output
+GREEN = "\033[38;5;34m"    # Bright green (Reggae primary color)
+GOLD = "\033[38;5;220m"    # Gold/Yellow (Reggae secondary color)
+RED = "\033[38;5;196m"     # Bright red (Reggae tertiary color)
+BLACK = "\033[38;5;232m"   # Deep black
+CYAN = "\033[38;5;51m"     # Cyan for information
+BOLD = "\033[1m"           # Bold text
+RESET = "\033[0m"          # Reset formatting
+
+# Custom formatter for colored logs
+class ColoredFormatter(logging.Formatter):
+    FORMATS = {
+        logging.DEBUG: f"{BLACK}%(asctime)s - {CYAN}%(name)s{RESET} - {CYAN}%(levelname)s{RESET} - %(message)s",
+        logging.INFO: f"{BLACK}%(asctime)s - {GREEN}%(name)s{RESET} - {GREEN}%(levelname)s{RESET} - {GREEN}%(message)s{RESET}",
+        logging.WARNING: f"{BLACK}%(asctime)s - {GOLD}%(name)s{RESET} - {GOLD}%(levelname)s{RESET} - {GOLD}%(message)s{RESET}",
+        logging.ERROR: f"{BLACK}%(asctime)s - {RED}%(name)s{RESET} - {RED}%(levelname)s{RESET} - {RED}%(message)s{RESET}",
+        logging.CRITICAL: f"{BLACK}%(asctime)s - {RED}{BOLD}%(name)s{RESET} - {RED}{BOLD}%(levelname)s{RESET} - {RED}{BOLD}%(message)s{RESET}",
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+# Configure logging with colors
+handler = logging.StreamHandler()
+handler.setFormatter(ColoredFormatter())
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    handlers=[handler]
 )
 logger = logging.getLogger("reggae_dashboard")
 
@@ -84,6 +110,74 @@ class ReggaeDashboardServer:
 
     def setup_routes(self):
         """Set up API routes and WebSocket endpoint."""
+        
+        @self.app.get("/")
+        async def root():
+            """Root endpoint that displays server information and available endpoints."""
+            # Create a simpler HTML response
+            html_content = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>OMEGA BTC AI - Reggae Dashboard API</title>
+                <style>
+                    body {
+                        background-color: #121212;
+                        color: #e0e0e0;
+                        font-family: 'Courier New', monospace;
+                        margin: 0;
+                        padding: 20px;
+                    }
+                    h1 {
+                        color: #4CAF50;
+                        border-bottom: 2px solid #FFD700;
+                    }
+                    .container {
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    .endpoint {
+                        background-color: #1E1E1E;
+                        border-left: 4px solid #FFD700;
+                        padding: 10px;
+                        margin: 10px 0;
+                    }
+                    .method {
+                        color: #4CAF50;
+                        font-weight: bold;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>OMEGA BTC AI - Reggae Dashboard API</h1>
+                    
+                    <h2>Available Endpoints</h2>
+                    <div class="endpoint">
+                        <div class="method">GET</div>
+                        <div>/api/health - Health check endpoint</div>
+                    </div>
+                    <div class="endpoint">
+                        <div class="method">GET</div>
+                        <div>/api/trap-probability - Get trap probability data</div>
+                    </div>
+                    <div class="endpoint">
+                        <div class="method">GET</div>
+                        <div>/api/position - Get position data</div>
+                    </div>
+                    <div class="endpoint">
+                        <div class="method">GET</div>
+                        <div>/api/redis-keys - List Redis keys</div>
+                    </div>
+                    <div class="endpoint">
+                        <div class="method">WebSocket</div>
+                        <div>/ws - Real-time updates</div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            return HTMLResponse(content=html_content)
         
         @self.app.get("/api/health")
         async def health_check():
@@ -318,21 +412,24 @@ class ReggaeDashboardServer:
 if __name__ == "__main__":
     # Create dashboard server instance
     dashboard = ReggaeDashboardServer()
+    app = dashboard.app
     
     # Register startup and shutdown events
-    dashboard.app.add_event_handler("startup", dashboard.startup)
-    dashboard.app.add_event_handler("shutdown", dashboard.shutdown)
+    app.add_event_handler("startup", dashboard.startup)
+    app.add_event_handler("shutdown", dashboard.shutdown)
     
     # Start the server
     logger.info(f"Starting Reggae Dashboard server on 0.0.0.0:8000")
     
-    # Run the app directly
-    uvicorn.run(
-        "reggae_dashboard_server:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True
-    )
+    # Print colorful banner
+    print(f"\n{GREEN}{BOLD}==============================================={RESET}")
+    print(f"{GREEN}{BOLD}    OMEGA BTC AI - REGGAE DASHBOARD SERVER    {RESET}")
+    print(f"{GREEN}{BOLD}==============================================={RESET}")
+    print(f"{GOLD}    JAH BLESS YOUR TRADING JOURNEY    {RESET}")
+    print(f"{GREEN}{BOLD}==============================================={RESET}\n")
+    
+    # Run the app directly with the string reference again
+    uvicorn.run("reggae_dashboard_server:app", host="0.0.0.0", port=8000)
 else:
     # For imported usage, create the app
     dashboard = ReggaeDashboardServer()
