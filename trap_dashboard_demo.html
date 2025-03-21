@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Trap Analysis Dashboard Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --green-color: #00B52D;
+            --yellow-color: #FFD700;
+            --red-color: #FF3D00;
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-color: #E0E0E0;
+            --muted-color: #AAAAAA;
+            --border-color: rgba(255, 215, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0, 181, 45, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 30%, rgba(255, 215, 0, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 70%, rgba(255, 61, 0, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            color: var(--yellow-color);
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-dot.connected {
+            background-color: var(--green-color);
+            box-shadow: 0 0 10px var(--green-color);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background-color: var(--red-color);
+            box-shadow: 0 0 10px var(--red-color);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 181, 45, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 181, 45, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 181, 45, 0);
+            }
+        }
+
+        .data-source {
+            background-color: rgba(255, 215, 0, 0.2);
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--yellow-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* BitGet Card Styles */
+        .bitget-card {
+            background: linear-gradient(145deg, #1a1a1a, #262626);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            padding: 18px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .bitget-card h2 {
+            background: linear-gradient(to right, #76b852, #ffeb3b, #ff6d00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bitget-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #76b852, #ffeb3b, #ff6d00);
+            z-index: 1;
+        }
+
+        .bitget-pnl-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bitget-pnl-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .bitget-pnl-label {
+            font-size: 0.8rem;
+            color: var(--muted-color);
+            margin-bottom: 5px;
+        }
+
+        .bitget-pnl-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .bitget-pnl-value.positive {
+            color: #76b852;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .bitget-pnl-value.negative {
+            color: #ff6d00;
+            text-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
+
+        .bitget-pnl-value.neutral {
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+        }
+
+        .bitget-detail-label {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+        }
+
+        .bitget-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .bitget-stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bitget-stat-label {
+            font-size: 0.7rem;
+            color: var(--muted-color);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bitget-stat-value {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .bitget-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .bitget-action-btn {
+            padding: 8px 0;
+            border-radius: 6px;
+            text-align: center;
+            flex: 1;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bitget-action-btn.edit {
+            background: linear-gradient(135deg, #ffeb3b, #ffc107);
+            color: #000;
+        }
+
+        .bitget-action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .rasta-divider {
+            height: 3px;
+            background: linear-gradient(to right, #76b852, #ffeb3b, #ff6d00);
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+
+        .trap-indicator {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .trap-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .trap-dot.bull {
+            background-color: var(--green-color);
+            box-shadow: 0 0 5px var(--green-color);
+        }
+
+        .trap-dot.bear {
+            background-color: var(--red-color);
+            box-shadow: 0 0 5px var(--red-color);
+        }
+
+        .trap-info {
+            flex: 1;
+        }
+
+        .trap-type {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .trap-confidence {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .trap-timeframe {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+        }
+
+        .refresh-button {
+            background-color: #1c384e;
+            color: #bcd4e6;
+            border: 1px solid #3a546a;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-top: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .refresh-button:hover {
+            background-color: #2a4e6c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-brands fa-bitcoin"></i> OMEGA BTC AI TRAP ANALYSIS DASHBOARD</h1>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot disconnected" id="status-dot"></div>
+                <span id="status-text">Connecting to Redis...</span>
+            </div>
+            <div class="data-source" id="data-source">
+                <i class="fas fa-database"></i>
+                <span>Data Source: Initializing...</span>
+            </div>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <!-- Trap Analysis Panel will be loaded here -->
+        </div>
+
+        <div class="footer">
+            <div>OMEGA BTC AI - Powered by Rastafarian wisdom & Modern AI</div>
+            <div>JAH LOVE ❤️ GUIDE THE WAY</div>
+        </div>
+    </div>
+
+    <!-- Mock Redis functions for demo purposes -->
+    <script>
+        // Simulated Redis fetch function
+        async function fetchRedisKey(key) {
+            console.log(`Fetching Redis key: ${key}`);
+
+            // Demo trap analysis data based on what we saw in Redis
+            if (key === 'dashboard:trap_analysis:data') {
+                return {
+                    "total_count": 111255,
+                    "timestamp": "2025-03-21T22:40:53.000999+00:00",
+                    "trap_types": {
+                        "Bear Trap": 111085,
+                        "Test Trap": 102,
+                        "Liquidity Accumulation (up)": 18,
+                        "Stop Hunt": 18,
+                        "Liquidity Grab": 16,
+                        "Liquidity Accumulation (down)": 12,
+                        "Volatility Liquidity Grab": 4
+                    },
+                    "dominant_type": "Bear Trap",
+                    "avg_confidence": 0.9584628624373605,
+                    "high_confidence_count": 105203,
+                    "hour_distribution": {
+                        "0": 4274, "1": 4260, "2": 4254, "3": 4254, "4": 4248, "5": 4260,
+                        "6": 4260, "7": 4206, "8": 4122, "9": 4122, "10": 3090, "11": 6,
+                        "12": 246, "13": 4082, "14": 5328, "15": 5448, "16": 3864, "17": 5656,
+                        "18": 5688, "19": 6122, "20": 7090, "21": 11804, "22": 9123, "23": 1448
+                    },
+                    "day_distribution": {
+                        "Friday": 105009,
+                        "Thursday": 6124,
+                        "Sunday": 102,
+                        "Saturday": 20
+                    },
+                    "recent_high_conf_traps": [
+                        { "type": "Bear Trap", "confidence": 0.97, "time_ago": "Just now", "timeframe": "15min" },
+                        { "type": "Bear Trap", "confidence": 0.97, "time_ago": "Just now", "timeframe": "15min" },
+                        { "type": "Bear Trap", "confidence": 0.97, "time_ago": "Just now", "timeframe": "15min" },
+                        { "type": "Bear Trap", "confidence": 1.0, "time_ago": "Just now", "timeframe": "15min" },
+                        { "type": "Bear Trap", "confidence": 0.97, "time_ago": "Just now", "timeframe": "15min" }
+                    ]
+                };
+            }
+
+            // Demo performance metrics
+            if (key === 'dashboard:trap_analysis:performance') {
+                return {
+                    "bear_trap_winrate": 65,
+                    "bull_trap_winrate": 58,
+                    "liquidity_grab_winrate": 72,
+                    "stop_hunt_winrate": 68,
+                    "avg_trade_pnl": 2.3,
+                    "timestamp": "2025-03-21T22:40:53.000999+00:00"
+                };
+            }
+
+            // If any other key is requested, return null
+            return null;
+        }
+    </script>
+
+    <!-- Import the JS for the trap analysis panel -->
+    <script src="dashboard_integration.js"></script>
+
+    <!-- Extra initialization script -->
+    <script>
+        // Update connection status for demo purposes
+        setTimeout(() => {
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            const dataSource = document.getElementById('data-source').querySelector('span');
+
+            if (statusDot) {
+                statusDot.className = 'status-dot connected';
+            }
+
+            if (statusText) {
+                statusText.textContent = 'Connected to Redis';
+            }
+
+            if (dataSource) {
+                dataSource.textContent = 'Data Source: Redis';
+            }
+        }, 2000);
+    </script>
+</body>
+
+</html>
