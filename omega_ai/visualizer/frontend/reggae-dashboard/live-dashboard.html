@@ -534,6 +534,14 @@
                     <span id="current-price" class="value neutral">$0.00</span>
                 </div>
                 <div class="data-row">
+                    <span class="label">Position Size:</span>
+                    <span id="position-size" class="value neutral">0.00 BTC</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Leverage:</span>
+                    <span id="position-leverage" class="value neutral">1x</span>
+                </div>
+                <div class="data-row">
                     <span class="label">PnL (%):</span>
                     <span id="pnl-percent" class="value neutral">0.00%</span>
                 </div>
@@ -542,8 +550,22 @@
                     <span id="pnl-usd" class="value neutral">$0.00</span>
                 </div>
                 <div class="data-row">
-                    <span class="label">Position Size:</span>
-                    <span id="position-size" class="value neutral">0.00 BTC</span>
+                    <span class="label">Risk Multiplier:</span>
+                    <span id="risk-multiplier" class="value neutral">1.00x</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Stop Loss:</span>
+                    <span id="stop-loss" class="value neutral">$0.00</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Take Profits:</span>
+                    <div id="take-profits" class="value neutral">
+                        <!-- Take profits will be inserted here -->
+                    </div>
+                </div>
+                <div class="data-row">
+                    <span class="label">Entry Time:</span>
+                    <span id="entry-time" class="value neutral">N/A</span>
                 </div>
                 <div class="data-row">
                     <span class="label">Source:</span>
@@ -552,6 +574,22 @@
                 <div class="data-row">
                     <span class="label">Last Updated:</span>
                     <span id="position-timestamp" class="value neutral">N/A</span>
+                </div>
+
+                <div id="trap-awareness" style="display: none;">
+                    <h3>Trap Awareness</h3>
+                    <div class="data-row">
+                        <span class="label">Trap Probability:</span>
+                        <span id="trap-probability" class="value neutral">0%</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">Trap Type:</span>
+                        <span id="trap-type" class="value neutral">None</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">Confidence:</span>
+                        <span id="trap-confidence" class="value neutral">0%</span>
+                    </div>
                 </div>
 
                 <button id="refresh-data" class="refresh-button">
@@ -574,7 +612,7 @@
 
     <script>
         // API endpoints
-        const API_BASE = "http://localhost:5000/api";
+        const API_BASE = "http://localhost:5001/api";
         const TRAP_ENDPOINT = `${API_BASE}/trap-probability`;
         const POSITION_ENDPOINT = `${API_BASE}/position`;
         const BTC_PRICE_ENDPOINT = `${API_BASE}/btc-price`;
@@ -711,6 +749,7 @@
 
             const hasPosition = data.has_position || false;
 
+            // Update basic position data
             document.getElementById('position-status').textContent = hasPosition ? 'Active' : 'No Position';
             document.getElementById('position-status').className = hasPosition ? 'value neutral' : 'value neutral';
 
@@ -728,7 +767,25 @@
 
             document.getElementById('entry-price').textContent = data.entry_price ? formatUSD(data.entry_price) : 'N/A';
             document.getElementById('current-price').textContent = data.current_price ? formatUSD(data.current_price) : 'N/A';
+            document.getElementById('position-size').textContent = data.position_size ? formatBTC(data.position_size) : 'N/A';
+            document.getElementById('position-leverage').textContent = data.leverage ? `${data.leverage}x` : 'N/A';
+            document.getElementById('risk-multiplier').textContent = data.risk_multiplier ? `${data.risk_multiplier.toFixed(2)}x` : 'N/A';
+            document.getElementById('stop-loss').textContent = data.stop_loss ? formatUSD(data.stop_loss) : 'N/A';
+            document.getElementById('entry-time').textContent = data.entry_time ? formatTimestamp(data.entry_time) : 'N/A';
+            document.getElementById('position-source').textContent = data.source || 'Unknown';
+            document.getElementById('position-timestamp').textContent = formatTimestamp(data.timestamp);
 
+            // Update take profits
+            const takeProfitsDiv = document.getElementById('take-profits');
+            if (data.take_profits && data.take_profits.length > 0) {
+                takeProfitsDiv.innerHTML = data.take_profits.map(tp =>
+                    `${formatUSD(tp.price)} (${(tp.size * 100).toFixed(0)}%)`
+                ).join('<br>');
+            } else {
+                takeProfitsDiv.textContent = 'N/A';
+            }
+
+            // Update PnL
             const pnlPercent = document.getElementById('pnl-percent');
             if (data.pnl_percent !== undefined) {
                 pnlPercent.textContent = formatPercent(data.pnl_percent);
@@ -759,9 +816,16 @@
                 pnlUsd.className = 'value neutral';
             }
 
-            document.getElementById('position-size').textContent = data.position_size ? formatBTC(data.position_size) : 'N/A';
-            document.getElementById('position-source').textContent = data.source || 'Unknown';
-            document.getElementById('position-timestamp').textContent = formatTimestamp(data.timestamp);
+            // Update trap awareness section
+            const trapAwarenessDiv = document.getElementById('trap-awareness');
+            if (data.trap_awareness) {
+                trapAwarenessDiv.style.display = 'block';
+                document.getElementById('trap-probability').textContent = formatPercent(data.trap_awareness.trap_probability * 100);
+                document.getElementById('trap-type').textContent = data.trap_awareness.trap_type.replace(/_/g, ' ');
+                document.getElementById('trap-confidence').textContent = formatPercent(data.trap_awareness.confidence * 100);
+            } else {
+                trapAwarenessDiv.style.display = 'none';
+            }
 
             // Update refresh time
             positionTime.textContent = formatTimeDiff(data.timestamp);

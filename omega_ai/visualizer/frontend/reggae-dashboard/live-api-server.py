@@ -8,12 +8,17 @@ import json
 import redis
 import logging
 from datetime import datetime, timezone, timedelta
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
+from flask_cors import CORS
 import os
 import sys
 import random
 from pathlib import Path
 import argparse
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -24,36 +29,97 @@ logger = logging.getLogger("live_api_server")
 
 app = Flask(__name__)
 
-# Redis connection
+# Enable CORS for all routes with more permissive settings
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "expose_headers": ["Content-Type"],
+        "supports_credentials": True,
+        "max_age": 600
+    }
+})
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+# Redis connection settings - use environment variables
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+
+# Redis keys we're interested in
+REDIS_KEYS = {
+    'btc_price': ['last_btc_price', 'btc_price', 'sim_last_btc_price'],
+    'price_changes': ['btc_price_changes'],
+    'price_patterns': ['btc_price_patterns'],
+    'trap_probability': ['current_trap_probability', 'trap_probability'],
+    'position': ['current_position', 'active_position']
+}
+
 def get_redis_client():
     """Get Redis client connection"""
     try:
-        # Connect to Redis
+        # Connect to Redis with environment settings
         client = redis.Redis(
-            host="localhost",
-            port=6379,
+            host=REDIS_HOST,
+            port=REDIS_PORT,
+            password=REDIS_PASSWORD,
             decode_responses=True
         )
-        client.ping()  # Test connection
-        logger.info("Connected to Redis at localhost:6379")
+        
+        # Test connection
+        client.ping()
+        
+        # Check for available keys
+        available_keys = []
+        for key_type, keys in REDIS_KEYS.items():
+            for key in keys:
+                if client.exists(key):
+                    available_keys.append(f"{key_type}:{key}")
+        
+        if available_keys:
+            logger.info(f"Connected to Redis at {REDIS_HOST}:{REDIS_PORT}")
+            logger.info(f"Found data keys: {', '.join(available_keys)}")
+        else:
+            logger.warning("Connected to Redis but no relevant data keys found")
+            
         return client
     except Exception as e:
         logger.error(f"Failed to connect to Redis: {e}")
+        logger.info("Using fallback data simulation")
         return None
 
 # Get data from Redis with fallback
-def get_data_from_redis(key, fallback_data):
+def get_data_from_redis(key_type, fallback_data):
     """Get data from Redis with fallback data if not available"""
     redis_client = get_redis_client()
     if redis_client:
         try:
-            data = redis_client.get(key)
-            if data:
-                return json.loads(data)
+            # Try each possible key for this data type
+            for key in REDIS_KEYS.get(key_type, []):
+                data = redis_client.get(key)
+                if data:
+                    try:
+                        return json.loads(data)
+                    except json.JSONDecodeError:
+                        # If it's not JSON, try to convert it to a number
+                        try:
+                            return {"value": float(data)}
+                        except ValueError:
+                            continue
+            logger.warning(f"No valid data found for {key_type}")
         except Exception as e:
-            logger.error(f"Error getting data from Redis: {e}")
+            logger.error(f"Error getting {key_type} data from Redis: {e}")
     
-    logger.warning(f"Using fallback data for {key}")
+    logger.info(f"Using fallback data for {key_type}")
     return fallback_data
 
 # Fallback data
@@ -132,6 +198,7 @@ def get_fallback_position_data():
     entry_price = random.uniform(60000, 70000)
     current_price = entry_price * random.uniform(0.98, 1.02)
     position_size = random.uniform(0.1, 0.5)
+    leverage = random.randint(1, 20)
     
     # Calculate PnL based on position side and price difference
     pct_diff = (current_price - entry_price) / entry_price
@@ -141,59 +208,102 @@ def get_fallback_position_data():
     pnl_percent = pct_diff * 100
     pnl_usd = pnl_percent * position_size * entry_price / 100
     
+    # Generate take profit and stop loss levels
+    take_profits = [
+        {"price": entry_price * (1.02 if position_side == "long" else 0.98), "size": 0.5},
+        {"price": entry_price * (1.05 if position_side == "long" else 0.95), "size": 0.3},
+        {"price": entry_price * (1.08 if position_side == "long" else 0.92), "size": 0.2}
+    ]
+    
+    stop_loss = entry_price * (0.98 if position_side == "long" else 1.02)
+    
     return {
         "has_position": True,
         "position_side": position_side,
         "entry_price": entry_price,
         "current_price": current_price,
         "position_size": position_size,
+        "leverage": leverage,
         "pnl_percent": pnl_percent,
         "pnl_usd": pnl_usd,
+        "take_profits": take_profits,
+        "stop_loss": stop_loss,
+        "entry_time": (now - timedelta(hours=random.randint(1, 24))).isoformat(),
         "timestamp": now.isoformat(),
-        "source": "simulator"
+        "source": "simulator",
+        "risk_multiplier": random.uniform(0.5, 1.5),
+        "trap_awareness": {
+            "trap_probability": random.uniform(0, 1),
+            "trap_type": random.choice(["bull_trap", "bear_trap", "liquidity_grab", "stop_hunt", "fake_pump", "fake_dump"]),
+            "confidence": random.uniform(0.3, 0.9)
+        }
     }
 
 def get_btc_price_data():
     """Get BTC price data from Redis with fallback to generated data"""
-    # Try to get real BTC price data from Redis
     redis_client = get_redis_client()
     if redis_client:
         try:
-            # Try different potential Redis keys for BTC price
-            for key in ["btc_price", "current_btc_price", "bitcoin_price", "price_btc"]:
-                data = redis_client.get(key)
-                if data:
+            # Get current price
+            price_data = None
+            for key in REDIS_KEYS['btc_price']:
+                price = redis_client.get(key)
+                if price:
                     try:
-                        # If it's a simple number
-                        return {"price": float(data), "timestamp": datetime.now(timezone.utc).isoformat()}
-                    except ValueError:
-                        # If it's a JSON string
-                        try:
-                            return json.loads(data)
-                        except json.JSONDecodeError:
-                            pass  # Try next key
-            
-            # Try to get the price from the position data
-            position_data = redis_client.get("current_position")
-            if position_data:
-                try:
-                    position_json = json.loads(position_data)
-                    if "current_price" in position_json:
-                        return {
-                            "price": position_json["current_price"],
-                            "timestamp": position_json.get("timestamp", datetime.now(timezone.utc).isoformat())
+                        price_data = {
+                            "price": float(price),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "source": key
                         }
-                except Exception:
+                        break
+                    except ValueError:
+                        continue
+
+            # Get price changes
+            changes_data = None
+            changes = redis_client.get('btc_price_changes')
+            if changes:
+                try:
+                    changes_data = json.loads(changes)
+                except json.JSONDecodeError:
                     pass
-            
+
+            # Get price patterns
+            patterns_data = None
+            patterns = redis_client.get('btc_price_patterns')
+            if patterns:
+                try:
+                    patterns_data = json.loads(patterns)
+                except json.JSONDecodeError:
+                    pass
+
+            if price_data:
+                result = price_data
+                if changes_data:
+                    result["changes"] = changes_data
+                if patterns_data:
+                    result["patterns"] = patterns_data
+                return result
+
         except Exception as e:
-            logger.error(f"Error getting BTC price from Redis: {e}")
+            logger.error(f"Error getting BTC price data from Redis: {e}")
     
     # Fallback to generated price data
     logger.warning("Using fallback BTC price data")
     return {
         "price": random.uniform(60000, 70000),
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "source": "fallback",
+        "changes": {
+            "short_term": random.uniform(-0.05, 0.05),
+            "medium_term": random.uniform(-0.1, 0.1)
+        },
+        "patterns": {
+            "wyckoff_distribution": random.uniform(0, 1),
+            "double_top": random.uniform(0, 1),
+            "head_and_shoulders": random.uniform(0, 1),
+            "bull_flag": random.uniform(0, 1)
+        }
     }
 
 # API routes
@@ -221,27 +331,39 @@ def health_check():
 def trap_probability():
     """Get trap probability data from Redis"""
     fallback_data = get_fallback_trap_data()
-    data = get_data_from_redis("current_trap_probability", fallback_data)
+    data = get_data_from_redis("trap_probability", fallback_data)
     return jsonify(data)
 
 @app.route('/api/position')
 def position():
     """Get position data from Redis"""
     fallback_data = get_fallback_position_data()
-    data = get_data_from_redis("current_position", fallback_data)
+    data = get_data_from_redis("position", fallback_data)
+    
+    # Add trap probability data if available
+    trap_data = get_data_from_redis("trap_probability", None)
+    if trap_data and isinstance(data, dict) and data.get("has_position"):
+        data["trap_awareness"] = {
+            "trap_probability": trap_data.get("probability", 0),
+            "trap_type": trap_data.get("trap_type"),
+            "confidence": trap_data.get("confidence", 0),
+            "components": trap_data.get("components", {}),
+            "descriptions": trap_data.get("descriptions", {})
+        }
+    
     return jsonify(data)
 
 @app.route('/api/btc-price')
 def btc_price():
-    """Get current BTC price"""
+    """Get current BTC price with additional market data"""
     data = get_btc_price_data()
     return jsonify(data)
 
 @app.route('/api/data')
 def combined_data():
     """Get combined data for all endpoints"""
-    trap_data = get_data_from_redis("current_trap_probability", get_fallback_trap_data())
-    position_data = get_data_from_redis("current_position", get_fallback_position_data())
+    trap_data = get_data_from_redis("trap_probability", get_fallback_trap_data())
+    position_data = get_data_from_redis("position", get_fallback_position_data())
     price_data = get_btc_price_data()
     
     return jsonify({
@@ -254,8 +376,8 @@ def combined_data():
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='OMEGA BTC AI Reggae Dashboard Server')
-    parser.add_argument('--port', type=int, default=5000,
-                       help='Port to run the server on (default: 5000)')
+    parser.add_argument('--port', type=int, default=8080,
+                       help='Port to run the server on (default: 8080)')
     args = parser.parse_args()
     
     # Determine directory
@@ -277,14 +399,6 @@ if __name__ == '__main__':
         available_dashboards.append("backup-dashboard.html")
     
     logger.info(f"Found dashboard files: {', '.join(available_dashboards)}")
-    
-    # Enable CORS for local development
-    @app.after_request
-    def after_request(response):
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        return response
     
     # Run the app
     port = args.port
