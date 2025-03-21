@@ -41,8 +41,8 @@ class ReggaeDashboardServer:
         """Initialize the dashboard server with WebSocket support."""
         self.app = FastAPI(title="OMEGA BTC AI - Reggae Hacker Dashboard")
         
-        # Active WebSocket connections
-        self.active_connections: Set[WebSocket] = set()
+        # Active WebSocket connections (using a list because WebSocket objects are unhashable)
+        self.active_connections = []
         
         # Redis client for data access
         self.redis_client = self._init_redis_client()
@@ -173,7 +173,7 @@ class ReggaeDashboardServer:
         async def websocket_endpoint(websocket: WebSocket):
             """WebSocket endpoint for real-time dashboard updates."""
             await websocket.accept()
-            self.active_connections.add(websocket)
+            self.active_connections.append(websocket)
             try:
                 while True:
                     # Wait for any message (ping)
@@ -184,7 +184,8 @@ class ReggaeDashboardServer:
                 self.active_connections.remove(websocket)
             except Exception as e:
                 logger.error(f"WebSocket error: {e}")
-                self.active_connections.remove(websocket)
+                if websocket in self.active_connections:
+                    self.active_connections.remove(websocket)
     
     def _get_trap_probability(self):
         """Get the current trap probability from Redis."""
@@ -281,15 +282,17 @@ class ReggaeDashboardServer:
                 }
                 
                 # Broadcast to all connected clients
-                disconnected = set()
+                disconnected = []
                 for websocket in self.active_connections:
                     try:
                         await websocket.send_json(update)
                     except Exception:
-                        disconnected.add(websocket)
+                        disconnected.append(websocket)
                 
                 # Remove disconnected clients
-                self.active_connections -= disconnected
+                for websocket in disconnected:
+                    if websocket in self.active_connections:
+                        self.active_connections.remove(websocket)
                 
                 # Sleep for a bit
                 await asyncio.sleep(1)

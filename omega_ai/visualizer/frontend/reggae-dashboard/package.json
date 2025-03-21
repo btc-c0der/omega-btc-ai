@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "OMEGA BTC AI - Reggae Hacker Omega UI Dashboard",
     "private": true,
+    "type": "module",
     "dependencies": {
         "axios": "^1.4.0",
         "framer-motion": "^10.12.18",
@@ -23,7 +24,7 @@
         "@types/react": "^18.2.14",
         "@types/react-dom": "^18.2.6",
         "@types/react-plotly.js": "^2.6.0",
-        "@vitejs/plugin-react": "^4.0.3",
+        "@vitejs/plugin-react": "^4.3.4",
         "@vitest/browser": "^3.0.9",
         "autoprefixer": "^10.4.14",
         "happy-dom": "^17.4.4",

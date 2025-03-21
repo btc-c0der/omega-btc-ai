@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Live Reggae Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --green-color: #00B52D;
+            --yellow-color: #FFD700;
+            --red-color: #FF3D00;
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-color: #E0E0E0;
+            --muted-color: #AAAAAA;
+            --border-color: rgba(255, 215, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0, 181, 45, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 30%, rgba(255, 215, 0, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 70%, rgba(255, 61, 0, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            color: var(--yellow-color);
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 i {
+            font-size: 1.6rem;
+        }
+
+        .price-ticker {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .btc-price {
+            font-weight: bold;
+            color: var(--yellow-color);
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+
+        .price-change {
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .price-change.positive {
+            background-color: rgba(0, 181, 45, 0.2);
+            color: var(--green-color);
+        }
+
+        .price-change.negative {
+            background-color: rgba(255, 61, 0, 0.2);
+            color: var(--red-color);
+        }
+
+        .price-change.neutral {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--yellow-color);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-dot.connected {
+            background-color: var(--green-color);
+            box-shadow: 0 0 10px var(--green-color);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background-color: var(--red-color);
+            box-shadow: 0 0 10px var(--red-color);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 181, 45, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 181, 45, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 181, 45, 0);
+            }
+        }
+
+        .data-source {
+            background-color: rgba(255, 215, 0, 0.2);
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--yellow-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: var(--yellow-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card h2 i {
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+
+        .card h2 .refresh-time {
+            font-size: 0.8rem;
+            color: var(--muted-color);
+            font-weight: normal;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .label {
+            color: var(--muted-color);
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .value.positive {
+            color: var(--green-color);
+        }
+
+        .value.negative {
+            color: var(--red-color);
+        }
+
+        .value.neutral {
+            color: var(--yellow-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            height: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease, background-color 1s ease;
+            background-image: linear-gradient(to right, var(--green-color), var(--yellow-color), var(--red-color));
+            background-size: 200% 100%;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .jah-message {
+            background: linear-gradient(to right, rgba(0, 181, 45, 0.2), rgba(255, 221, 0, 0.2), rgba(255, 61, 0, 0.2));
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            color: var(--yellow-color);
+            margin-top: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .jah-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.1),
+                    transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 100%;
+            }
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .component-item {
+            background-color: rgba(30, 30, 30, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .component-name {
+            font-size: 0.9rem;
+            color: var(--muted-color);
+            margin-bottom: 5px;
+        }
+
+        .component-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .component-bar {
+            flex-grow: 1;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .component-bar-inner {
+            height: 100%;
+            background-color: var(--yellow-color);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .component-number {
+            font-weight: bold;
+            color: var(--yellow-color);
+            font-size: 0.9rem;
+        }
+
+        .component-description {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .footer-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .footer-icons i {
+            color: var(--yellow-color);
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .footer-icons i:hover {
+            transform: scale(1.2);
+        }
+
+        .refresh-button {
+            background-color: transparent;
+            border: 1px solid var(--yellow-color);
+            color: var(--yellow-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .refresh-button:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .refresh-button:active {
+            transform: translateY(0);
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        .btc-logo {
+            font-size: 1.5rem;
+            margin-right: 8px;
+            color: var(--yellow-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-brands fa-bitcoin"></i> OMEGA BTC AI REGGAE DASHBOARD</h1>
+            <div class="price-ticker">
+                <i class="btc-logo fa-brands fa-bitcoin"></i>
+                <div class="btc-price" id="btc-price">$65,432.10</div>
+                <div class="price-change positive" id="price-change">+1.23%</div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot disconnected" id="status-dot"></div>
+                <span id="status-text">Connecting to Redis...</span>
+            </div>
+            <div class="data-source" id="data-source">
+                <i class="fas fa-database"></i>
+                <span>Data Source: Initializing...</span>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>
+                    <i class="fas fa-chart-line"></i> TRAP PROBABILITY
+                    <span class="refresh-time" id="trap-time">Updating...</span>
+                </h2>
+                <div class="data-row">
+                    <span class="label">Probability:</span>
+                    <span id="trap-probability" class="value neutral">0%</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Type:</span>
+                    <span id="trap-type" class="value neutral">Unknown</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Trend:</span>
+                    <span id="trap-trend" class="value neutral">Stable</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Confidence:</span>
+                    <span id="trap-confidence" class="value neutral">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="trap-bar" class="progress-bar-inner" style="width: 0%"></div>
+                </div>
+
+                <h3>Components Analysis</h3>
+                <div class="components-grid" id="trap-components">
+                    <!-- Components will be inserted here -->
+                </div>
+
+                <div id="jah-message" class="jah-message">
+                    JAH GUIDES THE TRADING PATH!
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <i class="fas fa-exchange-alt"></i> POSITION DATA
+                    <span class="refresh-time" id="position-time">Updating...</span>
+                </h2>
+                <div class="data-row">
+                    <span class="label">Status:</span>
+                    <span id="position-status" class="value neutral">No Position</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Side:</span>
+                    <span id="position-side" class="value neutral">N/A</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Entry Price:</span>
+                    <span id="entry-price" class="value neutral">$0.00</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Current Price:</span>
+                    <span id="current-price" class="value neutral">$0.00</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">PnL (%):</span>
+                    <span id="pnl-percent" class="value neutral">0.00%</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">PnL (USD):</span>
+                    <span id="pnl-usd" class="value neutral">$0.00</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Position Size:</span>
+                    <span id="position-size" class="value neutral">0.00 BTC</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Source:</span>
+                    <span id="position-source" class="value neutral">N/A</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Last Updated:</span>
+                    <span id="position-timestamp" class="value neutral">N/A</span>
+                </div>
+
+                <button id="refresh-data" class="refresh-button">
+                    <i class="fas fa-sync-alt"></i> Refresh Data Now
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div>OMEGA BTC AI - Powered by Rastafarian wisdom & Modern AI</div>
+            <div class="footer-icons">
+                <i class="fa-brands fa-bitcoin"></i>
+                <i class="fas fa-brain"></i>
+                <i class="fas fa-chart-line"></i>
+                <i class="fas fa-code"></i>
+            </div>
+            <div>JAH LOVE ❤️ GUIDE THE WAY</div>
+        </div>
+    </div>
+
+    <script>
+        // API endpoints
+        const API_BASE = "http://localhost:5000/api";
+        const TRAP_ENDPOINT = `${API_BASE}/trap-probability`;
+        const POSITION_ENDPOINT = `${API_BASE}/position`;
+        const BTC_PRICE_ENDPOINT = `${API_BASE}/btc-price`;
+        const HEALTH_ENDPOINT = `${API_BASE}/health`;
+
+        // DOM Elements
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const dataSource = document.getElementById('data-source').querySelector('span');
+        const btcPrice = document.getElementById('btc-price');
+        const priceChange = document.getElementById('price-change');
+        const trapTime = document.getElementById('trap-time');
+        const positionTime = document.getElementById('position-time');
+        const refreshButton = document.getElementById('refresh-data');
+
+        // Format helpers
+        const formatNumber = (num) => {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        };
+
+        const formatUSD = (num) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(num);
+        };
+
+        const formatBTC = (num) => {
+            return num.toFixed(8) + ' BTC';
+        };
+
+        const formatPercent = (num) => {
+            return num.toFixed(2) + '%';
+        };
+
+        const formatTimestamp = (timestamp) => {
+            if (!timestamp) return 'N/A';
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString();
+            } catch (e) {
+                return 'Invalid timestamp';
+            }
+        };
+
+        const formatTimeDiff = (timestamp) => {
+            if (!timestamp) return 'N/A';
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffSeconds = Math.floor((now - date) / 1000);
+
+                if (diffSeconds < 5) return 'Just now';
+                if (diffSeconds < 60) return `${diffSeconds}s ago`;
+                if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+                return `${Math.floor(diffSeconds / 3600)}h ago`;
+            } catch (e) {
+                return 'Invalid timestamp';
+            }
+        };
+
+        // Update the connection status
+        const updateConnectionStatus = (connected, message = null) => {
+            if (connected) {
+                statusDot.classList.remove('disconnected');
+                statusDot.classList.add('connected');
+                statusText.textContent = message || 'Connected to Redis';
+            } else {
+                statusDot.classList.remove('connected');
+                statusDot.classList.add('disconnected');
+                statusText.textContent = message || 'Disconnected from Redis';
+            }
+        };
+
+        // Update trap probability data
+        const updateTrapData = (data) => {
+            if (!data) return;
+
+            // Update basic trap data
+            document.getElementById('trap-probability').textContent = formatPercent((data.probability || 0) * 100);
+            document.getElementById('trap-type').textContent = (data.trap_type || 'Unknown').replace(/_/g, ' ');
+            document.getElementById('trap-trend').textContent = (data.trend || 'stable').replace(/_/g, ' ');
+            document.getElementById('trap-confidence').textContent = formatPercent((data.confidence || 0) * 100);
+
+            // Update timestamp
+            trapTime.textContent = formatTimeDiff(data.timestamp);
+
+            // Update progress bar
+            const trapBar = document.getElementById('trap-bar');
+            const probability = data.probability || 0;
+            trapBar.style.width = `${probability * 100}%`;
+
+            // Update JAH message
+            if (data.message) {
+                document.getElementById('jah-message').textContent = data.message;
+            }
+
+            // Update components if they exist
+            if (data.components) {
+                const componentsContainer = document.getElementById('trap-components');
+                componentsContainer.innerHTML = '';
+
+                const components = data.components;
+                const descriptions = data.descriptions || {};
+
+                Object.keys(components).forEach(key => {
+                    const value = components[key];
+                    const description = descriptions[key] || '';
+                    const formattedKey = key.replace(/_/g, ' ');
+
+                    const componentHtml = `
+                        <div class="component-item">
+                            <div class="component-name">${formattedKey}</div>
+                            <div class="component-value">
+                                <div class="component-bar">
+                                    <div class="component-bar-inner" style="width: ${value * 100}%"></div>
+                                </div>
+                                <div class="component-number">${formatPercent(value * 100)}</div>
+                            </div>
+                            <div class="component-description">${description}</div>
+                        </div>
+                    `;
+
+                    componentsContainer.innerHTML += componentHtml;
+                });
+            }
+        };
+
+        // Update position data
+        const updatePositionData = (data) => {
+            if (!data) return;
+
+            const hasPosition = data.has_position || false;
+
+            document.getElementById('position-status').textContent = hasPosition ? 'Active' : 'No Position';
+            document.getElementById('position-status').className = hasPosition ? 'value neutral' : 'value neutral';
+
+            document.getElementById('position-side').textContent = data.position_side || 'N/A';
+            if (data.position_side) {
+                const sideElement = document.getElementById('position-side');
+                if (data.position_side.toLowerCase() === 'long') {
+                    sideElement.className = 'value positive';
+                } else if (data.position_side.toLowerCase() === 'short') {
+                    sideElement.className = 'value negative';
+                } else {
+                    sideElement.className = 'value neutral';
+                }
+            }
+
+            document.getElementById('entry-price').textContent = data.entry_price ? formatUSD(data.entry_price) : 'N/A';
+            document.getElementById('current-price').textContent = data.current_price ? formatUSD(data.current_price) : 'N/A';
+
+            const pnlPercent = document.getElementById('pnl-percent');
+            if (data.pnl_percent !== undefined) {
+                pnlPercent.textContent = formatPercent(data.pnl_percent);
+                if (data.pnl_percent > 0) {
+                    pnlPercent.className = 'value positive';
+                } else if (data.pnl_percent < 0) {
+                    pnlPercent.className = 'value negative';
+                } else {
+                    pnlPercent.className = 'value neutral';
+                }
+            } else {
+                pnlPercent.textContent = 'N/A';
+                pnlPercent.className = 'value neutral';
+            }
+
+            const pnlUsd = document.getElementById('pnl-usd');
+            if (data.pnl_usd !== undefined) {
+                pnlUsd.textContent = formatUSD(data.pnl_usd);
+                if (data.pnl_usd > 0) {
+                    pnlUsd.className = 'value positive';
+                } else if (data.pnl_usd < 0) {
+                    pnlUsd.className = 'value negative';
+                } else {
+                    pnlUsd.className = 'value neutral';
+                }
+            } else {
+                pnlUsd.textContent = 'N/A';
+                pnlUsd.className = 'value neutral';
+            }
+
+            document.getElementById('position-size').textContent = data.position_size ? formatBTC(data.position_size) : 'N/A';
+            document.getElementById('position-source').textContent = data.source || 'Unknown';
+            document.getElementById('position-timestamp').textContent = formatTimestamp(data.timestamp);
+
+            // Update refresh time
+            positionTime.textContent = formatTimeDiff(data.timestamp);
+        };
+
+        // Update BTC price ticker
+        const updateBTCPrice = (data) => {
+            if (!data || !data.price) return;
+
+            btcPrice.textContent = formatUSD(data.price);
+
+            if (data.change !== undefined) {
+                const changeValue = data.change;
+                priceChange.textContent = (changeValue > 0 ? '+' : '') + formatPercent(changeValue);
+
+                if (changeValue > 0) {
+                    priceChange.className = 'price-change positive';
+                } else if (changeValue < 0) {
+                    priceChange.className = 'price-change negative';
+                } else {
+                    priceChange.className = 'price-change neutral';
+                }
+            } else {
+                priceChange.textContent = '0.00%';
+                priceChange.className = 'price-change neutral';
+            }
+        };
+
+        // Fetch data from endpoints
+        const fetchData = async () => {
+            try {
+                // Check health first
+                const healthResponse = await fetch(HEALTH_ENDPOINT);
+                if (!healthResponse.ok) throw new Error('Health check failed');
+
+                const healthData = await healthResponse.json();
+                const redisConnected = healthData.redis === 'connected';
+
+                updateConnectionStatus(redisConnected);
+                dataSource.textContent = `Data Source: ${redisConnected ? 'Redis (Live)' : 'Fallback (Simulated)'}`;
+
+                // Fetch trap probability data
+                const trapResponse = await fetch(TRAP_ENDPOINT);
+                if (!trapResponse.ok) throw new Error('Failed to fetch trap data');
+                const trapData = await trapResponse.json();
+                updateTrapData(trapData);
+
+                // Fetch position data
+                const positionResponse = await fetch(POSITION_ENDPOINT);
+                if (!positionResponse.ok) throw new Error('Failed to fetch position data');
+                const positionData = await positionResponse.json();
+                updatePositionData(positionData);
+
+                // Fetch BTC price data
+                const priceResponse = await fetch(BTC_PRICE_ENDPOINT);
+                if (!priceResponse.ok) throw new Error('Failed to fetch price data');
+                const priceData = await priceResponse.json();
+                updateBTCPrice(priceData);
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                updateConnectionStatus(false, `Connection Error: ${error.message}`);
+            }
+        };
+
+        // Shake animation for the JAH message
+        const shakeJahMessage = () => {
+            const jahMessage = document.getElementById('jah-message');
+            jahMessage.classList.add('shake');
+            setTimeout(() => {
+                jahMessage.classList.remove('shake');
+            }, 500);
+        };
+
+        // Set up event listeners
+        refreshButton.addEventListener('click', () => {
+            refreshButton.textContent = 'Refreshing...';
+            refreshButton.disabled = true;
+
+            fetchData().then(() => {
+                refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data Now';
+                refreshButton.disabled = false;
+                shakeJahMessage();
+            });
+        });
+
+        // Initial fetch
+        fetchData();
+
+        // Set up polling interval (every 2 seconds)
+        setInterval(fetchData, 2000);
+
+        // Random JAH message shake
+        setInterval(() => {
+            // 10% chance to shake the message
+            if (Math.random() < 0.1) {
+                shakeJahMessage();
+            }
+        }, 10000);
+    </script>
+</body>
+
+</html>

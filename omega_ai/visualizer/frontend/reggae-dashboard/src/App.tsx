@@ -6,7 +6,6 @@ import TrapProbabilityMeter from './components/TrapProbabilityMeter';
 import CandlestickChart from './components/CandlestickChart';
 import TrapAlertPanel from './components/TrapAlertPanel';
 import RedisFeedMonitor from './components/RedisFeedMonitor';
-import HaileSalassieQuote from './components/HaileSalassieQuote';
 import { TrapProbabilityData, PositionData } from './types';
 
 const App: React.FC = () => {
@@ -66,8 +65,13 @@ const App: React.FC = () => {
 
             {/* Footer Quote */}
             <footer className="mt-8 p-4 bg-reggae-black-light border-t border-reggae-gold/30">
-                <div className="container mx-auto">
-                    <HaileSalassieQuote />
+                <div className="container mx-auto text-center">
+                    <p className="text-reggae-text/70 text-sm">
+                        OMEGA BTC AI © {new Date().getFullYear()} | Trap Detection System
+                    </p>
+                    <p className="text-reggae-gold/50 text-xs mt-1">
+                        "JAH JAH GUIDE THE TRADING PATH"
+                    </p>
                 </div>
             </footer>
 
