@@ -168,8 +168,8 @@ class BitGetLiveTraders:
                 # Instead, use CCXT to verify the symbol
                 test_exchange = BitGetCCXT(
                     api_key=self.api_key,
-                    secret_key=self.secret_key,
-                    passphrase=self.passphrase,
+                    api_secret=self.secret_key,
+                    password=self.passphrase,
                     use_testnet=self.use_testnet
                 )
                 await test_exchange.initialize()
@@ -242,8 +242,8 @@ class BitGetLiveTraders:
                 strategic_sub_account = os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME", "")
                 trader = BitGetCCXT(
                     api_key=self.api_key,
-                    secret_key=self.secret_key,
-                    passphrase=self.passphrase,
+                    api_secret=self.secret_key,
+                    password=self.passphrase,
                     use_testnet=self.use_testnet,
                     sub_account=strategic_sub_account
                 )
@@ -272,8 +272,8 @@ class BitGetLiveTraders:
                 
                 trader = BitGetCCXT(
                     api_key=self.api_key,
-                    secret_key=self.secret_key,
-                    passphrase=self.passphrase,
+                    api_secret=self.secret_key,
+                    password=self.passphrase,
                     use_testnet=self.use_testnet,
                     sub_account=sub_account
                 )
