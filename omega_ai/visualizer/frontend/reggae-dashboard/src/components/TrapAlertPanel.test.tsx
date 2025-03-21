@@ -20,7 +20,7 @@ describe('TrapAlertPanel', () => {
             trap_type: 'bull_trap',
             confidence: 0.5,
             trend: 'stable',
-            jah_message: 'JAH JAH AWARE! WATCHFUL EYE ON MARKET ENERGY!'
+            message: 'JAH JAH AWARE! WATCHFUL EYE ON MARKET ENERGY!'
         };
 
         render(<TrapAlertPanel trapData={lowProbTrapData} />);
@@ -37,7 +37,7 @@ describe('TrapAlertPanel', () => {
             trap_type: 'bull_trap',
             confidence: 0.9,
             trend: 'increasing',
-            jah_message: 'JAH JAH SAY: BABYLON TRAP! HOLD YOUR FIRE, MASSIVE BULL TRAP!'
+            message: 'JAH JAH SAY: BABYLON TRAP! HOLD YOUR FIRE, MASSIVE BULL TRAP!'
         };
 
         render(<TrapAlertPanel trapData={highProbTrapData} />);
@@ -56,7 +56,7 @@ describe('TrapAlertPanel', () => {
             trap_type: 'bull_trap',
             confidence: 0.9,
             trend: 'increasing',
-            jah_message: 'JAH JAH SAY: BABYLON TRAP! HOLD YOUR FIRE, MASSIVE BULL TRAP!'
+            message: 'JAH JAH SAY: BABYLON TRAP! HOLD YOUR FIRE, MASSIVE BULL TRAP!'
         };
 
         const { rerender } = render(<TrapAlertPanel trapData={trapData1} />);
@@ -70,7 +70,7 @@ describe('TrapAlertPanel', () => {
             trap_type: 'liquidity_grab',
             confidence: 0.85,
             trend: 'stable',
-            jah_message: 'JAH JAH SAY: WATCH YA LIQUIDITY! BABYLON THIEF COMING!'
+            message: 'JAH JAH SAY: WATCH YA LIQUIDITY! BABYLON THIEF COMING!'
         };
 
         // Rerender with new data

@@ -25,7 +25,7 @@ const TrapAlertPanel: React.FC<TrapAlertPanelProps> = ({ trapData }) => {
             const newAlert: AlertMessage = {
                 id: Date.now().toString(),
                 type: trapData.trap_type,
-                message: trapData.jah_message || `${trapData.trap_type.toUpperCase()} detected!`,
+                message: trapData.message || `${trapData.trap_type.toUpperCase()} detected!`,
                 confidence: trapData.confidence || 0,
                 timestamp: new Date().toISOString()
             };

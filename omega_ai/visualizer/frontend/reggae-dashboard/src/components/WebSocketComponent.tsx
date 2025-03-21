@@ -72,4 +72,4 @@ const WebSocketComponent: React.FC<WebSocketComponentProps> = ({
     return null; // This component doesn't render anything
 };
 
-export default WebSocketComponent; 
+export default WebSocketComponent;

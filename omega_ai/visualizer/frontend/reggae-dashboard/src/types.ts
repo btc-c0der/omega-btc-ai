@@ -17,7 +17,7 @@ export interface TrapProbabilityData {
             description?: string;
         };
     };
-    jah_message?: string;
+    message?: string;
 }
 
 /**
