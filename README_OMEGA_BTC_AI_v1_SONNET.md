@@ -89,6 +89,18 @@ The system includes sophisticated exit strategies that consider:
 5. Dynamic trailing stops
 6. Risk management thresholds
 
+### Balance Management and Account Limits
+
+The system uses improved balance checking logic that:
+
+1. Uses **free balance** (available funds) rather than total balance for account limit checks
+2. Properly handles different types of balances reported by BitGet API:
+   - **Free Balance**: Funds available for new trades
+   - **Used Balance**: Funds locked as margin/collateral
+   - **Total Balance**: Includes all above plus unrealized P&L and notional position values
+3. Supports setting a minimum free balance requirement with the `--min-free-balance` parameter
+4. Provides clear logging about current balance status
+
 ## Installation and Setup
 
 ### Prerequisites
@@ -166,6 +178,16 @@ Or with custom parameters:
 - `--enable-elite-exits`: Enable elite exit strategies
 - `--elite-exit-confidence`: Confidence threshold for exits (default: 0.7)
 
+### Utility Scripts
+
+Several utility scripts are provided for checking system status:
+
+- **check_positions.py**: Display current open positions in both sub-accounts
+- **check_balances.py**: Show detailed balance information for both sub-accounts
+- **verify_credentials.py**: Validate BitGet API credentials
+- **test_trap_probability.py**: Test the trap probability meter
+- **check_trap_meter.py**: View current trap probability and components
+
 ### Monitoring the System
 
 Monitor the system's operation through the log files:
@@ -174,13 +196,59 @@ Monitor the system's operation through the log files:
 tail -f trap_aware_debug_*.log
 ```
 
+## Testing
+
+The OMEGA BTC AI system includes comprehensive test suites for both backend and frontend components.
+
+### Backend Tests
+
+Run the backend tests using pytest:
+
+```bash
+pytest tests/
+```
+
+Run specific test categories:
+
+```bash
+pytest tests/unit/                       # Unit tests only
+pytest tests/unit/trading/               # Trading module tests
+pytest tests/integration/                # Integration tests
+```
+
+### Frontend Tests
+
+For the Reggae Dashboard frontend (if installed):
+
+```bash
+cd omega_ai/visualizer/frontend/reggae-dashboard
+npm test                                 # Run all tests
+npm run test:watch                       # Run in watch mode
+npm run test:coverage                    # Generate coverage report
+```
+
+### Test Data Generation
+
+Generate test data for development and testing:
+
+```bash
+python tests/fixtures/create_test_trap_data.py --interval 2
+```
+
+Options:
+
+- `--host`: Redis host (default: localhost)
+- `--port`: Redis port (default: 6379)
+- `--interval`: Update interval in seconds (default: 1.0)
+
 ## Recent Improvements
 
 1. **Redis Fallback Enhancement**: Improved JSON handling for price data from Redis.
 2. **BitGet Integration**: Full support for BitGet futures trading with sub-account management.
 3. **Trap Awareness**: Integration of trap detection with trading strategies.
 4. **Elite Exit Strategy**: Sophisticated exit decision-making based on multiple factors.
-5. **V2 Roadmap**: Created comprehensive roadmap for ZION TRAIN V2 release.
+5. **Balance Management**: Improved free balance checking for better risk management.
+6. **V2 Roadmap**: Created comprehensive roadmap for ZION TRAIN V2 release.
 
 ## V2 Roadmap Highlights (ZION TRAIN)
 
@@ -247,6 +315,36 @@ The project adheres to several key principles:
    - Use GNU license in all files
    - Document major project decisions via RFC READMEs
    - Preserve existing functionality when processing new features
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Redis Connection Error**
+   - Ensure Redis is running: `redis-cli ping`
+   - Check connection parameters in `.env` file
+   - Verify `REDIS_HOST` is set to `localhost` for local development
+
+2. **BitGet API Issues**
+   - Validate credentials using `verify_credentials.py`
+   - Check API rate limits (BitGet has strict limits)
+   - Ensure system clock is synchronized
+
+3. **System Startup Issues**
+   - Kill any running processes first: `pkill -f "python.*omega_ai"`
+   - Start services in the correct order:
+     1. Data feed
+     2. WebSocket server
+     3. MM trap consumer
+     4. Trap probability meter
+     5. Trap-aware traders
+
+### Debugging Process
+
+1. Check log files for specific errors
+2. Run problematic components in foreground for direct observation
+3. Use utility scripts to verify system state
+4. Turn on DEBUG logging level for more verbose output
 
 ## License
 
