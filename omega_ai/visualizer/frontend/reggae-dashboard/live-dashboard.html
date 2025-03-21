@@ -1294,6 +1294,9 @@
             }
         };
 
+        // Alias for shakeJahMessage to maintain compatibility with existing code
+        const animateJahMessage = shakeJahMessage;
+
         // Helper function to format a price as USD
         const formatPrice = (price) => {
             if (price === null || price === undefined || isNaN(price)) {
@@ -1356,6 +1359,45 @@
             }
 
             return `${sign}${absPercent.toFixed(decimalPlaces)}%`;
+        };
+
+        // Helper function to format a timestamp as a relative time difference
+        const formatTimeDiff = (timestamp) => {
+            if (!timestamp) return 'Just now';
+
+            try {
+                const now = new Date();
+                const time = new Date(timestamp);
+
+                // If invalid date, return the raw timestamp
+                if (isNaN(time.getTime())) {
+                    return String(timestamp);
+                }
+
+                const diffMs = now - time;
+                const diffSec = Math.floor(diffMs / 1000);
+
+                if (diffSec < 60) {
+                    return diffSec <= 5 ? 'Just now' : `${diffSec} seconds ago`;
+                }
+
+                const diffMin = Math.floor(diffSec / 60);
+                if (diffMin < 60) {
+                    return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+                }
+
+                const diffHour = Math.floor(diffMin / 60);
+                if (diffHour < 24) {
+                    return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`;
+                }
+
+                // Just return the time if it's more than a day old
+                return time.toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Error formatting time difference:', error);
+                return 'Unknown time';
+            }
         };
 
         // Helper function to fetch Redis key value with retries
