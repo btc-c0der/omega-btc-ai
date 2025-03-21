@@ -1,102 +1,75 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface WebSocketComponentProps {
     onData: (data: any) => void;
     onConnectionChange: (connected: boolean) => void;
 }
 
-const WebSocketComponent: React.FC<WebSocketComponentProps> = ({ onData, onConnectionChange }) => {
-    const wsRef = useRef<WebSocket | null>(null);
-    const reconnectTimeoutRef = useRef<number | null>(null);
+const WebSocketComponent: React.FC<WebSocketComponentProps> = ({
+    onData,
+    onConnectionChange
+}) => {
+    const [isConnected, setIsConnected] = useState(false);
+    const intervalRef = useRef<number | null>(null);
 
-    const connectWebSocket = () => {
-        // Get the host from the current URL, fall back to localhost in development
-        const host = window.location.hostname === 'localhost'
-            ? 'localhost:8000'
-            : window.location.host;
+    // Fetch data from API endpoints instead of using WebSocket
+    const fetchData = async () => {
+        try {
+            // Fetch trap probability
+            const trapResponse = await fetch('/api/trap-probability');
+            const trapData = await trapResponse.json();
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${host}/ws`;
+            // Fetch position data
+            const positionResponse = await fetch('/api/position');
+            const positionData = await positionResponse.json();
 
-        const ws = new WebSocket(wsUrl);
-        wsRef.current = ws;
+            // Combine data
+            const combinedData = {
+                type: 'update',
+                timestamp: new Date().toISOString(),
+                trap_probability: trapData,
+                position: positionData
+            };
 
-        ws.onopen = () => {
-            console.log('WebSocket connected');
-            onConnectionChange(true);
-
-            // Send periodic pings to keep the connection alive
-            const pingInterval = setInterval(() => {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send('ping');
-                }
-            }, 30000); // ping every 30 seconds
-
-            // Store the interval ID in a ref so we can clear it on disconnect
-            (ws as any).pingInterval = pingInterval;
-        };
-
-        ws.onmessage = (event) => {
-            try {
-                // Skip "pong" messages
-                if (event.data === 'pong') {
-                    return;
-                }
-
-                // Parse and handle data
-                const data = JSON.parse(event.data);
-                if (data.type === 'update') {
-                    onData(data);
-                }
-            } catch (e) {
-                console.error('Error parsing WebSocket message:', e);
-            }
-        };
-
-        ws.onclose = () => {
-            console.log('WebSocket disconnected');
-            onConnectionChange(false);
-
-            // Clear the ping interval
-            if ((ws as any).pingInterval) {
-                clearInterval((ws as any).pingInterval);
+            // Update connection status
+            if (!isConnected) {
+                setIsConnected(true);
+                onConnectionChange(true);
             }
 
-            // Try to reconnect after a delay
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
+            // Pass data to parent component
+            onData(combinedData);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+
+            // Update connection status on error
+            if (isConnected) {
+                setIsConnected(false);
+                onConnectionChange(false);
             }
-
-            reconnectTimeoutRef.current = window.setTimeout(() => {
-                console.log('Attempting to reconnect...');
-                connectWebSocket();
-            }, 3000);
-        };
-
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            ws.close();
-        };
+        }
     };
 
     useEffect(() => {
-        // Connect on component mount
-        connectWebSocket();
+        // Fetch data immediately on mount
+        fetchData();
+
+        // Set up interval to fetch data every 2 seconds
+        const intervalId = window.setInterval(() => {
+            fetchData();
+        }, 2000);
+
+        intervalRef.current = intervalId;
 
         // Clean up on unmount
         return () => {
-            if (wsRef.current) {
-                wsRef.current.close();
-            }
-
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
+            if (intervalRef.current !== null) {
+                clearInterval(intervalRef.current);
             }
         };
     }, []);
 
-    // This component doesn't render anything visible
-    return null;
+    return null; // This component doesn't render anything
 };
 
 export default WebSocketComponent; 
