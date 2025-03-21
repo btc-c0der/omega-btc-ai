@@ -1169,44 +1169,8 @@
         const POSITION_ENDPOINT = `${API_BASE}/position`;
         const BTC_PRICE_ENDPOINT = `${API_BASE}/btc-price`;
         const REDIS_KEYS_ENDPOINT = `${API_BASE}/redis-keys`;
+        const COMBINED_DATA_ENDPOINT = `${API_BASE}/data`;
         const HEALTH_ENDPOINT = `${API_BASE}/health`;
-
-        // Custom direct Redis key access endpoints (uses backend proxy)
-        const REDIS_KEY_ENDPOINT = `${API_BASE}/redis-key`;
-
-        // Redis keys mapping - organize all available keys by purpose
-        const REDIS_KEYS = {
-            PRICE: {
-                CURRENT: "btc_price",              // Current BTC price 
-                LAST: "last_btc_price",            // Last recorded BTC price - Note: May not exist, use fallbacks
-                PREVIOUS: "prev_btc_price",        // Previous BTC price
-                RECENT_HIGH_LOW: "btc_recent_high_low" // Recent high/low values
-            },
-            CHANGES: {
-                PRICE_CHANGES: "btc_price_changes" // Price changes (short/medium term)
-            },
-            PATTERNS: {
-                PRICE_PATTERNS: "btc_price_patterns" // Price patterns 
-            },
-            MOVEMENTS: {
-                ONE_MIN: "btc_movements_1min",
-                FIVE_MIN: "btc_movements_5min",
-                FIFTEEN_MIN: "btc_movements_15min",
-                SIXTY_MIN: "btc_movements_60min",
-                MARKET_REGIME: "btc_market_regime"
-            },
-            VOLUME: {
-                CURRENT: "btc_volume_data",
-                HISTORY: "btc_volume_history"
-            },
-            MISC: {
-                ORDER_BOOK: "btc_order_book_summary"
-            },
-            HISTORY: {
-                MOVEMENT_HISTORY: "btc_movement_history",
-                HISTORICAL_MATCHES: "btc_historical_matches"
-            }
-        };
 
         // Animation helper for UI feedback
         const animateElement = (elementId) => {
@@ -1262,180 +1226,170 @@
 
             // Helper function to fetch Redis key value with retries
             const fetchRedisKey = async (key, retries = 1) => {
+                debug('REDIS', `Fetching Redis key value for: ${key}`);
                 try {
-                    debug('REDIS', `Fetching Redis key: ${key}`);
-                    const response = await fetch(`${REDIS_KEY_ENDPOINT}?key=${key}`);
-
+                    // Use the new direct Redis key access endpoint
+                    const response = await fetch(`${API_BASE}/redis-key?key=${encodeURIComponent(key)}`);
                     if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                        console.warn(`Failed to fetch Redis key ${key}: ${response.status}`, errorData);
-
-                        if (retries > 0) {
-                            debug('REDIS', `Retrying fetch for key ${key} (${retries} retries left)`);
-                            return fetchRedisKey(key, retries - 1);
-                        }
-
-                        return null;
+                        throw new Error(`Failed to fetch Redis key ${key}: ${response.status}`);
                     }
 
                     const data = await response.json();
                     debug('REDIS', `Received data for key ${key}:`, data);
 
-                    if (!data || !data.value) {
-                        console.warn(`Empty or invalid data for Redis key: ${key}`);
-                        return null;
-                    }
-
-                    // Try to parse the value as JSON if it's a string that looks like JSON
-                    if (typeof data.value === 'string') {
-                        if (data.value.trim().startsWith('{') || data.value.trim().startsWith('[')) {
-                            try {
-                                return JSON.parse(data.value);
-                            } catch (e) {
-                                debug('REDIS', `Could not parse Redis value for ${key} as JSON:`, e);
-                            }
-                        }
-
-                        // Return the raw string if not parseable as JSON
-                        return data.value;
+                    if (data.status === 'error') {
+                        throw new Error(data.error || `Error fetching key ${key}`);
                     }
 
                     return data.value;
                 } catch (error) {
                     console.error(`Error fetching Redis key ${key}:`, error);
+                    if (retries > 0) {
+                        debug('REDIS', `Retrying fetch for key ${key}, ${retries} retries left`);
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        return fetchRedisKey(key, retries - 1);
+                    }
                     return null;
                 }
             };
 
-            // Function to get BTC price data from Redis
+            // Function to get BTC price data using Redis keys directly
             const getBtcPriceData = async () => {
-                debug('REDIS', 'Fetching BTC price data from Redis keys');
+                debug('PRICE', 'Fetching BTC price data from Redis keys');
 
                 try {
-                    // Start with trying to fetch the current BTC price
-                    let currentPrice = await fetchRedisKey(REDIS_KEYS.PRICE.CURRENT);
-
-                    // If we couldn't get current price, try the test:btc:price key as fallback
-                    if (!currentPrice) {
-                        currentPrice = await fetchRedisKey("test:btc:price");
-                        debug('REDIS', 'Using test:btc:price as fallback for missing btc_price');
-                    }
-
-                    // Try to fetch additional data (but continue if any are missing)
-                    const [
-                        lastPrice,
-                        priceChanges,
-                        pricePatterns
-                    ] = await Promise.all([
-                        fetchRedisKey(REDIS_KEYS.PRICE.LAST),
-                        fetchRedisKey(REDIS_KEYS.CHANGES.PRICE_CHANGES),
-                        fetchRedisKey(REDIS_KEYS.PATTERNS.PRICE_PATTERNS)
-                    ]);
-
-                    debug('REDIS', 'Received Redis data', {
-                        currentPrice, lastPrice, priceChanges, pricePatterns
-                    });
-
-                    // Extract price data from whatever format we received
+                    // Try to fetch the current BTC price from Redis
                     let price = null;
-
-                    // Try different formats that might be used for price
-                    if (currentPrice) {
-                        if (typeof currentPrice === 'object' && 'price' in currentPrice) {
-                            price = currentPrice.price;
-                        } else if (typeof currentPrice === 'string' && !isNaN(parseFloat(currentPrice))) {
-                            price = parseFloat(currentPrice);
-                        } else if (typeof currentPrice === 'number') {
-                            price = currentPrice;
+                    // Try different possible keys for price data
+                    for (const priceKey of ['btc_price', 'last_btc_price', 'sim_last_btc_price']) {
+                        price = await fetchRedisKey(priceKey);
+                        if (price !== null) {
+                            debug('PRICE', `Found BTC price in key: ${priceKey}`);
+                            break;
                         }
                     }
 
-                    // If we still don't have a price and have lastPrice, try to use that
-                    if (!price && lastPrice) {
-                        if (typeof lastPrice === 'string' && !isNaN(parseFloat(lastPrice))) {
-                            price = parseFloat(lastPrice);
-                        } else if (typeof lastPrice === 'number') {
-                            price = lastPrice;
-                        }
+                    if (price === null) {
+                        throw new Error('Could not find BTC price in any Redis key');
                     }
 
-                    // If still no price, generate a fake one
-                    if (!price) {
-                        price = 65000 + (Math.random() * 5000) - 2500;
-                        debug('REDIS', 'Using fake price due to missing data');
-                    }
+                    // Get price changes data
+                    const changesData = await fetchRedisKey('btc_price_changes');
 
-                    // Extract price changes
-                    let shortTermChange = null;
-                    let mediumTermChange = null;
+                    // Get price patterns data
+                    const patternsData = await fetchRedisKey('btc_price_patterns');
 
-                    if (priceChanges) {
-                        if (typeof priceChanges === 'object') {
-                            shortTermChange = priceChanges.short_term || 0;
-                            mediumTermChange = priceChanges.medium_term || 0;
-                        }
-                    } else {
-                        // Generate fake changes if no data available
-                        shortTermChange = (Math.random() * 0.06) - 0.03;
-                        mediumTermChange = (Math.random() * 0.1) - 0.05;
-                        debug('REDIS', 'Using fake price changes due to missing data');
-                    }
+                    // Get recent high/low data
+                    const highLowData = await fetchRedisKey('btc_recent_high_low');
 
-                    // Extract/generate dominant pattern
-                    let patterns = pricePatterns || {
-                        bullish: Math.random(),
-                        bearish: Math.random(),
-                        neutral: Math.random(),
-                        wyckoff_accumulation: Math.random(),
-                        wyckoff_distribution: Math.random()
-                    };
-
-                    let dominantPattern = 'Unknown';
-                    let dominantPatternProbability = 0;
-
-                    for (const [pattern, probability] of Object.entries(patterns)) {
-                        if (probability > dominantPatternProbability) {
-                            dominantPattern = pattern;
-                            dominantPatternProbability = probability;
-                        }
-                    }
-
-                    // Format the data for display
-                    return {
-                        price: price,
-                        lastPrice: lastPrice,
-                        shortTermChange: shortTermChange,
-                        mediumTermChange: mediumTermChange,
-                        dominantPattern: dominantPattern,
-                        dominantPatternProbability: dominantPatternProbability,
-                        patterns: patterns,
-                        timestamp: new Date().toISOString()
-                    };
-                } catch (error) {
-                    console.error('Error getting BTC price data:', error);
-                    // Return fallback data
-                    return {
-                        price: 65000 + (Math.random() * 5000) - 2500,
+                    // Prepare the normalized data object
+                    const data = {
+                        price: typeof price === 'number' ? price : parseFloat(price),
                         lastPrice: null,
-                        shortTermChange: (Math.random() * 0.06) - 0.03,
-                        mediumTermChange: (Math.random() * 0.1) - 0.05,
-                        dominantPattern: 'Fallback Data',
-                        dominantPatternProbability: 0.5,
-                        patterns: {
-                            bullish: Math.random(),
-                            bearish: Math.random(),
-                            neutral: Math.random()
-                        },
-                        timestamp: new Date().toISOString()
+                        shortTermChange: (changesData && changesData.short_term) ? changesData.short_term : 0,
+                        mediumTermChange: (changesData && changesData.medium_term) ? changesData.medium_term : 0,
+                        dominantPattern: findDominantPattern(patternsData || {}),
+                        dominantPatternProbability: findHighestProbability(patternsData || {}),
+                        patterns: patternsData || {},
+                        timestamp: new Date().toISOString(),
+                        source: 'Redis'
                     };
+
+                    // If we have high/low data, include it
+                    if (highLowData) {
+                        data.highLow = highLowData;
+                    }
+
+                    debug('PRICE', 'Normalized BTC price data:', data);
+                    return data;
+                } catch (error) {
+                    console.error('Error getting BTC price data from Redis:', error);
+
+                    // Fallback to using the combined data endpoint if Redis key access fails
+                    try {
+                        debug('PRICE', 'Falling back to combined data endpoint');
+                        const response = await fetch(COMBINED_DATA_ENDPOINT);
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch combined data: ${response.status}`);
+                        }
+
+                        const combinedData = await response.json();
+                        debug('PRICE', 'Received combined data:', combinedData);
+
+                        // Extract the BTC price data from the combined response
+                        const data = combinedData.btc_price;
+                        if (!data) {
+                            throw new Error('BTC price data not found in combined data response');
+                        }
+
+                        // Normalize data format to ensure consistent structure
+                        return {
+                            price: data.price || 0,
+                            lastPrice: data.last_price || 0,
+                            shortTermChange: data.changes?.short_term || 0,
+                            mediumTermChange: data.changes?.medium_term || 0,
+                            dominantPattern: findDominantPattern(data.patterns || {}),
+                            dominantPatternProbability: findHighestProbability(data.patterns || {}),
+                            patterns: data.patterns || {},
+                            timestamp: data.timestamp || new Date().toISOString(),
+                            source: 'Combined API'
+                        };
+                    } catch (fallbackError) {
+                        console.error('Error with fallback data source:', fallbackError);
+
+                        // Return fallback data
+                        return {
+                            price: 65000 + (Math.random() * 5000) - 2500,
+                            lastPrice: null,
+                            shortTermChange: (Math.random() * 0.06) - 0.03,
+                            mediumTermChange: (Math.random() * 0.1) - 0.05,
+                            dominantPattern: 'Fallback Data',
+                            dominantPatternProbability: 0.5,
+                            patterns: {
+                                bullish: Math.random(),
+                                bearish: Math.random(),
+                                neutral: Math.random()
+                            },
+                            timestamp: new Date().toISOString(),
+                            source: 'Fallback'
+                        };
+                    }
                 }
+            };
+
+            // Helper function to find the dominant pattern
+            const findDominantPattern = (patterns) => {
+                let dominantPattern = 'Unknown';
+                let highestProb = 0;
+
+                for (const [pattern, probability] of Object.entries(patterns)) {
+                    if (probability > highestProb) {
+                        highestProb = probability;
+                        dominantPattern = pattern;
+                    }
+                }
+
+                return dominantPattern;
+            };
+
+            // Helper function to find the highest probability
+            const findHighestProbability = (patterns) => {
+                let highestProb = 0;
+
+                for (const probability of Object.values(patterns)) {
+                    if (probability > highestProb) {
+                        highestProb = probability;
+                    }
+                }
+
+                return highestProb;
             };
 
             // Function to update the BTC price ticker in the header
             const updateBTCPriceTicker = async () => {
                 debug('PRICE_TICKER', 'Updating BTC price ticker in header');
                 try {
-                    // Get BTC price data from Redis
+                    // Get BTC price data from combined data endpoint
                     const data = await getBtcPriceData();
 
                     if (!data || !data.price) {
@@ -1455,22 +1409,20 @@
                     const mediumTermElement = document.getElementById('mediumTermChange');
 
                     if (shortTermElement && data.shortTermChange !== null) {
-                        const shortTermValue = data.shortTermChange * 100; // Convert from decimal to percentage
                         shortTermElement.textContent = formatPercent(data.shortTermChange);
-                        shortTermElement.className = data.shortTermChange >= 0 ? 'positive' : 'negative';
+                        shortTermElement.className = data.shortTermChange >= 0 ? 'price-change positive' : 'price-change negative';
                     }
 
                     if (mediumTermElement && data.mediumTermChange !== null) {
-                        const mediumTermValue = data.mediumTermChange * 100; // Convert from decimal to percentage
                         mediumTermElement.textContent = formatPercent(data.mediumTermChange);
-                        mediumTermElement.className = data.mediumTermChange >= 0 ? 'positive' : 'negative';
+                        mediumTermElement.className = data.mediumTermChange >= 0 ? 'price-change positive' : 'price-change negative';
                     }
 
                     // Update dominant pattern
                     const dominantPatternElement = document.getElementById('dominantPattern');
                     if (dominantPatternElement && data.dominantPattern) {
                         // Capitalize pattern name
-                        const capitalizedPattern = data.dominantPattern.replace(/\b\w/g, l => l.toUpperCase());
+                        const capitalizedPattern = data.dominantPattern.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         dominantPatternElement.textContent = capitalizedPattern;
                     }
 
@@ -1479,11 +1431,11 @@
                     const lastUpdatedElement = document.getElementById('lastUpdated');
 
                     if (dataSourceElement) {
-                        dataSourceElement.textContent = 'Redis';
+                        dataSourceElement.textContent = data.source || 'Redis';
                     }
 
                     if (lastUpdatedElement && data.timestamp) {
-                        lastUpdatedElement.textContent = new Date(data.timestamp).toLocaleTimeString();
+                        lastUpdatedElement.textContent = formatTimeDiff(data.timestamp);
                     }
 
                     debug('PRICE_TICKER', 'BTC price ticker in header updated successfully');
@@ -1493,83 +1445,247 @@
                 }
             };
 
-            // Function to fetch BTC price and show popup
-            const showBTCPrice = async () => {
-                debug('HODL', 'HODL button clicked, fetching BTC price');
+            // Function to fetch Redis status
+            const checkRedisStatus = async () => {
                 try {
-                    // Add animation to button
-                    hodlButton.classList.add('pulse-animation');
-
-                    // Get BTC price data from Redis
-                    const data = await getBtcPriceData();
-
-                    if (!data || !data.price) {
-                        throw new Error('No price data available');
+                    const response = await fetch(HEALTH_ENDPOINT);
+                    if (!response.ok) {
+                        return { connected: false, message: 'Backend connection failed' };
                     }
 
-                    debug('HODL', 'BTC price data received:', data);
+                    const data = await response.json();
+                    return {
+                        connected: data.redis === 'connected',
+                        message: data.redis === 'connected' ? 'Connected to Redis' : 'Redis connection issue'
+                    };
+                } catch (error) {
+                    console.error('Error checking Redis status:', error);
+                    return { connected: false, message: 'Connection error' };
+                }
+            };
 
-                    // Update popup content
-                    document.getElementById('popup-price').textContent = formatPrice(data.price);
+            // Function to update Redis debug information
+            const updateRedisDebugInfo = async () => {
+                const connectionStatusElement = document.getElementById('redis-connection-status');
+                const lastUpdatedElement = document.getElementById('redis-last-updated');
+                const activeKeysElement = document.getElementById('redis-active-keys');
+                const keysListElement = document.getElementById('redis-keys-list');
 
-                    // Set change value
-                    const changeElement = document.getElementById('popup-change');
-                    const shortTermValue = data.shortTermChange || 0;
-                    const changeValue = shortTermValue * 100; // Convert from decimal to percentage
+                try {
+                    // Check Redis connection status
+                    const redisStatus = await checkRedisStatus();
+                    connectionStatusElement.textContent = redisStatus.connected ? 'Connected' : 'Disconnected';
+                    connectionStatusElement.className = redisStatus.connected ? 'value positive' : 'value negative';
 
-                    changeElement.textContent = formatPercent(data.shortTermChange);
-                    changeElement.className = data.shortTermChange >= 0 ? 'positive' : 'negative';
-
-                    // Set short-term change
-                    if (data.shortTermChange !== null) {
-                        const shortTermElement = document.getElementById('popup-short-term');
-                        shortTermElement.textContent = formatPercent(data.shortTermChange);
-                        shortTermElement.className = data.shortTermChange >= 0 ? 'positive' : 'negative';
-                    }
-
-                    // Set medium-term change
-                    if (data.mediumTermChange !== null) {
-                        const mediumTermElement = document.getElementById('popup-medium-term');
-                        mediumTermElement.textContent = formatPercent(data.mediumTermChange);
-                        mediumTermElement.className = data.mediumTermChange >= 0 ? 'positive' : 'negative';
-                    }
-
-                    // Set dominant pattern
-                    let dominantPattern = 'Unknown';
-                    let highestProb = 0;
-
-                    if (data.patterns) {
-                        // Find the pattern with the highest probability
-                        for (const pattern in data.patterns) {
-                            if (data.patterns[pattern] > highestProb) {
-                                highestProb = data.patterns[pattern];
-                                dominantPattern = pattern.replace(/_/g, ' ');
-                            }
+                    if (redisStatus.connected) {
+                        // Fetch Redis keys to check what's available
+                        const response = await fetch(REDIS_KEYS_ENDPOINT);
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch Redis keys: ${response.status}`);
                         }
 
-                        // Capitalize pattern name
-                        dominantPattern = dominantPattern.replace(/\b\w/g, l => l.toUpperCase());
+                        const keysData = await response.json();
+                        debug('REDIS', 'Received Redis keys data:', keysData);
+
+                        // Update keys count
+                        if (keysData.total_keys) {
+                            activeKeysElement.textContent = `${keysData.displayed_keys || 0}/${keysData.total_keys} keys`;
+                        } else {
+                            activeKeysElement.textContent = `${keysData.keys?.length || 0} keys`;
+                        }
+
+                        // Update keys list
+                        if (keysListElement && keysData.keys && keysData.keys.length > 0) {
+                            keysListElement.innerHTML = '';
+
+                            // Group keys by namespace (first part before colon)
+                            const keysByNamespace = {};
+                            keysData.keys.forEach(keyInfo => {
+                                const key = keyInfo.key;
+                                const namespace = key.includes(':') ? key.split(':')[0] : 'other';
+
+                                if (!keysByNamespace[namespace]) {
+                                    keysByNamespace[namespace] = [];
+                                }
+
+                                keysByNamespace[namespace].push(keyInfo);
+                            });
+
+                            // Create elements for each namespace
+                            for (const [namespace, keys] of Object.entries(keysByNamespace)) {
+                                const namespaceEl = document.createElement('div');
+                                namespaceEl.className = 'redis-namespace';
+                                namespaceEl.innerHTML = `<div class="redis-namespace-name">${namespace}</div>`;
+
+                                const keysEl = document.createElement('div');
+                                keysEl.className = 'redis-namespace-keys';
+
+                                keys.forEach(keyInfo => {
+                                    const keyEl = document.createElement('div');
+                                    keyEl.className = 'redis-key-item';
+
+                                    let details = '';
+                                    if (keyInfo.type) {
+                                        details += `type: ${keyInfo.type}`;
+                                    }
+                                    if (keyInfo.length !== undefined) {
+                                        details += details ? ', ' : '';
+                                        details += `length: ${keyInfo.length}`;
+                                    }
+                                    if (keyInfo.fields !== undefined) {
+                                        details += details ? ', ' : '';
+                                        details += `fields: ${keyInfo.fields}`;
+                                    }
+
+                                    keyEl.innerHTML = `
+                                        <span class="redis-key-name">${keyInfo.key}</span>
+                                        <span class="redis-key-detail">${details}</span>
+                                    `;
+
+                                    keysEl.appendChild(keyEl);
+                                });
+
+                                namespaceEl.appendChild(keysEl);
+                                keysListElement.appendChild(namespaceEl);
+                            }
+                        } else {
+                            keysListElement.innerHTML = '<div class="redis-key-error">No Redis keys found</div>';
+                        }
+                    } else {
+                        activeKeysElement.textContent = '0 keys';
+                        keysListElement.innerHTML = `<div class="redis-key-error">Redis connection failed: ${redisStatus.message}</div>`;
                     }
 
-                    document.getElementById('popup-pattern').textContent = `Dominant Pattern: ${dominantPattern}`;
-
-                    // Set timestamp
-                    document.getElementById('popup-time').textContent = new Date().toLocaleString();
-
-                    // Show popup
-                    popupOverlay.classList.add('show');
-                    btcPopup.classList.add('show');
-
-                    // Add JAH message shake for fun
-                    shakeJahMessage();
-                    debug('HODL', 'BTC price popup displayed successfully');
+                    // Update last updated timestamp
+                    lastUpdatedElement.textContent = new Date().toLocaleTimeString();
 
                 } catch (error) {
+                    console.error('Error updating Redis debug info:', error);
+
+                    connectionStatusElement.textContent = 'Error';
+                    connectionStatusElement.className = 'value negative';
+                    activeKeysElement.textContent = 'Error';
+                    lastUpdatedElement.textContent = new Date().toLocaleTimeString();
+
+                    if (keysListElement) {
+                        keysListElement.innerHTML = `<div class="redis-key-error">Error: ${error.message}</div>`;
+                    }
+                }
+            };
+
+            // Helper function to format time difference
+            const formatTimeDiff = (timestamp) => {
+                if (!timestamp) return 'N/A';
+                try {
+                    const date = new Date(timestamp);
+                    const now = new Date();
+                    const diffSeconds = Math.floor((now - date) / 1000);
+
+                    if (diffSeconds < 5) return 'Just now';
+                    if (diffSeconds < 60) return `${diffSeconds}s ago`;
+                    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+                    return `${Math.floor(diffSeconds / 3600)}h ago`;
+                } catch (e) {
+                    return 'Invalid timestamp';
+                }
+            };
+
+            // Function to display BTC price popup
+            const showBTCPrice = async () => {
+                debug('HODL', 'Showing BTC price popup');
+                const popupOverlay = document.getElementById('popup-overlay');
+                const btcPopup = document.getElementById('btc-popup');
+                const popupPrice = document.getElementById('popup-price');
+                const popupChange = document.getElementById('popup-change');
+                const popupShortTerm = document.getElementById('popup-short-term');
+                const popupMediumTerm = document.getElementById('popup-medium-term');
+                const popupPattern = document.getElementById('popup-pattern');
+                const popupTime = document.getElementById('popup-time');
+
+                // Show popup with loading state
+                popupOverlay.classList.add('show');
+                btcPopup.classList.add('show');
+
+                if (popupPrice) popupPrice.innerHTML = 'Loading...';
+                if (popupPattern) popupPattern.innerHTML = 'Checking patterns...';
+
+                try {
+                    // Get the latest BTC price data
+                    const priceData = await getBtcPriceData();
+                    debug('HODL', 'BTC price data for popup:', priceData);
+
+                    // Update popup content
+                    if (popupPrice) {
+                        popupPrice.innerHTML = formatPrice(priceData.price);
+                        popupPrice.classList.add('pulse-animation');
+                        setTimeout(() => popupPrice.classList.remove('pulse-animation'), 2000);
+                    }
+
+                    // Update 24h change
+                    if (popupChange) {
+                        const change = priceData.change || 0;
+                        popupChange.innerHTML = `24h: ${formatPercent(change)}`;
+                        popupChange.className = 'btc-popup-change';
+                        if (change > 0) popupChange.classList.add('positive');
+                        else if (change < 0) popupChange.classList.add('negative');
+                        else popupChange.classList.add('neutral');
+                    }
+
+                    // Update short-term change
+                    if (popupShortTerm) {
+                        const shortChange = priceData.shortTermChange || 0;
+                        popupShortTerm.innerHTML = `Short: ${formatPercent(shortChange)}`;
+                        popupShortTerm.className = 'btc-popup-change';
+                        if (shortChange > 0) popupShortTerm.classList.add('positive');
+                        else if (shortChange < 0) popupShortTerm.classList.add('negative');
+                        else popupShortTerm.classList.add('neutral');
+                    }
+
+                    // Update medium-term change
+                    if (popupMediumTerm) {
+                        const mediumChange = priceData.mediumTermChange || 0;
+                        popupMediumTerm.innerHTML = `Medium: ${formatPercent(mediumChange)}`;
+                        popupMediumTerm.className = 'btc-popup-change';
+                        if (mediumChange > 0) popupMediumTerm.classList.add('positive');
+                        else if (mediumChange < 0) popupMediumTerm.classList.add('negative');
+                        else popupMediumTerm.classList.add('neutral');
+                    }
+
+                    // Update pattern
+                    if (popupPattern) {
+                        const pattern = priceData.dominantPattern || 'Unknown';
+                        const probability = priceData.dominantPatternProbability || 0;
+
+                        // Format pattern name for display
+                        const patternName = pattern
+                            .split('_')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ');
+
+                        popupPattern.innerHTML = `Dominant Pattern: ${patternName} (${Math.round(probability * 100)}%)`;
+                    }
+
+                    // Update time
+                    if (popupTime) {
+                        popupTime.innerHTML = `Last Updated: ${new Date().toLocaleTimeString()}`;
+                    }
+
+                    // Shake the popup for emphasis
+                    btcPopup.classList.add('shake');
+                    setTimeout(() => btcPopup.classList.remove('shake'), 500);
+
+                    // Trigger JAH message animation for added effect
+                    shakeJahMessage();
+                } catch (error) {
                     console.error('Error showing BTC price:', error);
-                    alert(`Failed to fetch BTC price: ${error.message}`);
-                } finally {
-                    // Remove button animation
-                    hodlButton.classList.remove('pulse-animation');
+
+                    // Show error state
+                    if (popupPrice) popupPrice.innerHTML = 'Error loading price';
+                    if (popupPattern) popupPattern.innerHTML = 'Could not load pattern data';
+
+                    // Shake the popup to indicate error
+                    btcPopup.classList.add('shake');
+                    setTimeout(() => btcPopup.classList.remove('shake'), 500);
                 }
             };
 
@@ -1619,72 +1735,6 @@
                 // Convert decimal (0.024) to percentage (2.44%)
                 const percent = value * 100;
                 return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
-            };
-
-            // Update the connection status
-            const updateConnectionStatus = (connected, message = null) => {
-                console.log(`Connection status update: connected=${connected}, message=${message}`);
-
-                statusDot.className = connected
-                    ? 'status-dot connected'
-                    : 'status-dot disconnected';
-
-                statusText.textContent = message || (connected
-                    ? 'Connected to Redis'
-                    : 'Disconnected from Redis');
-            };
-
-            // Function to update Redis debug information
-            const updateRedisDebugInfo = async () => {
-                const connectionStatusElement = document.getElementById('redis-connection-status');
-                const lastUpdatedElement = document.getElementById('redis-last-updated');
-                const activeKeysElement = document.getElementById('redis-active-keys');
-
-                try {
-                    // Try to fetch a key to check connection
-                    const testKeyData = await fetchRedisKey(REDIS_KEYS.PRICE.CURRENT);
-
-                    if (testKeyData) {
-                        connectionStatusElement.textContent = 'Connected';
-                        connectionStatusElement.className = 'connected';
-
-                        // Get all available keys
-                        const allKeys = Object.values(REDIS_KEYS).flatMap(category => Object.values(category));
-
-                        // Check which keys are available
-                        const keyChecks = await Promise.all(
-                            allKeys.map(async key => {
-                                const value = await fetchRedisKey(key);
-                                return { key, available: !!value };
-                            })
-                        );
-
-                        const availableKeys = keyChecks.filter(k => k.available).map(k => k.key);
-                        activeKeysElement.textContent = `${availableKeys.length}/${allKeys.length} keys`;
-
-                        // Update last updated timestamp
-                        lastUpdatedElement.textContent = new Date().toLocaleTimeString();
-
-                        console.log('Redis debug info updated:', {
-                            connected: true,
-                            availableKeys
-                        });
-                    } else {
-                        connectionStatusElement.textContent = 'Disconnected';
-                        connectionStatusElement.className = 'disconnected';
-                        activeKeysElement.textContent = '0 keys';
-                        lastUpdatedElement.textContent = new Date().toLocaleTimeString();
-
-                        console.warn('Redis connection failed - no data returned');
-                    }
-                } catch (error) {
-                    console.error('Error updating Redis debug info:', error);
-
-                    connectionStatusElement.textContent = 'Error';
-                    connectionStatusElement.className = 'disconnected';
-                    activeKeysElement.textContent = 'Error';
-                    lastUpdatedElement.textContent = new Date().toLocaleTimeString();
-                }
             };
 
             // Initial data fetching
