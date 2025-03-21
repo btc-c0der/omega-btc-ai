@@ -1000,3 +1000,85 @@ For issues, please:
 **DISCLAIMER**: Trading cryptocurrencies involves significant risk. This software is provided for informational and educational purposes only. Always conduct your own research before trading and never risk more than you can afford to lose.
 
 ONE LOVE, ONE HEART, ONE CODE! 🌟
+
+# OMEGA BTC AI - Live Dashboard
+
+## Redis Data Structure
+
+### Key Redis Keys
+
+- `current_position`: Contains the current trading position data
+- `btc_price:last_btc_price`: Latest BTC price
+- `btc_price:btc_price`: Current BTC price (may be used for verification)
+- `btc_price:sim_last_btc_price`: Simulated BTC price (for testing)
+- `price_changes:btc_price_changes`: Historical price changes
+- `price_patterns:btc_price_patterns`: Detected price patterns
+- `trap_probability:current_trap_probability`: Current market maker trap probability
+
+### Position Data Structure
+
+The position data in Redis is stored as a JSON string with the following format:
+
+```json
+{
+    "has_position": true,
+    "position_side": "long",
+    "entry_price": 84150.50,
+    "current_price": 83920.75,
+    "position_size": 0.819497793,
+    "pnl_percent": -0.27,
+    "pnl_usd": -188.23,
+    "timestamp": "2025-03-21T08:51:00.000000+00:00",
+    "source": "live_trader"
+}
+```
+
+### Updating Position Data
+
+To manually update position data (for testing or fixes):
+
+```bash
+# Using redis-cli
+redis-cli set current_position '{"has_position": true, "position_side": "long", ...}'
+
+# Using Python
+import redis
+import json
+r = redis.Redis(host='localhost', port=6379)
+position_data = {
+    "has_position": True,
+    "position_side": "long",
+    ...
+}
+r.set('current_position', json.dumps(position_data))
+```
+
+### Dashboard Integration
+
+The live dashboard (`live-dashboard.html`) connects to the Redis database through the Flask API server (`live-api-server.py`). The server:
+
+1. Connects to Redis at localhost:6379
+2. Retrieves position and other data
+3. Formats and serves it via REST endpoints
+4. Updates the UI in real-time
+
+### Troubleshooting
+
+If position data appears incorrect:
+
+1. Check Redis connection (redis-cli ping)
+2. Verify current_position data (redis-cli get current_position)
+3. Ensure live-api-server.py is running and connected to Redis
+4. Check the timestamps to ensure data is current
+
+### Environment Setup
+
+Required environment variables:
+
+```bash
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=  # Leave empty for local development
+```
+
+JAH BLESS! ONE LOVE! 🦁

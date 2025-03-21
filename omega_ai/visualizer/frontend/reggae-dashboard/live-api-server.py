@@ -20,6 +20,11 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Force Redis connection to localhost
+os.environ['REDIS_HOST'] = 'localhost'
+os.environ['REDIS_PORT'] = '6379'
+os.environ['REDIS_PASSWORD'] = ''  # No password for local Redis
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -53,7 +58,7 @@ def after_request(response):
 # Redis connection settings - use environment variables
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+REDIS_PASSWORD = None  # No password for local Redis
 
 # Redis keys we're interested in
 REDIS_KEYS = {
@@ -67,6 +72,11 @@ REDIS_KEYS = {
 def get_redis_client():
     """Get Redis client connection"""
     try:
+        # Log connection attempt details
+        logger.info(f"Attempting to connect to Redis at {REDIS_HOST}:{REDIS_PORT}")
+        if REDIS_PASSWORD:
+            logger.info("Using Redis password authentication")
+        
         # Connect to Redis with environment settings
         client = redis.Redis(
             host=REDIS_HOST,
@@ -92,8 +102,20 @@ def get_redis_client():
             logger.warning("Connected to Redis but no relevant data keys found")
             
         return client
+    except redis.ConnectionError as e:
+        logger.error(f"Redis Connection Error: {str(e)}")
+        logger.error(f"Connection Details:")
+        logger.error(f"  Host: {REDIS_HOST}")
+        logger.error(f"  Port: {REDIS_PORT}")
+        logger.error(f"  Password: {'Set' if REDIS_PASSWORD else 'Not set'}")
+        logger.error(f"  Environment Variables:")
+        logger.error(f"    REDIS_HOST: {os.getenv('REDIS_HOST')}")
+        logger.error(f"    REDIS_PORT: {os.getenv('REDIS_PORT')}")
+        logger.error(f"    REDIS_PASSWORD: {'Set' if os.getenv('REDIS_PASSWORD') else 'Not set'}")
+        logger.info("Using fallback data simulation")
+        return None
     except Exception as e:
-        logger.error(f"Failed to connect to Redis: {e}")
+        logger.error(f"Unexpected error connecting to Redis: {str(e)}")
         logger.info("Using fallback data simulation")
         return None
 
@@ -337,21 +359,33 @@ def trap_probability():
 @app.route('/api/position')
 def position():
     """Get position data from Redis"""
-    fallback_data = get_fallback_position_data()
-    data = get_data_from_redis("position", fallback_data)
-    
-    # Add trap probability data if available
-    trap_data = get_data_from_redis("trap_probability", None)
-    if trap_data and isinstance(data, dict) and data.get("has_position"):
-        data["trap_awareness"] = {
-            "trap_probability": trap_data.get("probability", 0),
-            "trap_type": trap_data.get("trap_type"),
-            "confidence": trap_data.get("confidence", 0),
-            "components": trap_data.get("components", {}),
-            "descriptions": trap_data.get("descriptions", {})
-        }
-    
-    return jsonify(data)
+    try:
+        redis_client = get_redis_client()
+        if redis_client:
+            # Try to get position data from Redis
+            for key in REDIS_KEYS['position']:
+                data = redis_client.get(key)
+                if data:
+                    try:
+                        position_data = json.loads(data)
+                        # Ensure consistent data structure
+                        if isinstance(position_data, dict):
+                            # Add required fields if missing
+                            position_data.setdefault('has_position', False)
+                            position_data.setdefault('source', 'redis')
+                            position_data.setdefault('timestamp', datetime.now(timezone.utc).isoformat())
+                            return jsonify(position_data)
+                    except json.JSONDecodeError:
+                        logger.warning(f"Invalid JSON in Redis key {key}")
+                        continue
+                        
+        # If we get here, use fallback data
+        logger.info("Using fallback position data")
+        return jsonify(get_fallback_position_data())
+        
+    except Exception as e:
+        logger.error(f"Error getting position data: {e}")
+        return jsonify(get_fallback_position_data())
 
 @app.route('/api/btc-price')
 def btc_price():
