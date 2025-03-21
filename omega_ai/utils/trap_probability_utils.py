@@ -94,8 +94,16 @@ def get_probability_components() -> Dict[str, float]:
         # Parse the JSON
         prob_data = json.loads(prob_json)
         
-        # Return the components
-        return prob_data.get("components", {})
+        # Return the components - ensure all values are floats
+        components = prob_data.get("components", {})
+        
+        # Validate that components is a dict and all values are floats
+        if not isinstance(components, dict):
+            print(f"Warning: components is not a dictionary: {type(components)}")
+            return {}
+            
+        # Convert all values to float if possible
+        return {k: float(v) if isinstance(v, (int, float, str)) else 0.0 for k, v in components.items()}
         
     except Exception as e:
         print(f"Error getting probability components: {e}")

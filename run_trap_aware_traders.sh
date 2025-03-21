@@ -13,11 +13,13 @@ REDIS_PORT=6379
 SYMBOL="BTCUSDT"
 LONG_CAPITAL="150.0"
 SHORT_CAPITAL="200.0"
-LONG_LEVERAGE="5"
-SHORT_LEVERAGE="5"
+LONG_LEVERAGE="11"
+SHORT_LEVERAGE="11"
 TRAP_PROB_THRESHOLD="0.6"
 TRAP_ALERT_THRESHOLD="0.7"
-MIN_FREE_BALANCE="750.0"
+MIN_FREE_BALANCE="0.0"
+ENABLE_ELITE_EXITS="true"
+ELITE_EXIT_CONFIDENCE="0.7"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -238,6 +240,16 @@ parse_trading_parameters() {
     MIN_FREE_BALANCE="${BASH_REMATCH[1]}"
   fi
   
+  # Extract elite exits
+  if [[ "$args" =~ --enable-elite-exits ]]; then
+    ENABLE_ELITE_EXITS="true"
+  fi
+  
+  # Extract elite exit confidence
+  if [[ "$args" =~ --elite-exit-confidence[[:space:]]+([0-9.]+) ]]; then
+    ELITE_EXIT_CONFIDENCE="${BASH_REMATCH[1]}"
+  fi
+  
   # Output the args for debugging if in debug mode
   if $DEBUG; then
     echo "Parsed trading parameters:"
@@ -249,6 +261,8 @@ parse_trading_parameters() {
     echo "  TRAP_PROB_THRESHOLD = $TRAP_PROB_THRESHOLD"
     echo "  TRAP_ALERT_THRESHOLD = $TRAP_ALERT_THRESHOLD"
     echo "  MIN_FREE_BALANCE = $MIN_FREE_BALANCE"
+    echo "  ENABLE_ELITE_EXITS = $ENABLE_ELITE_EXITS"
+    echo "  ELITE_EXIT_CONFIDENCE = $ELITE_EXIT_CONFIDENCE"
   fi
 }
 
@@ -418,6 +432,11 @@ else
   echo "Starting Trap-Aware Dual Position Traders..."
 fi
 
+# Save full debug output to a separate file for troubleshooting
+DEBUG_LOG="trap_aware_debug_$(date +%Y%m%d_%H%M%S).log"
+colored_echo "\e[1;33mSaving detailed debug output to $DEBUG_LOG\e[0m"
+
+# Run with debugging enabled
 python -m omega_ai.trading.strategies.trap_aware_dual_traders \
   --symbol $SYMBOL \
   --long-capital $LONG_CAPITAL \
@@ -427,7 +446,9 @@ python -m omega_ai.trading.strategies.trap_aware_dual_traders \
   --trap-probability-threshold $TRAP_PROB_THRESHOLD \
   --trap-alert-threshold $TRAP_ALERT_THRESHOLD \
   --min-free-balance $MIN_FREE_BALANCE \
-  $EXTRA_ARGS > "$TEMPFILE" 2>&1 &
+  ${ENABLE_ELITE_EXITS:+--enable-elite-exits} \
+  --elite-exit-confidence $ELITE_EXIT_CONFIDENCE \
+  $EXTRA_ARGS > "$TEMPFILE" 2> "$DEBUG_LOG" &
 
 TRADERS_PID=$!
 
@@ -440,6 +461,14 @@ _store_trap_prediction() {
   fi
   
   # Store prediction code here
+}
+
+# Function to output colored trap probability line
+output_trap_probability_line() {
+  local line=$1
+  local prob=$(echo "$line" | sed 's/.*Trap Probability: \([0-9.]*%\).*/\1/' | sed 's/%//')
+  local color=$(get_probability_color "$prob")
+  printf "${color}%s\e[0m\n" "$line"
 }
 
 # Keep updating the display
@@ -491,10 +520,7 @@ while kill -0 $TRADERS_PID 2>/dev/null; do
       elif [[ $line == *" - ERROR "* ]] || [[ $line == *" - CRITICAL "* ]]; then
         printf "\e[0;31m%s\e[0m\n" "$line"  # Red for errors
       elif [[ $line == *"Trap Probability:"* ]]; then
-        # Extract probability value for coloring
-        local prob=$(echo "$line" | sed 's/.*Trap Probability: \([0-9.]*%\).*/\1/' | sed 's/%//')
-        local color=$(get_probability_color "$prob")
-        printf "${color}%s\e[0m\n" "$line"
+        output_trap_probability_line "$line"
       elif [[ $line == *"Likely "* ]] && [[ $line == *"_TRAP"* || $line == *"_HUNT"* ]]; then
         printf "\e[0;31m%s\e[0m\n" "$line"  # Red for trap detections
       else

@@ -63,6 +63,30 @@ class DirectionalBitGetTrader(BitGetLiveTraders):
         self.direction = direction
         logger.info(f"{BLUE}Created DirectionalBitGetTrader with {direction.upper()} only direction{RESET}")
     
+    async def get_current_price(self, symbol: str) -> float:
+        """
+        Get the current price of a symbol directly from CCXT.
+        
+        Args:
+            symbol: Trading symbol
+            
+        Returns:
+            float: Current price of the symbol
+            
+        Raises:
+            Exception: If there's an error getting the price
+        """
+        try:
+            if "strategic" not in self.traders:
+                raise ValueError("Strategic trader not initialized")
+                
+            formatted_symbol = self._format_symbol(symbol)
+            ticker = await self.traders["strategic"].exchange.exchange.fetch_ticker(formatted_symbol)
+            return float(ticker['last'])
+        except Exception as e:
+            logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
+            raise
+    
     async def _check_new_entry(self, trader, current_price):
         """
         Override the entry check to filter by direction.
@@ -524,13 +548,13 @@ def parse_args():
     parser.add_argument('--symbol', type=str, default='BTCUSDT',
                       help='Trading symbol (default: BTCUSDT)')
     parser.add_argument('--testnet', action='store_true',
-                      help='Use testnet (default: True)')
-    parser.add_argument('--mainnet', action='store_true',
-                      help='Use mainnet (default: False)')
-    parser.add_argument('--long-capital', type=float, default=24.0,
-                      help='Initial capital for long trader in USDT (default: 24.0)')
-    parser.add_argument('--short-capital', type=float, default=24.0,
-                      help='Initial capital for short trader in USDT (default: 24.0)')
+                      help='Use testnet (default: False)')
+    parser.add_argument('--mainnet', action='store_true', default=True,
+                      help='Use mainnet (default: True)')
+    parser.add_argument('--long-capital', type=float, default=150.0,
+                      help='Initial capital for long trader in USDT (default: 150.0)')
+    parser.add_argument('--short-capital', type=float, default=200.0,
+                      help='Initial capital for short trader in USDT (default: 200.0)')
     parser.add_argument('--api-key', type=str, default='',
                       help='BitGet API key')
     parser.add_argument('--secret-key', type=str, default='',
@@ -545,8 +569,8 @@ def parse_args():
                       help='Disable PnL alerts (default: False)')
     parser.add_argument('--pnl-alert-interval', type=int, default=1,
                       help='Interval in minutes for PnL alerts (default: 1)')
-    parser.add_argument('--account-limit', type=float, default=0.0,
-                      help='Maximum total account value in USDT (0 means no limit)')
+    parser.add_argument('--account-limit', type=float, default=1500.0,
+                      help='Maximum total account value in USDT (default: 1500.0)')
     parser.add_argument('--long-sub-account', type=str, default='',
                       help='Sub-account name for long positions (default from env STRATEGIC_SUB_ACCOUNT_NAME)')
     parser.add_argument('--short-sub-account', type=str, default='fst_short',

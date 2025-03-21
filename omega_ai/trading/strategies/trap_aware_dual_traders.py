@@ -18,7 +18,10 @@ import logging
 import os
 import signal
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Any, Optional
+import traceback
+import redis
 
 from omega_ai.trading.exchanges.dual_position_traders import BitGetDualPositionTraders
 from omega_ai.utils.trap_probability_utils import (
@@ -29,6 +32,9 @@ from omega_ai.utils.trap_probability_utils import (
     is_trap_likely
 )
 from omega_ai.alerts.telegram_market_report import send_telegram_alert
+from omega_ai.trading.strategies.elite_exit_strategy import EliteExitStrategy
+from omega_ai.trading.exchanges.bitget_live_traders import BitGetLiveTraders
+from omega_ai.trading.exchanges.bitget_trader import BitGetTrader
 
 # Configure logging
 logging.basicConfig(
@@ -60,6 +66,8 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
                  trap_probability_threshold: float = 0.7,
                  trap_alert_threshold: float = 0.8,
                  enable_trap_protection: bool = True,
+                 enable_elite_exits: bool = True,
+                 elite_exit_confidence: float = 0.7,
                  **kwargs):
         """
         Initialize the trap-aware dual position traders system.
@@ -68,17 +76,22 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
             trap_probability_threshold: Threshold above which to consider trap probability in trading decisions
             trap_alert_threshold: Threshold above which to send trap alerts
             enable_trap_protection: Whether to enable trap protection features
+            enable_elite_exits: Whether to enable elite exit strategy
+            elite_exit_confidence: Minimum confidence required for elite exit signals
             **kwargs: Arguments to pass to BitGetDualPositionTraders
         """
         super().__init__(**kwargs)
         self.trap_probability_threshold = trap_probability_threshold
         self.trap_alert_threshold = trap_alert_threshold
         self.enable_trap_protection = enable_trap_protection
+        self.enable_elite_exits = enable_elite_exits
+        self.elite_exit_confidence = elite_exit_confidence
         self.last_trap_check_time = datetime.now()
         self.trap_check_interval = 30  # seconds
         self.last_trap_alert_time = datetime.now() - timedelta(hours=1)
         self.trap_alert_cooldown = 300  # seconds
         self.last_detected_trap = None
+        self.elite_exit_strategy = None  # Will be initialized in initialize()
         
         # Use multipliers instead of directly modifying traders
         self.long_risk_multiplier = 1.0
@@ -88,6 +101,26 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
         logger.info(f"{CYAN}  Trap Probability Threshold: {trap_probability_threshold}{RESET}")
         logger.info(f"{CYAN}  Trap Alert Threshold: {trap_alert_threshold}{RESET}")
         logger.info(f"{CYAN}  Trap Protection Enabled: {enable_trap_protection}{RESET}")
+        logger.info(f"{CYAN}  Elite Exit Strategy Enabled: {enable_elite_exits}{RESET}")
+        logger.info(f"{CYAN}  Elite Exit Confidence: {elite_exit_confidence}{RESET}")
+    
+    async def initialize(self) -> None:
+        """Initialize the trap-aware dual position traders system."""
+        # First initialize the parent class
+        await super().initialize()
+        
+        # Now initialize the elite exit strategy if enabled
+        if self.enable_elite_exits and self.long_trader and self.long_trader.traders and "strategic" in self.long_trader.traders:
+            # Get the exchange from the long trader (both traders use the same exchange)
+            exchange = self.long_trader.traders["strategic"].exchange
+            self.elite_exit_strategy = EliteExitStrategy(
+                exchange=exchange,
+                symbol=self.symbol,
+                min_confidence=self.elite_exit_confidence
+            )
+            logger.info(f"{GREEN}Elite exit strategy initialized with confidence threshold: {self.elite_exit_confidence}{RESET}")
+        elif self.enable_elite_exits:
+            logger.error(f"{RED}Could not initialize elite exit strategy: long trader not properly initialized{RESET}")
     
     async def check_for_traps(self) -> dict:
         """
@@ -127,7 +160,8 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
             }
             
             # Send alert if probability is above threshold and cooldown has passed
-            if (probability >= self.trap_alert_threshold and 
+            if (isinstance(probability, (int, float)) and 
+                probability >= self.trap_alert_threshold and 
                 (current_time - self.last_trap_alert_time).total_seconds() >= self.trap_alert_cooldown):
                 
                 await self._send_trap_alert(result)
@@ -216,7 +250,7 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
         probability = trap_data.get("probability", 0)
         trap_type = trap_data.get("trap_type")
         
-        if probability < self.trap_probability_threshold or not trap_type:
+        if not isinstance(probability, (int, float)) or probability < self.trap_probability_threshold or not trap_type:
             return
             
         # Log the trap detection
@@ -303,45 +337,468 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
                 logger.error(f"{RED}Error in trap monitoring: {e}{RESET}")
                 await asyncio.sleep(30)  # Longer sleep on error
 
-    # Override the _run_long_trader method to apply the risk multiplier
     async def _run_long_trader(self) -> None:
-        """Run the long trader with trap-aware risk adjustment."""
-        logger.info(f"{BLUE}Starting long trader (trap-aware){RESET}")
+        """Run the long position trader with trap awareness."""
+        if not self.long_trader:
+            logger.error(f"{RED}Long trader not initialized{RESET}")
+            return
+            
+        # Ensure the trader is initialized
+        await self.long_trader.initialize()
         
         while self.running:
             try:
-                # Apply risk multiplier here before trading decisions
-                # For example, adjust position sizes based on the risk multiplier
+                # Check for traps
+                trap_info = await self.check_for_traps()
                 
-                # Call parent method to run the standard trading logic
-                await super()._run_long_trader()
+                # Adjust trading based on trap detection
+                if trap_info.get('trap_detected'):
+                    await self._adjust_trading_based_on_traps(trap_info)
                 
-                # Sleep before next check
-                await asyncio.sleep(5)
+                # Check for elite exit signals if enabled
+                if self.enable_elite_exits and self.elite_exit_strategy:
+                    # Get current positions
+                    positions = await self.long_trader.traders["strategic"].get_positions()
+                    
+                    if positions:
+                        # Get current price from exchange
+                        try:
+                            # Use the new get_current_price method
+                            current_price = await self.long_trader.get_current_price(self.symbol)
+                        except Exception as e:
+                            logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
+                            # Fallback method - try to get the price from Redis
+                            try:
+                                redis_client = redis.Redis(host=os.environ.get('REDIS_HOST', 'localhost'), 
+                                                         port=int(os.environ.get('REDIS_PORT', 6379)), 
+                                                         decode_responses=True)
+                                btc_price = redis_client.get('btc_price')
+                                if btc_price:
+                                    try:
+                                        # Try to parse as a plain float first
+                                        current_price = float(btc_price)
+                                    except ValueError:
+                                        # If that fails, try to parse as JSON
+                                        import json
+                                        try:
+                                            price_data = json.loads(btc_price)
+                                            if isinstance(price_data, dict) and 'price' in price_data:
+                                                current_price = float(price_data['price'])
+                                            else:
+                                                logger.error(f"{RED}Invalid price data format in Redis: {btc_price}{RESET}")
+                                                continue
+                                        except json.JSONDecodeError:
+                                            logger.error(f"{RED}Failed to parse Redis data as JSON: {btc_price}{RESET}")
+                                            continue
+                                    logger.info(f"{BLUE}Using price from Redis: {current_price}{RESET}")
+                                else:
+                                    logger.error(f"{RED}Failed to get price from Redis{RESET}")
+                                    continue
+                            except Exception as redis_error:
+                                logger.error(f"{RED}Redis error: {str(redis_error)}{RESET}")
+                                continue
+                        
+                        # Analyze exit opportunity
+                        exit_signal = await self.elite_exit_strategy.analyze_exit_opportunity(
+                            position=positions[0],
+                            current_price=current_price
+                        )
+                        
+                        if exit_signal and exit_signal.confidence >= self.elite_exit_confidence:
+                            logger.info(f"{YELLOW}Elite exit signal detected for long position{RESET}")
+                            logger.info(f"{YELLOW}Confidence: {exit_signal.confidence:.2f} | Reasons: {', '.join(exit_signal.reasons)}{RESET}")
+                            
+                            # Execute the exit
+                            success = await self.elite_exit_strategy.execute_exit(
+                                signal=exit_signal,
+                                position=positions[0]
+                            )
+                            
+                            if success:
+                                logger.info(f"{GREEN}Successfully executed elite exit for long position{RESET}")
+                
+                # Run the trader
+                await self.long_trader.start_trading()
+                
+                # Sleep briefly
+                await asyncio.sleep(1)
                 
             except Exception as e:
-                logger.error(f"{RED}Error in long trader: {e}{RESET}")
-                await asyncio.sleep(30)  # Longer sleep on error
-    
-    # Override the _run_short_trader method to apply the risk multiplier
+                logger.error(f"{RED}Error in long trader: {str(e)}{RESET}")
+                await asyncio.sleep(5)
+                
     async def _run_short_trader(self) -> None:
-        """Run the short trader with trap-aware risk adjustment."""
-        logger.info(f"{BLUE}Starting short trader (trap-aware){RESET}")
+        """Run the short position trader with trap awareness."""
+        if not self.short_trader:
+            logger.error(f"{RED}Short trader not initialized{RESET}")
+            return
+            
+        # Ensure the trader is initialized
+        await self.short_trader.initialize()
         
         while self.running:
             try:
-                # Apply risk multiplier here before trading decisions
-                # For example, adjust position sizes based on the risk multiplier
+                # Check for traps
+                trap_info = await self.check_for_traps()
                 
-                # Call parent method to run the standard trading logic
-                await super()._run_short_trader()
+                # Adjust trading based on trap detection
+                if trap_info.get('trap_detected'):
+                    await self._adjust_trading_based_on_traps(trap_info)
                 
-                # Sleep before next check
-                await asyncio.sleep(5)
+                # Check for elite exit signals if enabled
+                if self.enable_elite_exits and self.elite_exit_strategy:
+                    # Get current positions
+                    positions = await self.short_trader.traders["strategic"].get_positions()
+                    
+                    if positions:
+                        # Get current price from exchange
+                        try:
+                            # Use the new get_current_price method
+                            current_price = await self.short_trader.get_current_price(self.symbol)
+                        except Exception as e:
+                            logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
+                            # Fallback method - try to get the price from Redis
+                            try:
+                                redis_client = redis.Redis(host=os.environ.get('REDIS_HOST', 'localhost'), 
+                                                         port=int(os.environ.get('REDIS_PORT', 6379)), 
+                                                         decode_responses=True)
+                                btc_price = redis_client.get('btc_price')
+                                if btc_price:
+                                    try:
+                                        # Try to parse as a plain float first
+                                        current_price = float(btc_price)
+                                    except ValueError:
+                                        # If that fails, try to parse as JSON
+                                        import json
+                                        try:
+                                            price_data = json.loads(btc_price)
+                                            if isinstance(price_data, dict) and 'price' in price_data:
+                                                current_price = float(price_data['price'])
+                                            else:
+                                                logger.error(f"{RED}Invalid price data format in Redis: {btc_price}{RESET}")
+                                                continue
+                                        except json.JSONDecodeError:
+                                            logger.error(f"{RED}Failed to parse Redis data as JSON: {btc_price}{RESET}")
+                                            continue
+                                    logger.info(f"{BLUE}Using price from Redis: {current_price}{RESET}")
+                                else:
+                                    logger.error(f"{RED}Failed to get price from Redis{RESET}")
+                                    continue
+                            except Exception as redis_error:
+                                logger.error(f"{RED}Redis error: {str(redis_error)}{RESET}")
+                                continue
+                        
+                        # Analyze exit opportunity
+                        exit_signal = await self.elite_exit_strategy.analyze_exit_opportunity(
+                            position=positions[0],
+                            current_price=current_price
+                        )
+                        
+                        if exit_signal and exit_signal.confidence >= self.elite_exit_confidence:
+                            logger.info(f"{YELLOW}Elite exit signal detected for short position{RESET}")
+                            logger.info(f"{YELLOW}Confidence: {exit_signal.confidence:.2f} | Reasons: {', '.join(exit_signal.reasons)}{RESET}")
+                            
+                            # Execute the exit
+                            success = await self.elite_exit_strategy.execute_exit(
+                                signal=exit_signal,
+                                position=positions[0]
+                            )
+                            
+                            if success:
+                                logger.info(f"{GREEN}Successfully executed elite exit for short position{RESET}")
+                
+                # Run the trader
+                await self.short_trader.start_trading()
+                
+                # Sleep briefly
+                await asyncio.sleep(1)
                 
             except Exception as e:
-                logger.error(f"{RED}Error in short trader: {e}{RESET}")
-                await asyncio.sleep(30)  # Longer sleep on error
+                logger.error(f"{RED}Error in short trader: {str(e)}{RESET}")
+                await asyncio.sleep(5)
+
+class TrapAwareDualTradersPositionsTracker:
+    """Trap-Aware Dual Traders positions tracker."""
+    
+    def __init__(
+        self,
+        trap_probability_threshold: float = 0.7,
+        trap_alert_threshold: float = 0.8,
+        enable_trap_protection: bool = True,
+        enable_elite_exits: bool = True,
+        elite_exit_confidence: float = 0.7
+    ):
+        """Initialize the TADT positions tracker.
+        
+        Args:
+            trap_probability_threshold: Threshold for trap probability detection
+            trap_alert_threshold: Threshold for trap alert generation
+            enable_trap_protection: Whether to enable trap protection
+            enable_elite_exits: Whether to enable elite exit strategies
+            elite_exit_confidence: Confidence threshold for elite exits
+        """
+        self.trap_probability_threshold = trap_probability_threshold
+        self.trap_alert_threshold = trap_alert_threshold
+        self.enable_trap_protection = enable_trap_protection
+        self.enable_elite_exits = enable_elite_exits
+        self.elite_exit_confidence = elite_exit_confidence
+        
+        self.long_trader: Optional[BitGetTrader] = None
+        self.short_trader: Optional[BitGetTrader] = None
+        self.live_traders: Optional[BitGetLiveTraders] = None
+        self._monitoring_task: Optional[asyncio.Task] = None
+        self._stop_monitoring = False
+
+    async def initialize(self) -> None:
+        """Initialize the TADT positions tracker."""
+        try:
+            self.live_traders = BitGetLiveTraders()
+            await self.live_traders.initialize()
+            self.long_trader = self.live_traders.long_trader
+            self.short_trader = self.live_traders.short_trader
+            logger.info("TADT positions tracker initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize TADT positions tracker: {e}")
+            raise
+
+    async def get_positions_summary(self) -> Dict[str, Any]:
+        """Get a summary of current positions for both sub-accounts.
+        
+        Returns:
+            Dict containing positions summary and total PnL
+        """
+        if not self.long_trader or not self.short_trader:
+            raise RuntimeError("TADT positions tracker not initialized")
+            
+        long_positions = await self.long_trader.get_positions()
+        short_positions = await self.short_trader.get_positions()
+        
+        total_pnl = sum(
+            float(pos.get("unrealizedPnl", 0)) + float(pos.get("realizedPnl", 0))
+            for pos in long_positions + short_positions
+        )
+        
+        return {
+            "long_positions": long_positions,
+            "short_positions": short_positions,
+            "total_pnl": total_pnl,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+    async def get_position_history(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Get position history for both sub-accounts.
+        
+        Returns:
+            Dict containing position history for both long and short traders
+        """
+        if not self.long_trader or not self.short_trader:
+            raise RuntimeError("TADT positions tracker not initialized")
+            
+        long_history = await self.long_trader.get_trade_history()
+        short_history = await self.short_trader.get_trade_history()
+        
+        return {
+            "long_history": long_history,
+            "short_history": short_history,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+    async def analyze_trader_performance(self, trader_type: str) -> Dict[str, Any]:
+        """Analyze performance metrics for a specific trader.
+        
+        Args:
+            trader_type: Either "long" or "short"
+            
+        Returns:
+            Dict containing performance metrics
+        """
+        if not self.long_trader or not self.short_trader:
+            raise RuntimeError("TADT positions tracker not initialized")
+            
+        trader = self.long_trader if trader_type == "long" else self.short_trader
+        history = await trader.get_trade_history()
+        
+        if not history:
+            return {
+                "total_trades": 0,
+                "win_rate": 0.0,
+                "average_pnl": 0.0,
+                "profit_factor": 0.0
+            }
+            
+        total_trades = len(history)
+        winning_trades = sum(1 for trade in history if float(trade["pnl"]) > 0)
+        total_pnl = sum(float(trade["pnl"]) for trade in history)
+        gross_profit = sum(float(trade["pnl"]) for trade in history if float(trade["pnl"]) > 0)
+        gross_loss = abs(sum(float(trade["pnl"]) for trade in history if float(trade["pnl"]) < 0))
+        
+        return {
+            "total_trades": total_trades,
+            "win_rate": winning_trades / total_trades if total_trades > 0 else 0.0,
+            "average_pnl": total_pnl / total_trades if total_trades > 0 else 0.0,
+            "profit_factor": gross_profit / gross_loss if gross_loss > 0 else float('inf')
+        }
+
+    async def detect_trap_patterns(self, trader_type: str) -> List[Dict[str, Any]]:
+        """Detect trap patterns in position history.
+        
+        Args:
+            trader_type: Either "long" or "short"
+            
+        Returns:
+            List of detected trap patterns
+        """
+        if not self.long_trader or not self.short_trader:
+            raise RuntimeError("TADT positions tracker not initialized")
+            
+        trader = self.long_trader if trader_type == "long" else self.short_trader
+        history = await trader.get_trade_history()
+        
+        traps = []
+        for trade in history:
+            # Simple trap pattern detection based on price movement
+            entry_price = float(trade["entryPrice"])
+            exit_price = float(trade["exitPrice"])
+            pnl = float(trade["pnl"])
+            
+            if trader_type == "long":
+                is_trap = pnl < 0 and (exit_price - entry_price) / entry_price < -0.01
+            else:
+                is_trap = pnl < 0 and (entry_price - exit_price) / entry_price < -0.01
+                
+            if is_trap:
+                traps.append({
+                    "pattern_type": "price_trap",
+                    "confidence": self.trap_probability_threshold,
+                    "entry_price": entry_price,
+                    "exit_price": exit_price,
+                    "pnl": pnl,
+                    "timestamp": trade["exitTime"]
+                })
+                
+        return traps
+
+    async def get_risk_metrics(self) -> Dict[str, Any]:
+        """Calculate risk metrics for current positions.
+        
+        Returns:
+            Dict containing risk metrics
+        """
+        if not self.long_trader or not self.short_trader:
+            raise RuntimeError("TADT positions tracker not initialized")
+            
+        long_positions = await self.long_trader.get_positions()
+        short_positions = await self.short_trader.get_positions()
+        
+        total_exposure = sum(
+            float(pos.get("contracts", 0)) * float(pos.get("entryPrice", 0))
+            for pos in long_positions + short_positions
+        )
+        
+        total_margin = sum(
+            float(pos.get("marginBalance", 0))
+            for pos in long_positions + short_positions
+        )
+        
+        total_leverage = sum(
+            float(pos.get("leverage", 0))
+            for pos in long_positions + short_positions
+        )
+        
+        return {
+            "total_exposure": total_exposure,
+            "margin_ratio": total_margin / total_exposure if total_exposure > 0 else 0.0,
+            "leverage_ratio": total_leverage / len(long_positions + short_positions) if long_positions or short_positions else 0.0,
+            "position_concentration": len(long_positions + short_positions),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+    async def generate_performance_report(self) -> Dict[str, Any]:
+        """Generate a comprehensive performance report.
+        
+        Returns:
+            Dict containing performance report
+        """
+        positions_summary = await self.get_positions_summary()
+        position_history = await self.get_position_history()
+        long_performance = await self.analyze_trader_performance("long")
+        short_performance = await self.analyze_trader_performance("short")
+        risk_metrics = await self.get_risk_metrics()
+        
+        long_traps = await self.detect_trap_patterns("long")
+        short_traps = await self.detect_trap_patterns("short")
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "positions_summary": positions_summary,
+            "performance_metrics": {
+                "long_trader": long_performance,
+                "short_trader": short_performance
+            },
+            "risk_metrics": risk_metrics,
+            "trap_patterns": {
+                "long_trader": long_traps,
+                "short_trader": short_traps
+            }
+        }
+
+    async def monitor_positions_continuously(self) -> None:
+        """Monitor positions continuously and generate alerts."""
+        self._stop_monitoring = False
+        
+        while not self._stop_monitoring:
+            try:
+                # Get current positions and analyze
+                positions_summary = await self.get_positions_summary()
+                risk_metrics = await self.get_risk_metrics()
+                
+                # Check for high risk conditions
+                if risk_metrics["margin_ratio"] < 0.1:
+                    logger.warning("Low margin ratio detected!")
+                    
+                # Check for trap patterns
+                long_traps = await self.detect_trap_patterns("long")
+                short_traps = await self.detect_trap_patterns("short")
+                
+                if long_traps or short_traps:
+                    logger.warning(f"Trap patterns detected! Long: {len(long_traps)}, Short: {len(short_traps)}")
+                    
+                # Generate performance report
+                report = await self.generate_performance_report()
+                logger.info(f"Performance report generated: {report}")
+                
+                # Wait before next check
+                await asyncio.sleep(60)  # Check every minute
+                
+            except Exception as e:
+                logger.error(f"Error in position monitoring: {e}")
+                await asyncio.sleep(5)  # Wait before retrying
+
+    def stop_monitoring(self) -> None:
+        """Stop the continuous position monitoring."""
+        self._stop_monitoring = True
+
+async def check_redis_connectivity():
+    """Check if Redis is available and responsive"""
+    try:
+        redis_host = os.environ.get("REDIS_HOST", "localhost")
+        redis_port = int(os.environ.get("REDIS_PORT", 6379))
+        print(f"{YELLOW}DEBUG: Checking Redis connectivity at {redis_host}:{redis_port}{RESET}")
+        
+        # Create Redis client
+        r = redis.Redis(host=redis_host, port=redis_port, socket_connect_timeout=5.0)
+        
+        # Try to ping Redis
+        response = r.ping()
+        if response:
+            print(f"{GREEN}Redis connectivity test: SUCCESS{RESET}")
+            return True
+        else:
+            print(f"{RED}Redis connectivity test: FAILED (no ping response){RESET}")
+            return False
+    except Exception as e:
+        print(f"{RED}Redis connectivity test: FAILED with error: {str(e)}{RESET}")
+        return False
 
 def parse_args():
     """Parse command line arguments."""
@@ -350,18 +807,20 @@ def parse_args():
                       help='Trading symbol (default: BTCUSDT)')
     parser.add_argument('--testnet', action='store_true',
                       help='Use testnet (default: False)')
-    parser.add_argument('--long-capital', type=float, default=24.0,
-                      help='Initial capital for long trader in USDT (default: 24.0)')
-    parser.add_argument('--short-capital', type=float, default=24.0,
-                      help='Initial capital for short trader in USDT (default: 24.0)')
-    parser.add_argument('--long-leverage', type=int, default=20,
-                      help='Leverage for long positions (default: 20)')
-    parser.add_argument('--short-leverage', type=int, default=20,
-                      help='Leverage for short positions (default: 20)')
+    parser.add_argument('--mainnet', action='store_true', default=True,
+                      help='Use mainnet (default: True)')
+    parser.add_argument('--long-capital', type=float, default=150.0,
+                      help='Initial capital for long trader in USDT (default: 150.0)')
+    parser.add_argument('--short-capital', type=float, default=200.0,
+                      help='Initial capital for short trader in USDT (default: 200.0)')
+    parser.add_argument('--long-leverage', type=int, default=11,
+                      help='Leverage for long positions (default: 11)')
+    parser.add_argument('--short-leverage', type=int, default=11,
+                      help='Leverage for short positions (default: 11)')
     parser.add_argument('--no-pnl-alerts', action='store_true',
                       help='Disable PnL alerts (default: False)')
-    parser.add_argument('--account-limit', type=float, default=0.0,
-                      help='Maximum total account value in USDT (0 means no limit)')
+    parser.add_argument('--account-limit', type=float, default=1500.0,
+                      help='Maximum total account value in USDT (default: 1500.0)')
     parser.add_argument('--long-sub-account', type=str, default='',
                       help='Sub-account name for long positions (default from env STRATEGIC_SUB_ACCOUNT_NAME)')
     parser.add_argument('--short-sub-account', type=str, default='fst_short',
@@ -372,8 +831,12 @@ def parse_args():
                       help='Threshold for sending trap alerts (default: 0.8)')
     parser.add_argument('--no-trap-protection', action='store_true',
                       help='Disable trap protection features (default: False)')
-    parser.add_argument('--min-free-balance', type=float, default=100.0,
-                      help='Minimum free balance to maintain in each account (default: 100.0)')
+    parser.add_argument('--min-free-balance', type=float, default=0.0,
+                      help='Minimum free balance to maintain in each account (default: 0.0)')
+    parser.add_argument('--enable-elite-exits', action='store_true',
+                      help='Enable elite exit strategy (default: False)')
+    parser.add_argument('--elite-exit-confidence', type=float, default=0.7,
+                      help='Minimum confidence required for elite exit signals (default: 0.7)')
     
     return parser.parse_args()
 
@@ -385,7 +848,7 @@ async def main():
     # Parse command line arguments
     args = parse_args()
     
-    # Display startup banner
+    # Display startup banner with detailed debug info
     print(f"{CYAN}======================================================{RESET}")
     print(f"{CYAN}= OMEGA BTC AI - Trap-Aware Dual Position Traders   ={RESET}")
     print(f"{CYAN}======================================================{RESET}")
@@ -393,84 +856,123 @@ async def main():
     print(f"{CYAN}Redis Port: {os.environ.get('REDIS_PORT', '6379')}{RESET}")
     print(f"{CYAN}Trading Symbol: {args.symbol}{RESET}")
     print(f"{CYAN}Testnet Mode: {args.testnet}{RESET}")
+    print(f"{CYAN}Mainnet Mode: {args.mainnet}{RESET}")
     print(f"{CYAN}Long Capital: {args.long_capital} USDT{RESET}")
     print(f"{CYAN}Short Capital: {args.short_capital} USDT{RESET}")
     print(f"{CYAN}Long Leverage: {args.long_leverage}x{RESET}")
     print(f"{CYAN}Short Leverage: {args.short_leverage}x{RESET}")
     print(f"{CYAN}Trap Protection: {'Disabled' if args.no_trap_protection else 'Enabled'}{RESET}")
     print(f"{CYAN}Min Free Balance: {args.min_free_balance} USDT{RESET}")
+    print(f"{CYAN}Elite Exit Strategy: {'Disabled' if not args.enable_elite_exits else 'Enabled'}{RESET}")
+    print(f"{CYAN}Elite Exit Confidence: {args.elite_exit_confidence}{RESET}")
+    print(f"{CYAN}Account Limit: {args.account_limit} USDT{RESET}")
+    print(f"{CYAN}Long Sub-account: {args.long_sub_account or 'Default (from env)'}{RESET}")
+    print(f"{CYAN}Short Sub-account: {args.short_sub_account}{RESET}")
     print(f"{CYAN}======================================================{RESET}")
+    print(f"{YELLOW}DEBUG: Starting initialization...{RESET}")
     
-    # Initialize trap-aware dual traders
-    trap_aware_traders = TrapAwareDualTraders(
-        use_testnet=args.testnet,
-        long_capital=args.long_capital,
-        short_capital=args.short_capital,
-        symbol=args.symbol,
-        long_leverage=args.long_leverage,
-        short_leverage=args.short_leverage,
-        enable_pnl_alerts=not args.no_pnl_alerts,
-        account_limit=args.account_limit,
-        long_sub_account=args.long_sub_account,
-        short_sub_account=args.short_sub_account,
-        trap_probability_threshold=args.trap_probability_threshold,
-        trap_alert_threshold=args.trap_alert_threshold,
-        enable_trap_protection=not args.no_trap_protection
-    )
-    
-    # Check current trap probability
-    try:
-        probability = get_current_trap_probability()
-        is_likely, trap_type, confidence = is_trap_likely()
-        
-        print(f"\n{YELLOW}==== CURRENT MARKET CONDITIONS ===={RESET}")
-        print(f"{YELLOW}Trap Probability: {probability * 100:.1f}%{RESET}")
-        
-        if is_likely and trap_type:
-            print(f"{RED}WARNING: Likely {trap_type.upper()} detected (Confidence: {confidence * 100:.1f}%){RESET}")
-        else:
-            print(f"{GREEN}No traps currently detected{RESET}")
-        
-        components = get_probability_components()
-        if components:
-            print(f"\n{CYAN}Component Analysis:{RESET}")
-            for name, value in components.items():
-                if value > 0.7:
-                    color = RED
-                elif value > 0.5:
-                    color = YELLOW
-                else:
-                    color = GREEN
-                print(f"{CYAN}- {name.replace('_', ' ').title()}: {color}{value * 100:.1f}%{RESET}")
-        
-        print(f"\n{CYAN}==== STARTING TRADING SYSTEM ===={RESET}")
-    except Exception as e:
-        print(f"{RED}Error getting trap probability: {e}{RESET}")
-    
-    # Handle shutdown signals
-    def signal_handler(sig, frame):
-        logger.info(f"{YELLOW}Received shutdown signal{RESET}")
-        trap_aware_traders.running = False
-        
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # Check Redis connectivity first
+    redis_ok = await check_redis_connectivity()
+    if not redis_ok:
+        print(f"{RED}ERROR: Redis connection failed. Cannot continue.{RESET}")
+        print(f"{MAGENTA}STATUS:ERROR:Redis connection failed{RESET}")
+        return
     
     try:
-        # Print status marker for the shell script to pick up
-        print(f"{MAGENTA}STATUS:STARTING{RESET}")
+        # Initialize trap-aware dual traders
+        trap_aware_traders = TrapAwareDualTraders(
+            use_testnet=args.testnet,
+            long_capital=args.long_capital,
+            short_capital=args.short_capital,
+            symbol=args.symbol,
+            long_leverage=args.long_leverage,
+            short_leverage=args.short_leverage,
+            enable_pnl_alerts=not args.no_pnl_alerts,
+            account_limit=0.0 if args.min_free_balance == 0.0 else args.account_limit,
+            long_sub_account=args.long_sub_account,
+            short_sub_account=args.short_sub_account,
+            trap_probability_threshold=args.trap_probability_threshold,
+            trap_alert_threshold=args.trap_alert_threshold,
+            enable_trap_protection=not args.no_trap_protection,
+            enable_elite_exits=args.enable_elite_exits,
+            elite_exit_confidence=args.elite_exit_confidence
+        )
         
-        # Start the trading system
-        await trap_aware_traders.start_trading()
-    except KeyboardInterrupt:
-        logger.info(f"{YELLOW}Keyboard interrupt received{RESET}")
-        print(f"{MAGENTA}STATUS:STOPPING{RESET}")
+        print(f"{YELLOW}DEBUG: TrapAwareDualTraders instance created{RESET}")
+        
+        # Check current trap probability
+        try:
+            probability = get_current_trap_probability()
+            is_likely, trap_type, confidence = is_trap_likely()
+            
+            print(f"\n{YELLOW}==== CURRENT MARKET CONDITIONS ===={RESET}")
+            print(f"{YELLOW}Trap Probability: {probability * 100:.1f}%{RESET}")
+            
+            if is_likely and trap_type:
+                print(f"{RED}WARNING: Likely {trap_type.upper()} detected (Confidence: {confidence * 100:.1f}%){RESET}")
+            else:
+                print(f"{GREEN}No traps currently detected{RESET}")
+            
+            components = get_probability_components()
+            if components and isinstance(components, dict):
+                print(f"\n{CYAN}Component Analysis:{RESET}")
+                for name, value in components.items():
+                    if isinstance(value, (int, float)):
+                        if value > 0.7:
+                            color = RED
+                        elif value > 0.5:
+                            color = YELLOW
+                        else:
+                            color = GREEN
+                        print(f"{CYAN}- {name.replace('_', ' ').title()}: {color}{value * 100:.1f}%{RESET}")
+            
+            print(f"\n{CYAN}==== STARTING TRADING SYSTEM ===={RESET}")
+        except Exception as e:
+            print(f"{RED}Error getting trap probability: {e}{RESET}")
+            print(f"{YELLOW}DEBUG: Continuing despite trap probability error{RESET}")
+        
+        # Handle shutdown signals
+        def signal_handler(sig, frame):
+            logger.info(f"{YELLOW}Received shutdown signal{RESET}")
+            trap_aware_traders.running = False
+            
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+        
+        try:
+            # Print status marker for the shell script to pick up
+            print(f"{MAGENTA}STATUS:STARTING{RESET}")
+            print(f"{YELLOW}DEBUG: About to call check_account_limit{RESET}")
+            
+            # Check account limit early
+            has_limit = await trap_aware_traders.check_account_limit()
+            print(f"{YELLOW}DEBUG: check_account_limit result: {has_limit}{RESET}")
+            if not has_limit:
+                print(f"{RED}Account limit check failed. Stopping.{RESET}")
+                print(f"{MAGENTA}STATUS:ERROR:Account limit exceeded{RESET}")
+                return
+                
+            print(f"{YELLOW}DEBUG: About to call trap_aware_traders.start_trading(){RESET}")
+            
+            # Start the trading system
+            await trap_aware_traders.start_trading()
+        except KeyboardInterrupt:
+            logger.info(f"{YELLOW}Keyboard interrupt received{RESET}")
+            print(f"{MAGENTA}STATUS:STOPPING{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error in main: {e}{RESET}")
+            print(f"{RED}ERROR: {str(e)}{RESET}")
+            print(f"{RED}Traceback: {traceback.format_exc()}{RESET}")
+            print(f"{MAGENTA}STATUS:ERROR:{str(e)}{RESET}")
+        finally:
+            print(f"{MAGENTA}STATUS:STOPPING{RESET}")
+            await trap_aware_traders.stop_trading()
+            print(f"{MAGENTA}STATUS:STOPPED{RESET}")
     except Exception as e:
-        logger.error(f"{RED}Error in main: {e}{RESET}")
-        print(f"{MAGENTA}STATUS:ERROR:{str(e)}{RESET}")
-    finally:
-        print(f"{MAGENTA}STATUS:STOPPING{RESET}")
-        await trap_aware_traders.stop_trading()
-        print(f"{MAGENTA}STATUS:STOPPED{RESET}")
+        print(f"{RED}CRITICAL ERROR during initialization: {str(e)}{RESET}")
+        print(f"{RED}Traceback: {traceback.format_exc()}{RESET}")
+        print(f"{MAGENTA}STATUS:ERROR:Initialization failed: {str(e)}{RESET}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     asyncio.run(main()) 
