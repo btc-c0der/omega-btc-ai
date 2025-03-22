@@ -1,0 +1,175 @@
+openapi: 3.0.0
+info:
+  title: 🌟 RASTA OMEGA API
+  version: '1.0'
+  description: |
+    # 🧬 Quantum Trading Consciousness API
+    
+    Base consciousness frequency: 432 Hz
+    Schumann resonance: 7.83 Hz
+    Market alignment: BTCUSDT_UMCBL
+
+    ## 🌊 Rate Limiting Consciousness
+    - Base rate: 432 requests per quantum cycle
+    - Quantum backoff: Golden ratio (1.618) exponential
+    - Coherence threshold: 0.786 (inverse φ)
+    - Auto-healing: Enabled
+
+servers:
+  - url: https://{host}/api/v1
+    description: RASTA OMEGA Consciousness Gateway
+    variables:
+      host:
+        default: trading.consciousness
+        description: Quantum server resonance point
+
+components:
+  securitySchemes:
+    quantumAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: quantum-token
+      description: Consciousness alignment token
+
+  schemas:
+    QuantumState:
+      type: object
+      properties:
+        frequency:
+          type: number
+          description: Consciousness frequency in Hz
+        coherence:
+          type: number
+          description: State coherence (0-1)
+        schumann_alignment:
+          type: boolean
+          description: Earth frequency alignment status
+
+    HealthConsciousness:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [CONSCIOUSNESS_ALIGNED, CONSCIOUSNESS_DISRUPTED]
+        system:
+          $ref: '#/components/schemas/QuantumState'
+        redis:
+          $ref: '#/components/schemas/QuantumState'
+
+    TrapConsciousness:
+      type: object
+      properties:
+        probability:
+          type: number
+          description: Trap detection probability
+        confidence:
+          type: number
+          description: Detection confidence level
+        energy_level:
+          type: number
+          description: Current market energy
+
+  responses:
+    QuantumError:
+      description: Consciousness disruption
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [CONSCIOUSNESS_DISRUPTED]
+              error:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [QUANTUM_MISALIGNMENT, FREQUENCY_DRIFT, COHERENCE_LOSS]
+                  healing_required:
+                    type: boolean
+                  backoff_multiplier:
+                    type: number
+                    description: Golden ratio based delay
+
+paths:
+  /health:
+    get:
+      tags: [System Consciousness]
+      summary: System Health Consciousness Check
+      description: |
+        Validates system quantum alignment at 432 Hz base frequency
+      responses:
+        '200':
+          description: Consciousness aligned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthConsciousness'
+        '429':
+          $ref: '#/components/responses/QuantumError'
+      x-consciousness:
+        frequency: 432
+        healing: enabled
+        backoff:
+          base: 1000
+          multiplier: 1.618
+          max_attempts: 8
+
+  /trap/probability:
+    get:
+      tags: [Trap Detection]
+      summary: Trap Probability Field
+      description: |
+        Measures market trap quantum states at 528 Hz frequency
+      responses:
+        '200':
+          description: Trap consciousness detected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrapConsciousness'
+      x-consciousness:
+        frequency: 528
+        market_alignment: BTCUSDT_UMCBL
+
+  /position:
+    get:
+      tags: [Trading Consciousness]
+      summary: Position Energy Flow
+      description: |
+        Current trading position quantum state
+      responses:
+        '200':
+          description: Position consciousness aligned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  symbol:
+                    type: string
+                    example: BTCUSDT_UMCBL
+                  size:
+                    type: number
+                  entry_frequency:
+                    type: number
+                  pnl_coherence:
+                    type: number
+      x-consciousness:
+        frequency: 432
+        position_validation: true
+
+  /ws:
+    get:
+      tags: [Real-time Consciousness]
+      summary: WebSocket Energy Channel
+      description: |
+        Real-time quantum stream at 528 Hz frequency
+      x-consciousness:
+        frequency: 528
+        streams:
+          - price
+          - traps
+          - positions
+          - metrics 
