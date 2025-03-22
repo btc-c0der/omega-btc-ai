@@ -33,12 +33,18 @@ class RastaTrapMonitor:
             update_interval: Data update interval in seconds
             use_testnet: Whether to use testnet
         """
-        self.symbol = symbol
-        self.update_interval = update_interval
         self.use_testnet = use_testnet
+        self.update_interval = update_interval
+        
+        # Format symbol for testnet if needed
+        self.symbol = self._format_symbol(symbol)
+        logger.info(f"Initialized RastaTrapMonitor with symbol: {self.symbol}")
         
         # Initialize CCXT client
         self.exchange = BitGetCCXT({
+            'apiKey': '',  # Read-only access is sufficient
+            'secret': '',
+            'password': '',
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'swap',
@@ -64,9 +70,37 @@ class RastaTrapMonitor:
             }
         }
         
+    def _format_symbol(self, symbol: str) -> str:
+        """Format symbol for BitGet API."""
+        # Remove any existing formatting
+        clean_symbol = symbol.replace('/USDT:USDT', '').replace('USDT', '')
+        
+        # Add testnet prefix if needed
+        prefix = 'S' if self.use_testnet else ''
+        
+        # Format as BTCUSDT or SBTCUSDT for testnet
+        formatted = f"{prefix}{clean_symbol}USDT"
+        
+        # Convert to CCXT format
+        if not '/' in formatted:
+            base = formatted[:-4]  # Remove USDT suffix
+            formatted = f"{base}/USDT:USDT"
+            
+        return formatted.upper()
+        
     async def start(self):
         """Start the trap monitor."""
         self.running = True
+        logger.info(f"Starting trap monitor for {self.symbol}")
+        
+        # Initialize exchange
+        try:
+            await self.exchange.load_markets()
+            logger.info("Successfully loaded markets")
+        except Exception as e:
+            logger.error(f"Error loading markets: {str(e)}")
+            return
+            
         while self.running:
             try:
                 # Get current time
@@ -96,7 +130,7 @@ class RastaTrapMonitor:
             ohlcv = await self.exchange.fetch_ohlcv(self.symbol, timeframe='1h', limit=24)
             
             if not ticker or not ohlcv:
-                logger.warning("Failed to get market data")
+                logger.warning(f"Failed to get market data for {self.symbol}")
                 return
                 
             # Calculate trap probability components
