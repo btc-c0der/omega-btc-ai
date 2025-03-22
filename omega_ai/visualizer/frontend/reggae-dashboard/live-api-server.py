@@ -14,13 +14,28 @@ from flask_socketio import SocketIO, emit
 from datetime import datetime, timezone
 import redis
 import asyncio
-from omega_ai.trading.strategies.enhanced_exit_strategy import EnhancedExitStrategy
-from omega_ai.trading.exchanges.bitget_ccxt import BitGetCCXT
-from ccxt.base.types import OrderType, OrderSide
+import time
+import sys
+
+# Add parent directories to Python path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
+sys.path.insert(0, parent_dir)
+
+try:
+    from omega_ai.trading.strategies.enhanced_exit_strategy import EnhancedExitStrategy
+    from omega_ai.trading.exchanges.bitget_ccxt import BitGetCCXT
+    from ccxt.base.types import OrderType, OrderSide
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+    print(f"Current path: {sys.path}")
+    sys.exit(1)
 
 # ANSI color codes for terminal output
 GREEN = "\033[92m"
 GOLD = "\033[93m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
 
@@ -73,15 +88,17 @@ redis_client = redis.Redis(
 bitget_client = None
 
 def init_bitget_client():
-    """Initialize BitGet client if needed."""
+    """Initialize the BitGetCCXT client"""
     global bitget_client
     if not bitget_client and BITGET_API_KEY and BITGET_SECRET_KEY and BITGET_PASSPHRASE:
         bitget_client = BitGetCCXT(
-            api_key=BITGET_API_KEY,
-            api_secret=BITGET_SECRET_KEY,
-            password=BITGET_PASSPHRASE,
-            use_testnet=False,
-            sub_account=STRATEGIC_SUB_ACCOUNT
+            config={
+                'api_key': BITGET_API_KEY,
+                'api_secret': BITGET_SECRET_KEY,
+                'api_password': BITGET_PASSPHRASE,
+                'use_testnet': False,
+                'sub_account': STRATEGIC_SUB_ACCOUNT
+            }
         )
         logger.info(f"{GREEN}BitGet client initialized for sub-account: {STRATEGIC_SUB_ACCOUNT}{RESET}")
 
@@ -146,10 +163,13 @@ def redis_key():
                 "timestamp": datetime.now(timezone.utc).isoformat()
             })
         else:
+            # For missing keys, return a 200 response with null value instead of 404
+            # This helps frontend code handle missing keys more gracefully
             return jsonify({
-                "error": f"Key {key} not found",
+                "key": key,
+                "value": None,
                 "timestamp": datetime.now(timezone.utc).isoformat()
-            }), 404
+            })
             
     except Exception as e:
         logger.error(f"❌ Error accessing Redis key: {e}")
@@ -351,9 +371,11 @@ async def update_stop_loss():
 
 @app.route('/api/toggle-trailing-stop', methods=['POST'])
 async def toggle_trailing_stop():
-    """Toggle trailing stop activation."""
+    """Toggle trailing stop for current position."""
     try:
         data = request.get_json()
+        if data is None:
+            data = {}
         activate = data.get('activate', True)
         
         # Initialize BitGet client if needed
@@ -367,12 +389,12 @@ async def toggle_trailing_stop():
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }), 500
             
-        # Get current position from Redis
+        # Get position data from Redis
         position_data = redis_client.get('current_position')
         if not position_data:
             return jsonify({
                 "success": False,
-                "error": "No active position found",
+                "message": "No active position found",
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }), 404
             
@@ -380,11 +402,13 @@ async def toggle_trailing_stop():
         
         # Initialize enhanced exit strategy
         exit_strategy = EnhancedExitStrategy(
-            base_risk_percent=1.0,
-            enable_scalping=True,
-            scalping_coefficient=0.3,
-            strategic_coefficient=0.6,
-            aggressive_coefficient=0.1
+            config={
+                'base_risk_percent': 1.0,
+                'enable_scalping': True,
+                'scalping_coefficient': 0.3,
+                'strategic_coefficient': 0.6,
+                'aggressive_coefficient': 0.1
+            }
         )
         
         # Toggle trailing stop
@@ -468,6 +492,40 @@ def get_position_status():
             "timestamp": datetime.now(timezone.utc).isoformat()
         }), 500
 
+@app.route('/api/trap-analysis-panel')
+def trap_analysis_panel():
+    """Serve the trap analysis panel HTML content."""
+    try:
+        logger.info("🔍 GET /api/trap-analysis-panel - Fetching trap analysis panel")
+        
+        # Check if trap_analysis_panel.html exists in current directory
+        panel_path = os.path.join(current_dir, 'trap_analysis_panel.html')
+        if os.path.exists(panel_path):
+            with open(panel_path, 'r') as file:
+                content = file.read()
+                return content
+        
+        # If file doesn't exist, return a basic panel template
+        return """
+        <div class="trap-analysis-content">
+            <h3>Market Maker Trap Analysis</h3>
+            <div class="trap-status">
+                <p>No trap data available. Please check Redis connection.</p>
+            </div>
+        </div>
+        """
+        
+    except Exception as e:
+        logger.error(f"❌ Error fetching trap analysis panel: {e}")
+        return f"""
+        <div class="trap-analysis-content">
+            <h3>Market Maker Trap Analysis</h3>
+            <div class="trap-status error">
+                <p>Error: {str(e)}</p>
+            </div>
+        </div>
+        """
+
 # WebSocket proxy setup at /ws
 @app.route('/ws')
 def websocket_proxy():
@@ -478,8 +536,8 @@ def websocket_proxy():
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
 
-# Initialize Flask-SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 # WebSocket event handlers
 @socketio.on('connect')
@@ -491,7 +549,7 @@ def handle_connect():
 @socketio.on('disconnect')
 def handle_disconnect():
     """Handle client disconnection."""
-    logger.info(f"{YELLOW}Client disconnected from WebSocket{RESET}")
+    logger.info(f"{GREEN}Client disconnected from WebSocket{RESET}")
 
 @socketio.on('subscribe')
 def handle_subscribe(data):
@@ -508,25 +566,114 @@ def handle_subscribe(data):
             return
             
         # Register callbacks for each stream
+        valid_streams = [
+            'ticker', 'trades', 'orderbook', 'orders', 'positions',
+            'balance', 'klines', 'liquidations', 'funding', 
+            'market_state', 'system_status'
+        ]
+        
         for stream in streams:
-            if stream in ['ticker', 'trades', 'orderbook', 'orders', 'positions']:
+            if stream in valid_streams:
                 bitget_client.add_ws_callback(stream, lambda data: emit(stream, data))
                 logger.info(f"{GREEN}Client subscribed to {stream} stream{RESET}")
             
         emit('subscription_status', {
             'status': 'subscribed',
             'streams': streams,
-            'symbol': symbol
+            'symbol': symbol,
+            'timestamp': datetime.now(timezone.utc).isoformat()
         })
         
     except Exception as e:
         logger.error(f"{RED}Error in subscription: {str(e)}{RESET}")
         emit('error', {'message': str(e)})
 
+@socketio.on('unsubscribe')
+def handle_unsubscribe(data):
+    """Handle unsubscription from streams."""
+    try:
+        streams = data.get('streams', [])
+        
+        if not bitget_client:
+            emit('error', {'message': 'BitGet client not initialized'})
+            return
+            
+        # Remove callbacks for each stream
+        for stream in streams:
+            if stream in bitget_client.ws_callbacks:
+                bitget_client.ws_callbacks[stream] = []
+                logger.info(f"{GREEN}Client unsubscribed from {stream} stream{RESET}")
+            
+        emit('subscription_status', {
+            'status': 'unsubscribed',
+            'streams': streams,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"{RED}Error in unsubscription: {str(e)}{RESET}")
+        emit('error', {'message': str(e)})
+
+@socketio.on_error()
+def handle_error(e):
+    """Handle WebSocket errors."""
+    logger.error(f"{RED}WebSocket error: {str(e)}{RESET}")
+    emit('error', {'message': str(e)})
+
+@socketio.on('reconnect')
+def handle_reconnect():
+    """Handle client reconnection."""
+    logger.info(f"{GREEN}Client attempting to reconnect{RESET}")
+    emit('connection_status', {'status': 'reconnecting'})
+
+@socketio.on('reconnect_failed')
+def handle_reconnect_failed():
+    """Handle failed reconnection attempts."""
+    logger.warning(f"{YELLOW}Client reconnection failed{RESET}")
+    emit('connection_status', {'status': 'reconnect_failed'})
+
+# Add WebSocket route for stream status
+@app.route('/api/stream-status')
+def get_stream_status():
+    """Get status of all WebSocket streams."""
+    try:
+        if not bitget_client:
+            return jsonify({
+                "status": "disconnected",
+                "streams": {},
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            
+        status = {
+            "status": "connected" if bitget_client.ws_connected else "disconnected",
+            "streams": {},
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Get status of each stream
+        for stream in bitget_client.ws_callbacks:
+            last_message = bitget_client.ws_last_message_time.get(stream, 0)
+            time_since_last = time.time() - last_message if last_message > 0 else float('inf')
+            
+            status["streams"][stream] = {
+                "active": time_since_last < bitget_client.ws_heartbeat_interval * 2,
+                "last_message": datetime.fromtimestamp(last_message).isoformat() if last_message > 0 else None,
+                "subscribers": len(bitget_client.ws_callbacks[stream])
+            }
+            
+        return jsonify(status)
+        
+    except Exception as e:
+        logger.error(f"{RED}Error getting stream status: {str(e)}{RESET}")
+        return jsonify({
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }), 500
+
 # Update the main execution
 if __name__ == "__main__":
-    # Start the server with WebSocket support
-    logger.info(f"Starting Reggae Dashboard Frontend Proxy with WebSocket support on 0.0.0.0:5001")
+    # Start the server
+    logger.info(f"Starting Reggae Dashboard Frontend Proxy on 0.0.0.0:5001")
     
     # Print colorful banner
     print(f"\n{GREEN}{BOLD}==============================================={RESET}")
@@ -535,8 +682,8 @@ if __name__ == "__main__":
     print(f"{GOLD}    JAH BLESS YOUR TRADING JOURNEY    {RESET}")
     print(f"{GREEN}{BOLD}==============================================={RESET}\n")
     
-    # Run the app with Flask-SocketIO
-    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
+    # Run the app with standard Flask (no SocketIO for now)
+    app.run(host="0.0.0.0", port=5001, debug=True)
 else:
     # For imported usage, we already have the app instance created above
     pass 

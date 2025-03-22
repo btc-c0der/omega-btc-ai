@@ -2485,6 +2485,16 @@
                     throw new Error(data.error || `Error fetching key ${key}`);
                 }
 
+                // Handle the case where the key exists but value is null (key not found)
+                if (data.value === null) {
+                    debug('REDIS', `Key ${key} not found in Redis, returning default empty value`);
+                    // Return empty default values for common keys
+                    if (key === 'position_targets') {
+                        return { "long": [], "short": [] };
+                    }
+                    return null;
+                }
+
                 return data.value;
             } catch (error) {
                 console.error(`Error fetching Redis key ${key}:`, error);
@@ -2492,6 +2502,11 @@
                     debug('REDIS', `Retrying fetch for key ${key}, ${retries} retries left`);
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     return fetchRedisKey(key, retries - 1);
+                }
+
+                // Return default values for specific keys on error
+                if (key === 'position_targets') {
+                    return { "long": [], "short": [] };
                 }
                 return null;
             }
@@ -3975,8 +3990,13 @@
             const timestamp = document.getElementById('trading-control-timestamp');
 
             try {
-                // Get trader status from Redis
-                const traderStatus = await fetchRedisKey('trader_status');
+                // Get trader status from backend API
+                const response = await fetch(`${API_BASE}/trader-status`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch trader status: ${response.status}`);
+                }
+
+                const traderStatus = await response.json();
 
                 if (!traderStatus) {
                     // No status found, show inactive
