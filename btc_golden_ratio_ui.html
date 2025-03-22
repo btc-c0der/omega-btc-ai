@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - 7 Year Golden Ratio Fibonacci Visualizer</title>
+    <style>
+        :root {
+            --dark-bg: #121212;
+            --light-text: #f0f0f0;
+            --gold: #ffd700;
+            --accent: #3498db;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        h1 {
+            color: var(--gold);
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        .subtitle {
+            color: var(--light-text);
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--light-text);
+        }
+
+        select,
+        input,
+        button {
+            background-color: #2a2a2a;
+            color: var(--light-text);
+            border: 1px solid #444;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .visualization {
+            margin: 20px 0;
+            text-align: center;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .visualization img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 4px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading {
+            display: none;
+            color: var(--accent);
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--accent);
+            animation: spin 1s ease infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fibo-info {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .fibo-info h3 {
+            color: var(--gold);
+            margin-top: 0;
+        }
+
+        .fibo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .fibo-level {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .golden {
+            border-left: 3px solid var(--gold);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid #333;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .success {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>OMEGA BTC AI</h1>
+            <p class="subtitle">7 Year Golden Ratio Fibonacci Visualizer</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="years">Time Range:</label>
+                <select id="years">
+                    <option value="7" selected>7 Years</option>
+                    <option value="5">5 Years</option>
+                    <option value="10">10 Years</option>
+                </select>
+
+                <label for="dataSource">Data Source:</label>
+                <select id="dataSource">
+                    <option value="redis" selected>Redis (Historical)</option>
+                    <option value="simulation">Simulation</option>
+                </select>
+            </div>
+
+            <button id="generateBtn" onclick="generateVisualization()">Generate Visualization</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div class="visualization">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Generating visualization...</p>
+            </div>
+            <img id="chartImage" src="/api/images/btc_golden_ratio_7yr_20250322_161109.png"
+                alt="BTC Golden Ratio Chart">
+        </div>
+
+        <div class="fibo-info">
+            <h3>Fibonacci Levels & Golden Ratio</h3>
+            <p>
+                The Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, 13, 21, 34...) creates important ratios,
+                especially the Golden Ratio (φ ≈ 1.618), which appears throughout nature and financial markets.
+            </p>
+
+            <div class="fibo-grid">
+                <div class="fibo-level">
+                    <span>0.236</span>
+                    <span>Shallow Retracement</span>
+                </div>
+                <div class="fibo-level">
+                    <span>0.382</span>
+                    <span>Primary Retracement</span>
+                </div>
+                <div class="fibo-level">
+                    <span>0.5</span>
+                    <span>Mid-point (Not Fibonacci)</span>
+                </div>
+                <div class="fibo-level golden">
+                    <span>0.618</span>
+                    <span>Golden Ratio</span>
+                </div>
+                <div class="fibo-level">
+                    <span>0.786</span>
+                    <span>Deep Retracement</span>
+                </div>
+                <div class="fibo-level">
+                    <span>1.0</span>
+                    <span>Full Retracement</span>
+                </div>
+                <div class="fibo-level golden">
+                    <span>1.618</span>
+                    <span>Golden Ratio Extension</span>
+                </div>
+                <div class="fibo-level">
+                    <span>2.618</span>
+                    <span>Key Extension</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>OMEGA BTC AI - 7 Year Golden Ratio Fibonacci Visualizer | © 2025</p>
+    </footer>
+
+    <script>
+        function generateVisualization() {
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('chartImage').style.display = 'none';
+
+            // Get selected options
+            const years = document.getElementById('years').value;
+            const dataSource = document.getElementById('dataSource').value;
+
+            // Create request to our API
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    years: years,
+                    dataSource: dataSource
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading state
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('chartImage').style.display = 'block';
+
+                    // Update status
+                    const statusEl = document.getElementById('status');
+
+                    if (data.success) {
+                        // Update the image with the new file
+                        document.getElementById('chartImage').src = data.file;
+
+                        // Show success message
+                        statusEl.innerHTML = data.message;
+                        statusEl.className = 'status success';
+                    } else {
+                        // Show error message
+                        statusEl.innerHTML = `Error: ${data.error}`;
+                        statusEl.className = 'status error';
+                    }
+
+                    statusEl.style.display = 'block';
+
+                    // Hide status after 5 seconds
+                    setTimeout(() => {
+                        statusEl.style.display = 'none';
+                    }, 5000);
+                })
+                .catch(error => {
+                    // Hide loading state
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('chartImage').style.display = 'block';
+
+                    // Show error message
+                    const statusEl = document.getElementById('status');
+                    statusEl.innerHTML = `Error connecting to server: ${error}`;
+                    statusEl.className = 'status error';
+                    statusEl.style.display = 'block';
+
+                    // Hide status after 5 seconds
+                    setTimeout(() => {
+                        statusEl.style.display = 'none';
+                    }, 5000);
+                });
+        }
+    </script>
+</body>
+
+</html>
