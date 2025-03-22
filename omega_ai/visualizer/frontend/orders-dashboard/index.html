@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Live Trading Orders Dashboard</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Golden OMEGA Crown Favicon - Multiple Formats -->
+    <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
+    <link rel="icon"
+        href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPCEtLSBEYXJrIFB1cnBsZSBCYWNrZ3JvdW5kIENpcmNsZSAtLT4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0OCIgZmlsbD0iIzJBMTUzMCIgLz4KCiAgPCEtLSBHb2xkIFNwaXJhbCBQYXR0ZXJuIC0tPgogIDxwYXRoIGQ9Ik0gNTAgNQogICAgICAgICBBIDQ1IDQ1IDAgMCAxIDk1IDUwCiAgICAgICAgIEEgNDUgNDUgMCAwIDEgNTAgOTUKICAgICAgICAgQSA0NSA0NSAwIDAgMSA1IDUwCiAgICAgICAgIEEgNDUgNDUgMCAwIDEgNTAgNSIKICAgICAgc3Ryb2tlPSIjRkZEQTAwIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgLz4KCiAgPHBhdGggZD0iTSA1MCAxNQogICAgICAgICBBIDM1IDM1IDAgMCAxIDg1IDUwCiAgICAgICAgIEEgMzUgMzUgMCAwIDEgNTAgODUKICAgICAgICAgQSAzNSAzNSAwIDAgMSAxNSA1MAogICAgICAgICBBIDM1IDM1IDAgMCAxIDUwIDE1IgogICAgICBzdHJva2U9IiNGRkRBMDAiIHN0cm9rZS13aWR0aD0iMS41IiBmaWxsPSJub25lIiAvPgoKICA8cGF0aCBkPSJNIDUwIDI1CiAgICAgICAgIEEgMjUgMjUgMCAwIDEgNzUgNTAKICAgICAgICAgQSAyNSAyNSAwIDAgMSA1MCA3NQogICAgICAgICBBIDI1IDI1IDAgMCAxIDI1IDUwCiAgICAgICAgIEEgMjUgMjUgMCAwIDEgNTAgMjUiCiAgICAgIHN0cm9rZT0iI0ZGREE0MCIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiIC8+CgogIDxwYXRoIGQ9Ik0gNTAgMzUKICAgICAgICAgQSAxNSAxNSAwIDAgMSA2NSA1MAogICAgICAgICBBIDE1IDE1IDAgMCAxIDUwIDY1CiAgICAgICAgIEEgMTUgMTUgMCAwIDEgMzUgNTAKICAgICAgICAgQSAxNSAxNSAwIDAgMSA1MCAzNSIKICAgICAgc3Ryb2tlPSIjRkZEQTgwIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgLz4KCiAgPCEtLSBPbWVnYSBTeW1ib2wgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTAsNTApIj4KICAgIDxwYXRoIGQ9Ik0gLTE2IC0xMAogICAgICAgICAgQSAyMCAyMCAwIDAgMSA0IC0xMAogICAgICAgICAgQSAyMCAyMCAwIDAgMSAtNiAyMAogICAgICAgICAgTCAxNiAyMAogICAgICAgICAgTCAxNiAxMAogICAgICAgICAgTCAtNiAxMAogICAgICAgICAgQSAxMCAxMCAwIDAgMCAtNiAtMAogICAgICAgICAgQSAxMCAxMCAwIDAgMCAtNiAtMTAiCiAgICAgICAgZmlsbD0iI0ZGREEwMCIgLz4KICA8L2c+CgogIDwhLS0gRG90dGVkIENpcmNsZSAtLT4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MiIgc3Ryb2tlPSIjRkZEQTAwIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1kYXNoYXJyYXk9IjIsMiIgZmlsbD0ibm9uZSIgLz4KCiAgPCEtLSBDb3JuZXIgTWFya2luZ3MgLS0+CiAgPGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iMiIgZmlsbD0iI0ZGREE4MCIgLz4KICA8Y2lyY2xlIGN4PSI4OSIgY3k9IjExIiByPSIyIiBmaWxsPSIjRkZEQTgwIiAvPgogIDxjaXJjbGUgY3g9IjExIiBjeT0iODkiIHI9IjIiIGZpbGw9IiNGRkRBODAiIC8+CiAgPGNpcmNsZSBjeD0iODkiIGN5PSI4OSIgcj0iMiIgZmlsbD0iI0ZGREFBMCIgLz4KPC9zdmc+Cg=="
+        type="image/svg+xml">
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="static/favicon.svg">
+    <!-- Microsoft Tile -->
+    <meta name="msapplication-TileColor" content="#2A1530">
+    <meta name="msapplication-TileImage" content="static/favicon.svg">
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#2A1530">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="static/omega-logo.svg" alt="OMEGA Logo" class="omega-logo" width="50" height="50">
+                <div class="title-container">
+                    <h1 class="header-title">OMEGA BTC AI - Live Trading Orders Dashboard</h1>
+                    <div class="header-subtitle">JAH BLESS OMEGA FIBONACCI GOLDEN RATIO AI</div>
+                </div>
+            </div>
+            <div class="status-indicators">
+                <div class="indicator">
+                    <span class="indicator-label">Status:</span>
+                    <span id="system-status" class="indicator-value positive">OPERATIONAL</span>
+                </div>
+                <div class="indicator">
+                    <span class="indicator-label">Last Update:</span>
+                    <span id="last-update" class="indicator-value">-</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- System Status -->
+                <section class="panel">
+                    <h2 class="section-title">System Status</h2>
+                    <div id="system-metrics" class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Total PnL</div>
+                            <div id="total-pnl" class="metric-value positive">$0.00</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Active Positions</div>
+                            <div id="active-positions-count" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">BTC Price</div>
+                            <div id="btc-price" class="metric-value">$0.00</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Trading Performance -->
+                <section id="traders-section" class="dashboard-section">
+                    <h2 class="dashboard-section-header">Trader Performance</h2>
+                    <div id="trader-stats" class="trader-stats-container">
+                        <!-- Trader cards will be dynamically added here -->
+                    </div>
+                </section>
+
+                <!-- Active Positions -->
+                <section id="positions-section" class="dashboard-section">
+                    <h2 class="dashboard-section-header">Active Positions</h2>
+                    <div id="active-positions">
+                        <!-- Position cards will be dynamically added here -->
+                        <div class="no-positions">No active positions</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Order Log -->
+                <section id="log-section" class="dashboard-section">
+                    <h2 class="dashboard-section-header">Trading Activity</h2>
+                    <div class="controls">
+                        <button id="pause-log" class="control-button">Pause</button>
+                        <button id="clear-log" class="control-button">Clear</button>
+                        <select id="log-filter" class="filter-dropdown">
+                            <option value="all">All Events</option>
+                            <option value="positive">Buy Orders</option>
+                            <option value="negative">Sell Orders</option>
+                            <option value="neutral">Other Events</option>
+                        </select>
+                    </div>
+                    <div id="order-log-entries">
+                        <!-- Log entries will be dynamically added here -->
+                    </div>
+                </section>
+
+                <!-- Charts -->
+                <section class="panel">
+                    <h2 class="section-title">Performance Metrics</h2>
+                    <div class="charts-container">
+                        <div class="chart" id="pnl-chart-container">
+                            <canvas id="pnl-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Add a new section for ticker data -->
+                <section id="ticker-section" class="dashboard-section">
+                    <h2 class="dashboard-section-header">Market Data</h2>
+                    <div id="ticker-data" class="ticker-grid">
+                        <!-- Will be populated with ticker data from WebSocket -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div>OMEGA BTC AI - Powered by Golden Ratio Divine Fibonacci Sequence</div>
+        </footer>
+    </div>
+
+    <!-- Templates -->
+    <template id="trader-card-template">
+        <div class="trader-card">
+            <div class="trader-name"></div>
+            <div class="trader-metrics">
+                <div class="metric">
+                    <span class="metric-label">PnL</span>
+                    <span class="metric-value pnl"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Win Rate</span>
+                    <span class="metric-value win-rate"></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="position-card-template">
+        <div class="position-card">
+            <div class="position-header">
+                <span class="position-profile"></span>
+                <span class="position-side"></span>
+            </div>
+            <div class="position-details">
+                <div class="position-detail">
+                    <span class="detail-label">Entry</span>
+                    <span class="detail-value entry-price"></span>
+                </div>
+                <div class="position-detail">
+                    <span class="detail-label">Current</span>
+                    <span class="detail-value current-price"></span>
+                </div>
+                <div class="position-detail">
+                    <span class="detail-label">Size</span>
+                    <span class="detail-value position-size"></span>
+                </div>
+                <div class="position-detail">
+                    <span class="detail-label">PnL</span>
+                    <span class="detail-value position-pnl"></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="order-log-entry-template">
+        <div class="log-entry">
+            <div class="log-timestamp"></div>
+            <div class="log-content">
+                <span class="log-profile"></span>
+                <span class="log-action"></span>
+                <span class="log-details"></span>
+            </div>
+        </div>
+    </template>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Configuration for WebSocket -->
+    <script>
+        // Global configuration for WebSocket connection
+        const WEBSOCKET_CONFIG = {
+            port: 8765,  // MM WebSocket server port
+            path: '',
+            reconnectDelay: 5000
+        };
+    </script>
+    <script src="static/dashboard.js?v=1.3"></script>
+</body>
+
+</html>

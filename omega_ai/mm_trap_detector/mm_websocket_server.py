@@ -3,17 +3,24 @@ import json
 import websockets
 from datetime import datetime, UTC
 from omega_ai.visualizer.backend.ascii_art import display_omega_banner, print_status
+import os
 
 MM_WS_PORT = 8765
-MM_WS_URL = f"ws://localhost:{MM_WS_PORT}"
+MM_WS_PATH = "/ws"
+MM_WS_URL = f"ws://localhost:{MM_WS_PORT}{MM_WS_PATH}"
 
 connected_clients = set()
 
-async def handler(websocket):
+async def ws_handler(websocket):
     """Handles incoming WebSocket connections."""
+    # In websockets 15.0+ the path is accessible via websocket.path
+    if websocket.path != MM_WS_PATH:
+        await websocket.close(1008, f"Path not found: {websocket.path}")
+        return
+        
     global connected_clients
     client_info = websocket.remote_address
-    print_status(f"New WebSocket Connection: {client_info}", "success")
+    print_status(f"New WebSocket Connection: {client_info} on path {websocket.path}", "success")
     
     connected_clients.add(websocket)
     try:
@@ -39,7 +46,9 @@ async def start_server():
     """Start the WebSocket server."""
     display_omega_banner("Market Maker WebSocket Server")
     print_status(f"MM WebSocket Server Running on {MM_WS_URL}", "success")
-    async with websockets.serve(handler, "localhost", MM_WS_PORT):
+    
+    # In websockets 15.0+, the server checks paths automatically based on routes
+    async with websockets.serve(ws_handler, "localhost", MM_WS_PORT):
         await asyncio.Future()  # Keeps server running indefinitely
 
 if __name__ == "__main__":
