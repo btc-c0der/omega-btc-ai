@@ -9,6 +9,11 @@ and elite exit strategies.
 Usage:
     python run_trap_aware_dual_traders.py [--min-free-balance BALANCE] [--account-max MAX]
                                         [--trap-probability-threshold PROB] [--enable-elite-exits]
+                                        [--elite-exit-confidence CONF] [--symbol SYMBOL]
+                                        [--long-capital AMOUNT] [--short-capital AMOUNT]
+                                        [--long-leverage LEV] [--short-leverage LEV]
+                                        [--long-sub-account NAME] [--short-sub-account NAME]
+                                        [--testnet] [--no-trap-protection]
 
 Arguments:
     --min-free-balance: Minimum free USDT balance required (default: 100)
@@ -17,6 +22,15 @@ Arguments:
     --trap-alert-threshold: Threshold for sending trap alerts (default: 0.8)
     --enable-elite-exits: Enable elite exit strategies (default: False)
     --elite-exit-confidence: Minimum confidence required for elite exit signals (default: 0.7)
+    --symbol: Trading symbol (default: BTCUSDT)
+    --long-capital: Initial capital for long trader in USDT (default: from env INITIAL_CAPITAL or 24.0)
+    --short-capital: Initial capital for short trader in USDT (default: from env INITIAL_CAPITAL or 24.0)
+    --long-leverage: Leverage for long positions (default: from env MAX_LEVERAGE or 11)
+    --short-leverage: Leverage for short positions (default: from env MAX_LEVERAGE or 11)
+    --long-sub-account: Sub-account name for long positions (default: from env STRATEGIC_SUB_ACCOUNT_NAME)
+    --short-sub-account: Sub-account name for short positions (default: fst_short)
+    --testnet: Use testnet instead of mainnet
+    --no-trap-protection: Disable trap protection features
 """
 
 import asyncio
@@ -43,24 +57,37 @@ async def run_trap_aware_dual_traders(args):
     secret_key = os.getenv('BITGET_SECRET_KEY', '')
     passphrase = os.getenv('BITGET_PASSPHRASE', '')
     
-    # Get sub-account names
-    long_sub_account = os.getenv('STRATEGIC_SUB_ACCOUNT_NAME', '')
-    short_sub_account = "fst_short"  # Default from the code
+    # Get default values from environment
+    default_long_capital = float(os.getenv('INITIAL_CAPITAL', '24.0'))
+    default_short_capital = float(os.getenv('INITIAL_CAPITAL', '24.0'))
+    default_leverage = int(os.getenv('MAX_LEVERAGE', '11'))
+    default_symbol = os.getenv('TRADING_SYMBOL', 'BTCUSDT').split('_')[0]
     
-    # Use testnet based on environment
-    use_testnet = os.getenv('USE_TESTNET', 'false').lower() == 'true'
+    # Get sub-account names
+    long_sub_account = args.long_sub_account or os.getenv('STRATEGIC_SUB_ACCOUNT_NAME', '')
+    short_sub_account = args.short_sub_account
+    
+    # Use testnet based on args or environment
+    use_testnet = args.testnet or os.getenv('USE_TESTNET', 'false').lower() == 'true'
     
     print(f"\n===== STARTING OMEGA BTC AI TRAP-AWARE DUAL POSITION TRADERS =====")
     print(f"Using minimum free balance limit: {args.min_free_balance} USDT")
     print(f"Using account maximum limit: {args.account_max} USDT")
-    print(f"Using API Key: {api_key[:5]}...{api_key[-5:]}")
+    print(f"Trading symbol: {args.symbol}")
+    print(f"Using API Key: {api_key[:5]}...{api_key[-5:] if len(api_key) > 10 else ''}")
     print(f"Long sub-account: {long_sub_account}")
     print(f"Short sub-account: {short_sub_account}")
+    print(f"Long capital: {args.long_capital} USDT")
+    print(f"Short capital: {args.short_capital} USDT")
+    print(f"Long leverage: {args.long_leverage}x")
+    print(f"Short leverage: {args.short_leverage}x")
     print(f"Trap probability threshold: {args.trap_probability_threshold}")
     print(f"Trap alert threshold: {args.trap_alert_threshold}")
+    print(f"Trap protection enabled: {not args.no_trap_protection}")
     print(f"Elite exits enabled: {args.enable_elite_exits}")
     if args.enable_elite_exits:
         print(f"Elite exit confidence: {args.elite_exit_confidence}\n")
+    print(f"Using {'TESTNET' if use_testnet else 'MAINNET'}")
     
     # Import the TrapAwareDualTraders class
     from omega_ai.trading.strategies.trap_aware_dual_traders import TrapAwareDualTraders
@@ -112,20 +139,20 @@ async def run_trap_aware_dual_traders(args):
     # Initialize trap-aware dual traders with the modified class
     dual_traders = ModifiedTrapAwareDualTraders(
         use_testnet=use_testnet,
-        long_capital=float(os.getenv('INITIAL_CAPITAL', '24.0')),
-        short_capital=float(os.getenv('INITIAL_CAPITAL', '24.0')),
-        symbol=os.getenv('TRADING_SYMBOL', 'BTCUSDT').split('_')[0],
+        long_capital=args.long_capital,
+        short_capital=args.short_capital,
+        symbol=args.symbol,
         api_key=api_key,
         secret_key=secret_key,
         passphrase=passphrase,
-        long_leverage=int(os.getenv('MAX_LEVERAGE', '11')),
-        short_leverage=int(os.getenv('MAX_LEVERAGE', '11')),
+        long_leverage=args.long_leverage,
+        short_leverage=args.short_leverage,
         long_sub_account=long_sub_account,
         short_sub_account=short_sub_account,
         account_limit=args.min_free_balance,  # Use minimum free balance as limit
         trap_probability_threshold=args.trap_probability_threshold,
         trap_alert_threshold=args.trap_alert_threshold,
-        enable_trap_protection=True,
+        enable_trap_protection=not args.no_trap_protection,
         enable_elite_exits=args.enable_elite_exits,
         elite_exit_confidence=args.elite_exit_confidence
     )
@@ -170,6 +197,24 @@ def parse_args():
                       help='Enable elite exit strategies')
     parser.add_argument('--elite-exit-confidence', type=float, default=0.7,
                       help='Minimum confidence required for elite exit signals (default: 0.7)')
+    parser.add_argument('--symbol', type=str, default=os.getenv('TRADING_SYMBOL', 'BTCUSDT').split('_')[0],
+                      help='Trading symbol (default: BTCUSDT)')
+    parser.add_argument('--long-capital', type=float, default=float(os.getenv('INITIAL_CAPITAL', '24.0')),
+                      help='Initial capital for long trader in USDT')
+    parser.add_argument('--short-capital', type=float, default=float(os.getenv('INITIAL_CAPITAL', '24.0')),
+                      help='Initial capital for short trader in USDT')
+    parser.add_argument('--long-leverage', type=int, default=int(os.getenv('MAX_LEVERAGE', '11')),
+                      help='Leverage for long positions')
+    parser.add_argument('--short-leverage', type=int, default=int(os.getenv('MAX_LEVERAGE', '11')),
+                      help='Leverage for short positions')
+    parser.add_argument('--long-sub-account', type=str, default='',
+                      help='Sub-account name for long positions (default from env STRATEGIC_SUB_ACCOUNT_NAME)')
+    parser.add_argument('--short-sub-account', type=str, default='fst_short',
+                      help='Sub-account name for short positions (default: fst_short)')
+    parser.add_argument('--testnet', action='store_true',
+                      help='Use testnet instead of mainnet')
+    parser.add_argument('--no-trap-protection', action='store_true',
+                      help='Disable trap protection features')
     
     return parser.parse_args()
 
