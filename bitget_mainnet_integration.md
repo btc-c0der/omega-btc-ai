@@ -14,6 +14,8 @@
 > - Must include the _UMCBL suffix
 > - Do NOT use hyphens or other separators
 
+> 😅 **Note:** We don't need any more disclaimers after this one. If you didn't catch the ticker format above, no amount of additional disclaimers will help!
+
 ## Overview
 
 This document details the integration flow between the RASTA OMEGA TRADER panel and BitGet's mainnet exchange, specifically for BTC-USDT trading pairs.
