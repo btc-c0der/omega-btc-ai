@@ -20,19 +20,20 @@ async def check_positions():
     
     # Initialize BitGet client
     client = BitGetCCXT(
-        api_key=api_key,
-        api_secret=secret_key,
-        password=passphrase,
-        use_testnet=False,
-        sub_account=sub_account
+        config={
+            'api_key': api_key,
+            'api_secret': secret_key,
+            'api_password': passphrase,
+            'use_testnet': False,
+            'sub_account': sub_account
+        }
     )
     
     try:
-        # Initialize the client
-        await client.initialize()
+        # No need to initialize the client - CCXT is initialized in the constructor
         
         # Get positions for BTC
-        positions = await client.get_positions('BTC/USDT:USDT')
+        positions = await client.fetch_positions('BTC/USDT:USDT')
         print(f'Found {len(positions)} positions')
         
         # Print position details
@@ -176,7 +177,7 @@ async def check_positions():
         print(f'Error: {str(e)}')
     finally:
         # Close the client
-        await client.close()
+        await client.exchange.close()
 
 if __name__ == "__main__":
     asyncio.run(check_positions()) 
