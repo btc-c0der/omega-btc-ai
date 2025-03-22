@@ -95,16 +95,18 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
         
         # Initialize enhanced exit strategy
         self.exit_strategy = EnhancedExitStrategy(
-            base_risk_percent=1.0,
-            enable_scalping=True,
-            scalping_coefficient=0.3,
-            strategic_coefficient=0.6,
-            aggressive_coefficient=0.1,
-            enable_trailing_stop=True,
-            trailing_activation_threshold=1.0,
-            trailing_distance_factor=0.3,
-            min_tp_distance=0.5,
-            max_tp_levels=4
+            config={
+                'base_risk_percent': 1.0,
+                'enable_scalping': True,
+                'scalping_coefficient': 0.3,
+                'strategic_coefficient': 0.6,
+                'aggressive_coefficient': 0.1,
+                'enable_trailing_stop': True,
+                'trailing_activation_threshold': 1.0,
+                'trailing_distance_factor': 0.3,
+                'min_tp_distance': 0.5,
+                'max_tp_levels': 4
+            }
         )
         
         # Use multipliers instead of directly modifying traders

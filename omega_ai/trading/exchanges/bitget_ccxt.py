@@ -66,7 +66,18 @@ class BitGetCCXT:
         """Format symbol for BitGet API"""
         if not symbol:
             raise ValueError("Symbol is required")
-        return symbol.upper()
+            
+        # If the symbol is already formatted (contains a slash), return it as is
+        if '/' in symbol:
+            return symbol.upper()
+            
+        # Format BTCUSDT to BTC/USDT:USDT
+        if symbol.upper().endswith('USDT'):
+            base = symbol[:-4]  # Remove 'USDT' from the end
+            return f"{base}/USDT:USDT".upper()
+            
+        # Format basic symbol to include USDT pairs
+        return f"{symbol}/USDT:USDT".upper()
         
     async def create_market_order(
         self,
@@ -249,3 +260,100 @@ class BitGetCCXT:
         """Close the websocket connection"""
         self.ws_connected = False
         self.logger.info("Closed WebSocket connection")
+
+    # Compatibility methods with older implementations
+    async def initialize(self) -> None:
+        """Compatibility method - does nothing as initialization occurs in constructor."""
+        # No action needed as CCXT is initialized in the constructor
+        pass
+        
+    async def close(self) -> None:
+        """Close the exchange connection."""
+        await self.exchange.close()
+        
+    async def get_market_ticker(self, symbol: str) -> Dict[str, Any]:
+        """Fetch ticker for a symbol (compatibility method)."""
+        return await self.fetch_ticker(symbol)
+        
+    async def get_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Fetch positions (compatibility method)."""
+        return await self.fetch_positions(symbol)
+        
+    async def get_balance(self) -> Dict[str, Any]:
+        """Fetch balance (compatibility method)."""
+        return await self.fetch_balance()
+        
+    async def close_position(self, symbol: str, position: Dict[str, Any]) -> Dict[str, Any]:
+        """Close a position using market order."""
+        side = "sell" if position.get("side", "").lower() == "long" else "buy"
+        amount = float(position.get("contracts", 0))
+        
+        if amount <= 0:
+            self.logger.warning(f"Cannot close position with zero contracts")
+            return {}
+            
+        return await self.create_market_order(
+            symbol=symbol,
+            side=side,
+            amount=amount
+        )
+        
+    async def setup_trading_config(self, symbol: str, leverage: int) -> None:
+        """Set up trading configuration including leverage."""
+        # Format symbol
+        formatted_symbol = self._format_symbol(symbol)
+        
+        try:
+            # Set leverage
+            await self.exchange.set_leverage(leverage, formatted_symbol)
+            self.logger.info(f"Set leverage to {leverage}x for {formatted_symbol}")
+        except Exception as e:
+            self.logger.error(f"Error setting up trading config: {e}")
+            raise
+
+    async def place_order(self, symbol: str, side: str, amount: float, 
+                         price: Optional[float] = None, order_type: str = "market",
+                         params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Place an order with the exchange."""
+        if order_type.lower() == "market":
+            return await self.create_market_order(
+                symbol=symbol,
+                side=side,
+                amount=amount,
+                params=params or {}
+            )
+        else:
+            return await self.create_order(
+                symbol=symbol,
+                type=order_type,
+                side=side,
+                amount=amount,
+                price=price,
+                params=params or {}
+            )
+
+    async def create_market_order(self, symbol: str, side: str, amount: float, 
+                                reduce_only: bool = False,
+                                params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Create a market order with optional reduce_only flag."""
+        formatted_symbol = self._format_symbol(symbol)
+        
+        order_params = params or {}
+        if reduce_only:
+            order_params["reduceOnly"] = True
+            
+        try:
+            order = await self.exchange.create_order(
+                symbol=formatted_symbol,
+                type="market",
+                side=side,
+                amount=amount,
+                params=order_params
+            )
+            
+            self.logger.info(f"Created market {side} order for {amount} {formatted_symbol}")
+            return to_dict(order)
+            
+        except Exception as e:
+            self.logger.error(f"Error creating market order: {e}")
+            raise

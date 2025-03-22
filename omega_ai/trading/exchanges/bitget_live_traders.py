@@ -29,6 +29,8 @@ import os
 import sys
 import traceback
 from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
+import time
+import random
 
 # Custom JSON encoder for datetime objects
 class DateTimeEncoder(json.JSONEncoder):
@@ -143,12 +145,22 @@ class BitGetLiveTraders:
             if key in os.environ:
                 logger.debug(f"    {key}: {'*' * len(os.environ[key])}")
                 
-    def _format_symbol(self, symbol: str) -> str:
-        """Format symbol for CCXT use."""
-        # Remove USDT suffix if present
-        base = symbol.replace('USDT', '')
-        # Format for BitGet futures: BTC/USDT:USDT
-        return f"{base}/USDT:USDT"
+    def _format_symbol(self, symbol):
+        """Format the symbol for CCXT use."""
+        # If the symbol already contains a slash, return it as is
+        if '/' in symbol:
+            return symbol
+
+        # If it contains 'USDT:USDT', it's already formatted
+        if 'USDT:USDT' in symbol:
+            return symbol
+
+        # If it's already in format "BTCUSDT", remove the "USDT" suffix
+        if symbol.upper().endswith('USDT'):
+            symbol = symbol[:-4]  # Remove 'USDT' suffix
+
+        # Format as 'BTC/USDT:USDT'
+        return f"{symbol}/USDT:USDT"
 
     async def initialize(self) -> None:
         """Initialize the trading system."""
@@ -160,69 +172,38 @@ class BitGetLiveTraders:
         await self._initialize_traders()
         
     async def _verify_symbol(self) -> bool:
-        """Verify if the symbol is valid and available for futures trading."""
+        """Verify that the symbol exists."""
         try:
-            # Skip verification if CoinPicker is disabled
-            if not self.use_coin_picker or not self.coin_picker:
+            # First try using the CoinPicker if available
+            if self.coin_picker:
+                logger.info(f"{CYAN}Verifying symbol {self.symbol} with CoinPicker{RESET}")
+                return await self.coin_picker.verify_symbol(self.symbol)
+            else:
                 logger.info(f"{YELLOW}CoinPicker disabled, skipping symbol verification{RESET}")
                 # Instead, use CCXT to verify the symbol
                 test_exchange = BitGetCCXT(
-                    api_key=self.api_key,
-                    api_secret=self.secret_key,
-                    password=self.passphrase,
-                    use_testnet=self.use_testnet
+                    config={
+                        'api_key': self.api_key,
+                        'api_secret': self.secret_key,
+                        'api_password': self.passphrase,
+                        'use_testnet': self.use_testnet
+                    }
                 )
-                await test_exchange.initialize()
+                # No initialize method, the constructor initializes it
                 try:
                     formatted_symbol = self._format_symbol(self.symbol)
-                    await test_exchange.get_market_ticker(formatted_symbol)
-                    await test_exchange.close()
+                    await test_exchange.fetch_ticker(formatted_symbol)
+                    await test_exchange.exchange.close()
                     return True
                 except Exception as e:
                     logger.error(f"{RED}Symbol verification failed: {str(e)}{RESET}")
                     return False
                 
-            # Update coin picker cache
-            if not self.coin_picker.update_coins_cache():
-                logger.warning(f"{YELLOW}Failed to update coins cache, skipping verification{RESET}")
-                return True
-                
-            # Get symbol info
-            symbol_info = self.coin_picker.get_symbol_info(self.symbol)
-            if not symbol_info:
-                return False
-                
-            # Verify it's a futures symbol
-            if symbol_info.type != CoinType.FUTURES:
-                logger.error(f"{RED}Symbol {self.symbol} is not a futures contract{RESET}")
-                return False
-                
-            # Verify it's a USDT contract
-            if symbol_info.quote_currency != "USDT":
-                logger.error(f"{RED}Symbol {self.symbol} is not a USDT contract{RESET}")
-                return False
-                
-            # Get market analysis
-            analysis = self.coin_picker.analyze_symbol(self.symbol)
-            if not analysis:
-                return False
-                
-            logger.info(f"{GREEN}Symbol {self.symbol} verified successfully{RESET}")
-            logger.info(f"{BLUE}Symbol details:{RESET}")
-            logger.info(f"Base currency: {analysis['base_currency']}")
-            logger.info(f"Quote currency: {analysis['quote_currency']}")
-            logger.info(f"Last price: {analysis['last_price']}")
-            logger.info(f"24h volume: {analysis['volume_24h']}")
-            logger.info(f"24h price change: {analysis['price_change_24h']}%")
-            logger.info(f"Maker fee rate: {analysis['maker_fee_rate']}")
-            logger.info(f"Taker fee rate: {analysis['taker_fee_rate']}")
-            
-            return True
-            
         except Exception as e:
             logger.error(f"{RED}Error verifying symbol: {str(e)}{RESET}")
             logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
             logger.error(f"{RED}Exception args: {e.args}{RESET}")
+            logger.error(f"{RED}Exception traceback: {traceback.format_exc()}{RESET}")
             return False
         
     async def _initialize_traders(self) -> None:
@@ -241,11 +222,13 @@ class BitGetLiveTraders:
                 # Get sub-account name from environment or use empty string
                 strategic_sub_account = os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME", "")
                 trader = BitGetCCXT(
-                    api_key=self.api_key,
-                    api_secret=self.secret_key,
-                    password=self.passphrase,
-                    use_testnet=self.use_testnet,
-                    sub_account=strategic_sub_account
+                    config={
+                        'api_key': self.api_key,
+                        'api_secret': self.secret_key,
+                        'api_password': self.passphrase,
+                        'use_testnet': self.use_testnet,
+                        'sub_account': strategic_sub_account
+                    }
                 )
                 await trader.initialize()
                 # Set up trading configuration with current leverage
@@ -271,11 +254,13 @@ class BitGetLiveTraders:
                         logger.info(f"{GREEN}Using sub-account: {sub_account}{RESET}")
                 
                 trader = BitGetCCXT(
-                    api_key=self.api_key,
-                    api_secret=self.secret_key,
-                    password=self.passphrase,
-                    use_testnet=self.use_testnet,
-                    sub_account=sub_account
+                    config={
+                        'api_key': self.api_key,
+                        'api_secret': self.secret_key,
+                        'api_password': self.passphrase,
+                        'use_testnet': self.use_testnet,
+                        'sub_account': sub_account
+                    }
                 )
                 
                 await trader.initialize()
@@ -609,13 +594,13 @@ class BitGetLiveTraders:
         """Update and log trader performance metrics."""
         try:
             # Get positions and balance
-            positions = await trader.get_positions(f"{self.symbol}/USDT:USDT")
+            positions = await trader.get_positions(self._format_symbol(self.symbol))
             balance = await trader.get_balance()
             
             # Calculate total PnL
             total_pnl = 0
             for position in positions:
-                if position['symbol'] == f"{self.symbol}/USDT:USDT":
+                if position['symbol'] == self._format_symbol(self.symbol):
                     total_pnl += float(position.get('unrealizedPnl', 0))
             
             # Log performance
