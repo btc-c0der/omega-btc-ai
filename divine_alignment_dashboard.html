@@ -5,105 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMEGA BTC AI - Divine Alignment Dashboard</title>
+    <!-- Link to shared OMEGA dashboard styles -->
+    <link rel="stylesheet" href="/assets/css/omega_dashboard.css">
     <style>
-        :root {
-            --dark-bg: #121212;
-            --light-text: #f0f0f0;
-            --gold: #ffd700;
-            --green-divine: #2ecc71;
-            --red-trapped: #e74c3c;
-            --blue: #3498db;
-            --violet: #9b59b6;
+        /* Divine Alignment Dashboard specific styles */
+        @font-face {
+            font-family: 'Sacred';
+            src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfYPlDX5Z.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
         }
 
         @font-face {
             font-family: 'Sacred';
-            src: url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--light-text);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            background-image: radial-gradient(circle at center, #1a1a2e 0%, #121212 100%);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #333;
-            position: relative;
-        }
-
-        header::after {
-            content: "";
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--gold), transparent);
+            src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-jHgfYPlDX5Z.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
         }
 
         h1 {
             font-family: 'Sacred', 'Cinzel', serif;
-            color: var(--gold);
-            font-size: 2.8em;
-            margin: 0;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            color: var(--light-text);
-            font-style: italic;
-            margin-top: 5px;
-            font-size: 1.2em;
-        }
-
-        .divine-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .divine-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .status-panel {
-            background-color: rgba(30, 30, 30, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: 1px solid #333;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status-panel::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(to right, transparent, var(--gold), transparent);
         }
 
         .status-card {
@@ -184,22 +105,9 @@
             font-weight: bold;
         }
 
-        .deviation-positive {
-            color: var(--green-divine);
-        }
-
-        .deviation-negative {
-            color: var(--red-trapped);
-        }
-
         .fibo-levels {
-            background-color: rgba(30, 30, 30, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .fibo-level {
@@ -263,13 +171,6 @@
             background-color: rgba(255, 215, 0, 0.1);
             transform: translateX(5px);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .last-update {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: #888;
         }
 
         .crossing-alert {
@@ -451,17 +352,245 @@
             margin-top: 5px;
         }
 
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px 0;
-            border-top: 1px solid #333;
-            font-size: 0.9em;
-            color: #888;
+        /* Trading section styles */
+        .tp-container {
+            flex: 2;
         }
 
-        .hidden {
-            display: none;
+        .tp-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .tp-progress {
+            height: 30px;
+            background-color: rgba(30, 30, 30, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .tp-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, rgba(46, 204, 113, 0.7), rgba(52, 152, 219, 0.7));
+            width: 0;
+            transition: width 1s ease;
+            border-radius: 15px;
+        }
+
+        .tp-progress-short .tp-progress-bar {
+            background: linear-gradient(to right, rgba(231, 76, 60, 0.7), rgba(241, 196, 15, 0.7));
+        }
+
+        .tp-points {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .tp-point {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background-color: white;
+            opacity: 0.7;
+        }
+
+        .tp-point-label {
+            position: absolute;
+            top: -25px;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .tp-point-price {
+            position: absolute;
+            bottom: -25px;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .tp-point-entry {
+            background-color: white;
+        }
+
+        .tp-point-1 {
+            background-color: var(--gold);
+        }
+
+        .tp-point-2 {
+            background-color: var(--cyan);
+        }
+
+        .tp-point-3 {
+            background-color: var(--violet);
+        }
+
+        .tp-point-sl {
+            background-color: var(--red-trapped);
+        }
+
+        .tp-point-current {
+            background-color: var(--blue);
+            width: 5px;
+            height: 26px;
+            opacity: 0.9;
+        }
+
+        .elite-strategy {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .elite-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .elite-title {
+            color: var(--gold);
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .elite-mode {
+            padding: 5px 10px;
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--blue);
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .elite-signals {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .signal-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 3px solid;
+        }
+
+        .signal-high {
+            border-color: var(--green-divine);
+        }
+
+        .signal-medium {
+            border-color: var(--gold);
+        }
+
+        .signal-low {
+            border-color: var(--blue);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .signal-name {
+            font-weight: bold;
+        }
+
+        .signal-confidence {
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--green-divine);
+        }
+
+        .signal-description {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .signal-recommendation {
+            font-style: italic;
+            color: var(--gold);
+            font-size: 0.9em;
+        }
+
+        .trade-history {
+            margin-top: 30px;
+        }
+
+        .history-title {
+            color: var(--gold);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .history-table th {
+            padding: 12px 15px;
+            text-align: left;
+            background-color: rgba(30, 30, 30, 0.7);
+            color: var(--gold);
+            font-weight: normal;
+        }
+
+        .history-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .history-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .exit-tp {
+            color: var(--green-divine);
+        }
+
+        .exit-sl {
+            color: var(--red-trapped);
+        }
+
+        .exit-manual {
+            color: var(--blue);
+        }
+
+        .trading-section {
+            margin-top: 40px;
+        }
+
+        .trading-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .trading-header h2 {
+            color: var(--gold);
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .trading-header p {
+            color: var(--light-text);
+            font-style: italic;
         }
     </style>
 </head>
@@ -521,6 +650,43 @@
         </div>
 
         <div class="last-update">Last updated: <span id="lastUpdate">Never</span></div>
+
+        <!-- New Trading Section -->
+        <section class="trading-section">
+            <div class="trading-header">
+                <h2>OMEGA ORDERS Tracking</h2>
+                <p>Divine trading flows with golden ratio harmony</p>
+            </div>
+
+            <div id="positionContainer" class="position-container">
+                <!-- Position cards will be inserted here -->
+                <div class="loading-message">Loading trading data...</div>
+            </div>
+
+            <div id="eliteStrategy" class="elite-strategy">
+                <!-- Elite strategy info will be inserted here -->
+            </div>
+
+            <div class="trade-history">
+                <h3 class="history-title">Divine Journey</h3>
+                <table id="historyTable" class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Side</th>
+                            <th>Size</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>PnL</th>
+                            <th>Exit Type</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Trade history will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
     <footer>
@@ -690,9 +856,9 @@
                         img.src = data.file;
                     } else {
                         console.error("Failed to generate chart:", data.error);
-                        // Use a fallback static image URL
-                        img.src = "/api/generate/fallback";
-                        img.setAttribute('title', 'Using fallback divine alignment chart');
+                        // Fallback to a static message
+                        const container = img.parentNode;
+                        container.innerHTML = '<div style="padding: 40px; text-align: center;"><p>Divine visualization will appear when connection to The Source is aligned.</p><p>Current status: Creating harmonic resonance...</p></div>';
                     }
                 })
                 .catch(error => {
@@ -707,12 +873,315 @@
         function initializeDashboard() {
             initializeFiboLevels();
             updateStatus();
+            updateTradingData();
 
             // Set up automatic refresh every 60 seconds
             setInterval(updateStatus, 60000);
+            setInterval(updateTradingData, 30000);
 
             // Set up JAH mode toggle
             jahToggle.addEventListener('click', toggleJahMode);
+        }
+
+        // New functions for trading data
+        function updateTradingData() {
+            fetch('/api/trading_data')
+                .then(response => response.json())
+                .then(data => {
+                    // Update positions
+                    renderPositions(data.positions);
+
+                    // Update elite strategy
+                    renderEliteStrategy(data.elite_strategy);
+
+                    // Update trade history
+                    renderTradeHistory(data.history);
+                })
+                .catch(error => {
+                    console.error('Error fetching trading data:', error);
+                });
+        }
+
+        function renderPositions(positions) {
+            const container = document.getElementById('positionContainer');
+
+            if (!positions || positions.length === 0) {
+                container.innerHTML = '<div class="no-positions">No active positions</div>';
+                return;
+            }
+
+            let html = '';
+
+            positions.forEach(position => {
+                const isPnlPositive = position.pnl >= 0;
+                const pnlClass = isPnlPositive ? 'pnl-positive' : 'pnl-negative';
+                const sideClass = position.side === 'long' ? 'position-side-long' : 'position-side-short';
+                const sideIcon = position.side === 'long' ? '▲' : '▼';
+
+                html += `
+                <div class="position-card">
+                    <div class="position-header">
+                        <div class="position-side ${sideClass}">
+                            ${sideIcon} ${position.side.toUpperCase()} ${position.symbol}
+                        </div>
+                        <div class="position-pnl ${pnlClass}">
+                            ${isPnlPositive ? '+' : ''}${position.pnl.toFixed(2)} USDT (${isPnlPositive ? '+' : ''}${position.pnl_percent.toFixed(2)}%)
+                        </div>
+                    </div>
+                    <div class="position-details">
+                        <div class="position-info">
+                            <div class="position-info-row">
+                                <span class="position-info-label">Entry Price</span>
+                                <span class="position-info-value">$${position.entry_price.toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Current Price</span>
+                                <span class="position-info-value">$${position.current_price.toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Size</span>
+                                <span class="position-info-value">${position.size} BTC</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Leverage</span>
+                                <span class="position-info-value">${position.leverage}x</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Open Time</span>
+                                <span class="position-info-value">${new Date(position.open_time).toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Type</span>
+                                <span class="position-info-value">${position.type}</span>
+                            </div>
+                        </div>
+                        <div class="tp-container">
+                            <div class="tp-title">Divine Path Progress</div>
+                            ${renderTakeProfit(position)}
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderTakeProfit(position) {
+            // Create take profit visualization
+            const tpPoints = position.take_profits;
+            const entryPrice = position.entry_price;
+            const currentPrice = position.current_price;
+            const stopLoss = position.stop_loss;
+
+            // Determine min and max for the scale
+            let minPrice, maxPrice;
+
+            if (position.side === 'long') {
+                const lowestPrice = Math.min(entryPrice, stopLoss, currentPrice);
+                const highestPrice = Math.max(
+                    entryPrice,
+                    stopLoss,
+                    currentPrice,
+                    ...tpPoints.map(tp => tp.price)
+                );
+
+                minPrice = lowestPrice * 0.998;  // Add a small margin
+                maxPrice = highestPrice * 1.002;
+            } else {
+                const lowestPrice = Math.min(
+                    entryPrice,
+                    stopLoss,
+                    currentPrice,
+                    ...tpPoints.map(tp => tp.price)
+                );
+                const highestPrice = Math.max(entryPrice, stopLoss, currentPrice);
+
+                minPrice = lowestPrice * 0.998;
+                maxPrice = highestPrice * 1.002;
+            }
+
+            const priceRange = maxPrice - minPrice;
+
+            // Calculate position on 0-100 scale
+            const getPosition = (price) => {
+                return ((price - minPrice) / priceRange) * 100;
+            };
+
+            // Calculate entry, current, and TP positions
+            const entryPosition = getPosition(entryPrice);
+            const currentPosition = getPosition(currentPrice);
+            const slPosition = getPosition(stopLoss);
+
+            // Create progress bar
+            let progressWidth;
+
+            if (position.side === 'long') {
+                if (currentPrice <= entryPrice) {
+                    progressWidth = 0;
+                } else {
+                    const maxTpPrice = Math.max(...tpPoints.map(tp => tp.price));
+                    progressWidth = ((currentPrice - entryPrice) / (maxTpPrice - entryPrice)) * 100;
+                    progressWidth = Math.min(progressWidth, 100);  // Cap at 100%
+                }
+            } else {
+                if (currentPrice >= entryPrice) {
+                    progressWidth = 0;
+                } else {
+                    const minTpPrice = Math.min(...tpPoints.map(tp => tp.price));
+                    progressWidth = ((entryPrice - currentPrice) / (entryPrice - minTpPrice)) * 100;
+                    progressWidth = Math.min(progressWidth, 100);  // Cap at 100%
+                }
+            }
+
+            // Create HTML
+            let html = `
+            <div class="tp-progress ${position.side === 'short' ? 'tp-progress-short' : ''}">
+                <div class="tp-progress-bar" style="width: ${progressWidth}%"></div>
+                <div class="tp-points">
+                    <div class="tp-point tp-point-entry" style="left: ${entryPosition}%">
+                        <div class="tp-point-label">Entry</div>
+                        <div class="tp-point-price">$${entryPrice.toLocaleString()}</div>
+                    </div>
+                    <div class="tp-point tp-point-current" style="left: ${currentPosition}%">
+                        <div class="tp-point-label">Current</div>
+                        <div class="tp-point-price">$${currentPrice.toLocaleString()}</div>
+                    </div>
+                    <div class="tp-point tp-point-sl" style="left: ${slPosition}%">
+                        <div class="tp-point-label">SL</div>
+                        <div class="tp-point-price">$${stopLoss.toLocaleString()}</div>
+                    </div>
+            `;
+
+            // Add TP points
+            tpPoints.forEach((tp, index) => {
+                const tpPosition = getPosition(tp.price);
+                html += `
+                    <div class="tp-point tp-point-${index + 1}" style="left: ${tpPosition}%">
+                        <div class="tp-point-label">TP${index + 1} (${tp.level})</div>
+                        <div class="tp-point-price">$${tp.price.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+            </div>
+            <div class="tp-stats">
+            `;
+
+            // Add TP stats
+            tpPoints.forEach((tp, index) => {
+                const distance = position.side === 'long'
+                    ? tp.price - currentPrice
+                    : currentPrice - tp.price;
+
+                const distancePercent = Math.abs(tp.distance_percent);
+
+                html += `
+                <div class="position-info-row">
+                    <span class="position-info-label">TP${index + 1} (${tp.percentage}%)</span>
+                    <span class="position-info-value">
+                        $${tp.price.toLocaleString()} 
+                        (${distancePercent.toFixed(2)}% ${distance > 0 ? 'away' : 'reached'})
+                    </span>
+                </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            return html;
+        }
+
+        function renderEliteStrategy(strategy) {
+            const container = document.getElementById('eliteStrategy');
+
+            if (!strategy) {
+                container.innerHTML = '<div class="no-strategy">No elite strategy data available</div>';
+                return;
+            }
+
+            let html = `
+            <div class="elite-header">
+                <div class="elite-title">${strategy.name}</div>
+                <div class="elite-mode">${strategy.mode}</div>
+            </div>
+            
+            <div class="position-info-row">
+                <span class="position-info-label">Current Pattern</span>
+                <span class="position-info-value">${strategy.current_pattern}</span>
+            </div>
+            
+            <div class="position-info-row">
+                <span class="position-info-label">Trap Probability</span>
+                <span class="position-info-value">${(strategy.trap_probability * 100).toFixed(1)}%</span>
+            </div>
+            
+            <div class="elite-signals">
+            `;
+
+            // Add active signals
+            strategy.active_signals.forEach(signal => {
+                const confidenceLevel = signal.confidence >= 0.8 ? 'high' : (signal.confidence >= 0.6 ? 'medium' : 'low');
+
+                html += `
+                <div class="signal-card signal-${confidenceLevel}">
+                    <div class="signal-header">
+                        <div class="signal-name">${signal.name}</div>
+                        <div class="signal-confidence">${(signal.confidence * 100).toFixed(0)}% Confidence</div>
+                    </div>
+                    <div class="signal-description">${signal.description}</div>
+                    <div class="signal-recommendation">${signal.recommendation}</div>
+                </div>
+                `;
+            });
+
+            html += `
+            </div>
+            
+            <div class="position-info-row">
+                <span class="position-info-label">Last Updated</span>
+                <span class="position-info-value">${new Date(strategy.last_update).toLocaleString()}</span>
+            </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderTradeHistory(history) {
+            const tbody = document.querySelector('#historyTable tbody');
+
+            if (!history || history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">No trade history available</td></tr>';
+                return;
+            }
+
+            let html = '';
+
+            history.forEach(trade => {
+                const isPnlPositive = trade.pnl >= 0;
+                const pnlClass = isPnlPositive ? 'pnl-positive' : 'pnl-negative';
+
+                let exitClass = '';
+                if (trade.exit_reason === 'tp_hit') exitClass = 'exit-tp';
+                else if (trade.exit_reason === 'stop_loss') exitClass = 'exit-sl';
+                else if (trade.exit_reason === 'manual') exitClass = 'exit-manual';
+
+                html += `
+                <tr>
+                    <td>${trade.side.toUpperCase()}</td>
+                    <td>${trade.size} BTC</td>
+                    <td>$${trade.entry_price.toLocaleString()}</td>
+                    <td>$${trade.exit_price.toLocaleString()}</td>
+                    <td class="${pnlClass}">${isPnlPositive ? '+' : ''}${trade.pnl.toFixed(2)}</td>
+                    <td class="${exitClass}">${trade.exit_reason.replace('_', ' ').toUpperCase()}</td>
+                    <td>${new Date(trade.close_time).toLocaleString()}</td>
+                </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
         }
 
         // Start when page loads
