@@ -523,3 +523,230 @@
         // ...
     }
 </script>
+
+<div class="trap-analysis-content">
+    <h3>Market Maker Trap Analysis</h3>
+
+    <div class="trap-status-wrapper">
+        <div class="trap-status" id="trap-status">
+            <div class="trap-status-indicator no-trap">
+                <span>NO ACTIVE TRAPS</span>
+            </div>
+            <div class="trap-status-details">
+                <p>The market currently does not show signs of an active trap.</p>
+                <p class="trap-advice">Feel free to trade with normal risk management.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="trap-metrics">
+        <div class="trap-metric-row">
+            <div class="trap-metric">
+                <div class="trap-metric-label">Bull Trap Probability</div>
+                <div class="trap-metric-value" id="bull-trap-probability">0%</div>
+                <div class="trap-meter">
+                    <div class="trap-meter-fill bull" id="bull-trap-meter" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="trap-metric">
+                <div class="trap-metric-label">Bear Trap Probability</div>
+                <div class="trap-metric-value" id="bear-trap-probability">0%</div>
+                <div class="trap-meter">
+                    <div class="trap-meter-fill bear" id="bear-trap-meter" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="trap-history">
+        <h4>Recent Trap Detections</h4>
+        <div class="trap-history-list" id="trap-history">
+            <div class="trap-history-item">
+                <div class="trap-history-indicator">
+                    <span>No recent traps detected</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="trap-advice-section">
+        <h4>Trading Advice</h4>
+        <div class="trap-advice-content" id="trap-advice">
+            <p>The market appears stable without significant trap signals. Follow your regular trading strategy with
+                standard risk management.</p>
+        </div>
+    </div>
+
+    <script>
+        // Function to update trap analysis data
+        function updateTrapAnalysis() {
+            console.log("Updating trap analysis data");
+
+            // Fetch trap data from Redis
+            fetch('/api/redis-key?key=current_trap_probability')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.value) {
+                        try {
+                            // Parse the trap data
+                            const trapData = JSON.parse(data.value);
+
+                            // Update bull trap probability
+                            const bullProb = trapData.bull_trap_probability || 0;
+                            document.getElementById('bull-trap-probability').textContent =
+                                `${Math.round(bullProb * 100)}%`;
+                            document.getElementById('bull-trap-meter').style.width =
+                                `${Math.round(bullProb * 100)}%`;
+
+                            // Update bear trap probability
+                            const bearProb = trapData.bear_trap_probability || 0;
+                            document.getElementById('bear-trap-probability').textContent =
+                                `${Math.round(bearProb * 100)}%`;
+                            document.getElementById('bear-trap-meter').style.width =
+                                `${Math.round(bearProb * 100)}%`;
+
+                            // Update trap status
+                            const trapStatus = document.getElementById('trap-status');
+                            const trapIndicator = trapStatus.querySelector('.trap-status-indicator');
+                            const trapDetails = trapStatus.querySelector('.trap-status-details');
+
+                            if (bullProb > 0.4 || bearProb > 0.4) {
+                                // High trap probability
+                                trapIndicator.className = 'trap-status-indicator active-trap';
+
+                                if (bullProb > bearProb) {
+                                    trapIndicator.innerHTML = '<span>⚠️ BULL TRAP DETECTED</span>';
+                                    trapDetails.innerHTML = `
+                                        <p>A potential bull trap is detected with ${Math.round(bullProb * 100)}% confidence.</p>
+                                        <p class="trap-advice">Consider maintaining short positions or waiting for confirmation before entering longs.</p>
+                                    `;
+                                } else {
+                                    trapIndicator.innerHTML = '<span>⚠️ BEAR TRAP DETECTED</span>';
+                                    trapDetails.innerHTML = `
+                                        <p>A potential bear trap is detected with ${Math.round(bearProb * 100)}% confidence.</p>
+                                        <p class="trap-advice">Consider maintaining long positions or waiting for confirmation before entering shorts.</p>
+                                    `;
+                                }
+                            } else if (bullProb > 0.2 || bearProb > 0.2) {
+                                // Moderate trap probability
+                                trapIndicator.className = 'trap-status-indicator potential-trap';
+
+                                if (bullProb > bearProb) {
+                                    trapIndicator.innerHTML = '<span>POTENTIAL BULL TRAP</span>';
+                                    trapDetails.innerHTML = `
+                                        <p>Signs of a potential bull trap with ${Math.round(bullProb * 100)}% confidence.</p>
+                                        <p class="trap-advice">Exercise caution with long positions, consider reduced position sizes.</p>
+                                    `;
+                                } else {
+                                    trapIndicator.innerHTML = '<span>POTENTIAL BEAR TRAP</span>';
+                                    trapDetails.innerHTML = `
+                                        <p>Signs of a potential bear trap with ${Math.round(bearProb * 100)}% confidence.</p>
+                                        <p class="trap-advice">Exercise caution with short positions, consider reduced position sizes.</p>
+                                    `;
+                                }
+                            } else {
+                                // Low trap probability
+                                trapIndicator.className = 'trap-status-indicator no-trap';
+                                trapIndicator.innerHTML = '<span>NO ACTIVE TRAPS</span>';
+                                trapDetails.innerHTML = `
+                                    <p>The market currently does not show signs of an active trap.</p>
+                                    <p class="trap-advice">Feel free to trade with normal risk management.</p>
+                                `;
+                            }
+
+                            // Update trading advice
+                            const trapAdvice = document.getElementById('trap-advice');
+                            if (bullProb > 0.5) {
+                                trapAdvice.innerHTML = `
+                                    <p><strong>High bull trap probability (${Math.round(bullProb * 100)}%):</strong></p>
+                                    <ul>
+                                        <li>Avoid entering new long positions</li>
+                                        <li>Consider taking profits on existing longs</li>
+                                        <li>Wait for price confirmation or trap resolution before new entries</li>
+                                        <li>Short positions may be viable with proper stop loss management</li>
+                                    </ul>
+                                `;
+                            } else if (bearProb > 0.5) {
+                                trapAdvice.innerHTML = `
+                                    <p><strong>High bear trap probability (${Math.round(bearProb * 100)}%):</strong></p>
+                                    <ul>
+                                        <li>Avoid entering new short positions</li>
+                                        <li>Consider taking profits on existing shorts</li>
+                                        <li>Wait for price confirmation or trap resolution before new entries</li>
+                                        <li>Long positions may be viable with proper stop loss management</li>
+                                    </ul>
+                                `;
+                            } else if (bullProb > 0.3 || bearProb > 0.3) {
+                                trapAdvice.innerHTML = `
+                                    <p><strong>Moderate trap probability detected:</strong></p>
+                                    <ul>
+                                        <li>Consider reduced position sizes (50-75% of normal)</li>
+                                        <li>Use tighter stop losses than usual</li>
+                                        <li>Look for additional confirmation signals before entries</li>
+                                        <li>Be prepared for potential rapid price reversals</li>
+                                    </ul>
+                                `;
+                            } else {
+                                trapAdvice.innerHTML = `
+                                    <p>The market appears stable without significant trap signals. Follow your regular trading strategy with standard risk management.</p>
+                                `;
+                            }
+
+                            // Update trap history
+                            // (This would need real historical data from backend)
+                            const trapHistory = document.getElementById('trap-history');
+                            if (trapData.history && trapData.history.length > 0) {
+                                let historyHTML = '';
+                                trapData.history.forEach(item => {
+                                    const trapType = item.type || (item.bull_probability > item.bear_probability ? 'Bull Trap' : 'Bear Trap');
+                                    const confidence = item.confidence || Math.max(item.bull_probability, item.bear_probability);
+                                    const timestamp = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Recent';
+
+                                    historyHTML += `
+                                        <div class="trap-history-item">
+                                            <div class="trap-history-indicator ${trapType.toLowerCase().includes('bull') ? 'bull' : 'bear'}">
+                                                <span>${trapType}</span>
+                                            </div>
+                                            <div class="trap-history-details">
+                                                <span>${timestamp}</span>
+                                                <span>${Math.round(confidence * 100)}% confidence</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                trapHistory.innerHTML = historyHTML;
+                            } else {
+                                trapHistory.innerHTML = `
+                                    <div class="trap-history-item">
+                                        <div class="trap-history-indicator">
+                                            <span>No recent traps detected</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        } catch (error) {
+                            console.error("Error parsing trap data:", error);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching trap data:", error);
+                });
+        }
+
+        // Update trap analysis when the panel is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            updateTrapAnalysis();
+
+            // Set up automatic refresh
+            setInterval(updateTrapAnalysis, 30000); // Update every 30 seconds
+        });
+
+        // If this script is loaded dynamically (not on initial page load)
+        // we need to run the update immediately
+        if (document.readyState === 'complete') {
+            updateTrapAnalysis();
+        }
+    </script>
+</div>

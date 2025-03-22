@@ -703,35 +703,51 @@ class ReggaeDashboardServer:
                     except json.JSONDecodeError:
                         pass
                 
-                # Generate fallback trap data if not available in Redis
-                trap_types = ["bull_trap", "bear_trap", "liquidity_grab", "stop_hunt"]
-                severities = ["low", "medium", "high"]
-                
-                fallback_traps = []
-                for _ in range(5):  # Generate 5 sample traps
-                    trap_timestamp = datetime.now(timezone.utc) - timedelta(hours=random.randint(1, 24))
-                    sample_trap = {
-                        "type": random.choice(trap_types),
-                        "description": f"Detected potential trap pattern",
-                        "timestamp": trap_timestamp.isoformat(),
-                        "probability": random.uniform(0.5, 0.95),
-                        "severity": random.choice(severities)
-                    }
-                    fallback_traps.append(sample_trap)
-                
-                return fallback_traps
+                # Generate fallback data if not available
+                return []
                 
             except Exception as e:
-                logger.error(f"Error getting trap data: {e}")
-                return [
-                    {
-                        "type": "error",
-                        "description": f"Error retrieving trap data: {str(e)}",
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "probability": 0.0,
-                        "severity": "low"
-                    }
-                ]
+                logger.error(f"Error getting trap detections: {e}")
+                return []
+                
+        @self.app.get("/api/trader-status")
+        async def get_trader_status():
+            """Get trap-aware dual trader status information."""
+            try:
+                # Create Redis client
+                r = redis.Redis(
+                    host="localhost",
+                    port=6379,
+                    decode_responses=True
+                )
+                
+                # Try to get trader status from Redis
+                trader_status_json = r.get("trader_status")
+                if trader_status_json:
+                    try:
+                        trader_status = json.loads(trader_status_json)
+                        return trader_status
+                    except json.JSONDecodeError:
+                        logger.error("Failed to parse trader_status JSON from Redis")
+                
+                # Return default structure if not available in Redis
+                default_status = {
+                    "status": "unknown",
+                    "long_trader_status": "inactive",
+                    "short_trader_status": "inactive",
+                    "combined_pnl": 0,
+                    "last_action": "No recent actions",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                return default_status
+                
+            except Exception as e:
+                logger.error(f"Error getting trader status: {e}")
+                return {
+                    "status": "error",
+                    "error": str(e),
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
         
         @self.app.get("/api/prices")
         async def get_prices():
