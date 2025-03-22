@@ -987,23 +987,110 @@ class ReggaeDashboardServer:
                 return {"error": "Redis connection not available"}
                 
             try:
-                # This would normally call an external script or module to generate the visualization
-                # For now, we'll just return a mock response
+                import subprocess
+                import os
+                import sys
+                from pathlib import Path
                 
-                # In a real implementation, this would:
-                # 1. Get position data from Redis
-                # 2. Generate a 3D visualization using matplotlib or another library
-                # 3. Save the visualization to a file
-                # 4. Return the file path or base64 encoded image
+                # Get the position data from Redis
+                long_position = await self._get_redis_data('long_position')
+                short_position = await self._get_redis_data('short_position')
                 
+                # Determine which position to use (prefer long if both exist)
+                position_data = None
+                position_type = "unknown"
+                if long_position and "entry_price" in long_position:
+                    position_data = long_position
+                    position_type = "long"
+                elif short_position and "entry_price" in short_position:
+                    position_data = short_position
+                    position_type = "short"
+                
+                # Define paths
+                script_path = Path("scripts/position_flow_tracker.py").absolute()
+                output_dir = Path("omega_ai/visualizer/frontend/reggae-dashboard/static/images").absolute()
+                os.makedirs(output_dir, exist_ok=True)
+                
+                # Generate a timestamp for the output file
+                import time
+                timestamp = int(time.time())
+                output_file = output_dir / f"flow_3d_{timestamp}.png"
+                
+                # Prepare the command
+                if position_data:
+                    # Write position data to a temporary file
+                    import tempfile
+                    import json
+                    
+                    with tempfile.NamedTemporaryFile(suffix='.json', delete=False, mode='w') as tmp:
+                        json.dump(position_data, tmp)
+                        position_file = tmp.name
+                    
+                    # Run the position flow tracker script with the position data
+                    cmd = [
+                        sys.executable, 
+                        str(script_path),
+                        "--use-simulated" if not position_data else "",
+                        "--3d",
+                        "--hours", str(hours),
+                        "--position-file", position_file
+                    ]
+                    
+                    # Filter out empty strings
+                    cmd = [arg for arg in cmd if arg]
+                    
+                    logger.info(f"{CYAN}Running flow visualization command: {' '.join(cmd)}{RESET}")
+                    
+                    # Run the process
+                    process = subprocess.run(cmd, capture_output=True, text=True)
+                    
+                    # Clean up the temporary file
+                    os.unlink(position_file)
+                    
+                    if process.returncode != 0:
+                        logger.error(f"{RED}Error generating 3D flow: {process.stderr}{RESET}")
+                        return {
+                            "status": "error",
+                            "message": "Error generating 3D flow visualization",
+                            "details": process.stderr,
+                            "fallback_image_url": "/static/images/3d_flow_mock.png"
+                        }
+                    
+                    # The script should have saved the visualization to a file
+                    # Extract the filename from the output
+                    import re
+                    match = re.search(r"saved as (\S+\.png)", process.stdout)
+                    if match:
+                        output_file = match.group(1)
+                        
+                        # Move the file to the static directory if it's not already there
+                        if not output_file.startswith(str(output_dir)):
+                            import shutil
+                            target_file = output_dir / Path(output_file).name
+                            shutil.move(output_file, target_file)
+                            output_file = target_file
+                            
+                    return {
+                        "status": "success",
+                        "message": "3D flow visualization generated",
+                        "hours": hours,
+                        "position_type": position_type,
+                        "output": process.stdout,
+                        "image_url": f"/static/images/{Path(output_file).name}"
+                    }
+                
+                # Fall back to mock data if no position is available
                 return {
                     "status": "success",
-                    "message": "3D flow visualization generated",
+                    "message": "3D flow visualization generated with mock data",
                     "hours": hours,
-                    "image_url": "/static/images/3d_flow_mock.png"  # Mock image URL
+                    "image_url": "/static/images/3d_flow_mock.png"
                 }
+                    
             except Exception as e:
-                logger.error(f"{RED}Error generating 3D flow: {e}{RESET}")
+                logger.error(f"{RED}Error generating 3D flow: {str(e)}{RESET}")
+                import traceback
+                logger.error(f"{RED}{traceback.format_exc()}{RESET}")
                 return {"error": str(e)}
                 
         @self.app.get("/api/flow/2d")
@@ -1013,17 +1100,110 @@ class ReggaeDashboardServer:
                 return {"error": "Redis connection not available"}
                 
             try:
-                # This would normally call an external script or module to generate the visualization
-                # For now, we'll just return a mock response
+                import subprocess
+                import os
+                import sys
+                from pathlib import Path
                 
+                # Get the position data from Redis
+                long_position = await self._get_redis_data('long_position')
+                short_position = await self._get_redis_data('short_position')
+                
+                # Determine which position to use (prefer long if both exist)
+                position_data = None
+                position_type = "unknown"
+                if long_position and "entry_price" in long_position:
+                    position_data = long_position
+                    position_type = "long"
+                elif short_position and "entry_price" in short_position:
+                    position_data = short_position
+                    position_type = "short"
+                
+                # Define paths
+                script_path = Path("scripts/position_flow_tracker.py").absolute()
+                output_dir = Path("omega_ai/visualizer/frontend/reggae-dashboard/static/images").absolute()
+                os.makedirs(output_dir, exist_ok=True)
+                
+                # Generate a timestamp for the output file
+                import time
+                timestamp = int(time.time())
+                output_file = output_dir / f"flow_2d_{timestamp}.png"
+                
+                # Prepare the command
+                if position_data:
+                    # Write position data to a temporary file
+                    import tempfile
+                    import json
+                    
+                    with tempfile.NamedTemporaryFile(suffix='.json', delete=False, mode='w') as tmp:
+                        json.dump(position_data, tmp)
+                        position_file = tmp.name
+                    
+                    # Run the position flow tracker script with the position data
+                    cmd = [
+                        sys.executable, 
+                        str(script_path),
+                        "--use-simulated" if not position_data else "",
+                        "--2d",  # Use 2D mode
+                        "--hours", str(hours),
+                        "--position-file", position_file
+                    ]
+                    
+                    # Filter out empty strings
+                    cmd = [arg for arg in cmd if arg]
+                    
+                    logger.info(f"{CYAN}Running flow visualization command: {' '.join(cmd)}{RESET}")
+                    
+                    # Run the process
+                    process = subprocess.run(cmd, capture_output=True, text=True)
+                    
+                    # Clean up the temporary file
+                    os.unlink(position_file)
+                    
+                    if process.returncode != 0:
+                        logger.error(f"{RED}Error generating 2D flow: {process.stderr}{RESET}")
+                        return {
+                            "status": "error",
+                            "message": "Error generating 2D flow visualization",
+                            "details": process.stderr,
+                            "fallback_image_url": "/static/images/2d_flow_mock.png"
+                        }
+                    
+                    # The script should have saved the visualization to a file
+                    # Extract the filename from the output
+                    import re
+                    match = re.search(r"saved as (\S+\.png)", process.stdout)
+                    if match:
+                        output_file = match.group(1)
+                        
+                        # Move the file to the static directory if it's not already there
+                        if not output_file.startswith(str(output_dir)):
+                            import shutil
+                            target_file = output_dir / Path(output_file).name
+                            shutil.move(output_file, target_file)
+                            output_file = target_file
+                            
+                    return {
+                        "status": "success",
+                        "message": "2D flow visualization generated",
+                        "hours": hours,
+                        "position_type": position_type,
+                        "output": process.stdout,
+                        "image_url": f"/static/images/{Path(output_file).name}"
+                    }
+                
+                # Fall back to mock data if no position is available
                 return {
                     "status": "success",
-                    "message": "2D flow chart generated",
+                    "message": "2D flow visualization generated with mock data",
                     "hours": hours,
-                    "image_url": "/static/images/2d_flow_mock.png"  # Mock image URL
+                    "image_url": "/static/images/2d_flow_mock.png"
                 }
+                    
             except Exception as e:
-                logger.error(f"{RED}Error generating 2D flow: {e}{RESET}")
+                logger.error(f"{RED}Error generating 2D flow: {str(e)}{RESET}")
+                import traceback
+                logger.error(f"{RED}{traceback.format_exc()}{RESET}")
                 return {"error": str(e)}
         
         @self.app.get("/api/elite-exits")
@@ -1033,10 +1213,29 @@ class ReggaeDashboardServer:
                 return {"error": "Redis connection not available"}
                 
             try:
-                # In a real implementation, this would interface with the elite exit strategy
-                # module to get exit recommendations at the specified confidence level
+                # Try to get exit strategy data from Redis
+                elite_exit_keys = ['elite_exit_signals', 'elite_exit_data', 'exit_strategy_signals']
+                elite_exit_data = None
                 
-                # Mock elite exit data
+                for key in elite_exit_keys:
+                    data_json = self.redis_client.get(key)
+                    if data_json:
+                        try:
+                            exit_data = json.loads(data_json)
+                            if isinstance(exit_data, dict) and 'current_signal' in exit_data:
+                                elite_exit_data = exit_data
+                                # Add source attribution
+                                elite_exit_data["_source"] = f"redis:{key}"
+                                break
+                        except json.JSONDecodeError:
+                            pass
+                
+                # If we found real data, adjust for the requested confidence
+                if elite_exit_data:
+                    elite_exit_data["confidence_threshold"] = confidence
+                    return elite_exit_data
+                
+                # No real elite exit data found, generate mock with requested confidence
                 now = datetime.now()
                 mock_data = {
                     "current_signal": {
@@ -1071,145 +1270,71 @@ class ReggaeDashboardServer:
                             "confidence": 0.75
                         }
                     ],
-                    "confidence_threshold": confidence
+                    "confidence_threshold": confidence,
+                    "_source": "mock"
                 }
                 
                 return mock_data
             except Exception as e:
                 logger.error(f"{RED}Error fetching elite exit data: {e}{RESET}")
-                return {"error": str(e)}
+                return {"error": str(e), "status": "error"}
         
         # Helper method to get Redis data with fallback to mock data
         async def _get_redis_data(self, key):
             """Get data from Redis with fallback to mock data."""
             try:
                 # Try to get data from Redis
-                value = self.redis_client.get(key)
+                redis_key_mapping = {
+                    # Map logical keys to actual Redis keys
+                    'long_position': ['long_trader_position', 'current_long_position', 'dual_trader_long'],
+                    'short_position': ['short_trader_position', 'current_short_position', 'dual_trader_short'],
+                    'position_stats': ['trader_statistics', 'trade_stats', 'trader_performance'],
+                    'fibonacci:current_levels': ['fibonacci_levels', 'fib_levels', 'fibonacci:targets'],
+                    'mm_trap_detection': ['trap_detection', 'current_trap_probability', 'market_maker_traps'],
+                    'elite_exit_strategy': ['elite_exit_signals', 'elite_exit_data', 'exit_strategy_signals'],
+                    'trade_history': ['trade_history', 'position_history', 'closed_trades'],
+                    'dual_trader_status': ['dual_trader_status', 'trader_status', 'system_status']
+                }
                 
-                if value:
-                    # Try to parse as JSON
-                    try:
-                        return json.loads(value)
-                    except json.JSONDecodeError:
-                        # If not JSON, return raw value
-                        return value
-                        
+                # Get potential Redis keys for the requested logical key
+                redis_keys = redis_key_mapping.get(key, [key])
+                
+                # Try each potential Redis key
+                for redis_key in redis_keys:
+                    value = self.redis_client.get(redis_key)
+                    if value:
+                        # Try to parse as JSON
+                        try:
+                            data = json.loads(value)
+                            logger.info(f"{GREEN}Found data for {key} in Redis key {redis_key}{RESET}")
+                            # Add source attribution
+                            if isinstance(data, dict):
+                                data["_source"] = f"redis:{redis_key}"
+                            return data
+                        except json.JSONDecodeError:
+                            # If not JSON, check if it's numeric
+                            try:
+                                return float(value)
+                            except ValueError:
+                                # Return raw value
+                                return value
+                
+                # Not found in any potential Redis key
+                logger.warning(f"{YELLOW}No data found in Redis for key {key}, using mock data{RESET}")
+                
                 # Generate mock data if Redis key doesn't exist
-                return self._generate_mock_data(key)
+                mock_data = self._generate_mock_data(key)
+                if isinstance(mock_data, dict):
+                    mock_data["_source"] = "mock"
+                return mock_data
                 
             except Exception as e:
                 logger.error(f"{RED}Error getting Redis data for key {key}: {e}{RESET}")
-                return self._generate_mock_data(key)
-        
-        # Generate mock data for testing when Redis data is not available
-        def _generate_mock_data(self, key):
-            """Generate mock data for the given key."""
-            now = datetime.now()
-            
-            # Mock data for testing
-            mock_data = {
-                "long_position": {
-                    "entry_price": 84500,
-                    "size": 0.01,
-                    "leverage": 10,
-                    "direction": "LONG",
-                    "entry_time": (now - timedelta(hours=12)).isoformat(),
-                    "unrealized_pnl": 125.5,
-                    "take_profits": [{"percentage": 50, "price": 85500}],
-                    "stop_loss": 83000
-                },
-                "short_position": {
-                    "entry_price": 84200,
-                    "size": 0.015,
-                    "leverage": 5,
-                    "direction": "SHORT",
-                    "entry_time": (now - timedelta(hours=8)).isoformat(),
-                    "unrealized_pnl": -45.2,
-                    "take_profits": [{"percentage": 50, "price": 83200}],
-                    "stop_loss": 85700
-                },
-                "position_stats": {
-                    "win_rate": 0.68,
-                    "avg_profit": 125.75,
-                    "avg_loss": 42.30,
-                    "avg_hold_time": 3600 * 6,  # 6 hours
-                    "total_trades": 125,
-                    "profitable_trades": 85,
-                    "losing_trades": 40
-                },
-                "fibonacci:current_levels": {
-                    "direction": "LONG",
-                    "base_price": 84500,
-                    "levels": {
-                        "0.0": 84500,
-                        "0.236": 85003.2,
-                        "0.382": 85318.9,
-                        "0.5": 85565.0,
-                        "0.618": 85822.3,
-                        "0.786": 86178.5,
-                        "1.0": 86630.0,
-                        "1.618": 87845.7,
-                        "2.618": 89769.2
-                    }
-                },
-                "mm_trap_detection": {
-                    "current": {
-                        "trap_risk": 0.45,
-                        "trap_type": "bear_trap",
-                        "description": "Potential bear trap forming with high volume spike on 15m timeframe."
-                    },
-                    "history": [
-                        {
-                            "timestamp": (now - timedelta(days=1)).isoformat(),
-                            "type": "bull_trap",
-                            "probability": 0.82,
-                            "price_range": [85200, 85700]
-                        },
-                        {
-                            "timestamp": (now - timedelta(days=3)).isoformat(),
-                            "type": "stop_hunt",
-                            "probability": 0.73,
-                            "price_range": [82300, 82800]
-                        }
-                    ]
-                },
-                "elite_exit_strategy": {
-                    "current_signal": {
-                        "recommendation": "HOLD",
-                        "confidence": 0.62,
-                        "next_target": {
-                            "price": 87500,
-                            "type": "resistance"
-                        }
-                    },
-                    "metrics": {
-                        "trend_strength": 0.65,
-                        "volatility": 0.42,
-                        "price_momentum": 0.58,
-                        "volume_profile": 0.62
-                    },
-                    "history": [
-                        {
-                            "timestamp": (now - timedelta(hours=2)).isoformat(),
-                            "action": "EXIT",
-                            "position": "LONG",
-                            "price": 85200,
-                            "pnl": 450.75,
-                            "confidence": 0.82
-                        },
-                        {
-                            "timestamp": (now - timedelta(hours=8)).isoformat(),
-                            "action": "EXIT",
-                            "position": "SHORT",
-                            "price": 82100,
-                            "pnl": 215.50,
-                            "confidence": 0.75
-                        }
-                    ]
-                }
-            }
-            
-            return mock_data.get(key, {"message": f"No mock data available for key: {key}"})
+                mock_data = self._generate_mock_data(key)
+                if isinstance(mock_data, dict):
+                    mock_data["_source"] = "mock:error"
+                    mock_data["_error"] = str(e)
+                return mock_data
     
     def _get_trap_probability(self):
         """Get the current trap probability from Redis."""
@@ -1338,6 +1463,140 @@ class ReggaeDashboardServer:
             except asyncio.CancelledError:
                 pass
         logger.info("Stopped broadcast task")
+
+    # Generate mock data for testing when Redis data is not available
+    def _generate_mock_data(self, key):
+        """Generate mock data for the given key."""
+        now = datetime.now()
+        
+        # Mock data for testing
+        mock_data = {
+            "long_position": {
+                "entry_price": 84500,
+                "size": 0.01,
+                "leverage": 10,
+                "direction": "LONG",
+                "entry_time": (now - timedelta(hours=12)).isoformat(),
+                "unrealized_pnl": 125.5,
+                "take_profits": [{"percentage": 50, "price": 85500}],
+                "stop_loss": 83000
+            },
+            "short_position": {
+                "entry_price": 84200,
+                "size": 0.015,
+                "leverage": 5,
+                "direction": "SHORT",
+                "entry_time": (now - timedelta(hours=8)).isoformat(),
+                "unrealized_pnl": -45.2,
+                "take_profits": [{"percentage": 50, "price": 83200}],
+                "stop_loss": 85700
+            },
+            "position_stats": {
+                "win_rate": 0.68,
+                "avg_profit": 125.75,
+                "avg_loss": 42.30,
+                "avg_hold_time": 3600 * 6,  # 6 hours
+                "total_trades": 125,
+                "profitable_trades": 85,
+                "losing_trades": 40
+            },
+            "fibonacci:current_levels": {
+                "direction": "LONG",
+                "base_price": 84500,
+                "levels": {
+                    "0.0": 84500,
+                    "0.236": 85003.2,
+                    "0.382": 85318.9,
+                    "0.5": 85565.0,
+                    "0.618": 85822.3,
+                    "0.786": 86178.5,
+                    "1.0": 86630.0,
+                    "1.618": 87845.7,
+                    "2.618": 89769.2
+                }
+            },
+            "mm_trap_detection": {
+                "current": {
+                    "trap_risk": 0.45,
+                    "trap_type": "bear_trap",
+                    "description": "Potential bear trap forming with high volume spike on 15m timeframe."
+                },
+                "history": [
+                    {
+                        "timestamp": (now - timedelta(days=1)).isoformat(),
+                        "type": "bull_trap",
+                        "probability": 0.82,
+                        "price_range": [85200, 85700]
+                    },
+                    {
+                        "timestamp": (now - timedelta(days=3)).isoformat(),
+                        "type": "stop_hunt",
+                        "probability": 0.73,
+                        "price_range": [82300, 82800]
+                    }
+                ]
+            },
+            "elite_exit_strategy": {
+                "current_signal": {
+                    "recommendation": "HOLD",
+                    "confidence": 0.62,
+                    "next_target": {
+                        "price": 87500,
+                        "type": "resistance"
+                    }
+                },
+                "metrics": {
+                    "trend_strength": 0.65,
+                    "volatility": 0.42,
+                    "price_momentum": 0.58,
+                    "volume_profile": 0.62
+                },
+                "history": [
+                    {
+                        "timestamp": (now - timedelta(hours=2)).isoformat(),
+                        "action": "EXIT",
+                        "position": "LONG",
+                        "price": 85200,
+                        "pnl": 450.75,
+                        "confidence": 0.82
+                    },
+                    {
+                        "timestamp": (now - timedelta(hours=8)).isoformat(),
+                        "action": "EXIT",
+                        "position": "SHORT",
+                        "price": 82100,
+                        "pnl": 215.50,
+                        "confidence": 0.75
+                    }
+                ]
+            },
+            "trade_history": [
+                {
+                    "timestamp": (now - timedelta(days=2)).isoformat(),
+                    "type": "entry",
+                    "direction": "LONG",
+                    "price": 83500,
+                    "size": 0.01
+                },
+                {
+                    "timestamp": (now - timedelta(days=1, hours=12)).isoformat(),
+                    "type": "exit",
+                    "direction": "LONG", 
+                    "price": 84200,
+                    "size": 0.01,
+                    "pnl": 70
+                }
+            ],
+            "dual_trader_status": {
+                "long_status": "active",
+                "short_status": "active",
+                "last_action": "entry",
+                "last_action_time": (now - timedelta(hours=12)).isoformat(),
+                "total_pnl": 250.5
+            }
+        }
+        
+        return mock_data.get(key, {"message": f"No mock data available for key: {key}"})
 
 if __name__ == "__main__":
     # Create dashboard server instance
