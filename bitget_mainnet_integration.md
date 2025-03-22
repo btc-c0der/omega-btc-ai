@@ -18,14 +18,20 @@
 
 ## 🧠 Understanding UMCBL - Never Forget This
 
+### The Golden Ratio of BitGet Futures 🌀
+
 ```
-U M C B L
-│ │ │ │ └── Live (Mainnet)
-│ │ │ └──── Bitget
-│ │ └────── Contract
-│ └──────── Margined
-└────────── USDT
+U M C B L         │ Level 1 (1)
+│ │ │ │ └── Live │ Level 2 (1)
+│ │ │ └──── Bitget    │ Level 3 (2)
+│ │ └────── Contract       │ Level 4 (3)
+│ └──────── Margined            │ Level 5 (5)
+└────────── USDT                     │ Level 6 (8)
 ```
+
+> 🌀 **Fibonacci Insight**: Notice how each explanation line follows a natural expansion pattern,
+> similar to the Fibonacci sequence (1,1,2,3,5,8). From the single letter 'L' to the full 'USDT' explanation,
+> each line grows in perfect harmony - just like the golden ratio in trading!
 
 Think of it as: "**U**SDT-**M**argined **C**ontract on **B**itget **L**ive"
 
