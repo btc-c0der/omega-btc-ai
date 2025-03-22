@@ -35,6 +35,7 @@ from omega_ai.alerts.telegram_market_report import send_telegram_alert
 from omega_ai.trading.strategies.elite_exit_strategy import EliteExitStrategy
 from omega_ai.trading.exchanges.bitget_live_traders import BitGetLiveTraders
 from omega_ai.trading.exchanges.bitget_trader import BitGetTrader
+from omega_ai.trading.strategies.enhanced_exit_strategy import EnhancedExitStrategy
 
 # Configure logging
 logging.basicConfig(
@@ -91,7 +92,20 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
         self.last_trap_alert_time = datetime.now() - timedelta(hours=1)
         self.trap_alert_cooldown = 300  # seconds
         self.last_detected_trap = None
-        self.elite_exit_strategy = None  # Will be initialized in initialize()
+        
+        # Initialize enhanced exit strategy
+        self.exit_strategy = EnhancedExitStrategy(
+            base_risk_percent=1.0,
+            enable_scalping=True,
+            scalping_coefficient=0.3,
+            strategic_coefficient=0.6,
+            aggressive_coefficient=0.1,
+            enable_trailing_stop=True,
+            trailing_activation_threshold=1.0,
+            trailing_distance_factor=0.3,
+            min_tp_distance=0.5,
+            max_tp_levels=4
+        )
         
         # Use multipliers instead of directly modifying traders
         self.long_risk_multiplier = 1.0
@@ -355,67 +369,41 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
                 if trap_info.get('trap_detected'):
                     await self._adjust_trading_based_on_traps(trap_info)
                 
-                # Check for elite exit signals if enabled
-                if self.enable_elite_exits and self.elite_exit_strategy:
-                    # Get current positions
-                    positions = await self.long_trader.traders["strategic"].get_positions()
+                # Get current positions
+                positions = await self.long_trader.traders["strategic"].get_positions()
+                
+                if positions:
+                    # Get current price
+                    try:
+                        current_price = await self.long_trader.get_current_price(self.symbol)
+                    except Exception as e:
+                        logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
+                        current_price = None
                     
-                    if positions:
-                        # Get current price from exchange
-                        try:
-                            # Use the new get_current_price method
-                            current_price = await self.long_trader.get_current_price(self.symbol)
-                        except Exception as e:
-                            logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
-                            # Fallback method - try to get the price from Redis
-                            try:
-                                redis_client = redis.Redis(host=os.environ.get('REDIS_HOST', 'localhost'), 
-                                                         port=int(os.environ.get('REDIS_PORT', 6379)), 
-                                                         decode_responses=True)
-                                btc_price = redis_client.get('btc_price')
-                                if btc_price:
-                                    try:
-                                        # Try to parse as a plain float first
-                                        current_price = float(btc_price)
-                                    except ValueError:
-                                        # If that fails, try to parse as JSON
-                                        import json
-                                        try:
-                                            price_data = json.loads(btc_price)
-                                            if isinstance(price_data, dict) and 'price' in price_data:
-                                                current_price = float(price_data['price'])
-                                            else:
-                                                logger.error(f"{RED}Invalid price data format in Redis: {btc_price}{RESET}")
-                                                continue
-                                        except json.JSONDecodeError:
-                                            logger.error(f"{RED}Failed to parse Redis data as JSON: {btc_price}{RESET}")
-                                            continue
-                                    logger.info(f"{BLUE}Using price from Redis: {current_price}{RESET}")
-                                else:
-                                    logger.error(f"{RED}Failed to get price from Redis{RESET}")
-                                    continue
-                            except Exception as redis_error:
-                                logger.error(f"{RED}Redis error: {str(redis_error)}{RESET}")
-                                continue
-                        
-                        # Analyze exit opportunity
-                        exit_signal = await self.elite_exit_strategy.analyze_exit_opportunity(
-                            position=positions[0],
-                            current_price=current_price
-                        )
-                        
-                        if exit_signal and exit_signal.confidence >= self.elite_exit_confidence:
-                            logger.info(f"{YELLOW}Elite exit signal detected for long position{RESET}")
-                            logger.info(f"{YELLOW}Confidence: {exit_signal.confidence:.2f} | Reasons: {', '.join(exit_signal.reasons)}{RESET}")
+                    if current_price:
+                        # Check each position for exit conditions
+                        for position in positions:
+                            position_id = position.get('id', '')
                             
-                            # Execute the exit
-                            success = await self.elite_exit_strategy.execute_exit(
-                                signal=exit_signal,
-                                position=positions[0]
+                            # Update trailing stops
+                            new_stop = await self.exit_strategy.update_trailing_stop(
+                                position_id,
+                                current_price
                             )
                             
-                            if success:
-                                logger.info(f"{GREEN}Successfully executed elite exit for long position{RESET}")
+                            if new_stop and new_stop != position.get('stopLossPrice'):
+                                await self._update_stop_loss(position, new_stop)
+                            
+                            # Check exit conditions
+                            should_exit, exit_info = await self.exit_strategy.check_exit_conditions(
+                                position_id,
+                                current_price,
+                                trap_info
+                            )
+                            
+                            if should_exit and exit_info:
+                                # Execute the exit
+                                await self._execute_exit(position, exit_info)
                 
                 # Run the trader
                 await self.long_trader.start_trading()
@@ -426,7 +414,7 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
             except Exception as e:
                 logger.error(f"{RED}Error in long trader: {str(e)}{RESET}")
                 await asyncio.sleep(5)
-                
+
     async def _run_short_trader(self) -> None:
         """Run the short position trader with trap awareness."""
         if not self.short_trader:
@@ -445,67 +433,41 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
                 if trap_info.get('trap_detected'):
                     await self._adjust_trading_based_on_traps(trap_info)
                 
-                # Check for elite exit signals if enabled
-                if self.enable_elite_exits and self.elite_exit_strategy:
-                    # Get current positions
-                    positions = await self.short_trader.traders["strategic"].get_positions()
+                # Get current positions
+                positions = await self.short_trader.traders["strategic"].get_positions()
+                
+                if positions:
+                    # Get current price
+                    try:
+                        current_price = await self.short_trader.get_current_price(self.symbol)
+                    except Exception as e:
+                        logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
+                        current_price = None
                     
-                    if positions:
-                        # Get current price from exchange
-                        try:
-                            # Use the new get_current_price method
-                            current_price = await self.short_trader.get_current_price(self.symbol)
-                        except Exception as e:
-                            logger.error(f"{RED}Error getting current price: {str(e)}{RESET}")
-                            # Fallback method - try to get the price from Redis
-                            try:
-                                redis_client = redis.Redis(host=os.environ.get('REDIS_HOST', 'localhost'), 
-                                                         port=int(os.environ.get('REDIS_PORT', 6379)), 
-                                                         decode_responses=True)
-                                btc_price = redis_client.get('btc_price')
-                                if btc_price:
-                                    try:
-                                        # Try to parse as a plain float first
-                                        current_price = float(btc_price)
-                                    except ValueError:
-                                        # If that fails, try to parse as JSON
-                                        import json
-                                        try:
-                                            price_data = json.loads(btc_price)
-                                            if isinstance(price_data, dict) and 'price' in price_data:
-                                                current_price = float(price_data['price'])
-                                            else:
-                                                logger.error(f"{RED}Invalid price data format in Redis: {btc_price}{RESET}")
-                                                continue
-                                        except json.JSONDecodeError:
-                                            logger.error(f"{RED}Failed to parse Redis data as JSON: {btc_price}{RESET}")
-                                            continue
-                                    logger.info(f"{BLUE}Using price from Redis: {current_price}{RESET}")
-                                else:
-                                    logger.error(f"{RED}Failed to get price from Redis{RESET}")
-                                    continue
-                            except Exception as redis_error:
-                                logger.error(f"{RED}Redis error: {str(redis_error)}{RESET}")
-                                continue
-                        
-                        # Analyze exit opportunity
-                        exit_signal = await self.elite_exit_strategy.analyze_exit_opportunity(
-                            position=positions[0],
-                            current_price=current_price
-                        )
-                        
-                        if exit_signal and exit_signal.confidence >= self.elite_exit_confidence:
-                            logger.info(f"{YELLOW}Elite exit signal detected for short position{RESET}")
-                            logger.info(f"{YELLOW}Confidence: {exit_signal.confidence:.2f} | Reasons: {', '.join(exit_signal.reasons)}{RESET}")
+                    if current_price:
+                        # Check each position for exit conditions
+                        for position in positions:
+                            position_id = position.get('id', '')
                             
-                            # Execute the exit
-                            success = await self.elite_exit_strategy.execute_exit(
-                                signal=exit_signal,
-                                position=positions[0]
+                            # Update trailing stops
+                            new_stop = await self.exit_strategy.update_trailing_stop(
+                                position_id,
+                                current_price
                             )
                             
-                            if success:
-                                logger.info(f"{GREEN}Successfully executed elite exit for short position{RESET}")
+                            if new_stop and new_stop != position.get('stopLossPrice'):
+                                await self._update_stop_loss(position, new_stop)
+                            
+                            # Check exit conditions
+                            should_exit, exit_info = await self.exit_strategy.check_exit_conditions(
+                                position_id,
+                                current_price,
+                                trap_info
+                            )
+                            
+                            if should_exit and exit_info:
+                                # Execute the exit
+                                await self._execute_exit(position, exit_info)
                 
                 # Run the trader
                 await self.short_trader.start_trading()
@@ -516,6 +478,73 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
             except Exception as e:
                 logger.error(f"{RED}Error in short trader: {str(e)}{RESET}")
                 await asyncio.sleep(5)
+
+    async def _update_stop_loss(self, position: Dict, new_stop: float) -> None:
+        """Update stop loss order for a position."""
+        try:
+            symbol = position.get('symbol', '')
+            stop_order_id = position.get('stopLossId')
+            
+            if stop_order_id:
+                # Modify existing stop order
+                await self.long_trader.traders["strategic"].edit_order(
+                    symbol=symbol,
+                    order_id=stop_order_id,
+                    price=new_stop
+                )
+            else:
+                # Create new stop loss order
+                direction = position.get('side', '').lower()
+                contracts = float(position.get('contracts', 0))
+                
+                opposite_side = 'sell' if direction == 'buy' else 'buy'
+                await self.long_trader.traders["strategic"].create_order(
+                    symbol=symbol,
+                    type='stop',
+                    side=opposite_side,
+                    amount=contracts,
+                    price=new_stop,
+                    params={
+                        'stopPrice': new_stop,
+                        'reduceOnly': True
+                    }
+                )
+            
+            logger.info(f"{GREEN}Updated stop loss to {new_stop} for {symbol} position{RESET}")
+            
+        except Exception as e:
+            logger.error(f"{RED}Error updating stop loss: {str(e)}{RESET}")
+
+    async def _execute_exit(self, position: Dict, exit_info: Dict) -> None:
+        """Execute a full or partial position exit."""
+        try:
+            symbol = position.get('symbol', '')
+            direction = position.get('side', '').lower()
+            contracts = float(position.get('contracts', 0))
+            
+            # Calculate size to close
+            exit_percentage = exit_info.get('percentage', 100)
+            size_to_close = contracts * (exit_percentage / 100)
+            
+            # Create market order to close
+            opposite_side = 'sell' if direction == 'buy' else 'buy'
+            await self.long_trader.traders["strategic"].create_market_order(
+                symbol=symbol,
+                side=opposite_side,
+                amount=size_to_close,
+                reduce_only=True
+            )
+            
+            # Log the exit
+            reason = exit_info.get('reason', 'unknown')
+            price = exit_info.get('price', 0)
+            logger.info(f"{GREEN}Executed {exit_percentage}% {reason} exit at {price} for {symbol} position{RESET}")
+            
+            # Process the exit in our tracking
+            await self.exit_strategy.process_partial_exit(position.get('id', ''), exit_info)
+            
+        except Exception as e:
+            logger.error(f"{RED}Error executing exit: {str(e)}{RESET}")
 
 class TrapAwareDualTradersPositionsTracker:
     """Trap-Aware Dual Traders positions tracker."""

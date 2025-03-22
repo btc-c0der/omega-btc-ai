@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from typing import (Any, Dict, List, Literal, Optional, Sequence, TypeVar,
                     Union, cast)
 from uuid import uuid4
+from enum import Enum
 
 import ccxt.async_support as ccxt_async
 import ccxt.pro as ccxt_pro
@@ -48,6 +49,15 @@ OrderSide = Union[Literal["buy", "sell"], str]
 
 T = TypeVar("T")
 
+# Order type and side enums
+class OrderType(str, Enum):
+    LIMIT = 'limit'
+    MARKET = 'market'
+    STOP = 'stop'
+
+class OrderSide(str, Enum):
+    BUY = 'buy'
+    SELL = 'sell'
 
 def to_dict_list(items: Sequence[Any]) -> List[Dict[str, Any]]:
     """Convert a sequence of objects to a list of dictionaries."""
@@ -114,6 +124,17 @@ class BitGetCCXT:
             "sell": {"open": "short", "close": "long"},
         }
 
+        # Add WebSocket-related attributes
+        self.ws_connected = False
+        self.ws_tasks = []
+        self.ws_callbacks = {
+            'ticker': [],
+            'trades': [],
+            'orderbook': [],
+            'orders': [],
+            'positions': []
+        }
+
         logger.info(
             f"{GREEN}Initialized BitGet CCXT with {'TESTNET' if use_testnet else 'MAINNET'}{RESET}"
         )
@@ -145,25 +166,130 @@ class BitGetCCXT:
             await self.exchange.load_markets()
             logger.info(f"{GREEN}Markets loaded successfully{RESET}")
 
+            # Initialize WebSocket connection if using Pro version
+            if hasattr(self, 'exchange_pro'):
+                await self._init_websocket()
+
             # Get current position mode
             try:
                 mode = await self.exchange.fetch_position_mode()
-                self.is_hedge_mode = mode.get(
-                    "hedged", False
-                )  # Default to one-way mode if can't determine
+                self.is_hedge_mode = mode.get("hedged", False)
                 logger.info(
                     f"{GREEN}Current position mode: {'hedge' if self.is_hedge_mode else 'one-way'}{RESET}"
                 )
             except Exception as e:
-                logger.warning(
-                    f"{YELLOW}Could not fetch position mode: {str(e)}{RESET}"
-                )
+                logger.warning(f"{YELLOW}Could not fetch position mode: {str(e)}{RESET}")
                 logger.warning(f"{YELLOW}Will proceed with one-way mode{RESET}")
                 self.is_hedge_mode = False
 
         except Exception as e:
             logger.error(f"{RED}Error initializing exchange: {str(e)}{RESET}")
             raise
+
+    async def _init_websocket(self):
+        """Initialize WebSocket connection."""
+        try:
+            # Create WebSocket tasks for different data streams
+            self.ws_tasks = [
+                asyncio.create_task(self._watch_ticker()),
+                asyncio.create_task(self._watch_trades()),
+                asyncio.create_task(self._watch_orderbook()),
+                asyncio.create_task(self._watch_orders()),
+                asyncio.create_task(self._watch_positions())
+            ]
+            self.ws_connected = True
+            logger.info(f"{GREEN}WebSocket streams initialized{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error initializing WebSocket: {str(e)}{RESET}")
+            self.ws_connected = False
+
+    def add_ws_callback(self, stream: str, callback: callable):
+        """Add a callback function for a specific WebSocket stream.
+        
+        Args:
+            stream: Stream type ('ticker', 'trades', 'orderbook', 'orders', 'positions')
+            callback: Async callback function to handle the data
+        """
+        if stream in self.ws_callbacks:
+            self.ws_callbacks[stream].append(callback)
+            logger.info(f"{GREEN}Added callback for {stream} stream{RESET}")
+        else:
+            logger.warning(f"{YELLOW}Invalid stream type: {stream}{RESET}")
+
+    async def _watch_ticker(self):
+        """Watch ticker updates via WebSocket."""
+        try:
+            while self.ws_connected:
+                ticker = await self.exchange_pro.watch_ticker('BTC/USDT:USDT')
+                # Execute callbacks
+                for callback in self.ws_callbacks['ticker']:
+                    try:
+                        await callback(ticker)
+                    except Exception as e:
+                        logger.error(f"{RED}Error in ticker callback: {str(e)}{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error in ticker stream: {str(e)}{RESET}")
+            self.ws_connected = False
+
+    async def _watch_trades(self):
+        """Watch trades via WebSocket."""
+        try:
+            while self.ws_connected:
+                trades = await self.exchange_pro.watch_trades('BTC/USDT:USDT')
+                # Execute callbacks
+                for callback in self.ws_callbacks['trades']:
+                    try:
+                        await callback(trades)
+                    except Exception as e:
+                        logger.error(f"{RED}Error in trades callback: {str(e)}{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error in trades stream: {str(e)}{RESET}")
+            self.ws_connected = False
+
+    async def _watch_orderbook(self):
+        """Watch orderbook updates via WebSocket."""
+        try:
+            while self.ws_connected:
+                orderbook = await self.exchange_pro.watch_order_book('BTC/USDT:USDT')
+                # Execute callbacks
+                for callback in self.ws_callbacks['orderbook']:
+                    try:
+                        await callback(orderbook)
+                    except Exception as e:
+                        logger.error(f"{RED}Error in orderbook callback: {str(e)}{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error in orderbook stream: {str(e)}{RESET}")
+            self.ws_connected = False
+
+    async def _watch_orders(self):
+        """Watch order updates via WebSocket."""
+        try:
+            while self.ws_connected:
+                orders = await self.exchange_pro.watch_orders('BTC/USDT:USDT')
+                # Execute callbacks
+                for callback in self.ws_callbacks['orders']:
+                    try:
+                        await callback(orders)
+                    except Exception as e:
+                        logger.error(f"{RED}Error in orders callback: {str(e)}{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error in orders stream: {str(e)}{RESET}")
+            self.ws_connected = False
+
+    async def _watch_positions(self):
+        """Watch position updates via WebSocket."""
+        try:
+            while self.ws_connected:
+                positions = await self.exchange_pro.watch_positions('BTC/USDT:USDT')
+                # Execute callbacks
+                for callback in self.ws_callbacks['positions']:
+                    try:
+                        await callback(positions)
+                    except Exception as e:
+                        logger.error(f"{RED}Error in positions callback: {str(e)}{RESET}")
+        except Exception as e:
+            logger.error(f"{RED}Error in positions stream: {str(e)}{RESET}")
+            self.ws_connected = False
 
     async def set_hedge_mode(self):
         """Set up hedge mode for the account."""
@@ -583,42 +709,123 @@ class BitGetCCXT:
         """
         return await self.cancel_order(order_id, symbol)
 
-    async def close_position(self, symbol: str, side: str) -> Dict[str, Any]:
-        """
-        Close a position.
-
+    async def close_position(self, symbol: str, side: OrderSide, size: float) -> dict:
+        """Close a position.
+        
         Args:
             symbol: Trading symbol
-            side: Position side ("long" or "short")
-
+            side: Order side ('buy' or 'sell')
+            size: Position size to close
+            
         Returns:
-            Order response from the exchange
+            dict: Order response
         """
         try:
-            formatted_symbol = self._format_symbol(symbol)
-            close_side = "sell" if side == "long" else "buy"
-
-            # Get current position size
-            positions = await self.fetch_positions([formatted_symbol])
-            position = next((p for p in positions if p.get("side") == side), None)
-
-            if not position or float(position.get("contracts", 0)) == 0:
-                logger.info(f"{YELLOW}No position to close{RESET}")
-                return {}
-
-            amount = abs(float(position.get("contracts", 0)))
-
-            # Place market order to close position
-            return await self.place_order(
-                symbol=formatted_symbol,
-                side=close_side,
-                amount=amount,
-                order_type="market",
-                reduce_only=True,
+            order = await self.create_market_order(
+                symbol=symbol,
+                side=side,
+                size=size,
+                reduce_only=True
             )
-
+            return order
         except Exception as e:
-            logger.error(f"{RED}Error closing position: {str(e)}{RESET}")
+            logger.error(f"Error closing position: {e}")
+            raise
+
+    async def update_take_profit(self, symbol: str, price: float, position_id: str) -> dict:
+        """Update take profit order.
+        
+        Args:
+            symbol: Trading symbol
+            price: Take profit price
+            position_id: Position ID
+            
+        Returns:
+            dict: Order response
+        """
+        try:
+            # Cancel existing TP if any
+            await self.cancel_take_profit_order(symbol, position_id)
+            
+            # Create new TP order
+            order = await self.create_order(
+                symbol=symbol,
+                type='limit',
+                side='sell',  # Will be flipped for short positions
+                amount=0.0,  # Will be filled from position
+                price=price,
+                params={
+                    'reduceOnly': True,
+                    'timeInForce': 'GTC',
+                    'stopPrice': price,
+                    'triggerType': 'market_price',
+                    'positionId': position_id
+                }
+            )
+            return order
+        except Exception as e:
+            logger.error(f"Error updating take profit: {e}")
+            raise
+
+    async def update_stop_loss(self, symbol: str, price: float, position_id: str) -> dict:
+        """Update stop loss order.
+        
+        Args:
+            symbol: Trading symbol
+            price: Stop loss price
+            position_id: Position ID
+            
+        Returns:
+            dict: Order response
+        """
+        try:
+            # Cancel existing SL if any
+            await self.cancel_stop_loss_order(symbol, position_id)
+            
+            # Create new SL order
+            order = await self.create_order(
+                symbol=symbol,
+                type='stop',
+                side='sell',  # Will be flipped for short positions
+                amount=0.0,  # Will be filled from position
+                price=price,
+                params={
+                    'reduceOnly': True,
+                    'timeInForce': 'GTC',
+                    'stopPrice': price,
+                    'triggerType': 'market_price',
+                    'positionId': position_id
+                }
+            )
+            return order
+        except Exception as e:
+            logger.error(f"Error updating stop loss: {e}")
+            raise
+
+    async def cancel_take_profit_order(self, symbol: str, position_id: str) -> None:
+        """Cancel existing take profit order."""
+        try:
+            orders = await self.exchange.fetch_open_orders(symbol)
+            for order in orders:
+                if (order.get('info', {}).get('positionId') == position_id and 
+                    order.get('type') == 'limit' and 
+                    order.get('reduceOnly')):
+                    await self.cancel_order(order['id'], symbol)
+        except Exception as e:
+            logger.error(f"Error canceling take profit order: {e}")
+            raise
+
+    async def cancel_stop_loss_order(self, symbol: str, position_id: str) -> None:
+        """Cancel existing stop loss order."""
+        try:
+            orders = await self.exchange.fetch_open_orders(symbol)
+            for order in orders:
+                if (order.get('info', {}).get('positionId') == position_id and 
+                    order.get('type') == 'stop' and 
+                    order.get('reduceOnly')):
+                    await self.cancel_order(order['id'], symbol)
+        except Exception as e:
+            logger.error(f"Error canceling stop loss order: {e}")
             raise
 
     async def cancel_order(self, order_id: str, symbol: str) -> Dict[str, Any]:
@@ -664,6 +871,16 @@ class BitGetCCXT:
     async def close(self):
         """Close the exchange connection."""
         try:
+            # Cancel all WebSocket tasks
+            if self.ws_tasks:
+                self.ws_connected = False
+                for task in self.ws_tasks:
+                    task.cancel()
+                await asyncio.gather(*self.ws_tasks, return_exceptions=True)
+                self.ws_tasks = []
+                logger.info(f"{GREEN}WebSocket tasks cancelled{RESET}")
+
+            # Close exchange connections
             await self.exchange.close()
             await self.exchange_pro.close()
             logger.info(f"{GREEN}Exchange connections closed{RESET}")
@@ -770,8 +987,8 @@ class BitGetCCXT:
     async def create_order(
         self,
         symbol: str,
-        type: OrderType,
-        side: OrderSide,
+        type: str,
+        side: str,
         amount: float,
         price: Optional[float] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -780,8 +997,8 @@ class BitGetCCXT:
 
         Args:
             symbol (str): Trading symbol
-            type (OrderType): Order type ('market', 'limit', or 'stop')
-            side (OrderSide): Order side ('buy' or 'sell')
+            type (str): Order type ('market', 'limit', or 'stop')
+            side (str): Order side ('buy' or 'sell')
             amount (float): Order amount
             price (Optional[float], optional): Order price. Required for limit orders. Defaults to None.
             params (Optional[Dict[str, Any]], optional): Additional parameters. Defaults to None.
@@ -789,15 +1006,18 @@ class BitGetCCXT:
         Returns:
             Dict[str, Any]: Order information
         """
-        order = await self.exchange.create_order(
-            symbol=symbol,
-            type=type,  # CCXT accepts string literals directly
-            side=side,  # CCXT accepts string literals directly
-            amount=amount,
-            price=price,
-            params=params or {},
-        )
-        return dict(order)
+        try:
+            return await self.exchange.create_order(
+                symbol=symbol,
+                type=type,
+                side=side,
+                amount=amount,
+                price=price,
+                params=params or {}
+            )
+        except Exception as e:
+            logger.error(f"Error creating order: {e}")
+            raise
 
     async def create_stop_order(
         self,
