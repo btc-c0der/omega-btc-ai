@@ -1560,6 +1560,142 @@
             text-align: center;
             flex: 1;
         }
+
+        /* Trap Analysis Dashboard Panel Styles */
+        #trap-analysis-panel {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .panel-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .panel-control-btn,
+        .modal-control-btn {
+            background: none;
+            border: none;
+            color: var(--yellow-color);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .panel-control-btn:hover,
+        .modal-control-btn:hover {
+            background-color: rgba(255, 215, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .trap-analysis-content {
+            min-height: 300px;
+            max-height: 500px;
+            overflow: auto;
+            position: relative;
+        }
+
+        #trap-analysis-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--yellow-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: var(--yellow-color);
+            font-size: 1rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 95%;
+            height: 95%;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: var(--yellow-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+
+        .modal-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .panel-footer {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        /* End of Trap Analysis Styles */
     </style>
 </head>
 
@@ -2122,6 +2258,54 @@
         <p>You should have received a copy of the GNU General Public License
             along with this program. If not, see <a href="https://www.gnu.org/licenses/"
                 target="_blank">https://www.gnu.org/licenses/</a></p>
+    </div>
+
+    <!-- Trap Analysis Dashboard Panel -->
+    <div class="card" id="trap-analysis-panel">
+        <h2>
+            <i class="fas fa-spider"></i> TRAP ANALYSIS DASHBOARD
+            <div class="panel-controls">
+                <button class="panel-control-btn" id="expand-trap-btn" title="Expand Panel">
+                    <i class="fas fa-expand-alt"></i>
+                </button>
+                <button class="panel-control-btn" id="fullscreen-trap-btn" title="Full Screen Mode">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </h2>
+        <div class="trap-analysis-content">
+            <div id="trap-analysis-container">
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading Trap Analysis Dashboard...</div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="refresh-button" id="refresh-trap-analysis">
+                <i class="fas fa-sync-alt"></i> Refresh Analysis
+            </button>
+        </div>
+    </div>
+
+    <!-- Trap Analysis Fullscreen Modal -->
+    <div id="trap-analysis-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-spider"></i> TRAP ANALYSIS DASHBOARD</h2>
+                <div class="modal-controls">
+                    <button class="modal-control-btn" id="minimize-trap-btn" title="Minimize Panel">
+                        <i class="fas fa-compress-alt"></i>
+                    </button>
+                    <button class="modal-control-btn" id="close-trap-btn" title="Close Panel">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" id="trap-analysis-modal-content">
+                <!-- Trap analysis will be loaded here -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -4840,6 +5024,161 @@
                 toast.remove();
             }, 3000);
         };
+
+        // Trap Analysis Dashboard Integration
+        document.addEventListener('DOMContentLoaded', function () {
+            setupTrapAnalysisDashboard();
+        });
+
+        function setupTrapAnalysisDashboard() {
+            const expandBtn = document.getElementById('expand-trap-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-trap-btn');
+            const minimizeBtn = document.getElementById('minimize-trap-btn');
+            const closeBtn = document.getElementById('close-trap-btn');
+            const trapPanel = document.getElementById('trap-analysis-panel');
+            const trapModal = document.getElementById('trap-analysis-modal');
+            const trapContainer = document.getElementById('trap-analysis-container');
+            const trapModalContent = document.getElementById('trap-analysis-modal-content');
+            const refreshBtn = document.getElementById('refresh-trap-analysis');
+
+            // Load trap analysis content
+            loadTrapAnalysisDashboard();
+
+            // Expand button - make panel larger
+            if (expandBtn) {
+                expandBtn.addEventListener('click', function () {
+                    trapPanel.classList.toggle('expanded');
+                    if (trapPanel.classList.contains('expanded')) {
+                        trapPanel.style.gridColumn = 'span 2';
+                        trapPanel.style.height = '700px';
+                        expandBtn.innerHTML = '<i class="fas fa-compress-alt"></i>';
+                        expandBtn.title = 'Collapse Panel';
+                    } else {
+                        trapPanel.style.gridColumn = '';
+                        trapPanel.style.height = '';
+                        expandBtn.innerHTML = '<i class="fas fa-expand-alt"></i>';
+                        expandBtn.title = 'Expand Panel';
+                    }
+                });
+            }
+
+            // Fullscreen button - open modal
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', function () {
+                    trapModal.classList.add('show');
+                    const content = trapContainer.innerHTML;
+                    trapModalContent.innerHTML = content;
+                    // Refresh data in fullscreen view
+                    loadTrapAnalysisDashboard(true);
+                });
+            }
+
+            // Minimize button - collapse modal
+            if (minimizeBtn) {
+                minimizeBtn.addEventListener('click', function () {
+                    trapModal.classList.remove('show');
+                });
+            }
+
+            // Close button - close modal
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    trapModal.classList.remove('show');
+                });
+            }
+
+            // Refresh button - reload trap analysis data
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function () {
+                    loadTrapAnalysisDashboard();
+                    refreshBtn.disabled = true;
+                    setTimeout(() => {
+                        refreshBtn.disabled = false;
+                    }, 3000);
+                });
+            }
+        }
+
+        function loadTrapAnalysisDashboard(isFullscreen = false) {
+            debug('TRAP_DASHBOARD', 'Loading trap analysis dashboard');
+
+            const containerElement = isFullscreen ?
+                document.getElementById('trap-analysis-modal-content') :
+                document.getElementById('trap-analysis-container');
+
+            if (!containerElement) {
+                console.error('Container element not found');
+                return;
+            }
+
+            // Show loading indicator
+            containerElement.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading Trap Analysis Dashboard...</div>
+                </div>
+            `;
+
+            // Try to fetch the trap analysis panel HTML
+            fetch('/api/trap-analysis-panel')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to load trap analysis panel: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    // Successfully loaded trap panel content
+                    containerElement.innerHTML = html;
+
+                    // Initialize any scripts from the loaded content
+                    initializeTrapAnalysisScripts(containerElement);
+
+                    debug('TRAP_DASHBOARD', 'Trap analysis dashboard loaded successfully');
+                })
+                .catch(error => {
+                    console.error('Error loading trap analysis dashboard:', error);
+
+                    // Show error message
+                    containerElement.innerHTML = `
+                        <div class="trap-error-container" style="text-align: center; padding: 20px;">
+                            <div style="font-size: 3rem; color: var(--red-color); margin-bottom: 15px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h3 style="color: var(--red-color); margin-bottom: 10px;">Failed to Load Trap Analysis</h3>
+                            <p style="color: var(--muted-color); margin-bottom: 15px;">
+                                ${error.message}
+                            </p>
+                            <div>
+                                <button class="refresh-button" onclick="loadTrapAnalysisDashboard(${isFullscreen})">
+                                    <i class="fas fa-sync-alt"></i> Try Again
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+
+        function initializeTrapAnalysisScripts(containerElement) {
+            // Find any script tags in the loaded content and execute them
+            const scripts = containerElement.querySelectorAll('script');
+
+            scripts.forEach(script => {
+                // Create a new script element
+                const newScript = document.createElement('script');
+
+                // Copy all attributes from original script
+                Array.from(script.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+
+                // Set the script content
+                newScript.textContent = script.textContent;
+
+                // Replace the original script with new one to force execution
+                script.parentNode.replaceChild(newScript, script);
+            });
+        }
     </script>
 </body>
 
