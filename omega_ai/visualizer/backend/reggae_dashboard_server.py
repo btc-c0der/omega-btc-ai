@@ -363,43 +363,89 @@ class ReggaeDashboardServer:
                     decode_responses=True
                 )
                 
-                # Try to get price data from Redis
-                price_str = r.get("btc_price")
-                current_price = 65000  # Default fallback
+                # Try to get price data from different Redis keys in priority order
+                price_keys = ['btc_price', 'last_btc_price', 'current_position']
+                current_price = None
                 
-                if price_str:
+                for key in price_keys:
                     try:
-                        current_price = float(price_str)
-                    except (ValueError, TypeError):
-                        pass
+                        price_str = r.get(key)
+                        if not price_str:
+                            continue
+                            
+                        # Handle different data formats
+                        if key == 'btc_price':
+                            # btc_price is stored as JSON with a price field
+                            data = json.loads(price_str)
+                            if 'price' in data:
+                                current_price = float(data['price'])
+                                break
+                        elif key == 'last_btc_price':
+                            # last_btc_price is stored directly as a string
+                            current_price = float(price_str)
+                            break
+                        elif key == 'current_position':
+                            # Extract from position data if available
+                            position_data = json.loads(price_str)
+                            if 'current_price' in position_data:
+                                current_price = float(position_data['current_price'])
+                                break
+                    except (ValueError, TypeError, json.JSONDecodeError) as e:
+                        logging.warning(f"Error parsing price from {key}: {e}")
+                        continue
+                
+                # Default fallback if all else fails
+                if current_price is None:
+                    current_price = 65000  # Default fallback
                 
                 # Get change data directly from Redis if available
-                change_percent = None
-                try:
-                    change_str = r.get("btc_price_change")
-                    if change_str:
-                        change_percent = float(change_str)
-                except:
-                    pass
+                change_data = r.get("btc_price_changes")
+                changes = {
+                    "short_term": -0.06,
+                    "medium_term": -0.79,
+                    "long_term": 3.76
+                }
                 
-                # Use random as fallback if no change data found
-                if change_percent is None:
-                    change_percent = random.uniform(-2.5, 2.5)
+                if change_data:
+                    try:
+                        changes = json.loads(change_data)
+                    except json.JSONDecodeError:
+                        pass
+                
+                # Get price patterns data
+                patterns_data = r.get("btc_price_patterns")
+                patterns = {
+                    "bullish": 0.16,
+                    "bearish": 0.03,
+                    "neutral": 0.49,
+                    "volatile": 0.19
+                }
+                
+                if patterns_data:
+                    try:
+                        patterns = json.loads(patterns_data)
+                    except json.JSONDecodeError:
+                        pass
+                
+                # Calculate the percentage change
+                prev_price_str = r.get("prev_btc_price")
+                if prev_price_str:
+                    try:
+                        prev_price = float(prev_price_str)
+                        if prev_price > 0:
+                            change = ((current_price - prev_price) / prev_price) * 100
+                        else:
+                            change = 0
+                    except (ValueError, TypeError):
+                        change = 0
+                else:
+                    change = 0
                 
                 return {
                     "price": current_price,
-                    "change": change_percent,
-                    "changes": {
-                        "short_term": round(random.uniform(-1.5, 1.5), 2),
-                        "medium_term": round(random.uniform(-3.0, 3.0), 2),
-                        "long_term": round(random.uniform(-5.0, 5.0), 2)
-                    },
-                    "patterns": {
-                        "bullish": round(random.random(), 2),
-                        "bearish": round(random.random(), 2),
-                        "neutral": round(random.random(), 2),
-                        "volatile": round(random.random(), 2)
-                    },
+                    "change": change,
+                    "changes": changes,
+                    "patterns": patterns,
                     "source": "Redis",
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
