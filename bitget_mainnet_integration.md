@@ -16,6 +16,39 @@
 
 > 😅 **Note:** We don't need any more disclaimers after this one. If you didn't catch the ticker format above, no amount of additional disclaimers will help!
 
+## 🧠 Understanding UMCBL - Never Forget This
+
+```
+U M C B L
+│ │ │ │ └── Live (Mainnet)
+│ │ │ └──── Bitget
+│ │ └────── Contract
+│ └──────── Margined
+└────────── USDT
+```
+
+Think of it as: "**U**SDT-**M**argined **C**ontract on **B**itget **L**ive"
+
+### Why This Matters
+
+- `UMCBL` is BitGet's unique identifier for USDT-margined perpetual futures
+- Different from other BitGet contract types:
+  - `DMCBL` = Universal margin perpetual contract
+  - `CMCBL` = USDC perpetual contract
+  - `SUMCBL` = USDT simulation (testnet) contract
+
+### Example Usage
+
+```javascript
+// ✅ Correct format
+const mainnetTicker = "BTCUSDT_UMCBL"  // Will work!
+
+// ❌ Wrong formats
+const wrong1 = "BTC-USDT-UMCBL"   // Don't use hyphens!
+const wrong2 = "BTCUSDT"          // Missing _UMCBL!
+const wrong3 = "btcusdt_umcbl"    // Wrong case!
+```
+
 ## Overview
 
 This document details the integration flow between the RASTA OMEGA TRADER panel and BitGet's mainnet exchange, specifically for BTC-USDT trading pairs.
