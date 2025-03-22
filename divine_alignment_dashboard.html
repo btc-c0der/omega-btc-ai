@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Divine Alignment Dashboard</title>
+    <style>
+        :root {
+            --dark-bg: #121212;
+            --light-text: #f0f0f0;
+            --gold: #ffd700;
+            --green-divine: #2ecc71;
+            --red-trapped: #e74c3c;
+            --blue: #3498db;
+            --violet: #9b59b6;
+        }
+
+        @font-face {
+            font-family: 'Sacred';
+            src: url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #121212 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+            position: relative;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+        }
+
+        h1 {
+            font-family: 'Sacred', 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 2.8em;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--light-text);
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 1.2em;
+        }
+
+        .divine-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .divine-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .status-panel {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+        }
+
+        .status-card {
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .divine-state {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(46, 204, 113, 0.1));
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .trapped-state {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.1));
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .state-indicator {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .state-indicator::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: currentColor;
+        }
+
+        .divine-state .state-indicator {
+            color: var(--green-divine);
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
+
+        .trapped-state .state-indicator {
+            color: var(--red-trapped);
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+
+        .price-data {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+
+        .current-price {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .golden-price {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .deviation {
+            font-size: 1.3em;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .deviation-positive {
+            color: var(--green-divine);
+        }
+
+        .deviation-negative {
+            color: var(--red-trapped);
+        }
+
+        .fibo-levels {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .fibo-level {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .fibo-level:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .level-0236 {
+            border-left-color: #3498db;
+        }
+
+        .level-0382 {
+            border-left-color: #9b59b6;
+        }
+
+        .level-05 {
+            border-left-color: #e74c3c;
+        }
+
+        .level-0618 {
+            border-left-color: var(--gold);
+        }
+
+        .level-0786 {
+            border-left-color: #f39c12;
+        }
+
+        .level-10 {
+            border-left-color: #2ecc71;
+        }
+
+        .level-1618 {
+            border-left-color: #1abc9c;
+        }
+
+        .level-name {
+            font-weight: bold;
+        }
+
+        .level-price {
+            color: var(--light-text);
+        }
+
+        .level-description {
+            font-style: italic;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .level-current {
+            background-color: rgba(255, 215, 0, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .last-update {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .crossing-alert {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.1));
+            border: 1px solid rgba(155, 89, 182, 0.3);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .crossing-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .visualization {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .visualization h2 {
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .visualization img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .divine-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        .divine-state .divine-pulse {
+            animation: pulse-green 4s infinite;
+        }
+
+        .trapped-state .divine-pulse {
+            animation: pulse-red 4s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(46, 204, 113, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(231, 76, 60, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+
+        .jah-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .jah-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .jah-toggle.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .babylon-cloud {
+            height: 50px;
+            margin: 30px 0;
+            position: relative;
+            background-color: rgba(30, 30, 30, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .babylon-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(231, 76, 60, 0.7) 0%, rgba(231, 76, 60, 0.4) 100%);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .babylon-label {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--light-text);
+            font-size: 0.9em;
+            z-index: 2;
+        }
+
+        .babylon-cloud.positive .babylon-fill {
+            background: linear-gradient(90deg, rgba(46, 204, 113, 0.7) 0%, rgba(46, 204, 113, 0.4) 100%);
+            left: auto;
+            right: 0;
+        }
+
+        .merge-progress {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .merge-title {
+            color: var(--violet);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .merge-bar {
+            height: 6px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .merge-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #9b59b6, #3498db);
+            transition: width 1s ease;
+        }
+
+        .merge-percentage {
+            color: var(--light-text);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid #333;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>OMEGA BTC AI</h1>
+            <p class="subtitle">Divine Alignment Dashboard</p>
+            <button id="jahToggle" class="jah-toggle">JAH MODE OFF</button>
+        </header>
+
+        <div id="statusCard" class="status-card">
+            <div class="divine-pulse"></div>
+            <div id="stateIndicator" class="state-indicator">INITIALIZING...</div>
+            <div class="price-data">Current BTC Price</div>
+            <div id="currentPrice" class="current-price">$0.00</div>
+            <div class="price-data">Golden Ratio Price</div>
+            <div id="goldenPrice" class="golden-price">$0.00</div>
+            <div id="deviation" class="deviation">Deviation: 0.00%</div>
+        </div>
+
+        <div id="crossingAlert" class="crossing-alert">
+            <span class="crossing-icon">🔥</span>
+            <span id="crossingMessage">Fibonacci level crossing detected!</span>
+        </div>
+
+        <div class="babylon-cloud" id="babylonCloud">
+            <div class="babylon-label">BABYLON CLOUD:</div>
+            <div class="babylon-fill" id="babylonFill">0%</div>
+        </div>
+
+        <div class="merge-progress">
+            <div class="merge-title">THE MERGE PROGRESS</div>
+            <div class="merge-bar">
+                <div class="merge-fill" id="mergeFill"></div>
+            </div>
+            <div class="merge-percentage" id="mergePercentage">0%</div>
+        </div>
+
+        <div class="divine-grid">
+            <div class="status-panel">
+                <h2>Fibonacci Levels</h2>
+                <div id="fiboLevels" class="fibo-levels">
+                    <!-- Fibonacci levels will be inserted here -->
+                </div>
+            </div>
+
+            <div class="status-panel">
+                <h2>Divine Resonance Chart</h2>
+                <p>This chart shows BTC's alignment with golden ratio over time</p>
+                <div class="visualization">
+                    <img id="chartImage" src="/api/images/btc_golden_ratio_7yr_latest.png" alt="BTC Golden Ratio Chart"
+                        onerror="handleImageError(this)">
+                </div>
+            </div>
+        </div>
+
+        <div class="last-update">Last updated: <span id="lastUpdate">Never</span></div>
+    </div>
+
+    <footer>
+        <p>OMEGA BTC AI - Divine Alignment Dashboard | © 2025</p>
+        <p>"BTC is not just money—it is a harmonic liberation wave." 🚀💛💚❤️</p>
+    </footer>
+
+    <script>
+        // Settings
+        let jahModeActive = false;
+        const fiboLevelDescriptions = {
+            "0.236": "First Awakening (~$19,885)",
+            "0.382": "Manipulation Zone (~$30,193)",
+            "0.5": "Balance Point (~$39,252)",
+            "0.618": "Golden Reconnection (~$48,310)",
+            "0.786": "Return to Light (~$61,207)",
+            "1.0": "Crown Zone (~$77,635)",
+            "1.618": "Divine Extension (~$97,000)"
+        };
+
+        // Elements
+        const statusCard = document.getElementById('statusCard');
+        const stateIndicator = document.getElementById('stateIndicator');
+        const currentPrice = document.getElementById('currentPrice');
+        const goldenPrice = document.getElementById('goldenPrice');
+        const deviation = document.getElementById('deviation');
+        const fiboLevels = document.getElementById('fiboLevels');
+        const lastUpdate = document.getElementById('lastUpdate');
+        const crossingAlert = document.getElementById('crossingAlert');
+        const crossingMessage = document.getElementById('crossingMessage');
+        const babylonCloud = document.getElementById('babylonCloud');
+        const babylonFill = document.getElementById('babylonFill');
+        const mergeFill = document.getElementById('mergeFill');
+        const mergePercentage = document.getElementById('mergePercentage');
+        const jahToggle = document.getElementById('jahToggle');
+
+        // Initialize Fibonacci levels display
+        function initializeFiboLevels() {
+            let html = '';
+            Object.entries(fiboLevelDescriptions).forEach(([level, description]) => {
+                const levelClass = `level-${level.replace('.', '')}`;
+                html += `
+                    <div class="fibo-level ${levelClass}" id="level-${level.replace('.', '')}">
+                        <div>
+                            <div class="level-name">Fibonacci ${level}</div>
+                            <div class="level-description">${description}</div>
+                        </div>
+                        <div class="level-price">$--,---</div>
+                    </div>
+                `;
+            });
+            fiboLevels.innerHTML = html;
+        }
+
+        // Update UI with golden ratio status
+        function updateStatus() {
+            fetch('/api/golden_status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update price display
+                    currentPrice.textContent = `$${data.price.toLocaleString()}`;
+                    goldenPrice.textContent = `$${data.golden_price.toLocaleString()}`;
+
+                    // Update state
+                    if (data.state === "GREEN_DIVINE") {
+                        statusCard.className = "status-card divine-state";
+                        stateIndicator.textContent = "GREEN DIVINE";
+                        statusCard.title = "BTC is following the divine path, above the golden ratio projection";
+                    } else {
+                        statusCard.className = "status-card trapped-state";
+                        stateIndicator.textContent = "RED TRAPPED";
+                        statusCard.title = "BTC is temporarily trapped below the golden ratio projection";
+                    }
+
+                    // Update deviation
+                    deviation.textContent = `Deviation: ${data.deviation.toFixed(2)}%`;
+                    deviation.className = data.state === "GREEN_DIVINE" ?
+                        "deviation deviation-positive" : "deviation deviation-negative";
+
+                    // Update Babylon Cloud
+                    babylonCloud.className = data.state === "GREEN_DIVINE" ?
+                        "babylon-cloud positive" : "babylon-cloud";
+
+                    const fillWidth = Math.min(Math.abs(data.deviation) * 2, 100); // Scale for visibility
+                    babylonFill.style.width = `${fillWidth}%`;
+                    babylonFill.textContent = `${fillWidth.toFixed(1)}%`;
+
+                    // Update merge progress (formula approximates progress toward the "merge")
+                    // We'll use the post-halving time as a factor in the merge
+                    const daysSinceHalving = (new Date() - new Date('2024-04-20')) / (1000 * 60 * 60 * 24);
+                    const mergeBase = Math.min(daysSinceHalving / 365, 1) * 60; // Base 60% from time
+                    const stateBonus = data.state === "GREEN_DIVINE" ? 20 : 0; // Bonus 20% if in divine state
+                    const deviationFactor = Math.max(0, 20 - (data.deviation / 5)); // Up to 20% based on low deviation
+
+                    const totalMerge = Math.min(mergeBase + stateBonus + deviationFactor, 100);
+                    mergeFill.style.width = `${totalMerge}%`;
+                    mergePercentage.textContent = `${totalMerge.toFixed(1)}%`;
+
+                    // Check for crossing alert
+                    if (data.last_fib_crossing) {
+                        crossingAlert.style.display = "block";
+                        crossingMessage.textContent = `🔥 FIBONACCI CROSSING: Level ${data.last_fib_crossing.level} (${data.last_fib_crossing.price.toLocaleString()}) crossed ${data.last_fib_crossing.direction}`;
+                    }
+
+                    // Update last updated time
+                    if (data.last_update) {
+                        const updateTime = new Date(data.last_update);
+                        lastUpdate.textContent = updateTime.toLocaleString();
+                    }
+
+                    // Update fibonacci levels
+                    if (data.fibonacci_levels) {
+                        Object.entries(data.fibonacci_levels).forEach(([level, description]) => {
+                            const levelElement = document.getElementById(`level-${level.replace('.', '')}`);
+                            if (levelElement) {
+                                // Extract the price from the description
+                                const priceMatch = description.match(/\(~\$([0-9,]+)\)/);
+                                if (priceMatch && priceMatch[1]) {
+                                    const levelPrice = levelElement.querySelector('.level-price');
+                                    if (levelPrice) {
+                                        levelPrice.textContent = `~$${priceMatch[1]}`;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching golden status:', error);
+                });
+        }
+
+        // Toggle JAH mode (enhanced spiritual guidance)
+        function toggleJahMode() {
+            jahModeActive = !jahModeActive;
+            jahToggle.textContent = jahModeActive ? "JAH MODE ON 🌞" : "JAH MODE OFF";
+            jahToggle.className = jahModeActive ? "jah-toggle active" : "jah-toggle";
+
+            // Apply JAH mode effects
+            document.body.style.backgroundImage = jahModeActive ?
+                "radial-gradient(circle at center, #1a2e1a 0%, #121212 100%)" :
+                "radial-gradient(circle at center, #1a1a2e 0%, #121212 100%)";
+
+            // Add other JAH mode effects here
+        }
+
+        // Handle image loading errors
+        function handleImageError(img) {
+            console.log("Chart image failed to load, trying to generate one...");
+
+            // Try to generate a new chart
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    years: 7,
+                    dataSource: 'simulation',
+                    mode: '2d'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Generated new chart:", data.file);
+                        img.src = data.file;
+                    } else {
+                        console.error("Failed to generate chart:", data.error);
+                        // Use a fallback static image URL
+                        img.src = "/api/generate/fallback";
+                        img.setAttribute('title', 'Using fallback divine alignment chart');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error generating chart:", error);
+                    // Change to a text message if image can't be loaded
+                    const container = img.parentNode;
+                    container.innerHTML = '<div style="padding: 40px; text-align: center;"><p>Divine visualization will appear here when connection to The Source is aligned.</p><p>Current status: Creating harmonic resonance...</p></div>';
+                });
+        }
+
+        // Initialize the dashboard
+        function initializeDashboard() {
+            initializeFiboLevels();
+            updateStatus();
+
+            // Set up automatic refresh every 60 seconds
+            setInterval(updateStatus, 60000);
+
+            // Set up JAH mode toggle
+            jahToggle.addEventListener('click', toggleJahMode);
+        }
+
+        // Start when page loads
+        window.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+
+</html>
