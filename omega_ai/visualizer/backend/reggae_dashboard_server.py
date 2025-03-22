@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Any, Set
 
 import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import redis
@@ -82,6 +82,22 @@ class ReggaeDashboardServer:
             allow_methods=["*"],
             allow_headers=["*"],
         )
+        
+        # Mount static files for the dashboard
+        frontend_path = Path("omega_ai/visualizer/frontend/reggae-dashboard").absolute()
+        if frontend_path.exists():
+            # Mount the entire frontend directory for direct file access
+            self.app.mount("/dashboard", StaticFiles(directory=str(frontend_path), html=True), name="dashboard")
+            
+            # Also create a specific static directory for images and other assets
+            static_path = frontend_path / "static"
+            if not static_path.exists():
+                static_path.mkdir(exist_ok=True)
+            self.app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+            
+            logger.info(f"{GREEN}Mounted frontend files from {frontend_path}{RESET}")
+        else:
+            logger.warning(f"{GOLD}Frontend directory not found at {frontend_path}{RESET}")
         
         # Set up routes
         self.setup_routes()
@@ -1278,6 +1294,11 @@ class ReggaeDashboardServer:
             except Exception as e:
                 logger.error(f"{RED}Error fetching elite exit data: {e}{RESET}")
                 return {"error": str(e), "status": "error"}
+        
+        @self.app.get("/big-brother")
+        async def big_brother_panel():
+            """Direct access to the Big Brother monitoring panel."""
+            return RedirectResponse(url="/dashboard/big_brother_panel.html")
         
         # Helper method to get Redis data with fallback to mock data
         async def _get_redis_data(self, key):

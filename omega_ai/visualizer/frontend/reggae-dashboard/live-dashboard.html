@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Add Big Brother styles -->
     <style>
-        @import url('big_brother_styles.css');
+        @import url('/dashboard/big_brother_styles.css');
 
         :root {
             --green-color: #00B52D;
@@ -2323,7 +2323,7 @@
     </div>
 
     <!-- Add Big Brother Panel JavaScript -->
-    <script src="big_brother_panel.js"></script>
+    <script src="/dashboard/big_brother_panel.js"></script>
 
     <script>
         // Debug helper
@@ -5269,7 +5269,8 @@
         // Load the Big Brother panel
         async function loadBigBrotherPanel() {
             try {
-                const response = await fetch('big_brother_panel.html');
+                // Use the new dashboard mount path instead of a relative path
+                const response = await fetch('/dashboard/big_brother_panel.html');
                 if (!response.ok) {
                     throw new Error(`Failed to load Big Brother panel: ${response.status}`);
                 }
