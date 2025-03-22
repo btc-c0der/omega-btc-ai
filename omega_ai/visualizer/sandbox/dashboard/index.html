@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OMEGA BTC AI - Sandbox Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-color: #E0E0E0;
+            --muted-color: #888888;
+            --green-color: #4CAF50;
+            --red-color: #F44336;
+            --yellow-color: #FFD700;
+            --blue-color: #2196F3;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--green-color);
+            margin: 0;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: var(--yellow-color);
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .label {
+            color: var(--muted-color);
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .value.positive {
+            color: var(--green-color);
+        }
+
+        .value.negative {
+            color: var(--red-color);
+        }
+
+        .value.neutral {
+            color: var(--text-color);
+        }
+
+        /* RASTA OMEGA TRADER Panel Styles */
+        .bitget-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bitget-card h2 {
+            color: var(--yellow-color);
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .position-badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .position-badge.long {
+            background-color: var(--green-color);
+            color: white;
+        }
+
+        .position-badge.short {
+            background-color: var(--red-color);
+            color: white;
+        }
+
+        .bitget-pnl-box {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .bitget-pnl-item {
+            text-align: center;
+        }
+
+        .bitget-pnl-label {
+            color: var(--muted-color);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .bitget-pnl-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .bitget-pnl-value.positive {
+            color: var(--green-color);
+        }
+
+        .bitget-pnl-value.negative {
+            color: var(--red-color);
+        }
+
+        /* Stats Grid */
+        .bitget-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .bitget-stat-box {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .bitget-stat-box.highlight {
+            border: 1px solid var(--yellow-color);
+        }
+
+        .bitget-stat-label {
+            color: var(--muted-color);
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
+        .bitget-stat-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Details Grid */
+        .bitget-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .bitget-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .bitget-detail-label {
+            color: var(--muted-color);
+            font-size: 0.9em;
+        }
+
+        .bitget-detail-value {
+            font-weight: bold;
+        }
+
+        /* Take Profit & Stop Loss */
+        .bitget-take-profit,
+        .bitget-stop-loss {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 8px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .bitget-order-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .bitget-order-dot.tp {
+            background-color: var(--green-color);
+        }
+
+        .bitget-order-dot.sl {
+            background-color: var(--red-color);
+        }
+
+        /* Liquidation Meter */
+        .liquidation-meter {
+            margin: 15px 0;
+        }
+
+        .liquidation-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.8em;
+            color: var(--muted-color);
+        }
+
+        .liquidation-bar {
+            position: relative;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .liquidation-progress {
+            height: 100%;
+            background-color: var(--red-color);
+            transition: width 0.3s ease;
+        }
+
+        .price-marker {
+            position: absolute;
+            top: -25px;
+            transform: translateX(-50%);
+        }
+
+        .price-marker-label {
+            background-color: var(--card-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+
+        .price-marker.entry-price .price-marker-label {
+            color: var(--yellow-color);
+        }
+
+        .price-marker.current-price .price-marker-label {
+            color: var(--green-color);
+        }
+
+        .price-marker.pulsing .price-marker-label {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Divider */
+        .rasta-divider {
+            height: 2px;
+            background: linear-gradient(to right, var(--green-color), var(--yellow-color), var(--red-color));
+            margin: 15px 0;
+            border-radius: 1px;
+        }
+
+        /* Action Buttons */
+        .bitget-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .bitget-action-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .bitget-action-btn.close {
+            background-color: var(--red-color);
+            color: white;
+        }
+
+        .bitget-action-btn.edit {
+            background-color: var(--blue-color);
+            color: white;
+        }
+
+        .bitget-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .bitget-timestamp {
+            text-align: right;
+            font-size: 0.7rem;
+            color: var(--muted-color);
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-brands fa-bitcoin"></i> OMEGA BTC AI SANDBOX DASHBOARD</h1>
+        </div>
+
+        <div class="dashboard">
+            <!-- RASTA OMEGA TRADER Panel -->
+            <div class="bitget-card">
+                <h2>
+                    <span><i class="fas fa-rocket"></i> RASTA OMEGA TRADER</span>
+                    <span class="position-badge short" id="bg-position-badge">
+                        <i class="fas fa-arrow-down"></i> SHORT
+                    </span>
+                </h2>
+
+                <!-- Position PnL Box -->
+                <div class="bitget-pnl-box">
+                    <div class="bitget-pnl-item">
+                        <div class="bitget-pnl-label">PNL %</div>
+                        <div class="bitget-pnl-value negative" id="bg-pnl-percent">-1.20%</div>
+                    </div>
+                    <div class="bitget-pnl-item">
+                        <div class="bitget-pnl-label">PNL $</div>
+                        <div class="bitget-pnl-value negative" id="bg-pnl-usd">$11.41</div>
+                    </div>
+                </div>
+
+                <!-- Position Stats Grid -->
+                <div class="bitget-stats">
+                    <div class="bitget-stat-box highlight">
+                        <div class="bitget-stat-label">SIZE</div>
+                        <div class="bitget-stat-value" id="bg-position-size">0.0113 BTC</div>
+                    </div>
+                    <div class="bitget-stat-box">
+                        <div class="bitget-stat-label">LEVERAGE</div>
+                        <div class="bitget-stat-value" id="bg-leverage">20x</div>
+                    </div>
+                    <div class="bitget-stat-box">
+                        <div class="bitget-stat-label">MARGIN</div>
+                        <div class="bitget-stat-value" id="bg-margin">$47.58</div>
+                    </div>
+                </div>
+
+                <!-- Position Details Grid -->
+                <div class="bitget-detail-grid">
+                    <div class="bitget-detail-row">
+                        <div class="bitget-detail-label">ENTRY PRICE</div>
+                        <div class="bitget-detail-value" id="bg-entry-price">$84,205.22</div>
+                    </div>
+                    <div class="bitget-detail-row">
+                        <div class="bitget-detail-label">CURRENT PRICE</div>
+                        <div class="bitget-detail-value" id="bg-current-price">$84,255.70</div>
+                    </div>
+                    <div class="bitget-detail-row">
+                        <div class="bitget-detail-label">BREAK-EVEN</div>
+                        <div class="bitget-detail-value" id="bg-breakeven">$84,205.22</div>
+                    </div>
+                    <div class="bitget-detail-row">
+                        <div class="bitget-detail-label">LIQUIDATION</div>
+                        <div class="bitget-detail-value" id="bg-liquidation">$87,994.46</div>
+                    </div>
+                    <div class="bitget-detail-row">
+                        <div class="bitget-detail-label">MARGIN MODE</div>
+                        <div class="bitget-detail-value" id="bg-margin-mode">CROSSED</div>
+                    </div>
+                    <div class="bitget-detail-row">
+                        <div class="bitget-detail-label">POSITION MODE</div>
+                        <div class="bitget-detail-value" id="bg-position-mode">ONE-WAY-MODE</div>
+                    </div>
+                </div>
+
+                <!-- Take Profit & Stop Loss -->
+                <div class="bitget-take-profit" id="bg-tp-container">
+                    <div>
+                        <span class="bitget-order-dot tp"></span>
+                        <span class="bitget-detail-label">TAKE PROFIT</span>
+                    </div>
+                    <div class="bitget-detail-value" id="bg-take-profit">$83,500.00</div>
+                </div>
+
+                <div class="bitget-stop-loss" id="bg-sl-container" style="display: none;">
+                    <div>
+                        <span class="bitget-order-dot sl"></span>
+                        <span class="bitget-detail-label">STOP LOSS</span>
+                    </div>
+                    <div class="bitget-detail-value" id="bg-stop-loss">NOT SET</div>
+                </div>
+
+                <!-- Liquidation Distance Meter -->
+                <div class="liquidation-meter">
+                    <div class="liquidation-label">
+                        <span>Entry</span>
+                        <span>Liquidation</span>
+                    </div>
+                    <div class="liquidation-bar">
+                        <div class="liquidation-progress" id="bg-liquidation-progress" style="width: 1.3321%;"></div>
+                        <div class="price-marker entry-price" id="bg-entry-marker" style="left: 0%;">
+                            <div class="price-marker-label">$84,205</div>
+                        </div>
+                        <div class="price-marker current-price pulsing" id="bg-current-marker" style="left: 1.3321%;">
+                            <div class="price-marker-label">$84,256</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="rasta-divider"></div>
+
+                <div class="bitget-stats">
+                    <div class="bitget-stat-box">
+                        <div class="bitget-stat-label">MARGIN RATIO</div>
+                        <div class="bitget-stat-value" id="bg-margin-ratio">0.00%</div>
+                    </div>
+                    <div class="bitget-stat-box">
+                        <div class="bitget-stat-label">TOTAL FEE</div>
+                        <div class="bitget-stat-value" id="bg-total-fee">$0.00</div>
+                    </div>
+                    <div class="bitget-stat-box">
+                        <div class="bitget-stat-label">REALIZED PNL</div>
+                        <div class="bitget-stat-value neutral" id="bg-realized-pnl">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="bitget-actions">
+                    <div class="bitget-action-btn close" id="bg-close-position">CLOSE POSITION</div>
+                    <div class="bitget-action-btn edit" id="bg-edit-position">EDIT POSITION</div>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="bitget-timestamp" id="bg-position-timestamp">Updated: Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        let ws = null;
+        const wsUrl = 'ws://' + window.location.hostname + ':5001/ws';
+
+        function connectWebSocket() {
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('Connected to WebSocket');
+                document.getElementById('bg-position-timestamp').textContent = 'Connected to server';
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from WebSocket');
+                setTimeout(connectWebSocket, 5000);
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateDisplay(data);
+                } catch (e) {
+                    console.error('Error parsing WebSocket data:', e);
+                }
+            };
+        }
+
+        // Update display with new data
+        function updateDisplay(data) {
+            if (!data) return;
+
+            // Update timestamp
+            const timestamp = new Date().toLocaleString();
+            document.getElementById('bg-position-timestamp').textContent = 'Updated: ' + timestamp;
+
+            // Update position data if available
+            if (data.position) {
+                const position = data.position;
+
+                // Update badge
+                const badge = document.getElementById('bg-position-badge');
+                if (position.side === 'LONG') {
+                    badge.className = 'position-badge long';
+                    badge.innerHTML = '<i class="fas fa-arrow-up"></i> LONG';
+                } else if (position.side === 'SHORT') {
+                    badge.className = 'position-badge short';
+                    badge.innerHTML = '<i class="fas fa-arrow-down"></i> SHORT';
+                }
+
+                // Update PnL
+                const pnlPercent = document.getElementById('bg-pnl-percent');
+                const pnlUsd = document.getElementById('bg-pnl-usd');
+
+                pnlPercent.textContent = position.pnl_percent + '%';
+                pnlPercent.className = 'bitget-pnl-value ' + (parseFloat(position.pnl_percent) >= 0 ? 'positive' : 'negative');
+
+                pnlUsd.textContent = '$' + position.pnl_usd;
+                pnlUsd.className = 'bitget-pnl-value ' + (parseFloat(position.pnl_usd) >= 0 ? 'positive' : 'negative');
+
+                // Update position details
+                document.getElementById('bg-position-size').textContent = position.size + ' BTC';
+                document.getElementById('bg-leverage').textContent = position.leverage + 'x';
+                document.getElementById('bg-margin').textContent = '$' + position.margin;
+                document.getElementById('bg-entry-price').textContent = '$' + position.entry_price;
+                document.getElementById('bg-current-price').textContent = '$' + position.current_price;
+                document.getElementById('bg-breakeven').textContent = '$' + position.breakeven;
+                document.getElementById('bg-liquidation').textContent = '$' + position.liquidation;
+                document.getElementById('bg-margin-mode').textContent = position.margin_mode || 'CROSSED';
+                document.getElementById('bg-position-mode').textContent = position.position_mode || 'ONE-WAY-MODE';
+                document.getElementById('bg-margin-ratio').textContent = position.margin_ratio + '%';
+                document.getElementById('bg-total-fee').textContent = '$' + position.total_fee;
+                document.getElementById('bg-realized-pnl').textContent = '$' + position.realized_pnl;
+
+                // Update take profit and stop loss
+                if (position.take_profit) {
+                    document.getElementById('bg-tp-container').style.display = 'flex';
+                    document.getElementById('bg-take-profit').textContent = '$' + position.take_profit;
+                } else {
+                    document.getElementById('bg-tp-container').style.display = 'none';
+                }
+
+                if (position.stop_loss) {
+                    document.getElementById('bg-sl-container').style.display = 'flex';
+                    document.getElementById('bg-stop-loss').textContent = '$' + position.stop_loss;
+                } else {
+                    document.getElementById('bg-sl-container').style.display = 'none';
+                }
+
+                // Update liquidation meter
+                const entryPrice = parseFloat(position.entry_price);
+                const currentPrice = parseFloat(position.current_price);
+                const liquidationPrice = parseFloat(position.liquidation);
+
+                const totalDistance = Math.abs(liquidationPrice - entryPrice);
+                const currentDistance = Math.abs(currentPrice - entryPrice);
+                const progressPercentage = (currentDistance / totalDistance) * 100;
+
+                document.getElementById('bg-liquidation-progress').style.width = progressPercentage + '%';
+                document.getElementById('bg-entry-marker').style.left = '0%';
+                document.getElementById('bg-current-marker').style.left = progressPercentage + '%';
+
+                document.getElementById('bg-entry-marker').querySelector('.price-marker-label').textContent =
+                    '$' + Math.round(entryPrice).toLocaleString();
+                document.getElementById('bg-current-marker').querySelector('.price-marker-label').textContent =
+                    '$' + Math.round(currentPrice).toLocaleString();
+            }
+        }
+
+        // Auto-refresh function
+        function autoRefresh() {
+            fetch('/api/position')
+                .then(response => response.json())
+                .then(data => {
+                    updateDisplay({ position: data });
+                })
+                .catch(error => {
+                    console.error('Error refreshing position:', error);
+                });
+        }
+
+        // Set up auto-refresh interval (every 5 seconds)
+        setInterval(autoRefresh, 5000);
+
+        // Close position button handler
+        document.getElementById('bg-close-position').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/position/close', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Position closed successfully');
+                    updateDisplay({ position: null });
+                } else {
+                    alert('Failed to close position: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Error closing position:', e);
+                alert('Error closing position');
+            }
+        });
+
+        // Edit position button handler
+        document.getElementById('bg-edit-position').addEventListener('click', () => {
+            alert('Edit position functionality coming soon!');
+        });
+
+        // Connect to WebSocket when page loads
+        connectWebSocket();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OMEGA BTC AI - Sandbox Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-color: #E0E0E0;
+            --muted-color: #888888;
+            --green-color: #4CAF50;
+            --red-color: #F44336;
+            --yellow-color: #FFD700;
+            --blue-color: #2196F3;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--green-color);
+            margin: 0;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: var(--yellow-color);
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .label {
+            color: var(--muted-color);
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .value.positive {
+            color: var(--green-color);
+        }
+
+        .value.negative {
+            color: var(--red-color);
+        }
+
+        .value.neutral {
+            color: var(--text-color);
+        }
+
+        /* RASTA OMEGA TRADER Panel Styles */
+        .bitget-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bitget-card h2 {
+            color: var(--yellow-color);
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .position-badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .position-badge.long {
+            background-color: var(--green-color);
+            color: white;
+        }
+
+        .position-badge.short {
+            background-color: var(--red-color);
+            color: white;
+        }
+
+        .bitget-pnl-box {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .bitget-pnl-item {
+            text-align: center;
+        }
+
+        .bitget-pnl-label {
+            color: var(--muted-color);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .bitget-pnl-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .bitget-pnl-value.positive {
+            color: var(--green-color);
+        }
+
+        .bitget-pnl-value.negative {
+            color: var(--red-color);
+        }
+
+        .bitget-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .bitget-action-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .bitget-action-btn.close {
+            background-color: var(--red-color);
+            color: white;
+        }
+
+        .bitget-action-btn.edit {
+            background-color: var(--blue-color);
+            color: white;
+        }
+
+        .bitget-action-btn.refresh {
+            background-color: var(--green-color);
+            color: white;
+        }
+
+        .bitget-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .bitget-timestamp {
+            text-align: right;
+            font-size: 0.7rem;
+            color: var(--muted-color);
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-brands fa-bitcoin"></i> OMEGA BTC AI SANDBOX DASHBOARD</h1>
+        </div>
+
+        <div class="dashboard">
+            <!-- RASTA OMEGA TRADER Panel -->
+            <div class="bitget-card">
+                <h2>
+                    <span><i class="fas fa-rocket"></i> RASTA OMEGA TRADER</span>
+                    <span class="position-badge short" id="bg-position-badge">
+                        <i class="fas fa-arrow-down"></i> SHORT
+                    </span>
+                </h2>
+
+                <!-- Position PnL Box -->
+                <div class="bitget-pnl-box">
+                    <div class="bitget-pnl-item">
+                        <div class="bitget-pnl-label">PNL %</div>
+                        <div class="bitget-pnl-value negative" id="bg-pnl-percent">-0.66%</div>
+                    </div>
+                    <div class="bitget-pnl-item">
+                        <div class="bitget-pnl-label">PNL $</div>
+                        <div class="bitget-pnl-value negative" id="bg-pnl-usd">-$0.32</div>
+                    </div>
+                </div>
+
+                <!-- Position Stats -->
+                <div class="data-row">
+                    <span class="label">Entry Price:</span>
+                    <span class="value" id="bg-entry-price">$84,205</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Current Price:</span>
+                    <span class="value" id="bg-current-price">$84,233</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Size:</span>
+                    <span class="value" id="bg-position-size">0.01 BTC</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Leverage:</span>
+                    <span class="value" id="bg-leverage">10x</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="bitget-actions">
+                    <div class="bitget-action-btn close" id="bg-close-position">CLOSE POSITION</div>
+                    <div class="bitget-action-btn edit" id="bg-edit-position">EDIT POSITION</div>
+                    <div class="bitget-action-btn refresh" id="bg-refresh-position">
+                        <i class="fas fa-sync-alt"></i> REFRESH
+                    </div>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="bitget-timestamp" id="bg-position-timestamp">Updated: Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        let ws = null;
+        const wsUrl = 'ws://' + window.location.hostname + ':5002/ws';
+
+        function connectWebSocket() {
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('Connected to WebSocket');
+                document.getElementById('bg-position-timestamp').textContent = 'Connected to server';
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from WebSocket');
+                setTimeout(connectWebSocket, 5000);
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateDisplay(data);
+                } catch (e) {
+                    console.error('Error parsing WebSocket data:', e);
+                }
+            };
+        }
+
+        // Update display with new data
+        function updateDisplay(data) {
+            if (!data) return;
+
+            // Update timestamp
+            const timestamp = new Date().toLocaleString();
+            document.getElementById('bg-position-timestamp').textContent = 'Updated: ' + timestamp;
+
+            // Update position data if available
+            if (data.position) {
+                const position = data.position;
+
+                // Update badge
+                const badge = document.getElementById('bg-position-badge');
+                if (position.side === 'LONG') {
+                    badge.className = 'position-badge long';
+                    badge.innerHTML = '<i class="fas fa-arrow-up"></i> LONG';
+                } else if (position.side === 'SHORT') {
+                    badge.className = 'position-badge short';
+                    badge.innerHTML = '<i class="fas fa-arrow-down"></i> SHORT';
+                }
+
+                // Update PnL
+                document.getElementById('bg-pnl-percent').textContent = position.pnl_percent + '%';
+                document.getElementById('bg-pnl-usd').textContent = '$' + position.pnl_usd;
+
+                // Update position details
+                document.getElementById('bg-entry-price').textContent = '$' + position.entry_price;
+                document.getElementById('bg-current-price').textContent = '$' + position.current_price;
+                document.getElementById('bg-position-size').textContent = position.size + ' BTC';
+                document.getElementById('bg-leverage').textContent = position.leverage + 'x';
+            }
+        }
+
+        // Refresh button handler
+        document.getElementById('bg-refresh-position').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/position');
+                const data = await response.json();
+                updateDisplay({ position: data });
+            } catch (e) {
+                console.error('Error refreshing position:', e);
+            }
+        });
+
+        // Close position button handler
+        document.getElementById('bg-close-position').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/position/close', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Position closed successfully');
+                    updateDisplay({ position: null });
+                } else {
+                    alert('Failed to close position: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Error closing position:', e);
+                alert('Error closing position');
+            }
+        });
+
+        // Edit position button handler
+        document.getElementById('bg-edit-position').addEventListener('click', () => {
+            alert('Edit position functionality coming soon!');
+        });
+
+        // Connect to WebSocket when page loads
+        connectWebSocket();
+    </script>
+</body>
+
+</html>
