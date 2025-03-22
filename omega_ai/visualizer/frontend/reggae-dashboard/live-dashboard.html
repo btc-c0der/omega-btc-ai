@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMEGA BTC AI - Live Reggae Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Big Brother styles -->
     <style>
+        @import url('big_brother_styles.css');
+
         :root {
             --green-color: #00B52D;
             --yellow-color: #FFD700;
@@ -2200,6 +2203,17 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Big Brother Monitoring Panel -->
+            <div class="card" id="big-brother-container">
+                <h2>
+                    <i class="fas fa-eye"></i> Big Brother Monitoring
+                    <span class="refresh-time" id="big-brother-refresh-time">--</span>
+                </h2>
+                <div id="big-brother-content">
+                    <!-- Big Brother panel will be loaded here -->
+                </div>
+            </div>
         </div>
 
         <div class="footer">
@@ -2307,6 +2321,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Add Big Brother Panel JavaScript -->
+    <script src="big_brother_panel.js"></script>
 
     <script>
         // Debug helper
@@ -4984,6 +5001,9 @@
 
             // Set up BitGet trader action buttons
             setupBitGetTraderUI();
+
+            // Load Big Brother panel
+            loadBigBrotherPanel();
         });
 
         // Helper function to show toast notifications
@@ -5244,6 +5264,49 @@
                 // Replace the original script with new one to force execution
                 script.parentNode.replaceChild(newScript, script);
             });
+        }
+
+        // Load the Big Brother panel
+        async function loadBigBrotherPanel() {
+            try {
+                const response = await fetch('big_brother_panel.html');
+                if (!response.ok) {
+                    throw new Error(`Failed to load Big Brother panel: ${response.status}`);
+                }
+
+                const html = await response.text();
+                document.getElementById('big-brother-content').innerHTML = html;
+
+                // Update refresh time
+                document.getElementById('big-brother-refresh-time').textContent = new Date().toLocaleTimeString();
+
+                debug('MAIN', 'Big Brother panel loaded successfully');
+            } catch (error) {
+                console.error('Error loading Big Brother panel:', error);
+                document.getElementById('big-brother-content').innerHTML =
+                    '<div class="error-message">Failed to load Big Brother monitoring panel. Please refresh the page.</div>';
+            }
+        }
+
+        // Add Big Brother panel loading to initialization
+        document.addEventListener('DOMContentLoaded', function () {
+            // ... existing initialization code ...
+
+            // Load Big Brother panel
+            loadBigBrotherPanel();
+        });
+
+        // Add Big Brother panel to regular refresh cycle
+        function refreshDashboard() {
+            // ... existing refresh code ...
+
+            // Refresh Big Brother panel info every 60 seconds
+            const now = new Date();
+            const seconds = now.getSeconds();
+
+            if (seconds % 60 === 0) {
+                document.getElementById('big-brother-refresh-time').textContent = now.toLocaleTimeString();
+            }
         }
     </script>
 </body>
