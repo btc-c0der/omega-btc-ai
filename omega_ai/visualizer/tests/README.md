@@ -1,77 +1,69 @@
 # Big Brother Monitoring Panel Tests
 
-This directory contains tests for the Big Brother monitoring panel components of the OMEGA BTC AI trading platform.
+This directory contains tests for the Big Brother monitoring panel implementation in the OMEGA BTC AI trading platform.
 
-## Overview
+## Backend Tests
 
-The test suite covers both backend API endpoints and frontend functionality:
+Backend tests are implemented in `test_big_brother_api.py` and cover the API endpoints and data processing logic.
 
-1. **Backend Tests** - Verify the API endpoints that provide data and visualization functionality
-2. **Frontend Tests** - Verify the panel's UI interactions and data display
+### Running Backend Tests
 
-## Test Files
-
-- `test_big_brother_api.py` - Tests for the backend API endpoints
-- `../frontend/reggae-dashboard/tests/big_brother_panel.test.js` - Tests for the frontend components
-
-## Running Backend Tests
-
-To run the backend tests, use:
+To run backend tests:
 
 ```bash
-cd omega-btc-ai
-python -m pytest omega_ai/visualizer/tests/test_big_brother_api.py -v
+# From the project root
+pytest omega_ai/visualizer/tests/test_big_brother_api.py -v
 ```
 
-## Running Frontend Tests
+### What's Covered
 
-To run the frontend tests, use:
+- API endpoint `/api/big-brother-data` for fetching all monitoring data
+- 3D and 2D flow visualization generation endpoints
+- Redis data retrieval with fallback to mock data
+- Error handling for missing Redis connection or subprocess failures
+
+## Frontend Tests
+
+Frontend tests are implemented in `omega_ai/visualizer/frontend/reggae-dashboard/tests/big_brother_panel.test.js` and cover the panel UI and interactions.
+
+### Running Frontend Tests
+
+To run frontend tests:
 
 ```bash
-cd omega-btc-ai/omega_ai/visualizer/frontend/reggae-dashboard
-npm test
+# From the project root
+cd omega_ai/visualizer/frontend/reggae-dashboard
+npm test -- tests/big_brother_panel.test.js
 ```
 
-Make sure you have the required testing dependencies installed:
+### What's Covered
 
-```bash
-npm install --save-dev jsdom sinon assert mocha
-```
+- Tab navigation between different monitoring sections
+- Position data display and updates
+- Flow visualization generation UI
+- Panel expansion and fullscreen controls
+- Error handling for API failures
 
 ## Test Coverage
 
-The tests cover:
+The tests provide coverage for:
 
-### Backend Tests
+1. **API Endpoints**: All Big Brother monitoring API endpoints
+2. **Data Flow**: Retrieval from Redis and fallback mechanisms
+3. **Visualization Generation**: Both 3D and 2D flow visualization
+4. **UI Components**: Tabs, panels, data displays, and controls
+5. **Error Handling**: In both frontend and backend
 
-- Big Brother data endpoint
-- 3D flow visualization endpoint
-- 2D flow visualization endpoint
-- Redis data retrieval
-- Error handling
+## Adding More Tests
 
-### Frontend Tests
+### For Backend
 
-- Tab navigation functionality
-- Data loading and display
-- Flow visualization generation
-- Panel controls (expand/collapse, fullscreen)
+Add test cases to `test_big_brother_api.py` following the existing pattern. Use the fixture `app_with_redis` to get a server instance with mock Redis.
 
-## Adding New Tests
+### For Frontend
 
-When adding new features to the Big Brother panel:
+Add test cases to `big_brother_panel.test.js`. The DOM setup provides a mock environment to test against.
 
-1. Add corresponding backend tests in `test_big_brother_api.py`
-2. Add corresponding frontend tests in `big_brother_panel.test.js`
-3. Run the entire test suite to ensure no regressions
+## Integration Testing
 
-## Mock Data
-
-The tests use mock data to simulate Redis data and API responses. If you change the data structure:
-
-1. Update the mock data in `test_big_brother_api.py`
-2. Update the mock API responses in `big_brother_panel.test.js`
-
-## CI/CD Integration
-
-These tests are designed to be integrated with CI/CD pipelines. The backend tests use pytest, which can generate JUnit XML reports. The frontend tests can be run with the Mocha test runner with the appropriate reporters.
+For full end-to-end testing, consider using Cypress or Playwright to test the Big Brother panel in a real browser environment.
