@@ -227,6 +227,12 @@
                     <option value="redis" selected>Redis (Historical)</option>
                     <option value="simulation">Simulation</option>
                 </select>
+
+                <label for="mode">Visualization:</label>
+                <select id="mode">
+                    <option value="2d" selected>2D Chart</option>
+                    <option value="3d">3D Visualization</option>
+                </select>
             </div>
 
             <button id="generateBtn" onclick="generateVisualization()">Generate Visualization</button>
@@ -300,6 +306,7 @@
             // Get selected options
             const years = document.getElementById('years').value;
             const dataSource = document.getElementById('dataSource').value;
+            const mode = document.getElementById('mode').value;
 
             // Create request to our API
             fetch('/api/generate', {
@@ -309,7 +316,8 @@
                 },
                 body: JSON.stringify({
                     years: years,
-                    dataSource: dataSource
+                    dataSource: dataSource,
+                    mode: mode
                 })
             })
                 .then(response => response.json())
