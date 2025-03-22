@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Any, Set
 
 import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import redis
@@ -969,19 +969,23 @@ class ReggaeDashboardServer:
                 return {"error": "Redis connection not available"}
                 
             try:
-                # Get position data from Redis
-                long_position = await self._get_redis_data('long_position')
-                short_position = await self._get_redis_data('short_position')
-                position_stats = await self._get_redis_data('position_stats')
-                
-                # Get Fibonacci levels
-                fibonacci_levels = await self._get_redis_data('fibonacci:current_levels')
-                
-                # Get trap detection data
-                trap_data = await self._get_redis_data('mm_trap_detection')
-                
-                # Get elite exit strategy data
-                elite_exit_data = await self._get_redis_data('elite_exit_strategy')
+                # Get position data from Redis or mock data
+                try:
+                    # Try to use the self._get_redis_data method if available
+                    long_position = await self._get_redis_data('long_position')
+                    short_position = await self._get_redis_data('short_position')
+                    position_stats = await self._get_redis_data('position_stats')
+                    fibonacci_levels = await self._get_redis_data('fibonacci:current_levels')
+                    trap_data = await self._get_redis_data('mm_trap_detection')
+                    elite_exit_data = await self._get_redis_data('elite_exit_strategy')
+                except (AttributeError, Exception) as e:
+                    # Fall back to the self._generate_mock_data method
+                    long_position = self._generate_mock_data('long_position')
+                    short_position = self._generate_mock_data('short_position')
+                    position_stats = self._generate_mock_data('position_stats')
+                    fibonacci_levels = self._generate_mock_data('fibonacci:current_levels')
+                    trap_data = self._generate_mock_data('mm_trap_detection')
+                    elite_exit_data = self._generate_mock_data('elite_exit_strategy')
                 
                 return {
                     "long_position": long_position,
@@ -1015,16 +1019,21 @@ class ReggaeDashboardServer:
                 # Determine which position to use (prefer long if both exist)
                 position_data = None
                 position_type = "unknown"
-                if long_position and "entry_price" in long_position:
+                if long_position and isinstance(long_position, dict) and "entry_price" in long_position:
                     position_data = long_position
                     position_type = "long"
-                elif short_position and "entry_price" in short_position:
+                elif short_position and isinstance(short_position, dict) and "entry_price" in short_position:
                     position_data = short_position
                     position_type = "short"
                 
                 # Define paths
-                script_path = Path("scripts/position_flow_tracker.py").absolute()
-                output_dir = Path("omega_ai/visualizer/frontend/reggae-dashboard/static/images").absolute()
+                # Get the path to the project root
+                current_file = Path(__file__).resolve()
+                project_root = current_file.parent.parent.parent.parent  # Navigate up to project root
+                script_path = project_root / "scripts" / "position_flow_tracker.py"
+                output_dir = project_root / "omega_ai" / "visualizer" / "frontend" / "reggae-dashboard" / "static" / "images"
+                
+                # Ensure the output directory exists
                 os.makedirs(output_dir, exist_ok=True)
                 
                 # Generate a timestamp for the output file
@@ -1034,22 +1043,13 @@ class ReggaeDashboardServer:
                 
                 # Prepare the command
                 if position_data:
-                    # Write position data to a temporary file
-                    import tempfile
-                    import json
-                    
-                    with tempfile.NamedTemporaryFile(suffix='.json', delete=False, mode='w') as tmp:
-                        json.dump(position_data, tmp)
-                        position_file = tmp.name
-                    
                     # Run the position flow tracker script with the position data
                     cmd = [
                         sys.executable, 
                         str(script_path),
-                        "--use-simulated" if not position_data else "",
-                        "--3d",
-                        "--hours", str(hours),
-                        "--position-file", position_file
+                        "--use-simulated",  # Always use simulated mode for now
+                        "--3d",  # Use 3D mode
+                        "--hours", str(hours)
                     ]
                     
                     # Filter out empty strings
@@ -1059,9 +1059,6 @@ class ReggaeDashboardServer:
                     
                     # Run the process
                     process = subprocess.run(cmd, capture_output=True, text=True)
-                    
-                    # Clean up the temporary file
-                    os.unlink(position_file)
                     
                     if process.returncode != 0:
                         logger.error(f"{RED}Error generating 3D flow: {process.stderr}{RESET}")
@@ -1128,16 +1125,21 @@ class ReggaeDashboardServer:
                 # Determine which position to use (prefer long if both exist)
                 position_data = None
                 position_type = "unknown"
-                if long_position and "entry_price" in long_position:
+                if long_position and isinstance(long_position, dict) and "entry_price" in long_position:
                     position_data = long_position
                     position_type = "long"
-                elif short_position and "entry_price" in short_position:
+                elif short_position and isinstance(short_position, dict) and "entry_price" in short_position:
                     position_data = short_position
                     position_type = "short"
                 
                 # Define paths
-                script_path = Path("scripts/position_flow_tracker.py").absolute()
-                output_dir = Path("omega_ai/visualizer/frontend/reggae-dashboard/static/images").absolute()
+                # Get the path to the project root
+                current_file = Path(__file__).resolve()
+                project_root = current_file.parent.parent.parent.parent  # Navigate up to project root
+                script_path = project_root / "scripts" / "position_flow_tracker.py"
+                output_dir = project_root / "omega_ai" / "visualizer" / "frontend" / "reggae-dashboard" / "static" / "images"
+                
+                # Ensure the output directory exists
                 os.makedirs(output_dir, exist_ok=True)
                 
                 # Generate a timestamp for the output file
@@ -1147,22 +1149,13 @@ class ReggaeDashboardServer:
                 
                 # Prepare the command
                 if position_data:
-                    # Write position data to a temporary file
-                    import tempfile
-                    import json
-                    
-                    with tempfile.NamedTemporaryFile(suffix='.json', delete=False, mode='w') as tmp:
-                        json.dump(position_data, tmp)
-                        position_file = tmp.name
-                    
                     # Run the position flow tracker script with the position data
                     cmd = [
                         sys.executable, 
                         str(script_path),
-                        "--use-simulated" if not position_data else "",
+                        "--use-simulated",  # Always use simulated mode for now
                         "--2d",  # Use 2D mode
-                        "--hours", str(hours),
-                        "--position-file", position_file
+                        "--hours", str(hours)
                     ]
                     
                     # Filter out empty strings
@@ -1172,9 +1165,6 @@ class ReggaeDashboardServer:
                     
                     # Run the process
                     process = subprocess.run(cmd, capture_output=True, text=True)
-                    
-                    # Clean up the temporary file
-                    os.unlink(position_file)
                     
                     if process.returncode != 0:
                         logger.error(f"{RED}Error generating 2D flow: {process.stderr}{RESET}")
@@ -1298,64 +1288,44 @@ class ReggaeDashboardServer:
         @self.app.get("/big-brother")
         async def big_brother_panel():
             """Direct access to the Big Brother monitoring panel."""
-            return RedirectResponse(url="/dashboard/big_brother_panel.html")
-        
-        # Helper method to get Redis data with fallback to mock data
-        async def _get_redis_data(self, key):
-            """Get data from Redis with fallback to mock data."""
-            try:
-                # Try to get data from Redis
-                redis_key_mapping = {
-                    # Map logical keys to actual Redis keys
-                    'long_position': ['long_trader_position', 'current_long_position', 'dual_trader_long'],
-                    'short_position': ['short_trader_position', 'current_short_position', 'dual_trader_short'],
-                    'position_stats': ['trader_statistics', 'trade_stats', 'trader_performance'],
-                    'fibonacci:current_levels': ['fibonacci_levels', 'fib_levels', 'fibonacci:targets'],
-                    'mm_trap_detection': ['trap_detection', 'current_trap_probability', 'market_maker_traps'],
-                    'elite_exit_strategy': ['elite_exit_signals', 'elite_exit_data', 'exit_strategy_signals'],
-                    'trade_history': ['trade_history', 'position_history', 'closed_trades'],
-                    'dual_trader_status': ['dual_trader_status', 'trader_status', 'system_status']
-                }
+            from fastapi.responses import FileResponse
+            from pathlib import Path
+            import os
+            
+            # Get absolute path to project root
+            current_file = Path(__file__).resolve()
+            project_root = current_file.parent.parent.parent.parent  # Navigate up to project root
+            
+            # Build path to HTML file
+            html_file = project_root / "omega_ai" / "visualizer" / "frontend" / "reggae-dashboard" / "big_brother_panel.html"
+            
+            if html_file.exists():
+                return FileResponse(html_file)
+            else:
+                return {"error": f"File not found: {html_file}"}
                 
-                # Get potential Redis keys for the requested logical key
-                redis_keys = redis_key_mapping.get(key, [key])
-                
-                # Try each potential Redis key
-                for redis_key in redis_keys:
-                    value = self.redis_client.get(redis_key)
-                    if value:
-                        # Try to parse as JSON
-                        try:
-                            data = json.loads(value)
-                            logger.info(f"{GREEN}Found data for {key} in Redis key {redis_key}{RESET}")
-                            # Add source attribution
-                            if isinstance(data, dict):
-                                data["_source"] = f"redis:{redis_key}"
-                            return data
-                        except json.JSONDecodeError:
-                            # If not JSON, check if it's numeric
-                            try:
-                                return float(value)
-                            except ValueError:
-                                # Return raw value
-                                return value
-                
-                # Not found in any potential Redis key
-                logger.warning(f"{YELLOW}No data found in Redis for key {key}, using mock data{RESET}")
-                
-                # Generate mock data if Redis key doesn't exist
-                mock_data = self._generate_mock_data(key)
-                if isinstance(mock_data, dict):
-                    mock_data["_source"] = "mock"
-                return mock_data
-                
-            except Exception as e:
-                logger.error(f"{RED}Error getting Redis data for key {key}: {e}{RESET}")
-                mock_data = self._generate_mock_data(key)
-                if isinstance(mock_data, dict):
-                    mock_data["_source"] = "mock:error"
-                    mock_data["_error"] = str(e)
-                return mock_data
+        @self.app.get("/big-brother-assets/{file_path:path}")
+        async def serve_big_brother_assets(file_path: str):
+            """Serve Big Brother panel assets (JS, CSS, etc.)."""
+            from fastapi.responses import FileResponse
+            from pathlib import Path
+            import os
+            
+            # Get absolute path to project root
+            current_file = Path(__file__).resolve()
+            project_root = current_file.parent.parent.parent.parent  # Navigate up to project root
+            
+            # Base directory for Big Brother assets
+            base_dir = project_root / "omega_ai" / "visualizer" / "frontend" / "reggae-dashboard"
+            
+            # Get full file path - convert string to Path
+            full_path = base_dir / file_path
+            
+            # Check if the file exists
+            if full_path.exists():
+                return FileResponse(full_path)
+            else:
+                return {"error": f"File not found: {full_path}"}
     
     def _get_trap_probability(self):
         """Get the current trap probability from Redis."""
@@ -1618,6 +1588,62 @@ class ReggaeDashboardServer:
         }
         
         return mock_data.get(key, {"message": f"No mock data available for key: {key}"})
+        
+    async def _get_redis_data(self, key):
+        """Get data from Redis with fallback to mock data."""
+        try:
+            # Try to get data from Redis
+            redis_key_mapping = {
+                # Map logical keys to actual Redis keys
+                'long_position': ['long_trader_position', 'current_long_position', 'dual_trader_long'],
+                'short_position': ['short_trader_position', 'current_short_position', 'dual_trader_short'],
+                'position_stats': ['trader_statistics', 'trade_stats', 'trader_performance'],
+                'fibonacci:current_levels': ['fibonacci_levels', 'fib_levels', 'fibonacci:targets'],
+                'mm_trap_detection': ['trap_detection', 'current_trap_probability', 'market_maker_traps'],
+                'elite_exit_strategy': ['elite_exit_signals', 'elite_exit_data', 'exit_strategy_signals'],
+                'trade_history': ['trade_history', 'position_history', 'closed_trades'],
+                'dual_trader_status': ['dual_trader_status', 'trader_status', 'system_status']
+            }
+            
+            # Get potential Redis keys for the requested logical key
+            redis_keys = redis_key_mapping.get(key, [key])
+            
+            # Try each potential Redis key
+            for redis_key in redis_keys:
+                value = self.redis_client.get(redis_key)
+                if value:
+                    # Try to parse as JSON
+                    try:
+                        data = json.loads(value)
+                        logger.info(f"{GREEN}Found data for {key} in Redis key {redis_key}{RESET}")
+                        # Add source attribution
+                        if isinstance(data, dict):
+                            data["_source"] = f"redis:{redis_key}"
+                        return data
+                    except json.JSONDecodeError:
+                        # If not JSON, check if it's numeric
+                        try:
+                            return float(value)
+                        except ValueError:
+                            # Return raw value
+                            return value
+            
+            # Not found in any potential Redis key
+            logger.warning(f"{GOLD}No data found in Redis for key {key}, using mock data{RESET}")
+            
+            # Generate mock data if Redis key doesn't exist
+            mock_data = self._generate_mock_data(key)
+            if isinstance(mock_data, dict):
+                mock_data["_source"] = "mock"
+            return mock_data
+            
+        except Exception as e:
+            logger.error(f"{RED}Error getting Redis data for key {key}: {e}{RESET}")
+            mock_data = self._generate_mock_data(key)
+            if isinstance(mock_data, dict):
+                mock_data["_source"] = "mock:error"
+                mock_data["_error"] = str(e)
+            return mock_data
 
 if __name__ == "__main__":
     # Create dashboard server instance
@@ -1629,7 +1655,7 @@ if __name__ == "__main__":
     app.add_event_handler("shutdown", dashboard.shutdown)
     
     # Start the server
-    logger.info(f"Starting Reggae Dashboard server on 0.0.0.0:8001")
+    logger.info(f"Starting Reggae Dashboard server on 0.0.0.0:8000")
     
     # Print colorful banner
     print(f"\n{GREEN}{BOLD}==============================================={RESET}")
@@ -1639,7 +1665,7 @@ if __name__ == "__main__":
     print(f"{GREEN}{BOLD}==============================================={RESET}\n")
     
     # Run the app directly with the string reference again
-    uvicorn.run("reggae_dashboard_server:app", host="0.0.0.0", port=8001)
+    uvicorn.run("reggae_dashboard_server:app", host="0.0.0.0", port=8000)
 else:
     # For imported usage, create the app
     dashboard = ReggaeDashboardServer()

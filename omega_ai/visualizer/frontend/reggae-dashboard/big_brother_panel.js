@@ -4,7 +4,7 @@
  */
 
 // Define API_BASE for testing - in real environment, this would be provided by the main dashboard
-const API_BASE = typeof window.API_BASE !== 'undefined' ? window.API_BASE : "http://localhost:8001/api";
+const API_BASE = typeof window.API_BASE !== 'undefined' ? window.API_BASE : "http://localhost:8000/api";
 
 // Use the existing debug function or create a simple console.log wrapper
 // This assumes debug is defined in the main dashboard JavaScript
