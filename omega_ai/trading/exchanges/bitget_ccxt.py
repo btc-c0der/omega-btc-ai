@@ -25,31 +25,31 @@ def to_dict(obj: Any) -> Dict[str, Any]:
     return dict(obj)
 
 class BitGetCCXT:
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any] = None):
         """
         Initialize BitGet exchange interface using CCXT
         
         Args:
             config: Dictionary containing exchange configuration
         """
-        self.config = config
+        self.config = config or {}
         self.logger = logging.getLogger(__name__)
         
         # Initialize CCXT exchange
         self.exchange = ccxt_async.bitget({
-            'apiKey': config.get('api_key'),
-            'secret': config.get('api_secret'),
-            'password': config.get('api_password'),
-            'enableRateLimit': True,
-            'options': {
+            'apiKey': config.get('apiKey', ''),
+            'secret': config.get('secret', ''),
+            'password': config.get('password', ''),
+            'enableRateLimit': config.get('enableRateLimit', True),
+            'options': config.get('options', {
                 'defaultType': 'swap',
                 'adjustForTimeDifference': True,
                 'recvWindow': 60000,
-                'testnet': config.get('use_testnet', True),
-            }
+                'testnet': config.get('testnet', True),
+            })
         })
         
-        if config.get('use_testnet', True):
+        if config and config.get('options', {}).get('testnet', True):
             self.exchange.set_sandbox_mode(True)
         
         # WebSocket related attributes    
@@ -59,127 +59,52 @@ class BitGetCCXT:
         self.ws_heartbeat_interval = 30  # seconds
             
         logger.info(
-            f"Initialized BitGet CCXT with {'TESTNET' if config.get('use_testnet', True) else 'MAINNET'}"
+            f"Initialized BitGet CCXT with {'TESTNET' if config.get('testnet', True) else 'MAINNET'}"
         )
             
-    def _format_symbol(self, symbol: Optional[str]) -> str:
-        """Format symbol for BitGet API"""
-        if not symbol:
-            raise ValueError("Symbol is required")
+    async def load_markets(self, reload: bool = False) -> Dict[str, Any]:
+        """Load exchange markets."""
+        try:
+            return await self.exchange.load_markets(reload=reload)
+        except Exception as e:
+            self.logger.error(f"Error loading markets: {str(e)}")
+            raise
             
-        # If the symbol is already formatted (contains a slash), return it as is
-        if '/' in symbol:
-            return symbol.upper()
+    async def fetch_ticker(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Fetch current ticker for a symbol."""
+        try:
+            return await self.exchange.fetch_ticker(symbol)
+        except Exception as e:
+            self.logger.error(f"Error fetching ticker: {str(e)}")
+            return None
             
-        # Format BTCUSDT to BTC/USDT:USDT
-        if symbol.upper().endswith('USDT'):
-            base = symbol[:-4]  # Remove 'USDT' from the end
-            return f"{base}/USDT:USDT".upper()
-            
-        # Format basic symbol to include USDT pairs
-        return f"{symbol}/USDT:USDT".upper()
-        
-    async def create_market_order(
-        self,
-        symbol: str,
-        side: Literal["buy", "sell"],
-        amount: float,
-        params: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def fetch_ohlcv(self, 
+                         symbol: str, 
+                         timeframe: str = '1h',
+                         since: Optional[int] = None,
+                         limit: Optional[int] = None) -> Optional[List[List[float]]]:
         """
-        Create a market order
+        Fetch OHLCV candlestick data.
         
         Args:
             symbol: Trading symbol
-            side: Order side (buy/sell)
-            amount: Order amount
-            params: Additional parameters
+            timeframe: Candlestick timeframe
+            since: Timestamp to start from
+            limit: Number of candles to fetch
             
         Returns:
-            Dict containing order information
+            List of OHLCV candles [timestamp, open, high, low, close, volume]
         """
-        formatted_symbol = self._format_symbol(symbol)
-        
         try:
-            order_params = params or {}
-            
-            order = await self.exchange.create_order(
-                symbol=formatted_symbol,
-                type="market",
-                side=side,
-                amount=amount,
-                params=order_params
+            return await self.exchange.fetch_ohlcv(
+                symbol=symbol,
+                timeframe=timeframe,
+                since=since,
+                limit=limit
             )
-            
-            self.logger.info(f"Created market {side} order for {amount} {formatted_symbol}")
-            return to_dict(order)
-            
         except Exception as e:
-            self.logger.error(f"Error creating market order: {e}")
-            raise
-    
-    async def create_order(
-        self, 
-        symbol: str, 
-        type: str, 
-        side: str, 
-        amount: float, 
-        price: Optional[float] = None, 
-        params: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        Create an order of any type
-        
-        Args:
-            symbol: Trading symbol
-            type: Order type (market, limit, stop, etc.)
-            side: Order side (buy/sell)
-            amount: Order amount
-            price: Order price (required for limit orders)
-            params: Additional parameters
-            
-        Returns:
-            Dict containing order information
-        """
-        formatted_symbol = self._format_symbol(symbol)
-        
-        try:
-            order_params = params or {}
-            
-            order = await self.exchange.create_order(
-                symbol=formatted_symbol,
-                type=type,
-                side=side,
-                amount=amount,
-                price=price,
-                params=order_params
-            )
-            
-            self.logger.info(f"Created {type} {side} order for {amount} {formatted_symbol}")
-            return to_dict(order)
-            
-        except Exception as e:
-            self.logger.error(f"Error creating order: {e}")
-            raise
-            
-    async def fetch_ticker(self, symbol: str) -> Dict[str, Any]:
-        """
-        Fetch current ticker information for a symbol
-        
-        Args:
-            symbol: Trading symbol
-            
-        Returns:
-            Dict containing ticker information
-        """
-        formatted_symbol = self._format_symbol(symbol)
-        
-        try:
-            ticker = await self.exchange.fetch_ticker(formatted_symbol)
-            return to_dict(ticker)
-        except Exception as e:
-            self.logger.error(f"Error fetching ticker: {e}")
-            raise
+            self.logger.error(f"Error fetching OHLCV data: {str(e)}")
+            return None
             
     async def fetch_balance(self) -> Dict[str, Any]:
         """
@@ -268,7 +193,7 @@ class BitGetCCXT:
         pass
         
     async def close(self) -> None:
-        """Close the exchange connection."""
+        """Close exchange connection."""
         await self.exchange.close()
         
     async def get_market_ticker(self, symbol: str) -> Dict[str, Any]:
@@ -377,3 +302,20 @@ class BitGetCCXT:
         except Exception as e:
             self.logger.error(f"Error creating market order: {e}")
             raise
+
+    def _format_symbol(self, symbol: str) -> str:
+        """Format symbol for BitGet API."""
+        if not symbol:
+            return None
+            
+        # If the symbol is already formatted (contains a slash), return it as is
+        if '/' in symbol:
+            return symbol.upper()
+            
+        # Format BTCUSDT to BTC/USDT:USDT
+        if symbol.upper().endswith('USDT'):
+            base = symbol[:-4]  # Remove 'USDT' from the end
+            return f"{base}/USDT:USDT".upper()
+            
+        # Format basic symbol to include USDT pairs
+        return f"{symbol}/USDT:USDT".upper()

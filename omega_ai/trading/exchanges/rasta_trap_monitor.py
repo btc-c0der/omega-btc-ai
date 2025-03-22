@@ -42,9 +42,6 @@ class RastaTrapMonitor:
         
         # Initialize CCXT client
         self.exchange = BitGetCCXT({
-            'apiKey': '',  # Read-only access is sufficient
-            'secret': '',
-            'password': '',
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'swap',
@@ -82,9 +79,8 @@ class RastaTrapMonitor:
         formatted = f"{prefix}{clean_symbol}USDT"
         
         # Convert to CCXT format
-        if not '/' in formatted:
-            base = formatted[:-4]  # Remove USDT suffix
-            formatted = f"{base}/USDT:USDT"
+        base = formatted[:-4]  # Remove USDT suffix
+        formatted = f"{base}/USDT:USDT"
             
         return formatted.upper()
         
@@ -127,10 +123,18 @@ class RastaTrapMonitor:
         try:
             # Get market data
             ticker = await self.exchange.fetch_ticker(self.symbol)
-            ohlcv = await self.exchange.fetch_ohlcv(self.symbol, timeframe='1h', limit=24)
-            
-            if not ticker or not ohlcv:
-                logger.warning(f"Failed to get market data for {self.symbol}")
+            if not ticker:
+                logger.warning(f"Failed to get ticker data for {self.symbol}")
+                return
+                
+            # Get OHLCV data
+            ohlcv = await self.exchange.fetch_ohlcv(
+                symbol=self.symbol,
+                timeframe='1h',
+                limit=24
+            )
+            if not ohlcv:
+                logger.warning(f"Failed to get OHLCV data for {self.symbol}")
                 return
                 
             # Calculate trap probability components
