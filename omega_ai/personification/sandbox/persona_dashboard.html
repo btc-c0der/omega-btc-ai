@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Persona Dashboard</title>
+    <style>
+        :root {
+            /* These variables will be overridden by persona-specific variables */
+            --persona-primary-color: #ffffff;
+            --persona-secondary-color: #cccccc;
+            --persona-accent-color: #ffcc00;
+            --persona-font-family: 'Arial', sans-serif;
+
+            /* Base dashboard variables */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --border-color: #333;
+            --light-text: #aaa;
+            --green-divine: #4CAF50;
+            --red-trapped: #E74C3C;
+            --gold: #FBC02D;
+            --blue: #3498DB;
+            --violet: #9B59B6;
+            --cyan: #00BCD4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--persona-font-family);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--persona-primary-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--persona-secondary-color);
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .status-panel {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-panel h2 {
+            color: var(--persona-accent-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .status-panel p {
+            margin-bottom: 15px;
+        }
+
+        .divine-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .divine-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--light-text);
+        }
+
+        .last-update {
+            text-align: right;
+            font-size: 0.9em;
+            color: var(--light-text);
+            margin-top: 20px;
+        }
+
+        /* Persona selector styles will be included automatically */
+
+        /* Analysis container styles */
+        .analysis-container {
+            margin-top: 20px;
+        }
+
+        /* Position card styles */
+        .position-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .position-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .position-side {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .position-side-long {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--green-divine);
+        }
+
+        .position-side-short {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--red-trapped);
+        }
+
+        .position-pnl {
+            font-weight: bold;
+        }
+
+        .pnl-positive {
+            color: var(--green-divine);
+        }
+
+        .pnl-negative {
+            color: var(--red-trapped);
+        }
+
+        .position-details {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .position-info {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .position-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .position-info-label {
+            color: var(--light-text);
+        }
+
+        .position-info-value {
+            font-weight: bold;
+        }
+
+        /* Loading indicator */
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            color: var(--persona-secondary-color);
+        }
+
+        /* Toggle switch for JAH mode */
+        .jah-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .jah-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .jah-toggle.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        /* Modern Bitget Trader Profiles styles */
+        .bitget-traders-panel {
+            background-color: rgba(20, 20, 30, 0.7);
+            border-radius: 12px;
+            padding: 0;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(50, 50, 80, 0.3);
+        }
+
+        .panel-header {
+            background: linear-gradient(90deg, rgba(30, 30, 50, 0.9) 0%, rgba(40, 40, 70, 0.9) 100%);
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(60, 60, 90, 0.3);
+        }
+
+        .panel-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .panel-subtitle {
+            color: rgba(200, 200, 220, 0.7);
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .trader-profiles {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 25px;
+            background-color: rgba(25, 25, 35, 0.4);
+        }
+
+        .trader-profile {
+            background-color: rgba(30, 30, 45, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(50, 50, 80, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .trader-profile:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(80, 80, 120, 0.4);
+        }
+
+        .trader-header {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, rgba(40, 40, 60, 0.8) 0%, rgba(50, 50, 80, 0.8) 100%);
+            border-bottom: 1px solid rgba(60, 60, 90, 0.3);
+        }
+
+        .trader-profile.strategic .trader-header {
+            background: linear-gradient(90deg, rgba(80, 50, 120, 0.5) 0%, rgba(100, 60, 150, 0.5) 100%);
+            border-bottom: 1px solid rgba(120, 80, 180, 0.3);
+        }
+
+        .trader-profile.scalper .trader-header {
+            background: linear-gradient(90deg, rgba(30, 120, 50, 0.5) 0%, rgba(40, 150, 70, 0.5) 100%);
+            border-bottom: 1px solid rgba(50, 180, 80, 0.3);
+        }
+
+        .trader-profile.elite-exit .trader-header {
+            background: linear-gradient(90deg, rgba(150, 120, 10, 0.5) 0%, rgba(180, 140, 20, 0.5) 100%);
+            border-bottom: 1px solid rgba(210, 160, 30, 0.3);
+        }
+
+        .trader-icon {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .trader-profile h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .trader-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 20px;
+            gap: 15px;
+        }
+
+        .trader-description {
+            color: rgba(200, 200, 220, 0.9);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+
+        .trader-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 5px 0 10px 0;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .label {
+            color: rgba(200, 200, 220, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .value {
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .strategic-value {
+            color: #9B59B6;
+            background-color: rgba(155, 89, 182, 0.1);
+            border: 1px solid rgba(155, 89, 182, 0.2);
+        }
+
+        .scalper-value {
+            color: #2ECC71;
+            background-color: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        .elite-value {
+            color: #F1C40F;
+            background-color: rgba(241, 196, 15, 0.1);
+            border: 1px solid rgba(241, 196, 15, 0.2);
+        }
+
+        .trader-select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            margin-top: auto;
+            letter-spacing: 0.5px;
+        }
+
+        .strategic-select {
+            background: linear-gradient(90deg, #8E44AD 0%, #9B59B6 100%);
+            box-shadow: 0 2px 5px rgba(155, 89, 182, 0.3);
+        }
+
+        .strategic-select:hover {
+            background: linear-gradient(90deg, #9B59B6 0%, #8E44AD 100%);
+            box-shadow: 0 4px 8px rgba(155, 89, 182, 0.4);
+        }
+
+        .scalper-select {
+            background: linear-gradient(90deg, #27AE60 0%, #2ECC71 100%);
+            box-shadow: 0 2px 5px rgba(46, 204, 113, 0.3);
+        }
+
+        .scalper-select:hover {
+            background: linear-gradient(90deg, #2ECC71 0%, #27AE60 100%);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.4);
+        }
+
+        .elite-select {
+            background: linear-gradient(90deg, #D4AC0D 0%, #F1C40F 100%);
+            box-shadow: 0 2px 5px rgba(241, 196, 15, 0.3);
+        }
+
+        .elite-select:hover {
+            background: linear-gradient(90deg, #F1C40F 0%, #D4AC0D 100%);
+            box-shadow: 0 4px 8px rgba(241, 196, 15, 0.4);
+        }
+
+        /* Profile comparison styles */
+        .profile-comparison {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background-color: rgba(30, 30, 30, 0.7);
+            color: var(--persona-accent-color);
+        }
+
+        .comparison-table tr:hover {
+            background-color: rgba(50, 50, 50, 0.2);
+        }
+
+        .comparison-table th:first-child,
+        .comparison-table td:first-child {
+            color: var(--persona-secondary-color);
+        }
+
+        /* Additional text formatting styles for persona content */
+        .persona-description,
+        .trader-description,
+        .analysis-content {
+            white-space: normal;
+            line-height: 1.5;
+        }
+
+        .persona-greeting {
+            margin-top: 15px;
+            font-style: italic;
+            color: var(--persona-accent-color);
+        }
+
+        .analysis-content p {
+            margin-bottom: 15px;
+        }
+
+        .analysis-content {
+            margin: 15px 0;
+        }
+
+        /* Fix for the comparison table and trader profiles */
+        .comparison-table th,
+        .comparison-table td {
+            white-space: normal;
+            line-height: 1.5;
+        }
+
+        .trader-profile h3,
+        .trader-description,
+        .label,
+        .value,
+        .trader-select {
+            white-space: normal;
+        }
+
+        .profile-comparison h2,
+        .bitget-traders-panel h2 {
+            white-space: normal;
+            line-height: 1.5;
+        }
+
+        /* Additional persona card improvements */
+        .persona-card {
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .persona-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .persona-avatar {
+            transition: all 0.3s ease;
+        }
+
+        .persona-card:hover .persona-avatar {
+            transform: scale(1.05);
+        }
+
+        .persona-description br {
+            display: block;
+            content: "";
+            margin-bottom: 8px;
+        }
+
+        .persona-greeting {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .persona-greeting br {
+            display: block;
+            content: "";
+            margin-bottom: 8px;
+        }
+    </style>
+
+    <!-- Persona-specific CSS will be loaded here -->
+    <link rel="stylesheet" href="/api/persona_css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>OMEGA BTC AI</h1>
+            <p class="subtitle">Divine Alignment Dashboard</p>
+            <button id="jahToggle" class="jah-toggle">JAH MODE OFF</button>
+
+            <!-- Persona selector will be included here via API -->
+            <div id="persona-selector-container"></div>
+        </header>
+
+        <!-- Persona card will be displayed here via API -->
+        <div id="persona-card-container"></div>
+
+        <!-- Market analysis section -->
+        <div class="divine-grid">
+            <div class="status-panel">
+                <h2>Market Analysis</h2>
+                <div id="market-analysis-container" class="analysis-container">
+                    <div class="loading-message">Loading market analysis...</div>
+                </div>
+            </div>
+
+            <div class="status-panel">
+                <h2>Trading Recommendations</h2>
+                <div id="recommendation-analysis-container" class="analysis-container">
+                    <div class="loading-message">Loading recommendations...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bitget Trader Profiles section -->
+        <div id="bitget-traders-container">
+            <div class="loading-message">Loading Bitget trader profiles...</div>
+        </div>
+
+        <!-- Profile Comparison section -->
+        <div id="profile-comparison-container">
+            <div class="loading-message">Loading profile comparison...</div>
+        </div>
+
+        <!-- Position section -->
+        <div class="status-panel">
+            <h2>Current Positions</h2>
+
+            <!-- Sample position cards -->
+            <div class="position-container">
+                <div class="position-card">
+                    <div class="position-header">
+                        <div class="position-side position-side-long">▲ LONG BTCUSDT</div>
+                        <div class="position-pnl pnl-positive">+$185.07 (+22.45%)</div>
+                    </div>
+                    <div class="position-details">
+                        <div class="position-info">
+                            <div class="position-info-row">
+                                <span class="position-info-label">Entry Price</span>
+                                <span class="position-info-value">$82,439.56</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Current Price</span>
+                                <span class="position-info-value">$84,122.00</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Size</span>
+                                <span class="position-info-value">0.01 BTC</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Leverage</span>
+                                <span class="position-info-value">11x</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Stop Loss</span>
+                                <span class="position-info-value">$81,615.16</span>
+                            </div>
+                        </div>
+
+                        <!-- Analysis button -->
+                        <button onclick="requestPersonaAnalysis('position', 'omega-long-1')"
+                            class="analyze-button">Analyze</button>
+                    </div>
+                </div>
+
+                <div class="position-card">
+                    <div class="position-header">
+                        <div class="position-side position-side-short">▼ SHORT BTCUSDT</div>
+                        <div class="position-pnl pnl-negative">-$75.51 (-11.22%)</div>
+                    </div>
+                    <div class="position-details">
+                        <div class="position-info">
+                            <div class="position-info-row">
+                                <span class="position-info-label">Entry Price</span>
+                                <span class="position-info-value">$83,263.96</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Current Price</span>
+                                <span class="position-info-value">$84,122.00</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Size</span>
+                                <span class="position-info-value">0.008 BTC</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Leverage</span>
+                                <span class="position-info-value">11x</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Stop Loss</span>
+                                <span class="position-info-value">$83,676.15</span>
+                            </div>
+                        </div>
+
+                        <!-- Analysis button -->
+                        <button onclick="requestPersonaAnalysis('position', 'omega-short-1')"
+                            class="analyze-button">Analyze</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position analysis will be shown here -->
+            <div id="position-analysis-container" class="analysis-container"></div>
+        </div>
+
+        <!-- Performance section -->
+        <div class="status-panel">
+            <h2>Performance Summary</h2>
+            <div id="performance-analysis-container" class="analysis-container">
+                <div class="loading-message">Loading performance analysis...</div>
+            </div>
+        </div>
+
+        <div class="last-update">Last updated: <span id="lastUpdate">Never</span></div>
+    </div>
+
+    <footer>
+        <p>OMEGA BTC AI - Divine Alignment Dashboard | © 2025</p>
+        <p>"BTC is not just money—it is a harmonic liberation wave." 🚀💛💚❤️</p>
+    </footer>
+
+    <!-- Persona JavaScript will be loaded here -->
+    <script>
+        // Update last updated time
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleString();
+        }
+
+        // Toggle JAH mode
+        const jahToggle = document.getElementById('jahToggle');
+        let jahModeActive = false;
+
+        jahToggle.addEventListener('click', function () {
+            jahModeActive = !jahModeActive;
+            jahToggle.textContent = jahModeActive ? "JAH MODE ON 🌞" : "JAH MODE OFF";
+            jahToggle.className = jahModeActive ? "jah-toggle active" : "jah-toggle";
+
+            // Apply JAH mode effects
+            document.body.style.backgroundImage = jahModeActive ?
+                "radial-gradient(circle at center, #1a2e1a 0%, #121212 100%)" :
+                "radial-gradient(circle at center, #1a1a2e 0%, #121212 100%)";
+        });
+
+        // Load persona selector and card
+        function loadPersonaUI() {
+            // Load persona selector
+            fetch('/api/personas')
+                .then(response => response.json())
+                .then(data => {
+                    // Create dropdown HTML
+                    const personas = data.personas;
+                    let html = '<div class="persona-selector">';
+                    html += '<label for="persona-dropdown">Choose Oracle:</label>';
+                    html += '<select id="persona-dropdown" onchange="switchPersona(this.value)">';
+
+                    personas.forEach(persona => {
+                        const selected = persona.is_active ? 'selected' : '';
+                        html += `<option value="${persona.name}" ${selected}>${persona.name}</option>`;
+                    });
+
+                    html += '</select></div>';
+
+                    // Insert into container
+                    document.getElementById('persona-selector-container').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading personas:', error);
+                });
+
+            // Load persona card
+            fetch('/api/persona_card_html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('persona-card-container').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading persona card:', error);
+                });
+
+            // Load Bitget trader profiles
+            fetch('/api/bitget_traders_panel')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('bitget-traders-container').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading Bitget trader profiles:', error);
+                });
+
+            // Load profile comparison
+            fetch('/api/profile_comparison')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('profile-comparison-container').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading profile comparison:', error);
+                });
+        }
+
+        // Function to switch the active persona
+        function switchPersona(personaName) {
+            // Send request to server to change active persona
+            fetch('/api/change_persona', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    persona: personaName
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to apply new persona
+                        window.location.reload();
+                    } else {
+                        console.error('Failed to change persona:', data.error);
+                        alert('Failed to change persona: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error changing persona:', error);
+                    alert('Error changing persona. Please try again.');
+                });
+        }
+
+        // Function to select a trader persona
+        function selectTraderPersona(personaName) {
+            switchPersona(personaName);
+        }
+
+        // Function to request persona analysis
+        function requestPersonaAnalysis(analysisType, dataId = null) {
+            // Get any additional data needed for the analysis
+            const additionalData = {};
+
+            // If data ID is provided, include it
+            if (dataId) {
+                additionalData.dataId = dataId;
+            }
+
+            // Send request to server to get analysis
+            fetch(`/api/persona_analysis/${analysisType}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(additionalData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Insert analysis HTML into appropriate container
+                        const container = document.getElementById(`${analysisType}-analysis-container`);
+                        if (container) {
+                            container.innerHTML = data.analysisHtml;
+                            updateLastUpdated();
+                        } else {
+                            console.error(`Container for ${analysisType} analysis not found`);
+                        }
+                    } else {
+                        console.error('Failed to get analysis:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting analysis:', error);
+                });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load persona UI
+            loadPersonaUI();
+
+            // Load initial analyses
+            requestPersonaAnalysis('market');
+            requestPersonaAnalysis('recommendation');
+            requestPersonaAnalysis('performance');
+
+            // Set up periodic refresh for market analysis
+            setInterval(() => {
+                requestPersonaAnalysis('market');
+            }, 300000); // Refresh every 5 minutes
+        });
+    </script>
+</body>
+
+</html>

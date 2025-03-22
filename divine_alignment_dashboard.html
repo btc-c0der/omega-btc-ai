@@ -1096,29 +1096,43 @@
                         // Convert to string with proper formatting
                         const jsonString = JSON.stringify(jsonData, null, 2);
 
-                        // Copy to clipboard
-                        navigator.clipboard.writeText(jsonString).then(
-                            () => {
+                        // Fallback copy method that works in more environments
+                        try {
+                            // Create a temporary textarea element
+                            const textarea = document.createElement('textarea');
+                            textarea.value = jsonString;
+                            textarea.setAttribute('readonly', ''); // Prevent keyboard from appearing on mobile
+                            textarea.style.position = 'absolute';
+                            textarea.style.left = '-9999px'; // Move outside the screen
+                            document.body.appendChild(textarea);
+
+                            // Select the text
+                            textarea.select();
+                            textarea.setSelectionRange(0, 99999); // For mobile devices
+
+                            // Execute copy command
+                            const successful = document.execCommand('copy');
+
+                            // Remove the textarea
+                            document.body.removeChild(textarea);
+
+                            if (successful) {
                                 // Visual feedback
                                 copyJsonBtn.textContent = "Copied!";
                                 copyJsonBtn.classList.add('copied');
-
-                                // Reset button text after 2 seconds
-                                setTimeout(() => {
-                                    copyJsonBtn.textContent = "Copy JSON";
-                                    copyJsonBtn.classList.remove('copied');
-                                }, 2000);
-                            },
-                            (err) => {
-                                console.error('Could not copy text: ', err);
-                                copyJsonBtn.textContent = "Copy Failed";
-
-                                // Reset button text after 2 seconds
-                                setTimeout(() => {
-                                    copyJsonBtn.textContent = "Copy JSON";
-                                }, 2000);
+                            } else {
+                                throw new Error("Copy command was unsuccessful");
                             }
-                        );
+                        } catch (err) {
+                            console.error('Could not copy text with fallback: ', err);
+                            copyJsonBtn.textContent = "Copy Failed";
+                        }
+
+                        // Reset button text after 2 seconds
+                        setTimeout(() => {
+                            copyJsonBtn.textContent = "Copy JSON";
+                            copyJsonBtn.classList.remove('copied');
+                        }, 2000);
                     })
                     .catch(error => {
                         console.error('Error fetching data for copy:', error);
