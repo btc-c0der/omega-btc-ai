@@ -7,6 +7,7 @@
     <title>OMEGA BTC AI - Divine Alignment Dashboard</title>
     <!-- Link to shared OMEGA dashboard styles -->
     <link rel="stylesheet" href="/assets/css/omega_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/json-formatter-js@2.3.4/dist/json-formatter.umd.min.js"></script>
     <style>
         /* Divine Alignment Dashboard specific styles */
         @font-face {
@@ -592,6 +593,94 @@
             color: var(--light-text);
             font-style: italic;
         }
+
+        .json-orders-section {
+            margin-top: 40px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .view-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .view-controls label {
+            color: var(--gold);
+        }
+
+        .view-controls select {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--light-text);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .json-container {
+            background-color: rgba(20, 20, 20, 0.6);
+            border-radius: 5px;
+            padding: 15px;
+            overflow: auto;
+            max-height: 500px;
+            margin-top: 10px;
+            font-family: monospace;
+            position: relative;
+        }
+
+        /* Customize the JSON Formatter styles to match our theme */
+        .json-container .string {
+            color: #7EC699;
+        }
+
+        .json-container .number {
+            color: #F78C6C;
+        }
+
+        .json-container .boolean {
+            color: #89DDFF;
+        }
+
+        .json-container .null {
+            color: #FF5370;
+        }
+
+        .json-container .key {
+            color: #C792EA;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #9b59b6, #3498db);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #8e44ad, #2980b9);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
     </style>
 </head>
 
@@ -685,6 +774,29 @@
                         <!-- Trade history will be inserted here -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- JSON Orders Visualizer Section -->
+            <div class="json-orders-section">
+                <h3 class="history-title">JSON Orders Visualizer</h3>
+                <div class="view-controls">
+                    <label for="jsonExpandLevel">Expand Level:</label>
+                    <select id="jsonExpandLevel">
+                        <option value="1">1 - Collapsed</option>
+                        <option value="2" selected>2 - Medium</option>
+                        <option value="3">3 - Expanded</option>
+                        <option value="Infinity">Full Expansion</option>
+                    </select>
+                    <label for="viewSelector">View:</label>
+                    <select id="viewSelector">
+                        <option value="positions">Positions</option>
+                        <option value="history">Trade History</option>
+                        <option value="elite">Elite Strategy</option>
+                        <option value="all">All Data</option>
+                    </select>
+                    <button id="copyJsonBtn" class="copy-btn">Copy JSON</button>
+                </div>
+                <div id="jsonViewer" class="json-container"></div>
             </div>
         </section>
     </div>
@@ -869,21 +981,51 @@
                 });
         }
 
-        // Initialize the dashboard
-        function initializeDashboard() {
-            initializeFiboLevels();
-            updateStatus();
-            updateTradingData();
+        // Add this function to render the JSON data
+        function updateJsonViewer(data) {
+            const jsonViewer = document.getElementById('jsonViewer');
+            const viewSelector = document.getElementById('viewSelector');
+            const jsonExpandLevel = document.getElementById('jsonExpandLevel');
 
-            // Set up automatic refresh every 60 seconds
-            setInterval(updateStatus, 60000);
-            setInterval(updateTradingData, 30000);
+            // Determine which data to show based on the view selector
+            let jsonData = data;
+            switch (viewSelector.value) {
+                case 'positions':
+                    jsonData = data.positions;
+                    break;
+                case 'history':
+                    jsonData = data.history;
+                    break;
+                case 'elite':
+                    jsonData = data.elite_strategy;
+                    break;
+                case 'all':
+                default:
+                    jsonData = data;
+                    break;
+            }
 
-            // Set up JAH mode toggle
-            jahToggle.addEventListener('click', toggleJahMode);
+            // Get the expand level
+            const expandLevel = jsonExpandLevel.value === 'Infinity'
+                ? Infinity
+                : parseInt(jsonExpandLevel.value);
+
+            // Clear previous content
+            jsonViewer.innerHTML = '';
+
+            // Create a new formatter and render
+            const formatter = new JSONFormatter(jsonData, expandLevel, {
+                hoverPreviewEnabled: true,
+                hoverPreviewArrayCount: 100,
+                hoverPreviewFieldCount: 5,
+                animateOpen: true,
+                animateClose: true
+            });
+
+            jsonViewer.appendChild(formatter.render());
         }
 
-        // New functions for trading data
+        // Update the updateTradingData function to also update the JSON viewer
         function updateTradingData() {
             fetch('/api/trading_data')
                 .then(response => response.json())
@@ -896,12 +1038,116 @@
 
                     // Update trade history
                     renderTradeHistory(data.history);
+
+                    // Update JSON viewer
+                    updateJsonViewer(data);
                 })
                 .catch(error => {
                     console.error('Error fetching trading data:', error);
                 });
         }
 
+        // Add event listeners for the view and expand level selectors
+        function initializeJsonViewer() {
+            const viewSelector = document.getElementById('viewSelector');
+            const jsonExpandLevel = document.getElementById('jsonExpandLevel');
+            const copyJsonBtn = document.getElementById('copyJsonBtn');
+
+            viewSelector.addEventListener('change', () => {
+                fetch('/api/trading_data')
+                    .then(response => response.json())
+                    .then(data => updateJsonViewer(data))
+                    .catch(error => console.error('Error fetching data for JSON viewer:', error));
+            });
+
+            jsonExpandLevel.addEventListener('change', () => {
+                fetch('/api/trading_data')
+                    .then(response => response.json())
+                    .then(data => updateJsonViewer(data))
+                    .catch(error => console.error('Error fetching data for JSON viewer:', error));
+            });
+
+            // Add copy button functionality
+            copyJsonBtn.addEventListener('click', () => {
+                const viewSelector = document.getElementById('viewSelector');
+
+                // Get the current data
+                fetch('/api/trading_data')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Get the selected data view
+                        let jsonData = data;
+                        switch (viewSelector.value) {
+                            case 'positions':
+                                jsonData = data.positions;
+                                break;
+                            case 'history':
+                                jsonData = data.history;
+                                break;
+                            case 'elite':
+                                jsonData = data.elite_strategy;
+                                break;
+                            case 'all':
+                            default:
+                                jsonData = data;
+                                break;
+                        }
+
+                        // Convert to string with proper formatting
+                        const jsonString = JSON.stringify(jsonData, null, 2);
+
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(jsonString).then(
+                            () => {
+                                // Visual feedback
+                                copyJsonBtn.textContent = "Copied!";
+                                copyJsonBtn.classList.add('copied');
+
+                                // Reset button text after 2 seconds
+                                setTimeout(() => {
+                                    copyJsonBtn.textContent = "Copy JSON";
+                                    copyJsonBtn.classList.remove('copied');
+                                }, 2000);
+                            },
+                            (err) => {
+                                console.error('Could not copy text: ', err);
+                                copyJsonBtn.textContent = "Copy Failed";
+
+                                // Reset button text after 2 seconds
+                                setTimeout(() => {
+                                    copyJsonBtn.textContent = "Copy JSON";
+                                }, 2000);
+                            }
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data for copy:', error);
+                        copyJsonBtn.textContent = "Copy Failed";
+
+                        // Reset button text after 2 seconds
+                        setTimeout(() => {
+                            copyJsonBtn.textContent = "Copy JSON";
+                        }, 2000);
+                    });
+            });
+        }
+
+        // Initialize the dashboard
+        function initializeDashboard() {
+            initializeFiboLevels();
+            updateStatus();
+            updateTradingData();
+            initializeJsonViewer();
+
+            // Set up automatic refresh every 60 seconds
+            setInterval(updateStatus, 60000);
+            setInterval(updateTradingData, 30000);
+
+            // Set up JAH mode toggle
+            jahToggle.addEventListener('click', toggleJahMode);
+        }
+
+        // New functions for trading data
         function renderPositions(positions) {
             const container = document.getElementById('positionContainer');
 
