@@ -6,10 +6,11 @@ OMEGA BTC AI - Divine Alignment Dashboard Launcher
 Launches the Divine Alignment Dashboard with trader personas on port 5051.
 
 Usage:
-    python start_divine_dashboard.py [--no-browser]
+    python start_divine_dashboard.py [--no-browser] [--port PORT]
 
 Options:
     --no-browser    Don't automatically open browser window
+    --port PORT     Specify custom port (default: 5051)
 
 Author: OMEGA BTC AI Team
 Version: 2.0
@@ -23,6 +24,7 @@ import webbrowser
 import time
 import threading
 import signal
+import socket
 from pathlib import Path
 
 # ANSI color codes for terminal output
@@ -34,7 +36,7 @@ MAGENTA = "\033[35m"
 CYAN = "\033[36m"
 RESET = "\033[0m"
 
-def print_banner():
+def print_banner(port):
     """Print a stylized banner for the Divine Alignment Dashboard."""
     print(f"""
 {MAGENTA}╔══════════════════════════════════════════════════════════════════╗{RESET}
@@ -45,7 +47,7 @@ def print_banner():
 
 {GREEN}JAH BLESS OMEGA FIBONACCI GOLDEN RATIO AI{RESET}
 
-{CYAN}Launching Divine Alignment Dashboard with Trader Personas on port 5051{RESET}
+{CYAN}Launching Divine Alignment Dashboard with Trader Personas on port {port}{RESET}
 
 {YELLOW}Features:{RESET}
   • Golden Ratio Price Analysis
@@ -56,7 +58,29 @@ def print_banner():
 {CYAN}This assembly is not mechanical—it's rhythmic. Each opcode has intention.{RESET}
 """)
 
-def run_flask_app():
+def check_port_available(port):
+    """Check if the port is available."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        result = sock.connect_ex(('localhost', port))
+        sock.close()
+        return result != 0  # If result is 0, port is in use
+    except socket.error:
+        return False
+
+def find_available_port(start_port, max_attempts=100):
+    """Find an available port starting from the given port."""
+    port = start_port
+    for _ in range(max_attempts):
+        if check_port_available(port):
+            return port
+        port += 1
+    
+    # If no ports are available in the range, return None
+    return None
+
+def run_flask_app(port):
     """Run the Flask API for the dashboard."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     api_script = os.path.join(script_dir, 'golden_ratio_api.py')
@@ -66,9 +90,9 @@ def run_flask_app():
     env["FLASK_APP"] = api_script
     env["FLASK_ENV"] = "development"
     
-    # Start Flask app on port 5051
+    # Start Flask app on specified port
     process = subprocess.Popen(
-        [sys.executable, api_script],
+        [sys.executable, api_script, "--port", str(port)],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -120,17 +144,29 @@ def main():
     """Main entry point for the Divine Alignment Dashboard launcher."""
     parser = argparse.ArgumentParser(description="Launch the OMEGA BTC AI Divine Alignment Dashboard")
     parser.add_argument("--no-browser", action="store_true", help="Don't open browser automatically")
+    parser.add_argument("--port", type=int, default=5051, help="Port to run the dashboard on (default: 5051)")
     args = parser.parse_args()
     
-    # Print banner
-    print_banner()
+    # Check if the specified port is available
+    if not check_port_available(args.port):
+        print(f"{YELLOW}Port {args.port} is already in use.{RESET}")
+        new_port = find_available_port(args.port + 1)
+        if new_port:
+            print(f"{GREEN}Using alternative port: {new_port}{RESET}")
+            args.port = new_port
+        else:
+            print(f"{RED}No available ports found in range {args.port} to {args.port + 100}.{RESET}")
+            sys.exit(1)
+    
+    # Print banner with the port that will be used
+    print_banner(args.port)
     
     # Set up signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
     # Start Flask app
-    flask_process = run_flask_app()
+    flask_process = run_flask_app(args.port)
     
     # Create stop event for threads
     global stop_event
@@ -146,7 +182,7 @@ def main():
     
     # Open browser if not disabled
     if not args.no_browser:
-        open_dashboard("http://localhost:5051/divine")
+        open_dashboard(f"http://localhost:{args.port}/divine")
     
     try:
         # Keep the main thread alive

@@ -6,7 +6,10 @@ OMEGA BTC AI - Divine Alignment Dashboard - Trader Personas Tests
 Tests for the trader personas API endpoint in the Divine Alignment Dashboard.
 
 Usage:
-    python -m pytest test_trader_personas.py -v
+    python -m pytest test_trader_personas.py -v [--port PORT]
+
+Options:
+    --port PORT     Port to run the API on for testing (default: tries 5051-5100)
 
 Author: OMEGA BTC AI Team
 Version: 1.0
@@ -21,14 +24,39 @@ import time
 import subprocess
 import threading
 import signal
+import socket
+import argparse
 from pathlib import Path
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Test constants
-API_URL = "http://localhost:5051"
+TEST_PORT = None  # Will be determined dynamically
+API_URL = None  # Will be set once port is determined
 PERSONAS_ENDPOINT = "/api/trader_personas"
+
+def check_port_available(port):
+    """Check if the port is available."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        result = sock.connect_ex(('localhost', port))
+        sock.close()
+        return result != 0  # If result is 0, port is in use
+    except socket.error:
+        return False
+
+def find_available_port(start_port, max_attempts=50):
+    """Find an available port starting from the given port."""
+    port = start_port
+    for _ in range(max_attempts):
+        if check_port_available(port):
+            return port
+        port += 1
+    
+    # If no ports are available in the range, return None
+    return None
 
 class TestTraderPersonas:
     """Test suite for trader personas functionality."""
@@ -36,6 +64,29 @@ class TestTraderPersonas:
     @classmethod
     def setup_class(cls):
         """Set up the test class by starting the API server."""
+        global API_URL, TEST_PORT
+        
+        # Parse command line for custom port if provided
+        parser = argparse.ArgumentParser(description='Test Trader Personas API')
+        parser.add_argument('--port', type=int, help='Port to use for testing')
+        args, unknown = parser.parse_known_args()
+        
+        # Find an available port
+        if args.port:
+            if check_port_available(args.port):
+                TEST_PORT = args.port
+            else:
+                print(f"Requested port {args.port} is not available. Searching for an available port...")
+                TEST_PORT = find_available_port(args.port + 1)
+        else:
+            TEST_PORT = find_available_port(5051)
+        
+        if not TEST_PORT:
+            pytest.fail("No available ports found for testing")
+        
+        API_URL = f"http://localhost:{TEST_PORT}"
+        print(f"Using port {TEST_PORT} for testing")
+        
         # Start the API server in a subprocess
         script_dir = os.path.dirname(os.path.abspath(__file__))
         api_script = os.path.join(script_dir, 'golden_ratio_api.py')
@@ -45,7 +96,7 @@ class TestTraderPersonas:
         env["FLASK_ENV"] = "development"
         
         cls.api_process = subprocess.Popen(
-            [sys.executable, api_script],
+            [sys.executable, api_script, "--port", str(TEST_PORT)],
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -54,6 +105,14 @@ class TestTraderPersonas:
         
         # Give the server time to start
         time.sleep(3)
+        
+        # Check if server started successfully
+        try:
+            response = requests.get(f"{API_URL}/api/trader_personas", timeout=2)
+            if response.status_code != 200:
+                raise Exception(f"Server returned status code {response.status_code}")
+        except Exception as e:
+            pytest.fail(f"Failed to connect to test server: {str(e)}")
     
     @classmethod
     def teardown_class(cls):
