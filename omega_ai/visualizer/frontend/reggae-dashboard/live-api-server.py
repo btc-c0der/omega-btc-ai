@@ -50,12 +50,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger("live_api_server")
 
-# Backend server URL
-BACKEND_URL = "http://localhost:8001"
-
-# Redis configuration
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+# Constants for the localhost server
+redis_client = None
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
+BACKEND_URL = "http://localhost:8000"
+WS_URL = "ws://localhost:8000"
 
 # BitGet configuration
 BITGET_API_KEY = os.getenv('BITGET_API_KEY', '')
@@ -532,7 +533,7 @@ def websocket_proxy():
     """Redirect WebSocket connections to the backend."""
     # Just inform the client about WebSocket endpoint
     return jsonify({
-        "message": "WebSocket endpoint is at ws://localhost:8001/ws",
+        "message": "WebSocket endpoint is at ws://localhost:8000/ws",
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
 

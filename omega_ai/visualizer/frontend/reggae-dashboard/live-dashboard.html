@@ -2338,8 +2338,8 @@
             }
         }
 
-        // API endpoints for Redis data
-        const API_BASE = "http://localhost:8001/api";
+        // API endpoints for data retrieval
+        const API_BASE = "http://localhost:8000/api";
         const TRAP_ENDPOINT = `${API_BASE}/trap-probability`;
         const POSITION_ENDPOINT = `${API_BASE}/position`;
         const BTC_PRICE_ENDPOINT = `${API_BASE}/btc-price`;
@@ -2504,10 +2504,20 @@
 
                 // Handle the case where the key exists but value is null (key not found)
                 if (data.value === null) {
-                    debug('REDIS', `Key ${key} not found in Redis, returning default empty value`);
-                    // Return empty default values for common keys
+                    debug('REDIS', `Key ${key} not found in Redis, returning default value`);
+                    // Return default values for common keys
                     if (key === 'position_targets') {
                         return { "long": [], "short": [] };
+                    }
+                    else if (key === 'trader_config') {
+                        return {
+                            "trap_protection": true,
+                            "trap_threshold": 70,
+                            "long_risk_multiplier": 1.0,
+                            "short_risk_multiplier": 1.0,
+                            "auto_tp_sl": true,
+                            "default_leverage": 10
+                        };
                     }
                     return null;
                 }
@@ -2524,6 +2534,16 @@
                 // Return default values for specific keys on error
                 if (key === 'position_targets') {
                     return { "long": [], "short": [] };
+                }
+                else if (key === 'trader_config') {
+                    return {
+                        "trap_protection": true,
+                        "trap_threshold": 70,
+                        "long_risk_multiplier": 1.0,
+                        "short_risk_multiplier": 1.0,
+                        "auto_tp_sl": true,
+                        "default_leverage": 10
+                    };
                 }
                 return null;
             }
@@ -4352,10 +4372,25 @@
             // Initial load of trader config
             const loadTraderConfig = async () => {
                 try {
-                    const config = await fetchRedisKey('trader_config');
-                    if (config) {
+                    let config;
+                    try {
+                        config = await fetchRedisKey('trader_config');
                         debug('TRADER', 'Loaded trader config from Redis:', config);
+                    } catch (e) {
+                        // If fetchRedisKey fails, use default config
+                        debug('TRADER', 'Error fetching trader_config, using defaults:', e);
+                        config = {
+                            "trap_protection": true,
+                            "trap_threshold": 70,
+                            "long_risk_multiplier": 1.0,
+                            "short_risk_multiplier": 1.0,
+                            "auto_tp_sl": true,
+                            "default_leverage": 10
+                        };
+                    }
 
+                    // Only proceed if we have config (either from Redis or default)
+                    if (config) {
                         // Update UI with config values
                         if (trapProtectionToggle && config.trap_protection !== undefined) {
                             trapProtectionToggle.checked = config.trap_protection;
@@ -4378,6 +4413,7 @@
                     }
                 } catch (error) {
                     console.error('Error loading trader config:', error);
+                    debug('TRADER', 'Critical error in loadTraderConfig:', error);
                 }
             };
 
@@ -5269,8 +5305,8 @@
         // Load the Big Brother panel
         async function loadBigBrotherPanel() {
             try {
-                // Use the new dashboard mount path instead of a relative path
-                const response = await fetch('/dashboard/big_brother_panel.html');
+                // Use the /big-brother endpoint to fetch the panel
+                const response = await fetch('/big-brother');
                 if (!response.ok) {
                     throw new Error(`Failed to load Big Brother panel: ${response.status}`);
                 }
