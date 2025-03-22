@@ -118,20 +118,13 @@ def test_frontend_components():
 # Let's create a simpler test for the server API structure
 def test_server_api_structure():
     """Test that the server has all the expected API endpoints."""
-    # Test by making actual API calls rather than inspecting routes
-    # This is more reliable and avoids linting issues
+    routes = [route for route in test_server.app.routes]
+    endpoint_paths = [route.path for route in routes]
     
-    # Test Big Brother data endpoint
-    response = client.get("/api/big-brother-data")
-    assert response.status_code != 404, "Big Brother data endpoint not found"
-    
-    # Test 3D flow endpoint
-    response = client.get("/api/flow/3d")
-    assert response.status_code != 404, "3D flow endpoint not found"
-    
-    # Test 2D flow endpoint
-    response = client.get("/api/flow/2d")
-    assert response.status_code != 404, "2D flow endpoint not found"
+    # Check if all our Big Brother API endpoints are present
+    assert "/api/big-brother-data" in endpoint_paths
+    assert "/api/flow/3d" in endpoint_paths
+    assert "/api/flow/2d" in endpoint_paths
 
 # Let's also check that the Redis methods exist as expected
 def test_server_redis_methods():
@@ -144,35 +137,26 @@ def test_server_redis_methods():
     if test_server.redis_client:
         assert hasattr(test_server.redis_client, "get"), "Redis client missing get method"
 
-# New test to check for the "Failed to load Big Brother panel" error
-def test_dashboard_big_brother_integration():
-    """Test the integration of the Big Brother panel with the main dashboard."""
-    # Check if the panel HTML is in the correct location
-    panel_html_path = Path("omega_ai/visualizer/frontend/reggae-dashboard/big_brother_panel.html")
-    assert panel_html_path.exists(), "big_brother_panel.html not found, would cause loading error"
+def test_big_brother_panel_access():
+    """Test if the Big Brother panel HTML file is accessible via the proper URL."""
+    # Get the server URL path
+    test_client = TestClient(test_server.app)
     
-    # Check if the main dashboard HTML contains the code to load the panel
-    dashboard_html_path = Path("omega_ai/visualizer/frontend/reggae-dashboard/live-dashboard.html")
-    assert dashboard_html_path.exists(), "live-dashboard.html not found"
+    # Test direct access to the big_brother_panel.html via the dashboard mount point
+    response = test_client.get("/dashboard/big_brother_panel.html")
+    assert response.status_code == 200, "Big Brother panel HTML should be accessible via /dashboard/ path"
+    assert "<div class=\"big-brother-panel\">" in response.text
     
-    with open(dashboard_html_path, 'r') as f:
-        dashboard_content = f.read()
-        
-        # Check for the elements needed to load the Big Brother panel
-        assert 'id="big-brother-content"' in dashboard_content, "The container for Big Brother panel is missing"
-        assert 'function loadBigBrotherPanel' in dashboard_content, "The loading function is missing"
-        assert "fetch('big_brother_panel.html')" in dashboard_content, "The fetch call is missing or incorrect"
-        
-        # Check for error handling code
-        assert 'Failed to load Big Brother monitoring panel' in dashboard_content, "Error handling message is missing"
+    # Test the convenience redirect endpoint
+    response = test_client.get("/big-brother")
+    assert response.status_code in (200, 307), "The /big-brother endpoint should work"
     
-    # Verify the panel HTML is valid
-    with open(panel_html_path, 'r') as f:
-        panel_content = f.read()
-        assert '<div class="big-brother-panel">' in panel_content, "Panel HTML doesn't contain expected content"
+    # Test access to the CSS and JS files
+    response = test_client.get("/dashboard/big_brother_styles.css")
+    assert response.status_code == 200, "CSS file should be accessible"
     
-    # Verify the dashboard loads the panel on DOMContentLoaded
-    assert "DOMContentLoaded" in dashboard_content and "loadBigBrotherPanel" in dashboard_content, "Panel is not automatically loaded"
+    response = test_client.get("/dashboard/big_brother_panel.js") 
+    assert response.status_code == 200, "JS file should be accessible"
 
 if __name__ == "__main__":
     pytest.main(["-xvs", __file__]) 
