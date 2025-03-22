@@ -31,6 +31,7 @@ def generate_visualization():
         data = request.json or {}
         years = int(data.get('years', 7))
         use_redis = data.get('dataSource', 'redis') == 'redis'
+        use_3d = data.get('mode', '2d') == '3d'
         
         # Create a timestamp for the output filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -41,9 +42,14 @@ def generate_visualization():
         cmd = [
             sys.executable,
             'scripts/position_flow_tracker.py',
-            '--golden-ratio',
             f'--years={years}'
         ]
+        
+        # Add appropriate flag based on visualization mode
+        if use_3d:
+            cmd.append('--golden-ratio-3d')
+        else:
+            cmd.append('--golden-ratio')
         
         if not use_redis:
             cmd.append('--no-redis')

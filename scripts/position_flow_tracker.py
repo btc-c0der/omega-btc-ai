@@ -1234,6 +1234,176 @@ async def visualize_golden_ratio_overlay(years=7, redis_client=None):
     log_color(f"{years}-year BTC golden ratio visualization saved as {filename}", GREEN)
     plt.show()
 
+async def visualize_golden_ratio_3d(years=7, redis_client=None):
+    """
+    Create a 3D visualization of BTC price vs golden ratio simulation
+    with time as the third dimension.
+    
+    Args:
+        years: Number of years to analyze
+        redis_client: Redis client connection (optional)
+    """
+    # Fetch long-term BTC price data
+    price_data = await fetch_long_term_price_data(years, redis_client)
+    
+    if price_data is None or price_data.empty:
+        log_color("No price data available for visualization.", RED)
+        return
+    
+    # Generate golden ratio simulation
+    golden_simulation = await create_golden_ratio_simulation(price_data)
+    
+    # Merge actual and simulated data
+    combined_data = pd.merge(price_data, golden_simulation, on='timestamp')
+    
+    # Calculate difference and volatility metrics
+    combined_data['difference'] = combined_data['close'] - combined_data['golden_price']
+    combined_data['volatility'] = combined_data['close'].pct_change().rolling(window=30).std() * 100
+    
+    # Normalize timestamps for x-axis (0 to 1 scale)
+    total_days = (combined_data['timestamp'].max() - combined_data['timestamp'].min()).total_seconds() / 86400
+    combined_data['time_normalized'] = [(ts - combined_data['timestamp'].min()).total_seconds() / (86400 * total_days) 
+                                       for ts in combined_data['timestamp']]
+    
+    # Prepare 3D plot
+    plt.style.use('dark_background')
+    fig = plt.figure(figsize=(14, 10))
+    
+    # Create 3D axes
+    ax = fig.add_subplot(111, projection='3d')
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    
+    # Get data for 3D plot
+    x = combined_data['time_normalized'].values  # Normalized time
+    y_actual = combined_data['close'].values     # Actual price
+    y_golden = combined_data['golden_price'].values  # Golden ratio price
+    z = np.arange(len(combined_data))            # Sequential index for depth
+    
+    # Color mapping based on correlation
+    correlation = combined_data['close'].rolling(window=60).corr(combined_data['golden_price'])
+    norm = plt.Normalize(-1, 1)
+    colors = plt.cm.plasma(norm(correlation))
+    
+    # Plot actual price as a surface
+    xx, zz = np.meshgrid(x, z)
+    yy_actual = np.array([y_actual] * len(z))
+    
+    # Instead of plot_surface, use plot_wireframe
+    for i in range(len(z)-1):
+        ax.plot([x[i], x[i+1]], [y_actual[i], y_actual[i+1]], [z[i], z[i+1]], 
+                color='white', linewidth=2, alpha=0.8)
+    
+    # Plot golden ratio price
+    for i in range(len(z)-1):
+        ax.plot([x[i], x[i+1]], [y_golden[i], y_golden[i+1]], [z[i], z[i+1]], 
+                color='gold', linewidth=2, alpha=0.8)
+    
+    # Calculate Fibonacci levels based on price range
+    max_price = max(combined_data['close'].max(), combined_data['golden_price'].max())
+    min_price = min(combined_data['close'].min(), combined_data['golden_price'].min())
+    price_range = max_price - min_price
+    
+    # Standard Fibonacci levels
+    fibo_levels = [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618]
+    level_prices = [min_price + (level * price_range) for level in fibo_levels]
+    
+    # Add Fibonacci planes
+    for level, price, fib in zip(level_prices, level_prices, fibo_levels):
+        if min_price <= price <= max_price * 1.5:  # Show levels within reasonable range
+            # Different colors for different Fibonacci levels
+            if fib == 0.618:  # Golden ratio
+                color = 'gold'
+                alpha = 0.4
+            elif fib == 1.0:  # 100% level
+                color = 'white'
+                alpha = 0.3
+            else:
+                color = 'cyan'
+                alpha = 0.2
+            
+            # Create points for the horizontal plane
+            x_grid, z_grid = np.meshgrid([0, 1], [0, len(combined_data)])
+            y_grid = np.ones_like(x_grid) * price
+            
+            # Draw lines across the price level at regular intervals
+            for k in range(0, len(combined_data), int(len(combined_data)/10)):
+                ax.plot([0, 1], [price, price], [k, k], 
+                       color=color, alpha=alpha, linestyle='--')
+            
+            # Add text label
+            ax.text(0, price, len(combined_data), 
+                   f"Fib {fib}", color=color, fontsize=9)
+    
+    # Mark halving events
+    halving_dates = [
+        datetime(2016, 7, 9),
+        datetime(2020, 5, 11),
+        datetime(2024, 4, 20)
+    ]
+    
+    for halving_date in halving_dates:
+        if halving_date >= combined_data['timestamp'].min() and halving_date <= combined_data['timestamp'].max():
+            # Find the closest point
+            closest_idx = (combined_data['timestamp'] - halving_date).abs().idxmin()
+            halving_x = combined_data.loc[closest_idx, 'time_normalized']
+            halving_y_actual = combined_data.loc[closest_idx, 'close']
+            halving_z = closest_idx
+            
+            # Plot a vertical line at the halving date
+            ax.plot([halving_x, halving_x], [min_price, max_price], [halving_z, halving_z], 
+                   color='magenta', linestyle='-', alpha=0.7, linewidth=2)
+    
+    # Add correlation info
+    overall_corr = combined_data['close'].corr(combined_data['golden_price'])
+    fig.text(0.5, 0.01, f"Overall correlation: {overall_corr:.4f}", 
+            ha='center', color='white', fontsize=11)
+    
+    # Set labels and title
+    ax.set_xlabel('Time', labelpad=10)
+    ax.set_ylabel('Price (USD)', labelpad=10)
+    ax.set_zlabel('Sequence', labelpad=10)
+    
+    # Add custom tick labels for time axis
+    time_ticks = np.linspace(0, 1, 5)
+    time_labels = [combined_data['timestamp'].min() + 
+                  timedelta(days=t * total_days) for t in time_ticks]
+    time_labels = [t.strftime('%Y-%m') for t in time_labels]
+    ax.set_xticks(time_ticks)
+    ax.set_xticklabels(time_labels)
+    
+    # Color customization
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.zaxis.label.set_color('white')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    ax.tick_params(axis='z', colors='white')
+    
+    # Set title
+    plt.title(f"{years}-Year BTC Price with Golden Ratio (3D View)", 
+             color='white', fontsize=16)
+    
+    # Add legend
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], color='white', lw=2, label='BTC Price'),
+        Line2D([0], [0], color='gold', lw=2, label='Golden Ratio')
+    ]
+    ax.legend(handles=legend_elements, loc='upper left')
+    
+    # Set the view angle
+    ax.view_init(elev=20, azim=30)
+    
+    # Save the figure
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"btc_golden_ratio_3d_{years}yr_{timestamp}.png"
+    plt.tight_layout(rect=(0, 0.03, 1, 0.97))
+    plt.savefig(filename, dpi=200, bbox_inches='tight', facecolor='#121212')
+    
+    log_color(f"{years}-year BTC golden ratio 3D visualization saved as {filename}", GREEN)
+    plt.show()
+
 async def main():
     parser = argparse.ArgumentParser(description='Visualize BTC position price flow using Redis or BitGet API')
     parser.add_argument('--hours', type=int, default=24, help='Number of hours to look back for analysis')
@@ -1244,6 +1414,7 @@ async def main():
     parser.add_argument('--no-redis', action='store_true', help='Skip Redis and use BitGet API directly')
     parser.add_argument('--check-redis', action='store_true', help='Only check Redis connection and available keys')
     parser.add_argument('--golden-ratio', action='store_true', help='Generate 7-year BTC chart with golden ratio overlay')
+    parser.add_argument('--golden-ratio-3d', action='store_true', help='Generate 3D visualization of BTC golden ratio')
     parser.add_argument('--years', type=int, default=7, help='Number of years for golden ratio analysis')
     
     args = parser.parse_args()
@@ -1264,6 +1435,11 @@ async def main():
     # If golden ratio flag is set, run that visualization
     if args.golden_ratio:
         await visualize_golden_ratio_overlay(years=args.years, redis_client=redis_client)
+        return
+        
+    # If golden ratio 3D flag is set, run the 3D visualization
+    if args.golden_ratio_3d:
+        await visualize_golden_ratio_3d(years=args.years, redis_client=redis_client)
         return
         
     position = None
