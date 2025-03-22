@@ -36,6 +36,7 @@ from omega_ai.trading.strategies.elite_exit_strategy import EliteExitStrategy
 from omega_ai.trading.exchanges.bitget_live_traders import BitGetLiveTraders
 from omega_ai.trading.exchanges.bitget_trader import BitGetTrader
 from omega_ai.trading.strategies.enhanced_exit_strategy import EnhancedExitStrategy
+from omega_ai.trading.exchanges.bitget_ccxt import BitGetCCXT
 
 # Configure logging
 logging.basicConfig(
@@ -128,13 +129,42 @@ class TrapAwareDualTraders(BitGetDualPositionTraders):
         # Now initialize the elite exit strategy if enabled
         if self.enable_elite_exits and self.long_trader and self.long_trader.traders and "strategic" in self.long_trader.traders:
             # Get the exchange from the long trader (both traders use the same exchange)
-            exchange = self.long_trader.traders["strategic"].exchange
-            self.elite_exit_strategy = EliteExitStrategy(
-                exchange=exchange,
-                symbol=self.symbol,
-                min_confidence=self.elite_exit_confidence
-            )
-            logger.info(f"{GREEN}Elite exit strategy initialized with confidence threshold: {self.elite_exit_confidence}{RESET}")
+            try:
+                # First try to access exchange directly
+                strategic_trader = self.long_trader.traders["strategic"]
+                
+                # Different ways the exchange might be accessible
+                if hasattr(strategic_trader, 'exchange') and isinstance(strategic_trader.exchange, BitGetCCXT):
+                    exchange = strategic_trader.exchange
+                elif isinstance(strategic_trader, BitGetCCXT):
+                    # If it's already a BitGetCCXT instance, use it directly
+                    exchange = strategic_trader
+                else:
+                    # As a fallback, create a new BitGetCCXT instance
+                    logger.warning(f"{YELLOW}Creating new BitGetCCXT instance for elite exit strategy{RESET}")
+                    exchange = BitGetCCXT(
+                        config={
+                            'api_key': self.api_key,
+                            'api_secret': self.secret_key,
+                            'api_password': self.passphrase,
+                            'use_testnet': self.use_testnet,
+                            'sub_account': self.long_sub_account
+                        }
+                    )
+                    await exchange.initialize()
+                
+                # Make sure exchange is a BitGetCCXT instance
+                if not isinstance(exchange, BitGetCCXT):
+                    raise TypeError("Exchange must be a BitGetCCXT instance")
+                
+                self.elite_exit_strategy = EliteExitStrategy(
+                    exchange=exchange,
+                    symbol=self.symbol,
+                    min_confidence=self.elite_exit_confidence
+                )
+                logger.info(f"{GREEN}Elite exit strategy initialized with confidence threshold: {self.elite_exit_confidence}{RESET}")
+            except Exception as e:
+                logger.error(f"{RED}Error initializing elite exit strategy: {e}{RESET}")
         elif self.enable_elite_exits:
             logger.error(f"{RED}Could not initialize elite exit strategy: long trader not properly initialized{RESET}")
     
