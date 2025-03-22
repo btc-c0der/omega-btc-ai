@@ -1,5 +1,19 @@
 # BitGet Mainnet Integration Flow
 
+> ⚠️ **CRITICAL MAINNET NOTICE** ⚠️
+>
+> ```diff
+> + OFFICIAL BITGET FUTURES CONTRACT BTC-USDT TICKER FOR MAINNET:
+> + BTCUSDT_UMCBL
+> ```
+>
+> **⚠️ WARNING: Using any other ticker format may result in failed orders or incorrect API responses!**
+>
+> - This is the ONLY valid ticker format for BitGet USDT-M futures
+> - Format is case-sensitive
+> - Must include the _UMCBL suffix
+> - Do NOT use hyphens or other separators
+
 ## Overview
 
 This document details the integration flow between the RASTA OMEGA TRADER panel and BitGet's mainnet exchange, specifically for BTC-USDT trading pairs.
