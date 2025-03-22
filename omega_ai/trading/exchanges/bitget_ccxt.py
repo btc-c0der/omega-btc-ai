@@ -275,6 +275,26 @@ class BitGetCCXT:
         """Fetch ticker for a symbol (compatibility method)."""
         return await self.fetch_ticker(symbol)
         
+    async def get_market_candles(self, symbol: str, timeframe: str = "1h", limit: int = 100) -> List[List[float]]:
+        """
+        Fetch candlestick data for a symbol (compatibility method).
+        
+        Args:
+            symbol: Trading symbol
+            timeframe: Timeframe interval (e.g. "1m", "5m", "1h", "4h", "1d")
+            limit: Number of candles to fetch
+            
+        Returns:
+            List of OHLCV candles in format [timestamp, open, high, low, close, volume]
+        """
+        try:
+            formatted_symbol = self._format_symbol(symbol)
+            candles = await self.exchange.fetch_ohlcv(formatted_symbol, timeframe=timeframe, limit=limit)
+            return candles
+        except Exception as e:
+            self.logger.error(f"Error fetching candles: {e}")
+            return []
+        
     async def get_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
         """Fetch positions (compatibility method)."""
         return await self.fetch_positions(symbol)
