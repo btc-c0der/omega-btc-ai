@@ -15,6 +15,9 @@ from flask import Flask, request, jsonify, send_file, render_template
 import threading
 import time
 import requests
+import math
+import json
+from typing import Dict, Any, List, Optional
 
 # Import the visualization functions from position_flow_tracker
 from scripts.position_flow_tracker import visualize_golden_ratio_overlay, connect_to_redis
@@ -35,6 +38,19 @@ price_history = []
 golden_history = []
 golden_state = "INITIALIZING"
 last_fib_level_crossed = None
+
+# Add trading data cache
+trading_data_cache = {
+    "positions": [],
+    "elite_strategy": {
+        "name": "OMEGA Elite Exit Strategy",
+        "active_signals": [],
+        "fibonacci_levels": [],
+        "last_update": None
+    },
+    "take_profits": [],
+    "last_update": None
+}
 
 app = Flask(__name__, static_folder='.')
 
@@ -153,6 +169,40 @@ def fallback_chart():
     # Ultimate fallback: return a 404 that the frontend will handle
     return "Fallback chart not available", 404
 
+@app.route('/api/images/btc_golden_ratio_7yr_latest.png')
+def serve_latest_chart():
+    """Serve the most recent 7-year BTC golden ratio chart."""
+    # Find the most recent btc_golden_ratio_7yr file
+    files = [f for f in os.listdir('.') if f.startswith('btc_golden_ratio_7yr_')]
+    
+    if files:
+        # Get the most recent file
+        latest_file = max(files, key=lambda f: os.path.getctime(f))
+        return send_file(latest_file)
+    
+    # If no existing file, try to generate a new one
+    try:
+        cmd = [
+            sys.executable,
+            'scripts/position_flow_tracker.py',
+            '--golden-ratio',
+            '--years=7'
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, timeout=30)
+        
+        if result.returncode == 0:
+            # Find the newly generated file
+            files = [f for f in os.listdir('.') if f.startswith('btc_golden_ratio_7yr_')]
+            if files:
+                latest_file = max(files, key=lambda f: os.path.getctime(f))
+                return send_file(latest_file)
+    except Exception as e:
+        print(f"Error generating latest chart: {e}")
+    
+    # If we couldn't generate a new chart, return a 404
+    return "Latest golden ratio chart not available", 404
+
 def fetch_btc_price():
     """Fetch current BTC price from an exchange API with fallbacks."""
     # Try multiple API endpoints for redundancy
@@ -216,7 +266,6 @@ def fetch_btc_price():
     
     # Final fallback: Use a simulated price
     # Calculate a realistic simulated price based on time (varies by ±5% each day)
-    import math
     days_since_halving = (datetime.now() - datetime(2024, 4, 20)).days
     base_price = 84000.0
     daily_factor = math.sin(days_since_halving * 0.3) * 0.05  # ±5% variation
@@ -363,6 +412,169 @@ def golden_status():
     }
     
     return jsonify(response)
+
+@app.route('/api/trading_data')
+def get_trading_data():
+    """Return current trading data including positions and elite strategy info."""
+    global trading_data_cache
+    
+    # If we need to refresh the data (30 second cache)
+    current_time = datetime.now()
+    if (trading_data_cache["last_update"] is None or 
+        (current_time - trading_data_cache["last_update"]).total_seconds() > 30):
+        
+        # This would normally fetch from your trading system
+        # For now, we'll simulate some data
+        trading_data_cache = generate_trading_data(current_btc_price)
+        trading_data_cache["last_update"] = current_time
+    
+    return jsonify(trading_data_cache)
+
+def generate_trading_data(current_price: Optional[float] = None) -> Dict[str, Any]:
+    """Generate or fetch current trading data."""
+    if current_price is None:
+        current_price = fetch_btc_price()
+        
+    # Calculate golden ratio-based take profit levels
+    fib_levels = [0.618, 1.0, 1.618, 2.618]
+    take_profit_base = current_price * 0.98  # Simulate entry slightly below current price
+    
+    # Generate simulated positions
+    positions = [
+        {
+            "id": "omega-long-1",
+            "symbol": "BTCUSDT",
+            "side": "long",
+            "entry_price": take_profit_base,
+            "current_price": current_price,
+            "size": 0.01,
+            "leverage": 11,
+            "pnl": (current_price - take_profit_base) * 0.01 * 11,
+            "pnl_percent": ((current_price / take_profit_base) - 1) * 100 * 11,
+            "status": "open",
+            "open_time": (datetime.now() - timedelta(hours=4)).isoformat(),
+            "take_profits": [
+                {"level": "0.618", "price": take_profit_base * 1.02, "filled": False, "percentage": 33},
+                {"level": "1.0", "price": take_profit_base * 1.035, "filled": False, "percentage": 33},
+                {"level": "1.618", "price": take_profit_base * 1.055, "filled": False, "percentage": 34}
+            ],
+            "stop_loss": take_profit_base * 0.99,
+            "type": "elite_fib"
+        },
+        {
+            "id": "omega-short-1",
+            "symbol": "BTCUSDT",
+            "side": "short",
+            "entry_price": take_profit_base * 1.01,
+            "current_price": current_price,
+            "size": 0.008,
+            "leverage": 11,
+            "pnl": (take_profit_base * 1.01 - current_price) * 0.008 * 11,
+            "pnl_percent": ((take_profit_base * 1.01 / current_price) - 1) * 100 * 11,
+            "status": "open",
+            "open_time": (datetime.now() - timedelta(hours=2)).isoformat(),
+            "take_profits": [
+                {"level": "0.618", "price": take_profit_base * 0.992, "filled": False, "percentage": 50},
+                {"level": "1.0", "price": take_profit_base * 0.985, "filled": False, "percentage": 50}
+            ],
+            "stop_loss": take_profit_base * 1.015,
+            "type": "elite_trap"
+        }
+    ]
+    
+    # Calculate distance to take profit for each position
+    for position in positions:
+        for tp in position["take_profits"]:
+            if position["side"] == "long":
+                tp["distance_percent"] = ((tp["price"] / current_price) - 1) * 100
+                tp["distance_price"] = tp["price"] - current_price
+            else:
+                tp["distance_percent"] = ((current_price / tp["price"]) - 1) * 100
+                tp["distance_price"] = current_price - tp["price"]
+                
+            # Determine if this TP would be filled
+            if position["side"] == "long":
+                tp["filled"] = current_price >= tp["price"]
+            else:
+                tp["filled"] = current_price <= tp["price"]
+    
+    # Generate elite strategy info
+    elite_strategy = {
+        "name": "OMEGA Elite Exit Strategy",
+        "mode": "Adaptive Fibonacci",
+        "current_pattern": "Continuation",
+        "trap_probability": 0.42,
+        "active_signals": [
+            {
+                "name": "Fibonacci Expansion",
+                "confidence": 0.89,
+                "description": "Price approaching key 0.618 expansion level",
+                "recommendation": "Partial take profit at $" + str(round(current_price * 1.02, 2))
+            },
+            {
+                "name": "Golden Harmonic",
+                "confidence": 0.76,
+                "description": "Harmonic resonance between price and time",
+                "recommendation": "Hold for continued alignment with divine pattern"
+            }
+        ],
+        "fibonacci_levels": [
+            {"name": "0.618", "price": current_price * 1.02, "significance": "Golden Ratio"},
+            {"name": "1.0", "price": current_price * 1.035, "significance": "Full Extension"},
+            {"name": "1.618", "price": current_price * 1.055, "significance": "Golden Ratio Extension"}
+        ],
+        "last_update": datetime.now().isoformat()
+    }
+    
+    # Create fake trading history
+    history = []
+    for i in range(5):
+        entry_price = current_price * (0.95 + (i * 0.01))
+        exit_price = current_price * (0.96 + (i * 0.012))
+        
+        history.append({
+            "id": f"omega-trade-{i+1}",
+            "symbol": "BTCUSDT",
+            "side": "long" if i % 2 == 0 else "short",
+            "entry_price": entry_price if i % 2 == 0 else exit_price,
+            "exit_price": exit_price if i % 2 == 0 else entry_price,
+            "size": 0.01 - (i * 0.001),
+            "pnl": (exit_price - entry_price) * (0.01 - (i * 0.001)) * 11 if i % 2 == 0 else (entry_price - exit_price) * (0.01 - (i * 0.001)) * 11,
+            "open_time": (datetime.now() - timedelta(days=i, hours=i)).isoformat(),
+            "close_time": (datetime.now() - timedelta(days=i, hours=i-2)).isoformat(),
+            "exit_reason": "tp_hit" if i % 3 == 0 else ("stop_loss" if i % 3 == 1 else "manual")
+        })
+    
+    return {
+        "positions": positions,
+        "elite_strategy": elite_strategy,
+        "history": history,
+        "total_pnl": sum(p["pnl"] for p in positions),
+        "total_positions": len(positions),
+        "current_price": current_price,
+        "last_update": datetime.now().isoformat()
+    }
+
+@app.route('/assets/css/<filename>')
+def serve_css(filename):
+    """Serve CSS files from the assets directory."""
+    # Try multiple possible paths
+    possible_paths = [
+        # Direct path relative to the script
+        os.path.join(os.path.dirname(__file__), 'omega_ai/visualizer/frontend/assets/css', filename),
+        # Path from project root
+        os.path.join('omega_ai/visualizer/frontend/assets/css', filename),
+        # Absolute path from project root
+        os.path.abspath(os.path.join('omega_ai/visualizer/frontend/assets/css', filename))
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            return send_file(path)
+    
+    # If we got here, the file wasn't found
+    print(f"CSS file '{filename}' not found in any of these paths: {possible_paths}")
+    return "CSS file not found", 404
 
 if __name__ == '__main__':
     # Start background thread for price updates
