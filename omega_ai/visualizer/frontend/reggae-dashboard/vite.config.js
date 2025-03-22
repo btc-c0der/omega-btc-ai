@@ -14,10 +14,13 @@ export default defineConfig({
                 ws: false
             },
             '/api': {
-                target: 'http://localhost:8001',
+                target: 'http://localhost:8000',
                 changeOrigin: true,
                 secure: false,
-                ws: false
+            },
+            '/ws': {
+                target: 'ws://localhost:8000',
+                ws: true,
             }
         }
     }
