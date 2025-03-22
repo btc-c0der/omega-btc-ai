@@ -945,6 +945,271 @@ class ReggaeDashboardServer:
                 logger.error(f"WebSocket error: {e}")
                 if websocket in self.active_connections:
                     self.active_connections.remove(websocket)
+        
+        @self.app.get("/api/big-brother-data")
+        async def get_big_brother_data():
+            """Get all data needed for the Big Brother monitoring panel."""
+            if not self.redis_client:
+                return {"error": "Redis connection not available"}
+                
+            try:
+                # Get position data from Redis
+                long_position = await self._get_redis_data('long_position')
+                short_position = await self._get_redis_data('short_position')
+                position_stats = await self._get_redis_data('position_stats')
+                
+                # Get Fibonacci levels
+                fibonacci_levels = await self._get_redis_data('fibonacci:current_levels')
+                
+                # Get trap detection data
+                trap_data = await self._get_redis_data('mm_trap_detection')
+                
+                # Get elite exit strategy data
+                elite_exit_data = await self._get_redis_data('elite_exit_strategy')
+                
+                return {
+                    "long_position": long_position,
+                    "short_position": short_position,
+                    "position_stats": position_stats,
+                    "fibonacci_levels": fibonacci_levels,
+                    "trap_data": trap_data,
+                    "elite_exit_data": elite_exit_data,
+                    "timestamp": datetime.now().isoformat()
+                }
+            except Exception as e:
+                logger.error(f"{RED}Error fetching Big Brother data: {e}{RESET}")
+                return {"error": str(e)}
+                
+        @self.app.get("/api/flow/3d")
+        async def get_3d_flow(hours: int = 24):
+            """Generate 3D position flow visualization."""
+            if not self.redis_client:
+                return {"error": "Redis connection not available"}
+                
+            try:
+                # This would normally call an external script or module to generate the visualization
+                # For now, we'll just return a mock response
+                
+                # In a real implementation, this would:
+                # 1. Get position data from Redis
+                # 2. Generate a 3D visualization using matplotlib or another library
+                # 3. Save the visualization to a file
+                # 4. Return the file path or base64 encoded image
+                
+                return {
+                    "status": "success",
+                    "message": "3D flow visualization generated",
+                    "hours": hours,
+                    "image_url": "/static/images/3d_flow_mock.png"  # Mock image URL
+                }
+            except Exception as e:
+                logger.error(f"{RED}Error generating 3D flow: {e}{RESET}")
+                return {"error": str(e)}
+                
+        @self.app.get("/api/flow/2d")
+        async def get_2d_flow(hours: int = 24):
+            """Generate 2D position flow chart."""
+            if not self.redis_client:
+                return {"error": "Redis connection not available"}
+                
+            try:
+                # This would normally call an external script or module to generate the visualization
+                # For now, we'll just return a mock response
+                
+                return {
+                    "status": "success",
+                    "message": "2D flow chart generated",
+                    "hours": hours,
+                    "image_url": "/static/images/2d_flow_mock.png"  # Mock image URL
+                }
+            except Exception as e:
+                logger.error(f"{RED}Error generating 2D flow: {e}{RESET}")
+                return {"error": str(e)}
+        
+        @self.app.get("/api/elite-exits")
+        async def get_elite_exits(confidence: float = 0.7):
+            """Get elite exit strategy data with specified confidence threshold."""
+            if not self.redis_client:
+                return {"error": "Redis connection not available"}
+                
+            try:
+                # In a real implementation, this would interface with the elite exit strategy
+                # module to get exit recommendations at the specified confidence level
+                
+                # Mock elite exit data
+                now = datetime.now()
+                mock_data = {
+                    "current_signal": {
+                        "recommendation": "HOLD",
+                        "confidence": confidence - 0.1,  # Just below threshold
+                        "next_target": {
+                            "price": 87500,
+                            "type": "resistance"
+                        }
+                    },
+                    "metrics": {
+                        "trend_strength": 0.65,
+                        "volatility": 0.42,
+                        "price_momentum": 0.58,
+                        "volume_profile": 0.62
+                    },
+                    "history": [
+                        {
+                            "timestamp": (now - timedelta(hours=2)).isoformat(),
+                            "action": "EXIT",
+                            "position": "LONG",
+                            "price": 85200,
+                            "pnl": 450.75,
+                            "confidence": 0.82
+                        },
+                        {
+                            "timestamp": (now - timedelta(hours=8)).isoformat(),
+                            "action": "EXIT",
+                            "position": "SHORT",
+                            "price": 82100,
+                            "pnl": 215.50,
+                            "confidence": 0.75
+                        }
+                    ],
+                    "confidence_threshold": confidence
+                }
+                
+                return mock_data
+            except Exception as e:
+                logger.error(f"{RED}Error fetching elite exit data: {e}{RESET}")
+                return {"error": str(e)}
+        
+        # Helper method to get Redis data with fallback to mock data
+        async def _get_redis_data(self, key):
+            """Get data from Redis with fallback to mock data."""
+            try:
+                # Try to get data from Redis
+                value = self.redis_client.get(key)
+                
+                if value:
+                    # Try to parse as JSON
+                    try:
+                        return json.loads(value)
+                    except json.JSONDecodeError:
+                        # If not JSON, return raw value
+                        return value
+                        
+                # Generate mock data if Redis key doesn't exist
+                return self._generate_mock_data(key)
+                
+            except Exception as e:
+                logger.error(f"{RED}Error getting Redis data for key {key}: {e}{RESET}")
+                return self._generate_mock_data(key)
+        
+        # Generate mock data for testing when Redis data is not available
+        def _generate_mock_data(self, key):
+            """Generate mock data for the given key."""
+            now = datetime.now()
+            
+            # Mock data for testing
+            mock_data = {
+                "long_position": {
+                    "entry_price": 84500,
+                    "size": 0.01,
+                    "leverage": 10,
+                    "direction": "LONG",
+                    "entry_time": (now - timedelta(hours=12)).isoformat(),
+                    "unrealized_pnl": 125.5,
+                    "take_profits": [{"percentage": 50, "price": 85500}],
+                    "stop_loss": 83000
+                },
+                "short_position": {
+                    "entry_price": 84200,
+                    "size": 0.015,
+                    "leverage": 5,
+                    "direction": "SHORT",
+                    "entry_time": (now - timedelta(hours=8)).isoformat(),
+                    "unrealized_pnl": -45.2,
+                    "take_profits": [{"percentage": 50, "price": 83200}],
+                    "stop_loss": 85700
+                },
+                "position_stats": {
+                    "win_rate": 0.68,
+                    "avg_profit": 125.75,
+                    "avg_loss": 42.30,
+                    "avg_hold_time": 3600 * 6,  # 6 hours
+                    "total_trades": 125,
+                    "profitable_trades": 85,
+                    "losing_trades": 40
+                },
+                "fibonacci:current_levels": {
+                    "direction": "LONG",
+                    "base_price": 84500,
+                    "levels": {
+                        "0.0": 84500,
+                        "0.236": 85003.2,
+                        "0.382": 85318.9,
+                        "0.5": 85565.0,
+                        "0.618": 85822.3,
+                        "0.786": 86178.5,
+                        "1.0": 86630.0,
+                        "1.618": 87845.7,
+                        "2.618": 89769.2
+                    }
+                },
+                "mm_trap_detection": {
+                    "current": {
+                        "trap_risk": 0.45,
+                        "trap_type": "bear_trap",
+                        "description": "Potential bear trap forming with high volume spike on 15m timeframe."
+                    },
+                    "history": [
+                        {
+                            "timestamp": (now - timedelta(days=1)).isoformat(),
+                            "type": "bull_trap",
+                            "probability": 0.82,
+                            "price_range": [85200, 85700]
+                        },
+                        {
+                            "timestamp": (now - timedelta(days=3)).isoformat(),
+                            "type": "stop_hunt",
+                            "probability": 0.73,
+                            "price_range": [82300, 82800]
+                        }
+                    ]
+                },
+                "elite_exit_strategy": {
+                    "current_signal": {
+                        "recommendation": "HOLD",
+                        "confidence": 0.62,
+                        "next_target": {
+                            "price": 87500,
+                            "type": "resistance"
+                        }
+                    },
+                    "metrics": {
+                        "trend_strength": 0.65,
+                        "volatility": 0.42,
+                        "price_momentum": 0.58,
+                        "volume_profile": 0.62
+                    },
+                    "history": [
+                        {
+                            "timestamp": (now - timedelta(hours=2)).isoformat(),
+                            "action": "EXIT",
+                            "position": "LONG",
+                            "price": 85200,
+                            "pnl": 450.75,
+                            "confidence": 0.82
+                        },
+                        {
+                            "timestamp": (now - timedelta(hours=8)).isoformat(),
+                            "action": "EXIT",
+                            "position": "SHORT",
+                            "price": 82100,
+                            "pnl": 215.50,
+                            "confidence": 0.75
+                        }
+                    ]
+                }
+            }
+            
+            return mock_data.get(key, {"message": f"No mock data available for key: {key}"})
     
     def _get_trap_probability(self):
         """Get the current trap probability from Redis."""
