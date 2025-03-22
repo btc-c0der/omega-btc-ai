@@ -21,38 +21,32 @@ logger = logging.getLogger(__name__)
 class RastaTrapMonitor:
     """Real-time trap monitoring using BitGet data."""
     
-    def __init__(self,
-                 symbol: str = "BTC/USDT:USDT",
-                 update_interval: float = 5.0,
-                 use_testnet: bool = True):
-        """
-        Initialize the trap monitor.
+    def __init__(self, symbol: str = "BTC-USDT-UMCBL", update_interval: int = 5):
+        """Initialize the RastaTrapMonitor.
         
         Args:
-            symbol: Trading symbol in CCXT format
-            update_interval: Data update interval in seconds
-            use_testnet: Whether to use testnet
+            symbol: Trading symbol (default: BTC-USDT-UMCBL)
+            update_interval: Data update interval in seconds (default: 5)
         """
-        self.use_testnet = use_testnet
+        self.symbol = symbol
         self.update_interval = update_interval
+        self.logger = logging.getLogger(__name__)
         
-        # Format symbol for testnet if needed
-        self.symbol = self._format_symbol(symbol)
-        logger.info(f"Initialized RastaTrapMonitor with symbol: {self.symbol}")
-        
-        # Initialize CCXT client
-        self.exchange = BitGetCCXT({
-            'enableRateLimit': True,
+        # Initialize BitGet CCXT client
+        self.client = BitGetCCXT(config={
             'options': {
                 'defaultType': 'swap',
                 'adjustForTimeDifference': True,
-                'testnet': use_testnet
+                'testnet': False  # Use mainnet
             }
         })
         
-        # Initialize state
-        self.last_update = 0
-        self.running = False
+        self.last_update = None
+        self.last_price = None
+        self.last_volume = None
+        self.is_running = False
+        
+        # Initialize trap data structure
         self.trap_data = {
             'probability': 0,
             'type': 'Unknown',
@@ -64,81 +58,69 @@ class RastaTrapMonitor:
                 'trend_strength': 0,
                 'volume_analysis': 0,
                 'market_regime': 0
-            }
+            },
+            'timestamp': datetime.now().strftime('%I:%M:%S %p')
         }
         
-    def _format_symbol(self, symbol: str) -> str:
-        """Format symbol for BitGet API."""
-        # Remove any existing formatting
-        clean_symbol = symbol.replace('/USDT:USDT', '').replace('USDT', '')
-        
-        # Add testnet prefix if needed
-        prefix = 'S' if self.use_testnet else ''
-        
-        # Format as BTCUSDT or SBTCUSDT for testnet
-        formatted = f"{prefix}{clean_symbol}USDT"
-        
-        # Convert to CCXT format
-        base = formatted[:-4]  # Remove USDT suffix
-        formatted = f"{base}/USDT:USDT"
-            
-        return formatted.upper()
-        
-    async def start(self):
+    async def start_monitor(self):
         """Start the trap monitor."""
-        self.running = True
-        logger.info(f"Starting trap monitor for {self.symbol}")
-        
-        # Initialize exchange
         try:
-            await self.exchange.load_markets()
-            logger.info("Successfully loaded markets")
-        except Exception as e:
-            logger.error(f"Error loading markets: {str(e)}")
-            return
+            # Initialize the client
+            await self.client.initialize()
             
-        while self.running:
-            try:
-                # Get current time
-                current_time = time.time()
+            # Load markets
+            await self.client.load_markets()
+            self.logger.info("Successfully loaded markets")
+            
+            self.is_running = True
+            while self.is_running:
+                try:
+                    # Get current ticker data
+                    ticker = await self.client.fetch_ticker(self.symbol)
+                    if ticker:
+                        self.last_price = float(ticker['last'])
+                        self.last_volume = float(ticker['baseVolume'])
+                        self.last_update = datetime.now()
+                        
+                        # Update trap data
+                        await self.update_trap_data()
+                    else:
+                        self.logger.warning(f"Failed to get ticker data for {self.symbol}")
+                        
+                except Exception as e:
+                    self.logger.error(f"Error updating trap data: {str(e)}")
+                    
+                await asyncio.sleep(self.update_interval)
                 
-                # Check if it's time to update
-                if current_time - self.last_update >= self.update_interval:
-                    await self._update_trap_data()
-                    self.last_update = current_time
-                
-                # Sleep for a short interval
-                await asyncio.sleep(0.1)
-                
-            except Exception as e:
-                logger.error(f"Error in trap monitor: {str(e)}")
-                await asyncio.sleep(1)  # Sleep longer on error
-                
+        except Exception as e:
+            self.logger.error(f"Error in trap monitor: {str(e)}")
+            raise
+        
     async def stop(self):
         """Stop the trap monitor."""
-        self.running = False
+        self.is_running = False
         
-    async def _update_trap_data(self):
+    async def update_trap_data(self):
         """Update trap probability data."""
         try:
             # Get market data
-            ticker = await self.exchange.fetch_ticker(self.symbol)
+            ticker = await self.client.fetch_ticker(self.symbol)
             if not ticker:
-                logger.warning(f"Failed to get ticker data for {self.symbol}")
+                self.logger.warning(f"Failed to get ticker data for {self.symbol}")
                 return
                 
             # Get OHLCV data
-            ohlcv = await self.exchange.fetch_ohlcv(
+            ohlcv = await self.client.fetch_ohlcv(
                 symbol=self.symbol,
                 timeframe='1h',
                 limit=24
             )
             if not ohlcv:
-                logger.warning(f"Failed to get OHLCV data for {self.symbol}")
+                self.logger.warning(f"Failed to get OHLCV data for {self.symbol}")
                 return
                 
             # Calculate trap probability components
-            self.trap_data['components'] = await self._calculate_components(ticker, ohlcv)
+            components = await self._calculate_components(ticker, ohlcv)
             
             # Calculate overall probability
             weights = {
@@ -150,61 +132,86 @@ class RastaTrapMonitor:
             }
             
             probability = sum(
-                self.trap_data['components'][k] * weights[k]
+                components[k] * weights[k]
                 for k in weights
             )
             
             # Update trap data
-            self.trap_data.update({
+            self.trap_data = {
                 'probability': round(probability * 100),
-                'type': self._determine_trap_type(),
-                'trend': self._determine_trend(),
-                'confidence': self._calculate_confidence(),
+                'type': self._determine_trap_type(components),
+                'trend': self._determine_trend(components),
+                'confidence': self._calculate_confidence(components),
                 'timestamp': datetime.now().strftime('%I:%M:%S %p')
-            })
-            
-            # Log update
-            logger.info(f"Updated trap data: {json.dumps(self.trap_data, indent=2)}")
-            
-        except Exception as e:
-            logger.error(f"Error updating trap data: {str(e)}")
-            
-    async def _calculate_components(self, ticker: Dict[str, Any], ohlcv: list) -> Dict[str, float]:
-        """Calculate individual trap probability components."""
-        try:
-            # Extract price data
-            current_price = float(ticker['last'])
-            high_24h = float(ticker['high'])
-            low_24h = float(ticker['low'])
-            volume_24h = float(ticker['baseVolume'])
-            
-            # Calculate Fibonacci levels
-            fib_levels = self._calculate_fib_levels(high_24h, low_24h)
-            fib_alignment = self._check_fib_alignment(current_price, fib_levels)
-            
-            # Calculate price action score
-            price_action = self._calculate_price_action(ohlcv)
-            
-            # Calculate trend strength
-            trend_strength = self._calculate_trend_strength(ohlcv)
-            
-            # Calculate volume analysis
-            volume_analysis = self._analyze_volume(ohlcv)
-            
-            # Calculate market regime
-            market_regime = self._determine_market_regime(ohlcv)
-            
-            return {
-                'fibonacci_alignment': fib_alignment,
-                'price_action': price_action,
-                'trend_strength': trend_strength,
-                'volume_analysis': volume_analysis,
-                'market_regime': market_regime
             }
             
+            # Log update
+            self.logger.info(f"Updated trap data: {json.dumps(self.trap_data, indent=2)}")
+            
         except Exception as e:
-            logger.error(f"Error calculating components: {str(e)}")
-            return {k: 0 for k in self.trap_data['components']}
+            self.logger.error(f"Error updating trap data: {str(e)}")
+            
+    async def _calculate_components(self, ticker: Dict[str, Any], ohlcv: list) -> Dict[str, float]:
+        """Calculate trap probability components."""
+        try:
+            # Initialize components
+            components = {
+                'fibonacci_alignment': 0,
+                'price_action': 0,
+                'trend_strength': 0,
+                'volume_analysis': 0,
+                'market_regime': 0
+            }
+            
+            # Current price
+            current_price = float(ticker['last'])
+            
+            # Extract OHLCV data
+            closes = [float(candle[4]) for candle in ohlcv]
+            volumes = [float(candle[5]) for candle in ohlcv]
+            
+            # Simple calculations for demonstration
+            if len(closes) > 1:
+                # Price action component
+                price_change = (closes[-1] - closes[0]) / closes[0]
+                components['price_action'] = self._normalize_score(abs(price_change) * 10)
+                
+                # Trend strength
+                trend_direction = 1 if price_change > 0 else -1
+                trend_consistency = sum(1 for i in range(1, len(closes)) if 
+                                      (closes[i] - closes[i-1]) * trend_direction > 0) / (len(closes) - 1)
+                components['trend_strength'] = trend_consistency
+                
+                # Volume analysis
+                avg_volume = sum(volumes) / len(volumes)
+                volume_trend = sum(1 for i in range(1, len(volumes)) if volumes[i] > volumes[i-1]) / (len(volumes) - 1)
+                components['volume_analysis'] = volume_trend * (volumes[-1] / avg_volume if avg_volume > 0 else 1)
+                components['volume_analysis'] = self._normalize_score(components['volume_analysis'])
+                
+                # Market regime
+                volatility = sum(abs(closes[i] - closes[i-1]) / closes[i-1] for i in range(1, len(closes))) / (len(closes) - 1)
+                components['market_regime'] = self._normalize_score(volatility * 100)
+                
+                # Fibonacci alignment
+                high = max(closes)
+                low = min(closes)
+                range_price = high - low
+                fib_levels = [low + range_price * level for level in [0.236, 0.382, 0.5, 0.618, 0.786]]
+                closest_fib = min(fib_levels, key=lambda x: abs(x - current_price))
+                fib_proximity = 1 - (abs(closest_fib - current_price) / range_price)
+                components['fibonacci_alignment'] = self._normalize_score(fib_proximity * 2)
+            
+            return components
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating components: {str(e)}")
+            return {
+                'fibonacci_alignment': 0,
+                'price_action': 0,
+                'trend_strength': 0,
+                'volume_analysis': 0,
+                'market_regime': 0
+            }
             
     def _calculate_fib_levels(self, high: float, low: float) -> Dict[str, float]:
         """Calculate Fibonacci retracement levels."""
@@ -291,10 +298,8 @@ class RastaTrapMonitor:
         score = 0.5 + volatility * 2  # Center around 0.5
         return max(0, min(1, score))
         
-    def _determine_trap_type(self) -> str:
+    def _determine_trap_type(self, components: Dict[str, float]) -> str:
         """Determine the type of trap based on components."""
-        components = self.trap_data['components']
-        
         # Find strongest component
         strongest = max(components.items(), key=lambda x: x[1])
         
@@ -309,13 +314,13 @@ class RastaTrapMonitor:
         else:
             return 'Market Structure'
             
-    def _determine_trend(self) -> str:
+    def _determine_trend(self, components: Dict[str, float]) -> str:
         """Determine current trend direction."""
-        if self.trap_data['components']['trend_strength'] > 0.7:
-            return 'Bullish' if self.trap_data['components']['price_action'] > 0.5 else 'Bearish'
+        if components['trend_strength'] > 0.7:
+            return 'Bullish' if components['price_action'] > 0.5 else 'Bearish'
         return 'Neutral'
         
-    def _calculate_confidence(self) -> int:
+    def _calculate_confidence(self, components: Dict[str, float]) -> int:
         """Calculate confidence level in percentage."""
         # Weight components by their reliability
         weights = {
@@ -327,8 +332,13 @@ class RastaTrapMonitor:
         }
         
         confidence = sum(
-            self.trap_data['components'][k] * weights[k]
+            components[k] * weights[k]
             for k in weights
         )
         
-        return round(confidence * 100) 
+        return round(confidence * 100)
+
+    def _normalize_score(self, value: float) -> float:
+        """Normalize a score to [0, 1] range."""
+        # Clip value between 0 and 1
+        return max(0.0, min(1.0, value)) 

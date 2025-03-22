@@ -2,14 +2,15 @@
 BitGet Exchange Integration using CCXT
 """
 
-import ccxt
-import ccxt.async_support as ccxt_async
-import logging
-from typing import Dict, Any, Optional, List, Callable, TypeVar, cast, Literal, Union
-from datetime import datetime
 import asyncio
 import json
+import logging
 import time
+import os
+from typing import Dict, List, Optional, Any, Union, TypeVar, Callable
+
+# Use async version of ccxt
+import ccxt.async_support as ccxt_async
 from ccxt.base.types import Order, Ticker, Position, OrderSide, OrderType
 
 logger = logging.getLogger(__name__)
@@ -25,42 +26,46 @@ def to_dict(obj: Any) -> Dict[str, Any]:
     return dict(obj)
 
 class BitGetCCXT:
-    def __init__(self, config: Dict[str, Any] = None):
-        """
-        Initialize BitGet exchange interface using CCXT
-        
-        Args:
-            config: Dictionary containing exchange configuration
-        """
-        self.config = config or {}
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """Initialize the BitGet CCXT client."""
         self.logger = logging.getLogger(__name__)
+        self.config = config or {}
         
-        # Initialize CCXT exchange
+        # Get API credentials from config or environment variables
+        api_key = self.config.get('api_key', os.getenv('BITGET_API_KEY', ''))
+        api_secret = self.config.get('api_secret', os.getenv('BITGET_SECRET_KEY', ''))
+        api_password = self.config.get('api_password', os.getenv('BITGET_PASSPHRASE', ''))
+        
+        # Enable testnet only if explicitly specified
+        use_testnet = self.config.get('use_testnet', False)
+        if 'options' in self.config:
+            use_testnet = self.config['options'].get('testnet', use_testnet)
+        
+        # Create CCXT exchange object
         self.exchange = ccxt_async.bitget({
-            'apiKey': config.get('apiKey', ''),
-            'secret': config.get('secret', ''),
-            'password': config.get('password', ''),
-            'enableRateLimit': config.get('enableRateLimit', True),
-            'options': config.get('options', {
+            'apiKey': api_key,
+            'secret': api_secret,
+            'password': api_password,
+            'enableRateLimit': True,
+            'options': {
                 'defaultType': 'swap',
                 'adjustForTimeDifference': True,
-                'recvWindow': 60000,
-                'testnet': config.get('testnet', True),
-            })
+                'testnet': use_testnet
+            }
         })
         
-        if config and config.get('options', {}).get('testnet', True):
-            self.exchange.set_sandbox_mode(True)
+        # Set URL to testnet if specified
+        if use_testnet:
+            self.exchange.urls['api'] = 'https://api.bitget-testnet.com'
+            self.logger.info("Initialized BitGet CCXT with TESTNET")
+        else:
+            self.logger.info("Initialized BitGet CCXT with MAINNET")
         
         # WebSocket related attributes    
         self.ws_callbacks = {}  # Store callbacks for different streams
         self.ws_connected = False
         self.ws_last_message_time = {}
         self.ws_heartbeat_interval = 30  # seconds
-            
-        logger.info(
-            f"Initialized BitGet CCXT with {'TESTNET' if config.get('testnet', True) else 'MAINNET'}"
-        )
             
     async def load_markets(self, reload: bool = False) -> Dict[str, Any]:
         """Load exchange markets."""
@@ -73,7 +78,9 @@ class BitGetCCXT:
     async def fetch_ticker(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Fetch current ticker for a symbol."""
         try:
-            return await self.exchange.fetch_ticker(symbol)
+            formatted_symbol = self._format_symbol(symbol)
+            self.logger.info(f"Fetching ticker for formatted symbol: {formatted_symbol}")
+            return await self.exchange.fetch_ticker(formatted_symbol)
         except Exception as e:
             self.logger.error(f"Error fetching ticker: {str(e)}")
             return None
@@ -306,16 +313,23 @@ class BitGetCCXT:
     def _format_symbol(self, symbol: str) -> str:
         """Format symbol for BitGet API."""
         if not symbol:
-            return None
-            
-        # If the symbol is already formatted (contains a slash), return it as is
-        if '/' in symbol:
-            return symbol.upper()
-            
-        # Format BTCUSDT to BTC/USDT:USDT
-        if symbol.upper().endswith('USDT'):
-            base = symbol[:-4]  # Remove 'USDT' from the end
-            return f"{base}/USDT:USDT".upper()
-            
-        # Format basic symbol to include USDT pairs
-        return f"{symbol}/USDT:USDT".upper()
+            return "BTC-USDT-UMCBL"  # Default to BTC
+        
+        # If the symbol has BitGet format already (contains -UMCBL), return it as is
+        if "-UMCBL" in symbol:
+            return symbol
+        
+        # Remove any formatting characters
+        base = symbol.upper().replace("/", "").replace(":", "").replace("_", "-")
+        
+        # If it ends with -UMCBL or -UMCBL, return as is
+        if base.endswith("-UMCBL") or base.endswith("-UMCBL"):
+            return base
+        
+        # If it has USDT in it already
+        if "USDT" in base:
+            # Replace USDT with -USDT-UMCBL
+            return base.replace("USDT", "-USDT-UMCBL")
+        
+        # Default case: append -USDT-UMCBL
+        return f"{base}-USDT-UMCBL"
