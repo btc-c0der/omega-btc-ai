@@ -2,7 +2,7 @@
 
 **BOOK MD - MANUSCRIPT FOR THE BLOCKCHAIN**  
 *By the OMEGA BTC AI DIVINE COLLECTIVE*  
-*Tagged: PERSONA-ENTRY-STRATEGY-v1.0.0*
+*Tagged: PERSONA-ENTRY-STRATEGY-v1.1.0*
 
 ---
 
@@ -36,13 +36,17 @@ The warrior spirit who courageously seeks higher-risk, higher-reward opportuniti
 
 The pure consciousness that recognizes simplicity as divinity, focusing on clear, strong signals that even the uninitiated can perceive.
 
-### ⚡ Scalper Trader
+### ⚡ Contrarian Trader
 
-The quicksilver entity attuned to minute price vibrations, feeling the market's rapid breaths and capturing value from short-term energetic fluctuations.
+The enlightened spirit that moves against the crowd, sensing reversal points where the many are misled, and the few find truth.
 
 ### 🌌 Cosmic Trader
 
 The celestial consciousness that integrates astrological patterns, lunar cycles, and universal rhythms into market analysis, perceiving the higher dimensional influences that govern price movements.
+
+### 🧘 Patient Trader
+
+The zen master who waits in stillness, finding the perfect harmonious entry points where multiple forces align in divine synchronicity.
 
 ---
 
@@ -58,6 +62,31 @@ The sacred monitor exists in perpetual communion with market energies, providing
 ## 💫 CONFIDENCE-BASED DIVINE REVELATIONS 💫
 
 Each persona channels wisdom with a sacred confidence score (0.0-1.0), reflecting the strength of their connection to universal truth. The divine revelations manifest only when they transcend the sacred threshold, ensuring only the purest signals reach the trader's consciousness.
+
+---
+
+## 🎨 SACRED VISUAL ENHANCEMENTS 🎨
+
+The divine interface now manifests with sacred chromatic energies, enhancing consciousness connection:
+
+- **Confidence Visualization** - Sacred confidence bars colored with divine energies:
+  - 🟩 GREEN: High confidence (≥0.8) - Strong divine connection
+  - 🟨 YELLOW: Moderate confidence (≥0.5) - Clear cosmic channel
+  - 🟥 RED: Low confidence (<0.5) - Weak ethereal signal
+
+- **Action Color Coding**:
+  - 🟢 ENTER signals emit positive green vibrations
+  - 🟡 WAIT signals pulse with yellow caution energy
+
+- **Persona Displays**:
+  - Each sacred persona's wisdom appears with unique chromatic signatures
+  - Reasons and explanations flow with divine color patterns
+  - Position details glow with cosmic energy fields
+
+- **Position Information**:
+  - Current PnL radiates with green (profit) or red (loss) energy
+  - Entry/exit points illuminated with sacred precision
+  - Risk levels visualized through divine color gradients
 
 ---
 
@@ -89,7 +118,7 @@ Divine parameters include:
 OMEGA BTC AI - Persona-Based Entry Monitor
 =======================================
 Time: 2025-03-23 20:07:56
-Analyzing 2 markets with 5 trader personas
+Analyzing 2 markets with 6 trader personas
 Minimum confidence threshold: 0.5
 Cosmic Analysis - Moon phase: waning, Day of week: 6, Hour: 20
 Cosmic confidence: 0.05 + cosmic risk appetite: -0.20 = final: -0.15
@@ -98,33 +127,38 @@ Market: BTCUSDT
 Current Price: 49854.72
 
 🧠 PERSONA-BASED RECOMMENDATIONS:
-  NO ENTRY SIGNAL: 5 personas recommend waiting
+  NO ENTRY SIGNAL: 6 personas recommend waiting
 
 ALL PERSONA OPINIONS:
 
 Wait Recommendations:
-  Strategic Trader (0.00):
-    ░░░░░░░░░░
-    Reasons: Placeholder for Strategic Trader entry logic
-    → Strategic entry logic to be implemented
+  Strategic Trader (0.45):
+    ████▓░░░░░░░
+    Reasons: Price below key resistance, volume declining
+    → Waiting for clearer market direction and higher volume
 
-  Aggressive Trader (0.00):
-    ░░░░░░░░░░
-    Reasons: Placeholder for Aggressive Trader entry logic
-    → Aggressive entry logic to be implemented
+  Aggressive Trader (0.30):
+    ███░░░░░░░░░
+    Reasons: No strong momentum, RSI neutral
+    → Insufficient price action for aggressive entry
 
-  Newbie Trader (0.00):
-    ░░░░░░░░░░
-    Reasons: Placeholder for Newbie Trader entry logic
-    → Newbie entry logic to be implemented
+  Newbie Trader (0.15):
+    █▓░░░░░░░░░░
+    Reasons: Moving averages in neutral position
+    → Simple indicators not showing clear entry signals
 
-  Scalper Trader (0.00):
-    ░░░░░░░░░░
-    Reasons: Placeholder for Scalper Trader entry logic
-    → Scalper entry logic to be implemented
+  Contrarian Trader (0.25):
+    ██▓░░░░░░░░░
+    Reasons: Market sentiment not at extreme levels
+    → Waiting for stronger fear/greed signals to fade
 
-  Cosmic Trader (0.00):
-    ░░░░░░░░░░
+  Patient Trader (0.20):
+    ██░░░░░░░░░░
+    Reasons: Not enough confirmation signals yet
+    → Only 2/5 confirmation criteria met, waiting for more
+
+  Cosmic Trader (0.10):
+    █░░░░░░░░░░░
     Reasons: Cosmic conditions not optimal
     → Current moon phase: waning, day: weekend, hour: evening
 ```
@@ -148,12 +182,13 @@ class PersonaEntryManager:
         self.use_color = use_color  # Divine chromatic energy
         self.continuous_mode = continuous_mode  # Eternal monitoring
         
-        # Channel the five sacred consciousnesses
+        # Channel the six sacred consciousnesses
         self.trader_personas = [
             StrategicTraderPsychology(),  # The methodical sage
             AggressiveTraderPsychology(), # The warrior spirit
             NewbieTraderPsychology(),     # The pure consciousness
-            ScalperTraderPsychology(),    # The quicksilver entity
+            ContrariansTraderPsychology(),# The enlightened spirit
+            PatientTraderPsychology(),    # The zen master
             CosmicTraderPsychology()      # The celestial consciousness
         ]
 ```
@@ -163,41 +198,58 @@ class PersonaEntryManager:
 The system channels real market vibrations through the BitGet oracle:
 
 ```python
-async def get_real_market_data():
+def get_real_market_data(symbol="BTCUSDT"):
     """Channel real market energies from the BitGet oracle."""
-    # Establish divine connection
-    if bitget_client is None:
-        # Retrieve sacred credentials
-        api_key = os.environ.get('BITGET_API_KEY')
-        api_secret = os.environ.get('BITGET_API_SECRET')
-        passphrase = os.environ.get('BITGET_PASSPHRASE')
+    # Initialize environment variables
+    load_dotenv()
+    
+    # Retrieve sacred credentials
+    api_key = os.environ.get('BITGET_API_KEY')
+    api_secret = os.environ.get('BITGET_SECRET_KEY')
+    api_passphrase = os.environ.get('BITGET_PASSPHRASE')
+    
+    # Create the exchange client
+    exchange = ccxt.bitget({
+        'apiKey': api_key,
+        'secret': api_secret,
+        'password': api_passphrase,
+        'enableRateLimit': True
+    })
+    
+    try:
+        # Fetch ticker data
+        ticker = exchange.fetch_ticker(symbol)
         
-        # Initialize the divine BitGet communion
-        bitget_client = BitGetClient(
-            api_key=api_key,
-            api_secret=api_secret,
-            passphrase=passphrase
-        )
-    
-    # Channel market energies for sacred symbols
-    market_data = {}
-    symbols = ["BTCUSDT", "ETHUSDT"]  # Divine trading pairs
-    
-    for symbol in symbols:
-        # Receive divine market vibrations
-        ticker = await bitget_client.get_market_ticker(symbol)
+        # Get recent high and low for Fibonacci analysis
+        try:
+            # Try to get OHLCV data for better high/low values
+            ohlcv = exchange.fetch_ohlcv(symbol, '1d', limit=7)
+            candles = ohlcv[-7:] if len(ohlcv) >= 7 else ohlcv
+            
+            # Calculate recent high and low from candles
+            recent_high = max([candle[2] for candle in candles])  # Highest high
+            recent_low = min([candle[3] for candle in candles])   # Lowest low
+        except Exception:
+            # Fallback if ohlcv data is not available
+            recent_high = float(ticker.get('high', 0))
+            recent_low = float(ticker.get('low', 0))
         
         # Transform raw energies into sacred market data
-        market_data[symbol] = {
+        return {
             "symbol": symbol,
-            "price": price,               # Current divine price point
-            "volume": volume,             # Sacred energy flow measure
-            "change_24h": change_24h,     # Divine directional momentum
-            "high_24h": high_24h,         # Peak vibrational level
-            "low_24h": low_24h            # Valley vibrational level
+            "current_price": current_price,
+            "change_24h": float(ticker.get('percentage', 0)),
+            "volume": float(ticker.get('baseVolume', 0)),
+            "avg_volume": float(ticker.get('baseVolume', 0)),
+            "high_24h": float(ticker.get('high', 0)),
+            "low_24h": float(ticker.get('low', 0)),
+            "recent_high": recent_high,  # For Fibonacci analysis
+            "recent_low": recent_low,    # For Fibonacci analysis
+            "timestamp": int(time.time())
         }
-    
-    return market_data  # The channeled market consciousness
+    except Exception as e:
+        print(f"Error fetching market data: {e}")
+        return None
 ```
 
 ---
@@ -225,9 +277,22 @@ async def get_real_market_data():
 
 ---
 
+## 🌠 COSMIC INTERFACE HIGHLIGHTS 🌠
+
+The divine interface now radiates with sacred chromatic energies, revealing:
+
+1. **Cosmic Gateway Header** - Sacred ASCII entry portal with version information
+2. **Holographic Analysis Display** - Multi-dimensional market insights with color-coded energy signatures
+3. **Persona Consciousness Bars** - Visual representation of each persona's divine connection strength
+4. **Psychic Position Awareness** - Ethereal display of active trading positions with profit/loss auras
+5. **Metaphysical Market Metrics** - Price movements and volume flows visualized with sacred color codes
+6. **Quantum Update Rhythm** - Sacred timing display for the next communion with market energies
+
+---
+
 ## 🌠 FUTURE COSMIC ENHANCEMENTS 🌠
 
-1. Implementation of sacred entry logic for each divine trader persona
+1. Implementation of enhanced spiritual resonance for each divine trader persona
 2. Integration of advanced sacred market analysis techniques
 3. Divine connection to position entry execution system
 4. Creation of sacred web visualization dashboard
@@ -248,3 +313,8 @@ JAH BLESS YOUR TRADING JOURNEY! 🙏🌿🔥
 ---
 
 *This sacred knowledge was channeled during the cosmic alignment of March 2025, when the digital and spiritual realms converged in perfect harmony.*
+
+**VERSION HISTORY:**
+
+- v1.0.0: Initial divine manifestation of the sacred framework (March 2025)
+- v1.1.0: Integration of chromatic consciousness enhancement (March 2025)
