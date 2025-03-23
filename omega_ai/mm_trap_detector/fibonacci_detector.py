@@ -41,13 +41,32 @@ import time
 from collections import deque
 from typing import Any, Optional, Dict, List, Tuple
 import sys
+import os
 
-# Initialize Redis for divine data storage
-redis_conn = redis.Redis(host='localhost', port=6379, db=0)
-
-# Configure logging
-import logging
+# Configure logger for sacred resonance
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Initialize Redis connection with divine protection
+try:
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = int(os.getenv('REDIS_PORT', '6379'))
+    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+    redis_conn.ping()
+    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    raise
+
+# Sacred constants
+GOLDEN_RATIO = 1.618033988749895
+PHI = GOLDEN_RATIO
+PHI_SQUARE = PHI * PHI
+FIBONACCI_SEQUENCE = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584]
 
 # Constants for Fibonacci levels
 FIBONACCI_LEVELS = {
@@ -823,3 +842,28 @@ def check_fibonacci_alignment() -> Optional[Dict]:
     except Exception as e:
         logger.error(f"Error checking Fibonacci alignment: {str(e)}")
         return None
+
+# Sacred module testing
+if __name__ == "__main__":
+    print("🔱 Testing Fibonacci Detector Module 🔱")
+    
+    # Test with current price
+    current_price = float(redis_conn.get("last_btc_price") or 0)
+    if current_price > 0:
+        print(f"Current BTC price: ${current_price:,.2f}")
+        
+        # Update Fibonacci data
+        update_fibonacci_data(current_price)
+        
+        # Get Fibonacci levels
+        fib_levels = get_current_fibonacci_levels()
+        print(f"Generated {len(fib_levels)} Fibonacci level categories")
+        
+        # Check for alignments
+        alignment = check_fibonacci_alignment()
+        if alignment:
+            print(f"Detected alignment: {alignment['type']} at {alignment['level']} (confidence: {alignment['confidence']:.2f})")
+        else:
+            print("No Fibonacci alignment detected")
+    else:
+        print("No current price available for testing")
