@@ -34,6 +34,8 @@ import math
 import json
 from typing import Dict, Any, List, Optional
 import random
+import redis
+from redis.exceptions import ConnectionError as RedisConnectionError
 
 # Import the visualization functions from position_flow_tracker
 # Comment out the problematic import
@@ -53,7 +55,9 @@ GOLDEN_RATIO = (1 + 5 ** 0.5) / 2  # ~1.618033988749895
 FIBONACCI_LEVELS = [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618]
 
 # Initialize Flask application
-app = Flask(__name__)
+app = Flask(__name__, 
+           template_folder='templates',
+           static_folder='assets')
 
 # Global variables for state tracking
 last_generated_image = None
@@ -82,131 +86,60 @@ VISUALIZATION_API_ROOT = os.environ.get('VISUALIZATION_API_ROOT', 'http://localh
 CACHE_DIR = os.environ.get('CACHE_DIR', '/tmp/omega_btc_ai_cache')
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-# Create a mock visualization function to replace the imported one
-async def visualize_golden_ratio_overlay(
-    years=7, 
-    output_path=None, 
-    view_type="2d", 
-    current_price=None, 
-    **kwargs
-):
-    """
-    Mock implementation of the golden ratio visualization function.
-    Creates a simple chart showing BTC price with golden ratio levels.
-    
-    Args:
-        years: Number of years to simulate in the chart
-        output_path: Where to save the output image
-        view_type: Type of visualization (2d or 3d)
-        current_price: Current BTC price to highlight
-    
-    Returns:
-        Path to generated image
-    """
-    try:
-        # Create figure
-        plt.figure(figsize=(12, 8))
-        
-        # Generate some mock data
-        days = int(years * 365)  # Ensure days is an integer
-        x = np.linspace(0, days, days)
-        
-        # Create a sine wave with upward trend and some noise to simulate BTC price
-        noise = np.random.normal(0, 0.5, days)
-        trend = np.linspace(0, 5, days)
-        # Ensure price is a float
-        price_value = float(current_price) if current_price is not None and current_price > 0 else 50000.0
-        y = np.exp(0.7 * np.sin(x / 100) + trend) * 1000 + noise * 1000
-        
-        # If current price provided, make sure the last data point matches
-        if price_value > 0:
-            y[-1] = price_value
-        
-        # Calculate golden ratio levels
-        GOLDEN_RATIO = (1 + 5 ** 0.5) / 2  # ~1.618033988749895
-        base = float(min(y))
-        max_val = float(max(y))
-        range_val = max_val - base
-        
-        fib_levels = [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618, 2.618]
-        fib_lines = [base + (range_val * level) for level in fib_levels]
-        
-        # Plot the price curve
-        plt.plot(x, y, 'b-', label='BTC Price')
-        
-        # Plot golden ratio levels
-        for i, (level, price) in enumerate(zip(fib_levels, fib_lines)):
-            color = f'C{i}'
-            plt.axhline(y=float(price), color=color, linestyle='--', alpha=0.7, 
-                        label=f'Fib {level} - ${float(price):,.0f}')
-        
-        # Mark current price if provided
-        if price_value > 0:
-            plt.scatter([float(days-1)], [price_value], color='red', s=100, zorder=5)
-            plt.text(float(days-50), price_value, f'${price_value:,.0f}', 
-                    fontsize=12, color='red')
-        
-        # Set labels and title
-        plt.title(f'BTC Golden Ratio Analysis - {years} Year View', fontsize=16)
-        plt.xlabel('Days', fontsize=12)
-        plt.ylabel('Price (USD)', fontsize=12)
-        
-        # Use log scale for y-axis
-        plt.yscale('log')
-        
-        # Add legend
-        plt.legend(loc='upper left')
-        
-        # Add grid
-        plt.grid(True, alpha=0.3)
-        
-        # Add golden ratio watermark
-        plt.figtext(0.5, 0.02, 'OMEGA BTC AI - Divine Alignment', 
-                   ha='center', fontsize=12, alpha=0.7)
-        
-        # Save the figure
-        if output_path:
-            # Ensure directory exists
-            os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-            plt.savefig(output_path, dpi=150, bbox_inches='tight')
-            plt.close()
-            return output_path
-        
-        # Close the plot to free memory
-        plt.close()
-        return True
-        
-    except Exception as e:
-        print(f"Error in visualization: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return False
+# Redis connection management
+redis_client = None
 
-# Mock connection function
-async def connect_to_redis(*args, **kwargs):
-    """Mock implementation of the redis connection function."""
-    return {"success": True, "message": "Mock Redis connection (not actually connected)"}
+def get_redis_client():
+    """Get or create Redis client with connection handling."""
+    global redis_client
+    if redis_client is None:
+        try:
+            redis_client = redis.Redis(
+                host=REDIS_HOST,
+                port=REDIS_PORT,
+                db=REDIS_DB,
+                password=REDIS_PASSWORD,
+                decode_responses=True,
+                socket_timeout=5,
+                socket_connect_timeout=5
+            )
+            redis_client.ping()  # Test connection
+        except RedisConnectionError:
+            print("[API] Warning: Could not connect to Redis, running in standalone mode")
+            return None
+    return redis_client
 
+# Add error handling decorator
+def handle_errors(f):
+    """Decorator to handle API errors gracefully."""
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            print(f"[API ERROR] {str(e)}")
+            return jsonify({
+                "error": "Internal server error",
+                "message": str(e)
+            }), 500
+    wrapper.__name__ = f.__name__
+    return wrapper
 
+# Update routes with error handling
 @app.route('/')
+@handle_errors
 def index():
-    """Serve the main dashboard."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    return send_file(os.path.join(script_dir, 'divine_alignment_dashboard.html'))
-
+    """Serve the main page."""
+    return render_template('index.html')
 
 @app.route('/divine')
 def divine_dashboard():
     """Serve the Divine Alignment Dashboard."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    return send_file(os.path.join(script_dir, 'divine_alignment_dashboard.html'))
-
+    return render_template('divine_alignment_dashboard.html')
 
 @app.route('/favicon.ico')
 def favicon():
     """Serve the favicon."""
     return "", 204  # Return No Content response for favicon requests
-
 
 @app.route('/api/generate', methods=['POST'])
 def generate_visualization():
@@ -274,7 +207,6 @@ def generate_visualization():
             "error": str(e)
         }), 500
 
-
 @app.route('/api/images/<filename>')
 def serve_image(filename):
     """Serve a generated image by filename."""
@@ -314,7 +246,6 @@ def serve_image(filename):
     
     return send_file(image_path, mimetype='image/png')
 
-
 @app.route('/api/generate/fallback')
 def fallback_chart():
     """Generate a fallback chart when no custom parameters are provided."""
@@ -350,10 +281,10 @@ def fallback_chart():
         # Run with default parameters
         async def run_visualization():
             return await visualize_golden_ratio_overlay(
-                symbol="BTCUSDT",
-                timeframe="1d",
                 years=7,
-                output_path=full_path
+                output_path=full_path,
+                view_type="2d",
+                current_price=fetch_btc_price()
             )
         
         loop = asyncio.new_event_loop()
@@ -372,7 +303,6 @@ def fallback_chart():
             "success": False,
             "error": str(e)
         }), 500
-
 
 @app.route('/api/images/btc_golden_ratio_7yr_latest.png')
 def serve_latest_chart():
@@ -415,7 +345,6 @@ def serve_latest_chart():
     png_files.sort(key=lambda x: os.path.getmtime(os.path.join(script_dir, x)), reverse=True)
     return send_file(os.path.join(script_dir, png_files[0]), mimetype='image/png')
 
-
 def fetch_btc_price():
     """Fetch the current BTC price from an exchange."""
     global current_btc_price, last_price_check
@@ -429,7 +358,7 @@ def fetch_btc_price():
         # First try CCXT with Binance
         exchange = ccxt.binance()
         ticker = exchange.fetch_ticker('BTC/USDT')
-        price = float(ticker['last']) if ticker and 'last' in ticker else None
+        price = float(str(ticker['last'])) if ticker and 'last' in ticker else None
         
         if price is not None:
             current_btc_price = price
@@ -503,7 +432,6 @@ def fetch_btc_price():
             # Return the last known price or None
             return current_btc_price
 
-
 def calculate_golden_price():
     """Calculate the golden ratio price based on historical data."""
     try:
@@ -526,7 +454,6 @@ def calculate_golden_price():
         print(f"Error calculating golden price: {str(e)}")
         return None
 
-
 def determine_golden_state(price, golden_price):
     """Determine if BTC is in golden ratio alignment."""
     if price is None or golden_price is None:
@@ -541,7 +468,6 @@ def determine_golden_state(price, golden_price):
         return "approaching"
     else:
         return "distant"
-
 
 def check_fibonacci_crossings(current_price, previous_price, base_price=20000):
     """Check if price crossed any Fibonacci levels."""
@@ -572,7 +498,6 @@ def check_fibonacci_crossings(current_price, previous_price, base_price=20000):
     
     return crossings
 
-
 def update_price_data():
     """Update price data periodically in a background thread."""
     while True:
@@ -587,81 +512,48 @@ def update_price_data():
             print(f"Error in update_price_data: {str(e)}")
             time.sleep(60)  # Still wait before retry
 
-
 @app.route('/api/golden_status')
+@handle_errors
 def golden_status():
-    """API endpoint to get the current golden ratio status."""
+    """Get current golden ratio status with error handling."""
     try:
-        # Ensure we have the latest price
-        price = fetch_btc_price()
+        current_price = fetch_btc_price()
+        if not current_price:
+            return jsonify({
+                "error": "Could not fetch BTC price",
+                "fallback_price": 85000.0
+            })
         
-        # Calculate the golden price
         golden_price = calculate_golden_price()
+        state = determine_golden_state(current_price, golden_price)
         
-        # Determine alignment status
-        status = determine_golden_state(price, golden_price)
-        
-        # Get historical prices for chart
-        recent_prices = price_history[-100:] if len(price_history) > 100 else price_history
-        price_data = [p['price'] for p in recent_prices]
-        timestamps = [p['timestamp'] for p in recent_prices]
-        
-        # Format crossing info
-        crossing_info = "None detected"
-        if most_recent_crossing:
-            level_name = f"Fibonacci {most_recent_crossing['level']}"
-            direction = "upward" if most_recent_crossing['direction'] == 'up' else "downward"
-            crossing_info = f"{level_name} ({direction} cross at {most_recent_crossing['timestamp']})"
-        
-        # Get the active Fibonacci level if any
-        active_level = most_recent_ratio_level if most_recent_ratio_level else "None"
-        
-        # Make sure we never return null/None values that could cause frontend issues
-        if price is None:
-            price = 50000.0  # Default fallback
-        if golden_price is None:
-            golden_price = 61800.0  # Default fallback
-            
         return jsonify({
-            "current_price": price,
+            "price": current_price,
             "golden_price": golden_price,
-            "alignment_status": status,
-            "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "price_history": {
-                "prices": price_data if price_data else [price],
-                "timestamps": timestamps if timestamps else [datetime.now().strftime('%Y-%m-%d %H:%M:%S')]
-            },
-            "most_recent_crossing": crossing_info,
-            "active_fibonacci_level": active_level
+            "state": state,
+            "timestamp": datetime.now().isoformat()
         })
     except Exception as e:
-        print(f"Error in golden_status endpoint: {str(e)}")
-        # Return minimal valid data to avoid frontend errors
+        print(f"[API ERROR] Golden status error: {str(e)}")
         return jsonify({
-            "current_price": 50000.0,
-            "golden_price": 61800.0,
-            "alignment_status": "unknown",
-            "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "price_history": {
-                "prices": [50000.0],
-                "timestamps": [datetime.now().strftime('%Y-%m-%d %H:%M:%S')]
-            },
-            "most_recent_crossing": "None detected",
-            "active_fibonacci_level": "None"
-        })
-
+            "error": "Could not calculate golden status",
+            "message": str(e)
+        }), 500
 
 @app.route('/api/trading_data')
+@handle_errors
 def get_trading_data():
-    """Get combined trading data including price and alignment."""
-    # Get current price
-    price = fetch_btc_price()
-    
-    # Generate trading data
-    trading_data = generate_trading_data(price)
-    
-    return jsonify(trading_data)
-
+    """Get trading data with error handling."""
+    try:
+        current_price = fetch_btc_price()
+        data = generate_trading_data(current_price)
+        return jsonify(data)
+    except Exception as e:
+        print(f"[API ERROR] Trading data error: {str(e)}")
+        return jsonify({
+            "error": "Could not fetch trading data",
+            "message": str(e)
+        }), 500
 
 def generate_trading_data(current_price: Optional[float] = None) -> Dict[str, Any]:
     """Generate trading data for display."""
@@ -723,7 +615,6 @@ def generate_trading_data(current_price: Optional[float] = None) -> Dict[str, An
         "levels": levels
     }
 
-
 def generate_trade_signal(price, golden_price, alignment):
     """Generate a trade signal based on golden ratio alignment."""
     if not price or not golden_price:
@@ -763,7 +654,6 @@ def generate_trade_signal(price, golden_price, alignment):
     
     return signal, confidence
 
-
 def calculate_momentum():
     """Calculate price momentum."""
     if len(price_history) < 24:
@@ -786,7 +676,6 @@ def calculate_momentum():
         return "BEARISH"
     else:
         return "NEUTRAL"
-
 
 def calculate_trend_strength():
     """Calculate trend strength (simplified)."""
@@ -813,7 +702,6 @@ def calculate_trend_strength():
     
     return strength
 
-
 def generate_key_levels(current_price):
     """Generate key support and resistance levels."""
     # This is a simplified implementation
@@ -832,7 +720,6 @@ def generate_key_levels(current_price):
             round(current_price * 1.15, 2)
         ]
     }
-
 
 def assess_risk(price, golden_price, alignment, momentum):
     """Assess trading risk level."""
@@ -859,7 +746,6 @@ def assess_risk(price, golden_price, alignment, momentum):
             return "HIGH"
         else:
             return "MEDIUM"
-
 
 def generate_trade_description(signal, alignment, momentum, risk):
     """Generate a human-readable trade description."""
@@ -888,13 +774,11 @@ def generate_trade_description(signal, alignment, momentum, risk):
     
     return descriptions.get(signal, descriptions["NEUTRAL"])
 
-
 @app.route('/assets/css/<filename>')
 def serve_css(filename):
     """Serve CSS files."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return send_file(os.path.join(script_dir, 'assets', 'css', filename))
-
 
 @app.route('/api/trader_personas')
 def get_trader_personas():
@@ -956,17 +840,75 @@ def get_trader_personas():
     
     return jsonify(personas)
 
-
 # Start the price update thread
 price_update_thread = threading.Thread(target=update_price_data, daemon=True)
 price_update_thread.start()
 
+async def visualize_golden_ratio_overlay(years=7, output_path=None, view_type="2d", current_price=None):
+    """Generate a golden ratio visualization for BTC price."""
+    try:
+        # Create figure
+        plt.figure(figsize=(12, 8))
+        
+        # Generate sample data for demonstration
+        days = years * 365
+        t = np.linspace(0, days, days)
+        
+        # Generate a sample price curve
+        base_price = 3000  # Starting price
+        if current_price is None:
+            current_price = 50000  # Default current price
+            
+        # Create an exponential growth curve with some noise
+        growth_rate = np.log(current_price/base_price) / days
+        price_curve = base_price * np.exp(growth_rate * t)
+        noise = np.random.normal(0, 0.1, days)
+        price_curve = price_curve * (1 + noise)
+        
+        # Plot main price curve
+        plt.plot(t, price_curve, 'b-', label='BTC Price', alpha=0.7)
+        
+        # Add Fibonacci levels
+        for level in FIBONACCI_LEVELS:
+            fib_price = base_price + (current_price - base_price) * level
+            plt.axhline(y=fib_price, color='g', linestyle='--', alpha=0.3)
+            plt.text(days, fib_price, f'Fib {level}', alpha=0.5)
+        
+        # Add golden ratio line
+        golden_price = base_price * (GOLDEN_RATIO ** 3)
+        plt.axhline(y=golden_price, color='r', linestyle='-', label='Golden Ratio', alpha=0.5)
+        
+        # Customize plot
+        plt.title('BTC Golden Ratio Analysis')
+        plt.xlabel('Days')
+        plt.ylabel('Price (USD)')
+        plt.yscale('log')
+        plt.grid(True, alpha=0.3)
+        plt.legend()
+        
+        # Save plot
+        if output_path:
+            plt.savefig(output_path)
+            plt.close()
+            return True
+            
+        return False
+        
+    except Exception as e:
+        print(f"Error generating visualization: {e}")
+        return False
+
 if __name__ == '__main__':
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description='OMEGA BTC AI - Divine Alignment Dashboard API')
-    parser.add_argument('--port', type=int, default=5051, help='Port to run the server on (default: 5051)')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=5051)
     args = parser.parse_args()
     
-    # Run the Flask app on specified port
-    print(f"Starting Divine Alignment Dashboard API on port {args.port}...")
-    app.run(host='0.0.0.0', port=args.port, debug=True) 
+    # Initialize Redis connection
+    redis_client = get_redis_client()
+    
+    # Start price update thread
+    price_thread = threading.Thread(target=update_price_data, daemon=True)
+    price_thread.start()
+    
+    print(f"[API] Starting Divine Alignment Dashboard API on port {args.port}...")
+    app.run(host='0.0.0.0', port=args.port, debug=True, use_reloader=False) 

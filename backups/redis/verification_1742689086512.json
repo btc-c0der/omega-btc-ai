@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-03-23T00:18:06.342Z",
+  "size": 1053813882,
+  "keyCount": 5280,
+  "dataTypes": {
+    "hash": 5150,
+    "string": 83,
+    "list": 34,
+    "zset": 12,
+    "set": 1
+  },
+  "criticalKeys": {
+    "latest_organic_analysis": true,
+    "latest_fibonacci_confluence": true,
+    "btc_price_patterns": true,
+    "market_regime": true,
+    "current_position": true
+  }
+}

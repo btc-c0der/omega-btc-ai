@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔮 OMEGA Position Debug</title>
+    <style>
+        :root {
+            --green-divine: #2ECC71;
+            --red-trapped: #E74C3C;
+            --gold: #FFD700;
+            --blue: #3498DB;
+            --light-text: #ECF0F1;
+            --border-color: #34495E;
+            --card-bg: rgba(30, 30, 30, 0.7);
+            --muted-color: #718093;
+        }
+
+        body {
+            background: #121212;
+            color: var(--light-text);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .trading-section {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .trading-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .trading-header h2 {
+            color: var(--gold);
+            margin: 0;
+        }
+
+        .trading-header p {
+            color: var(--muted-color);
+            margin: 5px 0;
+        }
+
+        /* Debug Controls */
+        .debug-controls {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ws-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ws-connected {
+            color: var(--green-divine);
+        }
+
+        .ws-disconnected {
+            color: var(--red-trapped);
+        }
+
+        .debug-log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Position Component Styles */
+        .position-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .position-side {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .position-side-long {
+            color: var(--green-divine);
+        }
+
+        .position-side-short {
+            color: var(--red-trapped);
+        }
+
+        .position-pnl {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .pnl-positive {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--green-divine);
+        }
+
+        .pnl-negative {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--red-trapped);
+        }
+
+        .position-details {
+            padding: 15px;
+        }
+
+        .position-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .position-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .position-info-label {
+            color: var(--muted-color);
+        }
+
+        .position-info-value {
+            font-weight: bold;
+        }
+
+        /* Take Profit Progress */
+        .tp-container {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tp-title {
+            color: var(--gold);
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .tp-progress {
+            position: relative;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tp-progress-bar {
+            position: absolute;
+            height: 100%;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .tp-points {
+            position: relative;
+            height: 100%;
+        }
+
+        .tp-point {
+            position: absolute;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .tp-point-label {
+            color: var(--muted-color);
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
+        .tp-point-price {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .tp-stats {
+            display: grid;
+            gap: 10px;
+        }
+
+        /* Elite Strategy Section */
+        .elite-strategy {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .elite-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .elite-title {
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .elite-mode {
+            color: var(--blue);
+            font-size: 0.9em;
+        }
+
+        .elite-signals {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .signal-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .signal-name {
+            font-weight: bold;
+        }
+
+        .signal-confidence {
+            color: var(--muted-color);
+            font-size: 0.9em;
+        }
+
+        .signal-description {
+            color: var(--light-text);
+            margin-bottom: 10px;
+        }
+
+        .signal-recommendation {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        .signal-high {
+            border-left: 3px solid var(--green-divine);
+        }
+
+        .signal-medium {
+            border-left: 3px solid var(--gold);
+        }
+
+        /* Trade History */
+        .trade-history {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-title {
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-table th {
+            color: var(--muted-color);
+            font-weight: normal;
+        }
+
+        .exit-tp {
+            color: var(--green-divine);
+        }
+
+        .exit-sl {
+            color: var(--red-trapped);
+        }
+
+        .exit-manual {
+            color: var(--blue);
+        }
+
+        .last-update {
+            text-align: right;
+            color: var(--muted-color);
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+
+        .error {
+            color: var(--red-trapped);
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="trading-section">
+        <div class="trading-header">
+            <h2>OMEGA ORDERS Tracking</h2>
+            <p>Divine trading flows with golden ratio harmony</p>
+        </div>
+
+        <!-- Debug Controls -->
+        <div class="debug-controls">
+            <div class="ws-status" id="wsStatus">WebSocket: Disconnected</div>
+            <div class="debug-log" id="debugLog">Initializing...</div>
+            <div class="last-update" id="lastUpdate">Last Update: Never</div>
+        </div>
+
+        <!-- Position Component -->
+        <div id="positionContainer">
+            <!-- Position cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Elite Strategy Section -->
+        <div id="eliteStrategy" class="elite-strategy">
+            <div class="elite-header">
+                <div class="elite-title">OMEGA Elite Exit Strategy</div>
+                <div class="elite-mode">Adaptive Fibonacci</div>
+            </div>
+
+            <div class="position-info-row">
+                <span class="position-info-label">Current Pattern</span>
+                <span class="position-info-value">Waiting for data...</span>
+            </div>
+
+            <div class="position-info-row">
+                <span class="position-info-label">Trap Probability</span>
+                <span class="position-info-value">--</span>
+            </div>
+
+            <div class="elite-signals">
+                <!-- Signals will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Trade History -->
+        <div class="trade-history">
+            <h3 class="history-title">Divine Journey</h3>
+            <table id="historyTable" class="history-table">
+                <thead>
+                    <tr>
+                        <th>Side</th>
+                        <th>Size</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>PnL</th>
+                        <th>Exit Type</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Trade history will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket Connection
+        let ws = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+
+        // BitGet API credentials
+        const API_KEY = "bg_7a15e57ce77ae90909aed5a745092994";
+        const SECRET_KEY = "553a08b0d509d42f27819fc3d9bbc09578b281d2dc3bf7544375d698e800bf4b";
+        const PASSPHRASE = "aa03d3d008af2e989";
+
+        function generateSignature(timestamp) {
+            // Create the message string: timestamp + "GET" + "/user/verify"
+            const message = timestamp + "GET" + "/user/verify";
+
+            // Create HMAC SHA256 hash and encode as base64
+            const encoder = new TextEncoder();
+            const key = encoder.encode(SECRET_KEY);
+            const data = encoder.encode(message);
+
+            // Use SubtleCrypto for HMAC-SHA256
+            return crypto.subtle.importKey(
+                "raw", key,
+                { name: "HMAC", hash: "SHA-256" },
+                false,
+                ["sign"]
+            ).then(key => crypto.subtle.sign(
+                "HMAC",
+                key,
+                data
+            )).then(signature => btoa(String.fromCharCode(...new Uint8Array(signature))));
+        }
+
+        function updateDebugLog(message) {
+            const debugLog = document.getElementById('debugLog');
+            debugLog.textContent = message;
+        }
+
+        function updateLastUpdate() {
+            const lastUpdate = document.getElementById('lastUpdate');
+            lastUpdate.textContent = `Last Update: ${new Date().toLocaleString()}`;
+        }
+
+        function updateWsStatus(connected) {
+            const wsStatus = document.getElementById('wsStatus');
+            wsStatus.textContent = `WebSocket: ${connected ? 'Connected' : 'Disconnected'}`;
+            wsStatus.className = connected ? 'ws-connected' : 'ws-disconnected';
+        }
+
+        function updatePositionDisplay(position) {
+            const container = document.getElementById('positionContainer');
+
+            // Calculate PnL percentage
+            const pnlPercentage = (position.unrealizedPnL / (position.size * position.entryPrice)) * 100;
+
+            // Create position card HTML
+            const cardHtml = `
+                <div class="position-card">
+                    <div class="position-header">
+                        <div class="position-side position-side-${position.side.toLowerCase()}">
+                            ${position.side === 'long' ? '▲' : '▼'} ${position.side.toUpperCase()} ${position.symbol}
+                        </div>
+                        <div class="position-pnl ${position.unrealizedPnL >= 0 ? 'pnl-positive' : 'pnl-negative'}">
+                            ${position.unrealizedPnL >= 0 ? '+' : ''}${position.unrealizedPnL.toFixed(2)} USDT 
+                            (${position.unrealizedPnL >= 0 ? '+' : ''}${pnlPercentage.toFixed(2)}%)
+                        </div>
+                    </div>
+                    <div class="position-details">
+                        <div class="position-info">
+                            <div class="position-info-row">
+                                <span class="position-info-label">Entry Price</span>
+                                <span class="position-info-value">$${position.entryPrice.toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Current Price</span>
+                                <span class="position-info-value">$${position.markPrice.toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Size</span>
+                                <span class="position-info-value">${position.size} BTC</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Leverage</span>
+                                <span class="position-info-value">${position.leverage}x</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Margin Mode</span>
+                                <span class="position-info-value">${position.marginMode}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Status</span>
+                                <span class="position-info-value">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="tp-container">
+                            <div class="tp-title">Divine Path Progress</div>
+                            <div class="tp-progress">
+                                <div class="tp-progress-bar" style="width: ${calculateProgressWidth(position)}%"></div>
+                                <div class="tp-points">
+                                    ${generateTakeProfit(position)}
+                                </div>
+                            </div>
+                            <div class="tp-stats">
+                                ${generateTakeProfitStats(position)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = cardHtml;
+            updateLastUpdate();
+        }
+
+        function calculateProgressWidth(position) {
+            // Calculate progress based on current price relative to entry and target
+            const range = position.side === 'long'
+                ? position.takeProfits[position.takeProfits.length - 1] - position.entryPrice
+                : position.entryPrice - position.takeProfits[position.takeProfits.length - 1];
+
+            const progress = position.side === 'long'
+                ? position.markPrice - position.entryPrice
+                : position.entryPrice - position.markPrice;
+
+            return Math.max(0, Math.min(100, (progress / range) * 100));
+        }
+
+        function generateTakeProfit(position) {
+            // Generate take profit points HTML
+            let points = '';
+            const range = position.side === 'long'
+                ? position.takeProfits[position.takeProfits.length - 1] - position.stopLoss
+                : position.stopLoss - position.takeProfits[position.takeProfits.length - 1];
+
+            // Add entry point
+            points += generatePoint('Entry', position.entryPrice, range, position);
+
+            // Add current price point
+            points += generatePoint('Current', position.markPrice, range, position);
+
+            // Add stop loss point
+            points += generatePoint('SL', position.stopLoss, range, position);
+
+            // Add take profit points
+            position.takeProfits.forEach((tp, index) => {
+                points += generatePoint(`TP${index + 1}`, tp, range, position);
+            });
+
+            return points;
+        }
+
+        function generatePoint(label, price, range, position) {
+            const left = position.side === 'long'
+                ? ((price - position.stopLoss) / range) * 100
+                : ((position.stopLoss - price) / range) * 100;
+
+            return `
+                <div class="tp-point tp-point-${label.toLowerCase()}" style="left: ${left}%">
+                    <div class="tp-point-label">${label}</div>
+                    <div class="tp-point-price">$${price.toLocaleString()}</div>
+                </div>
+            `;
+        }
+
+        function generateTakeProfitStats(position) {
+            let stats = '';
+            position.takeProfits.forEach((tp, index) => {
+                const distance = position.side === 'long'
+                    ? ((tp - position.markPrice) / position.markPrice) * 100
+                    : ((position.markPrice - tp) / position.markPrice) * 100;
+
+                stats += `
+                    <div class="position-info-row">
+                        <span class="position-info-label">TP${index + 1}</span>
+                        <span class="position-info-value">
+                            $${tp.toLocaleString()} 
+                            (${Math.abs(distance).toFixed(2)}% ${distance > 0 ? 'away' : 'reached'})
+                        </span>
+                    </div>
+                `;
+            });
+            return stats;
+        }
+
+        async function setupWebSocket() {
+            if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                updateDebugLog('Max reconnection attempts reached. Please refresh page.');
+                return;
+            }
+
+            ws = new WebSocket('wss://ws.bitget.com/mix/v1/stream');
+
+            ws.onopen = async () => {
+                updateWsStatus(true);
+                updateDebugLog('Connected to BitGet WebSocket');
+                reconnectAttempts = 0;
+
+                // Generate timestamp and signature
+                const timestamp = Date.now().toString();
+                const signature = await generateSignature(timestamp);
+
+                // First send login message with sacred credentials
+                ws.send(JSON.stringify({
+                    "op": "login",
+                    "args": [{
+                        "apiKey": API_KEY,
+                        "passphrase": PASSPHRASE,
+                        "timestamp": timestamp,
+                        "sign": signature
+                    }]
+                }));
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                // Add divine debug formatting
+                const debugMessage = data.event === "error"
+                    ? `🔮 OMEGA DEBUG\n\n${JSON.stringify(data, null, 2)}`
+                    : `🌟 OMEGA DATA\n\n${JSON.stringify(data, null, 2)}`;
+
+                updateDebugLog(debugMessage);
+
+                // Handle login success
+                if (data.event === "login") {
+                    // Subscribe to position updates after successful login
+                    ws.send(JSON.stringify({
+                        "op": "subscribe",
+                        "args": [{
+                            "instType": "UMCBL",
+                            "channel": "positions",
+                            "instId": "BTCUSDT_UMCBL"
+                        }]
+                    }));
+                    return;
+                }
+
+                if (data.event === "error") {
+                    const pnlElement = document.querySelector('.position-pnl');
+                    pnlElement.innerHTML = `<span class="error">Sacred Connection Error: ${data.msg}</span>`;
+                    return;
+                }
+
+                if (data.topic === "positions") {
+                    updatePositionDisplay(data.data);
+                    updateLastUpdate();
+                }
+            };
+
+            ws.onclose = () => {
+                updateWsStatus(false);
+                updateDebugLog('WebSocket disconnected. Reconnecting...');
+                reconnectAttempts++;
+                setTimeout(setupWebSocket, 1000);
+            };
+
+            ws.onerror = (error) => {
+                updateDebugLog(`WebSocket error: ${error.message}`);
+                const pnlElement = document.querySelector('.position-pnl');
+                pnlElement.innerHTML = `<span class="error">Connection error. Reconnecting...</span>`;
+            };
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDebugLog('Initializing WebSocket connection...');
+            setupWebSocket();
+        });
+    </script>
+</body>
+
+</html>

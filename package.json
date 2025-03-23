@@ -1,6 +1,21 @@
 {
+  "name": "omega-btc-ai",
+  "version": "1.0.0",
+  "description": "OMEGA BTC AI Trading System",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "verify": "ts-node scripts/verify_redis_backup.ts",
+    "remove-sim": "ts-node scripts/remove_simulation_data.ts"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
+  },
   "devDependencies": {
-    "jsdom": "^26.0.0",
-    "vite": "^6.2.2"
-  }
+    "@types/ioredis": "^5.0.0",
+    "@types/node": "^20.11.28"
+  },
+  "type": "module"
 }

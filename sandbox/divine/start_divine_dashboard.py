@@ -89,43 +89,70 @@ def run_flask_app(port):
     env = os.environ.copy()
     env["FLASK_APP"] = api_script
     env["FLASK_ENV"] = "development"
+    env["PYTHONUNBUFFERED"] = "1"  # Ensure output is not buffered
     
-    # Start Flask app on specified port
-    process = subprocess.Popen(
-        [sys.executable, api_script, "--port", str(port)],
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
-    return process
+    try:
+        # Start Flask app on specified port
+        process = subprocess.Popen(
+            [sys.executable, api_script, "--port", str(port)],
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1  # Line buffered
+        )
+        
+        return process
+        
+    except Exception as e:
+        print(f"{RED}Error starting Flask app: {e}{RESET}")
+        return None
 
 def monitor_process(process, stop_event):
-    """Monitor the Flask process and print output."""
-    while not stop_event.is_set() and process.poll() is None:
-        # Read output
-        output = process.stdout.readline()
-        if output:
-            print(f"{BLUE}[API] {output.strip()}{RESET}")
-        
-        # Read errors
-        error = process.stderr.readline()
-        if error:
-            print(f"{RED}[API ERROR] {error.strip()}{RESET}")
-        
-        # Small delay to prevent high CPU usage
-        time.sleep(0.1)
+    """Monitor the Flask process and handle output."""
+    while not stop_event.is_set():
+        try:
+            # Read output line by line
+            stdout_line = process.stdout.readline()
+            if stdout_line:
+                if "[API]" in stdout_line:
+                    print(f"{GREEN}{stdout_line.strip()}{RESET}")
+                else:
+                    print(stdout_line.strip())
+            
+            stderr_line = process.stderr.readline()
+            if stderr_line:
+                if "WARNING" in stderr_line:
+                    print(f"{YELLOW}[API WARNING] {stderr_line.strip()}{RESET}")
+                else:
+                    print(f"{RED}[API ERROR] {stderr_line.strip()}{RESET}")
+            
+            # Check if process has terminated
+            if process.poll() is not None:
+                print(f"{RED}Flask process terminated unexpectedly{RESET}")
+                break
+                
+            time.sleep(0.1)  # Small delay to prevent CPU spinning
+            
+        except Exception as e:
+            print(f"{RED}Error monitoring process: {e}{RESET}")
+            break
 
 def signal_handler(sig, frame):
-    """Handle interrupt signals gracefully."""
-    print(f"\n{YELLOW}Shutting down Divine Alignment Dashboard...{RESET}")
+    """Handle graceful shutdown on CTRL+C."""
+    print(f"\n{YELLOW}Stopping Divine Alignment Dashboard...{RESET}")
     stop_event.set()
     
-    # Allow a moment for threads to clean up
-    time.sleep(1)
+    if flask_process:
+        try:
+            flask_process.terminate()
+            flask_process.wait(timeout=5)  # Wait up to 5 seconds
+        except subprocess.TimeoutExpired:
+            flask_process.kill()  # Force kill if not terminated
+        except Exception as e:
+            print(f"{RED}Error stopping Flask process: {e}{RESET}")
     
-    # Force exit if still running
+    print(f"{GREEN}Divine Alignment Dashboard stopped successfully.{RESET}")
     sys.exit(0)
 
 def open_dashboard(url, delay=2):
@@ -141,64 +168,60 @@ def open_dashboard(url, delay=2):
     browser_thread.start()
 
 def main():
-    """Main entry point for the Divine Alignment Dashboard launcher."""
-    parser = argparse.ArgumentParser(description="Launch the OMEGA BTC AI Divine Alignment Dashboard")
-    parser.add_argument("--no-browser", action="store_true", help="Don't open browser automatically")
-    parser.add_argument("--port", type=int, default=5051, help="Port to run the dashboard on (default: 5051)")
+    """Main function."""
+    global flask_process, stop_event
+    
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=5051)
+    parser.add_argument('--no-browser', action='store_true')
     args = parser.parse_args()
     
-    # Check if the specified port is available
-    if not check_port_available(args.port):
-        print(f"{YELLOW}Port {args.port} is already in use.{RESET}")
-        new_port = find_available_port(args.port + 1)
-        if new_port:
-            print(f"{GREEN}Using alternative port: {new_port}{RESET}")
-            args.port = new_port
-        else:
-            print(f"{RED}No available ports found in range {args.port} to {args.port + 100}.{RESET}")
-            sys.exit(1)
+    # Find available port
+    port = find_available_port(args.port)
+    if not port:
+        print(f"{RED}No available ports found!{RESET}")
+        return 1
     
-    # Print banner with the port that will be used
-    print_banner(args.port)
+    # Print banner
+    print_banner(port)
     
-    # Set up signal handlers
+    # Start Flask app
+    flask_process = run_flask_app(port)
+    if not flask_process:
+        return 1
+    
+    # Set up signal handler
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    # Start Flask app
-    flask_process = run_flask_app(args.port)
-    
-    # Create stop event for threads
-    global stop_event
+    # Create stop event
     stop_event = threading.Event()
     
-    # Monitor Flask process in a thread
+    # Start monitor thread
     monitor_thread = threading.Thread(
         target=monitor_process,
-        args=(flask_process, stop_event)
+        args=(flask_process, stop_event),
+        daemon=True
     )
-    monitor_thread.daemon = True
     monitor_thread.start()
     
-    # Open browser if not disabled
+    # Open dashboard in browser
     if not args.no_browser:
-        open_dashboard(f"http://localhost:{args.port}/divine")
+        url = f"http://localhost:{port}/divine"
+        print(f"Opening Divine Alignment Dashboard in browser: {url}")
+        threading.Thread(target=open_dashboard, args=(url,), daemon=True).start()
     
     try:
-        # Keep the main thread alive
-        while not stop_event.is_set() and flask_process.poll() is None:
-            time.sleep(0.5)
+        # Keep main thread alive
+        while not stop_event.is_set():
+            time.sleep(0.1)
     except KeyboardInterrupt:
-        # Handle Ctrl+C
         signal_handler(signal.SIGINT, None)
-    finally:
-        # Clean up
-        if flask_process.poll() is None:
-            print(f"{YELLOW}Terminating Flask process...{RESET}")
-            flask_process.terminate()
-            flask_process.wait(timeout=5)
-        
-        print(f"{GREEN}Divine Alignment Dashboard stopped successfully.{RESET}")
+    
+    return 0
 
 if __name__ == "__main__":
-    main() 
+    flask_process = None
+    stop_event = None
+    sys.exit(main()) 
