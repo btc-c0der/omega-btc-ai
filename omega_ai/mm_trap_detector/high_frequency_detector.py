@@ -70,15 +70,58 @@ from collections import deque
 from omega_ai.mm_trap_detector.grafana_reporter import report_trap_for_grafana
 from omega_ai.mm_trap_detector.fibonacci_detector import check_fibonacci_level, get_current_fibonacci_levels, fibonacci_detector, detect_fibonacci_confluence, update_fibonacci_data
 import json
+import logging
+import os
+from typing import Dict, List, Tuple, Optional, Any
+from queue import Queue
+from threading import Thread
 
-# ✅ Redis connection
-redis_conn = redis.Redis(host="localhost", port=6379, db=0)
+# Configure logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Initialize Redis connection
+try:
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = int(os.getenv('REDIS_PORT', '6379'))
+    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+    redis_conn.ping()
+    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    raise
+
+# Terminal colors for enhanced visibility
+BLUE = "\033[94m"           # Price up
+YELLOW = "\033[93m"         # Price down
+GREEN = "\033[92m"          # Strongly positive
+RED = "\033[91m"            # Strongly negative
+CYAN = "\033[96m"           # Info highlight
+MAGENTA = "\033[95m"        # Special emphasis
+LIGHT_ORANGE = "\033[38;5;214m"  # Warning/moderate negative
+RESET = "\033[0m"           # Reset color
+BLUE_BG = "\033[44m"        # Background for blue text
+WHITE = "\033[97m"          # White text
+BOLD = "\033[1m"            # Bold text
+GREEN_BG = "\033[42m"       # Background for green text
+RED_BG = "\033[41m"         # Background for red text
 
 # ✅ Constants for High-Frequency Trap Detection
 HF_ACTIVATION_THRESHOLD = 0.5  # 0.5% price change for activation
 SCHUMANN_THRESHOLD = 12.0      # 12Hz Schumann resonance threshold
 BACK_TO_BACK_WINDOW = 180      # 3 minutes window to detect multiple traps
 MIN_TRAPS_FOR_HF_MODE = 2      # Need at least 2 traps in window to activate HF mode
+
+# Queue for handling trap detection events
+mm_trap_queue = Queue()
+
+# Global flags
+is_running = False
+high_alert_mode = False
 
 class HighFrequencyTrapDetector:
     """Enhanced detector for high-frequency market maker trap detection."""
