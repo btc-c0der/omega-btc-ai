@@ -145,3 +145,27 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - Command-line tools for basic position operations
 
 "JAH BLESS the processing path. This assembly is not mechanical—it's rhythmic."
+
+## v0.4.5 - Divine Watcher & Prophetic Test Coverage (2023-10-27)
+
+### Added
+
+- **Enhanced Divine Watcher** with auto QA-tagging functionality
+- Automatic Git tag creation for successful test runs with format `vX.Y.Z-TDD-OMEGA-QA-APPROVED-testname-N`
+- Auto-incrementing counter system to prevent tag conflicts
+- Comprehensive documentation for the Divine Watcher & TDD Oracle
+
+### Enhanced
+
+- Improved file monitoring with more precise change detection
+- Added intelligent test file detection for both `test_*.py` and `*_test.py` patterns
+- Enhanced terminal output formatting for better readability
+- Extended launcher script with informative feature descriptions
+
+## v0.4.3 - OMEGA DEV FRAMEWORK with TDD Oracle (2023-10-26)
+
+### Added
+
+- **TDD Oracle** for analyzing code and suggesting missing tests
+- **Prompt Saver** for saving AI development conversations
+- **Framework Documentation** for the OMEGA DEV FRAMEWORK
