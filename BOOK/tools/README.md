@@ -2,6 +2,17 @@
 
 This directory contains documentation for the various tools and utilities provided by the Omega-BTC-AI system.
 
+## Development Framework Tools
+
+### [Divine Watcher & TDD Oracle](divine_watcher_tdd_oracle.md)
+
+Advanced test-driven development tools that operate on divine mathematical principles:
+
+- Divine Watcher - Monitors your codebase and runs the TDD Oracle on file changes
+- TDD Oracle - Analyzes test coverage and generates prophetic test templates
+- Auto QA-Tagging - Creates Git tags when tests pass with format `vX.Y.Z-TDD-OMEGA-QA-APPROVED-testname-N`
+- Prophetic Test Coverage - Ensures all modules maintain divine test coverage
+
 ## Position Management Tools
 
 ### [Position Harmony Advisor](position_harmony.md)
