@@ -70,6 +70,17 @@ Tests are not afterthoughts but prophecies of functionality:
 
 The OMEGA DEV FRAMEWORK builds upon the proven foundation:
 
+- **v0.4.5** - Divine Watcher & Prophetic Test Coverage (2023-10-27)
+  - Enhanced Divine Watcher with auto QA-tagging
+  - Automatic Git tag creation for successful test runs
+  - Auto-incrementing counter for tag consistency
+  - Improved file monitoring with intelligent test detection
+
+- **v0.4.3** - OMEGA DEV FRAMEWORK with TDD Oracle (2023-10-26)
+  - TDD Oracle for analyzing code and suggesting missing tests
+  - Prompt Saver for immortalizing AI development conversations
+  - Framework Documentation for divine development wisdom
+
 - **v0.4.2** - Integrated Monitoring Suite (2023-10-25)
   - Unified monitoring with tmux integration
   - Combined RastaBitgetMonitor and TrapProbabilityMeter
@@ -173,13 +184,14 @@ Divine guardian that watches your codebase and invokes the TDD Oracle when files
 
 ```bash
 # Start the divine watcher
-./run_divine_watcher.sh ./your_codebase_dir
+python omega_watcher.py --watch-dir ./your_codebase_dir
 
-# Watch a specific directory
-./run_divine_watcher.sh ./omega_ai
+# Enable auto QA-tagging for successful test runs
+python omega_watcher.py --watch-dir ./omega_ai --auto-tag
 
-# The watcher will automatically detect file changes
-# and run the TDD Oracle for prophetic test coverage
+# The watcher automatically detects file changes,
+# runs tests, and creates git tags for successful runs
+# with format: vX.Y.Z-TDD-OMEGA-QA-APPROVED-testname-N
 ```
 
 ### 5. **RastaBitgetMonitor**
