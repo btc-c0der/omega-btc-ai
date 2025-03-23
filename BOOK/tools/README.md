@@ -52,6 +52,16 @@ Sophisticated multi-factor exit management for trap-aware dual traders:
 - Market regime analysis for identifying optimal exit conditions
 - Pattern recognition for detecting potential reversal signals
 
+### [Elite Exit Strategy Integration](elite_monitor_integration.md)
+
+Terminal-focused integration of Elite Exit Strategies with RastaBitgetMonitor:
+
+- Pure LINUX TERMINAL TORVALDS OMEGA GNU 3.0 style implementation
+- Command-line interface for position monitoring and exit execution
+- Multiple output formats (text, JSON, CSV) for terminal flexibility
+- Trap detection integration for advanced market manipulation awareness
+- Scriptable design for automation and remote monitoring
+
 ## Market Analysis Tools
 
 ### Schumann Resonance Analyzer
