@@ -52,6 +52,23 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - Updated BitGet monitoring documentation
 - Expanded deployment guides
 
+## v0.4.2 - Integrated Monitoring Suite (2023-10-25)
+
+### Added
+
+- Unified monitoring suite with tmux integration
+- Combined RastaBitgetMonitor and TrapProbabilityMeter in single dashboard
+- Optimized display layout for trading workstation
+- run_monitors.sh script for one-command launch
+- External log file support for RastaBitgetMonitor
+
+### Enhanced
+
+- Reduced monitoring refresh time to 3 seconds
+- Improved visual styling with custom borders and status indicators
+- Added convenient detach/reattach functionality via tmux
+- Cleaner interface separation between position and trap monitoring
+
 ## v0.3.1.1 - Documentation Updates (2023-10-10)
 
 ### Added
