@@ -53,7 +53,8 @@ fi
 # Inform about QA tagging functionality
 echo -e "${MAGENTA}${BOLD}FEATURE: Auto QA-Tagging${NC}"
 echo -e "${CYAN}When test files pass all tests, a QA-approved git tag will be automatically created.${NC}"
-echo -e "${CYAN}These tags follow the format: vX.Y.Z-TDD-OMEGA-QA-APPROVED-testname${NC}"
+echo -e "${CYAN}These tags follow the format: vX.Y.Z-TDD-OMEGA-QA-APPROVED-testname-N${NC}"
+echo -e "${CYAN}where N is an auto-incrementing counter to prevent tag conflicts.${NC}"
 echo -e "${CYAN}Tags will be pushed to origin automatically.${NC}"
 echo ""
 
