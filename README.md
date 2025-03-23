@@ -1039,3 +1039,32 @@ python run_omega_system.py --no-market-analyzer --ui-first --no-cleanup
 # Run with just the essential services for the dashboard
 
 python run_omega_system.py --no-market-analyzer --no-backend --ui-first
+
+## OMEGA PROMETHEUS MATRIX
+
+The OMEGA PROMETHEUS MATRIX is a powerful CLI-based monitoring system that provides real-time insights into system performance, network activity, and trading metrics. Run it using:
+
+```bash
+./run_prometheus_matrix.sh
+```
+
+## Persona-Based Exit Strategies Monitor
+
+The Persona-Based Exit Strategies Monitor enhances the RastaBitgetMonitor with personalized exit recommendations from different trader profiles. This integration provides exit recommendations based on the analysis of multiple trading personas, each with their own risk management strategies and trading styles.
+
+Run the monitor:
+
+```bash
+python scripts/run_persona_exit_monitor.py
+```
+
+Optional parameters:
+
+- `--interval <seconds>`: Set refresh interval (default: 5)
+- `--min-persona-confidence <value>`: Set minimum confidence threshold (default: 0.5)
+- `--disable-persona-exits`: Disable persona-based exit recommendations
+- `--no-color`: Disable colored output
+
+---
+
+ONE LOVE, ONE HEART, ONE CODE! 🌟
