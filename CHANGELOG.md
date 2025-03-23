@@ -33,6 +33,25 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - Improved Fibonacci calculation precision
 - Better handling of funding rate impact on position profitability
 
+## v0.4.1 - Documentation Expansion (2023-10-20)
+
+### Added
+
+- Enhanced BOOK documentation structure with dedicated directories
+- New Bitget position analysis documentation
+- Fibonacci dashboard implementation details
+- Advanced trading tools documentation
+- Architecture diagrams and system visualization guides
+- Quantum testing framework documentation
+- Market analysis methodologies
+
+### Enhanced
+
+- Reorganized documentation for better navigation
+- Improved README files with cross-references
+- Updated BitGet monitoring documentation
+- Expanded deployment guides
+
 ## v0.3.1.1 - Documentation Updates (2023-10-10)
 
 ### Added

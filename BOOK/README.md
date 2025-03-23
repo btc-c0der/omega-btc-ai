@@ -6,9 +6,21 @@
 
 OMEGA BTC AI represents the pinnacle of sacred trading intelligence, harmonizing Fibonacci mathematics, Schumann resonance, and divine market analysis to create a holistic Bitcoin trading system aligned with cosmic rhythms.
 
-## 📣 LATEST RELEASE - v0.3.0
+## 📣 LATEST RELEASE - v0.3.1
 
-The latest release enhances our BitGet integration with:
+The latest release integrates the Position Harmony Advisor with the BitGet monitor:
+
+- **Position Harmony Advisor Integration**: Divine position sizing based on Golden Ratio principles
+- **Portfolio Balance Optimization**: Long/short balance recommendations using Fibonacci ratios
+- **Harmony Scoring Visualization**: Color-coded display of cosmic alignment
+- **Divine Recommendations**: Specific guidance for achieving mathematical balance
+- **Ideal Position Sizes**: Fibonacci-based position size suggestions with risk categories
+
+See the [Position Harmony Advisor](./tools/position_harmony.md) documentation and [CHANGELOG](./CHANGELOG.md) for details.
+
+## 📣 PREVIOUS RELEASE - v0.3.0
+
+The v0.3.0 release enhanced our BitGet integration with:
 
 - **Comprehensive JSON Field Display**: Complete visualization of all BitGet API position fields
 - **Improved Test Coverage**: Extensive test suite for JSON field parsing and handling
@@ -52,6 +64,11 @@ See the [Streaming RASTA BitGet Position Monitor](./core/bitget/streaming_rasta_
 - [BitGet Fibonacci Dashboard](./core/bitget/fibonacci_dashboard_README.md) - Master documentation for the BitGet Fibonacci Golden Ratio Dashboard
 - [BitGet Quantum Testing Framework](./core/bitget/quantum_testing_framework.md) - TCP/IP-aligned testing methodology for BitGet integration
 - [Streaming RASTA BitGet Position Monitor v0.3.0](./core/bitget/streaming_rasta_bitget_monitor.md) - Real-time position monitor with comprehensive JSON field support
+
+### Trading Tools & Utilities
+
+- [Position Harmony Advisor](./tools/position_harmony.md) - Divine guidance for position sizing based on Golden Ratio principles
+- [Tools Directory](./tools/README.md) - Overview of all available trading tools and utilities
 
 ### Deployment & Integration
 
