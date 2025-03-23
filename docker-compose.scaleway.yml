@@ -3,6 +3,7 @@ version: '3.8'
 # OMEGA BTC AI - Trap-Aware Dual Traders (TADT) System
 # Scaleway Cloud Deployment Configuration
 # This configuration uses the existing Scaleway Cloud Redis instance
+# Now with Fibonacci aligned architecture (1,1,2,3,5)
 
 services:
   trap-probability-meter:
@@ -51,6 +52,27 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+
+  elite-exit-strategy:
+    build:
+      context: .
+      dockerfile: docker/EliteExitStrategy.Dockerfile
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-172.16.8.2} # Default to Scaleway Cloud Redis IP
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SYMBOL=${SYMBOL:-BTCUSDT}
+      - CONFIDENCE_THRESHOLD=${ELITE_EXIT_CONFIDENCE:-0.7}
+      - ENABLE_FIBONACCI_EXITS=${ENABLE_FIBONACCI_EXITS:-true}
+      - ENABLE_PATTERN_RECOGNITION=${ENABLE_PATTERN_RECOGNITION:-true}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "15m"
+        max-file: "4"
 
   divine-dashboard:
     build:

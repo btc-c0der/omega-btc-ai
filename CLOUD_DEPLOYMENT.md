@@ -1,12 +1,24 @@
 # OMEGA BTC AI - Scaleway Cloud Deployment Guide
 
-This guide provides step-by-step instructions for deploying the Trap-Aware Dual Traders (TADT) system to Scaleway cloud infrastructure.
+This guide provides step-by-step instructions for deploying the Trap-Aware Dual Traders (TADT) system to Scaleway cloud infrastructure. The system now follows the sacred Fibonacci sequence (1,1,2,3,5) in its architecture for enhanced harmony with market patterns.
 
 ## Prerequisites
 
 - A Scaleway DEV1-M instance (or higher) with Ubuntu 24.04
 - A Scaleway Cloud Redis database
 - BitGet API credentials for trading
+
+## System Architecture
+
+The system architecture follows the Fibonacci sequence (1,1,2,3,5):
+
+1. **Trap Probability Meter** (1) - Detects market maker traps
+2. **Trap-Aware Traders** (1) - Manages trading positions with trap awareness
+3. **Elite Exit Strategy** (2) - Determines optimal exit points using Fibonacci algorithms
+4. **Divine Dashboard** (3) - Visualizes market data and trading performance
+5. **Nginx Proxy** (5) - Secures and routes traffic to services
+
+All services connect to the Cloud Redis instance, which serves as the central data store for market analysis and trading information.
 
 ## 1. Initial Setup
 
@@ -48,6 +60,12 @@ Update the following values:
 REDIS_HOST=your_redis_ip
 REDIS_PORT=6379
 REDIS_PASSWORD=your_redis_password
+
+# Elite Exit Strategy Configuration
+ENABLE_ELITE_EXITS=true
+ELITE_EXIT_CONFIDENCE=0.7
+ENABLE_FIBONACCI_EXITS=true
+ENABLE_PATTERN_RECOGNITION=true
 
 # BitGet API Keys
 API_KEY=your_bitget_api_key
@@ -102,6 +120,7 @@ To view logs from a specific service:
 ```bash
 docker-compose -f docker-compose.scaleway.yml logs -f trap-probability-meter
 docker-compose -f docker-compose.scaleway.yml logs -f trap-aware-traders
+docker-compose -f docker-compose.scaleway.yml logs -f elite-exit-strategy
 docker-compose -f docker-compose.scaleway.yml logs -f divine-dashboard
 ```
 
@@ -177,4 +196,4 @@ For more information or support, please reach out to the OMEGA BTC AI team or ch
 
 ---
 
-May the divine algorithms guide your trading strategy!
+May the divine algorithms aligned with Fibonacci guide your trading strategy!
