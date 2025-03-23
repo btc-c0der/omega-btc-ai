@@ -16,9 +16,18 @@ import time
 import json
 import logging
 import asyncio
+import random
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 from dataclasses import dataclass, field
+from dotenv import load_dotenv
+import argparse
+
+try:
+    from pybitget import Spot  # Import BitGet SDK
+except ImportError:
+    print("⚠️ BitGet SDK not found. Please install it with: pip install pybitget")
+    print("For now, using mock data only.")
 
 # Configure logging
 logging.basicConfig(
@@ -38,6 +47,7 @@ class Colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     END = '\033[0m'
+    RESET = '\033[0m'
 
 @dataclass
 class PersonaEntryRecommendation:
@@ -169,6 +179,24 @@ class PersonaEntryManager:
             return f"{color}{text}{Colors.END}"
         return text
 
+    def analyze_market(self, market_data: Dict[str, Any]) -> None:
+        """
+        Analyze a single market and print recommendations from all personas.
+        
+        Args:
+            market_data: Dictionary containing market data for a single symbol
+        """
+        symbol = market_data["symbol"]
+        current_price = market_data["current_price"]
+        
+        print(f"\n{self.colorize(Colors.CYAN, f'Analyzing {symbol} at {current_price:.2f} USDT')}")
+        
+        # Get recommendations from all personas
+        entry_strategy = self.generate_entry_recommendations(market_data)
+        
+        # Print recommendations with market details
+        print(self.format_recommendations_display(entry_strategy.recommendations, symbol, current_price))
+    
     def generate_entry_recommendations(self, market_data: Dict[str, Any]) -> PersonaBasedEntryStrategy:
         """
         Generate entry recommendations from different trader personas.
@@ -312,280 +340,269 @@ class PersonaEntryManager:
         )
     
     def _get_cosmic_entry(self, market_data: Dict[str, Any], current_price: float) -> PersonaEntryRecommendation:
-        """Get entry recommendation from Cosmic Trader persona based on divine market flow."""
-        confidence = 0.0
-        reasons = []
-        explanation = ""
-        side = "long"  # Default to long, will determine based on cosmic influences
+        """Generate entry recommendation from Cosmic Trader persona."""
+        symbol = market_data["symbol"]
         
-        # Get current time to determine cosmic influences
+        # Get current time for cosmic analysis
         now = datetime.now()
         hour = now.hour
-        day_of_week = now.weekday()  # 0=Monday, 6=Sunday
+        day_of_week = now.weekday()  # 0-6 (Monday-Sunday)
+        day_of_month = now.day
+        month = now.month
         
-        # For demo purposes - force new moon and Monday for optimal entry conditions
-        if 'force_cosmic_conditions' in market_data and market_data['force_cosmic_conditions']:
-            moon_day = 1  # New moon
-            day_of_week = 0  # Monday
-            hour = 9  # Morning trading
-            mercury_retrograde = False
+        # Determine moon phase (simplified calculation)
+        # This is a simplified approach - in production we could use an astronomy API
+        days_since_new_moon = (now.date() - datetime(2024, 2, 9).date()).days % 29.53  # Feb 9, 2024 was a new moon
+        if days_since_new_moon < 7.38:
+            moon_phase = "waxing crescent"
+            cosmic_confidence_adj = 0.2  # Growing energy, good for entries
+        elif days_since_new_moon < 14.76:
+            moon_phase = "waxing gibbous"
+            cosmic_confidence_adj = 0.3  # Strong energy, very good for entries
+        elif days_since_new_moon < 21.76:
+            moon_phase = "waning gibbous"
+            cosmic_confidence_adj = -0.1  # Declining energy, less favorable
         else:
-            # Determine if Mercury is retrograde (simplified simulation)
-            mercury_retrograde = (now.day % 7 == 0)  # Every 7th day of month
-            moon_day = now.day % 30
-        
-        # Determine moon phase (simplified simulation)
-        if moon_day < 4:  # New Moon
-            moon_phase = "new_moon"
-        elif moon_day < 11:  # Waxing 
-            moon_phase = "waxing"
-        elif moon_day < 15:  # Full Moon approaching
-            moon_phase = "full_approaching"
-        elif moon_day < 19:  # Full Moon
-            moon_phase = "full_moon"
-        else:  # Waning
-            moon_phase = "waning"
-        
-        print(f"Cosmic Analysis - Moon phase: {moon_phase}, Day of week: {day_of_week}, Hour: {hour}")
+            moon_phase = "waning crescent"
+            cosmic_confidence_adj = -0.2  # Low energy, poor for entries
             
-        # Base cosmic influences
-        cosmic_risk_appetite = 0.0
-        
-        # Moon phase influences
-        if moon_phase == "new_moon":
-            cosmic_risk_appetite += 0.3  # New beginnings - more risk
-            reasons.append("New moon cycle initiation")
-            explanation = "The new lunar cycle begins, perfect for planting the seeds of new positions."
-            confidence += 0.3
-        elif moon_phase == "waxing":
-            cosmic_risk_appetite += 0.2  # Building energy
-            reasons.append("Waxing moon energy accumulation")
-            explanation = "The lunar cycle is building energy, favorable for establishing positions."
-            confidence += 0.2
-        elif moon_phase == "full_approaching":
-            cosmic_risk_appetite -= 0.1  # Caution as we approach peak
-            reasons.append("Approaching energy peak")
-            explanation = "Approaching the full moon, energy is high but volatile."
-            confidence += 0.1
-        elif moon_phase == "full_moon":
-            cosmic_risk_appetite -= 0.3  # Full moon - peak energy, potential reversal
-            reasons.append("Full moon cycle peak")
-            explanation = "The lunar energy is at maximum, signaling potential completion of cycles."
-            # Less favorable for new entries
-            confidence -= 0.2
-        else:  # waning
-            cosmic_risk_appetite -= 0.2  # Declining energy
-            reasons.append("Waning moon cycle dissolution")
-            explanation = "The lunar cycle is releasing energy, better to wait for new beginnings."
-            confidence -= 0.1
+        # Day of week influence
+        if day_of_week in [1, 4]:  # Tuesday and Friday have historically positive energy
+            dow_influence = 0.15
+        elif day_of_week in [2, 5]:  # Wednesday and Saturday have neutral energy
+            dow_influence = 0.0
+        else:  # Monday, Thursday, Sunday have historically negative energy
+            dow_influence = -0.1
             
-        # Mercury retrograde makes cosmic traders more cautious
-        if mercury_retrograde:
-            cosmic_risk_appetite -= 0.3
-            reasons.append("Mercury retrograde caution")
-            explanation += " Mercury retrograde suggests communication and transaction issues, exercise caution."
-            confidence -= 0.2
+        # Hour of day influence (certain trading hours align with cosmic energy)
+        if 8 <= hour <= 11:  # Morning alignment
+            hour_influence = 0.1
+        elif 14 <= hour <= 16:  # Afternoon alignment
+            hour_influence = 0.15
+        elif 19 <= hour <= 22:  # Evening alignment
+            hour_influence = 0.05
+        else:  # Nighttime/early morning - low cosmic energy
+            hour_influence = -0.15
             
-        # Time of day effects
-        if hour >= 8 and hour <= 10:  # Morning market flow
-            cosmic_risk_appetite += 0.1
-            reasons.append("Morning market flow initiation")
-            explanation += " Morning hours bring fresh energy and ideal entry conditions."
-            confidence += 0.1
-        elif hour >= 14 and hour <= 16:  # Afternoon volatility
-            cosmic_risk_appetite -= 0.1
-            reasons.append("Afternoon volatility fluctuation")
-            explanation += " Afternoon brings uncertain energy, proceed with awareness."
-            confidence -= 0.05
-        elif hour >= 2 and hour <= 4:  # Deep night hours - connected to universe
-            cosmic_risk_appetite += 0.2
-            reasons.append("Deep night universal connection")
-            explanation += " Night hours connect to deeper cosmic wisdom, favorable for intuitive entries."
-            confidence += 0.15
+        # Analyze Fibonacci alignment
+        fib_alignment = 0.0
         
-        # Day of week effects
-        if day_of_week == 0:  # Monday - new energy
-            cosmic_risk_appetite += 0.1
-            reasons.append("Weekly cycle initiation")
-            explanation += " Beginning of trading week brings fresh market energy."
-            confidence += 0.05
-        elif day_of_week == 4:  # Friday - closing energy
-            cosmic_risk_appetite -= 0.2
-            reasons.append("Weekly cycle completion")
-            explanation += " End of trading week suggests waiting for new cycles to begin."
-            confidence -= 0.1
-        
-        # Market data analysis for cosmic patterns
-        # Check for Fibonacci relationships in recent price movements
-        if "high_24h" in market_data and "low_24h" in market_data:
-            high_24h = float(market_data.get("high_24h", current_price))
-            low_24h = float(market_data.get("low_24h", current_price))
-            range_24h = high_24h - low_24h
+        # Check if price is near Fibonacci level from recent high/low range
+        if "recent_high" in market_data and "recent_low" in market_data:
+            recent_high = market_data["recent_high"]
+            recent_low = market_data["recent_low"]
+            range_size = recent_high - recent_low
             
-            # Check if current price is at a key Fibonacci level
-            if range_24h > 0:
-                fib_618_level = low_24h + (range_24h * 0.618)
-                fib_382_level = low_24h + (range_24h * 0.382)
+            if range_size > 0:
+                # Calculate key Fibonacci levels
+                fib_levels = {
+                    0.236: recent_low + (range_size * 0.236),
+                    0.382: recent_low + (range_size * 0.382),
+                    0.5: recent_low + (range_size * 0.5),
+                    0.618: recent_low + (range_size * 0.618),
+                    0.786: recent_low + (range_size * 0.786),
+                    0.888: recent_low + (range_size * 0.888)
+                }
                 
-                # Price near the golden ratio retracement (0.618)
-                if abs(current_price - fib_618_level) / range_24h < 0.05:
-                    reasons.append("Golden ratio alignment (0.618)")
-                    explanation += " Price is aligned with the divine golden ratio (0.618), a cosmic harmony point."
-                    confidence += 0.3
-                    side = "long"  # Golden ratio retracement is bullish
-                    
-                # Price near the 0.382 Fibonacci level
-                elif abs(current_price - fib_382_level) / range_24h < 0.05:
-                    reasons.append("Fibonacci harmony point (0.382)")
-                    explanation += " Price found balance at the 0.382 Fibonacci level, a cosmic support zone."
-                    confidence += 0.2
-                    side = "long"
+                # Check if price is near any Fibonacci level
+                for level, price in fib_levels.items():
+                    # If price is within 0.5% of a Fibonacci level
+                    if current_price > 0 and abs(current_price - price) / current_price < 0.005:
+                        # Golden ratio and its derivatives have highest cosmic significance
+                        if level in [0.618, 0.382]:
+                            fib_alignment = 0.4
+                        elif level == 0.5:  # Square root alignment
+                            fib_alignment = 0.3
+                        else:
+                            fib_alignment = 0.2
+                        break
         
-        # Check for potential reversal patterns - suggests short position
+        # Combine cosmic factors
+        cosmic_confidence = cosmic_confidence_adj + dow_influence + hour_influence + fib_alignment
+        
+        # Calculate cosmic risk appetite based on moon phase
+        cosmic_risk_appetite = {
+            "waxing crescent": 0.1,  # Growing energy - moderate risk
+            "waxing gibbous": 0.2,   # Peak energy - higher risk tolerance
+            "waning gibbous": -0.1,  # Declining energy - reduce risk
+            "waning crescent": -0.2  # Low energy - very low risk tolerance
+        }[moon_phase]
+        
+        # Calculate final confidence
+        final_confidence = max(0.0, min(1.0, cosmic_confidence + cosmic_risk_appetite))
+        
+        # Determine if we should enter or wait
+        action = "ENTER" if final_confidence >= self.min_confidence else "WAIT"
+        
+        # Determine entry side based on cosmic alignment
+        # In a comprehensive system, this would use more factors
+        side = "long"  # Default
         if "change_24h" in market_data:
-            change_24h = float(market_data.get("change_24h", 0))
+            change_24h = market_data["change_24h"]
+            # If 24h change is negative but we have strong cosmic alignment, this 
+            # could be a reversal opportunity for long
+            if change_24h < -1.0 and final_confidence > 0.65:
+                side = "long"  # Potential reversal
+            # If 24h change is positive but cosmic alignment is weakening,
+            # consider a short position
+            elif change_24h > 2.0 and final_confidence < 0.4:
+                side = "short"
+        
+        # Generate cosmic analysis details for explanation
+        analysis_details = [
+            f"Moon phase: {moon_phase}",
+            f"Day of week: {day_of_week}",
+            f"Hour: {hour}"
+        ]
+        
+        if fib_alignment > 0:
+            analysis_details.append(f"Price aligned with Fibonacci level")
             
-            # Strong upward movement may be nearing completion
-            if change_24h > 5.0:
-                reasons.append("Energy cycle completion")
-                explanation += " Strong recent rise suggests completion of positive energy cycle."
-                confidence += 0.25
-                side = "short"  # Suggest reversal short
+        # Generate explanation
+        explanation = f"Cosmic confidence: {cosmic_confidence:.2f} + cosmic risk appetite: {cosmic_risk_appetite:.2f} = final: {final_confidence:.2f}"
+        
+        # Generate reasons
+        if action == "ENTER":
+            reasons = ["Cosmic conditions are favorable for entry"]
+            if fib_alignment > 0:
+                reasons.append(f"Price is aligned with sacred Fibonacci level")
+            if moon_phase in ["waxing crescent", "waxing gibbous"]:
+                reasons.append(f"Waxing moon provides positive energy for new positions")
+            if cosmic_risk_appetite > 0:
+                reasons.append(f"Celestial risk appetite supports position taking")
                 
-            # Strong downward movement may be bottoming
-            elif change_24h < -5.0:
-                reasons.append("Negative energy cycle exhaustion")
-                explanation += " Strong recent decline suggests negative energy depletion and potential reversal."
-                confidence += 0.25
-                side = "long"  # Suggest reversal long
-        
-        # Volume analysis as energy flow indicator
-        if "volume" in market_data and "avg_volume" in market_data:
-            volume = float(market_data.get("volume", 0))
-            avg_volume = float(market_data.get("avg_volume", volume))
+            # If confidence is very high, add more spiritual reasoning
+            if final_confidence > 0.7:
+                reasons.append("Strong universal alignment supports this entry")
+        else:
+            reasons = ["Cosmic conditions not optimal"]
+            reasons.append(f"→ Current moon phase: {moon_phase}, day: {'weekend' if day_of_week >= 5 else 'weekday'}, hour: {'morning' if hour < 12 else 'evening' if hour >= 18 else 'afternoon'}")
             
-            # High volume can indicate energy shift points
-            if volume > (avg_volume * 1.5):
-                reasons.append("Elevated energy flow (volume)")
-                explanation += " Increased transaction energy suggests important vibrational shift."
-                confidence += 0.15
-            
-        # Adjust overall confidence based on cosmic risk appetite
-        final_confidence = confidence + cosmic_risk_appetite
-        print(f"Cosmic confidence: {confidence:.2f} + cosmic risk appetite: {cosmic_risk_appetite:.2f} = final: {final_confidence:.2f}")
+            if cosmic_risk_appetite < 0:
+                reasons.append("→ Celestial risk appetite is low")
+                
+            if fib_alignment <= 0:
+                reasons.append("→ Price not aligned with sacred Fibonacci levels")
         
-        # Cap confidence between 0 and 1
-        final_confidence = max(0.0, min(1.0, final_confidence))
+        # Set target price slightly above current for long, below for short
+        adjustment = 0.01  # 1% adjustment
+        target_price = current_price * (1 + adjustment) if side == "long" else current_price * (1 - adjustment)
         
-        # Determine action based on confidence
-        action = "ENTER" if final_confidence >= 0.5 else "WAIT"
+        # More conservative stop loss for cosmic trader
+        stop_loss = current_price * (1 - 0.05) if side == "long" else current_price * (1 + 0.05)
         
-        # If cosmic confidence is low, recommend waiting
-        if final_confidence < 0.5:
-            action = "WAIT"
-            if not reasons:
-                reasons.append("Cosmic alignment not optimal")
-            if not explanation:
-                explanation = "The universal energies do not favor entry at this time. Patience is advised."
+        # Take profit aligned with Fibonacci extensions
+        take_profit = current_price * (1 + 0.118) if side == "long" else current_price * (1 - 0.118)  # 11.8% is 0.618 * 0.382 * 50
         
-        # Ensure there's always at least one reason
-        if not reasons:
-            if final_confidence >= 0.5:
-                reasons.append("Favorable cosmic alignment")
-            else:
-                reasons.append("Awaiting cosmic alignment")
-            
-        # Set appropriate stop loss and take profit based on side and risk profile
-        if side == "long":
-            stop_loss = current_price * 0.97  # 3% stop loss for long
-            take_profit = current_price * 1.05  # 5% take profit for long
-        else:  # short
-            stop_loss = current_price * 1.03  # 3% stop loss for short
-            take_profit = current_price * 0.95  # 5% take profit for short
-        
-        # Position size - varies based on cosmic alignment
-        position_size = 2.0  # Base position size
-        if final_confidence > 0.7:
-            position_size = 3.0  # Increase for stronger signals
-        elif final_confidence < 0.6:
-            position_size = 1.0  # Decrease for weaker signals
-        
+        # Return recommendation
         return PersonaEntryRecommendation(
             persona_name="Cosmic Trader",
             confidence=final_confidence,
             side=side,
-            target_price=current_price,
+            target_price=target_price,
             reasons=reasons,
-            risk_level="balanced",
-            time_horizon="universal",
+            risk_level="moderate",
+            time_horizon="medium-term",
             explanation=explanation,
-            trap_awareness=0.9,  # Cosmic traders have excellent trap awareness
-            position_size=position_size,
+            trap_awareness=0.7,  # Cosmic trader has higher trap awareness due to universal perspective
+            position_size=0.03,  # Conservative position size
             stop_loss=stop_loss,
             take_profit=take_profit,
-            color_code=Colors.PURPLE,
             action=action
         )
     
-    def format_recommendations_display(self, entry_strategy: PersonaBasedEntryStrategy) -> str:
-        """
-        Format entry recommendations for display.
-        
-        Args:
-            entry_strategy: PersonaBasedEntryStrategy with recommendations
+    def format_recommendations_display(self, recommendations: List[PersonaEntryRecommendation], 
+                                     symbol: str = "Unknown", current_price: float = 0.0) -> str:
+        """Format the entry recommendations into a human-readable display."""
+        if not recommendations:
+            return "No recommendations available."
             
-        Returns:
-            Formatted string for display
-        """
+        # Get the market from the trading pair or use provided symbol
+        market = symbol
+        
+        # Calculate how many personas recommend entry
+        entry_recommendations = [rec for rec in recommendations if rec.action == "ENTER"]
+        wait_recommendations = [rec for rec in recommendations if rec.action == "WAIT"]
+        
+        # Sort by confidence level (descending)
+        entry_recommendations.sort(key=lambda x: x.confidence, reverse=True)
+        wait_recommendations.sort(key=lambda x: x.confidence, reverse=True)
+        
+        # Generate header
+        header = f"\nMarket: {market}\nCurrent Price: {current_price:.2f}\n"
+        
+        # Generate summary section
+        summary = "\n🧠 PERSONA-BASED RECOMMENDATIONS:"
+        
+        if entry_recommendations:
+            best_persona = entry_recommendations[0].persona_name
+            entry_count = len(entry_recommendations)
+            if entry_count > 1:
+                other_count = entry_count - 1
+                summary += f"\n  {self.colorize(Colors.GREEN, f'ENTRY SIGNAL: {entry_count} personas recommend entry, led by {best_persona}')} "
+                summary += f"({other_count} other{'s' if other_count > 1 else ''})"
+            else:
+                summary += f"\n  {self.colorize(Colors.GREEN, f'ENTRY SIGNAL: {best_persona} recommends entry')}"
+        else:
+            summary += f"\n  {self.colorize(Colors.RESET, 'NO ENTRY SIGNAL: ')}"\
+                      f"{len(wait_recommendations)} personas recommend waiting"
+        
+        # Generate detailed section
+        details = "\n\nALL PERSONA OPINIONS:\n"
+        
+        # Format entry recommendations
+        if entry_recommendations:
+            details += "\nEntry Recommendations:\n"
+            for rec in entry_recommendations:
+                details += self._format_single_recommendation(rec)
+        
+        # Format wait recommendations
+        if wait_recommendations:
+            details += "\nWait Recommendations:\n"
+            for rec in wait_recommendations:
+                details += self._format_single_recommendation(rec)
+        
+        return header + summary + details
+        
+    def _format_single_recommendation(self, rec: PersonaEntryRecommendation) -> str:
+        """Format a single recommendation for display."""
+        # Create confidence bar (10 chars wide)
+        conf_val = max(0, min(1, rec.confidence))  # Ensure 0-1 range
+        conf_bar = "█" * int(conf_val * 10) + "░" * (10 - int(conf_val * 10))
+        
+        # Build the formatted output
         output = []
         
-        # Add market information
-        output.append(f"\nMarket: {entry_strategy.market_symbol}")
-        output.append(f"Current Price: {entry_strategy.current_price}")
+        # Persona name and confidence
+        if rec.action == "ENTER":
+            color = Colors.GREEN
+            output.append(f"  {self.colorize(color, rec.persona_name)} ({rec.confidence:.2f}) - {rec.side.upper()}:")
+        else:
+            color = Colors.RESET
+            output.append(f"  {self.colorize(color, rec.persona_name)} ({rec.confidence:.2f}):")
+            
+        # Confidence bar
+        output.append(f"    {conf_bar}")
         
-        # Add summary
-        output.append(f"\n🧠 PERSONA-BASED RECOMMENDATIONS:")
-        output.append(f"  {entry_strategy.summary}")
-        
-        # Group recommendations by action type
-        entry_recs = [r for r in entry_strategy.recommendations if r.action == "ENTER"]
-        wait_recs = [r for r in entry_strategy.recommendations if r.action == "WAIT"]
-        
-        # Sort by confidence (highest first)
-        entry_recs.sort(key=lambda r: r.confidence, reverse=True)
-        wait_recs.sort(key=lambda r: r.confidence, reverse=True)
-        
-        if entry_recs or wait_recs:
-            output.append("\nALL PERSONA OPINIONS:")
-        
-        # Display Entry recommendations
-        if entry_recs:
-            output.append("\nEntry Recommendations:")
-            for rec in entry_recs:
-                # Create confidence bar (10 chars wide)
-                conf_bar = "█" * int(rec.confidence * 10) + "░" * (10 - int(rec.confidence * 10))
-                
-                output.append(f"  {self.colorize(rec.persona_name, rec.color_code)} ({rec.confidence:.2f}) - {rec.side.upper()}:")
-                output.append(f"    {self.colorize(conf_bar, rec.color_code)}")
-                output.append(f"    Reasons: {', '.join(rec.reasons)}")
+        # Reasons
+        if hasattr(rec, 'reasons') and rec.reasons:
+            output.append(f"    Reasons: {', '.join(rec.reasons)}")
+            
+        # Explanation
+        if hasattr(rec, 'explanation') and rec.explanation:
+            output.append(f"    → {rec.explanation}")
+            
+        # Additional details for entry recommendations
+        if rec.action == "ENTER":
+            if hasattr(rec, 'risk_level') and hasattr(rec, 'time_horizon'):
                 output.append(f"    Approach: {rec.risk_level.capitalize()} risk, {rec.time_horizon} horizon")
-                output.append(f"    → {rec.explanation}")
-                output.append(f"    Position Size: {rec.position_size:.1f}% | Stop Loss: {rec.stop_loss:.1f} | Take Profit: {rec.take_profit:.1f}")
-                output.append("")
+                
+            if hasattr(rec, 'position_size') and hasattr(rec, 'stop_loss') and hasattr(rec, 'take_profit'):
+                output.append(f"    Position Size: {rec.position_size:.2f}% | Stop Loss: {rec.stop_loss:.1f} | Take Profit: {rec.take_profit:.1f}")
+                
+        # Add empty line at the end
+        output.append("")
         
-        # Display Wait recommendations
-        if wait_recs:
-            output.append("\nWait Recommendations:")
-            for rec in wait_recs:
-                # Create confidence bar (10 chars wide)
-                conf_bar = "█" * int(rec.confidence * 10) + "░" * (10 - int(rec.confidence * 10))
-                
-                output.append(f"  {self.colorize(rec.persona_name, rec.color_code)} ({rec.confidence:.2f}):")
-                output.append(f"    {self.colorize(conf_bar, rec.color_code)}")
-                output.append(f"    Reasons: {', '.join(rec.reasons)}")
-                output.append(f"    → {rec.explanation}")
-                output.append("")
-                
         return "\n".join(output)
 
 def demo():
@@ -612,7 +629,210 @@ def demo():
     print("\nOMEGA BTC AI - Persona-Based Entry Strategy Demo")
     print(f"Analyzing {market_data['symbol']} with {len(persona_manager.trader_personas)} trader personas")
     print(f"Minimum confidence threshold: {persona_manager.min_confidence}")
-    print(persona_manager.format_recommendations_display(entry_strategy))
+    print(persona_manager.format_recommendations_display(entry_strategy.recommendations))
+
+def run_continuous_monitor(interval=60, min_confidence=0.5, use_color=True, use_mock=True):
+    """
+    Run the persona entry strategy monitor continuously.
+    
+    Args:
+        interval (int): Interval between checks in seconds.
+        min_confidence (float): Minimum confidence threshold for recommendations.
+        use_color (bool): Whether to use color in output.
+        use_mock (bool): Whether to use mock market data instead of real market data.
+    """
+    print(f"Starting Persona Entry Monitor")
+    print(f"Interval: {interval} seconds")
+    print(f"Minimum confidence: {min_confidence}")
+    print(f"{'Using mock data' if use_mock else 'Using real BitGet data'}")
+    print(f"Press Ctrl+C to stop\n")
+    
+    # Initialize entry manager
+    manager = PersonaEntryManager(min_confidence=min_confidence, use_color=use_color)
+    
+    # Set up symbols to monitor
+    symbols = ["BTCUSDT", "ETHUSDT"]
+    
+    try:
+        while True:
+            print(f"\n{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Analyzing markets...")
+            
+            for symbol in symbols:
+                # Get market data
+                if use_mock:
+                    market_data = get_mock_market_data(symbol)
+                else:
+                    market_data = get_real_market_data(symbol)
+                    
+                if market_data:
+                    # Get entry recommendations
+                    manager.analyze_market(market_data)
+                else:
+                    print(f"❌ Failed to get market data for {symbol}")
+            
+            # Sleep until next check
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        print("\nPersona Entry Monitor stopped by user.")
+
+def get_mock_market_data(symbol="BTCUSDT"):
+    """
+    Generate mock market data for testing.
+    In a real implementation, this would fetch data from an exchange API.
+    """
+    # Generate a random price between 60000 and 70000 for BTC
+    # or between 2500 and 3500 for ETH
+    if symbol.startswith("BTC"):
+        base_price = random.uniform(60000, 70000)
+        # Generate recent high and low for Fibonacci analysis
+        recent_high = base_price * random.uniform(1.01, 1.05)  # 1-5% higher
+        recent_low = base_price * random.uniform(0.95, 0.99)   # 1-5% lower
+        vol_base = 100000000
+    elif symbol.startswith("ETH"):
+        base_price = random.uniform(2500, 3500)
+        # Generate recent high and low for Fibonacci analysis
+        recent_high = base_price * random.uniform(1.01, 1.05)  # 1-5% higher
+        recent_low = base_price * random.uniform(0.95, 0.99)   # 1-5% lower
+        vol_base = 50000000
+    else:
+        base_price = random.uniform(1, 100)
+        # Generate recent high and low for Fibonacci analysis
+        recent_high = base_price * random.uniform(1.01, 1.05)  # 1-5% higher
+        recent_low = base_price * random.uniform(0.95, 0.99)   # 1-5% lower
+        vol_base = 10000000
+
+    # Generate mock market data
+    return {
+        "symbol": symbol,
+        "current_price": base_price,
+        "change_24h": random.uniform(-5.0, 5.0),
+        "volume": vol_base * random.uniform(0.8, 1.2),
+        "avg_volume": vol_base,
+        "high_24h": base_price * random.uniform(1.01, 1.05),
+        "low_24h": base_price * random.uniform(0.95, 0.99),
+        "recent_high": recent_high,  # For Fibonacci analysis
+        "recent_low": recent_low,    # For Fibonacci analysis
+        "timestamp": int(time.time())
+    }
+
+def get_real_market_data(symbol="BTCUSDT"):
+    """
+    Fetch real market data from BitGet API.
+    """
+    # Check if BitGet SDK is available
+    if 'Spot' not in globals():
+        print("❌ BitGet SDK not available. Install with: pip install pybitget")
+        print("Falling back to mock data...")
+        return get_mock_market_data(symbol)
+        
+    try:
+        # Initialize BitGet client
+        api_key = os.environ.get('BITGET_API_KEY')
+        api_secret = os.environ.get('BITGET_SECRET_KEY')
+        api_passphrase = os.environ.get('BITGET_PASSPHRASE')
+        
+        if not api_key or not api_secret or not api_passphrase:
+            print("⚠️ BitGet API credentials not found. Make sure to set BITGET_API_KEY, BITGET_SECRET_KEY, and BITGET_PASSPHRASE environment variables.")
+            return get_mock_market_data(symbol)
+        
+        client = Spot(api_key=api_key, api_secret=api_secret, passphrase=api_passphrase)
+        
+        # Fetch current market data
+        ticker = client.market_ticker(symbol=symbol)
+        
+        # Fetch klines (candlesticks) for recent high/low and Fibonacci analysis
+        # Get last 24 hours of 15-minute klines
+        klines = []
+        try:
+            klines = client.market_candles(
+                symbol=symbol,
+                granularity="15m",
+                startTime=int((time.time() - 86400) * 1000),  # 24 hours ago
+                endTime=int(time.time() * 1000)               # Now
+            )
+        except Exception as e:
+            print(f"⚠️ Error fetching klines: {e}")
+        
+        # Process kline data for high and low
+        recent_high = 0
+        recent_low = float('inf')
+        
+        if klines and len(klines) > 0:
+            for kline in klines:
+                high = float(kline[2])
+                low = float(kline[3])
+                recent_high = max(recent_high, high)
+                recent_low = min(recent_low, low)
+        else:
+            # Fallback if klines are not available
+            recent_high = float(ticker.get('high24h', 0)) 
+            recent_low = float(ticker.get('low24h', 0))
+        
+        # If we somehow still don't have valid values, use current price with adjustment
+        current_price = float(ticker.get('last', 0))
+        if recent_high <= 0:
+            recent_high = current_price * 1.05
+        if recent_low == float('inf') or recent_low <= 0:
+            recent_low = current_price * 0.95
+        
+        # Build and return market data dictionary
+        return {
+            "symbol": symbol,
+            "current_price": current_price,
+            "change_24h": float(ticker.get('change24h', 0)),
+            "volume": float(ticker.get('baseVolume', 0)),
+            "avg_volume": float(ticker.get('baseVolume', 0)),  # Using current volume as avg for now
+            "high_24h": float(ticker.get('high24h', 0)),
+            "low_24h": float(ticker.get('low24h', 0)),
+            "recent_high": recent_high,  # For Fibonacci analysis
+            "recent_low": recent_low,    # For Fibonacci analysis
+            "timestamp": int(time.time())
+        }
+    except Exception as e:
+        print(f"❌ Error fetching market data: {e}")
+        print("Falling back to mock data...")
+        return get_mock_market_data(symbol)
 
 if __name__ == "__main__":
-    demo() 
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="OMEGA BTC AI - Persona-Based Entry Strategy")
+    parser.add_argument("--continuous", action="store_true", help="Run the monitor continuously")
+    parser.add_argument("--interval", type=int, default=60, help="Interval between checks in seconds")
+    parser.add_argument("--min-confidence", type=float, default=0.5, help="Minimum confidence threshold for recommendations")
+    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+    parser.add_argument("--mock", action="store_true", help="Use mock market data")
+    args = parser.parse_args()
+    
+    # Load environment variables from .env file if present
+    if os.path.exists(".env"):
+        load_dotenv()
+    
+    # Run the monitor
+    if args.continuous:
+        run_continuous_monitor(
+            interval=args.interval,
+            min_confidence=args.min_confidence,
+            use_color=not args.no_color,
+            use_mock=args.mock
+        )
+    else:
+        # Single run
+        manager = PersonaEntryManager(min_confidence=args.min_confidence, use_color=not args.no_color)
+        
+        # Analyze BTC and ETH markets
+        symbols = ["BTCUSDT", "ETHUSDT"]
+        
+        print(f"\n{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Analyzing markets...")
+        
+        for symbol in symbols:
+            # Get market data
+            if args.mock:
+                market_data = get_mock_market_data(symbol)
+            else:
+                market_data = get_real_market_data(symbol)
+                
+            if market_data:
+                # Get entry recommendations
+                manager.analyze_market(market_data)
+            else:
+                print(f"❌ Failed to get market data for {symbol}") 
