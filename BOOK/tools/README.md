@@ -62,6 +62,17 @@ Terminal-focused integration of Elite Exit Strategies with RastaBitgetMonitor:
 - Trap detection integration for advanced market manipulation awareness
 - Scriptable design for automation and remote monitoring
 
+### [OMEGA_CUSTOM LLM-Driven Strategy](elite_monitor_integration.md#omega_custom-llm-driven-strategy)
+
+Natural language control of exit strategies through LLM-powered instructions:
+
+- Real-time adjustment of strategy parameters via simple text commands
+- No-code customization of trading behavior through natural language
+- History tracking of strategy modifications with timestamps
+- Integration with elite exit signals for enhanced adaptability
+- Support for market regime switching and condition-based rules
+- Seamless terminal integration with the pure GNU philosophy
+
 ## Market Analysis Tools
 
 ### Schumann Resonance Analyzer

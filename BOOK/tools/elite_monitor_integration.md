@@ -767,3 +767,487 @@ The terminal-based approach enables:
 5. **Full control through command line** - Execute trades directly from terminal
 
 > "In the divine terminal, where only the essential remains, the true power of exit strategies emerges unobscured by graphical distractions." - OMEGA Wisdom
+
+## OMEGA_CUSTOM LLM-Driven Strategy
+
+The OMEGA_CUSTOM strategy enables dynamic, real-time adjustments to exit strategies through LLM-powered instructions. This provides a flexible layer of adaptability where traders can input natural language instructions to modify the strategy's behavior without code changes.
+
+### Architecture Extension
+
+The OMEGA_CUSTOM strategy extends the standard architecture with an LLM Interface:
+
+```
+                      ┌───────────────────────────┐
+                      │      Command Parser       │
+                      └───────────────┬───────────┘
+                                      │
+                                      ▼
+┌───────────────────┐      ┌───────────────────────────┐      ┌───────────────────────────┐
+│  BitGet API       │◄────►│    RastaBitgetMonitor     │◄────►│     EliteExitStrategy     │
+└───────────────────┘      └───────────────┬───────────┘      └───────────────┬───────────┘
+                                           │                                  │
+                                           ▼                                  ▼
+                           ┌───────────────────────────┐      ┌───────────────────────────┐
+                           │  Terminal Output Engine   │      │   Trap Detection System   │
+                           └───────────────────────────┘      └───────────┬───────────────┘
+                                           │                              │
+                                           │                              ▼
+                                           │               ┌───────────────────────────┐
+                                           └───────────────┤     OMEGA_CUSTOM LLM     │
+                                                           └───────────────────────────┘
+```
+
+### Implementation
+
+#### 1. OMEGA_CUSTOM Strategy Interface
+
+```python
+class OmegaCustomStrategy:
+    """
+    Dynamic LLM-driven exit strategy adjustments in real-time.
+    
+    This strategy accepts natural language instructions that are processed
+    by an LLM to modify the behavior of the exit strategy system without
+    requiring code changes.
+    """
+    
+    def __init__(self, 
+                 api_key: str,
+                 model: str = "omega-btc-ai-model",
+                 instruction_history_file: str = "omega_custom_instructions.log",
+                 max_history_length: int = 10,
+                 default_instructions: str = "Apply standard Elite Exit Strategy with default parameters"):
+        """
+        Initialize the OMEGA_CUSTOM LLM strategy.
+        
+        Args:
+            api_key: API key for LLM access
+            model: LLM model to use
+            instruction_history_file: File to log instruction history
+            max_history_length: Maximum number of instructions to keep in history
+            default_instructions: Default instruction set to use
+        """
+        self.api_key = api_key
+        self.model = model
+        self.instruction_history_file = instruction_history_file
+        self.max_history_length = max_history_length
+        self.current_instructions = default_instructions
+        self.instruction_history = []
+        self.custom_parameters = {}
+        self.last_update_time = time.time()
+        
+        # Load instruction history if exists
+        self._load_instruction_history()
+        
+        # Initialize with default parameters
+        self.update_parameters_from_instructions(default_instructions)
+        
+        logger.info("OMEGA_CUSTOM strategy initialized with default instructions")
+    
+    def _load_instruction_history(self):
+        """Load instruction history from file if exists."""
+        try:
+            if os.path.exists(self.instruction_history_file):
+                with open(self.instruction_history_file, 'r') as f:
+                    content = f.read().strip()
+                    if content:
+                        self.instruction_history = json.loads(content)
+                        # Get most recent instruction
+                        if self.instruction_history:
+                            self.current_instructions = self.instruction_history[-1]['instruction']
+        except Exception as e:
+            logger.error(f"Error loading instruction history: {e}")
+    
+    def _save_instruction_history(self):
+        """Save instruction history to file."""
+        try:
+            with open(self.instruction_history_file, 'w') as f:
+                json.dump(self.instruction_history, f, indent=2)
+        except Exception as e:
+            logger.error(f"Error saving instruction history: {e}")
+    
+    async def update_parameters_from_instructions(self, instructions: str) -> Dict[str, Any]:
+        """
+        Update parameters based on natural language instructions.
+        
+        Args:
+            instructions: Natural language instructions
+            
+        Returns:
+            Dictionary with updated parameters
+        """
+        try:
+            # Record instruction in history
+            timestamp = datetime.now().isoformat()
+            self.instruction_history.append({
+                'timestamp': timestamp,
+                'instruction': instructions
+            })
+            
+            # Keep history within limits
+            if len(self.instruction_history) > self.max_history_length:
+                self.instruction_history = self.instruction_history[-self.max_history_length:]
+            
+            self._save_instruction_history()
+            
+            # Set current instructions
+            self.current_instructions = instructions
+            self.last_update_time = time.time()
+            
+            # Call LLM to parse instructions
+            parameters = await self._call_llm_for_parameters(instructions)
+            
+            # Update parameters
+            self.custom_parameters = parameters
+            
+            logger.info(f"Updated parameters from instructions: {instructions[:50]}...")
+            return parameters
+            
+        except Exception as e:
+            logger.error(f"Error updating parameters from instructions: {e}")
+            return self.custom_parameters
+    
+    async def _call_llm_for_parameters(self, instructions: str) -> Dict[str, Any]:
+        """
+        Call LLM to parse natural language instructions into parameters.
+        
+        Args:
+            instructions: Natural language instructions
+            
+        Returns:
+            Dictionary with parameters extracted from instructions
+        """
+        try:
+            # Prepare prompt for LLM
+            prompt = f"""
+            INSTRUCTION: Convert the following trading strategy instruction into specific parameter adjustments.
+            
+            CURRENT INSTRUCTION: {instructions}
+            
+            AVAILABLE PARAMETERS:
+            - min_confidence: Minimum confidence threshold for exit signals (0.0-1.0)
+            - enable_fibonacci_exits: Whether to use Fibonacci levels for exits (true/false)
+            - enable_pattern_exits: Whether to use pattern recognition for exits (true/false)
+            - enable_trap_exits: Whether to use trap detection for exits (true/false)
+            - enable_trailing_stop: Whether to use trailing stops (true/false)
+            - trailing_stop_distance: Distance for trailing stop as percentage (0.1-10.0)
+            - trailing_stop_step: Step size for trailing stop updates (0.05-1.0)
+            - market_regime_weight: Weight given to market regime signals (0.0-1.0)
+            - volume_threshold: Volume threshold for signal confirmation (0.0-1.0)
+            - custom_rules: Array of custom rule objects with conditions and actions
+            
+            OUTPUT FORMAT:
+            JSON object with parameter keys and values derived from the instruction.
+            """
+            
+            # In a real implementation, this would call an actual LLM API
+            # For this documentation, simulate the response
+            
+            # Parse instruction and generate parameters
+            # This is a simplified simulation - in reality, LLM would parse the instructions
+            parameters = {}
+            
+            # Default parameters
+            parameters["min_confidence"] = 0.7
+            parameters["enable_fibonacci_exits"] = True
+            parameters["enable_pattern_exits"] = True 
+            parameters["enable_trap_exits"] = True
+            parameters["enable_trailing_stop"] = True
+            parameters["trailing_stop_distance"] = 0.5
+            parameters["trailing_stop_step"] = 0.1
+            parameters["market_regime_weight"] = 0.5
+            parameters["volume_threshold"] = 0.7
+            parameters["custom_rules"] = []
+            
+            # Simple keyword parsing (in reality, LLM would do sophisticated parsing)
+            # This is just demonstration code for documentation
+            if "aggressive" in instructions.lower():
+                parameters["min_confidence"] = 0.6
+                parameters["trailing_stop_distance"] = 0.3
+            
+            if "conservative" in instructions.lower():
+                parameters["min_confidence"] = 0.8
+                parameters["trailing_stop_distance"] = 0.8
+            
+            if "disable pattern" in instructions.lower():
+                parameters["enable_pattern_exits"] = False
+            
+            if "focus on traps" in instructions.lower():
+                parameters["enable_trap_exits"] = True
+                parameters["market_regime_weight"] = 0.8
+            
+            # Add a custom rule example if requested
+            if "add custom rule" in instructions.lower():
+                parameters["custom_rules"].append({
+                    "name": "Custom rule from instruction",
+                    "condition": "price > 200-day MA and volume > 2x average",
+                    "action": "increase min_confidence by 0.1"
+                })
+            
+            return parameters
+            
+        except Exception as e:
+            logger.error(f"Error calling LLM for parameters: {e}")
+            return {
+                "min_confidence": 0.7,  # Default fallback values
+                "enable_fibonacci_exits": True,
+                "enable_pattern_exits": True,
+                "enable_trap_exits": True,
+                "enable_trailing_stop": True,
+                "trailing_stop_distance": 0.5,
+                "trailing_stop_step": 0.1
+            }
+    
+    async def apply_custom_strategy(self, 
+                                    position_data: Dict[str, Any], 
+                                    market_data: Dict[str, Any],
+                                    base_signals: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Apply OMEGA_CUSTOM strategy to modify base signals.
+        
+        Args:
+            position_data: Position data
+            market_data: Market data
+            base_signals: Base exit signals from standard strategies
+            
+        Returns:
+            Modified exit signals
+        """
+        try:
+            modified_signals = base_signals.copy()
+            
+            # Apply parameter adjustments
+            if "min_confidence" in self.custom_parameters:
+                min_conf = self.custom_parameters["min_confidence"]
+                # Only modify if confidence is above custom threshold
+                if base_signals.get("confidence", 0) < min_conf:
+                    modified_signals["confidence"] = 0
+                    modified_signals["active"] = False
+            
+            # Apply custom rules
+            for rule in self.custom_parameters.get("custom_rules", []):
+                # In real implementation, this would parse and apply the rule
+                # For documentation, just add a note about rule application
+                modified_signals["custom_rule_applied"] = rule["name"]
+            
+            # Add metadata about the custom strategy
+            modified_signals["omega_custom"] = {
+                "active": True,
+                "instruction_age": time.time() - self.last_update_time,
+                "instruction_summary": self.current_instructions[:50] + "..." if len(self.current_instructions) > 50 else self.current_instructions
+            }
+            
+            return modified_signals
+            
+        except Exception as e:
+            logger.error(f"Error applying custom strategy: {e}")
+            return base_signals
+```
+
+#### 2. Integration with EnhancedRastaBitgetMonitor
+
+To add OMEGA_CUSTOM strategy to the monitor, extend the initialization:
+
+```python
+def __init__(self, 
+             api_key: str, 
+             api_secret: str, 
+             passphrase: str,
+             interval: int = 5,
+             enable_elite_exits: bool = True,
+             min_exit_confidence: float = 0.7,
+             enable_trap_detection: bool = True,
+             enable_omega_custom: bool = False,
+             omega_custom_api_key: str = None,
+             output_format: str = "text",
+             log_file: str = "elite_monitor.log",
+             use_color: bool = True):
+    """Initialize with added OMEGA_CUSTOM strategy support."""
+    # ... existing initialization code ...
+    
+    # Initialize OMEGA_CUSTOM strategy if enabled
+    self.enable_omega_custom = enable_omega_custom
+    if self.enable_omega_custom and omega_custom_api_key:
+        self.omega_custom_strategy = OmegaCustomStrategy(
+            api_key=omega_custom_api_key,
+            instruction_history_file=f"{os.path.splitext(log_file)[0]}_omega_custom.log"
+        )
+        logger.info("OMEGA_CUSTOM strategy initialized")
+    else:
+        self.omega_custom_strategy = None
+```
+
+#### 3. Adding Custom Strategy Processing
+
+Modify the analyze_exit_signals method to incorporate OMEGA_CUSTOM:
+
+```python
+async def analyze_exit_signals(self) -> Dict[str, Dict[str, Any]]:
+    """
+    Analyze positions for elite exit signals with OMEGA_CUSTOM strategy.
+    """
+    # Get base signals from standard strategies
+    base_signals = await self._get_base_exit_signals()
+    
+    # Apply OMEGA_CUSTOM strategy if enabled
+    if self.enable_omega_custom and self.omega_custom_strategy:
+        for symbol, signal in base_signals.items():
+            # Get market data
+            market_data = await self._get_market_data(symbol)
+            
+            # Apply custom strategy
+            modified_signal = await self.omega_custom_strategy.apply_custom_strategy(
+                position_data=self.positions.get(symbol, {}),
+                market_data=market_data,
+                base_signals=signal
+            )
+            
+            # Update signals
+            base_signals[symbol] = modified_signal
+    
+    return base_signals
+```
+
+#### 4. Command Interface for OMEGA_CUSTOM
+
+Add a new command to the process_command method:
+
+```python
+async def process_command(self, command: str) -> str:
+    """Process command line input with OMEGA_CUSTOM support."""
+    try:
+        # ... existing command processing ...
+        
+        # OMEGA_CUSTOM command: omega_custom <instruction>
+        if cmd == "omega_custom" and len(parts) > 1:
+            if not self.enable_omega_custom or not self.omega_custom_strategy:
+                return "OMEGA_CUSTOM strategy is not enabled"
+            
+            # Extract instruction (everything after the command)
+            instruction = command[len("omega_custom"):].strip()
+            
+            # Update parameters with new instruction
+            result = await self.omega_custom_strategy.update_parameters_from_instructions(instruction)
+            
+            return f"OMEGA_CUSTOM strategy updated with new instructions: {instruction[:50]}..."
+        
+        # ... other commands ...
+    
+    except Exception as e:
+        logger.error(f"Error processing command: {e}")
+        return f"Error: {str(e)}"
+```
+
+### Usage Examples
+
+#### Command Line Usage
+
+The OMEGA_CUSTOM strategy can be controlled using natural language instructions through the terminal:
+
+```
+$ ./elite_monitor.sh --enable-omega-custom --omega-api-key=your_llm_api_key
+...monitor output...
+
+> omega_custom Be more aggressive with exits when BTC volume is 2x daily average and disable pattern-based exits
+Command result: OMEGA_CUSTOM strategy updated with new instructions: Be more aggressive with exits when BTC volume is 2x da...
+
+> omega_custom During high market volatility (>80 VIX), increase min confidence to 0.85 and use tighter trailing stops at 0.3%
+Command result: OMEGA_CUSTOM strategy updated with new instructions: During high market volatility (>80 VIX), increase min...
+```
+
+#### Configuration Script Update
+
+Update the elite_monitor.sh script to support OMEGA_CUSTOM:
+
+```bash
+#!/bin/bash
+# ... existing script ...
+
+# Add OMEGA_CUSTOM options
+ENABLE_OMEGA_CUSTOM=false
+OMEGA_API_KEY=""
+
+# Update help function
+function show_help {
+    cat << EOF
+USAGE: 
+    ./elite_monitor.sh [OPTIONS]
+
+# ... existing options ...
+
+    -o, --enable-omega-custom    Enable OMEGA_CUSTOM LLM-driven strategy
+    -k, --omega-api-key KEY      API key for OMEGA_CUSTOM LLM
+    
+# ... existing help content ...
+EOF
+    exit 0
+}
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        # ... existing options ...
+        
+        -o|--enable-omega-custom)
+            ENABLE_OMEGA_CUSTOM=true
+            shift
+            ;;
+        -k|--omega-api-key)
+            OMEGA_API_KEY="$2"
+            shift 2
+            ;;
+        # ... existing options ...
+    esac
+done
+
+# Launch Python script with OMEGA_CUSTOM options
+python -m omega_ai.enhanced_monitor \
+    # ... existing options ...
+    $([ "${ENABLE_OMEGA_CUSTOM}" = true ] && echo "--enable-omega-custom") \
+    $([ -n "${OMEGA_API_KEY}" ] && echo "--omega-custom-api-key ${OMEGA_API_KEY}")
+```
+
+### Advanced Use Cases
+
+The OMEGA_CUSTOM strategy enables powerful adaptability through LLM-driven instructions:
+
+1. **Market Regime Switching**:
+
+   ```
+   omega_custom If SPX drops more than 2% in a day, switch to conservative mode with min_confidence 0.9
+   ```
+
+2. **News Integration**:
+
+   ```
+   omega_custom When FOMC announcement occurs today, ignore trap signals for 2 hours afterward
+   ```
+
+3. **Custom Signal Rules**:
+
+   ```
+   omega_custom Add custom rule: if RSI crosses below 30 on 1h and 4h timeframes simultaneously, exit with min confidence 0.65
+   ```
+
+4. **Volatility Response**:
+
+   ```
+   omega_custom During periods of low volatility (BTC historical vol < 30), reduce trailing stop distance to 0.2%
+   ```
+
+5. **Integration with External Data**:
+
+   ```
+   omega_custom When BTC funding rate exceeds 0.01%, prioritize pattern-based exits and ignore fibonacci signals
+   ```
+
+### Benefits of OMEGA_CUSTOM Strategy
+
+1. **Adaptability**: Respond to changing market conditions without code changes
+2. **Personalization**: Tailor exit strategies to individual trading preferences
+3. **Continuous Improvement**: Refine strategies based on observed results
+4. **Knowledge Integration**: Incorporate trader insights into the algorithmic system
+5. **Natural Language Interface**: No need to learn complex configuration options
+
+> "The true power of trading systems emerges when human wisdom and machine precision unite through the divine channel of natural language." - OMEGA Wisdom
