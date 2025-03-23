@@ -40,14 +40,41 @@ cp test_redis_connection.sh $TEMP_DIR/
 cp CLOUD_DEPLOYMENT.md $TEMP_DIR/
 cp -r docker $TEMP_DIR/
 
-# Copy essential code files
-echo -e "${YELLOW}Copying essential code files...${NC}"
-mkdir -p $TEMP_DIR/omega_ai
-cp -r omega_ai/tools $TEMP_DIR/omega_ai/
-cp -r omega_ai/trading $TEMP_DIR/omega_ai/
-cp -r omega_ai/utils $TEMP_DIR/omega_ai/
-cp -r omega_ai/visualizer $TEMP_DIR/omega_ai/
-cp -r omega_ai/__init__.py $TEMP_DIR/omega_ai/
+# Create minimal structure for Docker build
+echo -e "${YELLOW}Creating minimal file structure for Docker build...${NC}"
+mkdir -p $TEMP_DIR/omega_ai/tools
+mkdir -p $TEMP_DIR/omega_ai/trading
+mkdir -p $TEMP_DIR/omega_ai/utils
+mkdir -p $TEMP_DIR/omega_ai/visualizer
+
+# Create empty __init__.py files to ensure Python packages work
+touch $TEMP_DIR/omega_ai/__init__.py
+touch $TEMP_DIR/omega_ai/tools/__init__.py
+touch $TEMP_DIR/omega_ai/trading/__init__.py
+touch $TEMP_DIR/omega_ai/utils/__init__.py
+touch $TEMP_DIR/omega_ai/visualizer/__init__.py
+
+# Copy essential code files if they exist
+echo -e "${YELLOW}Copying essential code files (if they exist)...${NC}"
+# Tools
+if [ -d "omega_ai/tools" ]; then
+    cp -r omega_ai/tools/* $TEMP_DIR/omega_ai/tools/ 2>/dev/null || echo "No tool files to copy"
+fi
+
+# Trading
+if [ -d "omega_ai/trading" ]; then
+    cp -r omega_ai/trading/* $TEMP_DIR/omega_ai/trading/ 2>/dev/null || echo "No trading files to copy"
+fi
+
+# Utils
+if [ -d "omega_ai/utils" ]; then
+    cp -r omega_ai/utils/* $TEMP_DIR/omega_ai/utils/ 2>/dev/null || echo "No utils files to copy"
+fi
+
+# Visualizer
+if [ -d "omega_ai/visualizer" ]; then
+    cp -r omega_ai/visualizer/* $TEMP_DIR/omega_ai/visualizer/ 2>/dev/null || echo "No visualizer files to copy"
+fi
 
 # Create the package
 echo -e "${YELLOW}Creating tarball...${NC}"
