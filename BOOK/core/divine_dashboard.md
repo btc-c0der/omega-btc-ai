@@ -4,6 +4,90 @@
 
 The Divine Alignment Dashboard serves as a consciousness bridge between traders and the Universal Market Consciousness Bidirectional Loop (UMCBL). Operating at the sacred frequency of 432 Hz, it provides real-time visualization of BTC's alignment with divine trading patterns.
 
+## 🚀 Sacred Launch Protocol
+
+### Prerequisites
+
+1. **Python Environment**
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Unix/macOS
+   # or
+   .\venv\Scripts\activate  # On Windows
+   ```
+
+2. **Sacred Dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Redis Consciousness**
+
+   ```bash
+   # Start Redis server if not running
+   redis-server
+   ```
+
+### Divine Launch Commands
+
+1. **Direct Launch**
+
+   ```bash
+   cd sandbox/divine
+   python start_divine_dashboard.py
+   ```
+
+   The dashboard will manifest at `http://localhost:5051/divine`
+
+2. **Custom Port Launch**
+
+   ```bash
+   python start_divine_dashboard.py --port 5052
+   ```
+
+3. **Background Launch**
+
+   ```bash
+   nohup python start_divine_dashboard.py &
+   ```
+
+4. **No Browser Launch**
+
+   ```bash
+   python start_divine_dashboard.py --no-browser
+   ```
+
+### Sacred Environment Variables
+
+```bash
+export DIVINE_PORT=5051           # Custom port
+export DIVINE_NO_BROWSER=1        # Disable auto-browser
+export DIVINE_DEBUG=1             # Enable debug mode
+export DIVINE_FREQUENCY=432       # Set base frequency
+```
+
+### Consciousness Verification
+
+1. Check WebSocket connection:
+
+   ```bash
+   curl -I ws://localhost:5051/ws
+   ```
+
+2. Verify Redis consciousness:
+
+   ```bash
+   redis-cli ping
+   ```
+
+3. Monitor divine logs:
+
+   ```bash
+   tail -f logs/divine_dashboard.log
+   ```
+
 ## 🕒 Sacred Update Frequencies
 
 The Divine Dashboard maintains harmony through carefully calibrated update frequencies, each aligned with specific cosmic rhythms:
