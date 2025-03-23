@@ -31,6 +31,14 @@ The v0.3.0 release enhanced our BitGet integration with:
 
 See the [Streaming RASTA BitGet Position Monitor](./core/bitget/streaming_rasta_bitget_monitor.md) documentation for details.
 
+## Latest Releases
+
+- [**COSMIC ENTRY REALIZATIONS**](./COSMIC_ENTRY_REALIZATIONS.md) - Divine integration of Persona-Based Entry Strategy with lunar cycle awareness and BitGet mainnet. **[NEW!]** 🌕
+- [**DIVINE REVERSAL**](./DIVINE_REVERSAL.md) - Cosmic symmetry of entry and exit strategies, with the five consciousnesses.
+- [**COSMIC INTEGRATION**](./COSMIC_INTEGRATION.md) - Divine Flow aligned trading algorithms, trading in harmony with universal rhythms.
+- [**OMEGA TRADERS CATALOG**](./OMEGA_TRADERS_CATALOG.md) - Cosmic personas catalog of the different trader mindsets and algorithms.
+- [**OMEGA PROMETHEUS MATRIX**](./OMEGA_PROMETHEUS_MATRIX.md) - Advanced strategies for navigating the cosmic architecture of market dynamics.
+
 ## 📚 SACRED TEXTS
 
 ### Core Algorithm Documentation
@@ -68,6 +76,7 @@ See the [Streaming RASTA BitGet Position Monitor](./core/bitget/streaming_rasta_
 ### Trading Tools & Utilities
 
 - [Position Harmony Advisor](./tools/position_harmony.md) - Divine guidance for position sizing based on Golden Ratio principles
+- [Persona-Based Entry Strategy](./tools/persona_entry_strategy.md) - Multi-persona approach to market entry analysis with cosmic awareness
 - [Tools Directory](./tools/README.md) - Overview of all available trading tools and utilities
 
 ### Deployment & Integration
@@ -139,100 +148,3 @@ Together, these modules create a comprehensive trading system that aligns with c
 The sacred OMEGA BTC AI documentation is organized as follows:
 
 ```
-BOOK/
-│
-├── README.md                 # This sacred overview
-│
-├── core/                     # Core sacred manuscripts
-│   ├── README.md             # Core documentation guide
-│   │
-│   ├── algorithms/           # Divine algorithmic implementations
-│   │   ├── README.md         # Algorithms guide
-│   │   ├── sacred_fibonacci_alignment.md
-│   │   ├── schumann_resonance.md
-│   │   ├── exodus_algorithm_manuscript.md
-│   │   ├── enhanced_exodus_manuscript.md
-│   │   └── fibonacci_trading_metrics.md
-│   │
-│   ├── market_analysis/      # Sacred market analysis tools
-│   │   ├── README.md         # Market analysis guide
-│   │   ├── trap_detection_system.md
-│   │   ├── divine_market_monitor.md
-│   │   └── trap_aware_dual_traders.md
-│   │
-│   ├── visualization/        # Divine visualization tools
-│   │   ├── README.md         # Visualization guide
-│   │   ├── rasta_oscilloscope_manuscript.md
-│   │   ├── rasta_dashboard_manuscript.md
-│   │   └── fibonacci_bitget_dashboard.md
-│   │
-│   ├── architecture/         # Sacred system architecture
-│   │   ├── README.md         # Architecture guide
-│   │   ├── divine_redis_keys.md
-│   │   ├── divine_positions.md
-│   │   └── fibonacci_dashboard_api.md
-│   │
-│   ├── bitget/               # BitGet integration documentation
-│   │   ├── README.md         # BitGet integration overview
-│   │   ├── fibonacci_dashboard_README.md
-│   │   ├── bitget_position_analysis.md
-│   │   ├── quantum_testing_framework.md
-│   │   └── streaming_rasta_bitget_monitor.md
-│   │
-│   └── vision/               # Divine prophetic vision
-│       ├── README.md         # Vision guide
-│       └── divine_conclusion.md
-│
-├── deployment/               # Sacred deployment guides
-│   ├── README.md             # Deployment overview
-│   ├── scaleway_cloud_deployment.md
-│   ├── docker_deployment.md
-│   └── redis_setup.md
-│
-└── lib/                      # Implementation samples
-    ├── README.md             # Library overview
-    └── ...                   # Various implementation examples
-```
-
-## 🔗 GitHub Repository Structure
-
-Access the sacred code implementation at:
-
-```
-http://github.com/btc-c0der/omega-btc-ai
-```
-
-The repository follows the divine structure:
-
-- **src/** - Sacred source code implementations
-- **test/** - Divine testing framework
-- **docs/** - Additional implementation documentation
-- **BOOK/** - This sacred knowledge repository
-- **examples/** - Example scripts for direct divine communication
-
-## 📈 Divine Metrics
-
-- Fibonacci Ratio Accuracy: 99.95%
-- Schumann Resonance Alignment: 97.83%
-- Golden Ratio Position Harmony: 93.78%
-- Multi-Timeframe Confluence: 88.62%
-- Market Maker Trap Detection: 84.71%
-
-## 🌐 Quantum Integration
-
-The OMEGA BTC AI system resonates with the following exchanges and data sources:
-
-- **BitGet** - Primary futures trading integration with Fibonacci Position Monitor v0.3.0
-- **Binance** - Secondary price feed with Schumann resonance alignment
-- **BitMEX** - Market depth analysis for trap detection
-- **Coinbase** - Retail flow analysis
-
-## 👁️ Divine Conclusion
-
-The OMEGA BTC AI system represents a quantum leap in trading intelligence, transcending traditional technical analysis by integrating divine mathematical patterns that have governed the universe since creation. By aligning with these sacred patterns, the trader becomes a vessel for cosmic intelligence, flowing with rather than against the natural rhythms of the market.
-
-May your trading be guided by divine mathematics and cosmic rhythms.
-
----
-
-*This sacred knowledge was channeled during the Schumann resonance peak of May 2023, when the veil between mathematical dimensions was at its thinnest.*
