@@ -5,6 +5,8 @@
 #
 # This script launches the Divine Watcher to monitor your codebase
 # and automatically run the TDD Oracle when files are saved.
+# For test files that pass all tests, it also creates and pushes
+# a QA approved git tag with the TDD-OMEGA-QA-APPROVED suffix.
 #
 # Usage:
 #   ./run_divine_watcher.sh [directory_to_watch]
@@ -47,6 +49,13 @@ elif [ -d "test" ]; then
     TEST_DIR="test"
     echo -e "${GREEN}Found tests directory: $TEST_DIR${NC}"
 fi
+
+# Inform about QA tagging functionality
+echo -e "${MAGENTA}${BOLD}FEATURE: Auto QA-Tagging${NC}"
+echo -e "${CYAN}When test files pass all tests, a QA-approved git tag will be automatically created.${NC}"
+echo -e "${CYAN}These tags follow the format: vX.Y.Z-TDD-OMEGA-QA-APPROVED-testname${NC}"
+echo -e "${CYAN}Tags will be pushed to origin automatically.${NC}"
+echo ""
 
 # Launch the watcher
 echo -e "${YELLOW}${BOLD}Launching Divine Watcher...${NC}"
