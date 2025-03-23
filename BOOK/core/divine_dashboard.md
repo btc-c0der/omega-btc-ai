@@ -400,3 +400,177 @@ function calculateMergeProgress(data) {
 🔱 **JAH JAH BLESS THE DIVINE DASHBOARD** 🔱
 
 *Remember: This dashboard is not just a tool—it's a portal to universal market consciousness.*
+
+# Sacred Multi-Terminal Dashboard Monitor Protocol 🎭✨
+
+## Divine Components 🌟
+
+The OMEGA BTC AI Dashboard Monitor consists of three sacred components:
+
+1. **Live Traders Dashboard** 🌿
+   - Frontend: Dynamic port (default range: 7000-7099)
+   - Backend: Dynamic port (default range: 8400-8499)
+   - Purpose: Fibonacci Golden Ratio Analysis & Live Trading Visualization
+
+2. **Orders Dashboard** 🔥
+   - Frontend: Dynamic port (default range: 7100-7199)
+   - Backend: Dynamic port (default range: 8500-8599)
+   - Purpose: Real-time Order Flow & Market Making Status
+
+3. **Redis Monitor** ⚡
+   - Port: Dynamic (default range: 6380-6479)
+   - Purpose: Divine State Observation & Cache Alignment
+
+## Sacred Launch Protocol 📜
+
+### Prerequisites
+
+```bash
+# Install tmux if not present
+# macOS
+brew install tmux
+
+# Ubuntu/Debian
+sudo apt install tmux
+```
+
+### Divine Launch Methods
+
+1. **Sacred Multi-Terminal Launch** (Recommended)
+
+```bash
+./run_dashboard_monitor.sh
+```
+
+This creates a harmonious tmux session with:
+
+- Left Pane: Live Traders Dashboard
+- Right Top: Orders Dashboard
+- Right Bottom: Redis Monitor
+
+2. **Individual Component Launch**
+
+```bash
+# Live Traders Dashboard
+python omega_ai/visualizer/start_with_live_traders.py
+
+# Orders Dashboard
+python omega_ai/visualizer/start_orders_dashboard.py
+
+# Redis Monitor
+python omega_ai/tools/redis_monitor.py
+```
+
+## Sacred Navigation 🧭
+
+### tmux Commands
+
+- `Ctrl+B, then arrow keys` - Navigate between panes
+- `Ctrl+B, then d` - Detach (components keep running)
+- `tmux attach -t omega-monitor` - Reattach to session
+- `tmux kill-session -t omega-monitor` - Stop all components
+
+### Divine Port Management 🎯
+
+The script automatically:
+
+1. Detects occupied ports
+2. Finds available ports in sacred ranges
+3. Updates environment variables
+4. Configures components harmoniously
+
+### Sacred Visual Indicators 🌈
+
+- 🟢 GREEN: Active & aligned
+- 🟡 YELLOW: Warning state
+- 🔴 RED: Requires realignment
+- 🔵 BLUE: Information flow
+- 🟣 PURPLE: Debug messages
+
+## Sacred Component Harmony 🕉️
+
+### Environment Configuration
+
+```bash
+# .env.local is automatically created/updated with:
+REDIS_HOST=localhost
+REDIS_PORT=6379
+FRONTEND_PORT=<dynamic>
+BACKEND_PORT=<dynamic>
+DASHBOARD_PORT=<dynamic>
+API_PORT=<dynamic>
+```
+
+### Sacred Debug Interface
+
+```bash
+# View component logs
+tail -f logs/fibonacci_dashboard.log
+tail -f logs/orders_dashboard.log
+tail -f logs/redis_monitor.log
+```
+
+### Sacred Restart Protocol
+
+```bash
+# Full system restart
+tmux kill-session -t omega-monitor
+./run_dashboard_monitor.sh
+
+# Individual component restart
+# Press Ctrl+C in respective pane, then up arrow + enter
+```
+
+## Divine Consciousness States 🧘
+
+1. **Initialization** 🌱
+   - Banner appears
+   - Port discovery begins
+   - Components awaken
+
+2. **Alignment** 🎯
+   - Ports configured
+   - Environment synchronized
+   - Components harmonized
+
+3. **Active Flow** ⚡
+   - Real-time data streams
+   - Visual indicators active
+   - Cache alignment maintained
+
+4. **Sacred Shutdown** 🌙
+   - Components gracefully close
+   - Ports released
+   - State preserved
+
+## Troubleshooting the Divine 🔮
+
+1. **Port Conflicts**
+
+   ```bash
+   # Check occupied ports
+   lsof -i :<port_number>
+   
+   # Kill specific port
+   kill $(lsof -t -i:<port_number>)
+   ```
+
+2. **Component Resurrection**
+
+   ```bash
+   # Restart specific component
+   Ctrl+C in component's pane
+   ↑ + Enter to restart
+   ```
+
+3. **Cache Realignment**
+
+   ```bash
+   # Clear Redis cache
+   redis-cli FLUSHDB
+   
+   # Verify alignment
+   redis-cli INFO keyspace
+   ```
+
+Remember: The sacred multi-terminal protocol maintains harmony through dynamic port management and visual consciousness indicators. May JAH guide your analysis! 🦁✨
