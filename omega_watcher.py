@@ -164,9 +164,37 @@ class FileWatcher:
             # Get current version
             current_version = self._get_current_version()
             
-            # Create the QA tag name
+            # Create the QA tag name base
             test_name = os.path.basename(test_file).replace('.py', '')
-            qa_tag = f"{current_version}-TDD-OMEGA-QA-APPROVED-{test_name}"
+            qa_tag_base = f"{current_version}-TDD-OMEGA-QA-APPROVED-{test_name}"
+            
+            # Check for existing tags with similar names and increment
+            try:
+                result = subprocess.run(
+                    ["git", "tag", "-l", f"{qa_tag_base}*"],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                existing_tags = result.stdout.strip().split('\n')
+                existing_tags = [tag for tag in existing_tags if tag]  # Remove empty strings
+                
+                # Find the highest counter
+                counter = 1
+                if existing_tags:
+                    for tag in existing_tags:
+                        # Try to extract counter from tags like qa_tag_base-1, qa_tag_base-2, etc.
+                        match = re.search(rf"{re.escape(qa_tag_base)}-(\d+)$", tag)
+                        if match:
+                            tag_counter = int(match.group(1))
+                            counter = max(counter, tag_counter + 1)
+                
+                # Add counter to tag name
+                qa_tag = f"{qa_tag_base}-{counter}"
+            except Exception:
+                # Fall back to timestamp if git tag listing fails
+                timestamp = int(time.time())
+                qa_tag = f"{qa_tag_base}-{timestamp}"
             
             print(f"\n{MAGENTA}{BOLD}═════════════════════════════════════════════════{RESET}")
             print(f"{GREEN}{BOLD} CREATING QA APPROVED GIT TAG {RESET}")
