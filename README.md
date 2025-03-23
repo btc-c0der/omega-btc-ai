@@ -1048,22 +1048,37 @@ The OMEGA PROMETHEUS MATRIX is a powerful CLI-based monitoring system that provi
 ./run_prometheus_matrix.sh
 ```
 
-## Persona-Based Exit Strategies Monitor
+## Persona-Based Exit Strategy Integration
 
-The Persona-Based Exit Strategies Monitor enhances the RastaBitgetMonitor with personalized exit recommendations from different trader profiles. This integration provides exit recommendations based on the analysis of multiple trading personas, each with their own risk management strategies and trading styles.
+The RastaBitgetMonitor now features advanced persona-based exit strategy recommendations. This system analyzes your open positions through the lens of different trader personas, each with their own risk tolerance, time horizon, and trading style.
 
-Run the monitor:
+### Key Features
+
+- **Multiple Trader Personas**: Strategic, Aggressive, Newbie, and Scalper traders
+- **Personalized Recommendations**: Each persona evaluates positions differently
+- **Confidence Visualization**: Visual confidence bars show recommendation strength
+- **Detailed Explanations**: Includes reasoning behind each recommendation
+- **Integrated Display**: Seamlessly integrated with the existing RastaBitgetMonitor
+
+### Running with Persona-Based Exit Strategies
 
 ```bash
-python scripts/run_persona_exit_monitor.py
+# Run with default settings
+python scripts/integrate_persona_to_rastamon.py
+
+# Adjust confidence threshold
+python scripts/integrate_persona_to_rastamon.py --min-persona-confidence 0.7
+
+# Disable persona-based exit recommendations
+python scripts/integrate_persona_to_rastamon.py --disable-persona-exits
 ```
 
-Optional parameters:
+Each persona brings a unique perspective to position management:
 
-- `--interval <seconds>`: Set refresh interval (default: 5)
-- `--min-persona-confidence <value>`: Set minimum confidence threshold (default: 0.5)
-- `--disable-persona-exits`: Disable persona-based exit recommendations
-- `--no-color`: Disable colored output
+- **Strategic Trader**: Focuses on significant profits and proper risk management
+- **Aggressive Trader**: Takes quick profits but may hold longer through losses
+- **Newbie Trader**: Tends to exit early on profits and late on losses
+- **Scalper Trader**: Takes very small profits quickly and cuts losses immediately
 
 ---
 
