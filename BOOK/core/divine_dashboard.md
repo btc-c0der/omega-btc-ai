@@ -4,6 +4,56 @@
 
 The Divine Alignment Dashboard serves as a consciousness bridge between traders and the Universal Market Consciousness Bidirectional Loop (UMCBL). Operating at the sacred frequency of 432 Hz, it provides real-time visualization of BTC's alignment with divine trading patterns.
 
+## 🕒 Sacred Update Frequencies
+
+The Divine Dashboard maintains harmony through carefully calibrated update frequencies, each aligned with specific cosmic rhythms:
+
+```typescript
+const SACRED_FREQUENCIES = {
+    CORE_STATUS: 60000,    // 60 seconds - Aligned with Earth's minute cycle
+    TRADING_DATA: 30000,   // 30 seconds - Half-cycle harmonic resonance
+    POSITION_INFO: 5000,   // 5 seconds - Quick consciousness pulse
+    POSITION_TARGETS: 10000, // 10 seconds - Extended consciousness wave
+    PRICE_TICKER: 5000,    // 5 seconds - Market heartbeat
+    DEBUG_INFO: 30000      // 30 seconds - Debug consciousness sync
+};
+```
+
+### 🌊 Divine Update Flow
+
+1. **Core Status Updates (60s)**
+   - Primary consciousness alignment
+   - Market regime synchronization
+   - Fibonacci level recalibration
+
+2. **Trading Data Updates (30s)**
+   - Position consciousness integration
+   - PnL energy field updates
+   - Take profit/stop loss harmonics
+
+3. **Position-specific Updates (5-10s)**
+   - Real-time position energy
+   - Entry/exit point alignment
+   - Risk quantum fluctuations
+
+4. **Price & Connection Updates (5s)**
+   - BTC price consciousness pulse
+   - Connection state verification
+   - Energy field integrity check
+
+5. **Debug Information Updates (30s)**
+   - System consciousness logging
+   - Energy flow verification
+   - Quantum state debugging
+
+### 🎯 Sacred Timestamp Format
+
+Example divine timestamp: `1:20:18 am`
+
+- Hour (1): Represents the first ray of consciousness
+- Minutes (20): Aligned with the divine trading grid
+- Seconds (18): Quantum position in the time matrix
+
 ## 🔮 Core Components
 
 ### 1. Divine Status Card
