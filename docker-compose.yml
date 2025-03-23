@@ -2,60 +2,69 @@ version: '3.8'
 
 services:
   redis:
-    image: redis:7-alpine
-    volumes:
-      - ./redis_data:/data
-      - ./tools/redis.conf.optimized:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+    image: redis:7.2-alpine
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 3
 
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-omega_db}
-      POSTGRES_USER: ${POSTGRES_USER:-omega_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-omega_pass}
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U omega_user -d omega_db" ]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-
-  omega_btc_ai:
-    build: .
+  trap-probability-meter:
+    build:
+      context: .
+      dockerfile: docker/TrapProbabilityMeter.Dockerfile
     depends_on:
       redis:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./logs:/app/logs
-      - ./data:/app/data
-      - ./redis_data:/app/redis_data
-      - ./postgres_data:/app/postgres_data
-    ports:
-      - "8765:8765" # WebSocket Server
-      - "8050:8050" # Dashboard UI
     environment:
       - REDIS_HOST=redis
-      - POSTGRES_HOST=postgres
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - PYTHONPATH=/app
-      - OMEGA_ENV=production
+      - REDIS_PORT=6379
+      - DEBUG=false
+      - INTERVAL=5
     restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8050" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+
+  trap-aware-traders:
+    build:
+      context: .
+      dockerfile: docker/TrapAwareTraders.Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - USE_TESTNET=true
+      - SYMBOL=BTCUSDT
+      - LONG_CAPITAL=24.0
+      - SHORT_CAPITAL=24.0
+      - TRAP_PROBABILITY_THRESHOLD=0.7
+      - TRAP_ALERT_THRESHOLD=0.8
+      - ENABLE_TRAP_PROTECTION=true
+      - ENABLE_ELITE_EXITS=true
+      - ELITE_EXIT_CONFIDENCE=0.7
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+
+  divine-dashboard:
+    build:
+      context: .
+      dockerfile: docker/DivineDashboard.Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local

@@ -662,344 +662,149 @@ Trading cryptocurrencies carries a high level of risk. This software is for educ
 
 ONE LOVE, ONE HEART, ONE CODE! 🌟
 
-# OMEGA BTC AI - BitGet Live Traders
-
-A production-grade trading system running multiple trading profiles on BitGet exchange with real-time monitoring, risk management, and performance tracking.
+# OMEGA BTC AI - Trap-Aware Dual Traders (TADT) System 🎯
 
 ## Overview
 
-BitGet Live Traders is a core module of the OMEGA BTC AI trading system that manages multiple trading profiles on BitGet exchange. Each trader starts with a configurable amount of capital (default: 24 USDT) and trades Bitcoin futures with customizable leverage.
+The Trap-Aware Dual Traders (TADT) system is an advanced trading architecture that manages simultaneous long and short positions while being conscious of market maker traps. It combines trap detection, elite exit strategies, and dual-position management for optimal trading performance.
 
-The system features:
+## Features
 
-- Multiple trading profiles with different strategies
-- Position scaling at Fibonacci levels
-- Market maker trap detection
-- Real-time performance monitoring
-- PnL tracking and alerts via Telegram
-- Testnet and mainnet support
+- 🔄 Dual Position Management
+- 🎯 Market Maker Trap Detection
+- 🚪 Elite Exit Strategy
+- 📊 Real-time Performance Monitoring
+- 🔔 Advanced Alert System
+- 🛡️ Risk Management System
 
-## Installation
+## Quick Start
 
 ### Prerequisites
 
-- Python 3.8+
-- pip
-- BitGet API keys (for both testnet and mainnet)
+- Docker and Docker Compose
+- API Keys from supported exchanges
+- 2GB RAM minimum
+- 10GB disk space
 
-### Setup
+### Installation
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/omega-btc-ai.git
+git clone https://github.com/btc-c0der/omega-btc-ai.git
 cd omega-btc-ai
 ```
 
-2. Install dependencies:
+2. Create configuration file:
 
 ```bash
-pip install -r requirements.txt
+cp config/example.env config/.env
 ```
 
-3. Set up environment variables for API access:
-
-For testnet:
+3. Edit the configuration:
 
 ```bash
-export BITGET_TESTNET_API_KEY="your_testnet_api_key"
-export BITGET_TESTNET_SECRET_KEY="your_testnet_secret_key"
-export BITGET_TESTNET_PASSPHRASE="your_testnet_passphrase"
+nano config/.env
 ```
 
-For mainnet:
-
-```bash
-export BITGET_API_KEY="your_mainnet_api_key"
-export BITGET_SECRET_KEY="your_mainnet_secret_key"
-export BITGET_PASSPHRASE="your_mainnet_passphrase"
-```
-
-4. (Optional) Set up sub-account for strategic trader:
-
-```bash
-export STRATEGIC_SUB_ACCOUNT_NAME="your_sub_account_name"
-```
-
-## Usage
-
-### Command-line Arguments
-
-The BitGet Live Traders system can be run with various command-line arguments:
-
-| Argument | Description | Default |
-|----------|-------------|---------|
-| `--symbol` | Trading symbol | `BTCUSDT` |
-| `--testnet` | Use testnet | `True` |
-| `--mainnet` | Use mainnet | `False` |
-| `--capital` | Initial capital per trader in USDT | `24.0` |
-| `--api-key` | BitGet API key | From env |
-| `--secret-key` | BitGet secret key | From env |
-| `--passphrase` | BitGet API passphrase | From env |
-| `--use-coin-picker` | Use CoinPicker for symbol verification | `False` |
-| `--strategic-only` | Only use the strategic trader profile | `False` |
-| `--no-pnl-alerts` | Disable PnL alerts | `False` |
-| `--pnl-alert-interval` | Interval in minutes for PnL alerts | `1` |
-| `--leverage` | Trading leverage | `11` |
-
-### Basic Usage
-
-Run the system on testnet (default):
-
-```bash
-python -m omega_ai.trading.exchanges.bitget_live_traders
-```
-
-Run with specific settings:
-
-```bash
-python -m omega_ai.trading.exchanges.bitget_live_traders --symbol BTCUSDT --capital 30 --leverage 10 --pnl-alert-interval 5
-```
-
-Run on mainnet (be careful!):
-
-```bash
-python -m omega_ai.trading.exchanges.bitget_live_traders --mainnet
-```
-
-### Dry Run Simulation
-
-Before going live, you can use the dry run simulator to test how the system would handle an existing position:
-
-```bash
-python dry_run_trader.py
-```
-
-This will simulate the system's behavior with an existing 11x long position without executing any real trades.
-
-## Running as a Service
-
-### Using Systemd (Linux)
-
-1. Create a systemd service file:
-
-```bash
-sudo nano /etc/systemd/system/omega-bitget-trader.service
-```
-
-2. Add the following content:
-
-```ini
-[Unit]
-Description=OMEGA BTC AI BitGet Live Traders
-After=network.target
-
-[Service]
-User=yourusername
-WorkingDirectory=/path/to/omega-btc-ai
-ExecStart=/usr/bin/python3 -m omega_ai.trading.exchanges.bitget_live_traders --symbol BTCUSDT --leverage 11 --testnet
-Restart=always
-RestartSec=5
-Environment=BITGET_TESTNET_API_KEY=your_testnet_api_key
-Environment=BITGET_TESTNET_SECRET_KEY=your_testnet_secret_key
-Environment=BITGET_TESTNET_PASSPHRASE=your_testnet_passphrase
-# For mainnet, uncomment and set these instead:
-# Environment=BITGET_API_KEY=your_mainnet_api_key
-# Environment=BITGET_SECRET_KEY=your_mainnet_secret_key
-# Environment=BITGET_PASSPHRASE=your_mainnet_passphrase
-# Environment=STRATEGIC_SUB_ACCOUNT_NAME=your_sub_account_name
-
-[Install]
-WantedBy=multi-user.target
-```
-
-3. Enable and start the service:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable omega-bitget-trader
-sudo systemctl start omega-bitget-trader
-```
-
-4. Monitor the service:
-
-```bash
-sudo systemctl status omega-bitget-trader
-sudo journalctl -u omega-bitget-trader -f
-```
-
-### Using PM2 (Node.js Process Manager)
-
-1. Install PM2:
-
-```bash
-npm install -g pm2
-```
-
-2. Create an ecosystem.config.js file:
-
-```javascript
-module.exports = {
-  apps: [{
-    name: 'omega-bitget-trader',
-    script: 'python',
-    args: '-m omega_ai.trading.exchanges.bitget_live_traders --symbol BTCUSDT --leverage 11 --testnet',
-    cwd: '/path/to/omega-btc-ai',
-    env: {
-      BITGET_TESTNET_API_KEY: 'your_testnet_api_key',
-      BITGET_TESTNET_SECRET_KEY: 'your_testnet_secret_key',
-      BITGET_TESTNET_PASSPHRASE: 'your_testnet_passphrase',
-      // For mainnet:
-      // BITGET_API_KEY: 'your_mainnet_api_key',
-      // BITGET_SECRET_KEY: 'your_mainnet_secret_key',
-      // BITGET_PASSPHRASE: 'your_mainnet_passphrase',
-      // STRATEGIC_SUB_ACCOUNT_NAME: 'your_sub_account_name'
-    }
-  }]
-};
-```
-
-3. Start with PM2:
-
-```bash
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup
-```
-
-4. Monitor with PM2:
-
-```bash
-pm2 status
-pm2 logs omega-bitget-trader
-```
-
-### Using Docker
-
-1. Create a Dockerfile:
-
-```Dockerfile
-FROM python:3.9-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-CMD ["python", "-m", "omega_ai.trading.exchanges.bitget_live_traders"]
-```
-
-2. Create a docker-compose.yml file:
-
-```yaml
-version: '3'
-
-services:
-  omega-bitget-trader:
-    build: .
-    restart: always
-    environment:
-      - BITGET_TESTNET_API_KEY=your_testnet_api_key
-      - BITGET_TESTNET_SECRET_KEY=your_testnet_secret_key
-      - BITGET_TESTNET_PASSPHRASE=your_testnet_passphrase
-      # For mainnet:
-      # - BITGET_API_KEY=your_mainnet_api_key
-      # - BITGET_SECRET_KEY=your_mainnet_secret_key
-      # - BITGET_PASSPHRASE=your_mainnet_passphrase
-      # - STRATEGIC_SUB_ACCOUNT_NAME=your_sub_account_name
-    command: python -m omega_ai.trading.exchanges.bitget_live_traders --symbol BTCUSDT --leverage 11 --testnet
-    volumes:
-      - ./logs:/app/logs
-```
-
-3. Run with Docker Compose:
+4. Start the system:
 
 ```bash
 docker-compose up -d
+```
+
+### Accessing Services
+
+- Divine Dashboard: <http://localhost:3000>
+- Trap Probability Meter: Runs internally
+- Trading System: Runs internally
+
+## Configuration
+
+### Environment Variables
+
+```env
+# Exchange API Configuration
+API_KEY=your_api_key
+API_SECRET=your_api_secret
+API_PASSPHRASE=your_passphrase
+
+# Trading Parameters
+USE_TESTNET=true
+SYMBOL=BTCUSDT
+LONG_CAPITAL=24.0
+SHORT_CAPITAL=24.0
+
+# Trap Detection Parameters
+TRAP_PROBABILITY_THRESHOLD=0.7
+TRAP_ALERT_THRESHOLD=0.8
+ENABLE_TRAP_PROTECTION=true
+
+# Elite Exit Parameters
+ENABLE_ELITE_EXITS=true
+ELITE_EXIT_CONFIDENCE=0.7
+```
+
+## System Architecture
+
+The system consists of three main components:
+
+1. **Trap Probability Meter**: Monitors market conditions for potential traps
+2. **Trap-Aware Traders**: Manages trading positions with trap awareness
+3. **Divine Dashboard**: Visualizes system performance and metrics
+
+## Health Monitoring
+
+Check system health:
+
+```bash
+docker-compose ps
 docker-compose logs -f
 ```
 
-## Monitoring and Alerts
+## Backup and Recovery
 
-### Telegram Alerts
-
-The system sends Telegram alerts for:
-
-- Position openings and closings
-- Regular PnL updates (configurable interval)
-- System errors and warnings
-
-To set up Telegram alerts:
-
-1. Create a Telegram bot via @BotFather
-2. Get your chat ID
-3. Set environment variables:
+Backup Redis data:
 
 ```bash
-export TELEGRAM_BOT_TOKEN="your_bot_token"
-export TELEGRAM_CHAT_ID="your_chat_id"
+docker-compose exec redis redis-cli SAVE
 ```
-
-### Logging
-
-Logs are stored in the `bitget_live_trading.log` file. You can customize the logging level by modifying the `logging.basicConfig` section in the code.
-
-## Trading Profiles
-
-The system supports multiple trading profiles:
-
-1. **Strategic Trader**: A Fibonacci-based strategy that scales positions at key levels
-2. **Aggressive Trader**: Higher risk/reward profile with larger position sizes and tighter stops
-3. **Scalper Trader**: Frequent entries and exits with smaller profit targets
-
-In mainnet mode, only the Strategic Trader is used.
-
-## Security Considerations
-
-- Store API keys securely, never hardcode them
-- Start with testnet before moving to mainnet
-- Use isolated margin mode (default)
-- Monitor positions regularly
-- Start with a small amount of capital
 
 ## Troubleshooting
 
-### Common Issues
+Common issues and solutions:
 
-1. **API Connection Problems**
-   - Check your API keys are correct
-   - Verify network connectivity
-   - Check BitGet system status
+1. **Redis Connection Issues**
 
-2. **Position Not Closing**
-   - Check for error messages in logs
-   - Verify sufficient funds for fees
-   - Try manual closing via BitGet UI
+```bash
+docker-compose restart redis
+```
 
-3. **High CPU/Memory Usage**
-   - Reduce logging level
-   - Increase sleep time between cycles
-   - Check for memory leaks
+2. **Dashboard Not Loading**
 
-### Getting Support
+```bash
+docker-compose logs divine-dashboard
+```
 
-For issues, please:
+## Contributing
 
-1. Check the detailed logs in `bitget_live_trading.log`
-2. Post issues with full logs in GitHub Issues
-3. Contact the OMEGA BTC AI team via Telegram
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-[MIT License](LICENSE)
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please open an issue in the GitHub repository.
 
 ---
 
-**DISCLAIMER**: Trading cryptocurrencies involves significant risk. This software is provided for informational and educational purposes only. Always conduct your own research before trading and never risk more than you can afford to lose.
-
-ONE LOVE, ONE HEART, ONE CODE! 🌟
+*May the sacred algorithms guide your trades* 🙏✨
 
 # OMEGA BTC AI - Live Dashboard
 
