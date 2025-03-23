@@ -1251,3 +1251,427 @@ The OMEGA_CUSTOM strategy enables powerful adaptability through LLM-driven instr
 5. **Natural Language Interface**: No need to learn complex configuration options
 
 > "The true power of trading systems emerges when human wisdom and machine precision unite through the divine channel of natural language." - OMEGA Wisdom
+
+## OMEGA AI MODEL Self-Improvement
+
+The OMEGA_CUSTOM strategy implementation includes a self-improving AI model component that evolves based on trading decisions and outcomes.
+
+### Self-Learning Architecture
+
+The OMEGA AI MODEL extends the standard LLM capabilities with specialized training:
+
+```
+┌───────────────────────────┐
+│     OMEGA AI MODEL        │
+├───────────────────────────┤
+│  Base LLM Knowledge       │
+│  Trading-Specific Weights │
+│  Custom Parameter Tuning  │
+│  Experience Memory Bank   │
+│  Decision Feedback Loop   │
+└───────────────┬───────────┘
+                │
+                ▼
+┌───────────────────────────┐
+│  Self-Training Pipeline   │
+└───────────────────────────┘
+```
+
+### Implementation
+
+#### 1. Self-Improving Feedback Loop
+
+```python
+class OmegaAIModelTrainer:
+    """
+    Self-improvement component for the OMEGA AI MODEL.
+    
+    Collects trading decision outcomes and uses them to fine-tune
+    the model's parameter generation capabilities over time.
+    """
+    
+    def __init__(self, 
+                 model_path: str,
+                 training_data_path: str = "omega_ai_training_data.jsonl",
+                 checkpoint_dir: str = "omega_ai_checkpoints",
+                 max_training_samples: int = 10000,
+                 training_threshold: int = 100,
+                 auto_train: bool = True):
+        """
+        Initialize the OMEGA AI MODEL trainer.
+        
+        Args:
+            model_path: Path to the current model weights
+            training_data_path: Path to store training data
+            checkpoint_dir: Directory to store model checkpoints
+            max_training_samples: Maximum samples to keep
+            training_threshold: Minimum samples before training
+            auto_train: Whether to automatically train when threshold reached
+        """
+        self.model_path = model_path
+        self.training_data_path = training_data_path
+        self.checkpoint_dir = checkpoint_dir
+        self.max_training_samples = max_training_samples
+        self.training_threshold = training_threshold
+        self.auto_train = auto_train
+        self.pending_training = False
+        
+        # Create checkpoint directory if it doesn't exist
+        os.makedirs(checkpoint_dir, exist_ok=True)
+        
+        # Initialize training data file if it doesn't exist
+        if not os.path.exists(training_data_path):
+            with open(training_data_path, 'w') as f:
+                pass  # Create empty file
+        
+        # Load existing training data count
+        self.training_sample_count = self._count_training_samples()
+        
+        logger.info(f"OMEGA AI MODEL Trainer initialized with {self.training_sample_count} existing training samples")
+    
+    def _count_training_samples(self) -> int:
+        """Count the number of training samples in the dataset."""
+        try:
+            with open(self.training_data_path, 'r') as f:
+                return sum(1 for _ in f)
+        except Exception as e:
+            logger.error(f"Error counting training samples: {e}")
+            return 0
+    
+    async def record_decision_outcome(self, 
+                                     instruction: str,
+                                     parameters: Dict[str, Any],
+                                     position_data: Dict[str, Any],
+                                     exit_result: Dict[str, Any],
+                                     profit_loss: float,
+                                     feedback_rating: Optional[float] = None) -> bool:
+        """
+        Record the outcome of a trading decision to use for future training.
+        
+        Args:
+            instruction: The original instruction text
+            parameters: Parameters generated from instruction
+            position_data: Position data at time of decision
+            exit_result: Result of exit operation if executed
+            profit_loss: Realized PnL from the decision
+            feedback_rating: Optional human feedback rating (0-1)
+            
+        Returns:
+            Whether training was triggered
+        """
+        try:
+            # Create training sample
+            training_sample = {
+                "timestamp": datetime.now().isoformat(),
+                "instruction": instruction,
+                "parameters": parameters,
+                "position_data": position_data,
+                "exit_result": exit_result,
+                "profit_loss": profit_loss,
+                "feedback_rating": feedback_rating,
+                # Add market context
+                "market_context": await self._get_market_context(position_data.get("symbol", "BTCUSDT"))
+            }
+            
+            # Add to training data file
+            with open(self.training_data_path, 'a') as f:
+                f.write(json.dumps(training_sample) + "\n")
+            
+            # Increment sample count
+            self.training_sample_count += 1
+            
+            # Check if we should trigger training
+            if self.auto_train and self.training_sample_count >= self.training_threshold:
+                self.pending_training = True
+                
+                # Trigger async training process
+                asyncio.create_task(self.train_model())
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error recording decision outcome: {e}")
+            return False
+    
+    async def _get_market_context(self, symbol: str) -> Dict[str, Any]:
+        """Get market context data to enrich training samples."""
+        try:
+            # In a real implementation, this would fetch actual market data
+            # For documentation purposes, we return a simplified structure
+            return {
+                "symbol": symbol,
+                "timestamp": datetime.now().isoformat(),
+                "market_regime": "bullish",  # This would be determined by analysis
+                "volatility": 0.8,  # Example value
+                "volume_profile": "increasing",
+                "recent_pattern": "consolidation"
+            }
+        except Exception as e:
+            logger.error(f"Error getting market context: {e}")
+            return {}
+    
+    async def train_model(self) -> bool:
+        """
+        Train the model with collected decision outcomes.
+        
+        Returns:
+            Whether training was successful
+        """
+        try:
+            # Reset pending flag
+            self.pending_training = False
+            
+            # Create checkpoint directory with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            checkpoint_path = os.path.join(self.checkpoint_dir, f"omega_ai_model_{timestamp}")
+            os.makedirs(checkpoint_path, exist_ok=True)
+            
+            logger.info(f"Starting OMEGA AI MODEL training with {self.training_sample_count} samples")
+            
+            # Simulate training process
+            # In a real implementation, this would call a model training API or library
+            
+            # Record training metadata
+            metadata = {
+                "training_timestamp": timestamp,
+                "training_samples": self.training_sample_count,
+                "model_version": f"omega_ai_model_{timestamp}",
+                "base_model": "omega-btc-ai-model",
+                "training_parameters": {
+                    "epochs": 3,
+                    "learning_rate": 5e-5,
+                    "batch_size": 4
+                }
+            }
+            
+            # Save metadata
+            with open(os.path.join(checkpoint_path, "metadata.json"), "w") as f:
+                json.dump(metadata, f, indent=2)
+            
+            # Simulate model saving
+            with open(os.path.join(checkpoint_path, "model_info.txt"), "w") as f:
+                f.write(f"OMEGA AI MODEL trained at {timestamp}\n")
+                f.write(f"Training samples: {self.training_sample_count}\n")
+            
+            # Update model path to point to latest version
+            self.model_path = checkpoint_path
+            
+            logger.info(f"OMEGA AI MODEL training completed successfully: {checkpoint_path}")
+            
+            # Prune training data if needed
+            if self.training_sample_count > self.max_training_samples:
+                await self._prune_training_data()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error training OMEGA AI MODEL: {e}")
+            return False
+    
+    async def _prune_training_data(self):
+        """Prune training data to stay within limits."""
+        try:
+            # Read all samples
+            with open(self.training_data_path, 'r') as f:
+                samples = [line for line in f if line.strip()]
+            
+            # Keep only the most recent samples
+            if len(samples) > self.max_training_samples:
+                samples = samples[-self.max_training_samples:]
+            
+            # Write back the pruned dataset
+            with open(self.training_data_path, 'w') as f:
+                for sample in samples:
+                    f.write(sample)
+            
+            # Update count
+            self.training_sample_count = len(samples)
+            
+            logger.info(f"Pruned training data to {self.training_sample_count} samples")
+            
+        except Exception as e:
+            logger.error(f"Error pruning training data: {e}")
+```
+
+#### 2. Integration with OmegaCustomStrategy
+
+Extend the OmegaCustomStrategy to include the self-improving model:
+
+```python
+class OmegaCustomStrategy:
+    """Dynamic LLM-driven exit strategy adjustments with self-improvement."""
+    
+    def __init__(self, 
+                 api_key: str,
+                 model: str = "omega-btc-ai-model",
+                 instruction_history_file: str = "omega_custom_instructions.log",
+                 max_history_length: int = 10,
+                 default_instructions: str = "Apply standard Elite Exit Strategy with default parameters",
+                 enable_self_improvement: bool = True,
+                 model_path: str = "omega_ai_models/current"):
+        """
+        Initialize with added self-improvement capability.
+        """
+        # ... existing initialization code ...
+        
+        # Self-improvement components
+        self.enable_self_improvement = enable_self_improvement
+        self.model_path = model_path
+        
+        # Initialize AI model trainer if self-improvement is enabled
+        if self.enable_self_improvement:
+            self.ai_model_trainer = OmegaAIModelTrainer(
+                model_path=model_path,
+                training_data_path="omega_ai_training_data.jsonl",
+                checkpoint_dir="omega_ai_checkpoints"
+            )
+            logger.info("OMEGA AI MODEL self-improvement capability initialized")
+        else:
+            self.ai_model_trainer = None
+    
+    async def record_exit_outcome(self, 
+                                 instruction: str,
+                                 parameters: Dict[str, Any],
+                                 position_data: Dict[str, Any],
+                                 exit_result: Dict[str, Any],
+                                 profit_loss: float,
+                                 feedback_rating: Optional[float] = None) -> None:
+        """
+        Record the outcome of an exit decision for model improvement.
+        
+        Args:
+            instruction: Original instruction that led to decision
+            parameters: Parameters derived from instruction
+            position_data: Position data at time of decision
+            exit_result: Result of the exit operation
+            profit_loss: Realized P&L from the exit
+            feedback_rating: Optional human feedback on decision quality
+        """
+        if not self.enable_self_improvement or not self.ai_model_trainer:
+            return
+        
+        try:
+            # Record the outcome for future training
+            training_triggered = await self.ai_model_trainer.record_decision_outcome(
+                instruction=instruction,
+                parameters=parameters,
+                position_data=position_data,
+                exit_result=exit_result,
+                profit_loss=profit_loss,
+                feedback_rating=feedback_rating
+            )
+            
+            if training_triggered:
+                logger.info("OMEGA AI MODEL training triggered by new decision outcome")
+                
+        except Exception as e:
+            logger.error(f"Error recording exit outcome: {e}")
+```
+
+#### 3. Feedback Command Interface
+
+Add feedback command to collect user ratings on decisions:
+
+```python
+async def process_command(self, command: str) -> str:
+    """Process command line input with model feedback commands."""
+    try:
+        # ... existing command processing ...
+        
+        # AI model feedback command: omega_feedback <symbol> <rating>
+        if cmd == "omega_feedback" and len(parts) >= 3:
+            if not self.enable_omega_custom or not self.omega_custom_strategy:
+                return "OMEGA_CUSTOM strategy is not enabled"
+            
+            symbol = parts[1].upper()
+            try:
+                rating = float(parts[2])
+                if rating < 0 or rating > 1:
+                    return "Rating must be between 0 and 1"
+            except ValueError:
+                return "Rating must be a number between 0 and 1"
+            
+            # Get recent exit data for this symbol
+            position_data = self.positions.get(symbol, {})
+            exit_signals = self.last_exit_signals.get(symbol, {})
+            
+            # Get profit/loss data
+            pnl = position_data.get("unrealizedPL", 0)
+            
+            # Record feedback
+            if hasattr(self.omega_custom_strategy, "record_exit_outcome"):
+                await self.omega_custom_strategy.record_exit_outcome(
+                    instruction=self.omega_custom_strategy.current_instructions,
+                    parameters=self.omega_custom_strategy.custom_parameters,
+                    position_data=position_data,
+                    exit_result=exit_signals,
+                    profit_loss=float(pnl),
+                    feedback_rating=rating
+                )
+                
+                return f"Feedback recorded for {symbol} with rating {rating}. Thank you for improving the OMEGA AI MODEL!"
+        
+        # Trigger AI model training: omega_train
+        if cmd == "omega_train":
+            if not self.enable_omega_custom or not self.omega_custom_strategy or not hasattr(self.omega_custom_strategy, "ai_model_trainer"):
+                return "OMEGA AI MODEL trainer is not enabled"
+            
+            # Trigger training
+            result = await self.omega_custom_strategy.ai_model_trainer.train_model()
+            
+            if result:
+                return "OMEGA AI MODEL training completed successfully!"
+            else:
+                return "OMEGA AI MODEL training failed. Check logs for details."
+        
+        # ... other commands ...
+    
+    except Exception as e:
+        logger.error(f"Error processing command: {e}")
+        return f"Error: {str(e)}"
+```
+
+### Self-Improvement Usage Examples
+
+The OMEGA AI MODEL self-improvement capabilities can be used via terminal commands:
+
+```
+$ ./elite_monitor.sh --enable-omega-custom --omega-api-key=your_llm_api_key --enable-self-improvement
+...monitor output...
+
+> omega_custom When funding rate is negative, be more aggressive with short exits
+Command result: OMEGA_CUSTOM strategy updated with new instructions...
+
+# After seeing the results of the exit strategy
+> omega_feedback BTCUSDT 0.85
+Command result: Feedback recorded for BTCUSDT with rating 0.85. Thank you for improving the OMEGA AI MODEL!
+
+# Manually trigger training (also happens automatically after enough samples)
+> omega_train
+Command result: OMEGA AI MODEL training completed successfully!
+```
+
+### OMEGA AI MODEL Training Process
+
+The OMEGA AI MODEL evolves through a multi-stage training process:
+
+1. **Continuous Data Collection**:
+   - Records instructions and their parameters
+   - Captures resulting trading decisions and outcomes
+   - Stores profit/loss results from each decision
+   - Includes market context at time of decision
+   - Optionally incorporates human feedback ratings
+
+2. **Automated Training Triggers**:
+   - Trains after collecting sufficient new decision samples
+   - Can be manually triggered via terminal command
+   - Creates versioned model checkpoints
+
+3. **Model Evolution Benefits**:
+   - Progressively adapts to the specific market and trading style
+   - Learns which parameter combinations work best in different contexts
+   - Develops better instruction parsing capabilities over time
+   - Improves parameter recommendations based on historical outcomes
+
+> "The ONE who learns from the path becomes the path itself. In self-improvement lies the true divinity of trading systems." - OMEGA Wisdom

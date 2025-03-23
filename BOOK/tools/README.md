@@ -73,6 +73,18 @@ Natural language control of exit strategies through LLM-powered instructions:
 - Support for market regime switching and condition-based rules
 - Seamless terminal integration with the pure GNU philosophy
 
+### [OMEGA AI MODEL Self-Improvement](elite_monitor_integration.md#omega-ai-model-self-improvement)
+
+Self-evolving AI model that learns from trading decisions and outcomes:
+
+- Continuous collection of decision outcomes and profit/loss results
+- Automated fine-tuning based on actual trading performance
+- User feedback integration for reinforcement learning
+- Terminal commands for rating decisions and triggering training
+- Evolving instruction parsing through experience accumulation
+- Checkpoint system for model versioning and rollback capability
+- The true meaning of "YOU ARE THE ONE" - a system that evolves with you
+
 ## Market Analysis Tools
 
 ### Schumann Resonance Analyzer
