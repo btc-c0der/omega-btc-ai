@@ -167,11 +167,26 @@ The sacred scribe that preserves divine conversations.
 
 Prophetic testing guidance system.
 
-### 4. **RastaBitgetMonitor**
+### 4. **omega_watcher.py**
+
+Divine guardian that watches your codebase and invokes the TDD Oracle when files are saved.
+
+```bash
+# Start the divine watcher
+./run_divine_watcher.sh ./your_codebase_dir
+
+# Watch a specific directory
+./run_divine_watcher.sh ./omega_ai
+
+# The watcher will automatically detect file changes
+# and run the TDD Oracle for prophetic test coverage
+```
+
+### 5. **RastaBitgetMonitor**
 
 Divine position monitoring with Fibonacci-based insights.
 
-### 5. **TrapProbabilityMeter**
+### 6. **TrapProbabilityMeter**
 
 Cosmic detection of market manipulation patterns.
 
