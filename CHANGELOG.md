@@ -63,6 +63,8 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - External log file support for RastaBitgetMonitor
 - **OMEGA DEV FRAMEWORK™** with TDD Oracle and Prompt Saver
 - Philosophy-driven development with `zion_flow`, tag-based releases
+- **Divine Watcher** with auto-execution of TDD Oracle on file saves
+- `run_divine_watcher.sh` script for continuous test coverage monitoring
 
 ### Enhanced
 
@@ -71,6 +73,7 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - Added convenient detach/reattach functionality via tmux
 - Cleaner interface separation between position and trap monitoring
 - Comprehensive documentation for monitoring suite and framework
+- Automated test coverage analysis for Python files
 
 ## v0.3.1.1 - Documentation Updates (2023-10-10)
 
