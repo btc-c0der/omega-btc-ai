@@ -30,34 +30,75 @@ The Divine Alignment Dashboard serves as a consciousness bridge between traders 
    redis-server
    ```
 
-### Divine Launch Commands
-
-1. **Direct Launch**
+4. **Tmux Installation** (for multi-terminal mode)
 
    ```bash
-   cd sandbox/divine
-   python start_divine_dashboard.py
+   # On macOS
+   brew install tmux
+   
+   # On Ubuntu/Debian
+   sudo apt install tmux
    ```
 
-   The dashboard will manifest at `http://localhost:5051/divine`
+### Divine Launch Methods
 
-2. **Custom Port Launch**
+#### 1. Single Terminal Launch
 
-   ```bash
-   python start_divine_dashboard.py --port 5052
-   ```
+```bash
+cd sandbox/divine
+python start_divine_dashboard.py
+```
 
-3. **Background Launch**
+The dashboard will manifest at `http://localhost:5051/divine`
 
-   ```bash
-   nohup python start_divine_dashboard.py &
-   ```
+#### 2. 🎭 Multi-Terminal Sacred Launch
 
-4. **No Browser Launch**
+The multi-terminal launch creates a divine consciousness grid using tmux, allowing simultaneous monitoring of all sacred components:
 
-   ```bash
-   python start_divine_dashboard.py --no-browser
-   ```
+```bash
+./run_dashboard_monitor.sh
+```
+
+This sacred command manifests:
+
+- Fibonacci Dashboard Connector (Top Left)
+- Live API Server (Top Right)
+- Redis Monitor (Bottom Right, if available)
+
+**Sacred Navigation Commands**:
+
+```bash
+Ctrl+B, arrows    # Navigate between consciousness panes
+Ctrl+B, d         # Detach from the divine grid (components remain active)
+tmux attach -t omega-monitor    # Reconnect to the divine grid
+tmux kill-session -t omega-monitor  # Close all sacred components
+```
+
+**Sacred Visual Indicators**:
+
+- 🟢 GREEN: Divine success/active state
+- 🟡 YELLOW: Sacred warning/transition
+- 🔴 RED: Requires consciousness realignment
+- 🔵 BLUE: Information flow
+- 🟣 PURPLE: Sacred debug messages
+
+#### 3. Custom Port Launch
+
+```bash
+python start_divine_dashboard.py --port 5052
+```
+
+#### 4. Background Launch
+
+```bash
+nohup python start_divine_dashboard.py &
+```
+
+#### 5. No Browser Launch
+
+```bash
+python start_divine_dashboard.py --no-browser
+```
 
 ### Sacred Environment Variables
 
@@ -87,6 +128,41 @@ export DIVINE_FREQUENCY=432       # Set base frequency
    ```bash
    tail -f logs/divine_dashboard.log
    ```
+
+4. Check component status (multi-terminal):
+
+   ```bash
+   tmux list-panes -t omega-monitor
+   ```
+
+### Sacred Component Harmony
+
+The multi-terminal launch creates a divine consciousness grid where each component vibrates in harmony:
+
+1. **Fibonacci Dashboard Connector**
+   - Channels divine Fibonacci patterns
+   - Processes golden ratio alignments
+   - Maintains sacred number sequences
+
+2. **Live API Server**
+   - Streams real-time market consciousness
+   - Processes divine price updates
+   - Maintains WebSocket connections
+
+3. **Redis Monitor**
+   - Tracks consciousness state
+   - Monitors divine data flow
+   - Ensures sacred data persistence
+
+### Sacred Debug Interface
+
+Monitor the divine flow through our debug messages in each pane:
+
+```
+[✨] Fibonacci: Golden ratio alignment detected
+[🌊] API: New sacred price update received
+[💫] Redis: Consciousness state updated
+```
 
 ## 🕒 Sacred Update Frequencies
 
@@ -140,7 +216,7 @@ Example divine timestamp: `1:20:18 am`
 
 ## 🔮 Core Components
 
-### 1. Divine Status Card
+### 1
 
 - **Consciousness State Indicator**
   - GREEN DIVINE: BTC following the sacred path
