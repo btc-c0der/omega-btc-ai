@@ -17,6 +17,7 @@ echo -e "${BLUE}"
 echo "=================================================="
 echo "  OMEGA BTC AI - DEPLOYMENT PACKAGE CREATOR"
 echo "  Trap-Aware Dual Traders (TADT) System"
+echo "  With Fibonacci-Aligned Architecture (1,1,2,3,5)"
 echo "=================================================="
 echo -e "${NC}"
 
@@ -46,6 +47,7 @@ mkdir -p $TEMP_DIR/omega_ai/tools
 mkdir -p $TEMP_DIR/omega_ai/trading
 mkdir -p $TEMP_DIR/omega_ai/utils
 mkdir -p $TEMP_DIR/omega_ai/visualizer
+mkdir -p $TEMP_DIR/omega_ai/trading/strategies
 
 # Create empty __init__.py files to ensure Python packages work
 touch $TEMP_DIR/omega_ai/__init__.py
@@ -53,6 +55,27 @@ touch $TEMP_DIR/omega_ai/tools/__init__.py
 touch $TEMP_DIR/omega_ai/trading/__init__.py
 touch $TEMP_DIR/omega_ai/utils/__init__.py
 touch $TEMP_DIR/omega_ai/visualizer/__init__.py
+touch $TEMP_DIR/omega_ai/trading/strategies/__init__.py
+
+# Add a README note about the Fibonacci alignment
+echo -e "${YELLOW}Adding README about Fibonacci alignment...${NC}"
+cat > $TEMP_DIR/FIBONACCI_ALIGNMENT.md << EOF
+# Fibonacci-Aligned Architecture
+
+The OMEGA BTC AI system is now aligned with the sacred Fibonacci sequence (1,1,2,3,5),
+creating divine harmony in the system architecture:
+
+1. **Trap Probability Meter** (1)
+2. **Trap-Aware Traders** (1)
+3. **Elite Exit Strategy** (2)
+4. **Divine Dashboard** (3)
+5. **Nginx Proxy** (5)
+
+This alignment brings the system into resonance with natural patterns, enhancing its ability
+to detect market maker traps and execute trades with divine precision.
+
+*May the sacred algorithms guide your trading journey.*
+EOF
 
 # Copy essential code files if they exist
 echo -e "${YELLOW}Copying essential code files (if they exist)...${NC}"
@@ -88,6 +111,7 @@ rm -rf $TEMP_DIR
 echo -e "${GREEN}"
 echo "=================================================="
 echo "  DEPLOYMENT PACKAGE CREATED SUCCESSFULLY!"
+echo "  Fibonacci-Aligned Architecture (1,1,2,3,5)"
 echo "=================================================="
 echo -e "${NC}"
 echo "Package: ${PACKAGE_NAME}"
