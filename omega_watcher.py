@@ -20,6 +20,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
+import re
 
 # ANSI color codes for terminal styling
 GREEN = '\033[92m'
@@ -123,6 +124,73 @@ class FileWatcher:
         
         return file_times
     
+    def _get_current_version(self) -> str:
+        """
+        Get the current version from git tags.
+        
+        Returns:
+            str: Current version string (e.g. v0.4.3)
+        """
+        try:
+            # Get the latest semantic version tag
+            result = subprocess.run(
+                ["git", "tag", "--sort=-v:refname"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            # Parse the output to find the most recent semantic version
+            tags = result.stdout.strip().split('\n')
+            for tag in tags:
+                # Match standard semantic version tags (vX.Y.Z)
+                if re.match(r'^v\d+\.\d+\.\d+$', tag):
+                    return tag
+            
+            # If no semantic version tag found, return a default
+            return "v0.1.0"
+        except Exception as e:
+            print(f"{YELLOW}Warning: Could not determine current version: {str(e)}{RESET}")
+            return "v0.1.0"
+    
+    def _create_qa_tag(self, test_file: str) -> None:
+        """
+        Create and push a QA approved tag based on the current version.
+        
+        Args:
+            test_file: The test file that passed all tests
+        """
+        try:
+            # Get current version
+            current_version = self._get_current_version()
+            
+            # Create the QA tag name
+            test_name = os.path.basename(test_file).replace('.py', '')
+            qa_tag = f"{current_version}-TDD-OMEGA-QA-APPROVED-{test_name}"
+            
+            print(f"\n{MAGENTA}{BOLD}═════════════════════════════════════════════════{RESET}")
+            print(f"{GREEN}{BOLD} CREATING QA APPROVED GIT TAG {RESET}")
+            print(f"{MAGENTA}{BOLD}═════════════════════════════════════════════════{RESET}")
+            print(f"{CYAN}Tag: {qa_tag}{RESET}")
+            
+            # Create the tag
+            tag_message = f"TDD Oracle QA approved - {test_name} passed all tests"
+            subprocess.run(
+                ["git", "tag", "-a", qa_tag, "-m", tag_message],
+                check=True
+            )
+            
+            # Push the tag
+            subprocess.run(
+                ["git", "push", "origin", qa_tag],
+                check=True
+            )
+            
+            print(f"{GREEN}{BOLD}✓ QA tag created and pushed successfully!{RESET}")
+            
+        except Exception as e:
+            print(f"{YELLOW}Warning: Could not create QA tag: {str(e)}{RESET}")
+    
     def _run_oracle(self, file_path: str) -> None:
         """
         Run the TDD Oracle on a modified file.
@@ -148,7 +216,20 @@ class FileWatcher:
         print(f"{YELLOW}Invoking the divine oracle...{RESET}\n")
         
         try:
-            subprocess.run(oracle_cmd)
+            # Run the oracle
+            result = subprocess.run(oracle_cmd, capture_output=True, text=True)
+            
+            # Print the output
+            print(result.stdout)
+            
+            # Check if tests passed successfully
+            if result.returncode == 0 and "All modules have test coverage" in result.stdout:
+                # Check if this is a test file (either test_*.py or *_test.py pattern)
+                filename = os.path.basename(file_path)
+                if filename.startswith('test_') or filename.endswith('_test.py'):
+                    # Create a QA tag for successful test runs
+                    self._create_qa_tag(file_path)
+            
             print(f"\n{GREEN}{BOLD}✓ Oracle analysis complete{RESET}")
         except Exception as e:
             print(f"{RED}! Error running the oracle: {str(e)}{RESET}")
