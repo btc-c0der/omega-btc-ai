@@ -23,8 +23,10 @@ import signal
 import curses
 import datetime
 import socket
+import random
 from typing import Dict, List, Any, Optional, Tuple, Set, Callable, Union
 from collections import defaultdict, deque
+from enum import Enum
 
 # Configure logging
 logging.basicConfig(
@@ -73,6 +75,75 @@ class Colors:
     BRIGHT_MAGENTA = "\033[95m"
     BRIGHT_CYAN = "\033[96m"
     BRIGHT_WHITE = "\033[97m"
+
+class RastaLogMessages:
+    """Rasta-themed log messages for the OMEGA PROMETHEUS MATRIX"""
+    
+    # System health messages
+    SYSTEM_HEALTHY = [
+        "💚 MEMORY STABLE - ZION VIBRATION HOLDING",
+        "💚 CPU RUNNING SMOOTH LIKE ROOTS ROCK REGGAE",
+        "💚 SYSTEM IRIE - ALL COMPONENTS IN DIVINE HARMONY",
+        "💚 JAH PROVIDE THE RESOURCES - SYSTEM BLESSED",
+    ]
+    
+    SYSTEM_WARNING = [
+        "💛 SYSTEM PRESSURE RISING - STAY CALM AND MONITOR",
+        "💛 RESOURCES UNDER STRAIN - THE BABYLON SYSTEM PUSHING HARD",
+        "💛 WARNING VIBRATION DETECTED - WATCH THE SYSTEM PRESSURE",
+        "💛 PARTIAL SYSTEM STRAIN - STILL HOLDING THE VISION",
+    ]
+    
+    SYSTEM_CRITICAL = [
+        "❤️ BABYLON SYSTEM PRESSURE CRITICAL! RESOURCES OVERLOADED!",
+        "❤️ CRITICAL RESOURCE DEPLETION - TAKE ACTION NOW!",
+        "❤️ EMERGENCY STATE - SYSTEM CRYING FOR RELIEF!",
+        "❤️ CRITICAL ALERT - RESOURCES BURNED BY FIRE!",
+    ]
+    
+    # Trading messages
+    TRAP_DETECTED = [
+        "🔥 CYAA FOOL DI SYSTEM - MM TRAP SEEN AT {trap_confidence:.0f}%! 🔥",
+        "🔥 BABYLON BANKER TRAP EXPOSED AT {trap_confidence:.0f}%! SIGHT IT! 🔥",
+        "🔥 MM TRAP VIBRATION STRONG AT {trap_confidence:.0f}%! WATCH OUT! 🔥",
+        "🔥 THE HUNTER SET TRAP WITH {trap_confidence:.0f}% CONFIDENCE! I AND I SEE IT! 🔥",
+    ]
+    
+    PROFITABLE_POSITION = [
+        "💚 POSITION IN THE GREEN - JAH BLESS THE STRATEGY! +{pnl:.2f}%",
+        "💚 PROFITS GROWING LIKE SACRED HERB! +{pnl:.2f}%",
+        "💚 TRADING WISDOM BEARING FRUIT! POSITIVE ENERGY AT +{pnl:.2f}%",
+        "💚 ZION STRATEGY BRINGING THE GAINS! +{pnl:.2f}%",
+    ]
+    
+    LOSING_POSITION = [
+        "❤️ POSITION FEELING PRESSURE, BUT I AND I HOLD STRONG! {pnl:.2f}%",
+        "❤️ TEMPORARY SETBACK - NOT EVERY MARATHON WON IMMEDIATELY! {pnl:.2f}%",
+        "❤️ PATIENCE THROUGH THE FIRE - THIS POSITION WILL RISE! {pnl:.2f}%",
+        "❤️ POSITION UNDER BABYLON PRESSURE! HOLD FAITH! {pnl:.2f}%",
+    ]
+    
+    # Network messages
+    NETWORK_ACTIVE = [
+        "💚 NETWORK CHANNELS OPEN - MESSAGES FLOWING LIKE RIVER",
+        "💚 DATA STREAMING THROUGH THE DIGITAL ROOTS NETWORK",
+        "💚 NETWORK VIBRATIONS STRONG AND STABLE",
+        "💚 COMMUNICATION CHANNELS CLEAR - BABYLON FIREWALL HOLDING",
+    ]
+    
+    @staticmethod
+    def get_message(category, **kwargs):
+        """Get a random message from the specified category with formatted parameters"""
+        if not hasattr(RastaLogMessages, category):
+            return f"Message category {category} not found"
+        
+        messages = getattr(RastaLogMessages, category)
+        message = random.choice(messages)
+        
+        try:
+            return message.format(**kwargs)
+        except KeyError as e:
+            return f"Missing parameter for message: {e}"
 
 class PrometheusMetric:
     """Base class for metrics collected by the OMEGA PROMETHEUS MATRIX"""
@@ -362,77 +433,9 @@ class NetworkCollector(PrometheusCollector):
         logger.debug(f"Collected network metrics: Sent: {self.bytes_sent_per_sec.value:.2f} B/s, "
                     f"Received: {self.bytes_recv_per_sec.value:.2f} B/s") 
 
-class OmegaTradingCollector(PrometheusCollector):
-    """Collector for OMEGA BTC AI trading metrics"""
-    
-    def __init__(self, registry: MetricsRegistry, trading_api_client=None):
-        super().__init__(registry)
-        self.collection_interval = 60
-        self.trading_api_client = trading_api_client
-        
-        # Initialize metrics
-        self.active_positions = GaugeMetric(
-            "trading_active_positions",
-            "Number of active trading positions",
-            labels={"system": "omega_btc_ai"}
-        )
-        self.position_pnl = GaugeMetric(
-            "trading_position_pnl",
-            "Current PnL of all positions combined",
-            labels={"system": "omega_btc_ai"}
-        )
-        self.trading_volume_24h = GaugeMetric(
-            "trading_volume_24h",
-            "Trading volume in the last 24 hours",
-            labels={"system": "omega_btc_ai"}
-        )
-        self.order_success_rate = GaugeMetric(
-            "trading_order_success_rate",
-            "Percentage of successfully executed orders",
-            labels={"system": "omega_btc_ai"}
-        )
-        self.trap_detection_confidence = GaugeMetric(
-            "trading_trap_detection_confidence",
-            "Current trap detection confidence level",
-            labels={"system": "omega_btc_ai"}
-        )
-        
-        # Register metrics
-        self.registry.register_metric(self.active_positions)
-        self.registry.register_metric(self.position_pnl)
-        self.registry.register_metric(self.trading_volume_24h)
-        self.registry.register_metric(self.order_success_rate)
-        self.registry.register_metric(self.trap_detection_confidence)
-    
-    async def collect(self) -> None:
-        """Collect trading metrics from the OMEGA BTC AI system"""
-        # For now, use mock data if no client provided
-        # In a real implementation, this would query your trading API
-        if self.trading_api_client:
-            # Real data collection would happen here
-            positions = await self.trading_api_client.get_positions()
-            pnl = await self.trading_api_client.get_total_pnl()
-            volume = await self.trading_api_client.get_24h_volume()
-            success_rate = await self.trading_api_client.get_order_success_rate()
-            trap_confidence = await self.trading_api_client.get_trap_confidence()
-        else:
-            # Mock data for demonstration
-            import random
-            positions = random.randint(1, 10)
-            pnl = random.uniform(-5.0, 15.0)
-            volume = random.uniform(1000, 10000)
-            success_rate = random.uniform(80, 99)
-            trap_confidence = random.uniform(0, 100)
-        
-        # Update metrics
-        self.active_positions.set(positions)
-        self.position_pnl.set(pnl)
-        self.trading_volume_24h.set(volume)
-        self.order_success_rate.set(success_rate)
-        self.trap_detection_confidence.set(trap_confidence)
-        
-        logger.debug(f"Collected trading metrics: Positions: {positions}, PnL: {pnl}, "
-                    f"Trap Confidence: {trap_confidence}%")
+class ViewMode(Enum):
+    NORMAL = "normal"
+    ZION = "zion"
 
 class MatrixDisplay:
     """Terminal-based matrix display for the PROMETHEUS monitoring system"""
@@ -452,6 +455,25 @@ class MatrixDisplay:
         self.net_sent_history = deque(maxlen=self.max_history)
         self.trading_pnl_history = deque(maxlen=self.max_history)
         self.trap_confidence_history = deque(maxlen=self.max_history)
+        
+        # Add view mode
+        self.view_mode = ViewMode.NORMAL
+        self.last_mode_switch = time.time()
+        self.mode_switch_cooldown = 1.0  # seconds between mode switches
+        
+        # For Zion View
+        self.zion_message_index = 0
+        self.zion_messages = [
+            "JAH BLESS THE SYSTEM",
+            "MONITOR WITH DIVINE INSIGHT",
+            "OMEGA PROMETHEUS MATRIX",
+            "TERMINAL DIVINITY",
+            "ZION TECH RISING",
+        ]
+        self.zion_counter = 0
+        
+        # Fibonacci sequence for Zion View
+        self.fibonacci = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
     
     def start(self):
         """Start the matrix display"""
@@ -463,6 +485,19 @@ class MatrixDisplay:
         self.running = False
         if self.screen:
             curses.endwin()
+    
+    def _toggle_view_mode(self):
+        """Toggle between normal and Zion view modes"""
+        if time.time() - self.last_mode_switch < self.mode_switch_cooldown:
+            return  # Prevent rapid switching
+        
+        if self.view_mode == ViewMode.NORMAL:
+            self.view_mode = ViewMode.ZION
+            logger.info(RastaLogMessages.get_message("SYSTEM_HEALTHY"))
+        else:
+            self.view_mode = ViewMode.NORMAL
+        
+        self.last_mode_switch = time.time()
     
     def _run_display(self, screen):
         """Main display loop"""
@@ -480,6 +515,11 @@ class MatrixDisplay:
         curses.init_pair(6, curses.COLOR_CYAN, -1)   # Cyan on default
         curses.init_pair(7, curses.COLOR_WHITE, curses.COLOR_BLUE) # Title bar
         
+        # Rasta colors for Zion view
+        curses.init_pair(8, curses.COLOR_GREEN, -1)   # Rasta Green
+        curses.init_pair(9, curses.COLOR_YELLOW, -1)  # Rasta Yellow
+        curses.init_pair(10, curses.COLOR_RED, -1)    # Rasta Red
+        
         # Handle window resize
         screen.nodelay(1)  # Non-blocking input
         
@@ -489,6 +529,8 @@ class MatrixDisplay:
                 ch = screen.getch()
                 if ch == ord('q'):
                     break
+                elif ch == ord('z') or ch == ord('Z'):
+                    self._toggle_view_mode()
                 
                 # Update metrics history
                 self._update_history()
@@ -502,17 +544,21 @@ class MatrixDisplay:
                 # Draw header
                 self._draw_header(screen, width)
                 
-                # Draw system metrics panel
-                self._draw_system_panel(screen, 3, 0, height // 2 - 3, width // 2)
-                
-                # Draw network metrics panel
-                self._draw_network_panel(screen, 3, width // 2, height // 2 - 3, width // 2)
-                
-                # Draw trading metrics panel
-                self._draw_trading_panel(screen, height // 2, 0, height // 2, width)
-                
-                # Draw graphs
-                self._draw_graphs(screen, height // 2 + 2, width // 2 + 2, height // 2 - 4, width // 2 - 4)
+                if self.view_mode == ViewMode.NORMAL:
+                    # Draw system metrics panel
+                    self._draw_system_panel(screen, 3, 0, height // 2 - 3, width // 2)
+                    
+                    # Draw network metrics panel
+                    self._draw_network_panel(screen, 3, width // 2, height // 2 - 3, width // 2)
+                    
+                    # Draw trading metrics panel
+                    self._draw_trading_panel(screen, height // 2, 0, height // 2, width)
+                    
+                    # Draw graphs
+                    self._draw_graphs(screen, height // 2 + 2, width // 2 + 2, height // 2 - 4, width // 2 - 4)
+                else:
+                    # Draw Zion view
+                    self._draw_zion_view(screen, 3, 0, height - 4, width)
                 
                 # Draw footer with help text
                 self._draw_footer(screen, height - 1, width)
@@ -566,14 +612,44 @@ class MatrixDisplay:
         timestamp = datetime.datetime.now().strftime(" %Y-%m-%d %H:%M:%S ")
         padding = " " * (width - len(header) - len(timestamp) - 1)
         
-        screen.attron(curses.color_pair(7) | curses.A_BOLD)
-        screen.addstr(0, 0, header + padding + timestamp)
-        screen.attroff(curses.color_pair(7) | curses.A_BOLD)
-        
-        # Subtitle
-        screen.attron(curses.A_BOLD)
-        screen.addstr(1, 1, "Foresight-driven system monitoring")
-        screen.attroff(curses.A_BOLD)
+        if self.view_mode == ViewMode.NORMAL:
+            screen.attron(curses.color_pair(7) | curses.A_BOLD)
+            screen.addstr(0, 0, header + padding + timestamp)
+            screen.attroff(curses.color_pair(7) | curses.A_BOLD)
+            
+            # Subtitle
+            screen.attron(curses.A_BOLD)
+            screen.addstr(1, 1, "Foresight-driven system monitoring")
+            screen.attroff(curses.A_BOLD)
+        else:
+            # Rasta-colored header for Zion view
+            screen.attron(curses.color_pair(8) | curses.A_BOLD)
+            screen.addstr(0, 0, header[:len(header)//3])
+            screen.attroff(curses.color_pair(8) | curses.A_BOLD)
+            
+            screen.attron(curses.color_pair(9) | curses.A_BOLD)
+            screen.addstr(header[len(header)//3:2*len(header)//3])
+            screen.attroff(curses.color_pair(9) | curses.A_BOLD)
+            
+            screen.attron(curses.color_pair(10) | curses.A_BOLD)
+            screen.addstr(header[2*len(header)//3:])
+            screen.attroff(curses.color_pair(10) | curses.A_BOLD)
+            
+            screen.addstr(padding)
+            
+            screen.attron(curses.color_pair(7) | curses.A_BOLD)
+            screen.addstr(timestamp)
+            screen.attroff(curses.color_pair(7) | curses.A_BOLD)
+            
+            # Subtitle with Rasta message
+            self.zion_counter += 1
+            if self.zion_counter % 10 == 0:
+                self.zion_message_index = (self.zion_message_index + 1) % len(self.zion_messages)
+            
+            message = self.zion_messages[self.zion_message_index]
+            screen.attron(curses.A_BOLD)
+            screen.addstr(1, 1, message)
+            screen.attroff(curses.A_BOLD)
     
     def _draw_system_panel(self, screen, y, x, height, width):
         """Draw system metrics panel"""
@@ -762,10 +838,31 @@ class MatrixDisplay:
     
     def _draw_footer(self, screen, y, width):
         """Draw footer with help text"""
-        footer = " Press 'q' to quit | LINUX TERMINAL TORVALDS OMEGA GNU 3.0 STYLE "
-        screen.attron(curses.color_pair(7))
-        screen.addstr(y, 0, footer + " " * (width - len(footer) - 1))
-        screen.attroff(curses.color_pair(7))
+        if self.view_mode == ViewMode.NORMAL:
+            footer = " Press 'q' to quit | 'z' for ZION VIEW | LINUX TERMINAL TORVALDS OMEGA GNU 3.0 STYLE "
+        else:
+            footer = " Press 'q' to quit | 'z' for NORMAL VIEW | JAH BLESS | ONE LOVE | OMEGA GNU 3.0 "
+        
+        if self.view_mode == ViewMode.NORMAL:
+            screen.attron(curses.color_pair(7))
+            screen.addstr(y, 0, footer + " " * (width - len(footer) - 1))
+            screen.attroff(curses.color_pair(7))
+        else:
+            # Rasta-colored footer for Zion view
+            for i in range(width):
+                if i % 3 == 0:
+                    screen.attron(curses.color_pair(8))
+                elif i % 3 == 1:
+                    screen.attron(curses.color_pair(9))
+                else:
+                    screen.attron(curses.color_pair(10))
+                
+                if i < len(footer):
+                    screen.addstr(y, i, footer[i])
+                else:
+                    screen.addstr(y, i, " ")
+                
+                screen.attroff(curses.color_pair(8) | curses.color_pair(9) | curses.color_pair(10))
     
     def _draw_box(self, screen, y, x, height, width, title=None, color=0):
         """Draw a box with optional title"""
@@ -845,6 +942,129 @@ class MatrixDisplay:
             screen.addstr(y + graph_height - 1 - point_height, x + 2 + i, point_char)
             screen.attroff(color) 
 
+    def _draw_zion_view(self, screen, y, x, height, width):
+        """Draw the Zion View with sacred symbols and Fibonacci patterns"""
+        # Draw the Lion of Judah ASCII art
+        lion_art = [
+            "                      .--.                   ",
+            "                     / /  \                  ",
+            "                    | |    |                 ",
+            "                     \ \__/                  ",
+            "           @@@@@@@@   @@@@      @@@@@@@     ",
+            "          @@@@@@@@@@ @@@@@@    @@@@@@@@@    ",
+            "          !@@       @@@  @@@    @@     @@   ",
+            "          !@@@     @@@    @@@   @@     @@@  ",
+            "          !@@@@   @@@      @@@  @@     @@@  ",
+            "          !@@@@@ @@@        @@@ @@    @@@@  ",
+            "          !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ",
+            "          !@@@@@@@@@@@@@@@@@@@@@@@@@@@      ",
+            "                                             ",
+        ]
+        
+        # Calculate center position
+        start_y = y + height // 2 - len(lion_art) // 2
+        start_x = x + width // 4 - len(lion_art[0]) // 2
+        
+        # Draw the Lion
+        for i, line in enumerate(lion_art):
+            color = curses.color_pair(8) if i % 3 == 0 else (curses.color_pair(9) if i % 3 == 1 else curses.color_pair(10))
+            screen.attron(color | curses.A_BOLD)
+            screen.addstr(start_y + i, start_x, line)
+            screen.attroff(color | curses.A_BOLD)
+        
+        # Draw metrics in Fibonacci spiral pattern around the lion
+        metrics = []
+        
+        # Collect metrics for display
+        cpu_metric = self.registry.get_metric("system_cpu_usage", {"host": socket.gethostname()})
+        if cpu_metric and hasattr(cpu_metric, 'value'):
+            metrics.append(f"CPU: {cpu_metric.value:.1f}%")
+        
+        memory_metric = self.registry.get_metric("system_memory_usage", {"host": socket.gethostname()})
+        if memory_metric and hasattr(memory_metric, 'value'):
+            metrics.append(f"MEM: {memory_metric.value:.1f}%")
+        
+        disk_metric = self.registry.get_metric("system_disk_usage", {"host": socket.gethostname(), "path": "/"})
+        if disk_metric and hasattr(disk_metric, 'value'):
+            metrics.append(f"DISK: {disk_metric.value:.1f}%")
+        
+        net_recv_metric = self.registry.get_metric("network_bytes_recv_per_sec", {"host": socket.gethostname()})
+        if net_recv_metric and hasattr(net_recv_metric, 'value'):
+            recv_val = net_recv_metric.value
+            if recv_val < 1024:
+                metrics.append(f"NET IN: {recv_val:.1f} B/s")
+            elif recv_val < 1024 * 1024:
+                metrics.append(f"NET IN: {recv_val/1024:.1f} KB/s")
+            else:
+                metrics.append(f"NET IN: {recv_val/(1024*1024):.2f} MB/s")
+        
+        net_sent_metric = self.registry.get_metric("network_bytes_sent_per_sec", {"host": socket.gethostname()})
+        if net_sent_metric and hasattr(net_sent_metric, 'value'):
+            sent_val = net_sent_metric.value
+            if sent_val < 1024:
+                metrics.append(f"NET OUT: {sent_val:.1f} B/s")
+            elif sent_val < 1024 * 1024:
+                metrics.append(f"NET OUT: {sent_val/1024:.1f} KB/s")
+            else:
+                metrics.append(f"NET OUT: {sent_val/(1024*1024):.2f} MB/s")
+        
+        # Trading metrics
+        positions_metric = self.registry.get_metric("trading_active_positions", {"system": "omega_btc_ai"})
+        if positions_metric and hasattr(positions_metric, 'value'):
+            metrics.append(f"POSITIONS: {int(positions_metric.value)}")
+        
+        pnl_metric = self.registry.get_metric("trading_position_pnl", {"system": "omega_btc_ai"})
+        if pnl_metric and hasattr(pnl_metric, 'value'):
+            metrics.append(f"PNL: {pnl_metric.value:+.2f}%")
+        
+        trap_metric = self.registry.get_metric("trading_trap_detection_confidence", {"system": "omega_btc_ai"})
+        if trap_metric and hasattr(trap_metric, 'value'):
+            metrics.append(f"TRAP CONF: {trap_metric.value:.1f}%")
+        
+        # Place metrics in spiral pattern
+        fibonacci_points = [
+            (0, 0), (1, 0), (1, 1), (0, 1), (-1, 0), 
+            (-1, -1), (0, -1), (1, -1), (2, 0), (2, 1),
+            (1, 2), (0, 2), (-1, 1), (-2, 0), (-2, -1),
+            (-1, -2), (0, -2), (1, -2), (2, -1), (3, 0)
+        ]
+        
+        center_y = start_y + len(lion_art) + 2
+        center_x = start_x + len(lion_art[0]) // 2
+        
+        # Draw metrics in spiral
+        for i, metric in enumerate(metrics):
+            if i >= len(fibonacci_points):
+                break
+                
+            point = fibonacci_points[i]
+            pos_y = center_y + point[1] * 2
+            pos_x = center_x + point[0] * 15
+            
+            if 0 <= pos_y < height + y and 0 <= pos_x < width:
+                color = curses.color_pair(8) if i % 3 == 0 else (curses.color_pair(9) if i % 3 == 1 else curses.color_pair(10))
+                screen.attron(color | curses.A_BOLD)
+                screen.addstr(pos_y, pos_x, metric)
+                screen.attroff(color | curses.A_BOLD)
+        
+        # Draw divine message
+        divine_message = "ONE LOVE - ONE HEART - ONE DESTINY"
+        msg_y = y + height - 3
+        msg_x = x + (width - len(divine_message)) // 2
+        
+        # Draw with alternating colors
+        for i, char in enumerate(divine_message):
+            if i % 3 == 0:
+                color = curses.color_pair(8)
+            elif i % 3 == 1:
+                color = curses.color_pair(9)
+            else:
+                color = curses.color_pair(10)
+            
+            screen.attron(color | curses.A_BOLD)
+            screen.addstr(msg_y, msg_x + i, char)
+            screen.attroff(color | curses.A_BOLD)
+
 class PrometheusMatrix:
     """Main class for the OMEGA PROMETHEUS MATRIX monitoring system"""
     
@@ -917,6 +1137,87 @@ class PrometheusMatrix:
         
         logger.info("Shutting down PROMETHEUS MATRIX monitoring system...")
         self.running = False
+
+class OmegaTradingCollector(PrometheusCollector):
+    """Collector for OMEGA BTC AI trading metrics"""
+    
+    def __init__(self, registry: MetricsRegistry, trading_api_client=None):
+        super().__init__(registry)
+        self.collection_interval = 60
+        self.trading_api_client = trading_api_client
+        
+        # Initialize metrics
+        self.active_positions = GaugeMetric(
+            "trading_active_positions",
+            "Number of active trading positions",
+            labels={"system": "omega_btc_ai"}
+        )
+        self.position_pnl = GaugeMetric(
+            "trading_position_pnl",
+            "Current PnL of all positions combined",
+            labels={"system": "omega_btc_ai"}
+        )
+        self.trading_volume_24h = GaugeMetric(
+            "trading_volume_24h",
+            "Trading volume in the last 24 hours",
+            labels={"system": "omega_btc_ai"}
+        )
+        self.order_success_rate = GaugeMetric(
+            "trading_order_success_rate",
+            "Percentage of successfully executed orders",
+            labels={"system": "omega_btc_ai"}
+        )
+        self.trap_detection_confidence = GaugeMetric(
+            "trading_trap_detection_confidence",
+            "Current trap detection confidence level",
+            labels={"system": "omega_btc_ai"}
+        )
+        
+        # Register metrics
+        self.registry.register_metric(self.active_positions)
+        self.registry.register_metric(self.position_pnl)
+        self.registry.register_metric(self.trading_volume_24h)
+        self.registry.register_metric(self.order_success_rate)
+        self.registry.register_metric(self.trap_detection_confidence)
+    
+    async def collect(self) -> None:
+        """Collect trading metrics from the OMEGA BTC AI system"""
+        # For now, use mock data if no client provided
+        # In a real implementation, this would query your trading API
+        if self.trading_api_client:
+            # Real data collection would happen here
+            positions = await self.trading_api_client.get_positions()
+            pnl = await self.trading_api_client.get_total_pnl()
+            volume = await self.trading_api_client.get_24h_volume()
+            success_rate = await self.trading_api_client.get_order_success_rate()
+            trap_confidence = await self.trading_api_client.get_trap_confidence()
+        else:
+            # Mock data for demonstration
+            import random
+            positions = random.randint(1, 10)
+            pnl = random.uniform(-5.0, 15.0)
+            volume = random.uniform(1000, 10000)
+            success_rate = random.uniform(80, 99)
+            trap_confidence = random.uniform(0, 100)
+        
+        # Update metrics
+        self.active_positions.set(positions)
+        self.position_pnl.set(pnl)
+        self.trading_volume_24h.set(volume)
+        self.order_success_rate.set(success_rate)
+        self.trap_detection_confidence.set(trap_confidence)
+        
+        # Use Rasta log messages
+        if trap_confidence > 70:
+            logger.warning(RastaLogMessages.get_message("TRAP_DETECTED", trap_confidence=trap_confidence))
+        
+        if pnl >= 0:
+            logger.info(RastaLogMessages.get_message("PROFITABLE_POSITION", pnl=pnl))
+        else:
+            logger.info(RastaLogMessages.get_message("LOSING_POSITION", pnl=pnl))
+        
+        logger.debug(f"Collected trading metrics: Positions: {positions}, PnL: {pnl}, "
+                    f"Trap Confidence: {trap_confidence}%")
 
 def parse_arguments():
     """Parse command line arguments"""

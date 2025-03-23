@@ -169,3 +169,21 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - **TDD Oracle** for analyzing code and suggesting missing tests
 - **Prompt Saver** for saving AI development conversations
 - **Framework Documentation** for the OMEGA DEV FRAMEWORK
+
+## v0.4.6 - Divine BTC Date Decoder (2024-03-23)
+
+### Added
+
+- **BTC Date Decoder** with advanced timestamp analysis capabilities
+- Halving cycle and Fibonacci time alignment analysis
+- Special October 29, 2023 analysis with cosmic significance
+- Market cycle phase detection and divine date scoring
+- Temporal golden ratio alignment calculations
+- Rich CLI visualization for date analysis results
+- Multi-scale cycle analysis from micro to grand super cycles
+
+### Enhanced
+
+- Integration with existing Fibonacci utilities
+- Cross-scale temporal harmony assessment
+- Historical Bitcoin event correlation
