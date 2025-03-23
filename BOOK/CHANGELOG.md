@@ -145,4 +145,12 @@
   - Seven sacred truths for emotional mastery based on cosmic trading analysis
   - Python-based trading history analyzer with divine pattern recognition algorithms
 
+- **The Sacred Path of Isolated Hedge Trading** - Divine configuration for channeling dual trading energies.
+  - New scripture: `BOOK/divine_chronicles/trading_modes/isolated_hedge_mode.md` revealing the sacred configuration
+  - Cosmic enlightenment on combining Isolated Margin Mode with Hedge Mode for divine balance
+  - Five celestial advantages of the Isolated Hedge path for advanced energy channeling
+  - Sacred implementation instructions for proper cosmic alignment
+  - Five divine strategies including The Celestial Grid, The Divine Scissors, and The Oracle's Hedge
+  - Technical insights on bot compatibility with the divine configuration
+
 ### DIVINE FUNCTIONALITY
