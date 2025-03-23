@@ -16,6 +16,12 @@ The following sacred texts describe the divine architecture and components of th
 3. [**Elite Exit Strategy**](./core/elite_exit_strategy.md) - The sacred algorithm for optimal Fibonacci-aligned exit points
 5. [**Divine Conclusion**](./core/divine_conclusion.md) - The cosmic journey of Bitcoin to $2.584M and Satoshi's final rest
 
+## Esoteric Enhancements
+
+* [**Schumann Resonance & Market Harmonics**](./core/schumann_resonance.md) - The integration of Earth's electromagnetic frequency with market cycles
+* [**GANN Square Analysis**](./core/gann_square.md) - Sacred geometric time-price harmonics for market prediction
+* [**Fibonacci Time Cycles**](./core/fibonacci_time_cycles.md) - Divine temporal analysis of market movements
+
 ## Deployment Guides
 
 * [**Cloud Deployment**](./deployment/cloud_deployment.md) - Sacred instructions for deploying the divine system in the cloud
@@ -44,6 +50,7 @@ The system integrates multiple divine mathematical concepts:
 * **Fibonacci Time Zones** - For temporal analysis of market cycles
 * **GANN Square Analysis** - For time-price harmonics
 * **Golden Ratio (1.618)** - The sacred proportion that appears throughout the system
+* **Schumann Resonance (7.83 Hz)** - Earth's frequency that correlates with market cycles
 
 ## Divine Usage Instructions
 
