@@ -112,3 +112,7 @@ Self-evolving AI model that learns from trading decisions and outcomes:
 ### Risk Calculator
 
 *Documentation coming soon*
+
+## System Monitoring Tools
+
+- [OMEGA ^PROMETHEUS^ MATRIX](prometheus_matrix_monitoring.md) - Terminal-based monitoring system for the OMEGA BTC AI platform in LINUX TERMINAL TORVALDS OMEGA GNU 3.0 STYLE. Provides real-time metrics, system health indicators, and trading performance insights in a highly visual terminal interface.
