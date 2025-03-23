@@ -56,11 +56,13 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 
 ### Added
 
-- Unified monitoring suite with tmux integration
-- Combined RastaBitgetMonitor and TrapProbabilityMeter in single dashboard
-- Optimized display layout for trading workstation
-- run_monitors.sh script for one-command launch
+- **Unified Monitoring Suite** with tmux integration
+- Combined dashboard for RastaBitgetMonitor and TrapProbabilityMeter
+- Optimized display layout (85/15 split) for trading workstation
+- `run_monitors.sh` script for one-command launch
 - External log file support for RastaBitgetMonitor
+- **OMEGA DEV FRAMEWORK™** with TDD Oracle and Prompt Saver
+- Philosophy-driven development with `zion_flow`, tag-based releases
 
 ### Enhanced
 
@@ -68,6 +70,7 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - Improved visual styling with custom borders and status indicators
 - Added convenient detach/reattach functionality via tmux
 - Cleaner interface separation between position and trap monitoring
+- Comprehensive documentation for monitoring suite and framework
 
 ## v0.3.1.1 - Documentation Updates (2023-10-10)
 
