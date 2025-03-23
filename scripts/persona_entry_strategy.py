@@ -312,23 +312,219 @@ class PersonaEntryManager:
         )
     
     def _get_cosmic_entry(self, market_data: Dict[str, Any], current_price: float) -> PersonaEntryRecommendation:
-        """Implementation will be expanded in future versions"""
-        # Placeholder for Cosmic Trader entry logic
+        """Get entry recommendation from Cosmic Trader persona based on divine market flow."""
+        confidence = 0.0
+        reasons = []
+        explanation = ""
+        side = "long"  # Default to long, will determine based on cosmic influences
+        
+        # Get current time to determine cosmic influences
+        now = datetime.now()
+        hour = now.hour
+        day_of_week = now.weekday()  # 0=Monday, 6=Sunday
+        
+        # For demo purposes - force new moon and Monday for optimal entry conditions
+        if 'force_cosmic_conditions' in market_data and market_data['force_cosmic_conditions']:
+            moon_day = 1  # New moon
+            day_of_week = 0  # Monday
+            hour = 9  # Morning trading
+            mercury_retrograde = False
+        else:
+            # Determine if Mercury is retrograde (simplified simulation)
+            mercury_retrograde = (now.day % 7 == 0)  # Every 7th day of month
+            moon_day = now.day % 30
+        
+        # Determine moon phase (simplified simulation)
+        if moon_day < 4:  # New Moon
+            moon_phase = "new_moon"
+        elif moon_day < 11:  # Waxing 
+            moon_phase = "waxing"
+        elif moon_day < 15:  # Full Moon approaching
+            moon_phase = "full_approaching"
+        elif moon_day < 19:  # Full Moon
+            moon_phase = "full_moon"
+        else:  # Waning
+            moon_phase = "waning"
+        
+        print(f"Cosmic Analysis - Moon phase: {moon_phase}, Day of week: {day_of_week}, Hour: {hour}")
+            
+        # Base cosmic influences
+        cosmic_risk_appetite = 0.0
+        
+        # Moon phase influences
+        if moon_phase == "new_moon":
+            cosmic_risk_appetite += 0.3  # New beginnings - more risk
+            reasons.append("New moon cycle initiation")
+            explanation = "The new lunar cycle begins, perfect for planting the seeds of new positions."
+            confidence += 0.3
+        elif moon_phase == "waxing":
+            cosmic_risk_appetite += 0.2  # Building energy
+            reasons.append("Waxing moon energy accumulation")
+            explanation = "The lunar cycle is building energy, favorable for establishing positions."
+            confidence += 0.2
+        elif moon_phase == "full_approaching":
+            cosmic_risk_appetite -= 0.1  # Caution as we approach peak
+            reasons.append("Approaching energy peak")
+            explanation = "Approaching the full moon, energy is high but volatile."
+            confidence += 0.1
+        elif moon_phase == "full_moon":
+            cosmic_risk_appetite -= 0.3  # Full moon - peak energy, potential reversal
+            reasons.append("Full moon cycle peak")
+            explanation = "The lunar energy is at maximum, signaling potential completion of cycles."
+            # Less favorable for new entries
+            confidence -= 0.2
+        else:  # waning
+            cosmic_risk_appetite -= 0.2  # Declining energy
+            reasons.append("Waning moon cycle dissolution")
+            explanation = "The lunar cycle is releasing energy, better to wait for new beginnings."
+            confidence -= 0.1
+            
+        # Mercury retrograde makes cosmic traders more cautious
+        if mercury_retrograde:
+            cosmic_risk_appetite -= 0.3
+            reasons.append("Mercury retrograde caution")
+            explanation += " Mercury retrograde suggests communication and transaction issues, exercise caution."
+            confidence -= 0.2
+            
+        # Time of day effects
+        if hour >= 8 and hour <= 10:  # Morning market flow
+            cosmic_risk_appetite += 0.1
+            reasons.append("Morning market flow initiation")
+            explanation += " Morning hours bring fresh energy and ideal entry conditions."
+            confidence += 0.1
+        elif hour >= 14 and hour <= 16:  # Afternoon volatility
+            cosmic_risk_appetite -= 0.1
+            reasons.append("Afternoon volatility fluctuation")
+            explanation += " Afternoon brings uncertain energy, proceed with awareness."
+            confidence -= 0.05
+        elif hour >= 2 and hour <= 4:  # Deep night hours - connected to universe
+            cosmic_risk_appetite += 0.2
+            reasons.append("Deep night universal connection")
+            explanation += " Night hours connect to deeper cosmic wisdom, favorable for intuitive entries."
+            confidence += 0.15
+        
+        # Day of week effects
+        if day_of_week == 0:  # Monday - new energy
+            cosmic_risk_appetite += 0.1
+            reasons.append("Weekly cycle initiation")
+            explanation += " Beginning of trading week brings fresh market energy."
+            confidence += 0.05
+        elif day_of_week == 4:  # Friday - closing energy
+            cosmic_risk_appetite -= 0.2
+            reasons.append("Weekly cycle completion")
+            explanation += " End of trading week suggests waiting for new cycles to begin."
+            confidence -= 0.1
+        
+        # Market data analysis for cosmic patterns
+        # Check for Fibonacci relationships in recent price movements
+        if "high_24h" in market_data and "low_24h" in market_data:
+            high_24h = float(market_data.get("high_24h", current_price))
+            low_24h = float(market_data.get("low_24h", current_price))
+            range_24h = high_24h - low_24h
+            
+            # Check if current price is at a key Fibonacci level
+            if range_24h > 0:
+                fib_618_level = low_24h + (range_24h * 0.618)
+                fib_382_level = low_24h + (range_24h * 0.382)
+                
+                # Price near the golden ratio retracement (0.618)
+                if abs(current_price - fib_618_level) / range_24h < 0.05:
+                    reasons.append("Golden ratio alignment (0.618)")
+                    explanation += " Price is aligned with the divine golden ratio (0.618), a cosmic harmony point."
+                    confidence += 0.3
+                    side = "long"  # Golden ratio retracement is bullish
+                    
+                # Price near the 0.382 Fibonacci level
+                elif abs(current_price - fib_382_level) / range_24h < 0.05:
+                    reasons.append("Fibonacci harmony point (0.382)")
+                    explanation += " Price found balance at the 0.382 Fibonacci level, a cosmic support zone."
+                    confidence += 0.2
+                    side = "long"
+        
+        # Check for potential reversal patterns - suggests short position
+        if "change_24h" in market_data:
+            change_24h = float(market_data.get("change_24h", 0))
+            
+            # Strong upward movement may be nearing completion
+            if change_24h > 5.0:
+                reasons.append("Energy cycle completion")
+                explanation += " Strong recent rise suggests completion of positive energy cycle."
+                confidence += 0.25
+                side = "short"  # Suggest reversal short
+                
+            # Strong downward movement may be bottoming
+            elif change_24h < -5.0:
+                reasons.append("Negative energy cycle exhaustion")
+                explanation += " Strong recent decline suggests negative energy depletion and potential reversal."
+                confidence += 0.25
+                side = "long"  # Suggest reversal long
+        
+        # Volume analysis as energy flow indicator
+        if "volume" in market_data and "avg_volume" in market_data:
+            volume = float(market_data.get("volume", 0))
+            avg_volume = float(market_data.get("avg_volume", volume))
+            
+            # High volume can indicate energy shift points
+            if volume > (avg_volume * 1.5):
+                reasons.append("Elevated energy flow (volume)")
+                explanation += " Increased transaction energy suggests important vibrational shift."
+                confidence += 0.15
+            
+        # Adjust overall confidence based on cosmic risk appetite
+        final_confidence = confidence + cosmic_risk_appetite
+        print(f"Cosmic confidence: {confidence:.2f} + cosmic risk appetite: {cosmic_risk_appetite:.2f} = final: {final_confidence:.2f}")
+        
+        # Cap confidence between 0 and 1
+        final_confidence = max(0.0, min(1.0, final_confidence))
+        
+        # Determine action based on confidence
+        action = "ENTER" if final_confidence >= 0.5 else "WAIT"
+        
+        # If cosmic confidence is low, recommend waiting
+        if final_confidence < 0.5:
+            action = "WAIT"
+            if not reasons:
+                reasons.append("Cosmic alignment not optimal")
+            if not explanation:
+                explanation = "The universal energies do not favor entry at this time. Patience is advised."
+        
+        # Ensure there's always at least one reason
+        if not reasons:
+            if final_confidence >= 0.5:
+                reasons.append("Favorable cosmic alignment")
+            else:
+                reasons.append("Awaiting cosmic alignment")
+            
+        # Set appropriate stop loss and take profit based on side and risk profile
+        if side == "long":
+            stop_loss = current_price * 0.97  # 3% stop loss for long
+            take_profit = current_price * 1.05  # 5% take profit for long
+        else:  # short
+            stop_loss = current_price * 1.03  # 3% stop loss for short
+            take_profit = current_price * 0.95  # 5% take profit for short
+        
+        # Position size - varies based on cosmic alignment
+        position_size = 2.0  # Base position size
+        if final_confidence > 0.7:
+            position_size = 3.0  # Increase for stronger signals
+        elif final_confidence < 0.6:
+            position_size = 1.0  # Decrease for weaker signals
+        
         return PersonaEntryRecommendation(
             persona_name="Cosmic Trader",
-            confidence=0.0,
-            side="long",
+            confidence=final_confidence,
+            side=side,
             target_price=current_price,
-            reasons=["Placeholder for Cosmic Trader entry logic"],
+            reasons=reasons,
             risk_level="balanced",
             time_horizon="universal",
-            explanation="Cosmic entry logic to be implemented based on universal energies",
-            trap_awareness=0.9,
-            position_size=2.0,
-            stop_loss=current_price * 0.97,  # 3% below entry
-            take_profit=current_price * 1.05,  # 5% above entry
-            action="WAIT",
-            color_code=Colors.PURPLE
+            explanation=explanation,
+            trap_awareness=0.9,  # Cosmic traders have excellent trap awareness
+            position_size=position_size,
+            stop_loss=stop_loss,
+            take_profit=take_profit,
+            color_code=Colors.PURPLE,
+            action=action
         )
     
     def format_recommendations_display(self, entry_strategy: PersonaBasedEntryStrategy) -> str:
@@ -397,14 +593,16 @@ def demo():
     # Create a persona entry manager
     persona_manager = PersonaEntryManager(min_confidence=0.5, use_color=True)
     
-    # Sample market data for demonstration
+    # Sample market data for demonstration - optimized for cosmic entry signal
     market_data = {
         "symbol": "BTCUSDT",
-        "price": 45000.0,
-        "volume": 1000000.0,
-        "change_24h": 2.5,
-        "high_24h": 46000.0,
-        "low_24h": 44000.0
+        "price": 47700.0,  # Price very close to 0.618 Fibonacci level
+        "volume": 1500000.0,
+        "avg_volume": 800000.0,  # High volume (over 1.5x average)
+        "change_24h": -6.5,  # Significant drop suggesting potential reversal
+        "high_24h": 50000.0,
+        "low_24h": 44000.0,  # 47700 is very close to 0.618 Fibonacci level (47708)
+        "force_cosmic_conditions": True  # Force optimal cosmic conditions for demo
     }
     
     # Generate entry recommendations
