@@ -6,104 +6,130 @@ version: '3.8'
 # Now with Fibonacci aligned architecture (1,1,2,3,5)
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - dashboard
+    restart: always
+    networks:
+      - omega-net
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: always
+    networks:
+      - omega-net
+
+  btc-live-feed:
+    build:
+      context: .
+      dockerfile: docker/BTCLiveFeed.Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    restart: always
+    networks:
+      - omega-net
+
   trap-probability-meter:
     build:
       context: .
       dockerfile: docker/TrapProbabilityMeter.Dockerfile
     environment:
-      - REDIS_HOST=${REDIS_HOST:-172.16.8.2} # Default to Scaleway Cloud Redis IP
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - DEBUG=false
-      - INTERVAL=5
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - LOG_LEVEL=info
+    depends_on:
+      - redis
+      - btc-live-feed
+    restart: always
+    networks:
+      - omega-net
 
-  trap-aware-traders:
+  trap-aware-trader:
     build:
       context: .
-      dockerfile: docker/TrapAwareTraders.Dockerfile
+      dockerfile: docker/TrapAwareTrader.Dockerfile
     environment:
-      - REDIS_HOST=${REDIS_HOST:-172.16.8.2} # Default to Scaleway Cloud Redis IP
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - USE_TESTNET=${USE_TESTNET:-true}
-      - SYMBOL=${SYMBOL:-BTCUSDT}
-      - LONG_CAPITAL=${LONG_CAPITAL:-24.0}
-      - SHORT_CAPITAL=${SHORT_CAPITAL:-24.0}
-      - TRAP_PROBABILITY_THRESHOLD=${TRAP_PROBABILITY_THRESHOLD:-0.7}
-      - TRAP_ALERT_THRESHOLD=${TRAP_ALERT_THRESHOLD:-0.8}
-      - ENABLE_TRAP_PROTECTION=${ENABLE_TRAP_PROTECTION:-true}
-      - ENABLE_ELITE_EXITS=${ENABLE_ELITE_EXITS:-true}
-      - ELITE_EXIT_CONFIDENCE=${ELITE_EXIT_CONFIDENCE:-0.7}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - API_KEY=${API_KEY}
       - API_SECRET=${API_SECRET}
       - API_PASSPHRASE=${API_PASSPHRASE}
-    volumes:
-      - ./config:/app/config
-      - ./logs:/app/logs
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "20m"
-        max-file: "5"
+      - USE_TESTNET=${USE_TESTNET:-true}
+      - SYMBOL=${SYMBOL:-BTC/USDT:USDT}
+      - LONG_CAPITAL=${LONG_CAPITAL:-1000}
+      - SHORT_CAPITAL=${SHORT_CAPITAL:-1000}
+      - TRAP_PROBABILITY_THRESHOLD=${TRAP_PROBABILITY_THRESHOLD:-0.8}
+      - TRAP_ALERT_THRESHOLD=${TRAP_ALERT_THRESHOLD:-0.6}
+      - ENABLE_TRAP_PROTECTION=${ENABLE_TRAP_PROTECTION:-true}
+      - DEBUG=${DEBUG:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      - redis
+      - trap-probability-meter
+    restart: always
+    networks:
+      - omega-net
 
   elite-exit-strategy:
     build:
       context: .
       dockerfile: docker/EliteExitStrategy.Dockerfile
     environment:
-      - REDIS_HOST=${REDIS_HOST:-172.16.8.2} # Default to Scaleway Cloud Redis IP
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - SYMBOL=${SYMBOL:-BTCUSDT}
-      - CONFIDENCE_THRESHOLD=${ELITE_EXIT_CONFIDENCE:-0.7}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ENABLE_ELITE_EXITS=${ENABLE_ELITE_EXITS:-true}
+      - ELITE_EXIT_CONFIDENCE=${ELITE_EXIT_CONFIDENCE:-0.75}
       - ENABLE_FIBONACCI_EXITS=${ENABLE_FIBONACCI_EXITS:-true}
       - ENABLE_PATTERN_RECOGNITION=${ENABLE_PATTERN_RECOGNITION:-true}
-    volumes:
-      - ./logs:/app/logs
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "15m"
-        max-file: "4"
+      - DEBUG=${DEBUG:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      - redis
+      - trap-aware-trader
+    restart: always
+    networks:
+      - omega-net
 
-  divine-dashboard:
+  dashboard:
     build:
       context: .
-      dockerfile: docker/DivineDashboard.Dockerfile
+      dockerfile: docker/Dashboard.Dockerfile
     ports:
-      - "3000:3000"
+      - "8050:8050"
     environment:
-      - REDIS_HOST=${REDIS_HOST:-172.16.8.2} # Default to Scaleway Cloud Redis IP
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./logs/nginx:/var/log/nginx
-    ports:
-      - "80:80"
-      - "443:443"
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DEBUG=${DEBUG:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     depends_on:
-      - divine-dashboard
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - redis
+      - trap-probability-meter
+      - trap-aware-trader
+      - elite-exit-strategy
+      - btc-live-feed
+    restart: always
+    networks:
+      - omega-net
+
+networks:
+  omega-net:
+    driver: bridge
+
+volumes:
+  redis_data:

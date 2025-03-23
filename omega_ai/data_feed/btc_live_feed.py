@@ -14,7 +14,8 @@ import random
 import os
 
 # Set Redis host environment variable
-os.environ['REDIS_HOST'] = 'localhost'
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
+os.environ['REDIS_HOST'] = redis_host
 
 from omega_ai.utils.redis_manager import RedisManager
 import rel
@@ -35,6 +36,10 @@ MAGENTA_RASTA = "\033[95m"  # Royal Purple
 CYAN_RASTA = "\033[96m"   # Ocean Blue
 RESET = "\033[0m"
 BOLD = "\033[1m"
+
+# Fibonacci sequences and golden ratio
+FIBONACCI_SEQUENCE = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987]
+GOLDEN_RATIO = 1.618033988749895
 
 # Rasta logging functions
 def log_rasta(message: str, color: str = GREEN_RASTA, level: str = "info"):
@@ -60,7 +65,7 @@ def display_rasta_banner():
     ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
      ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
                 {YELLOW_RASTA}BTC AI SYSTEM v1.0
-              [ Rasta Price Feed - One Love ]{GREEN_RASTA}
+     [ Rasta Price Feed - One Love - Fibonacci Aligned ]{GREEN_RASTA}
 ╚══════════════════════════════════════════════════════════╝{RESET}
 """
     print(banner)
@@ -82,17 +87,17 @@ redis_conn = redis.Redis(
 def check_redis_health():
     """Perform a health check on Redis connection and data integrity."""
     try:
-        # Check Redis connection using localhost directly
-        redis_host = 'localhost'  # Use localhost directly
+        # Check Redis connection
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
         redis_port = int(os.getenv('REDIS_PORT', '6379'))
         redis_manager = RedisManager(host=redis_host, port=redis_port)
         redis_manager.ping()
         log_rasta(f"Redis connection: OK (Host: {redis_host}, Port: {redis_port})", GREEN_RASTA, "success")
 
         # Check if essential keys exist
-        essential_keys = ["last_btc_price", "prev_btc_price", "btc_movement_history"]
+        essential_keys = ["last_btc_price", "prev_btc_price", "btc_movement_history", "fibonacci_levels"]
         for key in essential_keys:
-            if not redis_manager.get_cached(key) and key != "btc_movement_history":
+            if not redis_manager.get_cached(key) and key != "btc_movement_history" and key != "fibonacci_levels":
                 log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
             elif key == "btc_movement_history":
                 # For list type, we need to check differently
@@ -126,6 +131,45 @@ def check_redis_health():
     except Exception as e:
         log_rasta(f"Redis health check failed: {e}", RED_RASTA, "error")
         return False
+
+# Calculate Fibonacci retracement levels
+def calculate_fibonacci_levels(high_price, low_price):
+    """Calculate and store Fibonacci retracement levels for current price range."""
+    try:
+        # Calculate retracement levels based on the provided high and low prices
+        price_range = high_price - low_price
+        
+        # Common Fibonacci retracement levels
+        levels = {
+            "0.0": low_price,
+            "0.236": low_price + 0.236 * price_range,
+            "0.382": low_price + 0.382 * price_range,
+            "0.5": low_price + 0.5 * price_range,  # Not a Fibonacci ratio but commonly used
+            "0.618": low_price + 0.618 * price_range,
+            "0.786": low_price + 0.786 * price_range,
+            "1.0": high_price,
+            # Extensions beyond the range
+            "1.618": high_price + 0.618 * price_range,
+            "2.618": high_price + 1.618 * price_range
+        }
+        
+        # Format levels for storage
+        formatted_levels = {k: f"{v:.2f}" for k, v in levels.items()}
+        
+        # Store in Redis
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        redis_port = int(os.getenv('REDIS_PORT', '6379'))
+        redis_manager = RedisManager(host=redis_host, port=redis_port)
+        redis_manager.set_cached("fibonacci_levels", json.dumps(formatted_levels))
+        redis_manager.set_cached("fibonacci_high", str(high_price))
+        redis_manager.set_cached("fibonacci_low", str(low_price))
+        redis_manager.set_cached("fibonacci_update_time", str(time.time()))
+        
+        log_rasta(f"Fibonacci levels calculated and stored: High=${high_price:.2f}, Low=${low_price:.2f}", CYAN_RASTA)
+        return formatted_levels
+    except Exception as e:
+        log_rasta(f"Error calculating Fibonacci levels: {e}", RED_RASTA, "error")
+        return None
 
 # WebSocket integration function from Code version
 async def send_to_mm_websocket(price):
@@ -165,8 +209,8 @@ def on_message(ws, message):
 
         log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
         
-        # Update Redis values using the RedisManager with localhost connection
-        redis_host = 'localhost'  # Use localhost directly
+        # Update Redis values using the RedisManager with connection based on environment
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
         redis_port = int(os.getenv('REDIS_PORT', '6379'))
         redis_manager = RedisManager(host=redis_host, port=redis_port)
         prev_price = redis_manager.get_cached("prev_btc_price")
@@ -191,10 +235,57 @@ def on_message(ws, message):
             # Add last update time
             redis_manager.set_cached("last_btc_update_time", str(time.time()))
             
+            # Update Fibonacci levels every 100 price updates or when significant movement occurs
+            update_fibonacci = False
+            fibonacci_update_count = redis_manager.get_cached("fibonacci_update_count")
+            if fibonacci_update_count:
+                count = int(fibonacci_update_count)
+                if count >= 100:
+                    update_fibonacci = True
+                    redis_manager.set_cached("fibonacci_update_count", "0")
+                else:
+                    redis_manager.set_cached("fibonacci_update_count", str(count + 1))
+            else:
+                redis_manager.set_cached("fibonacci_update_count", "1")
+            
+            # Also update Fibonacci on significant price movement
+            if prev_price and abs(price - prev_price) / prev_price > 0.01:  # 1% change
+                update_fibonacci = True
+            
+            if update_fibonacci:
+                # Get price history for high and low calculation
+                history = redis_manager.lrange("btc_movement_history", 0, -1)
+                if history:
+                    prices = []
+                    for item in history:
+                        if "," in item:
+                            price_str, _ = item.split(",")
+                            prices.append(float(price_str))
+                        else:
+                            prices.append(float(item))
+                    
+                    if prices:
+                        high_price = max(prices)
+                        low_price = min(prices)
+                        calculate_fibonacci_levels(high_price, low_price)
+            
             log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
             
             # Send price update to MM WebSocket server
             asyncio.run(send_to_mm_websocket(price))
+            
+            # Store fibonacci aligned flags
+            is_fibonacci_aligned = False
+            for level_value in FIBONACCI_SEQUENCE:
+                level = level_value * 1000
+                if abs(price - level) < 50:  # Within $50 of a Fibonacci level
+                    is_fibonacci_aligned = True
+                    redis_manager.set_cached("fibonacci_alignment", f"{level_value}000")
+                    log_rasta(f"🔱 SACRED ALIGNMENT: BTC price near Fibonacci level ${level_value}000", MAGENTA_RASTA)
+                    break
+            
+            if not is_fibonacci_aligned:
+                redis_manager.set_cached("fibonacci_alignment", "0")
             
             # Notify the high frequency detector about price update
             try:
@@ -370,6 +461,40 @@ class BtcPriceFeed:
                 
                 # Add last update time
                 self.redis_manager.set_cached("last_btc_update_time", str(time.time()))
+                
+                # Update Fibonacci levels every 100 price updates or when significant movement occurs
+                update_fibonacci = False
+                fibonacci_update_count = self.redis_manager.get_cached("fibonacci_update_count")
+                if fibonacci_update_count:
+                    count = int(fibonacci_update_count)
+                    if count >= 100:
+                        update_fibonacci = True
+                        self.redis_manager.set_cached("fibonacci_update_count", "0")
+                    else:
+                        self.redis_manager.set_cached("fibonacci_update_count", str(count + 1))
+                else:
+                    self.redis_manager.set_cached("fibonacci_update_count", "1")
+                
+                # Also update Fibonacci on significant price movement
+                if prev_price and abs(price - prev_price) / prev_price > 0.01:  # 1% change
+                    update_fibonacci = True
+                
+                if update_fibonacci:
+                    # Get price history for high and low calculation
+                    history = self.redis_manager.lrange("btc_movement_history", 0, -1)
+                    if history:
+                        prices = []
+                        for item in history:
+                            if "," in item:
+                                price_str, _ = item.split(",")
+                                prices.append(float(price_str))
+                            else:
+                                prices.append(float(item))
+                        
+                        if prices:
+                            high_price = max(prices)
+                            low_price = min(prices)
+                            calculate_fibonacci_levels(high_price, low_price)
                 
                 log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
                 
@@ -568,7 +693,22 @@ class BtcPriceFeed:
 
 if __name__ == "__main__":
     display_rasta_banner()
-    log_rasta("Initializing Rasta Price Feed...", GREEN_RASTA)
+    log_rasta("Initializing Rasta Price Feed with Fibonacci Alignment...", GREEN_RASTA)
     log_rasta(f"Redis Host: {os.getenv('REDIS_HOST', 'localhost')}", BLUE_RASTA)
     log_rasta("Connecting to Binance WebSocket...", BLUE_RASTA)
+    
+    # Initialize with default Fibonacci levels
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = int(os.getenv('REDIS_PORT', '6379'))
+    redis_manager = RedisManager(host=redis_host, port=redis_port)
+    
+    # Check if we need to initialize Fibonacci levels
+    if not redis_manager.get_cached("fibonacci_levels"):
+        # Default levels based on current BTC price range
+        default_high = 85000
+        default_low = 83000
+        calculate_fibonacci_levels(default_high, default_low)
+        log_rasta(f"Initialized default Fibonacci levels: High=${default_high}, Low=${default_low}", CYAN_RASTA)
+        
+    log_rasta("🔱 Fibonacci Alignment Active - Sacred Architecture (1)", MAGENTA_RASTA)
     start_btc_websocket()
