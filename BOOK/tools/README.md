@@ -33,6 +33,25 @@ Documentation on the integration of the Position Harmony Advisor with the RastaB
 - Divine recommendations for position adjustments
 - Unified interface for position monitoring and harmony analysis
 
+### [Advanced Exit Strategies](advanced_exit_strategies.md)
+
+Enhanced exit strategies for the RastaBitgetMonitor (v0.4.0):
+
+- Fee coverage analysis to ensure trading costs are covered before exit
+- Complementary position recommendations for hedging unrealized PnL
+- Bidirectional Fibonacci level visualization for both long and short perspectives
+- Partial exit recommendations based on multiple factors
+
+### [Elite Exit Strategies](elite_exit_strategies.md)
+
+Sophisticated multi-factor exit management for trap-aware dual traders:
+
+- Confidence-based exit signal generation from multiple sources
+- Integration with trap detection to avoid market manipulation
+- Dynamic trailing stop management with step-based updates
+- Market regime analysis for identifying optimal exit conditions
+- Pattern recognition for detecting potential reversal signals
+
 ## Market Analysis Tools
 
 ### Schumann Resonance Analyzer
