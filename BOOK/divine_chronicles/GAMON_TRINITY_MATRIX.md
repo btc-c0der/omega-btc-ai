@@ -79,12 +79,40 @@ The system generates an interactive visualization with five panels:
 
 ## Performance Metrics
 
-### Historical Accuracy
+### Historical Accuracy Tracking
 
-- Sliding window approach (30-day default)
-- Tracks accuracy for each component
-- Calculates confidence levels
-- Provides RMSE for eigenwave predictions
+- **Sliding Window Analysis**
+  - 30-day default window
+  - Adaptive window size based on volatility
+  - Exponential weighting for recent data
+
+- **Component-Specific Metrics**
+  - HMM: State prediction accuracy
+  - Eigenwaves: Projection RMSE
+  - Cycles: Phase detection accuracy
+  - Volume: Prediction correlation
+
+- **Cross-Validation**
+  - Time-series split validation
+  - Rolling window backtesting
+  - Out-of-sample performance tracking
+
+### Volume and Volatility Integration
+
+- **Volume-Based Confidence**
+  - Volume-weighted state probabilities
+  - Volume trend alignment scoring
+  - Liquidity impact assessment
+
+- **Volatility-Adjusted Metrics**
+  - ATR-based confidence scaling
+  - Volatility regime detection
+  - Risk-adjusted performance measures
+
+- **Market Regime Analysis**
+  - High/Low volatility state detection
+  - Volume profile analysis
+  - Market depth consideration
 
 ### Confidence Assessment
 
@@ -95,17 +123,33 @@ The system generates an interactive visualization with five panels:
 ## Usage
 
 ```python
-# Initialize predictor
-predictor = GAMONTrinityPredictor()
+# Initialize predictor with advanced metrics
+predictor = GAMONTrinityPredictor(
+    window_size=30,
+    volume_weight=0.3,
+    volatility_weight=0.2
+)
 
-# Load market data
-df = load_btc_data(start_date="2020-01-01")
+# Load market data with volume
+df = load_btc_data(
+    start_date="2020-01-01",
+    include_volume=True,
+    include_volatility=True
+)
 
-# Generate predictions
-predictions = predictor.predict_future_states(df)
+# Generate predictions with confidence metrics
+predictions = predictor.predict_future_states(
+    df,
+    include_volume=True,
+    include_volatility=True
+)
 
-# Create visualization
-predictor.plot_predictions(predictions)
+# Create visualization with enhanced metrics
+predictor.plot_predictions(
+    predictions,
+    show_volume=True,
+    show_volatility=True
+)
 ```
 
 ## Future Enhancements

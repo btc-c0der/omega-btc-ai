@@ -13,6 +13,25 @@
   - Comprehensive error handling and logging
   - Standalone mode for partial functionality when components are missing
 
+## [0.5.2-trinity-enhanced] - 2024-03-24
+
+### Added
+
+- Enhanced GAMON Trinity Matrix with advanced metrics
+  - Historical accuracy tracking with adaptive windows
+  - Volume and volatility integration in confidence calculations
+  - Cross-validation and backtesting framework
+  - Market regime analysis with volume profiles
+  - Risk-adjusted performance measures
+  - Comprehensive documentation in `BOOK/divine_chronicles/GAMON_TRINITY_MATRIX.md`
+
+### Enhanced
+
+- Improved prediction accuracy through volume-weighted probabilities
+- Better confidence assessment with volatility regime detection
+- More robust historical accuracy tracking
+- Enhanced visualization with volume and volatility metrics
+
 # OMEGA BTC AI Changelog
 
 This document tracks the key changes and enhancements in the OMEGA BTC AI system.
