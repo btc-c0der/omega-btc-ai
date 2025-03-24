@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TP/SL Management Panel</title>
+    <style>
+        .tp-sl-panel {
+            background: #1a1a1a;
+            color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .position-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-card .label {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-card .value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .info-card .value.profit {
+            color: #4CAF50;
+        }
+
+        .info-card .value.loss {
+            color: #f44336;
+        }
+
+        .tp-levels,
+        .sl-settings {
+            background: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tp-level {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .tp-level:last-child {
+            border-bottom: none;
+        }
+
+        .fib-level {
+            color: #64B5F6;
+            font-size: 0.9em;
+        }
+
+        .price-level {
+            font-weight: bold;
+        }
+
+        .percentage {
+            color: #4CAF50;
+        }
+
+        .distance {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .trailing-stop {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #81C784);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: #1976D2;
+        }
+
+        .button.danger {
+            background: #f44336;
+        }
+
+        .button.danger:hover {
+            background: #d32f2f;
+        }
+
+        .trap-alert {
+            background: #d32f2f;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .trap-alert.visible {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tp-sl-panel">
+        <div class="panel-header">
+            <h2>Take Profit & Stop Loss Management</h2>
+            <div>
+                <button class="button" onclick="refreshData()">Refresh</button>
+                <button class="button danger" onclick="closePosition()">Close Position</button>
+            </div>
+        </div>
+
+        <div class="trap-alert" id="trapAlert">
+            ⚠️ Market Maker Trap Detected! Consider adjusting your exit strategy.
+        </div>
+
+        <div class="position-info">
+            <div class="info-card">
+                <div class="label">Entry Price</div>
+                <div class="value" id="entryPrice">$0.00</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Current Price</div>
+                <div class="value" id="currentPrice">$0.00</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Unrealized PnL</div>
+                <div class="value" id="unrealizedPnl">$0.00</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Position Size</div>
+                <div class="value" id="positionSize">0 BTC</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Leverage</div>
+                <div class="value" id="leverage">0x</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Risk Multiplier</div>
+                <div class="value" id="riskMultiplier">1.0x</div>
+            </div>
+        </div>
+
+        <div class="tp-levels">
+            <h3>Take Profit Levels (Fibonacci-based)</h3>
+            <div id="tpLevelsContainer">
+                <!-- Take profit levels will be inserted here -->
+            </div>
+        </div>
+
+        <div class="sl-settings">
+            <h3>Stop Loss Settings</h3>
+            <div class="info-card">
+                <div class="label">Current Stop Loss</div>
+                <div class="value" id="currentStopLoss">$0.00</div>
+                <div class="distance" id="stopLossDistance">0.00%</div>
+            </div>
+
+            <div class="trailing-stop">
+                <div>
+                    <h4>Trailing Stop</h4>
+                    <div class="distance" id="trailingStopDistance">Not activated</div>
+                </div>
+                <div style="flex-grow: 1; margin-left: 20px;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="trailingProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to format price with 2 decimal places
+        function formatPrice(price) {
+            return '$' + parseFloat(price).toFixed(2);
+        }
+
+        // Function to format percentage
+        function formatPercentage(percentage) {
+            return parseFloat(percentage).toFixed(2) + '%';
+        }
+
+        // Function to update position data
+        async function updatePositionData() {
+            try {
+                const response = await fetch('/api/redis-key?key=current_position');
+                const data = await response.json();
+                const position = JSON.parse(data.value);
+
+                if (position.has_position) {
+                    document.getElementById('entryPrice').textContent = formatPrice(position.entry_price);
+                    document.getElementById('currentPrice').textContent = formatPrice(position.current_price);
+                    document.getElementById('positionSize').textContent = position.position_size + ' BTC';
+                    document.getElementById('leverage').textContent = position.leverage + 'x';
+                    document.getElementById('riskMultiplier').textContent = position.risk_multiplier + 'x';
+
+                    // Update PnL with color
+                    const pnlElement = document.getElementById('unrealizedPnl');
+                    pnlElement.textContent = formatPrice(position.pnl_usd);
+                    pnlElement.className = 'value ' + (position.pnl_usd >= 0 ? 'profit' : 'loss');
+
+                    // Update stop loss
+                    document.getElementById('currentStopLoss').textContent = formatPrice(position.stop_loss);
+                    document.getElementById('stopLossDistance').textContent =
+                        formatPercentage(position.stop_loss_distance || 0);
+
+                    // Update take profit levels
+                    updateTakeProfitLevels(position);
+
+                    // Update trailing stop
+                    updateTrailingStop(position);
+
+                    // Check for trap alerts
+                    checkTrapAlert();
+                }
+            } catch (error) {
+                console.error('Error updating position data:', error);
+            }
+        }
+
+        // Function to update take profit levels
+        function updateTakeProfitLevels(position) {
+            const container = document.getElementById('tpLevelsContainer');
+            container.innerHTML = '';
+
+            if (position.take_profit && position.take_profit_distance) {
+                const tpLevel = document.createElement('div');
+                tpLevel.className = 'tp-level';
+                tpLevel.innerHTML = `
+                    <div>
+                        <div class="fib-level">Fibonacci Level 1.0</div>
+                        <div class="price-level">${formatPrice(position.take_profit)}</div>
+                    </div>
+                    <div class="percentage">${formatPercentage(position.take_profit_distance)}</div>
+                `;
+                container.appendChild(tpLevel);
+            }
+        }
+
+        // Function to update trailing stop display
+        function updateTrailingStop(position) {
+            const distanceElement = document.getElementById('trailingStopDistance');
+            const progressElement = document.getElementById('trailingProgress');
+
+            if (position.trailing_activated) {
+                distanceElement.textContent = `Active - Following ${formatPercentage(position.trailing_distance || 0)} behind price`;
+                progressElement.style.width = '100%';
+            } else {
+                distanceElement.textContent = 'Not activated';
+                progressElement.style.width = '0%';
+            }
+        }
+
+        // Function to check for trap alerts
+        async function checkTrapAlert() {
+            try {
+                const response = await fetch('/api/redis-key?key=current_trap_probability');
+                const data = await response.json();
+                if (data.value) {
+                    const trapData = JSON.parse(data.value);
+                    const alertElement = document.getElementById('trapAlert');
+
+                    if (trapData.probability > 0.7) {
+                        alertElement.textContent = `⚠️ ${trapData.trap_type} detected with ${(trapData.probability * 100).toFixed(1)}% probability!`;
+                        alertElement.classList.add('visible');
+                    } else {
+                        alertElement.classList.remove('visible');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking trap alert:', error);
+            }
+        }
+
+        // Function to refresh data
+        function refreshData() {
+            updatePositionData();
+        }
+
+        // Function to close position
+        async function closePosition() {
+            if (confirm('Are you sure you want to close this position?')) {
+                try {
+                    const response = await fetch('/api/close-position', {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Position closed successfully');
+                        refreshData();
+                    } else {
+                        alert('Failed to close position: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error closing position:', error);
+                    alert('Error closing position');
+                }
+            }
+        }
+
+        // Update data every 5 seconds
+        setInterval(updatePositionData, 5000);
+
+        // Initial update
+        updatePositionData();
+    </script>
+</body>
+
+</html>

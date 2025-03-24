@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 import aiohttp
 import asyncio
 from typing import Dict, Any
+from unittest.mock import patch
+from fastapi.testclient import TestClient
 
 # JSON Schemas for Backend API
 BACKEND_SCHEMAS = {
@@ -234,21 +236,50 @@ async def test_backend_health_endpoint():
 @pytest.mark.asyncio
 async def test_backend_trap_probability_endpoint():
     """Test the backend trap probability endpoint."""
-    async with aiohttp.ClientSession() as session:
-        async with session.get("http://localhost:8000/api/trap-probability") as response:
-            assert response.status == 200
-            data = await response.json()
-            validate(instance=data, schema=BACKEND_SCHEMAS["trap_probability_response"])
-            assert 0 <= data["probability"] <= 1
-            assert data["trap_type"] is None or isinstance(data["trap_type"], str)
-            assert 0 <= data["confidence"] <= 1
-            assert isinstance(data["components"], dict)
-            assert data["trend"] in ["bullish", "bearish", "stable"]
+    # Create test data
+    test_data = {
+        "probability": 0.75,
+        "trap_type": "bull_trap",
+        "confidence": 0.85,
+        "trend": "bullish",
+        "components": {
+            "price_pattern": {"value": 0.7, "description": "Recent price pattern analysis"},
+            "market_sentiment": {"value": 0.5, "description": "Current market sentiment"},
+            "fibonacci_match": {"value": 0.6, "description": "Fibonacci level alignment"},
+            "liquidity_concentration": {"value": 0.8, "description": "Normalized trading volume"},
+            "order_imbalance": {"value": 0.5, "description": "Buy/Sell order ratio"}
+        }
+    }
 
-            # Validate component values
-            for component in data["components"].values():
-                assert 0 <= component["value"] <= 1
-                assert isinstance(component["description"], str)
+    # Mock Redis manager
+    with patch('redis.Redis') as mock_redis:
+        mock_instance = mock_redis.return_value
+        mock_instance.get.return_value = json.dumps(test_data)
+
+        # Create server with mock Redis
+        server = MMTrapVisualizerServer()
+        server.redis_manager.redis = mock_instance
+
+        # Create test client
+        client = TestClient(server.app)
+
+        # Test the endpoint
+        response = client.get("/api/trap-probability")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Validate response against schema
+        validate(instance=data, schema=BACKEND_SCHEMAS["trap_probability_response"])
+        assert 0 <= data["probability"] <= 1
+        assert data["trap_type"] is None or isinstance(data["trap_type"], str)
+        assert 0 <= data["confidence"] <= 1
+        assert isinstance(data["components"], dict)
+        assert data["trend"] in ["bullish", "bearish", "stable"]
+
+        # Validate component values
+        for component in data["components"].values():
+            assert 0 <= component["value"] <= 1
+            assert isinstance(component["description"], str)
 
 @pytest.mark.asyncio
 async def test_backend_position_endpoint():

@@ -1,0 +1,16 @@
+[Unit]
+Description=OMEGA Dump - Divine Log Management Service
+After=network.target redis.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=omega
+Group=omega
+ExecStart=/usr/local/bin/omega-dump --logs-dir /var/log/omega-dump --backup-dir /var/log/omega-dump/backup --redis-url redis://localhost:6379/0
+Restart=always
+RestartSec=5
+Environment=PYTHONPATH=/usr/local/lib/omega-dump
+
+[Install]
+WantedBy=multi-user.target 

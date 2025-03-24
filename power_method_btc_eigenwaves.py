@@ -1,595 +1,309 @@
 #!/usr/bin/env python3
 """
-OMEGA BTC AI - Power Method BTC Eigenwave Detector
-=================================================
+Power Method BTC Eigenwaves
+==========================
 
-Implementation of the Power Method algorithm to detect leading eigenvectors (eigenwaves)
-from rolling covariance matrices of BTC price movements.
-
-This divine tool reveals the dominant price movement patterns (eigenwaves) that 
-govern Bitcoin's sacred price trajectory, including their stability and cyclical nature.
+Implements the power method for finding dominant eigenvalues/eigenvectors in BTC price data.
+Uses matrix-based approach to identify key market cycles and oscillation patterns.
 """
 
 import numpy as np
 import pandas as pd
+from typing import List, Dict, Optional, Tuple, Any, Union
+import os
+import json
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.express as px
-import plotly.io as pio
-import os
-import warnings
-from datetime import datetime, timedelta
-from tqdm import tqdm
-from sklearn.preprocessing import StandardScaler
-import seaborn as sns
-
-# Try to import the HMM BTC State Mapper for data loading
-try:
-    from hmm_btc_state_mapper import load_btc_data, COLORS
-except ImportError:
-    # Define our own data loading function if import fails
-    def load_btc_data(filepath_or_url=None, start_date=None, end_date=None):
-        """Load BTC price data from a file or download it."""
-        try:
-            import yfinance as yf
-            print("Downloading BTC data from yfinance...")
-            data = yf.download(
-                'BTC-USD',
-                start=start_date if start_date else '2020-01-01',
-                end=end_date if end_date else datetime.now().strftime('%Y-%m-%d'),
-                interval='1d'
-            )
-            
-            if data is None or data.empty:
-                print("Failed to download data from yfinance or data is empty")
-                return None
-                
-            if isinstance(data.columns, pd.MultiIndex):
-                data.columns = data.columns.get_level_values(0)
-            
-            data.columns = [str(c).lower() for c in data.columns]
-            data = data.reset_index()
-            data = data.rename(columns={'date': 'date', 'open': 'open', 'high': 'high', 
-                                       'low': 'low', 'close': 'close', 'volume': 'volume'})
-            return data
-        except ImportError:
-            print("yfinance not installed. Please install it with: pip install yfinance")
-            return None
-    
-    # Define our own colors if import fails
-    COLORS = {
-        'background': '#0d1117',
-        'text': '#c9d1d9',
-        'grid': '#21262d',
-        'primary': '#58a6ff',
-        'secondary': '#bc8cff',
-        'accent': '#f0883e',
-        'positive': '#3fb950',
-        'negative': '#f85149',
-        'neutral': '#8b949e',
-        'highlight': '#ffffff',
-        'state_0': '#e6194B',  # Markdown/Bear
-        'state_1': '#3cb44b',  # Markup/Bull
-        'state_2': '#ffe119',  # Accumulation
-        'state_3': '#4363d8',  # Distribution
-        'state_4': '#911eb4',  # Fakeout/Liquidity Grab
-        'state_5': '#f58231',  # Consolidation
-        # Add eigenwave colors using the same colors as states
-        'wave_0': '#e6194B',  # First eigenwave (red)
-        'wave_1': '#3cb44b',  # Second eigenwave (green)
-        'wave_2': '#ffe119',  # Third eigenwave (yellow)
-        'wave_3': '#4363d8',  # Fourth eigenwave (blue)
-        'wave_4': '#911eb4',  # Fifth eigenwave (purple)
-        'wave_5': '#f58231'   # Sixth eigenwave (orange)
-    }
-
-# Set Plotly theme to a divine dark template
-pio.templates.default = "plotly_dark"
-
-# Suppress warnings
-warnings.filterwarnings("ignore")
+import pickle
 
 class PowerMethodBTCEigenwaves:
-    """Power Method implementation for BTC eigenwave detection."""
+    """Implements the power method for finding dominant eigenvectors in BTC price waves."""
     
-    def __init__(self, window_size=30, n_eigenwaves=3, rolling_step=1, max_iterations=1000, tolerance=1e-6):
-        """
-        Initialize the Power Method BTC Eigenwave Detector.
+    def __init__(self, n_components=3):
+        self.n_components = n_components
+        self.eigenvectors = None
+        self.eigenvalues = None
+        self.model_path = None
+        self.price_matrix = None
+        self.projections = None
+        self.feature_columns = ['close', 'high', 'low']
+        self.df_with_eigenwaves = None
         
-        Args:
-            window_size: Size of rolling window for covariance matrix (days)
-            n_eigenwaves: Number of leading eigenwaves to extract
-            rolling_step: Step size for rolling windows
-            max_iterations: Maximum iterations for Power Method convergence
-            tolerance: Convergence tolerance for Power Method
-        """
-        self.window_size = window_size
-        self.n_eigenwaves = n_eigenwaves
-        self.rolling_step = rolling_step
-        self.max_iterations = max_iterations
-        self.tolerance = tolerance
-        self.scaler = StandardScaler()
-        self.feature_names = []
+    def fit(self, df):
+        """Fit the eigenwave model to the data."""
+        # Create price matrix
+        price_matrix = self._create_price_matrix(df)
         
-    def _prepare_features(self, df, return_df=False):
-        """
-        Prepare and engineer features from price and volume data.
+        # Compute correlation matrix
+        correlation_matrix = self._compute_correlation_matrix(price_matrix)
         
-        Args:
-            df: DataFrame with OHLCV data at minimum
-            return_df: If True, return the full DataFrame with all features
-            
-        Returns:
-            Numpy array of features for covariance analysis and optionally the full DataFrame
-        """
-        # Deep copy to avoid modifying original
-        data = df.copy()
+        # Apply power method
+        self.eigenvectors, self.eigenvalues = self._power_method(correlation_matrix)
         
-        # Basic features
-        data['returns'] = data['close'].pct_change()
-        data['log_returns'] = np.log(data['close'] / data['close'].shift(1))
-        data['high_log_returns'] = np.log(data['high'] / data['high'].shift(1))
-        data['low_log_returns'] = np.log(data['low'] / data['low'].shift(1))
-        data['volatility'] = data['log_returns'].rolling(window=20).std()
-        data['volume_change'] = data['volume'].pct_change()
+        return self
         
-        # Price momentum features
-        for period in [3, 5, 8, 13, 21, 34]:
-            data[f'momentum_{period}d'] = data['close'].pct_change(periods=period)
+    def _create_price_matrix(self, df):
+        """Create price matrix from DataFrame."""
+        # Extract price features
+        features = df[['close', 'high', 'low']].values
         
-        # Volume momentum features
-        for period in [3, 5, 8, 13, 21]:
-            data[f'volume_momentum_{period}d'] = data['volume'].pct_change(periods=period)
+        # Normalize features
+        features = (features - np.mean(features, axis=0)) / np.std(features, axis=0)
         
-        # Price range features
-        data['daily_range'] = (data['high'] - data['low']) / data['low']
-        data['range_ma5'] = data['daily_range'].rolling(window=5).mean()
-        data['range_ma21'] = data['daily_range'].rolling(window=21).mean()
+        return features
         
-        # Drop NaN values
-        data = data.dropna()
+    def _compute_correlation_matrix(self, price_matrix):
+        """Compute correlation matrix from price matrix."""
+        # Ensure price_matrix is a numpy array
+        price_matrix = np.array(price_matrix)
         
-        # Feature selection for eigenwave analysis
-        selected_features = [
-            'log_returns', 'high_log_returns', 'low_log_returns', 
-            'volume_change', 'daily_range',
-            'momentum_3d', 'momentum_5d', 'momentum_8d', 'momentum_13d', 'momentum_21d', 'momentum_34d',
-            'volume_momentum_3d', 'volume_momentum_5d', 'volume_momentum_8d', 'volume_momentum_13d', 'volume_momentum_21d'
-        ]
-        self.feature_names = selected_features
+        # Compute correlation matrix
+        correlation_matrix = np.corrcoef(price_matrix.T)
         
-        # Scale features
-        features = self.scaler.fit_transform(data[selected_features])
+        return correlation_matrix
         
-        if return_df:
-            return features, data
-        else:
-            return features, data.index
-    
-    def _power_method(self, matrix, n_vectors=1, max_iter=None, tol=None):
-        """
-        Extract the n leading eigenvectors and eigenvalues using the Power Method.
-        
-        Args:
-            matrix: Covariance matrix
-            n_vectors: Number of eigenvectors to extract
-            max_iter: Maximum iterations (use instance value if None)
-            tol: Convergence tolerance (use instance value if None)
-            
-        Returns:
-            List of eigenvalues and eigenvectors
-        """
-        max_iter = max_iter if max_iter is not None else self.max_iterations
-        tol = tol if tol is not None else self.tolerance
-        
-        # Get matrix dimensions
+    def _power_method(self, matrix, max_iter=1000, tol=1e-6):
+        """Apply power method to find eigenvalues and eigenvectors."""
         n = matrix.shape[0]
+        eigenvectors = np.zeros((n, self.n_components))
+        eigenvalues = np.zeros(self.n_components)
         
-        # Initialize storage for eigenvalues and eigenvectors
-        eigenvalues = []
-        eigenvectors = []
-        
-        # Make copy of matrix for deflation
-        A = matrix.copy()
-        
-        for i in range(n_vectors):
+        for i in range(self.n_components):
             # Initialize random vector
-            v = np.random.rand(n)
+            v = np.random.randn(n)
             v = v / np.linalg.norm(v)
             
-            # Initialize eigenvalue in case loop exits early
-            eigenvalue = 0.0
-            
-            # Iterate until convergence
-            for j in range(max_iter):
-                # Power iteration
-                v_new = A @ v
+            for _ in range(max_iter):
+                v_old = v
+                v = matrix @ v
+                v = v / np.linalg.norm(v)
                 
-                # Normalize the vector
-                v_new_norm = np.linalg.norm(v_new)
-                
-                # Check for zero norm (happens with deflated matrices)
-                if v_new_norm < tol:
-                    # Generate a new random vector orthogonal to previous eigenvectors
-                    v_new = np.random.rand(n)
-                    for w in eigenvectors:
-                        v_new = v_new - np.dot(v_new, w) * w
-                    v_new_norm = np.linalg.norm(v_new)
-                    
-                v_new = v_new / v_new_norm
-                
-                # Estimate eigenvalue using Rayleigh quotient
-                eigenvalue = np.dot(v_new, A @ v_new)
-                
-                # Check convergence
-                if np.linalg.norm(v_new - v) < tol or np.linalg.norm(v_new + v) < tol:
+                if np.abs(np.dot(v, v_old) - 1) < tol:
                     break
-                
-                v = v_new
+                    
+            eigenvectors[:, i] = v
+            eigenvalues[i] = np.dot(v, matrix @ v)
             
-            # Store results
-            eigenvalues.append(eigenvalue)
-            eigenvectors.append(v)
+            # Deflate matrix
+            matrix = matrix - eigenvalues[i] * np.outer(v, v)
             
-            # Matrix deflation (subtract the effect of found eigenvector)
-            A = A - eigenvalue * np.outer(v, v)
+        return eigenvectors, eigenvalues
         
-        return eigenvalues, eigenvectors
-    
-    def analyze(self, df):
+    def get_projections(self, df):
+        """Get eigenwave projections for input data."""
+        if self.eigenvectors is None:
+            raise ValueError("Model must be fitted before getting projections")
+            
+        price_matrix = self._create_price_matrix(df)
+        projections = price_matrix @ self.eigenvectors
+        
+        return pd.DataFrame(projections, columns=[f'eigenwave_{i+1}' for i in range(self.n_components)])
+        
+    def save_model(self, filepath):
+        """Save the model to a file."""
+        model_data = {
+            'eigenvectors': self.eigenvectors,
+            'eigenvalues': self.eigenvalues,
+            'n_components': self.n_components
+        }
+        with open(filepath, 'wb') as f:
+            pickle.dump(model_data, f)
+        self.model_path = filepath
+        
+    def load_model(self, filepath):
+        """Load the model from a file."""
+        with open(filepath, 'rb') as f:
+            model_data = pickle.load(f)
+        self.eigenvectors = model_data['eigenvectors']
+        self.eigenvalues = model_data['eigenvalues']
+        self.n_components = model_data['n_components']
+        self.model_path = filepath
+        
+    def analyze(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Analyze BTC data to extract rolling eigenwaves using the Power Method.
+        Analyze BTC price data with power method to find eigenwaves.
         
         Args:
             df: DataFrame with OHLCV data
             
         Returns:
-            DataFrame with original data, eigenvalues, and eigenvectors
+            DataFrame with eigenwave features added
         """
-        # Prepare features
-        features, data_with_features = self._prepare_features(df, return_df=True)
+        # Create price matrix
+        price_matrix = self._create_price_matrix(df)
         
-        # Initialize lists for eigenvalues and eigenvectors
-        dates = []
-        eigenvalues_list = []
-        eigenvectors_list = []
+        # Compute correlation matrix
+        correlation_matrix = self._compute_correlation_matrix(price_matrix)
         
-        # Create rolling windows for analysis
-        print(f"Analyzing {len(features) - self.window_size} windows for eigenwaves...")
-        for i in tqdm(range(0, len(features) - self.window_size, self.rolling_step)):
-            # Get window data
-            window = features[i:i+self.window_size]
+        # Apply power method
+        self.eigenvectors, self.eigenvalues = self._power_method(correlation_matrix)
+        
+        # Project prices onto eigenvectors
+        projections = price_matrix @ self.eigenvectors
+        self.projections = projections
+        
+        # Add projections to dataframe
+        df_result = df.copy()
+        for i in range(self.n_components):
+            df_result[f'eigenwave_{i+1}'] = projections[:, i]
             
-            # Calculate covariance matrix
-            cov_matrix = np.cov(window, rowvar=False)
+        # Calculate eigenwave momentum (rate of change)
+        for i in range(self.n_components):
+            df_result[f'eigenwave_{i+1}_momentum'] = df_result[f'eigenwave_{i+1}'].diff()
             
-            # Apply power method to extract eigenvalues and eigenvectors
-            eigenvalues, eigenvectors = self._power_method(cov_matrix, self.n_eigenwaves)
-            
-            # Store results
-            dates.append(data_with_features.index[i + self.window_size])
-            eigenvalues_list.append(eigenvalues)
-            eigenvectors_list.append(eigenvectors)
+        # Calculate dominant wave
+        wave_columns = [f'eigenwave_{i+1}' for i in range(self.n_components)]
+        df_result['dominant_wave'] = df_result[wave_columns].abs().idxmax(axis=1)
         
-        # Create results DataFrame
-        results = pd.DataFrame({'date': dates})
+        # Store processed dataframe
+        self.df_with_eigenwaves = df_result
         
-        # Add eigenvalues
-        for i in range(self.n_eigenwaves):
-            results[f'eigenvalue_{i}'] = [vals[i] if i < len(vals) else np.nan for vals in eigenvalues_list]
+        print(f"Power method analysis complete with {self.n_components} eigenwaves")
         
-        # Add eigenvectors (flattened)
-        for i in range(self.n_eigenwaves):
-            for j in range(len(self.feature_names)):
-                results[f'eigenvector_{i}_{self.feature_names[j]}'] = [
-                    vecs[i][j] if i < len(vecs) else np.nan for vecs in eigenvectors_list
-                ]
+        return df_result
         
-        # Merge with original data
-        result_index = data_with_features.index.get_indexer(results['date'], method='nearest')
-        results = results.drop('date', axis=1)
-        data_with_eigenwaves = data_with_features.iloc[result_index].copy()
-        data_with_eigenwaves[results.columns] = results.values
-        
-        # Calculate eigenwave projections (how much each day's data projects onto each eigenwave)
-        for i in range(self.n_eigenwaves):
-            projections = []
-            for idx in range(len(data_with_eigenwaves)):
-                # Get feature values for this day
-                day_features = features[idx]
-                
-                # Get the corresponding eigenvector
-                # Find closest date with eigenwave data
-                closest_idx = np.abs(result_index - idx).argmin()
-                
-                # Extract eigenvector
-                eigenvector = np.array([
-                    data_with_eigenwaves.iloc[closest_idx][f'eigenvector_{i}_{feat}'] 
-                    for feat in self.feature_names
-                ])
-                
-                # Calculate projection
-                projection = np.dot(day_features, eigenvector)
-                projections.append(projection)
-            
-            data_with_eigenwaves[f'eigenwave_{i}_projection'] = projections
-        
-        return data_with_eigenwaves
-    
-    def plot_eigenvalues(self, df_with_eigenwaves):
+    def save_results(self, output_file: str = "results/btc_eigenwaves.csv") -> None:
         """
-        Plot the evolution of eigenvalues over time.
+        Save eigenwave results to CSV file.
         
         Args:
-            df_with_eigenwaves: DataFrame with eigenwave data
-            
-        Returns:
-            Plotly figure
+            output_file: Path to save CSV file
         """
-        # Create figure
-        fig = go.Figure()
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         
-        # Define colors for eigenwaves if not in COLORS
-        wave_colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#911eb4', '#f58231']
+        # Save eigenvalues and eigenvectors
+        eigenwave_data = {
+            "eigenvalues": self.eigenvalues.tolist() if self.eigenvalues is not None else None,
+            "eigenvectors": self.eigenvectors.tolist() if self.eigenvectors is not None else None,
+            "feature_columns": self.feature_columns,
+            "n_components": self.n_components
+        }
         
-        # Add traces for each eigenvalue
-        for i in range(self.n_eigenwaves):
-            # Use predefined color with fallback to array
-            color = wave_colors[i % len(wave_colors)]
+        # Save as JSON
+        with open("results/eigenwave_data.json", "w") as f:
+            json.dump(eigenwave_data, f, indent=2)
             
-            fig.add_trace(
-                go.Scatter(
-                    x=df_with_eigenwaves.index,
-                    y=df_with_eigenwaves[f'eigenvalue_{i}'],
-                    name=f"Eigenvalue {i+1}",
-                    line=dict(color=color, width=2)
-                )
-            )
+        print(f"Eigenwave data saved to results/eigenwave_data.json")
         
-        # Update layout
-        fig.update_layout(
-            title="Divine BTC Eigenvalue Evolution",
-            xaxis_title="Date",
-            yaxis_title="Eigenvalue Magnitude",
-            legend_title="Eigenvalues",
-            template="plotly_dark",
-            hovermode="closest"
-        )
-        
-        return fig
-    
-    def plot_eigenwaves(self, df_with_eigenwaves):
+        # Save projections to CSV if available
+        if self.df_with_eigenwaves is not None:
+            # Select only necessary columns
+            df_to_save = self.df_with_eigenwaves[['date' if 'date' in self.df_with_eigenwaves.columns else 'timestamp'] + 
+                                              [f'eigenwave_{i+1}' for i in range(self.n_components)] +
+                                              [f'eigenwave_{i+1}_momentum' for i in range(self.n_components)] +
+                                              ['dominant_wave']].copy()
+            
+            # Save to CSV
+            df_to_save.to_csv(output_file, index=False)
+            print(f"Eigenwave projections saved to {output_file}")
+        else:
+            print("No eigenwave projections to save")
+            
+    def visualize_eigenwaves(self, output_file: str = "plots/btc_eigenwaves_projections.html") -> None:
         """
-        Plot the BTC price with eigenwave projections.
+        Create interactive visualization of eigenwaves.
         
         Args:
-            df_with_eigenwaves: DataFrame with eigenwave data
-            
-        Returns:
-            Plotly figure
+            output_file: Path to save HTML visualization
         """
-        # Create subplot figure
-        fig = make_subplots(
-            rows=2, 
-            cols=1, 
-            shared_xaxes=True, 
-            vertical_spacing=0.05,
-            row_heights=[0.7, 0.3],
-            subplot_titles=("Divine BTC Price with Eigenwave Indicators", "Eigenwave Projections")
-        )
+        if self.df_with_eigenwaves is None:
+            print("No eigenwave data to visualize")
+            return
+            
+        # Create figure with subplots
+        fig = make_subplots(rows=self.n_components + 1, cols=1,
+                          subplot_titles=['BTC Price'] + 
+                                        [f'Eigenwave {i+1} (λ={self.eigenvalues[i]:.4f})' 
+                                         for i in range(self.n_components)],
+                          vertical_spacing=0.08)
         
-        # Define colors for eigenwaves
-        wave_colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#911eb4', '#f58231']
-        pos_color = '#3fb950'  # Green for positive candles
-        neg_color = '#f85149'  # Red for negative candles
-        
-        # Add candlestick chart for price
+        # Add BTC price
         fig.add_trace(
-            go.Candlestick(
-                x=df_with_eigenwaves.index,
-                open=df_with_eigenwaves['open'],
-                high=df_with_eigenwaves['high'],
-                low=df_with_eigenwaves['low'],
-                close=df_with_eigenwaves['close'],
-                name="BTC Price",
-                increasing_line_color=pos_color,
-                decreasing_line_color=neg_color
-            ),
+            go.Scatter(x=self.df_with_eigenwaves['date'] if 'date' in self.df_with_eigenwaves.columns else pd.to_datetime(self.df_with_eigenwaves.index),
+                     y=self.df_with_eigenwaves['close'],
+                     mode='lines',
+                     name='BTC Price',
+                     line=dict(color='gold', width=1.5)),
             row=1, col=1
         )
         
-        # Add eigenwave projections
-        for i in range(self.n_eigenwaves):
-            color = wave_colors[i % len(wave_colors)]
-            
+        # Add eigenwaves
+        colors = ['rgba(255,0,0,0.8)', 'rgba(0,128,0,0.8)', 'rgba(0,0,255,0.8)']
+        for i in range(min(self.n_components, 3)):
             fig.add_trace(
-                go.Scatter(
-                    x=df_with_eigenwaves.index,
-                    y=df_with_eigenwaves[f'eigenwave_{i}_projection'],
-                    name=f"Eigenwave {i+1}",
-                    line=dict(color=color, width=2)
-                ),
-                row=2, col=1
+                go.Scatter(x=self.df_with_eigenwaves['date'] if 'date' in self.df_with_eigenwaves.columns else pd.to_datetime(self.df_with_eigenwaves.index),
+                         y=self.df_with_eigenwaves[f'eigenwave_{i+1}'],
+                         mode='lines',
+                         name=f'Eigenwave {i+1}',
+                         line=dict(color=colors[i], width=1.5)),
+                row=i+2, col=1
+            )
+            
+            # Add momentum as dotted line
+            fig.add_trace(
+                go.Scatter(x=self.df_with_eigenwaves['date'] if 'date' in self.df_with_eigenwaves.columns else pd.to_datetime(self.df_with_eigenwaves.index),
+                         y=self.df_with_eigenwaves[f'eigenwave_{i+1}_momentum'],
+                         mode='lines',
+                         name=f'Momentum {i+1}',
+                         line=dict(color=colors[i], width=1, dash='dot')),
+                row=i+2, col=1
             )
         
         # Update layout
         fig.update_layout(
-            title="Divine BTC Eigenwaves Analysis",
-            xaxis2_title="Date",
-            yaxis_title="BTC Price (USD)",
-            yaxis2_title="Eigenwave Projection",
-            legend_title="Components",
+            title_text="BTC Eigenwave Analysis",
             template="plotly_dark",
-            hovermode="x"
+            height=200 * (self.n_components + 1),
+            width=1000,
+            showlegend=True
         )
+        
+        # Save figure
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        fig.write_html(output_file)
+        print(f"Eigenwave visualization saved to {output_file}")
         
         return fig
-    
-    def plot_feature_contributions(self, df_with_eigenwaves, top_n=5):
-        """
-        Plot the top feature contributions to each eigenwave.
         
-        Args:
-            df_with_eigenwaves: DataFrame with eigenwave data
-            top_n: Number of top features to display
-            
-        Returns:
-            Plotly figure
-        """
-        # Create subplot figure
-        fig = make_subplots(
-            rows=min(3, self.n_eigenwaves), 
-            cols=1, 
-            subplot_titles=[f"Eigenwave {i+1} Feature Contributions" for i in range(min(3, self.n_eigenwaves))]
-        )
-        
-        # Define colors for eigenwaves
-        wave_colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#911eb4', '#f58231']
-        
-        # For each of the first 3 eigenwaves
-        for i in range(min(3, self.n_eigenwaves)):
-            # Get the latest eigenvector
-            eigenvector_features = [
-                (feat, df_with_eigenwaves.iloc[-1][f'eigenvector_{i}_{feat}']) 
-                for feat in self.feature_names
-            ]
-            
-            # Sort by absolute magnitude
-            eigenvector_features.sort(key=lambda x: abs(x[1]), reverse=True)
-            
-            # Take top_n features
-            top_features = eigenvector_features[:top_n]
-            
-            # Get color for this eigenwave
-            color = wave_colors[i % len(wave_colors)]
-            
-            # Create bar chart
-            fig.add_trace(
-                go.Bar(
-                    x=[f[0] for f in top_features],
-                    y=[f[1] for f in top_features],
-                    name=f"Eigenwave {i+1}",
-                    marker_color=color
-                ),
-                row=i+1, col=1
-            )
-        
-        # Update layout
-        fig.update_layout(
-            title="Divine Features Contributing to BTC Eigenwaves",
-            height=300 * min(3, self.n_eigenwaves),
-            showlegend=False,
-            template="plotly_dark"
-        )
-        
-        return fig
-    
-    def save_results(self, df_with_eigenwaves, filepath="results/btc_eigenwaves.csv"):
-        """
-        Save eigenwave results to a file.
-        
-        Args:
-            df_with_eigenwaves: DataFrame with eigenwave data
-            filepath: Path to save the results
-        """
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        
-        # Save to file
-        df_with_eigenwaves.to_csv(filepath)
-        print(f"Eigenwave results saved to {filepath}")
-        
-    def save_visualizations(self, df_with_eigenwaves, dir_path="plots"):
-        """
-        Save all visualizations to files.
-        
-        Args:
-            df_with_eigenwaves: DataFrame with eigenwave data
-            dir_path: Directory to save visualizations
-        """
-        # Create directory if it doesn't exist
-        os.makedirs(dir_path, exist_ok=True)
-        
-        # Generate and save plots
-        eigenvalues_fig = self.plot_eigenvalues(df_with_eigenwaves)
-        eigenwaves_fig = self.plot_eigenwaves(df_with_eigenwaves)
-        contributions_fig = self.plot_feature_contributions(df_with_eigenwaves)
-        
-        # Save as HTML for interactive viewing
-        eigenvalues_fig.write_html(os.path.join(dir_path, "btc_eigenvalues_evolution.html"))
-        eigenwaves_fig.write_html(os.path.join(dir_path, "btc_eigenwaves_projections.html"))
-        contributions_fig.write_html(os.path.join(dir_path, "btc_eigenwave_contributions.html"))
-        
-        # Save as PNG for static viewing
-        eigenvalues_fig.write_image(os.path.join(dir_path, "btc_eigenvalues_evolution.png"))
-        eigenwaves_fig.write_image(os.path.join(dir_path, "btc_eigenwaves_projections.png"))
-        contributions_fig.write_image(os.path.join(dir_path, "btc_eigenwave_contributions.png"))
-        
-        print(f"Visualizations saved to {dir_path}")
-
-
 def main():
-    """Main entry point for the Power Method BTC Eigenwave Detector."""
-    print("🧠 OMEGA BTC AI - Power Method BTC Eigenwave Detector")
-    print("====================================================")
+    """Run power method analysis on BTC data."""
+    # Create sample data
+    np.random.seed(42)
+    dates = pd.date_range(start='2020-01-01', periods=1000, freq='D')
     
-    # Load BTC data
-    print("\n🔄 Loading BTC price data...")
-    btc_data = load_btc_data(start_date='2020-01-01')
-    if btc_data is None:
-        print("❌ Failed to load BTC data")
-        return
-        
-    print(f"✅ Loaded BTC data with {len(btc_data)} rows")
+    # Generate random walk for close prices
+    close = 10000 + np.cumsum(np.random.normal(0, 200, 1000))
     
-    # Initialize and run the Power Method
-    print("\n🔄 Initializing Power Method BTC Eigenwave Detector...")
-    detector = PowerMethodBTCEigenwaves(
-        window_size=60,      # 60-day rolling window
-        n_eigenwaves=5,      # Extract top 5 eigenwaves
-        rolling_step=2       # Step 2 days at a time for efficiency
-    )
+    # Generate open, high, low based on close
+    open_prices = close * (1 + np.random.normal(0, 0.01, 1000))
+    high = np.maximum(close, open_prices) * (1 + np.abs(np.random.normal(0, 0.01, 1000)))
+    low = np.minimum(close, open_prices) * (1 - np.abs(np.random.normal(0, 0.01, 1000)))
     
-    # Analyze the data
-    print("\n🔄 Analyzing BTC data with Power Method...")
-    results = detector.analyze(btc_data)
-    print("✅ Analysis complete")
+    # Generate volume
+    volume = np.random.lognormal(10, 1, 1000)
     
-    # Generate visualizations
-    print("\n🔄 Generating divine visualizations...")
-    detector.save_visualizations(results)
-    print("✅ Visualizations generated")
+    # Create DataFrame
+    df = pd.DataFrame({
+        'date': dates,
+        'open': open_prices,
+        'high': high,
+        'low': low,
+        'close': close,
+        'volume': volume
+    })
+    
+    # Create and run power method
+    power_method = PowerMethodBTCEigenwaves()
+    df_with_eigenwaves = power_method.analyze(df)
     
     # Save results
-    print("\n🔄 Saving results...")
-    detector.save_results(results)
-    print("✅ Results saved")
+    power_method.save_results()
     
-    # Display current eigenwave projections
-    latest_projections = {i: results.iloc[-1][f'eigenwave_{i}_projection'] for i in range(detector.n_eigenwaves)}
-    dominant_wave = max(latest_projections.items(), key=lambda x: abs(x[1]))
+    # Visualize
+    power_method.visualize_eigenwaves()
     
-    print("\n🔮 Current Dominant Eigenwave Analysis:")
-    for i in range(detector.n_eigenwaves):
-        projection = latest_projections[i]
-        print(f"  Eigenwave {i+1}: Projection = {projection:.4f}")
-    
-    print(f"\n🔮 The dominant eigenwave is Eigenwave {dominant_wave[0]+1} with projection {dominant_wave[1]:.4f}")
-    
-    # Show eigenvalue stability
-    eigenvalue_stability = {
-        i: results[f'eigenvalue_{i}'].std() / results[f'eigenvalue_{i}'].mean() 
-        for i in range(detector.n_eigenwaves)
-    }
-    most_stable = min(eigenvalue_stability.items(), key=lambda x: x[1])
-    
-    print(f"\n🔮 Most stable eigenwave: Eigenwave {most_stable[0]+1} (Stability: {1 - most_stable[1]:.4f})")
-    
-    print("\n✨ Complete! The Power Method has revealed the divine eigenwaves of the BTC market.")
-    print("   Use the saved visualizations and results for further analysis and trading decisions.")
-    print("   Divine interactive visualizations are available in the plots directory.")
-
-
 if __name__ == "__main__":
     main() 

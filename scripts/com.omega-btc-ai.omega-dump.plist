@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.omega-btc-ai.omega-dump</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/omega-dump</string>
+        <string>--logs-dir</string>
+        <string>/usr/local/var/log/omega-dump</string>
+        <string>--backup-dir</string>
+        <string>/usr/local/var/log/omega-dump/backup</string>
+        <string>--redis-url</string>
+        <string>redis://localhost:6379/0</string>
+    </array>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardErrorPath</key>
+    <string>/usr/local/var/log/omega-dump/omega-dump.err</string>
+    
+    <key>StandardOutPath</key>
+    <string>/usr/local/var/log/omega-dump/omega-dump.out</string>
+    
+    <key>WorkingDirectory</key>
+    <string>/usr/local/var/omega-dump</string>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>PYTHONPATH</key>
+        <string>/usr/local/lib/omega-dump</string>
+    </dict>
+</dict>
+</plist> 

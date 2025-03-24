@@ -61,8 +61,8 @@ class TestMMTrapDetector(unittest.TestCase):
         self.assertEqual(confidence, 0.0)
 
     def test_neutral_trend_no_trap(self):
-        """Test that neutral trends don't trigger traps."""
-        trend = "Neutral"
+        """Test that stable trends don't trigger traps."""
+        trend = "stable"
         price_change = 1.5  # 1.5% change
         trap_type, confidence = detect_possible_mm_traps(
             self.test_timeframe,

@@ -217,8 +217,8 @@ class MarketTrendsModel:
         # Calculate RSI
         if len(df) > 14:
             delta = df_new['price'].diff()
-            gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-            loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+            gain = (delta.where(delta.astype(float) > 0, 0)).rolling(window=14).mean()
+            loss = (-delta.where(delta.astype(float) < 0, 0)).rolling(window=14).mean()
             rs = gain / loss
             df_new['rsi_14'] = 100 - (100 / (1 + rs))
         
@@ -234,8 +234,8 @@ class MarketTrendsModel:
                 level = low + ratio * price_range
                 df_new[f'fib_dist_{ratio}'] = (df_new['price'] - level) / df_new['price'] * 100
         
-        # Create trend change indicators
-        timeframes = [tf for tf in df.columns if tf.startswith('trend_')]
+        # Create trend change indicators - but ensure we don't duplicate "_change" suffix
+        timeframes = [tf for tf in df.columns if tf.startswith('trend_') and not tf.endswith('_change')]
         for tf in timeframes:
             df_new[f'{tf}_change'] = df_new[tf].diff().fillna(0)
         
@@ -245,7 +245,7 @@ class MarketTrendsModel:
             df_new['trend_alignment'] = (df_new['trend_15min'] == df_new['trend_60min']).astype(int)
         
         # Fill NaN values
-        df_new = df_new.fillna(method='bfill').fillna(method='ffill').fillna(0)
+        df_new = df_new.fillna(0)
         
         return df_new
     
@@ -344,7 +344,7 @@ class MarketTrendsModel:
             accuracy = accuracy_score(y_test, y_pred)
             
             logger.info(f"Trend model trained with test accuracy: {accuracy:.4f}")
-            logger.info("\n" + classification_report(y_test, y_pred))
+            logger.info(f"\n{str(classification_report(y_test, y_pred))}")
             
             # Save the model
             self.save_models()
@@ -412,7 +412,7 @@ class MarketTrendsModel:
             accuracy = accuracy_score(y_test, y_pred)
             
             logger.info(f"Trap model trained with test accuracy: {accuracy:.4f}")
-            logger.info("\n" + classification_report(y_test, y_pred))
+            logger.info(f"\n{str(classification_report(y_test, y_pred))}")
             
             # Save the model
             self.save_models()
@@ -510,6 +510,20 @@ class MarketTrendsModel:
             feature_cols = [col for col in df.columns if col not in exclude_cols]
             X = df[feature_cols]
             
+            # IMPORTANT: Ensure feature consistency by using only features the model was trained on
+            if hasattr(self.trend_classifier, 'feature_names_in_'):
+                # For newer scikit-learn versions
+                trained_features = self.trend_classifier.feature_names_in_
+                missing_features = set(trained_features) - set(X.columns)
+                extra_features = set(X.columns) - set(trained_features)
+                
+                # Add missing features with zeros
+                for feature in missing_features:
+                    X[feature] = 0
+                
+                # Select only the features used during training
+                X = X[trained_features]
+            
             # Make prediction
             pred_class = self.trend_classifier.predict(X)[0]
             pred_proba = np.max(self.trend_classifier.predict_proba(X)[0])
@@ -567,15 +581,37 @@ class MarketTrendsModel:
             feature_cols = [col for col in df.columns if col not in exclude_cols]
             X = df[feature_cols]
             
+            # IMPORTANT: Ensure feature consistency by using only features the model was trained on
+            if hasattr(self.price_regressor, 'feature_names_in_'):
+                # For newer scikit-learn versions
+                trained_features = self.price_regressor.feature_names_in_
+                missing_features = set(trained_features) - set(X.columns)
+                extra_features = set(X.columns) - set(trained_features)
+                
+                # Add missing features with zeros
+                for feature in missing_features:
+                    X[feature] = 0
+                
+                # Select only the features used during training
+                X = X[trained_features]
+            
             # Make prediction (scaled)
             scaled_pred = self.price_regressor.predict(X)[0]
             
-            # Convert back to original scale
-            price_pred = self.price_scaler.inverse_transform([[scaled_pred]])[0][0]
+            # Check if scaler is fitted before using inverse_transform
+            try:
+                # Convert back to original scale
+                price_pred = self.price_scaler.inverse_transform(np.array([[scaled_pred]]))[0][0]
+            except Exception as e:
+                logger.warning(f"Price scaler not fitted. Using scaled prediction: {e}")
+                # If scaler is not fitted, use the scaled prediction directly with current price as baseline
+                # This is a fallback approach when the scaler is not available
+                price_pred = current_price * (1 + scaled_pred)
             
             # Calculate confidence based on feature importance and variance
             # This is a simplified approach - in a real model, use prediction intervals
-            r2_score = max(0, min(1, self.price_regressor.score(X, [[scaled_pred]])))
+            score_val = float(self.price_regressor.score(X, np.array([[scaled_pred]])))
+            r2_score = max(0.0, min(1.0, score_val))
             
             # Calculate percent change
             pct_change = ((price_pred - current_price) / current_price) * 100
@@ -630,6 +666,20 @@ class MarketTrendsModel:
             exclude_cols = ['timestamp', 'trend_15min', 'price', 'trap_detected']
             feature_cols = [col for col in df.columns if col not in exclude_cols]
             X = df[feature_cols]
+            
+            # IMPORTANT: Ensure feature consistency by using only features the model was trained on
+            if hasattr(self.trap_classifier, 'feature_names_in_'):
+                # For newer scikit-learn versions
+                trained_features = self.trap_classifier.feature_names_in_
+                missing_features = set(trained_features) - set(X.columns)
+                extra_features = set(X.columns) - set(trained_features)
+                
+                # Add missing features with zeros
+                for feature in missing_features:
+                    X[feature] = 0
+                
+                # Select only the features used during training
+                X = X[trained_features]
             
             # Make prediction
             trap_detected = bool(self.trap_classifier.predict(X)[0])
@@ -849,6 +899,7 @@ class MarketTrendsModel:
         
         trap_detected = predictions["trap"].get("trap_detected", False)
         trap_type = predictions["trap"].get("trap_type", None)
+        trap_conf = predictions["trap"].get("confidence", 0.0)
         
         harmony = self._calculate_harmony_score(predictions)
         
