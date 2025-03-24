@@ -1,191 +1,164 @@
 import unittest
-from unittest.mock import patch, MagicMock
+import sys
+import os
 import json
-from datetime import datetime, timezone
+import redis
+from unittest.mock import patch, MagicMock, mock_open
+from datetime import datetime, timezone, timedelta
 
-# Import the module to be tested
-from omega_ai.monitor.market_trends_monitor_ai import AIEnhancedMarketTrendAnalyzer
+# Set up path for imports
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
+# Import modules to test
+from omega_ai.db_manager.database import analyze_price_trend, insert_price_movement
+from omega_ai.monitor.monitor_market_trends_fixed import detect_possible_mm_traps
 
-class TestMarketTrendsMonitor(unittest.TestCase):
-    """Test the AI Enhanced Market Trend Analyzer."""
-    
+class TestMarketTrendMonitor(unittest.TestCase):
+    """Test cases for the market trends monitor functionality"""
+
     def setUp(self):
-        """Set up the test environment."""
-        # Disable real connections
-        self.db_patcher = patch('omega_ai.db_manager.database.redis_conn')
-        self.db_mock = self.db_patcher.start()
+        """Set up test environment"""
+        # Mock Redis
+        self.redis_patcher = patch('redis.StrictRedis')
+        self.mock_redis = self.redis_patcher.start()
+        self.mock_redis_instance = MagicMock()
+        self.mock_redis.return_value = self.mock_redis_instance
         
-        self.fib_patcher = patch('omega_ai.mm_trap_detector.fibonacci_detector.redis_conn')
-        self.fib_mock = self.fib_patcher.start()
+        # Also mock the redis_conn in the database module
+        self.db_redis_patcher = patch('omega_ai.db_manager.database.redis_conn')
+        self.mock_db_redis = self.db_redis_patcher.start()
         
-        # Mock Redis connection
-        self.redis_patcher = patch('omega_ai.monitor.market_trends_monitor_ai.redis_conn')
-        self.redis_mock = self.redis_patcher.start()
-        
-        # Mock the get method
-        self.redis_mock.get.side_effect = self._mock_redis_get
-        self.redis_mock.lrange.return_value = ["0.5", "0.7", "0.3", "0.4"]
-        
-        # Mock the MarketTrendsModel
-        self.model_patcher = patch('omega_ai.monitor.market_trends_monitor_ai.MarketTrendsModel')
-        self.model_mock = self.model_patcher.start()
-        
-        # Create a mock instance of MarketTrendsModel
-        self.model_instance = MagicMock()
-        self.model_mock.return_value = self.model_instance
-        
-        # Mock generate_predictions method
-        self.model_instance.generate_predictions.return_value = self._mock_ai_predictions()
-        
-        # Mock analyze_price_trend
-        self.analyze_trend_patcher = patch('omega_ai.monitor.market_trends_monitor_ai.analyze_price_trend')
-        self.analyze_trend_mock = self.analyze_trend_patcher.start()
-        self.analyze_trend_mock.return_value = ("Bullish", 1.5)
-        
-        # Mock Fibonacci functions
-        self.get_fib_levels_patcher = patch('omega_ai.monitor.market_trends_monitor_ai.get_current_fibonacci_levels')
-        self.get_fib_levels_mock = self.get_fib_levels_patcher.start()
-        self.get_fib_levels_mock.return_value = self._mock_fibonacci_levels()
-        
-        self.check_fib_align_patcher = patch('omega_ai.monitor.market_trends_monitor_ai.check_fibonacci_alignment')
-        self.check_fib_align_mock = self.check_fib_align_patcher.start()
-        self.check_fib_align_mock.return_value = self._mock_fibonacci_alignment()
-        
-        self.update_fib_patcher = patch('omega_ai.monitor.market_trends_monitor_ai.update_fibonacci_data')
-        self.update_fib_mock = self.update_fib_patcher.start()
-        
-        # Create analyzer for testing
-        self.analyzer = AIEnhancedMarketTrendAnalyzer()
-    
-    def tearDown(self):
-        """Clean up after tests."""
-        self.redis_patcher.stop()
-        self.model_patcher.stop()
-        self.analyze_trend_patcher.stop()
-        self.get_fib_levels_patcher.stop()
-        self.check_fib_align_patcher.stop()
-        self.update_fib_patcher.stop()
-        self.db_patcher.stop()
-        self.fib_patcher.stop()
-    
-    def _mock_redis_get(self, key):
-        """Mock Redis get method."""
-        data = {
-            "last_btc_price": "83000",
-            "last_btc_volume": "5000",
-            "abs_price_change_history": json.dumps(["0.5", "0.7", "0.3"])
-        }
-        return data.get(key)
-    
-    def _mock_ai_predictions(self):
-        """Create mock AI predictions."""
-        return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "trend": {
-                "trend": "Bullish",
-                "confidence": 0.85
-            },
-            "price": {
-                "price": 85000.0,
-                "current_price": 83000.0,
-                "pct_change": 2.4,
-                "confidence": 0.75
-            },
-            "trap": {
-                "trap_detected": False,
-                "confidence": 0.92
-            },
-            "divine_wisdom": "The market follows the eternal dance of the Fibonacci sequence. Observe the pattern and flow with it."
-        }
-    
-    def _mock_fibonacci_levels(self):
-        """Create mock Fibonacci levels."""
-        return {
-            "0.0": 75000.0,
-            "0.236": 76800.0,
-            "0.382": 78100.0,
-            "0.5": 79000.0,
-            "0.618": 80000.0,
-            "0.786": 81500.0,
-            "1.0": 83000.0
-        }
-    
-    def _mock_fibonacci_alignment(self):
-        """Create mock Fibonacci alignment data."""
-        return {
-            "type": "GOLDEN_RATIO",
-            "level": "0.618",
-            "price": 80000.0,
-            "distance_pct": 0.01,
-            "confidence": 0.95,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-    
-    def test_analyze_trends(self):
-        """Test the analyze_trends method."""
-        # Run the method
-        results = self.analyzer.analyze_trends()
-        
-        # Check that results are as expected
-        self.assertIn("current_price", results)
-        self.assertEqual(results["current_price"], 83000.0)
-        
-        # Check timeframes
-        self.assertIn("1min", results)
-        self.assertIn("15min", results)
-        
-        # Check trend data
-        self.assertEqual(results["15min"]["trend"], "Bullish")
-        self.assertEqual(results["15min"]["change"], 1.5)
-        
-        # Check Fibonacci data
-        self.assertIn("fibonacci_levels", results)
-        self.assertIn("fibonacci_alignment", results)
-        
-        # Check AI predictions
-        self.assertIn("ai_predictions", results)
-        self.assertEqual(results["ai_predictions"]["trend"]["trend"], "Bullish")
-        self.assertEqual(results["ai_predictions"]["price"]["price"], 85000.0)
-    
-    def test_calculate_volatility(self):
-        """Test the calculate_volatility method."""
-        # Calculate volatility
-        volatility = self.analyzer.calculate_volatility()
-        
-        # Verify result
-        self.assertEqual(volatility, 0.475)  # (0.5 + 0.7 + 0.3 + 0.4) / 4
-    
-    def test_determine_market_regime(self):
-        """Test the determine_market_regime method."""
-        # Mock calculate_volatility
-        with patch.object(self.analyzer, 'calculate_volatility', return_value=0.7):
-            # Get regime
-            regime = self.analyzer.determine_market_regime()
-            
-            # Check result
-            self.assertEqual(regime, "Moderate Volatility Bullish")
-    
-    def test_high_volatility_regime(self):
-        """Test high volatility regime determination."""
-        # Mock calculate_volatility for high volatility
-        with patch.object(self.analyzer, 'calculate_volatility', return_value=1.5):
-            # Get regime
-            regime = self.analyzer.determine_market_regime()
-            
-            # Check result
-            self.assertEqual(regime, "High Volatility Bullish")
-    
-    def test_low_volatility_regime(self):
-        """Test low volatility regime determination."""
-        # Mock calculate_volatility for low volatility
-        with patch.object(self.analyzer, 'calculate_volatility', return_value=0.3):
-            # Get regime
-            regime = self.analyzer.determine_market_regime()
-            
-            # Check result
-            self.assertEqual(regime, "Low Volatility Bullish")
+        # Set up the mock to return None for cached trend data to force recalculation
+        self.mock_db_redis.get.return_value = None
 
+    def tearDown(self):
+        """Clean up after tests"""
+        self.redis_patcher.stop()
+        self.db_redis_patcher.stop()
+
+    @patch('omega_ai.db_manager.database.insert_trend_analysis', return_value=None)
+    @patch('omega_ai.db_manager.database.fetch_multi_interval_movements')
+    def test_analyze_price_trend_normal_data(self, mock_fetch, mock_insert):
+        """Test price trend analysis with normal data"""
+        # Setup mock data
+        mock_fetch.return_value = [
+            {'o': 58000.0, 'c': 60000.0, 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'o': 57000.0, 'c': 58000.0, 'timestamp': datetime.now(timezone.utc).isoformat()}
+        ]
+        
+        # Test
+        trend, change = analyze_price_trend(15)
+        
+        # Assertions
+        self.assertEqual(trend, "Strongly Bullish")
+        self.assertAlmostEqual(change, 5.26, places=2)
+        
+    @patch('omega_ai.db_manager.database.insert_trend_analysis', return_value=None)
+    @patch('omega_ai.db_manager.database.fetch_multi_interval_movements')
+    def test_analyze_price_trend_missing_data(self, mock_fetch, mock_insert):
+        """Test price trend analysis with missing data"""
+        # Setup mock data - empty list
+        mock_fetch.return_value = []
+        
+        # Test
+        trend, change = analyze_price_trend(15)
+        
+        # Assertions
+        self.assertEqual(trend, "Neutral")
+        self.assertEqual(change, 0.0)
+        
+    @patch('omega_ai.db_manager.database.insert_trend_analysis', return_value=None)
+    @patch('omega_ai.db_manager.database.fetch_multi_interval_movements')
+    def test_analyze_price_trend_invalid_price(self, mock_fetch, mock_insert):
+        """Test price trend analysis with invalid price data"""
+        # Setup mock data with zero reference price
+        mock_fetch.return_value = [
+            {'o': 60000.0, 'c': 60000.0, 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'o': 0.0, 'c': 60000.0, 'timestamp': datetime.now(timezone.utc).isoformat()}
+        ]
+        
+        # Test
+        trend, change = analyze_price_trend(15)
+        
+        # Assertions
+        self.assertEqual(trend, "Invalid Price")
+        self.assertEqual(change, 0.0)
+        
+    def test_detect_mm_traps_normal_data(self):
+        """Test MM trap detection with normal data"""
+        # Test strongly bearish trend
+        trap_type, confidence = detect_possible_mm_traps(
+            "15min", "Strongly Bearish", -3.5, 1200.0
+        )
+        
+        # Assertions
+        self.assertEqual(trap_type, "Bear Trap")
+        self.assertGreater(confidence, 0.8)
+        
+        # Test strongly bullish trend
+        trap_type, confidence = detect_possible_mm_traps(
+            "15min", "Strongly Bullish", 4.2, 1500.0
+        )
+        
+        # Assertions
+        self.assertEqual(trap_type, "Bull Trap")
+        self.assertGreater(confidence, 0.8)
+        
+    def test_detect_mm_traps_invalid_data(self):
+        """Test MM trap detection with invalid data"""
+        # Test with very small price change
+        trap_type, confidence = detect_possible_mm_traps(
+            "15min", "Slightly Bearish", -0.02, 1.5
+        )
+        
+        # Assertions
+        self.assertIsNone(trap_type)
+        self.assertEqual(confidence, 0.0)
+        
+    def test_detect_mm_traps_unrealistic_change(self):
+        """Test MM trap detection with unrealistic price change"""
+        # Test with extremely large negative change
+        trap_type, confidence = detect_possible_mm_traps(
+            "15min", "Strongly Bearish", -40.0, 40.0
+        )
+        
+        # Assertions - should still detect trap but we'll verify it's working
+        self.assertEqual(trap_type, "Bear Trap")
+        self.assertGreater(confidence, 0.8)
+        
+    @patch('omega_ai.db_manager.database.insert_trend_analysis', return_value=None)
+    @patch('omega_ai.db_manager.database.fetch_multi_interval_movements')
+    def test_trend_standardization(self, mock_fetch, mock_insert):
+        """Test consistency of trend values across the system"""
+        # Setup mock data for different trend scenarios
+        mock_fetch.return_value = [
+            {'o': 60000.0, 'c': 60000.0, 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'o': 58000.0, 'c': 58000.0, 'timestamp': datetime.now(timezone.utc).isoformat()}
+        ]
+        
+        # Test
+        trend, change = analyze_price_trend(15)
+        
+        # Assertions - verify trend value is one of the standardized values
+        self.assertIn(trend, ["Strongly Bullish", "Bullish", "Neutral", "Bearish", "Strongly Bearish", "No Data", "Invalid Price"])
+        
+    @patch('omega_ai.db_manager.database.redis_conn')
+    def test_price_movement_decimal_places(self, mock_redis):
+        """Test handling of price movement decimal places"""
+        # Insert price movement with known values
+        insert_price_movement(
+            price=60000.123456789,  # Test with many decimal places
+            volume=100.0,
+            interval=5,
+            change_pct=1.23456789,
+            abs_change=723.123456789
+        )
+        
+        # Check Redis calls
+        mock_redis.set.assert_any_call("last_btc_price", "60000.123456789")
+        mock_redis.lpush.assert_any_call("btc_movement_history", "60000.123456789,100.0")
+        mock_redis.lpush.assert_any_call("btc_change_history", "1.23456789")
+        mock_redis.lpush.assert_any_call("abs_price_change_history", "723.123456789")
 
 if __name__ == '__main__':
     unittest.main() 

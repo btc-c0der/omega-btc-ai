@@ -11,6 +11,7 @@
 # Default values
 INTERVAL=60
 USE_TMUX=false
+USE_BACKGROUND=false
 SESSION_NAME="entry-monitor"
 LOG_FILE="persona_entry_monitor.log"
 USE_MOCK=false
@@ -29,6 +30,7 @@ function show_help {
   echo "  -h, --help             Show this help message"
   echo "  -i, --interval SECONDS Interval between checks in seconds (default: 60)"
   echo "  -t, --tmux             Run in tmux session"
+  echo "  -b, --background       Run in background (default is foreground)"
   echo "  -s, --session NAME     tmux session name (default: entry-monitor)"
   echo "  -n, --no-color         Disable colored output"
   echo "  -l, --log FILE         Log file path (default: persona_entry_monitor.log)"
@@ -41,6 +43,7 @@ function show_help {
   echo "Example:"
   echo "  $0 --interval 30 --tmux --session my-monitor"
   echo "  $0 --mock --interval 120"
+  echo "  $0 --background --log custom.log"
   echo "  $0 --api-key YOUR_KEY --api-secret YOUR_SECRET --passphrase YOUR_PASS"
   echo
   echo "IMPORTANT: Without the --mock option, the script connects to the BITGET MAINNET"
@@ -60,6 +63,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -t|--tmux)
       USE_TMUX=true
+      shift
+      ;;
+    -b|--background)
+      USE_BACKGROUND=true
       shift
       ;;
     -s|--session)
@@ -164,11 +171,9 @@ function run_in_tmux {
   fi
 }
 
-# Run command
-if [ "$USE_TMUX" = true ]; then
-  run_in_tmux
-else
-  echo "Running persona entry monitor with interval: ${INTERVAL}s"
+# Function to run in background
+function run_in_background {
+  echo "Running persona entry monitor in background with interval: ${INTERVAL}s"
   if [ "$USE_MOCK" = true ]; then
     echo "Using mock market data"
   else
@@ -189,4 +194,34 @@ else
   echo "Entry monitor running in background with PID: $PID"
   echo "To view logs: tail -f $LOG_FILE"
   echo "To stop: kill $PID"
+}
+
+# Function to run in foreground
+function run_in_foreground {
+  echo "Running persona entry monitor in foreground with interval: ${INTERVAL}s"
+  if [ "$USE_MOCK" = true ]; then
+    echo "Using mock market data"
+  else
+    echo "Using REAL BitGet MAINNET market data"
+  fi
+  
+  if [ "$USE_COLOR" = false ]; then
+    echo "Color output disabled"
+  fi
+  
+  echo "Minimum confidence threshold: $MIN_CONFIDENCE"
+  echo "Press Ctrl+C to stop"
+  echo
+  
+  # Run directly in foreground
+  eval "$CMD"
+}
+
+# Run command
+if [ "$USE_TMUX" = true ]; then
+  run_in_tmux
+elif [ "$USE_BACKGROUND" = true ]; then
+  run_in_background
+else
+  run_in_foreground
 fi 

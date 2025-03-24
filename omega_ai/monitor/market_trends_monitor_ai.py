@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, Optional, Any
 from datetime import datetime, timezone
 from omega_ai.ml.market_trends_model import MarketTrendsModel
 from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap
-from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level, update_fibonacci_data
+from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level, update_fibonacci_data, check_fibonacci_alignment
 
 # Configure logger with enhanced formatting
 logger = logging.getLogger(__name__)
@@ -185,13 +185,14 @@ class AIEnhancedMarketTrendAnalyzer:
         # Display trends for each timeframe with enhanced formatting
         for timeframe, data in results.items():
             if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment" and timeframe != "current_price" and timeframe != "ai_predictions":
-                trend = data["trend"]
-                change = data["change"]
-                print(format_trend_output(timeframe, trend, change))
-                
-                # Add movement description
-                abs_change = abs(change)
-                print(f"   {describe_movement(change, abs_change)}")
+                if isinstance(data, dict) and "trend" in data and "change" in data:
+                    trend = data["trend"]
+                    change = data["change"]
+                    print(format_trend_output(timeframe, trend, change))
+                    
+                    # Add movement description
+                    abs_change = abs(change)
+                    print(f"   {describe_movement(change, abs_change)}")
         
         # Display Fibonacci analysis if available
         if "fibonacci_alignment" in results:

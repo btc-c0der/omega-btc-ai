@@ -104,6 +104,12 @@ This creates:
 
 1. `plots/gamon_trinity_matrix_live.html` - Complete Trinity Matrix visualization
 2. `plots/gamon_trinity_dashboard_live.html` - Real-time dashboard with key metrics
+3. `plots/gamon_matrix.png` - Static PNG version of the Trinity Matrix
+4. `plots/btc_state_transitions.png` - PNG visualization of state transitions
+5. `plots/btc_market_states.png` - PNG visualization of market states
+6. `plots/btc_eigenwave_contributions.png` - PNG visualization of eigenwave analysis
+
+All PNG files are stored in the `plots/` directory at the root of the project. These static visualizations provide snapshot records of market conditions at specific times and can be used for external reports or documentation.
 
 ## Running the Live Feed
 

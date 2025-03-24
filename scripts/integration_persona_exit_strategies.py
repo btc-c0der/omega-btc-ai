@@ -535,7 +535,7 @@ class PersonaExitManager:
 
 # Example usage in RastaBitgetMonitor
 # Add this method to RastaBitgetMonitor class:
-"""
+'''
 def _display_persona_recommendations(self, analysis: Dict[str, Any]):
     """Display persona-based exit recommendations."""
     position_analyses = analysis['position_analyses']
@@ -554,7 +554,7 @@ def _display_persona_recommendations(self, analysis: Dict[str, Any]):
             persona_exit_strategy
         )
         print(recommendations_display)
-"""
+'''
 
 if __name__ == "__main__":
     print("This module is intended to be imported by RastaBitgetMonitor.")

@@ -286,6 +286,64 @@ def detect_possible_mm_traps(timeframe, trend, price_change_pct, price_move):
     print(f"\n{BLUE_BG}{WHITE}{BOLD} MM TRAP ANALYSIS | {timeframe} {RESET}")
     print(f"{MAGENTA}{'─' * 5} ANALYZING PRICE ACTION {'─' * 5}{RESET}")
     
+    # Check if trend data is missing or "No Data"
+    if not trend or trend == "No Data":
+        # Attempt to use movement data from Redis as fallback
+        try:
+            movement_history = redis_conn.lrange("btc_movement_history", 0, 0)
+            candle_data = redis_conn.get(f"btc_candle_{timeframe}")
+            last_price = float(redis_conn.get("last_btc_price") or 0)
+            
+            if candle_data:
+                # Use candle data if available
+                candle = json.loads(candle_data)
+                if 'o' in candle and 'c' in candle:
+                    old_price = float(candle['o'])
+                    new_price = float(candle['c'])
+                    if old_price > 0:
+                        calculated_change = ((new_price - old_price) / old_price) * 100
+                        price_move = abs(new_price - old_price)
+                        
+                        # Infer trend from price change
+                        if calculated_change > 1.0:
+                            trend = "Bullish"
+                        elif calculated_change < -1.0:
+                            trend = "Bearish"
+                        else:
+                            trend = "Neutral"
+                            
+                        price_change_pct = calculated_change
+                        print(f"{YELLOW}⚠️ No trend data available. Using candle data: {trend} ({price_change_pct:.2f}%){RESET}")
+            elif movement_history:
+                # Use movement history as fallback
+                try:
+                    last_movements = movement_history[0].split(',')
+                    if len(last_movements) >= 2:
+                        old_price = float(last_movements[0])
+                        if old_price > 0 and last_price > 0:
+                            calculated_change = ((last_price - old_price) / old_price) * 100
+                            price_move = abs(last_price - old_price)
+                            
+                            # Infer trend from price change
+                            if calculated_change > 1.0:
+                                trend = "Bullish"
+                            elif calculated_change < -1.0:
+                                trend = "Bearish"
+                            else:
+                                trend = "Neutral"
+                                
+                            price_change_pct = calculated_change
+                            print(f"{YELLOW}⚠️ No trend data available. Using price movement data: {trend} ({price_change_pct:.2f}%){RESET}")
+                except Exception as e:
+                    logger.warning(f"Error parsing movement history for fallback: {e}")
+            else:
+                print(f"{RED}❌ No trend data or fallback data available for analysis{RESET}")
+                return None, 0.0
+        except Exception as e:
+            logger.warning(f"Failed to use fallback data: {e}")
+            print(f"{RED}❌ No trend data available and fallback failed{RESET}")
+            return None, 0.0
+    
     # Print price movement metrics
     print(f"{WHITE}Price Change: {price_change_pct:.2f}% | Absolute Move: ${price_move:.2f}{RESET}")
     print(f"{WHITE}Trend: {trend}{RESET}")
@@ -425,6 +483,44 @@ def monitor_market_trends():
     
     analyzer = MarketTrendAnalyzer()
     
+    # Ensure we have access to historical BTC data
+    try:
+        # Check if btc_movement_history exists
+        movement_count = redis_conn.llen("btc_movement_history")
+        if movement_count == 0:
+            print(f"{YELLOW}⚠️ No BTC movement history found. Manual initialization may be required.{RESET}")
+            
+            # Try to get current price at least
+            current_price = float(redis_conn.get("last_btc_price") or 0)
+            if current_price > 0:
+                print(f"{GREEN}✓ Current BTC price available: ${current_price:,.2f}{RESET}")
+                # Initialize movement history with current price
+                redis_conn.lpush("btc_movement_history", f"{current_price},0")
+                print(f"{GREEN}✓ Initialized movement history with current price{RESET}")
+        else:
+            print(f"{GREEN}✓ BTC movement history available ({movement_count} entries){RESET}")
+            
+        # Check if candle data exists for timeframes
+        for timeframe in ["1min", "5min", "15min", "30min", "60min", "240min"]:
+            candle_data = redis_conn.get(f"btc_candle_{timeframe}")
+            if candle_data:
+                print(f"{GREEN}✓ Candle data available for {timeframe}{RESET}")
+            else:
+                print(f"{YELLOW}⚠️ No candle data found for {timeframe}. Will use movement history as fallback.{RESET}")
+        
+        # Make sure Fibonacci data is initialized
+        fib_data = get_current_fibonacci_levels()
+        if not fib_data:
+            # Try to initialize with current price
+            current_price = float(redis_conn.get("last_btc_price") or 0)
+            if current_price > 0:
+                update_fibonacci_data(current_price)
+                print(f"{GREEN}✓ Initialized Fibonacci levels with current price${current_price:,.2f}{RESET}")
+            else:
+                print(f"{YELLOW}⚠️ Could not initialize Fibonacci levels - missing price data{RESET}")
+    except Exception as e:
+        print(f"{RED}⚠️ Error during data availability check: {e}{RESET}")
+    
     while True:
         try:
             # Check if it's time for analysis
@@ -435,6 +531,13 @@ def monitor_market_trends():
                 # Perform analysis
                 print(f"\n{BLUE_BG}{WHITE}{BOLD} MARKET ANALYSIS | {now.strftime('%Y-%m-%d %H:%M:%S')} {RESET}")
                 results = analyzer.analyze_trends()
+                
+                # If current price is missing, fetch it directly
+                if "current_price" not in results or results["current_price"] == 0:
+                    current_price = float(redis_conn.get("last_btc_price") or 0)
+                    if current_price > 0:
+                        results["current_price"] = current_price
+                        print(f"{GREEN}✓ Retrieved current price from Redis: ${current_price:,.2f}{RESET}")
                 
                 # Display results
                 analyzer.display_results(results)

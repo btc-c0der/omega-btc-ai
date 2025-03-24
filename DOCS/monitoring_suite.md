@@ -16,7 +16,7 @@ The OMEGA BTC AI Integrated Monitoring Suite combines multiple monitoring tools 
 Run the monitoring suite with a single command:
 
 ```bash
-./run_monitors.sh
+./run_trap_position_monitors.sh
 ```
 
 ### Keyboard Controls
@@ -53,11 +53,28 @@ Analyzes market conditions for potential manipulation:
 
 ## Customization
 
-The default configuration provides an optimal balance between the two monitoring components, but you can adjust the layout by modifying the `run_monitors.sh` script:
+The default configuration provides an optimal balance between the two monitoring components, but you can adjust the layout by modifying the `run_trap_position_monitors.sh` script:
 
 - Change the refresh interval by modifying the `--interval` parameters
-- Adjust the vertical space allocation by changing the `-y` percentage in the `resize-pane` command
-- Modify the styling by editing the `set-option` commands
+- Adjust the pane size allocation by changing the resize-pane percentages
+
+### Split Mode Configuration
+
+You can configure the split orientation through your `.env` file:
+
+```
+# In your .env file
+SPLIT_MODE=vertical   # Default: panes stacked top/bottom
+```
+
+To optimize for vertical monitors, use a horizontal split:
+
+```
+# In your .env file
+SPLIT_MODE=horizontal   # Panes arranged side-by-side (better for vertical monitors)
+```
+
+This configuration will be automatically loaded when you run the script.
 
 ## Troubleshooting
 

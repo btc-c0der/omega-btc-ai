@@ -179,12 +179,20 @@ def parse_arguments():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Persona-Enhanced BitGet Position Monitor")
     
+    # Authentication options
+    parser.add_argument("--api-key", type=str, help="BitGet API key")
+    parser.add_argument("--api-secret", type=str, help="BitGet API secret")
+    parser.add_argument("--passphrase", type=str, help="BitGet API passphrase")
+    
+    # Display options
     parser.add_argument("--interval", type=int, default=5,
                         help="Refresh interval in seconds (default: 5)")
     parser.add_argument("--no-color", action="store_true",
                         help="Disable colored output")
     parser.add_argument("--debug", action="store_true",
                         help="Enable debug mode")
+    
+    # Exit strategy options
     parser.add_argument("--disable-advanced-exits", action="store_true",
                         help="Disable advanced exit strategies")
     parser.add_argument("--fee-coverage", type=float, default=200.0,
@@ -202,14 +210,15 @@ def parse_arguments():
 
 async def main(args):
     """Main function to run the persona-enhanced monitor."""
-    # Get API credentials from environment
-    api_key = os.getenv("BITGET_API_KEY", "")
-    api_secret = os.getenv("BITGET_API_SECRET", "")
-    passphrase = os.getenv("BITGET_PASSPHRASE", "")
+    # Get API credentials from command line args or environment
+    api_key = args.api_key or os.environ.get("BITGET_API_KEY", "")
+    api_secret = args.api_secret or os.environ.get("BITGET_SECRET_KEY", "")
+    passphrase = args.passphrase or os.environ.get("BITGET_PASSPHRASE", "")
     
-    if not api_key or not api_secret or not passphrase:
-        print("Error: API credentials not found in .env file")
-        print("Please set BITGET_API_KEY, BITGET_API_SECRET, and BITGET_PASSPHRASE")
+    if not all([api_key, api_secret, passphrase]):
+        print("Error: API credentials are required")
+        print("Please provide them as command line arguments or set environment variables:")
+        print("  BITGET_API_KEY, BITGET_SECRET_KEY, and BITGET_PASSPHRASE")
         return
     
     # Initialize the persona-enhanced monitor
