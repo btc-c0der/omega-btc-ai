@@ -1,0 +1,58 @@
+{
+  "name": "OMEGA Whale Movement #0x123456",
+  "description": "A significant whale movement of 150.50 BTC captured on 2024-03-24 12:00:00",
+  "image": "generated_nfts/visualizations/whale_movement_0x123456.html",
+  "attributes": [
+    {
+      "trait_type": "Value",
+      "value": "150.50 BTC"
+    },
+    {
+      "trait_type": "Fibonacci Level",
+      "value": "0.618"
+    },
+    {
+      "trait_type": "Cluster Size",
+      "value": 2
+    },
+    {
+      "trait_type": "Divine Alignment",
+      "value": "0.0000"
+    },
+    {
+      "trait_type": "Temporal Resonance",
+      "value": "0.0000"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": "25.21"
+    }
+  ],
+  "blockchain_data": {
+    "transaction_hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    "block_timestamp": 1711278000,
+    "value_btc": 150.5,
+    "from_addresses": [
+      "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    ],
+    "to_addresses": [
+      "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    ],
+    "cluster_size": 2,
+    "network": "Bitcoin",
+    "chain_id": "mainnet"
+  },
+  "divine_metrics": {
+    "divine_alignment": 0.0,
+    "cluster_harmony": 0.3333333333333333,
+    "temporal_resonance": 1.2246467991473532e-16,
+    "fibonacci_level": 0.618,
+    "golden_ratio_alignment": 0.06985884693140836,
+    "silver_ratio_alignment": 0.37660858862849195
+  },
+  "rarity_score": 25.206666666666667,
+  "edition": 1,
+  "total_editions": 1,
+  "created_at": "2025-03-24T19:42:52.037846",
+  "updated_at": "2025-03-24T19:42:52.037846"
+}

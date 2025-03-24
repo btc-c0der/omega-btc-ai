@@ -36,6 +36,14 @@ except redis.ConnectionError as e:
     logger.error(f"Failed to connect to Redis: {e}")
     redis_conn = None
 
+def get_db_connection():
+    """Return the Redis connection object.
+    
+    Returns:
+        Redis connection object or None if connection failed
+    """
+    return redis_conn
+
 def initialize_database() -> None:
     """Initialize the database with required tables."""
     try:
@@ -531,9 +539,142 @@ def fetch_recent_mm_traps(limit: int = 10) -> List[Dict[str, Any]]:
         logger.error(f"Error fetching MM traps: {e}")
         return []
 
+def validate_price_change(change_pct: float, timeframe_minutes: int) -> Tuple[bool, str]:
+    """
+    Validate if a price change percentage is realistic for the given timeframe.
+    
+    Args:
+        change_pct: The percentage change to validate
+        timeframe_minutes: The timeframe in minutes
+        
+    Returns:
+        Tuple of (is_valid, reason)
+    """
+    # Define maximum allowed percentage changes based on timeframe
+    # These are reasonable limits that can be adjusted based on market volatility
+    max_changes = {
+        1: 5.0,      # 1min: max 5% change
+        5: 8.0,      # 5min: max 8% change
+        15: 12.0,    # 15min: max 12% change
+        30: 15.0,    # 30min: max 15% change
+        60: 20.0,    # 1hr: max 20% change
+        240: 30.0,   # 4hr: max 30% change
+        720: 40.0,   # 12hr: max 40% change
+        1440: 50.0,  # 24hr: max 50% change
+    }
+    
+    # Get the maximum allowed change for this timeframe
+    max_allowed = max_changes.get(timeframe_minutes, 50.0)
+    
+    # Check if the change exceeds the maximum allowed (in either direction)
+    if abs(change_pct) > max_allowed:
+        return False, f"Price change of {change_pct:.2f}% exceeds maximum of {max_allowed:.2f}% for {timeframe_minutes}min timeframe"
+    
+    return True, "Valid price change"
+
+def format_price(price: float) -> str:
+    """
+    Format a price value consistently.
+    
+    Args:
+        price: The price to format
+        
+    Returns:
+        Formatted price string with commas and 2 decimal places
+    """
+    return f"${price:,.2f}"
+
+def format_percentage(percentage: float) -> str:
+    """
+    Format a percentage value consistently.
+    
+    Args:
+        percentage: The percentage to format
+        
+    Returns:
+        Formatted percentage string with 2 decimal places and % sign
+    """
+    if percentage is None:
+        percentage = 0.0
+    elif isinstance(percentage, str):
+        try:
+            percentage = float(percentage)
+        except ValueError:
+            percentage = 0.0
+    
+    return f"{percentage:.2f}%"
+
+def get_fallback_trend_data(minutes: int) -> Tuple[str, float]:
+    """
+    Get fallback trend data when primary sources are unavailable.
+    Uses multiple fallback mechanisms in a cascading manner.
+    
+    Args:
+        minutes: Timeframe in minutes
+        
+    Returns:
+        Tuple of (trend_description, percent_change)
+    """
+    logger.info(f"Using fallback mechanism for {minutes}min trend data")
+    
+    # Fallback 1: Try to get data from a nearby timeframe
+    nearby_timeframes = [1, 5, 15, 30, 60, 240, 720, 1440]
+    nearby_timeframes.sort(key=lambda x: abs(x - minutes))
+    
+    for tf in nearby_timeframes[1:3]:  # Try the 2 closest timeframes
+        try:
+            if redis_conn:
+                cached_trend = redis_conn.get(f"btc_trend_{tf}min")
+                if cached_trend:
+                    trend_data = json.loads(cached_trend)
+                    logger.info(f"Using {tf}min data as fallback for {minutes}min")
+                    change_pct = trend_data.get("change_pct", 0.0)
+                    # Ensure change_pct is a float
+                    if isinstance(change_pct, str):
+                        try:
+                            change_pct = float(change_pct)
+                        except ValueError:
+                            change_pct = 0.0
+                    return trend_data.get("trend", "Neutral"), change_pct
+        except Exception as e:
+            logger.warning(f"Failed to get fallback data from {tf}min: {e}")
+    
+    # Fallback 2: Try to calculate from price history
+    try:
+        if redis_conn:
+            price_history = redis_conn.lrange("btc_movement_history", 0, 1)
+            if len(price_history) >= 2:
+                # Parse price history entries
+                latest_price = float(price_history[0].split(",")[0])
+                reference_price = float(price_history[-1].split(",")[0])
+                
+                if reference_price > 0:
+                    change_pct = ((latest_price - reference_price) / reference_price) * 100
+                    
+                    # Determine trend
+                    if change_pct > 3.0:
+                        trend = "Strongly Bullish"
+                    elif change_pct > 0.5:
+                        trend = "Bullish"
+                    elif change_pct < -3.0:
+                        trend = "Strongly Bearish"
+                    elif change_pct < -0.5:
+                        trend = "Bearish"
+                    else:
+                        trend = "Neutral"
+                        
+                    logger.info(f"Calculated fallback trend from price history: {trend} ({change_pct:.2f}%)")
+                    return trend, change_pct
+    except Exception as e:
+        logger.warning(f"Failed to calculate trend from price history: {e}")
+    
+    # Fallback 3: Default to neutral with zero change
+    logger.warning(f"All fallback mechanisms failed for {minutes}min, using default neutral")
+    return "Neutral", 0.0
+
 def analyze_price_trend(minutes: int) -> Tuple[str, float]:
     """
-    Analyze price trend for the given timeframe.
+    Analyze price trend for the given timeframe with enhanced validation and fallbacks.
     
     Args:
         minutes: Time interval in minutes
@@ -549,65 +690,117 @@ def analyze_price_trend(minutes: int) -> Tuple[str, float]:
                 if cached_trend:
                     trend_data = json.loads(cached_trend)
                     now = datetime.now(timezone.utc)
-                    timestamp = datetime.fromisoformat(trend_data["timestamp"])
+                    timestamp = datetime.fromisoformat(trend_data.get("timestamp", now.isoformat()))
                     
-                    # Use cached result if less than 1 minute old
-                    age_seconds = (now - timestamp).total_seconds()
-                    if age_seconds < 60:
-                        return trend_data["trend"], trend_data["change_pct"]
+                    # Also validate cached data
+                    age_minutes = (now - timestamp).total_seconds() / 60
+                    if age_minutes < 1.0 and "trend" in trend_data and "change_pct" in trend_data:
+                        # Ensure the change_pct is a float
+                        change_pct = trend_data["change_pct"]
+                        if isinstance(change_pct, str):
+                            try:
+                                change_pct = float(change_pct)
+                            except ValueError:
+                                change_pct = 0.0
+                        # Return cached result
+                        return trend_data["trend"], float(change_pct)
             except Exception as e:
-                logger.warning(f"Failed to get cached trend: {e}")
+                logger.warning(f"Failed to retrieve cached trend for {minutes}min: {e}")
         
-        # If no cached result or too old, calculate from data
-        movements, summary = fetch_multi_interval_movements(interval=minutes, limit=100)
+        # If no valid cached data, calculate trend
+        # Get price data from database
+        price_data, _ = fetch_multi_interval_movements(minutes)
         
-        # Need at least 2 price points for trend
-        if len(movements) < 2:
-            return "No Data", 0.0
-        
-        # Calculate percentage change
-        latest_price = movements[0]["price"]
-        reference_price = movements[-1]["price"]
-        
-        if reference_price <= 0:  # Avoid division by zero
-            return "Invalid Price", 0.0
+        if not price_data or len(price_data) < 2:
+            logger.warning(f"Missing price data for {minutes}min trend analysis")
+            return get_fallback_trend_data(minutes)
             
-        change_pct = ((latest_price - reference_price) / reference_price) * 100
-        
-        # Determine trend
-        if change_pct > 2.0:
-            trend = "Strongly Bullish"
-        elif change_pct > 0.5:
-            trend = "Bullish"
-        elif change_pct < -2.0:
-            trend = "Strongly Bearish"
-        elif change_pct < -0.5:
-            trend = "Bearish"
-        else:
-            trend = "Neutral"
-        
-        # Store analysis in database
-        insert_trend_analysis(minutes, trend, change_pct)
-        
-        # Cache in Redis if available
-        if redis_conn:
-            try:
-                trend_data = {
-                    "timeframe": minutes,
-                    "trend": trend,
-                    "change_pct": change_pct,
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                }
+        # Extract current and old prices
+        try:
+            current_candle = price_data[0]
+            old_candle = price_data[-1]
+            
+            # Check for invalid price data
+            if not isinstance(current_candle, dict) or not isinstance(old_candle, dict):
+                logger.warning(f"Invalid candle data format for {minutes}min")
+                return get_fallback_trend_data(minutes)
                 
-                redis_conn.set(f"btc_trend_{minutes}min", json.dumps(trend_data))
+            # Safely access candle data
+            current_price = current_candle.get('c', 0)
+            reference_price = old_candle.get('o', 0)
+            
+            # Ensure values are floats
+            if isinstance(current_price, str):
+                try:
+                    current_price = float(current_price)
+                except ValueError:
+                    current_price = 0.0
+            if isinstance(reference_price, str):
+                try:
+                    reference_price = float(reference_price)
+                except ValueError:
+                    reference_price = 0.0
+                    
+            if current_price <= 0 or reference_price <= 0:
+                logger.warning(f"Invalid price values (0 or negative) for {minutes}min trend analysis")
+                return get_fallback_trend_data(minutes)
+            
+            # Calculate price change
+            price_diff = current_price - reference_price
+            percent_change = (price_diff / reference_price) * 100
+            
+            # Validate the calculated change
+            is_valid, reason = validate_price_change(percent_change, minutes)
+            if not is_valid:
+                logger.warning(reason)
+                # Cap the change to maximum allowed
+                max_changes = {
+                    1: 5.0, 5: 8.0, 15: 12.0, 30: 15.0, 
+                    60: 20.0, 240: 30.0, 720: 40.0, 1440: 50.0
+                }
+                max_allowed = max_changes.get(minutes, 50.0)
+                # Preserve direction but cap magnitude
+                if percent_change > 0:
+                    percent_change = min(percent_change, max_allowed)
+                else:
+                    percent_change = max(percent_change, -max_allowed)
+            
+            # Classify the trend based on percentage change
+            if percent_change > 3.0:
+                trend = "Strongly Bullish"
+            elif percent_change > 0.5:
+                trend = "Bullish"
+            elif percent_change < -3.0:
+                trend = "Strongly Bearish"
+            elif percent_change < -0.5:
+                trend = "Bearish"
+            else:
+                trend = "Neutral"
+                
+            # Log the result
+            logger.info(f"Analyzed {minutes}min trend: {trend} ({percent_change:.2f}%) from {format_price(reference_price)} to {format_price(current_price)}")
+            
+            # Cache the result in Redis
+            try:
+                if redis_conn:
+                    result = {
+                        "trend": trend,
+                        "change_pct": percent_change,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                    redis_conn.set(f"btc_trend_{minutes}min", json.dumps(result))
             except Exception as e:
-                logger.warning(f"Failed to cache trend in Redis: {e}")
-        
-        return trend, change_pct
-        
+                logger.warning(f"Failed to cache trend result: {e}")
+                
+            return trend, percent_change
+            
+        except (IndexError, KeyError, TypeError) as e:
+            logger.warning(f"Error accessing price data for {minutes}min: {e}")
+            return get_fallback_trend_data(minutes)
+            
     except Exception as e:
-        logger.error(f"Error analyzing trend: {e}")
-        return "Error", 0.0
+        logger.error(f"Error in trend analysis for {minutes}min: {e}")
+        return get_fallback_trend_data(minutes)
 
 # Ensure database is initialized
 try:

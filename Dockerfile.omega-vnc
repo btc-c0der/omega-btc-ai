@@ -1,0 +1,64 @@
+# OMEGA BTC AI - Custom VNC Portal Docker Image
+# ==========================================
+#
+# Based on dorowu/ubuntu-desktop-lxde-vnc with OMEGA BTC AI customizations
+#
+# Copyright (C) 2024 OMEGA BTC AI Team
+# License: GNU General Public License v3.0
+
+FROM dorowu/ubuntu-desktop-lxde-vnc:latest
+
+LABEL maintainer="OMEGA BTC AI Team <omega-btc-ai@example.com>"
+
+# Install additional tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    vim \
+    git \
+    htop \
+    tmux \
+    python3 \
+    python3-pip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add custom scripts
+COPY ./docker/omega-vnc/scripts/ /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh || true
+
+# Add custom branding
+COPY ./docker/omega-vnc/branding/logo.png /usr/local/share/novnc/app/images/logo.png
+COPY ./docker/omega-vnc/branding/bg.jpg /usr/share/backgrounds/omega-bg.jpg
+
+# Customize noVNC interface
+RUN sed -i 's/<title>noVNC<\/title>/<title>OMEGA VNC Portal<\/title>/' /usr/local/share/novnc/vnc.html \
+    && sed -i 's/noVNC/OMEGA VNC Portal/g' /usr/local/share/novnc/app/ui.js
+
+# Set default environment variables
+ENV HOME=/root \
+    DEBIAN_FRONTEND=noninteractive \
+    VNC_RESOLUTION=1280x800 \
+    VNC_COL_DEPTH=24 \
+    DISPLAY=:1 \
+    VNC_PW=jah_bless_vnc \
+    VNC_VIEW_ONLY=false
+
+# Create required directories
+RUN mkdir -p /root/omega
+
+# Create desktop shortcuts
+RUN mkdir -p /root/Desktop
+COPY ./docker/omega-vnc/desktop/ /root/Desktop/
+RUN chmod +x /root/Desktop/*.desktop || true
+
+# Set wallpaper
+RUN mkdir -p /root/.config/autostart && \
+    echo 'pcmanfm --set-wallpaper="/usr/share/backgrounds/omega-bg.jpg"' > /root/.config/autostart/wallpaper.sh \
+    && chmod +x /root/.config/autostart/wallpaper.sh
+
+# Expose ports
+EXPOSE 80
+
+# Set entrypoint
+ENTRYPOINT ["/startup.sh"] 

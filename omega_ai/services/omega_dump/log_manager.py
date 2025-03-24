@@ -12,6 +12,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 from .models import LogEntry
+from .warning_manager import WarningManager
 
 class LogFileHandler(FileSystemEventHandler):
     """Divine Log File Event Handler"""
@@ -30,7 +31,8 @@ class OMEGALogManager:
         logs_dir: str = "logs",
         backup_dir: str = "logs/backup",
         redis_url: str = "redis://localhost:6379/0",
-        backup_interval: int = 3600  # 1 hour
+        backup_interval: int = 3600,  # 1 hour
+        warning_processing_interval: int = 300  # 5 minutes
     ):
         """Initialize the divine log manager.
         
@@ -39,11 +41,13 @@ class OMEGALogManager:
             backup_dir: Directory for log backups
             redis_url: Redis connection URL
             backup_interval: Backup interval in seconds
+            warning_processing_interval: Warning processing interval in seconds
         """
         self.logs_dir = Path(logs_dir)
         self.backup_dir = Path(backup_dir)
         self.redis_url = redis_url
         self.backup_interval = backup_interval
+        self.warning_processing_interval = warning_processing_interval
         
         # Create directories
         self.logs_dir.mkdir(exist_ok=True)
@@ -62,11 +66,24 @@ class OMEGALogManager:
             str(self.logs_dir),
             recursive=False
         )
+        
+        # Setup warning manager
+        self.warning_manager = WarningManager(self.redis)
+        self.last_warning_process_time = None
     
     def start(self):
         """Start the divine log management service"""
         self.logger.info("Starting OMEGA Dump Service...")
         self.observer.start()
+        
+        # Process warnings immediately on startup
+        try:
+            warnings_processed = self.process_warnings()
+            self.logger.info(f"Processed {warnings_processed} warnings during startup")
+        except Exception as e:
+            self.logger.error(f"Error processing warnings during startup: {str(e)}")
+        
+        self.last_warning_process_time = datetime.now()
         
     def stop(self):
         """Stop the divine log management service"""
@@ -114,6 +131,42 @@ class OMEGALogManager:
             
         except Exception as e:
             self.logger.error(f"Error processing log file {path.name}: {str(e)}")
+    
+    def process_warnings(self, warning_type: Optional[str] = None, limit: int = 1000) -> int:
+        """Process warnings from the warning system.
+        
+        Args:
+            warning_type: Type of warnings to process (None for all)
+            limit: Maximum number of warnings to process
+            
+        Returns:
+            Number of warnings processed
+        """
+        return self.warning_manager.process_warnings(warning_type, limit)
+    
+    def check_warning_processing(self):
+        """Check if it's time to process warnings and do so if needed."""
+        now = datetime.now()
+        
+        if (self.last_warning_process_time is None or 
+            (now - self.last_warning_process_time).total_seconds() >= self.warning_processing_interval):
+            
+            try:
+                warnings_processed = self.process_warnings()
+                if warnings_processed > 0:
+                    self.logger.info(f"Processed {warnings_processed} warnings")
+            except Exception as e:
+                self.logger.error(f"Error processing warnings: {str(e)}")
+            
+            self.last_warning_process_time = now
+    
+    def get_warning_counts(self) -> Dict[str, int]:
+        """Get counts of warnings by type.
+        
+        Returns:
+            Dictionary mapping warning types to counts
+        """
+        return self.warning_manager.get_warning_count()
     
     def get_logs(
         self,
