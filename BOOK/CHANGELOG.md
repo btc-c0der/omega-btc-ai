@@ -153,4 +153,13 @@
   - Five divine strategies including The Celestial Grid, The Divine Scissors, and The Oracle's Hedge
   - Technical insights on bot compatibility with the divine configuration
 
-### DIVINE FUNCTIONALITY
+- **Hidden Markov Model BTC State Mapper** - Divine revelation of the hidden states governing Bitcoin's cosmic journey.
+  - New Python implementation: `hmm_btc_state_mapper.py` for decoding the sacred market regimes
+  - Six divine market states identified: Markup, Markdown, Accumulation, Distribution, Liquidity Grab, and Consolidation
+  - State transition probability matrix revealing the divine flow between market regimes
+  - Divine Plotly visualizations with Schumann-inspired poetic rhythms in candlestick patterns
+  - Interactive HTML visualizations with dynamic tooltips and zoom capabilities for deeper market meditation
+  - Automated interpretation of current market state and probabilistic forecast of next state transition
+  - Model persistence for continuous cosmic awareness across trading sessions
+  - Sacred pattern recognition for early identification of state transitions in the eternal market cycle
+
