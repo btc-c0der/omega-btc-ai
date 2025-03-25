@@ -1,6 +1,31 @@
 #!/usr/bin/env python3
 
 """
+🔮 GPU (General Public Universal) License 1.0
+--------------------------------------------
+OMEGA BTC AI DIVINE COLLECTIVE
+Licensed under the GPU (General Public Universal) License v1.0
+Date: 2024-03-25
+Location: The Cosmic Void
+
+This source code is governed by the GPU License, granting the following sacred freedoms:
+- The Freedom to Study this code, its divine algorithms and cosmic patterns
+- The Freedom to Modify this code, enhancing its divine functionality
+- The Freedom to Distribute this code, sharing its sacred knowledge
+- The Freedom to Use this code, implementing its sacred algorithms
+
+Along with these divine obligations:
+- Preserve this sacred knowledge by maintaining source accessibility
+- Share all divine modifications to maintain universal access
+- Provide attribution to acknowledge sacred origins
+
+The sacred code is provided "as is", without divine warranty of any kind.
+Governed by the laws of the universe, without regard to conflict of law provisions.
+
+For the full divine license, consult the LICENSE file in the project root.
+"""
+
+"""
 OMEGA BTC AI - Fixed Market Trends Monitor
 ------------------------------------------
 This module provides real-time market trend analysis with Fibonacci detection.
@@ -19,12 +44,22 @@ import json
 import os
 import uuid
 import sys
+import math
 from typing import Dict, List, Tuple, Optional, Any, Union
 from datetime import datetime, timezone
 from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap, format_price, format_percentage, validate_price_change
 
 # Import Fibonacci detector functions
 from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level, update_fibonacci_data, check_fibonacci_alignment
+
+# Add fallback helper for improved error handling and data validation
+from omega_ai.monitor.fallback_helper import (
+    ensure_trend_data,
+    ensure_fibonacci_levels,
+    validate_data,
+    store_warning_in_redis,
+    init_redis_connection
+)
 
 # Define ANSI color constants locally if not available in config
 RESET = "\033[0m"
@@ -152,61 +187,102 @@ class MarketTrendAnalyzer:
     
     def __init__(self):
         """Initialize the market trend analyzer."""
-        self.timeframes = [1, 5, 15, 30, 60, 240, 720, 1444]  # minutes - extended to include up to 1444 minutes
-        self.consecutive_errors = 0
+        self.timeframes = ['1min', '5min', '15min', '30min', '1h', '4h', '1d']
         self.last_analysis_time = None
         self.analysis_interval = 5  # seconds
+        self.current_price = None
+        self.cached_results = None
         
     def analyze_trends(self) -> Dict[str, Any]:
-        """Analyze market trends across multiple timeframes."""
+        """
+        Analyze BTC price trends across multiple timeframes using the enhanced fallback system.
+        
+        Returns:
+            Dict[str, Any]: Analysis results including trends and market conditions
+        """
+        # Check if enough time has passed since last analysis
+        current_time = time.time()
+        if (self.last_analysis_time is not None and 
+            current_time - self.last_analysis_time < self.analysis_interval):
+            # Return cached results if available
+            if self.cached_results is not None:
+                return self.cached_results
+        
+        self.last_analysis_time = current_time
+        
+        # Get current BTC price
         try:
-            results = {}
+            current_price_str = redis_conn.get("last_btc_price")
+            if current_price_str:
+                # Validate price data
+                is_valid, error_msg = validate_data('price', current_price_str)
+                if is_valid:
+                    self.current_price = float(current_price_str)
+                else:
+                    logger.warning(f"Invalid price data: {error_msg}")
+                    store_warning_in_redis("DATA_ERROR", f"Invalid price data: {error_msg}")
+                    # Try to get price from other sources
+                    candle_data = redis_conn.get("btc_candle_15min")
+                    if candle_data:
+                        try:
+                            candle = json.loads(candle_data)
+                            self.current_price = candle.get('c')
+                        except (json.JSONDecodeError, KeyError) as e:
+                            logger.error(f"Error getting price from candle: {e}")
+                            
+            else:
+                logger.warning("No BTC price available in Redis")
             
-            # Get current price from Redis
-            current_price = float(redis_conn.get("last_btc_price") or 0)
-            if current_price == 0:
-                logger.warning("No current price available for analysis")
-                return {}
+            # Initialize results dictionary
+            results = {
+                "current_price": self.current_price,
+                "trends": {},
+                "sources": {}  # Track data sources for transparency
+            }
             
-            # Store current price in results
-            results["current_price"] = current_price
+            # Check for NaN or None values
+            if not self.current_price or (isinstance(self.current_price, float) and math.isnan(self.current_price)):
+                logger.error("Current BTC price is None or NaN")
+                store_warning_in_redis("PRICE_ERROR", "Current BTC price is None or NaN")
+                # Set a fallback price to avoid crashes
+                self.current_price = 50000.0  # Default price
+                results["current_price"] = self.current_price
+                results["price_source"] = "fallback"
             
-            # Update Fibonacci data with current price
-            update_fibonacci_data(current_price)
-            
-            # Analyze each timeframe
-            for minutes in self.timeframes:
-                trend, change = analyze_price_trend(minutes)
-                results[f"{minutes}min"] = {
-                    "trend": trend,
-                    "change": change,
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                }
-            
-            # Get Fibonacci levels
-            fib_levels = get_current_fibonacci_levels()
-            if fib_levels:
-                results["fibonacci_levels"] = fib_levels
+            # Analyze trends for each timeframe using enhanced fallback system
+            for timeframe in self.timeframes:
+                # Get trend data with fallback
+                trend_result = ensure_trend_data(timeframe)
+                trend = trend_result["data"]
+                source = trend_result["source"]
+                actual_timeframe = trend_result["timeframe"]
                 
-                # Check for Fibonacci alignment
-                fib_alignment = check_fibonacci_alignment()
-                if fib_alignment:
-                    results["fibonacci_alignment"] = fib_alignment
-                    
-                    # Log alignment details
-                    logger.info(f"Fibonacci Alignment: {fib_alignment['type']} at {fib_alignment['level']} "
-                              f"(${fib_alignment['price']:,.2f}) - {fib_alignment['distance_pct']:.2f}% away")
+                # Store results
+                results["trends"][timeframe] = trend
+                results["sources"][timeframe] = source
+                
+                # Log fallback usage for monitoring
+                if source != "primary":
+                    logger.info(f"Using {source} data for {timeframe} (actual timeframe: {actual_timeframe})")
+                    if source == "fallback_timeframe":
+                        store_warning_in_redis(
+                            "TIMEFRAME_FALLBACK", 
+                            f"Used {actual_timeframe} data for {timeframe}"
+                        )
             
-            # Reset error counter on successful analysis
-            self.consecutive_errors = 0
-            self.last_analysis_time = datetime.now(timezone.utc)
-            
+            # Cache the results
+            self.cached_results = results
             return results
             
         except Exception as e:
-            self.consecutive_errors += 1
-            logger.error(f"Error in trend analysis: {e}")
-            return {}
+            logger.error(f"Error analyzing trends: {e}")
+            store_warning_in_redis("ANALYSIS_ERROR", f"Error in analyze_trends: {e}")
+            # Return empty results as fallback
+            return {
+                "current_price": self.current_price or 50000.0,
+                "trends": {tf: "No Data" for tf in self.timeframes},
+                "sources": {tf: "error" for tf in self.timeframes}
+            }
     
     def display_results(self, results: Dict[str, Any]) -> None:
         """Display analysis results with consistent formatting."""
@@ -241,7 +317,7 @@ class MarketTrendAnalyzer:
                 print(format_trend_output(tf, trend, change_pct))
                 
                 # Movement description with consistent formatting
-                direction = f"{GREEN}↑ UP{RESET}" if change_pct > 0 else f"{RED}↓ DOWN{RESET}" if change_pct < 0 else f"{RESET}→ FLAT{RESET}"
+                direction = f"{GREEN}↑ UP{RESET}" if change_pct > 0 else f"{RED}↓ DOWN{RESET}"
                 
                 # Determine intensity of movement for description
                 intensity = describe_movement_intensity(change_pct)
@@ -653,18 +729,14 @@ def display_fibonacci_levels():
 
 def monitor_market_trends():
     """
-    Monitor BTC market trends across multiple timeframes.
+    Monitor BTC market trends across multiple timeframes with enhanced error handling.
     
     This function continuously monitors BTC price movements,
-    analyzes trends, and detects potential market maker traps.
+    analyzes trends, and detects potential market maker traps with robust
+    fallback mechanisms for handling missing or invalid data.
     """
-    # Initialize Redis connection
-    global redis_conn
-    try:
-        redis_conn = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-        redis_conn.ping()  # Check connection
-    except redis.ConnectionError as e:
-        logger.error(f"Failed to connect to Redis: {e}")
+    # Initialize Redis connection with fallback handling
+    if not init_redis_connection():
         print(f"{RED}Error: Failed to connect to Redis. Please ensure Redis server is running.{RESET}")
         sys.exit(1)
     
@@ -686,156 +758,74 @@ def monitor_market_trends():
         # Check data availability
         print(f"{BLUE}Checking data availability...{RESET}")
         
-        # Check for price data
-        current_price = redis_conn.get("last_btc_price")
-        if not current_price:
-            print(f"{YELLOW}⚠️ No BTC price data found in Redis. Waiting for price updates...{RESET}")
-        else:
-            print(f"{GREEN}✓ BTC price data available (${float(current_price):,.2f}){RESET}")
-        
-        # Check for BTC volatility
-        volatility = redis_conn.get("btc_volatility")
-        if not volatility:
-            print(f"{YELLOW}⚠️ No BTC volatility data found. Will calculate on the fly.{RESET}")
-        else:
-            print(f"{GREEN}✓ BTC volatility data available ({float(volatility):.2f}%){RESET}")
-            
-        # Check for price movement data
-        movement_count = redis_conn.llen("btc_price_movements")
-        if movement_count < 10:
-            print(f"{YELLOW}⚠️ Insufficient BTC movement data ({movement_count} entries). Results may be limited.{RESET}")
-        else:
-            print(f"{GREEN}✓ BTC movement history available ({movement_count} entries){RESET}")
-            
-        # Check if candle data exists for timeframes
-        for timeframe in ["1min", "5min", "15min", "30min", "60min", "240min"]:
-            candle_data = redis_conn.get(f"btc_candle_{timeframe}")
-            if candle_data:
-                print(f"{GREEN}✓ Candle data available for {timeframe}{RESET}")
+        # Initialize movement history if empty
+        movement_history_len = redis_conn.llen("btc_movement_history")
+        if movement_history_len == 0:
+            current_price = redis_conn.get("last_btc_price")
+            if current_price:
+                redis_conn.lpush("btc_movement_history", f"{current_price},0")
+                print(f"{GREEN}Initialized movement history with current price: {current_price}{RESET}")
             else:
-                print(f"{YELLOW}⚠️ No candle data found for {timeframe}. Will use movement history as fallback.{RESET}")
+                print(f"{YELLOW}Warning: No current price available to initialize movement history{RESET}")
         
-        # Make sure Fibonacci data is initialized
-        fib_data = get_current_fibonacci_levels()
-        if not fib_data or len(fib_data) == 0:
-            # Try to initialize with current price
-            current_price = float(redis_conn.get("last_btc_price") or 0)
-            if current_price > 0:
-                update_fibonacci_data(current_price)
-                print(f"{GREEN}✓ Initialized Fibonacci levels with current price${current_price:,.2f}{RESET}")
+        # Check for Fibonacci data and initialize if needed
+        fib_result = ensure_fibonacci_levels()
+        if fib_result["source"] != "primary":
+            if fib_result["source"] == "generated":
+                print(f"{GREEN}Generated new Fibonacci levels with price: {fib_result['data']['base_price']}{RESET}")
             else:
-                print(f"{YELLOW}⚠️ Could not initialize Fibonacci levels - missing price data{RESET}")
-    except Exception as e:
-        print(f"{RED}⚠️ Error during data availability check: {e}{RESET}")
-    
-    while True:
-        try:
+                print(f"{YELLOW}Warning: No Fibonacci data available{RESET}")
+        
+        # Main monitoring loop
+        print(f"{BLUE}Starting market trend monitoring...{RESET}")
+        while True:
             current_time = time.time()
-            time_since_refresh = current_time - last_refresh_time
             
-            # Clear screen and update in fixed display mode
-            if fixed_display and time_since_refresh >= refresh_interval:
+            # If in fixed display, refresh the screen at regular intervals
+            if fixed_display and (current_time - last_refresh_time >= refresh_interval):
                 clear_screen()
                 last_refresh_time = current_time
                 
-                # Display header with time
-                now = datetime.now(timezone.utc)
-                print(f"\n{BLUE_BG}{WHITE}{BOLD} OMEGA BTC AI - MARKET MONITOR | {now.strftime('%Y-%m-%d %H:%M:%S UTC')} {RESET}")
+                # Display header
+                print(f"{MAGENTA}{BOLD}╔════════════════════════════════════════════════════════════╗{RESET}")
+                print(f"{MAGENTA}{BOLD}║                OMEGA BTC AI - MARKET MONITOR               ║{RESET}")
+                print(f"{MAGENTA}{BOLD}║         🧠 DIVINE FIBONACCI MARKET ANALYSIS 🧠           ║{RESET}")
+                print(f"{MAGENTA}{BOLD}╚════════════════════════════════════════════════════════════╝{RESET}")
                 
-                # Perform analysis
-                results = analyzer.analyze_trends()
+                # Get latest timestamp
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                print(f"{CYAN}Last Update: {timestamp}{RESET}")
+                print(f"{YELLOW}Refresh in: {refresh_interval} seconds{RESET}")
+                print()
                 
-                # If current price is missing, fetch it directly
-                if "current_price" not in results or results["current_price"] == 0:
-                    current_price = float(redis_conn.get("last_btc_price") or 0)
-                    if current_price > 0:
-                        results["current_price"] = current_price
-                
-                # Display results
+            # Get analysis results with fallback handling
+            results = analyzer.analyze_trends()
+            
+            # Display results
+            if results:
                 analyzer.display_results(results)
+                analyzer.display_market_conditions()
                 
-                # Display Fibonacci levels
+                # Display Fibonacci levels if available
                 display_fibonacci_levels()
                 
-                # Check for potential MM traps
-                check_system_warnings(limit=5)
-                
-                # Show countdown for next refresh
-                seconds_to_refresh = int(refresh_interval - (time.time() - last_refresh_time))
-                if seconds_to_refresh > 0:
-                    print(f"\n{CYAN}Next refresh in {seconds_to_refresh} seconds...{RESET}")
-                    
-                # Add status bar at bottom
-                status = f"OMEGA BTC AI | FIXED DISPLAY | REFRESH: {refresh_interval}s | PRESS CTRL+C TO EXIT"
-                print(f"\n{BLUE_BG}{WHITE}{BOLD}{status.center(80)}{RESET}")
-                
-            # Regular mode
-            elif not fixed_display:
-                # Check if it's time for analysis
-                now = datetime.now(timezone.utc)
-                if (analyzer.last_analysis_time is None or 
-                    (now - analyzer.last_analysis_time).total_seconds() >= analyzer.analysis_interval):
-                    
-                    # Perform analysis
-                    print(f"\n{BLUE_BG}{WHITE}{BOLD} MARKET ANALYSIS | {now.strftime('%Y-%m-%d %H:%M:%S')} {RESET}")
-                    results = analyzer.analyze_trends()
-                    
-                    # If current price is missing, fetch it directly
-                    if "current_price" not in results or results["current_price"] == 0:
-                        current_price = float(redis_conn.get("last_btc_price") or 0)
-                        if current_price > 0:
-                            results["current_price"] = current_price
-                    
-                    # Display results
-                    analyzer.display_results(results)
-                    
-                    # Display Fibonacci levels if they exist
-                    display_fibonacci_levels()
-                    
-                    # Check for potential MM traps
-                    trap_timeframes = {
-                        "5min": "short-term", 
-                        "15min": "short-term",
-                        "30min": "medium-term",
-                        "60min": "medium-term", 
-                        "240min": "long-term"
-                    }
-                    
-                    for tf, term in trap_timeframes.items():
-                        if tf in results:
-                            tf_data = results[tf]
-                            trend = tf_data.get("trend", "Unknown")
-                            change_pct = tf_data.get("change", 0.0)
-                            price_move = abs(change_pct) * results["current_price"] / 100
-                            
-                            # Detect traps
-                            trap_type, confidence = detect_possible_mm_traps(
-                                tf, trend, change_pct, price_move
-                            )
-                            
-                            if trap_type and confidence > 0.7:
-                                print(f"\n{RED_BG}{WHITE}{BOLD} POTENTIAL {trap_type.upper()} DETECTED! {RESET}")
-                                print(f"{YELLOW}⚠️ {term.title()} {trap_type} with {confidence:.0%} confidence on {tf} timeframe{RESET}")
-                                print(f"{YELLOW}📊 {trend.title()} trend with {change_pct:.2f}% movement (${price_move:.2f}){RESET}")
-                                
-                                # Save to Redis for alert system
-                                warning_msg = f"{trap_type.upper()} on {tf}: {trend} trend with {change_pct:.2f}% movement"
-                                store_warning_in_redis("market_trap", warning_msg)
-                                
-                                # Check Fibonacci alignment for confluence
-                                if check_fibonacci_alignment():
-                                    print(f"{RED}🎯 WARNING: Trap aligned with Fibonacci level - higher confidence!{RESET}")
-    
-            # Sleep to prevent CPU overuse
-            time.sleep(1)
+                # Check for system warnings
+                check_system_warnings()
+            else:
+                print(f"{RED}No analysis results available{RESET}")
             
-        except KeyboardInterrupt:
-            print(f"\n{GREEN}OMEGA BTC AI Market Trends Monitor stopped.{RESET}")
-            break
-        except Exception as e:
-            logger.error(f"Error in market trends monitor: {e}")
-            print(f"{RED}Error: {e}{RESET}")
-            time.sleep(5)  # Wait before retrying
+            # If not in fixed display mode, add separator
+            if not fixed_display:
+                print("\n" + "=" * 80 + "\n")
+            
+            time.sleep(5)  # Adjust timing as needed
+            
+    except KeyboardInterrupt:
+        print(f"\n{YELLOW}Monitoring stopped by user.{RESET}")
+    except Exception as e:
+        print(f"{RED}Error: {e}{RESET}")
+        logger.error(f"Error in monitor_market_trends: {e}")
+        store_warning_in_redis("MONITOR_ERROR", f"Error in monitor_market_trends: {e}")
 
 def describe_movement_intensity(price_change: float) -> str:
     """
