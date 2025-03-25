@@ -216,255 +216,231 @@ def _render_whale_visualization(whale_size, direction, depth, impact):
         expand=False
     )
 
-def _render_whale_sonar(is_streaming=False):
-    """Create the WHALE SONAR visualization for the SEA SHEPHERD module"""
-    if not is_streaming:
-        # Grey out when not streaming
-        sonar_text = Text("ø10-WHALE SONAR: OFFLINE (awaiting data stream)", style="dim")
-        sonar_text.justify = "center"
-        return sonar_text
-    
-    # Create a sonar visualization that "scans" by changing with time
-    timestamp = time.time()
-    scan_phase = (timestamp % 4)  # 0-3 for different phases of the scan
-    
-    # Create the sonar animation frames based on scan phase
-    if scan_phase < 1:
-        sonar_frame = "◜   ◝"
-    elif scan_phase < 2:
-        sonar_frame = "◠───◠"
-    elif scan_phase < 3:
-        sonar_frame = "◟   ◞"
-    else:
-        sonar_frame = "◡───◡"
-    
-    # Random status message changing based on the configured cycle
-    message_index = int(timestamp / whale_message_cycle_seconds) % len(WHALE_MESSAGES)
-    whale_message = WHALE_MESSAGES[message_index]
-    
-    # Status changes based on configured cycle
-    status_seed = int(timestamp / whale_status_cycle_seconds)
-    random.seed(status_seed)  # Use time-based seed for consistent randomness within the same cycle
-    
-    # Randomly choose a status level, weighted toward calmer states
-    status_weight = random.random()
-    if status_weight < 0.6:  # 60% chance of lowest two levels
-        status_index = random.randint(0, 1)
-    elif status_weight < 0.85:  # 25% chance of middle two levels
-        status_index = random.randint(2, 3)
-    else:  # 15% chance of highest two levels
-        status_index = random.randint(4, 5)
-    
-    random.seed()  # Reset the random seed
-    
-    status = WHALE_STATUS[status_index]
-    
-    # Choose status color based on level
-    if status_index <= 1:
-        status_color = "bright_green"
-    elif status_index <= 3:
-        status_color = "bright_yellow"
-    else:
-        status_color = "bright_red"
-    
-    # Combine everything into the sonar display
-    sonar_text = Text()
-    sonar_text.append("\n\nø11-SEA SHEPHERD CLI Ω MODULE", style="bright_blue")
-    sonar_text.append("\nø12-WHALE SONAR: [ACTIVE] ", style="bright_cyan")
-    sonar_text.append(sonar_frame, style="bright_white")
-    sonar_text.append(f"\nø13-{whale_message}", style="cyan")
-    sonar_text.append(f"\nø14-STATUS: ", style="white")
-    sonar_text.append(status, style=status_color)
-    
-    # Timing info display
-    sonar_text.append(f"\nø15-[MSG: {whale_message_cycle_seconds}s | STATUS: {whale_status_cycle_seconds}s]", style="dim")
-    
-    # Whale detection based on configured cycle
-    detected_whale = False
-    whale_size = 0
-    depth = 0
-    
-    if int(timestamp / whale_detection_cycle_seconds) % 2 == 1 and random.random() < 0.3:
-        depth = random.randint(100, 1000)
-        whale_size = random.randint(100, 900)
-        sonar_text.append(f"\nø16-[WHALE DETECTED] Depth: {depth}m | Size: {whale_size} BTC", style="bright_magenta")
-        detected_whale = True
-    
-    sonar_text.justify = "center"
-    
-    # Add whale visualization if a whale was detected
-    if detected_whale:
-        directions = ["→", "←", "↑", "↓", "↗", "↘", "↙", "↖"]
-        impacts = ["Low", "Medium", "High"]
-        
-        # Render the whale visualization panel
-        whale_panel = _render_whale_visualization(
-            whale_size=whale_size,
-            direction=random.choice(directions),
-            depth=depth,
-            impact=random.choice(impacts)
-        )
-        
-        # Create a column with sonar and whale visualization
-        sonar_column = Columns([sonar_text, whale_panel], expand=True)
-        return sonar_column
-    
-    return sonar_text
-
-def _render_price_chart(price_history, volume_history=None, height=10, width=40, is_streaming=False, use_omega=False):
-    """Create ASCII price chart visualization similar to the Redis Divine Monitor
+def _render_whale_sonar(is_streaming=False, custom_text=None):
+    """Render the whale sonar section of the panel
     
     Args:
-        price_history: List of price data points
-        volume_history: List of volume data points
+        is_streaming: Whether data is streaming or in awaiting state
+        custom_text: Optional custom text to override default rendering
+    
+    Returns:
+        Text: The formatted whale sonar text
+    """
+    if custom_text is not None:
+        return custom_text
+        
+    # Default rendering if no custom text is provided
+    whale_sonar_text = Text()
+    
+    # Only show whale sonar in streaming mode
+    if is_streaming:
+        # Animation frames for sonar
+        frames = ["◟   ◞", "◜   ◝", "◠───◠", "◡───◡"]
+        frame = frames[int(time.time() * 2) % len(frames)]
+        
+        status_options = [
+            "Minor ripples. Small accumulation observed.",
+            "Calm waters. No large movements detected.", 
+            "Moderate activity. Watching closely.",
+            "Significant volume detected. Alert raised."
+        ]
+        
+        msg_options = [
+            "Divine protection for the ocean's largest traders",
+            "Monitoring market depths for benevolent whales",
+            "No harmful trading patterns detected in these waters",
+            "Whale sanctuary established in these market depths"
+        ]
+        
+        # Choose messages based on time
+        status_idx = int(time.time() / whale_status_cycle_seconds) % len(status_options)
+        msg_idx = int(time.time() / whale_message_cycle_seconds) % len(msg_options)
+        
+        current_status = status_options[status_idx]
+        current_msg = msg_options[msg_idx]
+        
+        # Add the whale sonar components
+        whale_sonar_text.append("\nø11-SEA SHEPHERD CLI Ω MODULE\n", style="bright_cyan bold")
+        whale_sonar_text.append(f"ø12-WHALE SONAR: [ACTIVE] {frame}\n", style="bright_green")
+        whale_sonar_text.append(f"ø13-{current_msg}\n", style="bright_yellow")
+        whale_sonar_text.append(f"ø14-STATUS: {current_status}\n", style="bright_white")
+        whale_sonar_text.append(f"ø15-[MSG: {whale_message_cycle_seconds}s | STATUS: {whale_status_cycle_seconds}s]\n", style="bright_yellow")
+        
+        # Add whale detection if time is right
+        detection_phase = (time.time() % whale_detection_cycle_seconds) / whale_detection_cycle_seconds
+        if detection_phase < 0.3:  # Show detection 30% of the time
+            whale_size = random.randint(250, 750)
+            depth = random.randint(300, 600)
+            whale_sonar_text.append(f"\nø16-[WHALE DETECTED] Depth: {depth}m | Size: {whale_size} BTC\n", style="bright_red")
+    else:
+        # Awaiting data stream
+        whale_sonar_text.append("\nWhale Sonar: STANDBY (awaiting data stream)\n", style="dim_grey")
+        whale_sonar_text.append("Connect to Redis for advanced whale detection\n", style="dim_grey")
+    
+    return whale_sonar_text
+
+def _render_price_chart(price_history, volume_history=None, height=10, width=40, is_streaming=False, use_omega=False, whale_sonar_text=None):
+    """Render a price chart with colored dots based on price levels
+    
+    Args:
+        price_history: List of price points
+        volume_history: List of volume points (optional)
         height: Height of the chart
         width: Width of the chart
-        is_streaming: Whether data is streaming or in mockup mode
-        use_omega: Whether to use the Omega symbol (Ω) instead of dot (●)
+        is_streaming: Whether data is streaming or in awaiting state
+        use_omega: Whether to use Omega symbols instead of dots
+        whale_sonar_text: Optional custom whale sonar text
+    
+    Returns:
+        Panel: Rich panel containing the price chart
     """
-    chart_height = height
-    chart_width = width
-    
-    # Choose the character for price dots
-    dot_char = "Ω" if use_omega else "●"
-    
     if len(price_history) < 2:
-        return Panel(
-            Text("Awaiting divine price flow...", style="bright_yellow", justify="center"),
-            title="BTCUSDT Divine Flow" + (" (Ω)" if use_omega else ""), 
-            border_style="bright_green"
-        )
-    
-    # Use provided volume history or generate random if not provided
-    if volume_history is None or len(volume_history) != len(price_history):
-        volume_history = [random.uniform(300, 700) for _ in range(len(price_history))]
-    
-    # Normalize prices to fit chart height
-    min_price = min(price_history)
-    max_price = max(price_history)
-    current_price = price_history[-1]
-    price_range = max(0.01, max_price - min_price)  # Avoid division by zero
-    
-    # Normalize volumes
-    min_volume = min(volume_history)
-    max_volume = max(volume_history)
-    current_volume = volume_history[-1]
-    volume_range = max(0.01, max_volume - min_volume)  # Avoid division by zero
-    
-    # Create a text representation of the chart with colored dots
-    chart_lines = []
-    for y in range(chart_height):
-        line = Text()
-        for x in range(chart_width):
-            if x < len(price_history[-chart_width:]):
-                price = price_history[-chart_width:][x]
-                normalized_pos = chart_height - 1 - int((price - min_price) / price_range * (chart_height - 1))
-                
-                if y == normalized_pos:
-                    # Determine dot color based on price
-                    if abs(price - max_price) < 0.01:
-                        dot = Text(dot_char, style="bright_cyan")  # High price
-                    elif abs(price - min_price) < 0.01:
-                        dot = Text(dot_char, style="bright_magenta")  # Low price
-                    elif abs(price - current_price) < 0.01:
-                        dot = Text(dot_char, style="bright_green")  # Current price
-                    elif price > (min_price + price_range * 0.7):
-                        dot = Text(dot_char, style="cyan")  # Upper range
-                    elif price > (min_price + price_range * 0.4):
-                        dot = Text(dot_char, style="green")  # Middle range
-                    else:
-                        dot = Text(dot_char, style="magenta")  # Lower range
-                    
-                    line = line + dot
-                    
-                    # Add divine pattern
-                    if x > 0 and x % 5 == 0 and random.random() < 0.8 and y != normalized_pos:
-                        divine_symbol = random.choice(["✧", "✦", "✴", "⁕", "⚝"])
-                        divine_style = random.choice(["bright_yellow", "bright_white", "gold1"])
-                        y_random = random.randint(0, chart_height - 1)
-                        chart_lines[y_random] = chart_lines[y_random] + Text(divine_symbol, style=divine_style)
-                else:
-                    line = line + " "
-            else:
-                line = line + " "
-        chart_lines.append(line)
-    
-    # Combine all lines into a single text object
-    chart_text = Text("\n").join(chart_lines)
-    
-    # Create price info text
-    price_info = Text()
-    price_info.append(f"Current: ${current_price:.2f}  ", style="bright_green")
-    price_info.append(f"High: ${max_price:.2f}  ", style="bright_cyan")
-    price_info.append(f"Low: ${min_price:.2f}", style="bright_magenta")
-    price_info.justify = "center"
-    
-    # Choose a random divine wisdom or use default
-    divine_index = random.randint(0, len(DIVINE_WISDOM) - 1)
-    divine_wisdom = Text(f'"{DIVINE_WISDOM[divine_index]}"', style="bright_cyan")
-    divine_wisdom.justify = "center"
-    
-    # Create divine resonance visualization (▁▂▃▄▅▆▇█)
-    # Use resonance formula for random-but-sensible values
-    resonance_seed = sum([ord(c) for c in str(current_price)])
-    random.seed(resonance_seed)
-    resonance = random.uniform(0.1, 0.9)
-    random.seed()  # Reset seed
-    
-    resonance_bars = int(resonance * 10)
-    resonance_visual = "▁" * (10 - resonance_bars) + "▂" * resonance_bars
-    
-    divine_resonance = Text("Divine Resonance: " + resonance_visual, style="bright_yellow")
-    divine_resonance.justify = "center"
-    
-    # Add volume resonance if streaming
-    volume_text = Text()
-    if is_streaming:
-        volume_normalized = (current_volume - min_volume) / volume_range
-        volume_bars = int(volume_normalized * 10)
-        volume_bars = max(1, min(10, volume_bars))  # Ensure between 1-10
+        return Panel("Insufficient data for visualization")
         
-        volume_visual = "▁" * (10 - volume_bars) + "▂" * volume_bars
-        volume_text = Text(f"Volume Resonance: {volume_visual} ({current_volume:.2f})", style="bright_blue")
-        volume_text.justify = "center"
+    # Extract the prices we'll use for the chart
+    prices_to_plot = price_history[-width:]
+    
+    # Calculate min/max for Y-axis scale
+    max_price = max(prices_to_plot)
+    min_price = min(prices_to_plot)
+    price_range = max_price - min_price
+    
+    # Make sure there is a range to avoid division by zero
+    if price_range == 0:
+        price_range = 1
+    
+    # Current price is the most recent price
+    current_price = prices_to_plot[-1]
+    
+    # Create a list of chart rows
+    chart_rows = []
+    for i in range(height):
+        # Calculate the price at this row
+        row_price = max_price - (i / (height - 1)) * price_range
+        
+        # Create a new row
+        row = ""
+        for j, price in enumerate(prices_to_plot):
+            # Only plot if we have enough prices
+            if j < len(prices_to_plot):
+                # Determine if this price should be plotted at this height
+                # We need price to be within 1/height of the row price
+                price_step = price_range / height
+                if abs(price - row_price) < price_step / 2:
+                    # Use Omega symbol if requested
+                    symbol = "Ω" if use_omega else "●"
+                    
+                    # Determine color based on price value
+                    if abs(price - current_price) < price_step / 2:
+                        color = "bright_green"  # Current price
+                    elif price >= (max_price - price_range * 0.2):
+                        color = "bright_cyan"   # High prices (top 20%)
+                    elif price <= (min_price + price_range * 0.2):
+                        color = "bright_magenta"  # Low prices (bottom 20%)
+                    else:
+                        # Create a gradient color for prices in between
+                        # Higher values closer to cyan, lower values closer to magenta
+                        normalized = (price - min_price) / price_range
+                        if normalized > 0.5:
+                            # Upper half - blend from green to cyan
+                            blend = (normalized - 0.5) * 2  # 0 to 1
+                            color = "bright_green" if blend < 0.5 else "bright_cyan"
+                        else:
+                            # Lower half - blend from magenta to green
+                            blend = normalized * 2  # 0 to 1
+                            color = "bright_magenta" if blend < 0.5 else "bright_green"
+                    
+                    # Add the symbol with color
+                    row += f"[{color}]{symbol}[/]"
+                else:
+                    row += " "
+            else:
+                row += " "
+        
+        # Add the row to the chart
+        chart_rows.append(row)
+    
+    # Create the chart text
+    chart_text = Text("\n".join(chart_rows))
+    
+    # Add price metrics
+    price_info = Text(f"\nCurrent: ${current_price:.2f}  High: ${max_price:.2f}  Low: ${min_price:.2f}\n\n")
+    price_info.stylize("bright_green", 0, 8)  # Style "Current:"
+    price_info.stylize("bright_green", 9, 9 + len(f"${current_price:.2f}"))
+    price_info.stylize("bright_cyan", 9 + len(f"${current_price:.2f}") + 2, 9 + len(f"${current_price:.2f}") + 2 + 5)  # Style "High:"
+    price_info.stylize("bright_cyan", 9 + len(f"${current_price:.2f}") + 2 + 6, 9 + len(f"${current_price:.2f}") + 2 + 6 + len(f"${max_price:.2f}"))
+    price_info.stylize("bright_magenta", 9 + len(f"${current_price:.2f}") + 2 + 6 + len(f"${max_price:.2f}") + 2, 9 + len(f"${current_price:.2f}") + 2 + 6 + len(f"${max_price:.2f}") + 2 + 4)  # Style "Low:"
+    price_info.stylize("bright_magenta", 9 + len(f"${current_price:.2f}") + 2 + 6 + len(f"${max_price:.2f}") + 2 + 5, 9 + len(f"${current_price:.2f}") + 2 + 6 + len(f"${max_price:.2f}") + 2 + 5 + len(f"${min_price:.2f}"))
+    
+    # Get divine wisdom
+    divine_wisdom = _generate_divine_wisdom()
+    wisdom_text = Text(f'"{divine_wisdom}"\n\n')
+    wisdom_text.stylize("bright_cyan")
+    
+    # Create divine resonance
+    if is_streaming:
+        resonance = Text("Divine Resonance: ")
+        # Generate a resonance bar with 10 segments
+        resonance_level = random.randint(1, 10)
+        for i in range(10):
+            if i < resonance_level:
+                segment = "▂"
+            else:
+                segment = "▁"
+            resonance.append(segment)
+        resonance.stylize("bright_yellow")
+    else:
+        resonance = Text("Divine Resonance: ▁▁▁▁▁▁▁▁▁▁ (awaiting data stream)")
+        resonance.stylize("dim_grey")
+    
+    # Add volume resonance if volume history is provided
+    if volume_history and len(volume_history) > 0:
+        # Get the last volume for display
+        last_volume = volume_history[-1]
+        
+        resonance.append("\n\n")  # Add spacing
+        
+        if is_streaming:
+            volume_text = Text("Volume Resonance: ")
+            # Generate a volume bar with 10 segments
+            volume_level = random.randint(1, 10)
+            for i in range(10):
+                if i < volume_level:
+                    segment = "▂"
+                else:
+                    segment = "▁"
+                volume_text.append(segment)
+            volume_text.append(f" ({last_volume:.2f})")
+            volume_text.stylize("bright_blue")
+        else:
+            volume_text = Text("Volume Resonance: ▁▁▁▁▁▁▁▁▁▁ (awaiting data stream)")
+            volume_text.stylize("dim_grey")
+        
+        resonance.append(volume_text)
     
     # Combine all elements
-    combined_text = Text()
-    combined_text = combined_text + chart_text + "\n"
-    combined_text = combined_text + price_info + "\n\n"
-    combined_text = combined_text + divine_wisdom + "\n\n"
-    combined_text = combined_text + divine_resonance
+    combined_text = chart_text + price_info + wisdom_text + resonance + "\n\n"
     
-    if is_streaming and len(volume_text) > 0:
-        combined_text = combined_text + "\n\n" + volume_text
-    
-    # Add whale sonar if streaming
+    # Add the whale sonar if we're in streaming mode
     if is_streaming:
-        whale_sonar_text = _render_whale_sonar(is_streaming=True)
+        # Use custom whale sonar text if provided, otherwise generate default
+        whale_sonar_text = whale_sonar_text if whale_sonar_text else _render_whale_sonar(is_streaming=True)
         
-        # Handle both Text and Columns return types from _render_whale_sonar
+        # Handle both Text and string types
         if isinstance(whale_sonar_text, Text):
-            # For standard sonar display (Text object)
-            combined_text = combined_text + "\n\n" + whale_sonar_text
+            combined_text += whale_sonar_text
         else:
-            # For whale detection display (Columns object)
-            # Create a new panel with just the chart content
-            chart_panel = Panel(
-                combined_text,
-                title="BTCUSDT Divine Flow" + (" (Ω)" if use_omega else ""),
-                border_style="bright_green" if not use_omega else "bright_magenta",
-                expand=True
-            )
-            
-            # Return a columns layout with the chart panel and whale display
-            return Columns([chart_panel, whale_sonar_text], expand=True)
+            combined_text.append(whale_sonar_text)
     
-    # Create the final panel
+    # Create the panel with the appropriate title and styling
+    title = "BTCUSDT Divine Flow (Ω)" if use_omega else "BTCUSDT Divine Flow"
+    style = "bright_magenta" if use_omega else "bright_blue"
+    
     panel = Panel(
         combined_text,
-        title="BTCUSDT Divine Flow" + (" (Ω)" if use_omega else ""),
-        border_style="bright_green" if not use_omega else "bright_magenta",
-        expand=True
+        title=title,
+        border_style=style,
+        width=width+30
     )
     
     return panel
@@ -502,13 +478,42 @@ async def demonstrate_expected_panel(use_comparison=False):
     prices = SAMPLE_PRICES.copy()
     volumes = SAMPLE_VOLUMES.copy()
     
-    # Track update timing for a steadier display
+    # Track update timing for components
     update_counter = 0
-    update_frequency = 10  # Update panel every 10 iterations (making it more steady)
+    chart_update_frequency = 2  # More frequent chart updates for better flow
+    
+    # Animation state for the scanning dots
+    scanning_dots_state = 0
+    scanning_dots = [".", "..", "..."]
+    
+    # Create a collection of sonar messages for ø13
+    sonar_messages = [
+        "Divine protection for the ocean's largest traders",
+        "Monitoring market depths for benevolent whales",
+        "No harmful trading patterns detected in these waters",
+        "Watching for predatory market manipulation",
+        "Scanning market depths for significant movements",
+        "The divine sonar detects ripples in the cosmic ocean",
+        "Protecting gentle giants from market predators",
+        "Whale sanctuary established in these market depths"
+    ]
+    
+    # Initialize status messages for ø14
+    status_messages = [
+        "STATUS: Calm waters. No large movements detected.",
+        "STATUS: Minor ripples. Small accumulation observed.",
+        "STATUS: Moderate activity. Watching closely.",
+        "STATUS: Increased activity detected. Alert level raised.",
+        "STATUS: Large movements detected. Divine protection activated."
+    ]
+    
+    # Initialize message and status
+    current_message = random.choice(sonar_messages)
+    current_status = random.choice(status_messages)
     
     try:
         while True:
-            # Update standard panel data every iteration
+            # Update data every iteration
             last_price = prices[-1]
             price_change = random.uniform(-0.5, 0.5)
             
@@ -533,17 +538,52 @@ async def demonstrate_expected_panel(use_comparison=False):
             if len(volumes) > 100:
                 volumes = volumes[-100:]
             
-            # Update panel less frequently for a steadier display
-            should_update_panel = (update_counter % update_frequency) == 0
+            # Update panel more frequently for a better flow
+            should_update_panel = (update_counter % chart_update_frequency) == 0
             
             if should_update_panel or update_counter == 0:
-                # Render the Omega panel with full functionality
+                # Update animation elements
+                
+                # Update scanning dots animation (ø13)
+                scanning_dots_state = (scanning_dots_state + 1) % len(scanning_dots)
+                scanning_suffix = scanning_dots[scanning_dots_state]
+                
+                # Change sonar message every 6 updates (ø13)
+                if update_counter % 6 == 0:
+                    current_message = random.choice(sonar_messages)
+                
+                # Change status message every 10 updates (ø14)
+                if update_counter % 10 == 0:
+                    current_status = random.choice(status_messages)
+                
+                # Create custom whale sonar section with styled components
+                whale_sonar_text = Text()
+                
+                # ø11 - Static title with title styling
+                whale_sonar_text.append("\nø11-SEA SHEPHERD CLI Ω MODULE\n", style="bright_cyan bold")
+                
+                # ø12 - Active subtitle with animation
+                # Alternate between different animation frames
+                sonar_frame = "◜   ◝" if update_counter % 2 == 0 else "◟   ◞"
+                whale_sonar_text.append(f"ø12-WHALE SONAR: [ACTIVE] {sonar_frame}\n", style="bright_green")
+                
+                # ø13 - Scanning with dots progress bar
+                whale_sonar_text.append(f"ø13-{current_message}{scanning_suffix}\n", style="bright_yellow")
+                
+                # ø14 - Status refreshes as per sonar reading
+                whale_sonar_text.append(f"ø14-{current_status}\n", style="bright_white")
+                
+                # ø15 - Current timing info
+                whale_sonar_text.append("ø15-[MSG: 3s | STATUS: 5s]\n", style="bright_yellow")
+                
+                # Render the Omega panel with full functionality and custom whale sonar
                 panel = _render_price_chart(
                     prices, volumes, 
                     height=12,  # Taller chart for better visualization
                     width=50,   # Wider chart for more detail
                     is_streaming=True, 
-                    use_omega=True
+                    use_omega=True,
+                    whale_sonar_text=whale_sonar_text  # Pass custom whale sonar text
                 )
                 
                 # Display the panel
@@ -552,8 +592,8 @@ async def demonstrate_expected_panel(use_comparison=False):
             # Increment counter
             update_counter += 1
             
-            # Sleep for a bit before the next update
-            await asyncio.sleep(random.uniform(0.5, 1.5))
+            # Sleep for a shorter time for smoother animation
+            await asyncio.sleep(random.uniform(0.2, 0.6))
             
     except KeyboardInterrupt:
         console.print("[bright_yellow]Demonstration ended.[/]")
@@ -646,6 +686,27 @@ async def main():
     # Show instructions for running actual monitor
     print("\nTo run the actual Redis Divine Monitor:")
     show_actual_execution()
+
+def _generate_divine_wisdom():
+    """Generate a random piece of divine wisdom for the chart"""
+    wisdom_quotes = [
+        "The wise trader observes more and acts less",
+        "Buy fear, sell euphoria - the eternal divine law",
+        "The market flows in divine patterns beyond mortal comprehension",
+        "True profit comes from alignment with cosmic market cycles",
+        "When Bitcoin ascends, altcoins follow the divine path",
+        "Market volatility is merely the breath of the cosmic trader",
+        "The patient accumulator receives the greatest divine rewards",
+        "Alignment with cosmic cycles brings trader enlightenment",
+        "The divine pattern reveals itself to those who wait",
+        "In market turbulence, find the eye of the divine storm",
+        "Zoom out to see the divine pattern, zoom in to find entry",
+        "Greed and fear are the clouds that obscure divine vision",
+        "The cosmic trader waits for confluence of multiple timeframes",
+        "Divine patience is the greatest trading strategy",
+        "Ride the cosmic wave, do not fight its flow"
+    ]
+    return random.choice(wisdom_quotes)
 
 if __name__ == "__main__":
     asyncio.run(main()) 
