@@ -124,7 +124,7 @@ WHALE_ASCII_ART = {
      \\     ||        |\\    |      |  \\_/       |
       \\    ||        | \\   |      \\/           |
        \\   ||        |  \\  |       \\__     ___/
-        \\__||\\\_______/    \\|           \\   /
+        \\__||\\_______/    \\|           \\   /
             ''   `----'     '            \\_/"""
 }
 
@@ -281,10 +281,13 @@ def _render_whale_sonar(is_streaming=False):
     
     # Whale detection based on configured cycle
     detected_whale = False
+    whale_size = 0
+    depth = 0
+    
     if int(timestamp / whale_detection_cycle_seconds) % 2 == 1 and random.random() < 0.3:
         depth = random.randint(100, 1000)
-        size = random.randint(100, 900)
-        sonar_text.append(f"\nø16-[WHALE DETECTED] Depth: {depth}m | Size: {size} BTC", style="bright_magenta")
+        whale_size = random.randint(100, 900)
+        sonar_text.append(f"\nø16-[WHALE DETECTED] Depth: {depth}m | Size: {whale_size} BTC", style="bright_magenta")
         detected_whale = True
     
     sonar_text.justify = "center"
@@ -296,7 +299,7 @@ def _render_whale_sonar(is_streaming=False):
         
         # Render the whale visualization panel
         whale_panel = _render_whale_visualization(
-            whale_size=size,
+            whale_size=whale_size,
             direction=random.choice(directions),
             depth=depth,
             impact=random.choice(impacts)
