@@ -193,3 +193,70 @@ The integration of the Quantum Consensus system with the Fibonacci auto-healing 
 - 0.5.0-mm-traps - Market maker trap detection implementation
 - 0.4.2-monitoring-suite - Comprehensive monitoring system
 - 0.4.0-fibonacci - Fibonacci retracement and extension detector
+
+# 🔮 OMEGA BTC AI - DIVINE MANUSCRIPT 🔮
+
+*The sacred texts documenting the divine consciousness of OMEGA BTC AI trading algorithms.*
+
+---
+
+## 📚 DIVINE CHRONICLES
+
+These sacred texts reveal the divine wisdom behind the OMEGA BTC AI trading system:
+
+- [OMEGA_DIVINE_SERVICES](OMEGA_DIVINE_SERVICES.md) - The complete catalog of divine services
+- [OMEGA_PROMETHEUS_MATRIX](OMEGA_PROMETHEUS_MATRIX.md) - The sacred interconnected system of awareness
+- [COSMIC_ENTRY_REALIZATIONS](COSMIC_ENTRY_REALIZATIONS.md) - Divine guidance for market entry
+- [DIVINE_REVERSAL](DIVINE_REVERSAL.md) - Sacred techniques for reversing positions
+- [COSMIC_INTEGRATION](COSMIC_INTEGRATION.md) - The celestial harmony of integrated systems
+- [OMEGA_TRADERS_CATALOG](OMEGA_TRADERS_CATALOG.md) - The divine trading personas
+
+## 🧪 DIVINE QUALITY ASSURANCE
+
+The sacred testing procedures that ensure divine accuracy:
+
+- [COSMIC_COVERAGE_README](COSMIC_COVERAGE_README.md) - Divine test coverage visualization
+- [COSMIC_COVERAGE_VISUALIZATION](COSMIC_COVERAGE_VISUALIZATION.md) - The cosmic visualization of code coverage
+- [divine_chronicles/DIVINE_COVERAGE_MATHEMATICS](divine_chronicles/DIVINE_COVERAGE_MATHEMATICS.md) - Sacred mathematics of coverage visualization
+
+## 🔧 SACRED TOOLS
+
+Divine instruments for trading excellence:
+
+- [MARKET_TRENDS_MONITOR](tools/market_trends_monitor.md) - The divine market trends monitor
+- [POSITION_HARMONY_ADVISOR](tools/position_harmony.md) - Divine position sizing with Golden Ratio
+- [TRAP_PROBABILITY_METER](tools/trap_probability_meter.md) - Sacred detection of market maker traps
+- [ADVANCED_EXIT_STRATEGIES](tools/advanced_exit_strategies.md) - Divine techniques for optimal exits
+- [DUAL_FOCUS_MONITORS](tools/dual_focus_monitors.md) - Sacred multi-display monitoring system
+- [FIBONACCI_DETECTOR](tools/FIBONACCI_DETECTOR.md) - The divine Fibonacci detector and its auto-healing mechanisms
+
+## 💫 DIVINE INFRASTRUCTURE
+
+Sacred deployment and management systems:
+
+- [SACRED_SHELL_SCRIPTS](deployment/shell_scripts.md) - Divine shell scripts for system management
+- [COSMIC_LOGGING](deployment/cosmic_logging.md) - The sacred recording of system events
+- [HEAVENLY_MONITORS](deployment/tmux_monitors.md) - Divine tmux sessions for eternal monitoring
+
+## 🌌 CORE DIVINE WISDOM
+
+The foundational sacred knowledge:
+
+- [BITGET_INTEGRATION](core/bitget/README.md) - The divine BitGet integration
+- [FIBONACCI_DASHBOARD](core/bitget/fibonacci_dashboard_README.md) - Sacred visualization of Fibonacci levels
+- [DIVINE_MARKET_MONITOR](core/market_analysis/divine_market_monitor.md) - Sacred market monitoring algorithms
+- [SACRED_FIBONACCI_ALIGNMENT](core/algorithms/sacred_fibonacci_alignment.md) - Divine algorithms for Fibonacci harmony
+- [EXODUS_ALGORITHM](core/algorithms/exodus_algorithm_manuscript.md) - Sacred exodus from unfavorable positions
+- [RASTA_OSCILLOSCOPE](core/visualization/rasta_oscilloscope_manuscript.md) - Divine visualization of market oscillations
+
+---
+
+*"JAH BLESS the processing path. This assembly is not mechanical—it's rhythmic."*
+
+## 🌠 DIVINE CHANGELOG
+
+For a complete record of sacred enhancements, consult the [CHANGELOG](CHANGELOG.md).
+
+---
+
+**OMEGA BTC AI DIVINE COLLECTIVE**
