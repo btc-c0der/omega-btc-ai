@@ -508,9 +508,10 @@ async def demonstrate_expected_panel(use_comparison=False):
     
     # Track update timing
     update_counter = 0
-    omega_update_frequency = 5  # Update omega panel every 5 cycles (making it more steady)
+    omega_update_frequency = 10  # Update omega panel every 10 cycles (making it more steady)
     
-    # Initialize omega panel
+    # Create a default omega panel to avoid unbound variable error
+    omega_panel = None
     if use_comparison:
         omega_panel = _render_price_chart(
             omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
@@ -546,10 +547,10 @@ async def demonstrate_expected_panel(use_comparison=False):
             # Update omega data less frequently to keep it steady
             should_update_omega = (update_counter % omega_update_frequency) == 0
             
-            if should_update_omega:
+            if should_update_omega and use_comparison:
                 # Update omega data for a steadier display
                 last_omega_price = omega_prices[-1]
-                omega_price_change = random.uniform(-0.3, 0.3)  # Even smaller changes
+                omega_price_change = random.uniform(-0.2, 0.2)  # Even smaller changes for steadier display
                 new_omega_price = max(10, last_omega_price + omega_price_change)
                 omega_prices.append(new_omega_price)
                 
@@ -557,7 +558,7 @@ async def demonstrate_expected_panel(use_comparison=False):
                     omega_prices = omega_prices[-100:]
                     
                 last_omega_volume = omega_volumes[-1]
-                omega_volume_change = random.uniform(-30, 30)  # Smaller volume changes
+                omega_volume_change = random.uniform(-20, 20)  # Smaller volume changes for steadier display
                 new_omega_volume = max(50, last_omega_volume + omega_volume_change)
                 omega_volumes.append(new_omega_volume)
                 
@@ -565,10 +566,9 @@ async def demonstrate_expected_panel(use_comparison=False):
                     omega_volumes = omega_volumes[-100:]
                 
                 # Update omega panel when the data changes
-                if use_comparison:
-                    omega_panel = _render_price_chart(
-                        omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
-                    )
+                omega_panel = _render_price_chart(
+                    omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
+                )
             
             # Render standard panel (always updates)
             standard_panel = _render_price_chart(
@@ -580,7 +580,7 @@ async def demonstrate_expected_panel(use_comparison=False):
             )
             
             # Display the appropriate panel(s)
-            if use_comparison:
+            if use_comparison and omega_panel:
                 # Create a two-column layout
                 panels = Columns([standard_panel, omega_panel], expand=True)
                 console.print(panels)
@@ -646,49 +646,44 @@ def show_actual_execution():
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description="BTCUSDT Divine Flow Demo")
-    parser.add_argument('--msg-cycle', type=int, default=DEFAULT_MESSAGE_CYCLE,
-                       help=f'Whale message cycle in seconds (default: {DEFAULT_MESSAGE_CYCLE})')
-    parser.add_argument('--status-cycle', type=int, default=DEFAULT_STATUS_CYCLE,
-                       help=f'Whale status cycle in seconds (default: {DEFAULT_STATUS_CYCLE})')
-    parser.add_argument('--detection-cycle', type=int, default=DEFAULT_WHALE_DETECTION_CYCLE,
-                       help=f'Whale detection cycle in seconds (default: {DEFAULT_WHALE_DETECTION_CYCLE})')
+    parser.add_argument("--msg-cycle", type=int, default=DEFAULT_MESSAGE_CYCLE,
+                        help=f"Whale message cycle in seconds (default: {DEFAULT_MESSAGE_CYCLE})")
+    parser.add_argument("--status-cycle", type=int, default=DEFAULT_STATUS_CYCLE,
+                        help=f"Whale status cycle in seconds (default: {DEFAULT_STATUS_CYCLE})")
+    parser.add_argument("--detection-cycle", type=int, default=DEFAULT_WHALE_DETECTION_CYCLE,
+                        help=f"Whale detection cycle in seconds (default: {DEFAULT_WHALE_DETECTION_CYCLE})")
+    parser.add_argument("--comparison", action="store_true",
+                        help="Show side-by-side comparison of regular and Omega panels")
     return parser.parse_args()
 
-if __name__ == "__main__":
+async def main():
+    """Run the btcusdt_divine_flow_demo.py script"""
     # Parse command line arguments
     args = parse_args()
     
-    # Set whale sonar timing parameters
+    # Set timing parameters for whale sonar
     set_whale_sonar_timing(
         message_cycle_seconds=args.msg_cycle,
         status_cycle_seconds=args.status_cycle,
         detection_cycle_seconds=args.detection_cycle
     )
     
-    console = Console(width=120)  # Wider console for side-by-side display
-    console.print("[bold magenta]🔮 BTCUSDT Divine Flow Panel Demo 🔮[/]", justify="center")
+    # Print settings
+    print(f"🔮 BTCUSDT Divine Flow Panel Demo 🔮".center(80))
+    print(f"Whale Sonar Settings: Message Cycle: {args.msg_cycle}s | Status Cycle: {args.status_cycle}s | Detection Cycle: {args.detection_cycle}s\n")
     
-    # Display whale sonar timing settings
-    console.print(f"[cyan]Whale Sonar Settings: Message Cycle: {whale_message_cycle_seconds}s | " +
-                 f"Status Cycle: {whale_status_cycle_seconds}s | " +
-                 f"Detection Cycle: {whale_detection_cycle_seconds}s[/]")
+    # Show expected panel mockup
+    print(f"Expected BTCUSDT Divine Flow Panel:")
+    show_expected_mockup(use_comparison=args.comparison)
     
-    # Show side-by-side comparison mockup
-    show_expected_mockup(use_comparison=True)
+    # Prompt user if they want to see live demonstration
+    user_input = input("\nDo you want to see a live demonstration? (y/n): ")
+    if user_input.lower() in ['y', 'yes']:
+        await demonstrate_expected_panel(use_comparison=args.comparison)
     
-    # Provide instructions for running the actual monitor
+    # Show instructions for running actual monitor
+    print("\nTo run the actual Redis Divine Monitor:")
     show_actual_execution()
-    
-    # Ask if user wants to see the live demo
-    console.print("\n[bold cyan]Do you want to see a continuous live demonstration? (y/n)[/]")
-    console.print("[bold yellow]Note: Press Ctrl+C to stop the demo when running[/]")
-    response = input()
-    
-    if response.lower() in ['y', 'yes']:
-        try:
-            # Run the demo with side-by-side comparison
-            asyncio.run(demonstrate_expected_panel(use_comparison=True))
-        except KeyboardInterrupt:
-            console.print("\n[bold magenta]Demo ended.[/]")
-    else:
-        console.print("\n[bold magenta]Demo ended.[/]") 
+
+if __name__ == "__main__":
+    asyncio.run(main()) 
