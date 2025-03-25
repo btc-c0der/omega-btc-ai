@@ -1,41 +1,90 @@
+# OMEGA BTC AI
+
+Advanced Bitcoin analytics platform with market trend detection and trader position analysis.
+
 ## 🧠 Market Trends AI Model
 
-The project now includes an AI model that learns from historical market trends and provides predictions:
+The OMEGA BTC AI analyzes Bitcoin market patterns using an ensemble of trained models. It generates market trend data for BTCUSDT, including:
 
-- **Trend Classification:** Predicts market direction (Bullish, Bearish, Neutral)
-- **Price Prediction:** Projects future BTC price movements with confidence scores
-- **Trap Detection:** Identifies potential market maker traps
-- **Fibonacci Harmony Score:** Measures market alignment with natural Fibonacci patterns
-- **Divine Wisdom:** Generates market insights based on predictions
+- Candle-based pattern recognition
+- Support and resistance detection  
+- Fibonacci retracement levels
+- Trend direction and strength prediction
 
-Learn more in [BOOK/divine_chronicles/MARKET_TRENDS_AI_MODEL.md](BOOK/divine_chronicles/MARKET_TRENDS_AI_MODEL.md)
+### 📊 Generating Data
 
-```bash
-# Generate data, train and run the model
-python -m omega_ai.ml.run_market_ai --generate-data --train
+```
+python generate_market_data.py
+```
 
-# Run the AI-enhanced market monitor
-python -m omega_ai.monitor.market_trends_monitor_ai
+The system uses harmonics and Fibonacci sequences to predict future price action and detect potential market manipulation.
+
+### 🤖 Running the Model
+
+```
+python run_market_trends_tests.py
+```
+
+To generate the full visualization dashboard:
+
+```
+python run_market_trends_tests.py --only-visualize
 ```
 
 ## 🔮 BTCUSDT Divine Flow Panel
 
-The OMEGA BTC AI system now includes a CLI visualization panel for BTCUSDT with dynamic animations and real-time market insights:
+Advanced market visualization panel with real-time insights and dynamic animations:
 
-- **Omega Symbol Representation:** Enhanced price visualization with Ω symbols
-- **Dynamic Color Coding:** Bright color scheme for price levels and market states
-- **Animated Whale Sonar:** 4-frame animation sequence that scans for market whales
-- **Divine Wisdom:** Cosmic market insights that change with the flow of time
-- **Component Labeling:** ø-prefixed components for precise identification
+- Animated whale sonar with size detection and visualization
+- Price chart with dynamic refresh rates
+- Sentiment analysis with divine wisdom
+- Fibonacci level detection and display
 
-Try the demo with:
+### Running the Divine Flow Demo
 
-```bash
-# Run the Divine Flow demonstration
+```
 python btcusdt_divine_flow_demo.py
-
-# Run the actual Redis Divine Monitor (requires Redis)
-python -m omega_ai.monitor.redis_divine_monitor --symbols btcusdt
 ```
 
-The visualization includes the SEA SHEPHERD CLI Ω MODULE for whale detection, providing real-time insights into significant market movements. For full documentation, see [BOOK/divine_chronicles/DIVINE_FLOW_COMPONENT_DIARY.md](BOOK/divine_chronicles/DIVINE_FLOW_COMPONENT_DIARY.md)
+For the actual Redis monitor:
+
+```
+./run_redis_divine_monitor.sh
+```
+
+See the full component diary documentation in `BOOK/divine_chronicles/DIVINE_FLOW_COMPONENT_DIARY.md`.
+
+## 🖥️ OMEGA CLI DIVINE PORTAL
+
+The OMEGA CLI DIVINE PORTAL provides a unified command center for all OMEGA BTC AI tools and systems. It's designed as an interactive dashboard that consolidates all scripts and utilities in a tmux-based interface.
+
+### Features
+
+- Categorized access to all system components
+- Interactive menu system for easy navigation
+- Tmux-based dashboard with multiple windows
+- Support for both tmux and CLI-only modes
+
+### Running the Portal
+
+```bash
+# Launch the full tmux-based dashboard
+./omega_cli_portal.sh
+
+# Launch in CLI-only mode without tmux
+./omega_cli_portal.sh --cli
+```
+
+### Available Categories
+
+- Core Systems - Main system services and components
+- Market Monitors - Various market monitoring dashboards
+- Trading Systems - Trading algorithms and strategies
+- Visualization - Data visualization tools
+- Diagnostics & Tools - System analysis and maintenance
+- Divine Special Systems - Advanced analysis modules
+
+## License
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
