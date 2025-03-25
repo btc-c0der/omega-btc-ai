@@ -390,114 +390,84 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
         chart_lines.append(line)
     
     # Combine all lines into a single text object
-    chart_text = Text()
-    for i, line in enumerate(chart_lines):
-        chart_text = chart_text + line
-        if i < len(chart_lines) - 1:
-            chart_text = chart_text + "\n"
+    chart_text = Text("\n").join(chart_lines)
     
-    chart_text.justify = "center"
-    
-    # Add price info
+    # Create price info text
     price_info = Text()
-    price_info.append("Current: $", style="white")
-    price_info.append(f"{current_price:.2f}", style="bright_green")
-    price_info.append("  High: $", style="white")
-    price_info.append(f"{max_price:.2f}", style="bright_cyan")
-    price_info.append("  Low: $", style="white")
-    price_info.append(f"{min_price:.2f}", style="bright_magenta")
+    price_info.append(f"Current: ${current_price:.2f}  ", style="bright_green")
+    price_info.append(f"High: ${max_price:.2f}  ", style="bright_cyan")
+    price_info.append(f"Low: ${min_price:.2f}", style="bright_magenta")
     price_info.justify = "center"
     
-    # Add divine wisdom - change every 60 seconds instead of random
-    # Use the current minute as index to select wisdom
-    minute_index = (int(time.time()) // 60) % len(DIVINE_WISDOM)
-    wisdom = DIVINE_WISDOM[minute_index]
-    
-    divine_wisdom = Text(f"\n\n\"{wisdom}\"", style="bright_yellow")
+    # Choose a random divine wisdom or use default
+    divine_index = random.randint(0, len(DIVINE_WISDOM) - 1)
+    divine_wisdom = Text(f'"{DIVINE_WISDOM[divine_index]}"', style="bright_cyan")
     divine_wisdom.justify = "center"
     
-    # Calculate divine resonance with sine wave
-    resonance = math.sin(time.time() * 0.1) * 0.5 + 0.5
+    # Create divine resonance visualization (▁▂▃▄▅▆▇█)
+    # Use resonance formula for random-but-sensible values
+    resonance_seed = sum([ord(c) for c in str(current_price)])
+    random.seed(resonance_seed)
+    resonance = random.uniform(0.1, 0.9)
+    random.seed()  # Reset seed
+    
     resonance_bars = int(resonance * 10)
+    resonance_visual = "▁" * (10 - resonance_bars) + "▂" * resonance_bars
     
-    # Set resonance style based on streaming status
+    divine_resonance = Text("Divine Resonance: " + resonance_visual, style="bright_yellow")
+    divine_resonance.justify = "center"
+    
+    # Add volume resonance if streaming
+    volume_text = Text()
     if is_streaming:
-        resonance_style = "bright_yellow"
-        resonance_visual = "▁" * (10 - resonance_bars) + "▂" * resonance_bars
-        resonance_text = Text(f"\n\nDivine Resonance: {resonance_visual}", style=resonance_style)
-        resonance_text.justify = "center"
-    else:
-        # Grey out when not streaming
-        resonance_style = "dim"
-        resonance_visual = "▁" * 10  # All empty/low bars
-        resonance_text = Text(f"\n\nDivine Resonance: {resonance_visual} (awaiting data stream)", style=resonance_style)
-        resonance_text.justify = "center"
-    
-    # Create volume resonance bar with color gradient
-    volume_percentage = (current_volume - min_volume) / volume_range
-    volume_bars = int(volume_percentage * 10)
-    
-    # Create volume visualization based on streaming status
-    if is_streaming:
-        # Create colored volume bar segments
-        volume_visual = Text()
-        for i in range(10):
-            # Determine the bar character
-            if i < 10 - volume_bars:
-                bar_char = "▁"  # Lower bar for unfilled portion
-            else:
-                bar_char = "▂"  # Higher bar for filled portion
-            
-            # Determine the color based on position in the bar
-            # Create a gradient from magenta (low) to cyan (high)
-            position = i / 10.0  # Normalized position (0.0 to 1.0)
-            
-            if position < 0.3:
-                bar_style = "magenta"  # Low volume
-            elif position < 0.6:
-                bar_style = "green"    # Medium volume
-            else:
-                bar_style = "cyan"     # High volume
-                
-            # For the filled portion, make colors brighter
-            if i >= 10 - volume_bars:
-                if position < 0.3:
-                    bar_style = "bright_magenta"  # Low volume (filled)
-                elif position < 0.6:
-                    bar_style = "bright_green"    # Medium volume (filled)
-                else:
-                    bar_style = "bright_cyan"     # High volume (filled)
-                    
-            volume_visual.append(bar_char, style=bar_style)
+        volume_normalized = (current_volume - min_volume) / volume_range
+        volume_bars = int(volume_normalized * 10)
+        volume_bars = max(1, min(10, volume_bars))  # Ensure between 1-10
         
-        # Add volume info with the current value
-        volume_text = Text(f"\n\nVolume Resonance: ")
-        volume_text.append(volume_visual)
-        volume_text.append(f" ({current_volume:.2f})")
-        volume_text.justify = "center"
-    else:
-        # Grey out when not streaming
-        volume_visual = "▁" * 10  # All empty/low bars
-        volume_text = Text(f"\n\nVolume Resonance: {volume_visual} (awaiting data stream)", style="dim")
+        volume_visual = "▁" * (10 - volume_bars) + "▂" * volume_bars
+        volume_text = Text(f"Volume Resonance: {volume_visual} ({current_volume:.2f})", style="bright_blue")
         volume_text.justify = "center"
     
-    # Combine all elements with extra spacing
+    # Combine all elements
     combined_text = Text()
-    combined_text = combined_text + chart_text + "\n" + price_info + divine_wisdom + resonance_text + volume_text
+    combined_text = combined_text + chart_text + "\n"
+    combined_text = combined_text + price_info + "\n\n"
+    combined_text = combined_text + divine_wisdom + "\n\n"
+    combined_text = combined_text + divine_resonance
     
-    # Add WHALE SONAR section only to the Omega panel
-    if use_omega:
-        whale_sonar_text = _render_whale_sonar(is_streaming)
-        combined_text = combined_text + whale_sonar_text
+    if is_streaming and len(volume_text) > 0:
+        combined_text = combined_text + "\n\n" + volume_text
     
-    panel_title = "BTCUSDT Divine Flow" + (" (Ω)" if use_omega else "")
+    # Add whale sonar if streaming
+    if is_streaming:
+        whale_sonar_text = _render_whale_sonar(is_streaming=True)
+        
+        # Handle both Text and Columns return types from _render_whale_sonar
+        if isinstance(whale_sonar_text, Text):
+            # For standard sonar display (Text object)
+            combined_text = combined_text + "\n\n" + whale_sonar_text
+        else:
+            # For whale detection display (Columns object)
+            # Create a new panel with just the chart content
+            chart_panel = Panel(
+                combined_text,
+                title="BTCUSDT Divine Flow" + (" (Ω)" if use_omega else ""),
+                border_style="bright_green" if not use_omega else "bright_magenta",
+                expand=True
+            )
+            
+            # Return a columns layout with the chart panel and whale display
+            return Columns([chart_panel, whale_sonar_text], expand=True)
     
-    return Panel(
+    # Create the final panel
+    panel = Panel(
         combined_text,
-        title=panel_title, 
-        border_style="bright_green",
-        expand=False
+        title="BTCUSDT Divine Flow" + (" (Ω)" if use_omega else ""),
+        border_style="bright_green" if not use_omega else "bright_magenta",
+        expand=True
     )
+    
+    return panel
 
 def create_side_by_side_panels(price_history, volume_history=None, height=8, width=30, is_streaming=False):
     """Create side-by-side comparison of dot and omega panels"""
