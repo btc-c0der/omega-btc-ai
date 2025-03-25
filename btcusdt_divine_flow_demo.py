@@ -234,9 +234,10 @@ def _render_whale_sonar(is_streaming=False, custom_text=None):
     
     # Only show whale sonar in streaming mode
     if is_streaming:
-        # Animation frames for sonar
+        # Animation frames for sonar - use all 4 frames for a more dynamic animation
         frames = ["◟   ◞", "◜   ◝", "◠───◠", "◡───◡"]
-        frame = frames[int(time.time() * 2) % len(frames)]
+        frame_index = int(time.time() * 2) % len(frames)  # Faster animation speed
+        frame = frames[frame_index]
         
         status_options = [
             "Minor ripples. Small accumulation observed.",
@@ -493,6 +494,9 @@ async def demonstrate_expected_panel(use_comparison=False):
     scanning_dots_state = 0
     scanning_dots = [".", "..", "..."]
     
+    # Sonar animation frames - restore the full 4-frame animation
+    sonar_frames = ["◟   ◞", "◜   ◝", "◠───◠", "◡───◡"]
+    
     # Create a collection of sonar messages for ø13
     sonar_messages = [
         "Divine protection for the ocean's largest traders",
@@ -569,9 +573,9 @@ async def demonstrate_expected_panel(use_comparison=False):
                 # ø11 - Static title with title styling
                 whale_sonar_text.append("\nø11-SEA SHEPHERD CLI Ω MODULE\n", style="bright_cyan bold")
                 
-                # ø12 - Active subtitle with animation
-                # Alternate between different animation frames
-                sonar_frame = "◜   ◝" if update_counter % 2 == 0 else "◟   ◞"
+                # ø12 - Active subtitle with full 4-frame animation
+                # Use the full animation sequence instead of just alternating between two frames
+                sonar_frame = sonar_frames[update_counter % len(sonar_frames)]
                 whale_sonar_text.append(f"ø12-WHALE SONAR: [ACTIVE] {sonar_frame}\n", style="bright_green")
                 
                 # ø13 - Scanning with dots progress bar
