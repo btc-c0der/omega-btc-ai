@@ -1,0 +1,3 @@
+Main figure: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/main_fig_temp.html
+Supplementary figure 1: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/supp_fig_temp_0.html
+Supplementary figure 2: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/supp_fig_temp_1.html

@@ -122,7 +122,11 @@ def describe_movement(change_pct, abs_change):
 
 def format_trend_output(interval, trend, change_pct):
     """Format trend output with colors based on direction and intensity."""
-    if "Bullish" in trend:
+    if trend == "Insufficient Data":
+        color_trend = f"{YELLOW}{trend}{RESET}"
+        sign = ""
+        color_pct = YELLOW
+    elif "Bullish" in trend:
         if "Strongly" in trend:
             color_trend = f"{GREEN}{trend}{RESET}"
         else:
@@ -133,7 +137,7 @@ def format_trend_output(interval, trend, change_pct):
         if "Strongly" in trend:
             color_trend = f"{RED}{trend}{RESET}"
         else:
-            color_trend = f"{LIGHT_ORANGE}{trend}{RESET}"
+            color_trend = f"{YELLOW}{trend}{RESET}"
         sign = ""
         color_pct = RED
     else:
@@ -244,14 +248,35 @@ def calculate_fibonacci_levels(prices):
 def analyze_price_trend(minutes=15):
     """Analyze price trend for specified timeframe."""
     try:
-        # Get price history
-        history = get_btc_price_history(limit=minutes*2)
-        if not history or len(history) < minutes:
+        # Get price history - increased multiplier for longer timeframes
+        # Use a variable multiplier based on timeframe to handle limited data
+        if minutes <= 60:
+            multiplier = 2  # For shorter timeframes, get 2x the data
+        elif minutes <= 240:
+            multiplier = 1.5  # For medium timeframes, get 1.5x data
+        else:
+            multiplier = 1.2  # For longer timeframes, be more flexible
+            
+        history = get_btc_price_history(limit=int(minutes*multiplier))
+        
+        # For longer timeframes, we'll be more flexible with data requirements
+        # For 4h+ timeframes, require at least 50% of the requested data
+        min_required = minutes
+        if minutes > 240:  # For timeframes > 4 hours
+            min_required = int(minutes * 0.5)  # Only require 50% of data points
+        elif minutes > 60:  # For timeframes > 1 hour
+            min_required = int(minutes * 0.75)  # Require 75% of data points
+            
+        if not history or len(history) < min_required:
             return "No Data", 0.0
         
         # Calculate relevant price points
         current_price = history[0]["price"]
-        past_price = history[min(minutes, len(history)-1)]["price"]
+        
+        # For longer timeframes where we don't have full history,
+        # use the oldest available price we have
+        comparison_index = min(minutes, len(history)-1)
+        past_price = history[comparison_index]["price"]
         
         # Calculate percentage change
         change_pct = ((current_price - past_price) / past_price) * 100
@@ -291,12 +316,20 @@ def detect_fibonacci_alignment(current_price, fib_levels):
                 # Consider aligned if within 0.5%
                 if diff_pct <= 0.5:
                     confidence = 1.0 - (diff_pct / 0.5)
+                    alignment_type = "STRONG" if confidence > 0.8 else "MODERATE" if confidence > 0.5 else "WEAK"
+                    
+                    # Special handling for Golden Ratio (0.618)
+                    if "618" in level_name:
+                        confidence += 0.1  # Boost confidence for Golden Ratio
+                        alignment_type = "GOLDEN_RATIO"
+                        
                     all_alignments.append({
                         "category": category,
                         "level": level_name,
                         "price": level_price,
                         "diff_pct": diff_pct,
-                        "confidence": confidence
+                        "confidence": confidence,
+                        "type": alignment_type
                     })
     
     # Sort by confidence and return the best match
@@ -352,29 +385,98 @@ def detect_mm_trap(timeframe, trend, price_change):
     
     return None
 
+def display_fibonacci_analysis(current_price, fib_levels):
+    """Display current Fibonacci levels and check for price alignment."""
+    print(f"\n{CYAN}🔄 FIBONACCI ANALYSIS{RESET}")
+    print("=" * 40)
+    
+    if not fib_levels:
+        print(f"{YELLOW}⚠️ Insufficient data for Fibonacci analysis{RESET}")
+        return
+    
+    # Check if current price is at a Fibonacci level
+    alignment = detect_fibonacci_alignment(current_price, fib_levels)
+    
+    if alignment:
+        # Highlight the current level with color based on its importance
+        if alignment["type"] == "GOLDEN_RATIO":
+            level_color = f"{MAGENTA}"  # Golden ratio gets special color
+            importance = "GOLDEN RATIO"
+        elif alignment["confidence"] > 0.8:
+            level_color = f"{GREEN}"
+            importance = "KEY LEVEL"
+        else:
+            level_color = f"{BLUE}"
+            importance = "Standard"
+            
+        print(f"{level_color}⭐ PRICE AT FIBONACCI {importance}: "
+              f"{alignment['level']} level (${alignment['price']:.2f}){RESET}")
+        print(f"  {YELLOW}Confidence: {alignment['confidence']:.2f} | Distance: {alignment['diff_pct']:.3f}%{RESET}")
+    
+    # Display all Fibonacci levels with current price highlighted
+    print(f"\n{CYAN}Current Fibonacci Levels:{RESET}")
+    
+    # Show retracement levels
+    print(f"{MAGENTA}Retracement Levels:{RESET}")
+    for level, price in fib_levels["retracement"].items():
+        # Highlight the level closest to current price
+        if alignment and level == alignment["level"] and alignment["category"] == "retracement":
+            print(f"  {GREEN}→ {level}: ${price:.2f} [CURRENT PRICE]{RESET}")
+        else:
+            # Color code by proximity to current price
+            proximity = abs(current_price - price) / price * 100
+            if proximity < 0.5:  # Very close but not quite at the level
+                color = YELLOW
+            elif proximity < 2:  # Somewhat close
+                color = BLUE
+            else:
+                color = RESET
+                
+            print(f"  {color}{level}: ${price:.2f}{RESET}")
+    
+    # Show extension levels
+    print(f"\n{MAGENTA}Extension Levels:{RESET}")
+    for level, price in fib_levels["extension"].items():
+        # Highlight the level closest to current price
+        if alignment and level == alignment["level"] and alignment["category"] == "extension":
+            print(f"  {GREEN}→ {level}: ${price:.2f} [CURRENT PRICE]{RESET}")
+        else:
+            # Color code by proximity to current price
+            proximity = abs(current_price - price) / price * 100
+            if proximity < 0.5:  # Very close but not quite at the level
+                color = YELLOW
+            elif proximity < 2:  # Somewhat close
+                color = BLUE
+            else:
+                color = RESET
+                
+            print(f"  {color}{level}: ${price:.2f}{RESET}")
+
 class DivineFibonacciMonitor:
     """Sacred market monitor that integrates with Fibonacci-aligned architecture."""
     
-    def __init__(self):
+    def __init__(self, analysis_interval=5):
         """Initialize the divine monitor."""
         self.timeframes = [1, 5, 15, 30, 60, 240, 720, 1444]  # Fibonacci-inspired timeframes
         self.last_analysis_time = None
-        self.analysis_interval = 5  # seconds
+        self.analysis_interval = analysis_interval  # seconds, now configurable
         self.redis_manager = RedisManager(host=redis_host, port=redis_port)
         self.consecutive_errors = 0
+        self.previous_price = None  # Track previous price for up/down comparison
+        self.last_btc_price = 0  # Store last BTC price
     
     def analyze_market(self):
         """Perform comprehensive market analysis with Fibonacci alignment."""
         try:
             results = {}
             
-            # Get current price
-            current_price = float(redis_conn.get("last_btc_price") or 0)
-            if current_price == 0:
+            # Get current price directly from Redis
+            self.last_btc_price = float(redis_conn.get("last_btc_price") or 0)
+            if self.last_btc_price == 0:
                 logger.warning("No current price available for analysis")
                 return {}
             
-            results["current_price"] = current_price
+            results["current_price"] = self.last_btc_price
             
             # Calculate Fibonacci levels
             history = get_btc_price_history(limit=100)
@@ -383,18 +485,42 @@ class DivineFibonacciMonitor:
                 results["fibonacci_levels"] = fib_levels
                 
                 # Check for Fibonacci alignment
-                alignment = detect_fibonacci_alignment(current_price, fib_levels)
+                alignment = detect_fibonacci_alignment(self.last_btc_price, fib_levels)
                 if alignment:
                     results["fibonacci_alignment"] = alignment
             
-            # Analyze each timeframe
+            # Analyze each timeframe - capture data availability info
+            available_minutes = len(history)
+            available_hours = available_minutes / 60
+            
+            # Add data availability information to results
+            results["data_availability"] = {
+                "minutes": available_minutes,
+                "hours": available_hours,
+                "oldest_price": history[-1]["price"] if history else None,
+                "newest_price": history[0]["price"] if history else None
+            }
+            
+            # Only analyze timeframes where we might have reasonable data
+            analyzed_timeframes = []
             for minutes in self.timeframes:
+                # Only process timeframes that make sense with our data
+                # For timeframes > 4h, require at least 50% of data
+                if minutes > 240 and len(history) < minutes * 0.5:
+                    results[f"{minutes}min"] = {
+                        "trend": "Insufficient Data",
+                        "change": 0.0,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                    continue
+                    
                 trend, change = analyze_price_trend(minutes)
                 results[f"{minutes}min"] = {
                     "trend": trend,
                     "change": change,
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
+                analyzed_timeframes.append(minutes)
                 
                 # Check for MM traps
                 trap = detect_mm_trap(f"{minutes}min", trend, change)
@@ -429,6 +555,10 @@ class DivineFibonacciMonitor:
                 if "mm_traps" in results:
                     self.redis_manager.set_cached("divine:mm_traps", 
                                                  json.dumps(results["mm_traps"]))
+                    
+                # Store data availability info
+                self.redis_manager.set_cached("divine:data_availability",
+                                             json.dumps(results["data_availability"]))
             except Exception as e:
                 logger.error(f"Error storing analysis results in Redis: {e}")
             
@@ -447,9 +577,33 @@ class DivineFibonacciMonitor:
         # Display sacred banner
         display_sacred_banner()
         
-        # Display current BTC price
+        # Get current BTC price and compare with previous price
         current_price = results.get("current_price", 0)
-        print(f"\n{BLUE_BG}{WHITE}{BOLD} 💰 CURRENT BTC PRICE: ${current_price:,.2f} 💰 {RESET}")
+        price_direction = ""
+        color_indicator = ""
+        
+        if self.previous_price is not None:
+            if current_price > self.previous_price:
+                price_direction = "↑ UP"
+                color_indicator = BLUE
+            elif current_price < self.previous_price:
+                price_direction = "↓ DOWN"
+                color_indicator = MAGENTA
+            else:
+                price_direction = "→ FLAT"
+                color_indicator = CYAN
+        
+        # Store current price for next comparison
+        self.previous_price = current_price
+        
+        # Display current BTC price with direction indicator
+        print(f"\n{BLUE_BG}{WHITE}{BOLD} 💰 CURRENT BTC PRICE: ${current_price:,.2f} 💰 {RESET} {color_indicator}{price_direction}{RESET}")
+        print(f"{CYAN}Last Redis Key Update: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC{RESET}")
+        
+        # Display data availability if available
+        if "data_availability" in results:
+            availability = results["data_availability"]
+            print(f"{YELLOW}Available price history: {availability['minutes']} minutes ({availability['hours']:.1f} hours){RESET}")
         
         # Display trends for each timeframe
         print(f"\n{YELLOW}══════════════ {GREEN}MARKET TREND ANALYSIS{YELLOW} ══════════════{RESET}")
@@ -459,7 +613,14 @@ class DivineFibonacciMonitor:
                 trend = data["trend"]
                 change = data["change"]
                 print(format_trend_output(timeframe, trend, change))
-                print(f"   {describe_movement(change, abs(change))}")
+                if trend != "Insufficient Data":
+                    print(f"   {describe_movement(change, abs(change))}")
+                else:
+                    print(f"   {YELLOW}Not enough historical data for this timeframe{RESET}")
+        
+        # Display Fibonacci analysis if levels are present
+        if "fibonacci_levels" in results:
+            display_fibonacci_analysis(current_price, results["fibonacci_levels"])
         
         # Display Fibonacci alignment if present
         if "fibonacci_alignment" in results:
@@ -471,7 +632,7 @@ class DivineFibonacciMonitor:
             print(f"  Distance: {alignment['diff_pct']:.3f}%")
             
             # Special message for golden ratio alignment
-            if "618" in alignment['level'] or "golden" in alignment['level'].lower():
+            if alignment["type"] == "GOLDEN_RATIO":
                 print(f"\n  {MAGENTA}🌟 GOLDEN RATIO ALIGNMENT DETECTED - SACRED HARMONIC POINT 🌟{RESET}")
         
         # Display MM traps if detected
@@ -482,58 +643,50 @@ class DivineFibonacciMonitor:
                 print(f"  {confidence_color}{trap['type']} | {trap['timeframe']} | Confidence: {trap['confidence']:.2f}{RESET}")
                 print(f"  {WHITE}Trend: {trap['trend']} | Change: {trap['price_change']:.2f}%{RESET}")
         
-        # Display Fibonacci levels section
-        if "fibonacci_levels" in results:
-            fib_levels = results["fibonacci_levels"]
-            
-            print(f"\n{BLUE_BG}{WHITE}{BOLD} 🧮 SACRED FIBONACCI LEVELS 🧮 {RESET}")
-            
-            # Only show nearby levels (within 10% of current price)
-            current = fib_levels["current"]
-            print(f"\n{CYAN}Nearby Retracement Levels:{RESET}")
-            for level, price in fib_levels["retracement"].items():
-                if abs((price - current) / current) < 0.1:  # Within 10%
-                    diff_pct = ((price - current) / current) * 100
-                    direction = "↑" if diff_pct > 0 else "↓"
-                    diff_color = GREEN if diff_pct > 0 else RED
-                    print(f"  {level}: ${price:,.2f} ({diff_color}{direction} {abs(diff_pct):.2f}%{RESET})")
-            
-            print(f"\n{CYAN}Nearby Extension Levels:{RESET}")
-            for level, price in fib_levels["extension"].items():
-                if abs((price - current) / current) < 0.1:  # Within 10%
-                    diff_pct = ((price - current) / current) * 100
-                    direction = "↑" if diff_pct > 0 else "↓"
-                    diff_color = GREEN if diff_pct > 0 else RED
-                    print(f"  {level}: ${price:,.2f} ({diff_color}{direction} {abs(diff_pct):.2f}%{RESET})")
-        
         # Display divine wisdom footer
         print(f"\n{GREEN}══════════════ {YELLOW}SACRED ALIGNMENT{GREEN} ══════════════{RESET}")
         print(f"{MAGENTA}May your trades be guided by the Divine Fibonacci Sequence{RESET}")
         print(f"{YELLOW}Last update: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC{RESET}")
+        print(f"\n{YELLOW}Next update in {self.analysis_interval} seconds...{RESET}")
 
-def run_divine_monitor():
-    """Run the divine market monitor continuously."""
-    monitor = DivineFibonacciMonitor()
+def run_divine_monitor(interval=5):
+    """Run the divine market monitor continuously with configurable interval."""
+    monitor = DivineFibonacciMonitor(analysis_interval=interval)
     
     print(f"\n{GREEN}Initializing Divine Fibonacci Market Monitor...{RESET}")
     print(f"{BLUE}🔱 Connected to Redis at {redis_host}:{redis_port}{RESET}")
+    print(f"{YELLOW}Monitoring interval set to {interval} seconds{RESET}")
     
     while True:
         try:
-            # Check if it's time for analysis
-            now = datetime.now(timezone.utc)
-            if (monitor.last_analysis_time is None or 
-                (now - monitor.last_analysis_time).total_seconds() >= monitor.analysis_interval):
+            # Get current BTC price directly for display
+            try:
+                btc_price = float(redis_conn.get("last_btc_price") or 0)
+                if btc_price > 0:
+                    monitor.last_btc_price = btc_price
+            except Exception as e:
+                print(f"{RED}Error reading from Redis: {e}{RESET}")
                 
-                # Perform analysis
-                results = monitor.analyze_market()
-                
-                # Display results
-                if results:
-                    monitor.display_results(results)
+            # Perform analysis
+            results = monitor.analyze_market()
             
-            # Sleep for a short interval
-            time.sleep(1)
+            # Display results
+            if results:
+                monitor.display_results(results)
+            else:
+                print(f"{RED}⚠️ No results from analysis - checking Redis connection...{RESET}")
+                # Get current BTC price directly from Redis for a basic display
+                try:
+                    btc_price = float(redis_conn.get("last_btc_price") or 0)
+                    if btc_price > 0:
+                        print(f"{YELLOW}Current BTC Price (from Redis): ${btc_price:,.2f}{RESET}")
+                    else:
+                        print(f"{RED}Unable to get current BTC price from Redis{RESET}")
+                except Exception as e:
+                    print(f"{RED}Error reading from Redis: {e}{RESET}")
+            
+            # Sleep for the specified interval
+            time.sleep(interval)
             
         except redis.RedisError as e:
             monitor.consecutive_errors += 1
@@ -549,6 +702,13 @@ def run_divine_monitor():
             time.sleep(wait_time)
 
 if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Divine Fibonacci Market Monitor")
+    parser.add_argument("-i", "--interval", type=int, default=5, 
+                      help="Analysis interval in seconds (default: 5)")
+    args = parser.parse_args()
+    
     display_sacred_banner()
     print(f"{GREEN}🌟 DIVINE FIBONACCI MONITOR ACTIVATED 🌟{RESET}")
-    run_divine_monitor() 
+    run_divine_monitor(interval=args.interval) 
