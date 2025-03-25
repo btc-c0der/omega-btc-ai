@@ -494,7 +494,7 @@ def create_comparison_mockup():
 
 async def demonstrate_expected_panel(use_comparison=False):
     """Demonstrate the expected panel with live updates"""
-    console = Console()
+    console = Console(width=120)  # Set wider console for better visualization
     console.print(f"[bright_magenta]Demonstrating live panel...[/]")
     console.print("[bright_yellow]Press Ctrl+C to exit[/]")
     
@@ -502,20 +502,9 @@ async def demonstrate_expected_panel(use_comparison=False):
     prices = SAMPLE_PRICES.copy()
     volumes = SAMPLE_VOLUMES.copy()
     
-    # Create a separate dataset for the omega panel that updates less frequently
-    omega_prices = SAMPLE_PRICES.copy()
-    omega_volumes = SAMPLE_VOLUMES.copy()
-    
-    # Track update timing
+    # Track update timing for a steadier display
     update_counter = 0
-    omega_update_frequency = 10  # Update omega panel every 10 cycles (making it more steady)
-    
-    # Create a default omega panel to avoid unbound variable error
-    omega_panel = None
-    if use_comparison:
-        omega_panel = _render_price_chart(
-            omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
-        )
+    update_frequency = 10  # Update panel every 10 iterations (making it more steady)
     
     try:
         while True:
@@ -544,48 +533,21 @@ async def demonstrate_expected_panel(use_comparison=False):
             if len(volumes) > 100:
                 volumes = volumes[-100:]
             
-            # Update omega data less frequently to keep it steady
-            should_update_omega = (update_counter % omega_update_frequency) == 0
+            # Update panel less frequently for a steadier display
+            should_update_panel = (update_counter % update_frequency) == 0
             
-            if should_update_omega and use_comparison:
-                # Update omega data for a steadier display
-                last_omega_price = omega_prices[-1]
-                omega_price_change = random.uniform(-0.2, 0.2)  # Even smaller changes for steadier display
-                new_omega_price = max(10, last_omega_price + omega_price_change)
-                omega_prices.append(new_omega_price)
-                
-                if len(omega_prices) > 100:
-                    omega_prices = omega_prices[-100:]
-                    
-                last_omega_volume = omega_volumes[-1]
-                omega_volume_change = random.uniform(-20, 20)  # Smaller volume changes for steadier display
-                new_omega_volume = max(50, last_omega_volume + omega_volume_change)
-                omega_volumes.append(new_omega_volume)
-                
-                if len(omega_volumes) > 100:
-                    omega_volumes = omega_volumes[-100:]
-                
-                # Update omega panel when the data changes
-                omega_panel = _render_price_chart(
-                    omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
+            if should_update_panel or update_counter == 0:
+                # Render the Omega panel with full functionality
+                panel = _render_price_chart(
+                    prices, volumes, 
+                    height=12,  # Taller chart for better visualization
+                    width=50,   # Wider chart for more detail
+                    is_streaming=True, 
+                    use_omega=True
                 )
-            
-            # Render standard panel (always updates)
-            standard_panel = _render_price_chart(
-                prices, volumes, 
-                height=8 if use_comparison else 10, 
-                width=30 if use_comparison else 40, 
-                is_streaming=True, 
-                use_omega=False
-            )
-            
-            # Display the appropriate panel(s)
-            if use_comparison and omega_panel:
-                # Create a two-column layout
-                panels = Columns([standard_panel, omega_panel], expand=True)
-                console.print(panels)
-            else:
-                console.print(standard_panel)
+                
+                # Display the panel
+                console.print(panel)
             
             # Increment counter
             update_counter += 1
@@ -674,12 +636,12 @@ async def main():
     
     # Show expected panel mockup
     print(f"Expected BTCUSDT Divine Flow Panel:")
-    show_expected_mockup(use_comparison=args.comparison)
+    show_expected_mockup(use_comparison=False)  # Always use single panel mode
     
     # Prompt user if they want to see live demonstration
     user_input = input("\nDo you want to see a live demonstration? (y/n): ")
     if user_input.lower() in ['y', 'yes']:
-        await demonstrate_expected_panel(use_comparison=args.comparison)
+        await demonstrate_expected_panel(use_comparison=False)  # Always use single panel mode
     
     # Show instructions for running actual monitor
     print("\nTo run the actual Redis Divine Monitor:")
