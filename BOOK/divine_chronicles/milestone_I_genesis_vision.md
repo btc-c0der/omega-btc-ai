@@ -1,14 +1,14 @@
-# II. The Colorblind Revelation
+# I. The Genesis Vision
 
-*Colors emerge from monochrome constraints,*  
-*Green for current, cyan for heights untold,*  
-*Magenta depths where value's light grows faint,*  
-*A rainbow of signals in characters bold.*
+*In the darkened console's glow, patterns emerge,*  
+*Divine symbols awaiting cosmic alignment,*  
+*A humble script to channel market surge,*  
+*Where price and wisdom dance in refinement.*
 
 ```
 ╭────────────────── BTCUSDT Divine Flow ──────────────────╮
-│      ✦        ●                                         │
-│           ✴  ●                                          │
+│      ⚝        ●                                         │
+│           ⚝  ●                                          │
 │                                                         │
 │                                                         │
 │             ●                                           │
@@ -17,7 +17,7 @@
 │   ●    ●●●                                              │
 │ Current: $29482.10  High: $29482.10  Low: $29375.10     │
 │                                                         │
-│ "Market volatility is merely the breath of the cosmic trader" │
+│ "When Bitcoin ascends, altcoins follow the divine path" │
 │                                                         │
 │ Divine Resonance: ▁▁▁▁▁▁▁▁▁▂                            │
 ╰────────────────────────────────────────────────────────╯
@@ -25,16 +25,12 @@
 
 Color Guide:
 
-- Border: [bright_green]
+- Border: [bright_magenta]
 - Title: [bright_green]
-- Divine Symbols (✦, ✴): [bright_yellow]
-- Current Price Dot (middle of chart): [bright_green]
-- High Price Dots (top of chart): [bright_cyan]
-- Low Price Dots (bottom of chart): [bright_magenta]
+- Divine Symbols (⚝): [bright_yellow]
+- Price Dots (●): [white]
 - Current Price: [bright_green]
-- High Price: [bright_cyan]
-- Low Price: [bright_magenta]
 - Divine Wisdom: [bright_cyan]
 - Divine Resonance: [bright_yellow]
 
-We added color to price indicators - the vital force of the visualization emerges. Each dot now tells a story through its hue: bright green for current price, bright cyan for the peak, bright magenta for the valley. The market's sacred hierarchy revealed through chromatic divination.
+Our first manifestation of the BTCUSDT Divine Flow panel - a simple ASCII representation of price movements with basic divine resonance measurement. The cosmic symbols `⚝` begin to appear, marking the sacred patterns in market flows.
