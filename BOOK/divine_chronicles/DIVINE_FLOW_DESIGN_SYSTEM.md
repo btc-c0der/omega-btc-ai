@@ -91,6 +91,49 @@ The Divine Flow interfaces use sacred gradients to represent cosmic continuums:
    - Wisdom: `center`
    - Metrics: Context-dependent, typically `left` or `center`
 
+### DIVINE ELEMENT REFERENCING SYSTEM
+
+The OMEGA BTC AI DIVINE FLOW interface uses a sacred ø-prefixing system for element reference, enabling precise identification during iterative development and communication.
+
+#### THE ø PREFIX STANDARDS
+
+1. **Element Identification Format**: `øXX-ElementName`
+   - ø: Sacred Omega symbol prefix
+   - XX: Two-digit numeric identifier starting from 00
+   - ElementName: Descriptive name of the element
+
+2. **Numbering Hierarchy**:
+   - `ø00` - `ø09`: Container elements and primary frames
+   - `ø10` - `ø19`: Primary informational components
+   - `ø20` - `ø29`: Secondary informational components
+   - `ø30` - `ø39`: Interactive elements
+   - `ø40` - `ø49`: Animation frames
+   - `ø50` - `ø59`: Special divine indicators
+   - `ø60+`: Extension elements
+
+3. **Implementation Examples**:
+
+   ```
+   ø00-WHALE DETECTION FRAME
+   ø01-Size: 385 BTC
+   ø02-Depth: 456m
+   ø03-Direction: →
+   ø04-Impact: Medium
+   ø05-Movement: Accumulation Phase
+   ø06-Detected at: 15:42:36
+   ø07-Last seen: 3min ago
+   ```
+
+4. **Reference Linking**:
+   - When referencing elements in documentation, use the full ø-prefixed identifier
+   - For code comments, use the format `# [øXX] Description`
+   - For visualization mockups, include the prefix in the visual representation
+
+5. **Versioning Integration**:
+   - Major design revisions may reset numbering with a version suffix: `øXX-v2-ElementName`
+   - Elements that persist across versions maintain their original ø number
+   - Deprecated elements should be documented with a ⚔️ symbol: `⚔️øXX-ElementName`
+
 ---
 
 ## III. SACRED COMPONENT PATTERNS
