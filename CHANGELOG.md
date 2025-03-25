@@ -268,3 +268,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation
 - Project structure
 - System design
+
+## [0.7.4] - 2025-03-25
+
+### Fixed
+
+- Fixed Schumann resonance JSON parsing in high-frequency detector
+- Added proper error handling for different Schumann resonance data formats
+- Implemented backwards compatibility for both JSON and simple float formats
+- Created test script for verifying Schumann resonance parsing
+
+### Added
+
+- Comprehensive documentation for Schumann resonance fix (SCHUMANN_RESONANCE_FIX.md)
+- Enhanced error messages for debugging Schumann resonance issues
