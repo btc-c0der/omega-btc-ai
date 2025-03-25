@@ -312,14 +312,14 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
     # Current price is the most recent price
     current_price = prices_to_plot[-1]
     
-    # Create a list of chart rows
+    # Create a list of chart rows using Text objects
     chart_rows = []
     for i in range(height):
         # Calculate the price at this row
         row_price = max_price - (i / (height - 1)) * price_range
         
-        # Create a new row
-        row = ""
+        # Create a new row as a Text object
+        row = Text()
         for j, price in enumerate(prices_to_plot):
             # Only plot if we have enough prices
             if j < len(prices_to_plot):
@@ -350,18 +350,22 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
                             blend = normalized * 2  # 0 to 1
                             color = "bright_magenta" if blend < 0.5 else "bright_green"
                     
-                    # Add the symbol with color
-                    row += f"[{color}]{symbol}[/]"
+                    # Add the symbol with color using Text object methods
+                    row.append(symbol, style=color)
                 else:
-                    row += " "
+                    row.append(" ")
             else:
-                row += " "
+                row.append(" ")
         
         # Add the row to the chart
         chart_rows.append(row)
     
-    # Create the chart text
-    chart_text = Text("\n".join(chart_rows))
+    # Create the chart text by joining the rows
+    chart_text = Text()
+    for i, row in enumerate(chart_rows):
+        chart_text.append(row)
+        if i < len(chart_rows) - 1:
+            chart_text.append("\n")
     
     # Add price metrics
     price_info = Text(f"\nCurrent: ${current_price:.2f}  High: ${max_price:.2f}  Low: ${min_price:.2f}\n\n")
@@ -387,8 +391,7 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
                 segment = "▂"
             else:
                 segment = "▁"
-            resonance.append(segment)
-        resonance.stylize("bright_yellow")
+            resonance.append(segment, style="bright_yellow")
     else:
         resonance = Text("Divine Resonance: ▁▁▁▁▁▁▁▁▁▁ (awaiting data stream)")
         resonance.stylize("dim_grey")
@@ -409,9 +412,8 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
                     segment = "▂"
                 else:
                     segment = "▁"
-                volume_text.append(segment)
-            volume_text.append(f" ({last_volume:.2f})")
-            volume_text.stylize("bright_blue")
+                volume_text.append(segment, style="bright_blue")
+            volume_text.append(f" ({last_volume:.2f})", style="bright_blue")
         else:
             volume_text = Text("Volume Resonance: ▁▁▁▁▁▁▁▁▁▁ (awaiting data stream)")
             volume_text.stylize("dim_grey")
@@ -419,7 +421,12 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
         resonance.append(volume_text)
     
     # Combine all elements
-    combined_text = chart_text + price_info + wisdom_text + resonance + "\n\n"
+    combined_text = Text()
+    combined_text.append(chart_text)
+    combined_text.append(price_info)
+    combined_text.append(wisdom_text)
+    combined_text.append(resonance)
+    combined_text.append("\n\n")
     
     # Add the whale sonar if we're in streaming mode
     if is_streaming:
@@ -428,7 +435,7 @@ def _render_price_chart(price_history, volume_history=None, height=10, width=40,
         
         # Handle both Text and string types
         if isinstance(whale_sonar_text, Text):
-            combined_text += whale_sonar_text
+            combined_text.append(whale_sonar_text)
         else:
             combined_text.append(whale_sonar_text)
     
