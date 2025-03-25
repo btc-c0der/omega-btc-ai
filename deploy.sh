@@ -58,4 +58,34 @@ aws ecs wait services-stable \
 
 echo "✅ Deployment completed successfully!"
 echo "🔍 Monitor the deployment in AWS Console:"
-echo "https://$AWS_REGION.console.aws.amazon.com/ecs/home?region=$AWS_REGION#/clusters/$ECS_CLUSTER/services/$ECS_SERVICE" 
+echo "https://$AWS_REGION.console.aws.amazon.com/ecs/home?region=$AWS_REGION#/clusters/$ECS_CLUSTER/services/$ECS_SERVICE"
+
+echo "🚀 Starting OMEGA BTC AI Deployment Process"
+echo "============================================"
+echo "Version: $(cat VERSION)"
+
+# Step 1: Create deployment package
+echo "📦 Creating deployment package..."
+mkdir -p deploy
+
+# Copy core files
+cp -r omega_ai deploy/
+cp -r config deploy/
+cp -r scripts deploy/
+cp -r db deploy/
+cp -r data deploy/
+cp requirements.txt deploy/
+cp VERSION deploy/
+
+# Copy documentation
+cp README.md deploy/
+cp CHANGELOG.md deploy/
+cp LICENSE deploy/
+cp SCHUMANN_RESONANCE_FIX.md deploy/
+
+# Copy test scripts
+cp test_schumann_resonance.py deploy/
+
+# Step 2: Connect to Scaleway and deploy
+echo "🔄 Connecting to Scaleway server..."
+# ... existing code ... 
