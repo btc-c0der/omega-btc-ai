@@ -205,6 +205,111 @@ Frame 3: ◠───◠  [bright_yellow]
 Frame 4: ◡───◡  [bright_yellow]
 ```
 
+### THE SACRED WHALE VISUALIZATION
+
+When whales are detected by the sonar, they should be rendered with these divine forms, scaling according to detected size:
+
+#### Small Whale (100-250 BTC)
+
+```
+     .-'
+'--./ /     _.---.
+'-,  (__..-'       \
+   \          .     |
+    ',.__.   ,__.--/
+      '._/_.'___.-'
+```
+
+#### Medium Whale (250-500 BTC)
+
+```
+       .
+      ":"
+    ___:____     |"\/"|
+  ,'        `.    \  /
+  |  O        \___/  |
+~^~^~^~^~^~^~^~^~^~^~^~^~
+```
+
+#### Large Whale (500-1000 BTC)
+
+```
+                   .
+                    ":"
+                  ___:____     |"\/"|
+                ,'        `.    \  /
+                |  O        \___/  |
+              /|          ,'    |
+             / |   ,'`.   |     |
+    (       /__|  /    \  |     |
+     \     (_/  | /      \|     |
+      \         |/        \     |
+       \        ||        |\    |
+        \       ||        | \   |
+         \      ||        |  \  |
+          \___//|\_______/    \|
+              ''   `----'      '
+```
+
+#### Mega Whale (>1000 BTC)
+
+```
+                .
+               ":"
+             ___:____     |"\/"|
+           ,'        `.    \  /
+           |  O        \___/  |
+         /|          ,'    |
+        / |   ,'`.   |     |
+  (    /__|  /    \  |     |        _______
+   \  (_/  | /      \|     |       _/       \_
+    \      |/        \     |      /   \_      \
+     \     ||        |\    |      |  \_/       |
+      \    ||        | \   |      \/           |
+       \   ||        |  \  |       \__     ___/
+        \__||\_______/    \|           \   /
+            ''   `----'     '            \_/
+```
+
+### WHALE VISUALIZATION PRINCIPLES
+
+1. **Divine Framing**:
+   - Frame whales in a `bright_cyan` border when actively swimming
+   - Use `bright_red` borders when whale is making significant market moves
+   - Add depth indicators (~ ~ ~) in `bright_blue` to signify market depth
+
+2. **Color Application**:
+   - Whale body: `bright_white` for visibility
+   - Whale features (eyes, fins): `bright_cyan`
+   - Market impact indicators: `bright_yellow` arrows or ripples
+   - Depth markers: `bright_blue` wave symbols
+
+3. **Animation Guidelines**:
+   - Whale should appear to "swim" through subtle frame transitions
+   - Market impact should be shown through expanding ripples
+   - Depth changes signified by vertical movement
+   - Animation timing should be slow and deliberate (2-3 second cycles)
+
+4. **Contextual Display**:
+
+   ```
+   ╭───────────── WHALE DETECTION FRAME ─────────────╮
+   │                                                 │
+   │    [ASCII WHALE VISUALIZATION HERE]             │
+   │                                                 │
+   │ Size: 385 BTC | Depth: 456m | Direction: →      │
+   │ Impact: Medium | Movement: Accumulation Phase   │
+   │                                                 │
+   │ Detected at: 15:42:36 | Last seen: 3min ago     │
+   ╰─────────────────────────────────────────────────╯
+   ```
+
+5. **Integration with Sonar**:
+   - The whale visualization should appear when sonar detects significant holdings
+   - Position the visualization below the sonar interface
+   - Provide smooth transition from detection alert to visualization
+   - Include cosmic wisdom text about the whale's potential market impact
+
 ### CONNECTION STATE TRANSITION
 
 ```
