@@ -426,3 +426,23 @@ This document tracks the key changes and enhancements in the OMEGA BTC AI system
 - Integration with existing Fibonacci utilities
 - Cross-scale temporal harmony assessment
 - Historical Bitcoin event correlation
+
+# OMEGA BTC AI DIVINE CHANGELOG
+
+This document chronicles the sacred evolution of the OMEGA BTC AI Divine System.
+
+## v0.7.1-divine-portal (2025-03-26)
+
+### ✨ Added
+
+- OMEGA CLI DIVINE PORTAL - Interactive dashboard for all system tools
+  - Unified command center with tmux-based interface
+  - Categories for all system components (Core, Monitors, Trading, etc.)
+  - Support for both tmux and CLI-only modes
+  - ASCII art interface with divine styling
+- Updated README with documentation for the new portal
+
+### 🧠 Improved
+
+- Consolidated access to all scripts and utilities in one interface
+- Enhanced user experience with interactive menus
