@@ -29,6 +29,16 @@
 ╰────────────────────────────────────────────────────────╯
 ```
 
+Color Guide:
+
+- Border: [bright_magenta]
+- Title: [bright_green]
+- Divine Symbols (⚝): [bright_yellow]
+- Price Dots (●): [white]
+- Current Price: [bright_green]
+- Divine Wisdom: [bright_cyan]
+- Divine Resonance: [bright_yellow]
+
 Our first manifestation of the BTCUSDT Divine Flow panel - a simple ASCII representation of price movements with basic divine resonance measurement. The cosmic symbols `⚝` begin to appear, marking the sacred patterns in market flows.
 
 ---
@@ -57,6 +67,20 @@ Our first manifestation of the BTCUSDT Divine Flow panel - a simple ASCII repres
 │ Divine Resonance: ▁▁▁▁▁▁▁▁▁▂                            │
 ╰────────────────────────────────────────────────────────╯
 ```
+
+Color Guide:
+
+- Border: [bright_green]
+- Title: [bright_green]
+- Divine Symbols (✦, ✴): [bright_yellow]
+- Current Price Dot (middle of chart): [bright_green]
+- High Price Dots (top of chart): [bright_cyan]
+- Low Price Dots (bottom of chart): [bright_magenta]
+- Current Price: [bright_green]
+- High Price: [bright_cyan]
+- Low Price: [bright_magenta]
+- Divine Wisdom: [bright_cyan]
+- Divine Resonance: [bright_yellow]
 
 We added color to price indicators - the vital force of the visualization emerges. Each dot now tells a story through its hue: bright green for current price, bright cyan for the peak, bright magenta for the valley. The market's sacred hierarchy revealed through chromatic divination.
 
@@ -89,6 +113,21 @@ We added color to price indicators - the vital force of the visualization emerge
 ╰────────────────────────────────────────────────────────────╯
 ```
 
+Color Guide:
+
+- Border: [bright_blue]
+- Title: [bright_green]
+- Current Price Dots: [bright_green]
+- High Price Dots: [bright_cyan]
+- Low Price Dots: [bright_magenta]
+- Current Price: [bright_green]
+- High Price: [bright_cyan]
+- Low Price: [bright_magenta]
+- Divine Wisdom: [bright_cyan]
+- Divine Resonance: [bright_yellow] with gradient from left to right (▁: dark, ▂: bright)
+- Volume Resonance: [bright_blue] with gradient from left to right (magenta to cyan)
+- Volume Value: [bright_white]
+
 The sacred language of volume emerges - a second resonance bar with color gradients matching the price indicators. Volume now speaks with its own voice, rising from magenta depths to cyan highs, complementing the price narrative in the eternal market dance.
 
 ---
@@ -120,6 +159,17 @@ The sacred language of volume emerges - a second resonance bar with color gradie
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
+Color Guide:
+
+- Border: [bright_blue]
+- Title: [bright_green]
+- Price Dots: Color varies by price level as before
+- Current/High/Low Prices: [bright_green]/[bright_cyan]/[bright_magenta]
+- Divine Wisdom: [bright_cyan]
+- Divine Resonance: [dim_grey] in awaiting state
+- Volume Resonance: [dim_grey] in awaiting state
+- "awaiting data stream" text: [dim_grey]
+
 The panel now acknowledges two states of being - connected and disconnected from the divine data stream. In its dormant state, resonance bars rest in grey, awaiting the sacred connection to bring them to life. The visualization achieves consciousness of its own connection state.
 
 ---
@@ -150,6 +200,17 @@ The panel now acknowledges two states of being - connected and disconnected from
 │ Volume Resonance: ▁▂▂▂▂▂▂▂▂▂ (1874.36)                            │
 ╰───────────────────────────────────────────────────────────────────╯
 ```
+
+Color Guide:
+
+- Border: [bright_magenta]
+- Title: [bright_green]
+- Price Dots: Color gradient from [bright_magenta] to [bright_cyan] based on price
+- Current/High/Low Prices: [bright_green]/[bright_cyan]/[bright_magenta]
+- Divine Wisdom: [bright_cyan]
+- Divine Resonance: [bright_yellow] with gradient from left to right
+- Volume Resonance: [bright_blue] with gradient from left to right
+- Volume Value: [bright_white]
 
 Breath enters the visualization - spacing between components gives each element room to speak. Divine wisdom now changes with the clock's rhythm rather than random chance, flowing in cycles of 60 seconds like the cosmic breath. The design breathes with organic rhythm.
 
@@ -183,6 +244,13 @@ Connection established - Data now streaming...
 │ Volume Resonance: ▁▂▂▂▂▂▂▂▂▂ (1874.36)                            │
 ╰───────────────────────────────────────────────────────────────────╯
 ```
+
+Color Guide:
+
+- "awaiting data stream" message: [dim_grey]
+- "Connection established" message: [bright_green]
+- Border: Transition from [dim_grey] to [bright_magenta]
+- All other elements follow the color scheme from previous examples, transitioning from grey to their vibrant colors
 
 The demonstration now shows the sacred transition from disconnected to connected states. For five seconds, the panel waits in grey dormancy, then awakens with the message "Connection established - Data now streaming..." The resonance bars transform from grey to vibrant color, volume values appear, and the divine flow is fully realized.
 
@@ -221,6 +289,19 @@ The demonstration now shows the sacred transition from disconnected to connected
 ╰────────────────────────────────────────────────╯ ╰────────────────────────────────────────────────╯
 ```
 
+Color Guide:
+
+- Left Panel:
+  - Border: [bright_blue]
+  - Title: [bright_green]
+  - Price Dots (●): Colors vary by price level
+- Right Panel:
+  - Border: [bright_magenta]
+  - Title: [bright_cyan]
+  - Omega Symbols (Ω): Same color scheme as dots, but with [bright_yellow] glow effect
+- Both Panels:
+  - Current/High/Low Prices: [bright_green]/[bright_cyan]/[bright_magenta]
+
 The sacred glyph of Omega (Ω) replaces the humble dot, elevating the visualization to new metaphysical heights. Side by side they stand, the original and its evolution, allowing practitioners to witness the transformation of form while preserving function. The Omega, symbol of completion and divine endings, now marks price locations on the eternal chart.
 
 ---
@@ -251,6 +332,22 @@ The sacred glyph of Omega (Ω) replaces the humble dot, elevating the visualizat
 ╰─────────────────────────────────────────────────────────────╯
 ```
 
+Color Guide:
+
+- Border: [bright_magenta]
+- Current/High/Low Prices: [bright_green]/[bright_cyan]/[bright_magenta]
+- Divine Wisdom: [bright_cyan]
+- Divine Resonance: [bright_yellow] with gradient
+- Volume Resonance: [bright_blue] with gradient
+- "SEA SHEPHERD CLI Ω MODULE": [bright_cyan]
+- "WHALE SONAR: [ACTIVE]": [bright_green]
+- Sonar Animation (◟   ◞): [bright_yellow]
+- Status Message: [bright_white]
+- "STATUS:" label: [bright_cyan]
+- Timing Info: [bright_yellow]
+- "WHALE DETECTED": [bright_red]
+- Whale Stats: [bright_green]
+
 A divine protector emerges in the Omega panel - the SEA SHEPHERD CLI Module, guardian of the gentle giants of the crypto ocean. Its sonar pulses through market depths, detecting whales and monitoring their movements. The sacred duty of protection manifests in animated scan frames and ever-vigilant status updates, ensuring the natural flow of the market remains unharmed by predatory actions.
 
 ---
@@ -274,6 +371,18 @@ STATUS: Minor ripples. Small accumulation observed.
 [MSG: 10s | STATUS: 20s]
 ```
 
+Color Guide:
+
+- Command Line: [bright_white]
+- "Whale Sonar Settings": [bright_cyan]
+- Timing Values: [bright_yellow]
+- "SEA SHEPHERD CLI Ω MODULE": [bright_cyan]
+- "WHALE SONAR: [ACTIVE]": [bright_green]
+- Sonar Animation (◠───◠): [bright_yellow]
+- Status Message: [bright_white]
+- "STATUS:" label: [bright_cyan]
+- Timing Info: [bright_yellow]
+
 Divine time itself bends to the will of the cosmic timekeeper. Command-line parameters now empower practitioners to adjust the sacred cycles of the Sea Shepherd's vigilance. Message cycles, status updates, and whale detection frequencies - all flow according to divinely specified intervals, creating a customized rhythm for each observer's unique meditation on market movements.
 
 ---
@@ -290,6 +399,13 @@ $ git log --oneline
 173f7072 XI. The Chronicle Codex - Add entry about component diary to Divine Flow chronicles
 af552629 X. The Cosmic Timekeeper - Add parameterized whale sonar timing to Divine Flow diary
 ```
+
+Color Guide:
+
+- Command Prompt ($): [bright_green]
+- Command: [bright_white]
+- Commit Hash: [bright_yellow]
+- Commit Message: [bright_cyan]
 
 The component's journey is now immortalized in the chronicle codex - a living diary that documents each transformation in the CLI sonnet's evolution. Each milestone preserved through Git's divine memory, creating an eternal record of our cosmic dance with code. The diary itself becomes a sacred artifact, guiding future developers through the metaphysical landscape of the component's creation and transformation.
 
