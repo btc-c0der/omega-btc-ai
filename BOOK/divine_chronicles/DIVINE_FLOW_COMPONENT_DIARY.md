@@ -1,3 +1,21 @@
+## 📜 GPU LICENSE NOTICE
+
+This sacred manuscript is licensed under the GPU (General Public Universal) License v1.0.
+For the full license text, see `GPU_LICENSE.md` in the divine_chronicles directory.
+
+```python
+LICENSE = {
+    'type': 'GPU (General Public Universal)',
+    'version': '1.0',
+    'permissions': ['study', 'modify', 'distribute', 'use'],
+    'obligations': ['preserve', 'share', 'attribute'],
+    'divine_origin': 'OMEGA BTC AI DIVINE COLLECTIVE',
+    'last_updated': '2024-03-26'
+}
+```
+
+*By accessing this divine knowledge, you agree to uphold the sacred principles of universal freedom and cosmic wisdom.*
+
 # 🔮 DIVINE FLOW COMPONENT CHRONICLES 🔮
 
 *The Manuscripts of a CLI Omega Sonnet Evolution*

@@ -5,6 +5,40 @@ All notable changes to the OMEGA BTC AI framework will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.3] - 2024-03-26
+
+### Added
+
+- Enhanced State Visualization System
+  - Implemented 15-minute candlestick charts
+  - Added three-panel visualization layout:
+    - Main price chart with candlesticks (top)
+    - PnL tracking chart (bottom left)
+    - State tree visualization (bottom right)
+  - Improved position markers with clear entry/exit points
+  - Enhanced datetime handling and type conversion
+  - Added comprehensive state transition tracking
+  - Implemented dynamic position sizing based on volatility
+
+### Changed
+
+- Updated position state labels for clarity:
+  - "LONG_SETUP" → "OPEN_LONG"
+  - "SHORT_SETUP" → "OPEN_SHORT"
+  - Added "CLOSE_LONG" and "CLOSE_SHORT" states
+- Enhanced visualization aesthetics with:
+  - Sacred color scheme for different states
+  - Improved grid layout using GridSpec
+  - Better datetime formatting on x-axis
+  - Clear entry/exit markers with color coding
+
+### Fixed
+
+- Datetime handling in visualization
+- Type conversion issues with matplotlib dates
+- GridSpec import and implementation
+- Position marker placement and styling
+
 ## [0.7.2] - 2024-03-26
 
 ### Added

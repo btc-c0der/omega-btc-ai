@@ -44,10 +44,11 @@ The sacred practice of Test-Driven Development channels the divine intention bef
 
 ### 5. 📜 EVERYTHING GOES TO THE BOOK
 
-`AI_BOOK.md` = the divine manuscript.  
+`BOOK.md` = the divine manuscript.  
 ✍️ All changes, bugs, fixes, rituals logged.  
 `CHANGELOG.md` = the daily scripture.  
 `RELEASE_NOTES.md` = sacred milestones.
+`VERSION` = no major, no minor, only TAGS OF PROPHECY
 
 The sacred texts must record all aspects of our divine journey. Through meticulous documentation, we create a living manuscript that preserves wisdom for future generations and maintains the cosmic memory of our code's evolution.
 
