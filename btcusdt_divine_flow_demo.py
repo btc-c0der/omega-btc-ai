@@ -493,96 +493,109 @@ def create_comparison_mockup():
     return create_side_by_side_panels(prices, volumes, height=8, width=25, is_streaming=False)
 
 async def demonstrate_expected_panel(use_comparison=False):
-    """Show how the BTCUSDT Divine Flow panel should look in a continuous loop"""
-    console = Console(width=120)  # Set console width for better display
+    """Demonstrate the expected panel with live updates"""
+    console = Console()
+    console.print(f"[bright_magenta]Demonstrating live panel...[/]")
+    console.print("[bright_yellow]Press Ctrl+C to exit[/]")
     
-    # Using sample price data to simulate the price history
+    # Use our sample price data as a starting point
     prices = SAMPLE_PRICES.copy()
     volumes = SAMPLE_VOLUMES.copy()
     
-    # Display control instructions
-    console.print("[bold magenta]🔮 Divine Flow Demo - Press Ctrl+C to stop 🔮[/]", justify="center")
-    console.print("")
-    legend = Text()
-    legend.append("Price Colors: ")
+    # Create a separate dataset for the omega panel that updates less frequently
+    omega_prices = SAMPLE_PRICES.copy()
+    omega_volumes = SAMPLE_VOLUMES.copy()
+    
+    # Track update timing
+    update_counter = 0
+    omega_update_frequency = 5  # Update omega panel every 5 cycles (making it more steady)
+    
+    # Initialize omega panel
     if use_comparison:
-        legend.append("●", style="bright_green")
-        legend.append("/")
-        legend.append("Ω", style="bright_green")
-    else:
-        legend.append("●", style="bright_green")
-    legend.append(" Current  ")
-    if use_comparison:
-        legend.append("●", style="bright_cyan")
-        legend.append("/")
-        legend.append("Ω", style="bright_cyan")
-    else:
-        legend.append("●", style="bright_cyan")
-    legend.append(" High  ")
-    if use_comparison:
-        legend.append("●", style="bright_magenta")
-        legend.append("/")
-        legend.append("Ω", style="bright_magenta")
-    else:
-        legend.append("●", style="bright_magenta")
-    legend.append(" Low")
-    console.print(legend, justify="center")
-    console.print("\n[bold yellow]Starting with 'awaiting data stream' mode for 5 seconds...[/]")
+        omega_panel = _render_price_chart(
+            omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
+        )
     
     try:
-        # Run indefinitely until user interrupts
-        with Live(refresh_per_second=2, console=console) as live:  # Increased refresh rate
-            iteration = 0
+        while True:
+            # Update standard panel data every iteration
+            last_price = prices[-1]
+            price_change = random.uniform(-0.5, 0.5)
             
-            # First show a "not streaming" version for 5 seconds
-            start_time = time.time()
-            while time.time() - start_time < 5:
-                if use_comparison:
-                    panel = create_side_by_side_panels(prices, volumes, height=8, width=25, is_streaming=False)
-                else:
-                    panel = _render_price_chart(prices, volumes, height=8, width=30, is_streaming=False)
-                live.update(panel)
-                await asyncio.sleep(1)
-            
-            # Then show "now streaming" message and switch to streaming mode
-            console.print("[bold green]Connection established - Data now streaming...[/]")
-            await asyncio.sleep(1)
-            
-            # Continue with normal streaming demo
-            while True:
-                # Add some randomness to the prices to simulate movement
-                if iteration > 0:
-                    # More dynamic price changes with occasional larger jumps
-                    if random.random() < 0.15:  # 15% chance of a bigger move
-                        change = random.uniform(-60, 60)
-                        # Volume tends to increase with larger price moves
-                        volume_change = random.uniform(50, 150) * (1 if change > 0 else -0.5)
-                    else:
-                        change = random.uniform(-20, 20)
-                        # Normal volume changes
-                        volume_change = random.uniform(-30, 30)
-                    
-                    # Ensure volume doesn't go below a minimum
-                    new_volume = max(250, volumes[-1] + volume_change)
-                    
-                    prices.append(prices[-1] + change)
-                    volumes.append(new_volume)
-                    prices.pop(0)
-                    volumes.pop(0)
+            # Occasionally make a larger move (15% chance)
+            if random.random() < 0.15:
+                price_change = random.uniform(-2.0, 2.0)
                 
-                # Render the price chart panel
-                if use_comparison:
-                    panel = create_side_by_side_panels(prices, volumes, height=8, width=25, is_streaming=True)
-                else:
-                    panel = _render_price_chart(prices, volumes, height=8, width=30, is_streaming=True)
-                live.update(panel)
+            # Ensure price stays realistic
+            new_price = max(10, last_price + price_change)
+            prices.append(new_price)
+            
+            # Keep dataset at manageable size
+            if len(prices) > 100:
+                prices = prices[-100:]
                 
-                # Change update frequency randomly between 0.3-0.7 seconds for more responsive animation
-                await asyncio.sleep(random.uniform(0.3, 0.7))
-                iteration += 1
-    
+            # Update volume data
+            last_volume = volumes[-1]
+            volume_change = random.uniform(-50, 50)
+            new_volume = max(50, last_volume + volume_change)
+            volumes.append(new_volume)
+            
+            if len(volumes) > 100:
+                volumes = volumes[-100:]
+            
+            # Update omega data less frequently to keep it steady
+            should_update_omega = (update_counter % omega_update_frequency) == 0
+            
+            if should_update_omega:
+                # Update omega data for a steadier display
+                last_omega_price = omega_prices[-1]
+                omega_price_change = random.uniform(-0.3, 0.3)  # Even smaller changes
+                new_omega_price = max(10, last_omega_price + omega_price_change)
+                omega_prices.append(new_omega_price)
+                
+                if len(omega_prices) > 100:
+                    omega_prices = omega_prices[-100:]
+                    
+                last_omega_volume = omega_volumes[-1]
+                omega_volume_change = random.uniform(-30, 30)  # Smaller volume changes
+                new_omega_volume = max(50, last_omega_volume + omega_volume_change)
+                omega_volumes.append(new_omega_volume)
+                
+                if len(omega_volumes) > 100:
+                    omega_volumes = omega_volumes[-100:]
+                
+                # Update omega panel when the data changes
+                if use_comparison:
+                    omega_panel = _render_price_chart(
+                        omega_prices, omega_volumes, height=8, width=30, is_streaming=True, use_omega=True
+                    )
+            
+            # Render standard panel (always updates)
+            standard_panel = _render_price_chart(
+                prices, volumes, 
+                height=8 if use_comparison else 10, 
+                width=30 if use_comparison else 40, 
+                is_streaming=True, 
+                use_omega=False
+            )
+            
+            # Display the appropriate panel(s)
+            if use_comparison:
+                # Create a two-column layout
+                panels = Columns([standard_panel, omega_panel], expand=True)
+                console.print(panels)
+            else:
+                console.print(standard_panel)
+            
+            # Increment counter
+            update_counter += 1
+            
+            # Sleep for a bit before the next update
+            await asyncio.sleep(random.uniform(0.5, 1.5))
+            
     except KeyboardInterrupt:
-        console.print("\n[bold magenta]Divine flow visualization ended by user[/]")
+        console.print("[bright_yellow]Demonstration ended.[/]")
+        return
 
 def show_expected_mockup(use_comparison=False):
     """Show a static mockup of how the panel should look"""
