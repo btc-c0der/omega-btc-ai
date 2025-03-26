@@ -10,7 +10,7 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -26,7 +26,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U omega_user -d omega_db"]
+      test: [ "CMD-SHELL", "pg_isready -U omega_user -d omega_db" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -42,9 +42,26 @@ services:
       - ./logs:/app/logs
       - ./data:/app/data
     ports:
-      - "8765:8765"  # WebSocket Server
-      - "8050:8050"  # Dashboard UI
+      - "8765:8765" # WebSocket Server
+      - "8050:8050" # Dashboard UI
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  omega-dashboard:
+    build: .
+    ports:
+      - "8051:8051"
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - PYTHONPATH=/app
+      - OMEGA_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8051" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

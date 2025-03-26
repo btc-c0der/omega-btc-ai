@@ -9,12 +9,18 @@ providing detailed debugging information about potential trades before execution
 
 import json
 import time
+import random
 import datetime
+import logging
 import redis
 import numpy as np
-from typing import Tuple, Dict, List, Optional, Any
+from typing import Tuple, Dict, List, Optional, Any, Union, cast, TypeVar, Sequence
 
 from omega_ai.algos.omega_algorithms import OmegaAlgo
+
+# Type variables for Redis responses
+T = TypeVar('T')
+RedisResponse = Union[bytes, str, int, float, List[T], Dict[str, T], None]
 
 # Terminal colors for visual output
 RESET = "\033[0m"
@@ -38,6 +44,8 @@ class TradingAnalyzer:
         self.debug_mode = debug_mode
         self.last_analysis_time = datetime.datetime.min
         self.analysis_cooldown = 15  # seconds between analyses
+        self.random = random.Random()  # Initialize random number generator
+        self.logger = logging.getLogger(__name__)
         
         # Analysis score thresholds
         self.entry_threshold = 50  # Changed from 70
@@ -64,7 +72,7 @@ class TradingAnalyzer:
     def get_current_price(self) -> float:
         """Get the current BTC price from Redis."""
         try:
-            price_str = self.redis_conn.get("last_btc_price")
+            price_str = cast(str, self.redis_conn.get("last_btc_price"))
             if price_str:
                 return float(price_str)
             return 0.0
@@ -89,11 +97,11 @@ class TradingAnalyzer:
         
         # Get market bias
         try:
-            bias_data = self.redis_conn.hgetall("market_bias")
+            bias_data = cast(Dict[str, str], self.redis_conn.hgetall("market_bias"))
             if bias_data:
                 context["market_bias"] = bias_data.get("bias", "Neutral/Sideways")
-                context["bullish_score"] = float(bias_data.get("bullish_score", 0))
-                context["bearish_score"] = float(bias_data.get("bearish_score", 0))
+                context["bullish_score"] = float(bias_data.get("bullish_score", "0"))
+                context["bearish_score"] = float(bias_data.get("bearish_score", "0"))
                 
                 self.log_debug(f"Market bias: {context['market_bias']} (Bull:{context['bullish_score']:.1f}/Bear:{context['bearish_score']:.1f})", "ANALYSIS")
         except Exception as e:
@@ -101,7 +109,7 @@ class TradingAnalyzer:
         
         # Get Fibonacci levels
         try:
-            fib_data = self.redis_conn.hgetall("realtime_fibonacci_levels")
+            fib_data = cast(Dict[str, str], self.redis_conn.hgetall("realtime_fibonacci_levels"))
             if fib_data:
                 for level_name, price_str in fib_data.items():
                     if level_name != "timestamp":
@@ -144,7 +152,7 @@ class TradingAnalyzer:
         
         # Get MM traps
         try:
-            trap_data = self.redis_conn.get("latest_mm_trap")
+            trap_data = cast(Optional[str], self.redis_conn.get("latest_mm_trap"))
             if trap_data:
                 context["recent_trap"] = json.loads(trap_data)
                 trap_time = context["recent_trap"].get("timestamp", 0)
@@ -162,16 +170,16 @@ class TradingAnalyzer:
         
         # Get volatility info
         try:
-            volatility = self.redis_conn.get("current_dynamic_threshold")
-            regime = self.redis_conn.get("current_market_regime")
+            volatility = cast(Optional[str], self.redis_conn.get("current_dynamic_threshold"))
+            regime = cast(Optional[str], self.redis_conn.get("current_market_regime"))
             
             if volatility:
                 context["recent_volatility"] = float(volatility)
-                self.log_debug(f"Current volatility threshold: ${context["recent_volatility"]:.2f}", "ANALYSIS")
+                self.log_debug(f"Current volatility threshold: ${context['recent_volatility']:.2f}", "ANALYSIS")
                 
             if regime:
                 context["regime"] = regime
-                self.log_debug(f"Current market regime: {context["regime"]}", "ANALYSIS")
+                self.log_debug(f"Current market regime: {context['regime']}", "ANALYSIS")
         except Exception as e:
             self.log_debug(f"Error getting volatility data: {e}", "WARNING")
             
@@ -301,34 +309,34 @@ class TradingAnalyzer:
             current_vol_key = "volume_1m:current"
             prev_vol_key = "volume_1m:previous"
             
-            current_vol = self.redis_conn.get(current_vol_key)
-            prev_vol = self.redis_conn.get(prev_vol_key)
+            current_vol = cast(Optional[str], self.redis_conn.get(current_vol_key))
+            prev_vol = cast(Optional[str], self.redis_conn.get(prev_vol_key))
             
             if not current_vol or not prev_vol:
                 # Try to get from another source or calculate from tick data
-                vol_data = self.redis_conn.lrange("recent_volume_data", -2, -1)
+                vol_data = cast(List[str], self.redis_conn.lrange("recent_volume_data", -2, -1))
                 if len(vol_data) >= 2:
                     try:
-                        prev_vol = float(vol_data[0])
-                        current_vol = float(vol_data[1])
+                        prev_vol = vol_data[0]
+                        current_vol = vol_data[1]
                     except (ValueError, TypeError):
                         return context
                 else:
                     return context
-            else:
-                current_vol = float(current_vol)
-                prev_vol = float(prev_vol)
             
             # Calculate volume delta as percentage change
-            if prev_vol > 0:
-                vol_delta = (current_vol - prev_vol) / prev_vol
+            current_vol_float = float(current_vol)
+            prev_vol_float = float(prev_vol)
+            
+            if prev_vol_float > 0:
+                vol_delta = (current_vol_float - prev_vol_float) / prev_vol_float
                 vol_delta_pct = vol_delta * 100
                 
                 context["volume_delta"] = vol_delta
                 context["volume_delta_pct"] = vol_delta_pct
                 
                 # Log volume information
-                self.log_debug(f"Volume delta: {vol_delta_pct:+.1f}% (Current: {current_vol:.1f}, Previous: {prev_vol:.1f})", "ANALYSIS")
+                self.log_debug(f"Volume delta: {vol_delta_pct:+.1f}% (Current: {current_vol_float:.1f}, Previous: {prev_vol_float:.1f})", "ANALYSIS")
                 
                 # Score based on volume acceleration
                 if vol_delta > 1.0:  # 100%+ increase in volume
@@ -602,7 +610,7 @@ class TradingAnalyzer:
             if price_data is None:
                 # Try to get from Redis
                 key = f"btc_price_{timeframe_minutes}m"
-                data_str = self.redis_conn.get(key)
+                data_str = cast(Optional[str], self.redis_conn.get(key))
                 
                 if not data_str:
                     raise ValueError(f"No data available for {timeframe_minutes}m timeframe")

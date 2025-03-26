@@ -13,6 +13,8 @@ import datetime
 import threading
 from redis.exceptions import ConnectionError
 from omega_ai.utils.redis_connection import RedisConnectionManager
+from omega_ai.alerts.alerts_orchestrator import send_mm_trap_alert
+from omega_ai.db_manager.database import insert_mm_trap
 
 # Initialize Redis connection manager
 redis_manager = RedisConnectionManager()
@@ -75,17 +77,44 @@ class TrapProcessor:
             trap_type = trap_data.get('type', 'Unknown')
             confidence = trap_data.get('confidence', 0)
             price = trap_data.get('price', 0)
+            price_change = trap_data.get('price_change', 0)
+            liquidity_grabbed = trap_data.get('liquidity_grabbed', 0)
+            
+            # Standardize trap data format
+            standardized_trap = {
+                "trap_type": trap_type.lower().replace("-", "_").replace(" ", "_"),
+                "btc_price": float(price) if isinstance(price, str) else price,
+                "price_change": float(price_change) if isinstance(price_change, str) else price_change,
+                "confidence": float(confidence) if isinstance(confidence, str) else confidence,
+                "liquidity_grabbed": float(liquidity_grabbed) if isinstance(liquidity_grabbed, str) else liquidity_grabbed,
+                "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+            }
             
             # Process trap based on confidence
-            if confidence > 0.8:
-                # High confidence trap - log to database
-                print(f"⚠️ HIGH CONFIDENCE TRAP: {trap_type} at ${price} ({confidence:.2f})")
-                # Here you would call your database code to store the trap
-                # from omega_ai.db_manager.database import log_mm_trap
-                # log_mm_trap(trap_type, price, confidence)
+            if standardized_trap["confidence"] > 0.8:
+                # High confidence trap - log to database and send alert
+                print(f"⚠️ HIGH CONFIDENCE TRAP: {trap_type} at ${standardized_trap['btc_price']:.2f} ({standardized_trap['confidence']:.2f})")
+                
+                # Store in database
+                insert_mm_trap(
+                    trap_data={
+                        "trap_type": standardized_trap["trap_type"],
+                        "price_level": standardized_trap["btc_price"],
+                        "direction": "up" if standardized_trap["price_change"] > 0 else "down",
+                        "confidence_score": standardized_trap["confidence"],
+                        "volume_spike": standardized_trap["liquidity_grabbed"],
+                        "timeframe": "1h",  # Default timeframe
+                        "price_range": abs(standardized_trap["price_change"] * standardized_trap["btc_price"]),
+                        "description": f"MM trap detected: {trap_type} at ${standardized_trap['btc_price']:.2f}",
+                        "metadata": {"source": "mm_trap_consumer", "detected_at": standardized_trap["timestamp"]}
+                    }
+                )
+                
+                # Send specialized alert with highlighted formatting
+                send_mm_trap_alert(standardized_trap)
             else:
                 # Low confidence trap - just log
-                print(f"ℹ️ Low confidence trap: {trap_type} ({confidence:.2f})")
+                print(f"ℹ️ Low confidence trap: {trap_type} ({standardized_trap['confidence']:.2f})")
             
             return True
         except Exception as e:
