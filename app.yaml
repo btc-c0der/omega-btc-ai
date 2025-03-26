@@ -1,0 +1,26 @@
+name: omega-btc-ai-websocket
+services:
+- name: websocket
+  github:
+    branch: deploy/websocket
+    deploy_on_push: true
+    repo: your-username/omega-btc-ai
+  health_check:
+    http_path: /health
+  http_port: 8765
+  instance_count: 2
+  instance_size_slug: basic-xxs
+  run_command: python -m omega_ai.mm_trap_detector.mm_websocket_server
+  envs:
+  - key: REDIS_HOST
+    value: ${REDIS_HOST}
+  - key: REDIS_PORT
+    value: ${REDIS_PORT}
+  - key: REDIS_USERNAME
+    value: ${REDIS_USERNAME}
+  - key: REDIS_PASSWORD
+    value: ${REDIS_PASSWORD}
+  - key: REDIS_USE_TLS
+    value: ${REDIS_USE_TLS}
+  - key: REDIS_CERT
+    value: ${REDIS_CERT}
