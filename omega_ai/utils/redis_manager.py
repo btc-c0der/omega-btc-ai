@@ -7,57 +7,19 @@ from typing import Optional, Dict, Any, List, Union, Tuple
 import json
 import time
 import os
+from .redis_config import get_redis_config
 
 class RedisManager:
-    def __init__(self, host=None, port=None, db=0, 
-                 username=None, password=None, ssl=False, ssl_ca_certs=None):
-        """
-        Initialize Redis connection manager with optional SSL support
+    """Redis connection manager with error handling and retries."""
+    
+    def __init__(self, **kwargs):
+        """Initialize Redis connection with configuration."""
+        # Get default config and update with any overrides
+        config = get_redis_config()
+        config.update(kwargs)
         
-        Args:
-            host: Redis host (default: from env or localhost)
-            port: Redis port (default: from env or 6379)
-            db: Redis database number (default: 0)
-            username: Redis username for auth (default: None)
-            password: Redis password for auth (default: None)
-            ssl: Whether to use SSL/TLS (default: False)
-            ssl_ca_certs: Path to CA certificate file (default: None)
-        """
-        # Get Redis connection details from environment variables or use defaults
-        # Force use of localhost unless explicitly overridden
-        host = host or 'localhost'  # Default to localhost first
-        port = port or int(os.getenv('REDIS_PORT', '6379'))
-        
-        # Initialize Redis connection with flexible parameters
-        connection_params = {
-            "host": host,
-            "port": port,
-            "db": db,
-            "decode_responses": True
-        }
-        
-        # Add optional authentication if provided and not in development mode
-        if not os.environ.get('OMEGA_DEV_MODE', 'true').lower() == 'true':
-            if username:
-                connection_params["username"] = username
-            if password:
-                connection_params["password"] = password
-                
-            # Add SSL/TLS parameters if enabled
-            if ssl:
-                connection_params["ssl"] = True
-                if ssl_ca_certs:
-                    connection_params["ssl_ca_certs"] = ssl_ca_certs
-        
-        try:
-            self.redis = redis.Redis(**connection_params)
-            print(f"Redis Manager initialized - Host: {host}, Port: {port}, SSL: {ssl}")
-            # Test connection
-            self.redis.ping()
-            print("✅ Redis connection successful")
-        except Exception as e:
-            print(f"Error initializing Redis connection: {e}")
-            raise
+        self.redis = redis.Redis(**config)
+        self._test_connection()
         
         self._cache = {}
         self._cache_ttl = {}
@@ -66,6 +28,13 @@ class RedisManager:
         # Register signal handlers
         signal.signal(signal.SIGINT, self._handle_shutdown)
         signal.signal(signal.SIGTERM, self._handle_shutdown)
+    
+    def _test_connection(self):
+        """Test Redis connection."""
+        try:
+            self.redis.ping()
+        except redis.ConnectionError as e:
+            raise ConnectionError(f"Failed to connect to Redis: {str(e)}")
     
     def connect(self):
         """Get a blessed Redis connection."""

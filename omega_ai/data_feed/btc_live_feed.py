@@ -96,8 +96,12 @@ except ImportError:
         sys.exit(1)
 
 # Set Redis host environment variable
-redis_host = os.environ.get('REDIS_HOST', 'localhost')
-os.environ['REDIS_HOST'] = redis_host
+from omega_ai.utils.redis_config import get_redis_config
+redis_config = get_redis_config()
+os.environ['REDIS_HOST'] = redis_config['host']
+os.environ['REDIS_PORT'] = str(redis_config['port'])
+os.environ['REDIS_USERNAME'] = redis_config['username']
+os.environ['REDIS_PASSWORD'] = redis_config['password']
 
 from omega_ai.utils.redis_manager import RedisManager
 
@@ -158,11 +162,7 @@ BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
 MM_WS_URL = "ws://localhost:8765"
 
 # Redis Connection - used by legacy functions
-redis_conn = redis.Redis(
-    host=os.getenv('REDIS_HOST', 'localhost'),
-    port=int(os.getenv('REDIS_PORT', '6379')),
-    db=0
-)
+redis_conn = redis.Redis(**redis_config)
 
 # Redis health check function from Code version
 def check_redis_health():

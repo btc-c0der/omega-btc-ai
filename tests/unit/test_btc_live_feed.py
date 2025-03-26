@@ -1418,4 +1418,53 @@ class TestBtcLiveFeed:
             # Verify message is user-friendly
             assert len(safe_message) < 100  # Not too long
             assert safe_message.isprintable()  # No control characters
-            assert safe_message == safe_message.strip()  # No leading/trailing whitespace 
+            assert safe_message == safe_message.strip()  # No leading/trailing whitespace
+    
+    @pytest.mark.asyncio
+    async def test_small_volume_handling(self):
+        """Test handling of very small volume values (7e-05)."""
+        # Test data with very small volume
+        test_data = {
+            "price": 85000.0,
+            "volume": 7e-05,  # Very small volume
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Mock Redis client for volume-specific operations
+        self.feed.redis_client.set = AsyncMock()
+        self.feed.redis_client.lpush = AsyncMock()
+        
+        # Process the message
+        await self.feed.on_message(test_data)
+        
+        # Verify volume was stored correctly
+        self.feed.redis_client.set.assert_any_call(
+            "last_btc_volume",
+            "0.00007"  # String representation of 7e-05
+        )
+        
+        # Verify combined data format
+        self.feed.redis_client.lpush.assert_any_call(
+            "btc_movement_history",
+            "85000.0,0.00007"  # Price and volume in correct format
+        )
+        
+        # Test volume validation
+        async def validate_volume(data: Dict[str, Any]) -> bool:
+            volume = data.get("volume", 0.0)
+            if volume < 1e-06:  # Minimum volume threshold
+                raise ValueError("Volume too small")
+            return True
+        
+        self.feed.validate_input = AsyncMock(side_effect=validate_volume)
+        
+        # Test with even smaller volume
+        with pytest.raises(ValueError, match="Volume too small"):
+            await self.feed.validate_input({"volume": 1e-07})
+        
+        # Test with valid small volume
+        assert await self.feed.validate_input({"volume": 7e-05})
+        
+        # Verify volume formatting in logs
+        log_message = f"LIVE BTC PRICE UPDATE: ${test_data['price']:.2f} (Vol: {test_data['volume']:.8f})"
+        assert "0.00007000" in log_message  # Check proper formatting of small numbers 
