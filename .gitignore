@@ -186,3 +186,9 @@ temp_deployment_package.zip
 omega_viz_*/
 tmp_data/omega_viz_*/
 .DS_Store
+
+# Large files
+*.pack
+*.dylib
+*.log
+venv/
