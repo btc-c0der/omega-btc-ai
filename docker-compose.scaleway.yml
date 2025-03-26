@@ -35,14 +35,38 @@ services:
     build:
       context: .
       dockerfile: docker/BTCLiveFeed.Dockerfile
+    container_name: btc-live-feed
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - redis
-    restart: always
+      - REDIS_HOST=${REDIS_HOST:-172.16.8.2}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_USERNAME=${REDIS_USERNAME:-btc-omega-redis}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USE_TLS=${REDIS_USE_TLS:-true}
+      - REDIS_CERT=${REDIS_CERT:-/app/config/SSL_redis-btc-omega-redis.pem}
+      - USE_GPU=${USE_GPU:-true}
+      - TF_FORCE_GPU_ALLOW_GROWTH=${TF_FORCE_GPU_ALLOW_GROWTH:-true}
+      - DEBUG=${DEBUG:-false}
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
-      - omega-net
+      - btc-net
 
   trap-probability-meter:
     build:
@@ -129,6 +153,8 @@ services:
 
 networks:
   omega-net:
+    driver: bridge
+  btc-net:
     driver: bridge
 
 volumes:

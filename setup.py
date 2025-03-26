@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="omega-btc-ai",
-    version="0.5.3",
+    version="0.420",
     packages=find_packages(),
     install_requires=[
         "flask",

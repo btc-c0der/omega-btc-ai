@@ -261,10 +261,10 @@ class GAMONTrinityLiveFeed:
             if not is_closed:
                 return
                 
-            # Store candle in Redis
+            # Store candle in Redis with consistent column names
             candle_data = {
                 'timestamp': timestamp,
-                'datetime': datetime.fromtimestamp(timestamp).isoformat(),
+                'date': datetime.fromtimestamp(timestamp).isoformat(),  # Use 'date' consistently
                 'open': open_price,
                 'high': high_price,
                 'low': low_price,
@@ -340,6 +340,11 @@ class GAMONTrinityLiveFeed:
             for raw_candle in raw_candles:
                 try:
                     candle = json.loads(raw_candle)
+                    # Ensure we have a date column
+                    if 'datetime' in candle:
+                        candle['date'] = candle['datetime']
+                    elif 'timestamp' in candle:
+                        candle['date'] = datetime.fromtimestamp(candle['timestamp']).isoformat()
                     candles.append(candle)
                 except:
                     continue
@@ -353,8 +358,17 @@ class GAMONTrinityLiveFeed:
                 logger.warning(f"{YELLOW}⚠️ No valid candles found in Redis{RESET}")
                 return None
                 
-            # Set datetime index
-            df['date'] = pd.to_datetime(df['datetime'])
+            # Ensure date column is datetime
+            if 'date' in df.columns:
+                df['date'] = pd.to_datetime(df['date'])
+            elif 'datetime' in df.columns:
+                df['date'] = pd.to_datetime(df['datetime'])
+            elif 'timestamp' in df.columns:
+                df['date'] = pd.to_datetime(df['timestamp'], unit='s')
+            else:
+                logger.warning(f"{YELLOW}⚠️ No date column found in candles{RESET}")
+                return None
+                
             # Make sure all required columns exist
             required_columns = ['open', 'high', 'low', 'close', 'volume', 'date']
             for col in required_columns:
@@ -505,6 +519,10 @@ class GAMONTrinityLiveFeed:
             # Make sure the plots directory exists
             os.makedirs("plots", exist_ok=True)
                 
+            # Debug: Print DataFrame columns
+            if hasattr(self, 'candles') and self.candles is not None:
+                logger.info(f"{CYAN}📊 DataFrame columns: {list(self.candles.columns)}{RESET}")
+            
             # Render the visualization
             fig = self.trinity.render_trinity_matrix(
                 output_file="plots/gamon_trinity_matrix_live.html"

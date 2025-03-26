@@ -3,7 +3,7 @@ from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
 import signal
 import sys
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Union, Tuple
 import json
 import time
 import os
@@ -94,9 +94,159 @@ class RedisManager:
                 self._cache_ttl[key] = now + self.CACHE_DURATION
                 return value
             return default
+        except redis.exceptions.ResponseError as e:
+            print(f"Redis error on get: {e}")
+            # Check if this is a WRONGTYPE error
+            if "WRONGTYPE" in str(e):
+                # Try to identify the actual type and get it appropriately
+                return self.get_key_with_type_detection(key, default)
+            return default
         except redis.RedisError as e:
             print(f"Redis error on get: {e}")
             return default
+    
+    def get_key_with_type_detection(self, key: str, default: Any = None) -> Any:
+        """
+        Get a key's value from Redis with automatic type detection.
+        Handles cases where a key exists but is of a different type than expected.
+        """
+        try:
+            # Check the type of the key
+            key_type = self.redis.type(key).decode('utf-8')
+            
+            if key_type == 'string':
+                return self.redis.get(key)
+            elif key_type == 'list':
+                return self.redis.lrange(key, 0, -1)
+            elif key_type == 'hash':
+                return self.redis.hgetall(key)
+            elif key_type == 'set':
+                return list(self.redis.smembers(key))
+            elif key_type == 'zset':
+                return self.redis.zrange(key, 0, -1, withscores=True)
+            else:
+                print(f"Unknown Redis type for key '{key}': {key_type}")
+                return default
+        except redis.RedisError as e:
+            print(f"Error detecting type for key '{key}': {e}")
+            return default
+    
+    def fix_key_type(self, key: str, expected_type: str) -> bool:
+        """
+        Fix a key that has the wrong type by getting its value,
+        deleting it, and recreating it with the correct type.
+        
+        Args:
+            key: The Redis key to fix
+            expected_type: The expected type ('string', 'list', 'hash', etc.)
+            
+        Returns:
+            bool: True if fixed successfully, False otherwise
+        """
+        try:
+            # Get current value with type detection
+            current_value = self.get_key_with_type_detection(key)
+            if current_value is None:
+                return False
+                
+            # Delete the key
+            self.redis.delete(key)
+            
+            # Recreate with proper type
+            if expected_type == 'string':
+                # For a string, we need to convert other types to string
+                if isinstance(current_value, list):
+                    if len(current_value) > 0:
+                        value = current_value[0] if isinstance(current_value[0], str) else json.dumps(current_value[0])
+                    else:
+                        value = ""
+                elif isinstance(current_value, dict):
+                    value = json.dumps(current_value)
+                else:
+                    value = str(current_value)
+                return self.set_cached(key, value)
+                
+            elif expected_type == 'list':
+                # Convert to list if not already
+                if not isinstance(current_value, list):
+                    current_value = [current_value]
+                
+                # Add each item to the list
+                for item in current_value:
+                    self.lpush(key, item)
+                return True
+                
+            elif expected_type == 'hash':
+                # Convert to dict if not already
+                if not isinstance(current_value, dict):
+                    if isinstance(current_value, list) and len(current_value) > 0:
+                        # Try to convert list to dict
+                        try:
+                            current_value = json.loads(current_value[0])
+                            if not isinstance(current_value, dict):
+                                current_value = {"value": current_value}
+                        except:
+                            current_value = {"value": str(current_value)}
+                    else:
+                        current_value = {"value": str(current_value)}
+                
+                # Add hash fields
+                return bool(self.redis.hset(key, mapping=current_value))
+                
+            else:
+                print(f"Conversion to type '{expected_type}' not implemented")
+                return False
+                
+        except Exception as e:
+            print(f"Error fixing key type: {e}")
+            return False
+    
+    def safe_get(self, key: str, default: Any = None) -> Optional[Any]:
+        """Get a value from Redis, handling any type errors safely."""
+        try:
+            return self.get_cached(key, default)
+        except redis.exceptions.ResponseError:
+            # Try to get with type detection
+            return self.get_key_with_type_detection(key, default)
+        except Exception as e:
+            print(f"Error retrieving key '{key}': {e}")
+            return default
+    
+    def safe_lrange(self, key: str, start: int, end: int) -> List:
+        """Safely get a range from a Redis list, handling type errors."""
+        try:
+            return self.lrange(key, start, end) or []
+        except redis.exceptions.ResponseError as e:
+            if "WRONGTYPE" in str(e):
+                # Try to fix the key
+                self.fix_key_type(key, 'list')
+                # Try lrange again
+                try:
+                    return self.lrange(key, start, end) or []
+                except:
+                    return []
+            return []
+        except Exception:
+            return []
+    
+    def check_key_exists(self, key: str) -> bool:
+        """Check if a key exists in Redis."""
+        try:
+            return bool(self.redis.exists(key))
+        except Exception as e:
+            print(f"Error checking key existence: {e}")
+            return False
+    
+    def get_key_type(self, key: str) -> Optional[str]:
+        """Get the type of a Redis key."""
+        try:
+            key_type = self.redis.type(key)
+            if isinstance(key_type, bytes):
+                return key_type.decode('utf-8')
+            return key_type
+        except Exception as e:
+            print(f"Error getting key type: {e}")
+            return None
     
     def set_cached(self, key: str, value: Any) -> bool:
         """Set a value in Redis with divine energy."""

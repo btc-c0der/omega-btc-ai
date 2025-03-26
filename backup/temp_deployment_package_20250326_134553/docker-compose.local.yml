@@ -1,0 +1,75 @@
+version: '3.8'
+
+# OMEGA BTC AI - Trap-Aware Dual Traders (TADT) System
+# Local Testing Configuration to Simulate Scaleway Environment
+
+services:
+  # Mock Scaleway Redis service
+  mock-scaleway-redis:
+    image: redis:6-alpine
+    container_name: mock-scaleway-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-omegaredispass}
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./temp/data/redis:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-omegaredispass}", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - btc-network
+
+  # BTC Live Feed service
+  btc-live-feed:
+    build:
+      context: .
+      dockerfile: docker/BTCLiveFeed.Dockerfile
+    container_name: btc-live-feed
+    depends_on:
+      mock-scaleway-redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=mock-scaleway-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-omegaredispass}
+      - REDIS_USE_TLS=false
+      - DEBUG=true
+      - USE_GPU=false
+      - TF_FORCE_GPU_ALLOW_GROWTH=false
+    restart: unless-stopped
+    networks:
+      - btc-network
+
+  # Redis Test Client to verify data
+  redis-test-client:
+    image: redis:6-alpine
+    container_name: redis-test-client
+    depends_on:
+      - mock-scaleway-redis
+    entrypoint: >
+      sh -c "
+        echo '⏳ Waiting for Redis to be populated with data...' &&
+        sleep 15 &&
+        echo '🔍 Checking Redis connection with ping...' &&
+        redis-cli -h mock-scaleway-redis -a ${REDIS_PASSWORD:-omegaredispass} ping &&
+        echo '✅ Connection successful!' &&
+        echo '🔍 Checking for BTC data in Redis...' &&
+        redis-cli -h mock-scaleway-redis -a ${REDIS_PASSWORD:-omegaredispass} keys 'btc:*' &&
+        echo '🔁 Test client will exit in 5 seconds...' &&
+        sleep 5 &&
+        echo '👋 Test client exiting.'
+      "
+    networks:
+      - btc-network
+
+networks:
+  btc-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

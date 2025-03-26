@@ -5,22 +5,33 @@ Market Maker Trap Queue Consumer
 Efficiently processes the mm_trap_queue with sorted sets
 """
 
-import redis
 import json
 import time
 import signal
 import datetime
 import threading
-from redis.exceptions import ConnectionError
-from omega_ai.utils.redis_connection import RedisConnectionManager
-from omega_ai.alerts.alerts_orchestrator import send_mm_trap_alert
-from omega_ai.db_manager.database import insert_mm_trap
+import logging
+from typing import Dict, Any, List, Optional, Tuple
+from redis.exceptions import ConnectionError, ResponseError
 
-# Initialize Redis connection manager
-redis_manager = RedisConnectionManager()
+# Import the improved RedisManager
+from omega_ai.utils.redis_manager import RedisManager
+from omega_ai.alerts.alerts_orchestrator import send_mm_trap_alert
+from omega_ai.db_manager.database import insert_possible_mm_trap
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Initialize Redis manager
+redis_manager = RedisManager()
 
 # Configuration
-QUEUE_NAME = "mm_trap_queue:zset"  # Using the new sorted set queue
+QUEUE_NAME = "mm_trap_queue:zset"  # Using sorted set queue
 BATCH_SIZE = 50
 SLEEP_WHEN_EMPTY = 0.1  # seconds
 PROCESSING_TIMEOUT = 60  # seconds
@@ -31,7 +42,7 @@ running = True
 def signal_handler(sig, frame):
     """Handle termination signals for graceful shutdown"""
     global running
-    print("Shutdown signal received, finishing current batch...")
+    logger.info("Shutdown signal received, finishing current batch...")
     running = False
 
 # Set up signal handlers
@@ -70,8 +81,17 @@ class TrapProcessor:
                 trap_data = trap_data.decode('utf-8')
                 
             # Parse JSON if it's a JSON string
-            if isinstance(trap_data, str) and trap_data.startswith('{'):
-                trap_data = json.loads(trap_data)
+            if isinstance(trap_data, str):
+                try:
+                    trap_data = json.loads(trap_data)
+                except json.JSONDecodeError as e:
+                    logger.error(f"Invalid JSON format: {e}")
+                    return False
+            
+            # Ensure trap_data is a dictionary at this point
+            if not isinstance(trap_data, dict):
+                logger.error(f"Expected dictionary for trap_data, got {type(trap_data)}")
+                return False
             
             # Extract trap details
             trap_type = trap_data.get('type', 'Unknown')
@@ -93,32 +113,30 @@ class TrapProcessor:
             # Process trap based on confidence
             if standardized_trap["confidence"] > 0.8:
                 # High confidence trap - log to database and send alert
-                print(f"⚠️ HIGH CONFIDENCE TRAP: {trap_type} at ${standardized_trap['btc_price']:.2f} ({standardized_trap['confidence']:.2f})")
+                logger.info(f"⚠️ HIGH CONFIDENCE TRAP: {trap_type} at ${standardized_trap['btc_price']:.2f} ({standardized_trap['confidence']:.2f})")
+                
+                # Prepare data for database
+                db_trap_data = {
+                    "type": standardized_trap["trap_type"],
+                    "price": standardized_trap["btc_price"],
+                    "price_change": standardized_trap["price_change"],
+                    "confidence": standardized_trap["confidence"],
+                    "timeframe": "1h",  # Default timeframe
+                    "timestamp": standardized_trap["timestamp"]
+                }
                 
                 # Store in database
-                insert_mm_trap(
-                    trap_data={
-                        "trap_type": standardized_trap["trap_type"],
-                        "price_level": standardized_trap["btc_price"],
-                        "direction": "up" if standardized_trap["price_change"] > 0 else "down",
-                        "confidence_score": standardized_trap["confidence"],
-                        "volume_spike": standardized_trap["liquidity_grabbed"],
-                        "timeframe": "1h",  # Default timeframe
-                        "price_range": abs(standardized_trap["price_change"] * standardized_trap["btc_price"]),
-                        "description": f"MM trap detected: {trap_type} at ${standardized_trap['btc_price']:.2f}",
-                        "metadata": {"source": "mm_trap_consumer", "detected_at": standardized_trap["timestamp"]}
-                    }
-                )
+                insert_possible_mm_trap(db_trap_data)
                 
                 # Send specialized alert with highlighted formatting
                 send_mm_trap_alert(standardized_trap)
             else:
                 # Low confidence trap - just log
-                print(f"ℹ️ Low confidence trap: {trap_type} ({standardized_trap['confidence']:.2f})")
+                logger.info(f"ℹ️ Low confidence trap: {trap_type} ({standardized_trap['confidence']:.2f})")
             
             return True
         except Exception as e:
-            print(f"Error processing trap: {e}")
+            logger.error(f"Error processing trap: {e}")
             return False
     
     def process_batch(self, batch):
@@ -137,19 +155,46 @@ class TrapProcessor:
         
     def run_consumer(self):
         """Main consumer loop"""
-        print(f"Starting trap consumer for {QUEUE_NAME}")
+        logger.info(f"Starting trap consumer for {QUEUE_NAME}")
         empty_count = 0
         
         while running:
             try:
-                # Get items from sorted set with scores
-                # ZRANGE returns newest items first with REV
-                items = redis_manager.client.zrange(QUEUE_NAME, 0, BATCH_SIZE-1)
-                
+                # Get items from sorted set (newest first)
+                items = None
+                try:
+                    # We need to use redis directly for zrange, since our RedisManager might not
+                    # fully implement this for sorted sets
+                    items = redis_manager.redis.zrange(QUEUE_NAME, 0, BATCH_SIZE-1)
+                    logger.debug(f"Retrieved {len(items) if items else 0} items from queue")
+                except ResponseError as e:
+                    logger.error(f"Redis response error: {e}")
+                    # If this is a WRONGTYPE error, the key might exist but as wrong type
+                    if "WRONGTYPE" in str(e):
+                        logger.warning(f"Queue key {QUEUE_NAME} exists but has wrong type. Attempting recovery...")
+                        # Try to read the actual type
+                        key_type = redis_manager.get_key_type(QUEUE_NAME)
+                        logger.info(f"Found key type: {key_type}")
+                        if key_type and key_type != 'zset':
+                            # Try to fix it by creating proper zset
+                            try:
+                                # First rename the existing key to backup
+                                backup_key = f"{QUEUE_NAME}_backup_{int(time.time())}"
+                                redis_manager.redis.rename(QUEUE_NAME, backup_key)
+                                logger.info(f"Renamed problematic key to {backup_key}")
+                            except Exception as rename_error:
+                                logger.error(f"Error renaming key: {rename_error}")
+                    time.sleep(1)
+                    continue
+                except Exception as e:
+                    logger.error(f"Error retrieving items from queue: {e}")
+                    time.sleep(1)
+                    continue
+                    
                 if not items:
                     empty_count += 1
                     if empty_count % 100 == 0:
-                        print(f"Queue empty for {empty_count} checks")
+                        logger.info(f"Queue empty for {empty_count} checks")
                     time.sleep(SLEEP_WHEN_EMPTY)
                     continue
                 
@@ -161,36 +206,62 @@ class TrapProcessor:
                 
                 # Remove processed items from the queue
                 if successful > 0:
-                    # Get the highest score we've processed
-                    scores = redis_manager.client.zmscore(QUEUE_NAME, items[:successful])
-                    if scores:
-                        max_score = max(scores)
-                        # Remove all items with scores up to max_score
-                        redis_manager.client.zremrangebyscore(QUEUE_NAME, '-inf', max_score)
+                    try:
+                        # Get the items we need to remove - we're taking the first "successful" items
+                        items_to_remove = items[:successful]
+                        
+                        # Remove these items from the queue using zrem
+                        removed = redis_manager.redis.zrem(QUEUE_NAME, *items_to_remove)
+                        
+                        logger.debug(f"Removed {removed} of {successful} processed items from queue")
+                    except Exception as e:
+                        logger.error(f"Error removing processed items from queue: {e}")
                 
                 # Print stats periodically
-                if self.stats["processed"] % 500 == 0 and self.stats["processed"] > 0:
+                if self.stats["processed"] % 100 == 0 and self.stats["processed"] > 0:
                     self.print_stats()
                     
             except ConnectionError:
-                print("Redis connection error. Retrying...")
+                logger.error("Redis connection error. Retrying...")
                 time.sleep(5)
             except Exception as e:
-                print(f"Error in consumer loop: {e}")
+                logger.error(f"Error in consumer loop: {e}")
                 time.sleep(1)
     
     def print_stats(self):
         """Print processing statistics"""
         with self.stats_lock:
             elapsed = time.time() - self.stats["start_time"]
-            print("\n--- Trap Consumer Stats ---")
-            print(f"Processed: {self.stats['processed']} traps")
-            print(f"Errors: {self.stats['errors']}")
-            print(f"Running for: {elapsed:.1f} seconds")
-            print(f"Processing rate: {self.stats['processing_rate']:.2f} traps/second")
-            print(f"Queue length: {redis_manager.client.zcard(QUEUE_NAME)}")
-            print("---------------------------\n")
+            logger.info("\n--- Trap Consumer Stats ---")
+            logger.info(f"Processed: {self.stats['processed']} traps")
+            logger.info(f"Errors: {self.stats['errors']}")
+            logger.info(f"Running for: {elapsed:.1f} seconds")
+            logger.info(f"Processing rate: {self.stats['processing_rate']:.2f} traps/second")
+            
+            # Safely get queue info
+            try:
+                queue_length = redis_manager.redis.zcard(QUEUE_NAME)
+                logger.info(f"Queue length: {queue_length}")
+                
+                # Get a sample of recent items for diagnostic purposes
+                if queue_length > 0:
+                    sample_items = redis_manager.redis.zrange(QUEUE_NAME, -5, -1, withscores=True)
+                    if sample_items:
+                        logger.info(f"Recent items in queue: {len(sample_items)}")
+                        for item, score in sample_items:
+                            item_time = datetime.datetime.fromtimestamp(score)
+                            logger.debug(f"Item from {item_time}: {item[:50]}...")
+            except Exception as e:
+                logger.error(f"Error getting queue info: {e}")
+                
+            logger.info("---------------------------\n")
 
 if __name__ == "__main__":
     processor = TrapProcessor()
-    processor.run_consumer()
+    try:
+        processor.run_consumer()
+    except KeyboardInterrupt:
+        logger.info("Consumer stopped by user")
+    except Exception as e:
+        logger.error(f"Unexpected error in trap consumer: {e}")
+        raise
