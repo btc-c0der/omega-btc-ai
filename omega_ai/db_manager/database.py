@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 
 """
-Database manager for the OMEGA BTC AI system.
-Handles storage and retrieval of price movements, trend analysis, and market maker traps.
+🔱 OMEGA BTC AI - Database Manager 🔱
+Sacred database management with divine data persistence and retrieval.
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
 """
 
 import json
@@ -10,9 +20,10 @@ import logging
 import sqlite3
 import time
 import os
-from typing import Dict, List, Tuple, Optional, Any
-from datetime import datetime, timezone
 import redis
+from typing import Dict, List, Tuple, Optional, Any, Union
+from datetime import datetime, timezone
+from ..utils.redis_manager import RedisManager
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -27,16 +38,14 @@ DB_PATH = os.getenv('DB_PATH', 'omega_btc_ai.db')
 
 # Redis connection
 try:
-    redis_host = os.getenv('REDIS_HOST', 'localhost')
-    redis_port = int(os.getenv('REDIS_PORT', '6379'))
-    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
-    redis_conn.ping()
-    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
-except redis.ConnectionError as e:
+    redis_manager = RedisManager()
+    redis_conn = redis_manager.redis
+    logger.info(f"Successfully connected to Redis at {redis_conn.connection_pool.connection_kwargs['host']}:{redis_conn.connection_pool.connection_kwargs['port']}")
+except ConnectionError as e:
     logger.error(f"Failed to connect to Redis: {e}")
     redis_conn = None
 
-def get_db_connection():
+def get_db_connection() -> Optional[redis.Redis]:
     """Return the Redis connection object.
     
     Returns:
@@ -128,6 +137,10 @@ def insert_price_movement(price: float, volume: Optional[float] = None,
         
     Returns:
         int: ID of the inserted record
+        
+    Raises:
+        ValueError: If record ID is not available
+        sqlite3.Error: If database operation fails
     """
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -145,6 +158,9 @@ def insert_price_movement(price: float, volume: Optional[float] = None,
         )
         
         record_id = cursor.lastrowid
+        if record_id is None:
+            raise ValueError("Failed to get last inserted record ID")
+            
         conn.commit()
         conn.close()
         
@@ -177,13 +193,55 @@ def insert_price_movement(price: float, volume: Optional[float] = None,
                     redis_conn.lpush("abs_price_change_history", str(abs_change))
                     redis_conn.ltrim("abs_price_change_history", 0, 999)  # Keep last 1000 entries
             except Exception as e:
-                logger.warning(f"Failed to update Redis cache: {e}")
+                logger.error(f"Failed to update Redis cache: {e}")
         
         return record_id
         
-    except sqlite3.Error as e:
+    except (sqlite3.Error, ValueError) as e:
         logger.error(f"Error inserting price movement: {e}")
-        return -1
+        raise
+
+def get_redis_value(key: str, default: Any = None) -> Any:
+    """
+    Get a value from Redis with error handling.
+    
+    Args:
+        key: Redis key to get
+        default: Default value if key doesn't exist or Redis is not available
+        
+    Returns:
+        Value from Redis or default
+    """
+    if redis_conn is None:
+        return default
+        
+    try:
+        value = redis_conn.get(key)
+        return value.decode('utf-8') if value is not None else default
+    except Exception as e:
+        logger.error(f"Error getting Redis value for key '{key}': {e}")
+        return default
+
+def set_redis_value(key: str, value: Any) -> bool:
+    """
+    Set a value in Redis with error handling.
+    
+    Args:
+        key: Redis key to set
+        value: Value to set
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    if redis_conn is None:
+        return False
+        
+    try:
+        redis_conn.set(key, str(value))
+        return True
+    except Exception as e:
+        logger.error(f"Error setting Redis value for key '{key}': {e}")
+        return False
 
 def insert_trend_analysis(timeframe: int, trend: str, change_pct: float) -> int:
     """
@@ -683,37 +741,18 @@ def analyze_price_trend(minutes: int) -> Tuple[str, float]:
         Tuple of (trend_description, percent_change)
     """
     try:
-        # First check if we have cached results in Redis
-        if redis_conn:
-            try:
-                cached_trend = redis_conn.get(f"btc_trend_{minutes}min")
-                if cached_trend:
-                    trend_data = json.loads(cached_trend)
-                    now = datetime.now(timezone.utc)
-                    timestamp = datetime.fromisoformat(trend_data.get("timestamp", now.isoformat()))
-                    
-                    # Also validate cached data
-                    age_minutes = (now - timestamp).total_seconds() / 60
-                    if age_minutes < 1.0 and "trend" in trend_data and "change_pct" in trend_data:
-                        # Ensure the change_pct is a float
-                        change_pct = trend_data["change_pct"]
-                        if isinstance(change_pct, str):
-                            try:
-                                change_pct = float(change_pct)
-                            except ValueError:
-                                change_pct = 0.0
-                        # Return cached result
-                        return trend_data["trend"], float(change_pct)
-            except Exception as e:
-                logger.warning(f"Failed to retrieve cached trend for {minutes}min: {e}")
+        # Get current price from Redis
+        current_btc_price = float(redis_conn.get("last_btc_price") or 0)
+        if current_btc_price == 0:
+            logger.warning(f"No current price available for {minutes}min trend analysis")
+            return "No Data", 0.0
         
-        # If no valid cached data, calculate trend
         # Get price data from database
         price_data, _ = fetch_multi_interval_movements(minutes)
         
         if not price_data or len(price_data) < 2:
             logger.warning(f"Missing price data for {minutes}min trend analysis")
-            return get_fallback_trend_data(minutes)
+            return "No Data", 0.0
             
         # Extract current and old prices
         try:
@@ -723,7 +762,7 @@ def analyze_price_trend(minutes: int) -> Tuple[str, float]:
             # Check for invalid price data
             if not isinstance(current_candle, dict) or not isinstance(old_candle, dict):
                 logger.warning(f"Invalid candle data format for {minutes}min")
-                return get_fallback_trend_data(minutes)
+                return "No Data", 0.0
                 
             # Safely access candle data
             current_price = current_candle.get('c', 0)
@@ -743,7 +782,7 @@ def analyze_price_trend(minutes: int) -> Tuple[str, float]:
                     
             if current_price <= 0 or reference_price <= 0:
                 logger.warning(f"Invalid price values (0 or negative) for {minutes}min trend analysis")
-                return get_fallback_trend_data(minutes)
+                return "No Data", 0.0
             
             # Calculate price change
             price_diff = current_price - reference_price
@@ -780,27 +819,15 @@ def analyze_price_trend(minutes: int) -> Tuple[str, float]:
             # Log the result
             logger.info(f"Analyzed {minutes}min trend: {trend} ({percent_change:.2f}%) from {format_price(reference_price)} to {format_price(current_price)}")
             
-            # Cache the result in Redis
-            try:
-                if redis_conn:
-                    result = {
-                        "trend": trend,
-                        "change_pct": percent_change,
-                        "timestamp": datetime.now(timezone.utc).isoformat()
-                    }
-                    redis_conn.set(f"btc_trend_{minutes}min", json.dumps(result))
-            except Exception as e:
-                logger.warning(f"Failed to cache trend result: {e}")
-                
             return trend, percent_change
             
         except (IndexError, KeyError, TypeError) as e:
             logger.warning(f"Error accessing price data for {minutes}min: {e}")
-            return get_fallback_trend_data(minutes)
+            return "No Data", 0.0
             
     except Exception as e:
         logger.error(f"Error in trend analysis for {minutes}min: {e}")
-        return get_fallback_trend_data(minutes)
+        return "No Data", 0.0
 
 # Ensure database is initialized
 try:

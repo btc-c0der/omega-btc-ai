@@ -33,6 +33,8 @@ from typing import Dict, List, Tuple, Optional, Any
 from datetime import datetime, timezone
 from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap
 from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level, update_fibonacci_data
+import os
+from omega_ai.utils.test_redis_manager import TestRedisManager
 
 # Configure logger with enhanced formatting
 logger = logging.getLogger(__name__)
@@ -44,7 +46,13 @@ logger.addHandler(handler)
 
 # Initialize Redis connection with error handling
 try:
-    redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+    # Check if we're in test mode
+    use_test_redis = os.getenv('OMEGA_TEST_USE_LOCAL_REDIS', 'false').lower() == 'true'
+    if use_test_redis:
+        redis_conn = TestRedisManager().redis
+        logger.info("Using test Redis connection")
+    else:
+        redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
     redis_conn.ping()
     logger.info("Successfully connected to Redis")
 except redis.ConnectionError as e:
@@ -118,12 +126,13 @@ def format_trend_output(interval, trend, change_pct):
 class MarketTrendAnalyzer:
     """Analyzes market trends with multiple indicators and timeframes."""
     
-    def __init__(self):
+    def __init__(self, redis_connection=None):
         """Initialize the market trend analyzer."""
         self.timeframes = [1, 5, 15, 30, 60, 240, 720, 1444]  # minutes - extended to include up to 1444 minutes
         self.consecutive_errors = 0
         self.last_analysis_time = None
         self.analysis_interval = 5  # seconds
+        self.redis_conn = redis_connection or redis_conn
         
     def analyze_trends(self) -> Dict[str, Any]:
         """Analyze market trends across multiple timeframes."""
@@ -131,7 +140,7 @@ class MarketTrendAnalyzer:
             results = {}
             
             # Get current price from Redis
-            current_price = float(redis_conn.get("last_btc_price") or 0)
+            current_price = float(self.redis_conn.get("last_btc_price") or 0)
             if current_price == 0:
                 logger.warning("No current price available for analysis")
                 return {}
@@ -150,6 +159,17 @@ class MarketTrendAnalyzer:
                     "change": change,
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
+                
+                # Only store trend data if we have valid data and current price
+                if trend != "No Data" and current_price > 0:
+                    self.redis_conn.set(f"btc_trend_{minutes}min", json.dumps({
+                        "trend": trend,
+                        "change": change,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }))
+                else:
+                    # Clear any existing trend data if we don't have valid data
+                    self.redis_conn.delete(f"btc_trend_{minutes}min")
             
             # Get Fibonacci levels
             fib_levels = get_current_fibonacci_levels()
@@ -214,8 +234,8 @@ class MarketTrendAnalyzer:
         """Display current market conditions and indicators."""
         try:
             # Get current price and volume
-            price = float(redis_conn.get("last_btc_price") or 0)
-            volume = float(redis_conn.get("last_btc_volume") or 0)
+            price = float(self.redis_conn.get("last_btc_price") or 0)
+            volume = float(self.redis_conn.get("last_btc_volume") or 0)
             
             print(f"\n{CYAN}📊 MARKET CONDITIONS:{RESET}")
             print(f"Current Price: ${price:,.2f}")
@@ -238,7 +258,7 @@ class MarketTrendAnalyzer:
         """Calculate current market volatility."""
         try:
             # Get recent price changes
-            changes = redis_conn.lrange("abs_price_change_history", 0, 23)  # Last 24 changes
+            changes = self.redis_conn.lrange("abs_price_change_history", 0, 23)  # Last 24 changes
             if not changes:
                 return None
             
@@ -502,58 +522,129 @@ def check_fibonacci_alignment() -> Optional[Dict[str, Any]]:
         logger.error(f"Error checking Fibonacci alignment: {e}")
         return None
 
+def initialize_fibonacci_levels():
+    """Initialize Fibonacci levels if they don't exist."""
+    try:
+        # Try to get current price
+        current_price = float(redis_conn.get("last_btc_price") or 0)
+        if current_price > 0:
+            update_fibonacci_data(current_price)
+            print(f"{GREEN}✓ Initialized Fibonacci levels with current price ${current_price:,.2f}{RESET}")
+        else:
+            print(f"{YELLOW}⚠️ Could not initialize Fibonacci levels - missing price data{RESET}")
+    except Exception as e:
+        logger.error(f"Error initializing Fibonacci levels: {e}")
+
+def initialize_btc_data():
+    """Initialize BTC movement history if it doesn't exist."""
+    try:
+        # Try to get current price
+        current_price = float(redis_conn.get("last_btc_price") or 0)
+        if current_price > 0:
+            redis_conn.lpush("btc_movement_history", json.dumps({
+                "price": current_price,
+                "volume": 0,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }))
+            print(f"{GREEN}✓ Initialized BTC movement history with current price{RESET}")
+        else:
+            print(f"{YELLOW}⚠️ Could not initialize BTC movement history - missing price data{RESET}")
+    except Exception as e:
+        logger.error(f"Error initializing BTC movement history: {e}")
+
+def initialize_candle_data(timeframe):
+    """Initialize candle data for a specific timeframe if it doesn't exist."""
+    try:
+        # Try to get current price
+        current_price = float(redis_conn.get("last_btc_price") or 0)
+        if current_price > 0:
+            redis_conn.set(f"btc_candle_{timeframe}", json.dumps({
+                "o": current_price,
+                "h": current_price,
+                "l": current_price,
+                "c": current_price,
+                "v": 0,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }))
+            print(f"{GREEN}✓ Initialized candle data for {timeframe}{RESET}")
+        else:
+            print(f"{YELLOW}⚠️ Could not initialize candle data for {timeframe} - missing price data{RESET}")
+    except Exception as e:
+        logger.error(f"Error initializing candle data for {timeframe}: {e}")
+
+def categorize_fibonacci_levels(fib_levels, current_price):
+    """Categorize Fibonacci levels by type and calculate distances from current price."""
+    fib_types = {
+        "EXTENSION": [],
+        "RETRACEMENT": [],
+        "KEY": []
+    }
+    
+    # Sort and categorize Fibonacci levels
+    for level, price in sorted(fib_levels.items(), key=lambda x: float(x[1])):
+        # Calculate percentage difference from current price
+        pct_diff = ((price - current_price) / current_price) * 100
+        
+        # Determine level color based on distance from current price
+        if abs(pct_diff) < 1.0:
+            level_color = f"{RED_BG}{WHITE}"  # Very close - highlight
+        elif abs(pct_diff) < 2.5:
+            level_color = f"{YELLOW}"  # Somewhat close
+        else:
+            level_color = f"{CYAN}"  # Far
+        
+        # Determine category
+        if "0." in level:
+            fib_types["RETRACEMENT"].append((level, price, pct_diff, level_color))
+        elif level.replace("fib", "").strip().replace(".", "", 1).isdigit() and float(level.replace("fib", "").strip()) > 1.0:
+            fib_types["EXTENSION"].append((level, price, pct_diff, level_color))
+        else:
+            fib_types["KEY"].append((level, price, pct_diff, level_color))
+    
+    return fib_types
+
 def monitor_market_trends():
     """Main function to monitor market trends continuously."""
-    print(f"\n{BLUE_BG}{WHITE}{BOLD} 🚀 OMEGA MARKET TREND ANALYZER v1.0 {RESET}")
-    print(f"{MAGENTA}Starting Market Trend Analysis with RASTA VIBES...{RESET}")
-    print(f"{GREEN}JAH BLESS LINUS TORVALDS AND THE OPEN SOURCE COMMUNITY!{RESET}")
-    
-    analyzer = MarketTrendAnalyzer()
-    
-    # Ensure we have access to historical BTC data
     try:
-        # Check if btc_movement_history exists
-        movement_count = redis_conn.llen("btc_movement_history")
-        if movement_count == 0:
-            print(f"{YELLOW}⚠️ No BTC movement history found. Manual initialization may be required.{RESET}")
-            
-            # Try to get current price at least
-            current_price = float(redis_conn.get("last_btc_price") or 0)
-            if current_price > 0:
-                print(f"{GREEN}✓ Current BTC price available: ${current_price:,.2f}{RESET}")
-                # Initialize movement history with current price
-                redis_conn.lpush("btc_movement_history", f"{current_price},0")
-                print(f"{GREEN}✓ Initialized movement history with current price{RESET}")
+        # Initialize Redis connection
+        global redis_conn
+        if os.getenv('OMEGA_TEST_USE_LOCAL_REDIS', 'true').lower() == 'true':
+            from omega_ai.utils.test_redis_manager import TestRedisManager
+            redis_conn = TestRedisManager().redis
         else:
-            print(f"{GREEN}✓ BTC movement history available ({movement_count} entries){RESET}")
-            
-        # Check if candle data exists for timeframes
-        for timeframe in ["1min", "5min", "15min", "30min", "60min", "240min"]:
-            candle_data = redis_conn.get(f"btc_candle_{timeframe}")
-            if candle_data:
-                print(f"{GREEN}✓ Candle data available for {timeframe}{RESET}")
-            else:
-                print(f"{YELLOW}⚠️ No candle data found for {timeframe}. Will use movement history as fallback.{RESET}")
+            redis_conn = redis.Redis(
+                host=os.getenv('REDIS_HOST', 'redis-19332.fcrce173.eu-west-1-1.ec2.redns.redis-cloud.com'),
+                port=int(os.getenv('REDIS_PORT', '19332')),
+                username=os.getenv('REDIS_USERNAME', 'omega'),
+                password=os.getenv('REDIS_PASSWORD', 'VuKJU8Z.Z2V8Qn_'),
+                ssl=os.getenv('REDIS_USE_TLS', 'true').lower() == 'true',
+                ssl_ca_certs=os.getenv('REDIS_CERT', 'SSL_redis-btc-omega-redis.pem'),
+                decode_responses=True
+            )
         
-        # Make sure Fibonacci data is initialized
-        fib_data = get_current_fibonacci_levels()
-        if not fib_data:
-            # Try to initialize with current price
-            current_price = float(redis_conn.get("last_btc_price") or 0)
-            if current_price > 0:
-                update_fibonacci_data(current_price)
-                print(f"{GREEN}✓ Initialized Fibonacci levels with current price${current_price:,.2f}{RESET}")
-            else:
-                print(f"{YELLOW}⚠️ Could not initialize Fibonacci levels - missing price data{RESET}")
-    except Exception as e:
-        print(f"{RED}⚠️ Error during data availability check: {e}{RESET}")
-    
-    while True:
-        try:
-            # Check if it's time for analysis
-            now = datetime.now(timezone.utc)
-            if (analyzer.last_analysis_time is None or 
-                (now - analyzer.last_analysis_time).total_seconds() >= analyzer.analysis_interval):
+        logger.info("Successfully connected to Redis")
+        
+        # Initialize market trend analyzer with Redis connection
+        analyzer = MarketTrendAnalyzer(redis_connection=redis_conn)
+        
+        # Initialize Fibonacci levels
+        initialize_fibonacci_levels()
+        
+        # Check for historical BTC data
+        if not redis_conn.exists("btc_movement_history"):
+            print(f"{YELLOW}No historical BTC data found. Initializing...{RESET}")
+            initialize_btc_data()
+        
+        # Check for candle data
+        for timeframe in ['1min', '5min', '15min', '30min', '1h', '4h']:
+            if not redis_conn.exists(f"btc_candle_{timeframe}"):
+                print(f"{YELLOW}No candle data found for {timeframe}. Initializing...{RESET}")
+                initialize_candle_data(timeframe)
+        
+        # Main monitoring loop
+        while True:
+            try:
+                now = datetime.now(timezone.utc)
                 
                 # Perform analysis
                 print(f"\n{BLUE_BG}{WHITE}{BOLD} MARKET ANALYSIS | {now.strftime('%Y-%m-%d %H:%M:%S')} {RESET}")
@@ -571,40 +662,16 @@ def monitor_market_trends():
                 
                 # Provide Fibonacci section header if available
                 if "fibonacci_levels" in results:
-                    print(f"\n{BLUE_BG}{WHITE}{BOLD} EXTENDED FIBONACCI ANALYSIS {RESET}")
-                    print(f"{YELLOW}{'─' * 80}{RESET}")
-                    print(f"{CYAN}🌟 CURRENT FIBONACCI LEVELS FOR ALL TIMEFRAMES (UP TO 1444 MIN):{RESET}")
+                    print(f"\n{BLUE_BG}{WHITE}{BOLD} FIBONACCI ANALYSIS {RESET}")
+                    print(f"{YELLOW}{'─' * 50}{RESET}")
                     
-                    # Group Fibonacci levels by type for better organization
-                    fib_types = {
-                        "EXTENSION": [],
-                        "RETRACEMENT": [],
-                        "KEY": []
-                    }
+                    # Get current price for comparison
+                    current_price = results.get("current_price", 0)
+                    if current_price == 0:
+                        current_price = float(redis_conn.get("last_btc_price") or 0)
                     
-                    # Get current price for reference
-                    current_price = float(redis_conn.get("last_btc_price") or 0)
-                    
-                    # Sort and categorize Fibonacci levels
-                    for level, price in sorted(results["fibonacci_levels"].items(), key=lambda x: float(x[1])):
-                        # Calculate percentage difference from current price
-                        pct_diff = ((price - current_price) / current_price) * 100
-                        
-                        # Determine level color based on distance from current price
-                        if abs(pct_diff) < 1.0:
-                            level_color = f"{RED_BG}{WHITE}"  # Very close - highlight
-                        elif abs(pct_diff) < 2.5:
-                            level_color = f"{YELLOW}"  # Somewhat close
-                        else:
-                            level_color = f"{CYAN}"  # Far
-                        
-                        # Determine category
-                        if "0." in level:
-                            fib_types["RETRACEMENT"].append((level, price, pct_diff, level_color))
-                        elif level.replace("fib", "").strip().replace(".", "", 1).isdigit() and float(level.replace("fib", "").strip()) > 1.0:
-                            fib_types["EXTENSION"].append((level, price, pct_diff, level_color))
-                        else:
-                            fib_types["KEY"].append((level, price, pct_diff, level_color))
+                    # Categorize Fibonacci levels
+                    fib_types = categorize_fibonacci_levels(results["fibonacci_levels"], current_price)
                     
                     # Print each category
                     for category, levels in fib_types.items():
@@ -617,10 +684,6 @@ def monitor_market_trends():
                     # Store Fibonacci levels in Redis for the dashboard
                     try:
                         redis_conn.set("fibonacci:current_levels", json.dumps(results["fibonacci_levels"]))
-                        # Also store each timeframe trend data
-                        for timeframe, data in results.items():
-                            if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment" and timeframe != "current_price":
-                                redis_conn.set(f"btc_trend_{timeframe}", json.dumps(data))
                     except Exception as e:
                         logger.error(f"Error storing Fibonacci data in Redis: {e}")
                 
@@ -648,67 +711,38 @@ def monitor_market_trends():
                                 "price_change": data["change"]
                             })
                 
-                # Summarize detected traps
+                # Store detected traps in database if enabled
                 if detected_traps:
-                    print(f"\n{RED_BG}{WHITE}{BOLD} MM TRAP SUMMARY {RESET}")
+                    print(f"\n{RED_BG}{WHITE}{BOLD} DETECTED TRAPS {RESET}")
                     print(f"{YELLOW}{'─' * 50}{RESET}")
-                    print(f"{RED}Total traps detected: {len(detected_traps)}{RESET}")
-                    
                     for trap in detected_traps:
-                        confidence_color = RED if trap["confidence"] > 0.8 else LIGHT_ORANGE if trap["confidence"] > 0.5 else YELLOW
-                        print(f"{confidence_color}⚠️ {trap['trap_type']} on {trap['timeframe']} | Confidence: {trap['confidence']:.2f} | Trend: {trap['trend']} | Change: {trap['price_change']:.2f}%{RESET}")
+                        print(f"{RED}⚠️ MM TRAP DETECTED: {trap['trap_type']} on {trap['timeframe']} (confidence: {trap['confidence']}){RESET}")
                         
-                        # Store trap in database if enabled
+                        # Store trap data in Redis
                         try:
-                            insert_possible_mm_trap({
+                            redis_conn.set(f"mm_trap_{trap['timeframe']}", json.dumps({
                                 "type": trap["trap_type"],
-                                "timeframe": trap["timeframe"],
                                 "confidence": trap["confidence"],
-                                "price_change": trap["price_change"]
-                            })
-                            print(f"{GREEN}✓ Trap recorded in database{RESET}")
+                                "trend": trap["trend"],
+                                "price_change": trap["price_change"],
+                                "timestamp": datetime.now(timezone.utc).isoformat()
+                            }))
                         except Exception as e:
-                            print(f"{YELLOW}⚠️ Could not store trap in database: {e}{RESET}")
-                    
-                    # Send detected traps to the mm_trap_queue for further processing
-                    try:
-                        # Import necessary function
-                        from omega_ai.mm_trap_detector.high_frequency_detector import register_trap_detection
-                        
-                        for trap in detected_traps:
-                            if trap["confidence"] >= 0.5:  # Only register high confidence traps
-                                register_trap_detection(
-                                    trap_type=trap["trap_type"],
-                                    confidence=trap["confidence"],
-                                    price_change=trap["price_change"]
-                                )
-                                print(f"{GREEN}✓ Trap forwarded to high-frequency detector{RESET}")
-                    except ImportError:
-                        print(f"{YELLOW}⚠️ High-frequency detector module not available{RESET}")
-                    except Exception as e:
-                        print(f"{YELLOW}⚠️ Error registering trap with high-frequency detector: {e}{RESET}")
-                else:
-                    print(f"\n{BLUE}No MM traps detected in this analysis cycle{RESET}")
+                            logger.error(f"Error storing trap data in Redis: {e}")
                 
-                # Sleep for a minute before next analysis with JAH BLESSING
-                print(f"\n{GREEN}JAH BLESS THE CODE - Waiting for next analysis cycle...{RESET}")
-                print(f"{YELLOW}{'─' * 50}{RESET}")
-            
-            # Sleep for a short interval
-            time.sleep(1)
-            
-        except redis.RedisError as e:
-            analyzer.consecutive_errors += 1
-            wait_time = min(30 * analyzer.consecutive_errors, 300)  # Max 5 minutes
-            print(f"{RED}⚠️ Redis Connection Error: {e} - Retrying in {wait_time} seconds{RESET}")
-            time.sleep(wait_time)
-            
-        except Exception as e:
-            analyzer.consecutive_errors += 1
-            wait_time = min(15 * analyzer.consecutive_errors, 120)  # Max 2 minutes
-            print(f"{RED}⚠️ Error in market trend analysis: {e}{RESET}")
-            print(f"{YELLOW}🔄 RASTA RESILIENCE - Restarting analysis in {wait_time} seconds{RESET}")
-            time.sleep(wait_time)
+                # Sleep for a short interval
+                time.sleep(5)
+                
+            except KeyboardInterrupt:
+                print(f"\n{RED}Stopping market trend monitor...{RESET}")
+                break
+            except Exception as e:
+                logger.error(f"Error in market trend monitor: {e}")
+                time.sleep(5)
+                
+    except Exception as e:
+        logger.error(f"Fatal error in market trend monitor: {e}")
+        raise
 
 if __name__ == "__main__":
     monitor_market_trends()

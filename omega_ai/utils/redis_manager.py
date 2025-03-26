@@ -1,9 +1,23 @@
+"""
+🔱 OMEGA BTC AI - Redis Connection Manager 🔱
+Sacred Redis connection management with divine error handling and retries.
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
+"""
 import redis
 from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
 import signal
 import sys
-from typing import Optional, Dict, Any, List, Union, Tuple
+from typing import Optional, Dict, Any, List, Union, Tuple, Mapping
 import json
 import time
 import os
@@ -18,8 +32,26 @@ class RedisManager:
         config = get_redis_config()
         config.update(kwargs)
         
-        self.redis = redis.Redis(**config)
-        self._test_connection()
+        # Add retry strategy for better connection handling
+        retry_strategy = Retry(
+            ExponentialBackoff(),
+            retries=3
+        )
+        
+        # Ensure proper configuration
+        config.setdefault('retry_on_timeout', True)
+        config.setdefault('retry_on_error', [redis.ConnectionError])
+        config.setdefault('retry', retry_strategy)
+        
+        try:
+            self.redis = redis.Redis(**config)
+            self._test_connection()
+        except redis.AuthenticationError as e:
+            raise ConnectionError(f"Redis authentication failed: {str(e)}")
+        except redis.ConnectionError as e:
+            raise ConnectionError(f"Failed to connect to Redis: {str(e)}")
+        except Exception as e:
+            raise ConnectionError(f"Unexpected error connecting to Redis: {str(e)}")
         
         self._cache = {}
         self._cache_ttl = {}
@@ -33,8 +65,12 @@ class RedisManager:
         """Test Redis connection."""
         try:
             self.redis.ping()
+        except redis.AuthenticationError as e:
+            raise ConnectionError(f"Redis authentication failed: {str(e)}")
         except redis.ConnectionError as e:
             raise ConnectionError(f"Failed to connect to Redis: {str(e)}")
+        except Exception as e:
+            raise ConnectionError(f"Unexpected error testing Redis connection: {str(e)}")
     
     def connect(self):
         """Get a blessed Redis connection."""
@@ -159,8 +195,9 @@ class RedisManager:
                     else:
                         current_value = {"value": str(current_value)}
                 
-                # Add hash fields
-                return bool(self.redis.hset(key, mapping=current_value))
+                # Add hash fields with proper type hints
+                mapping: Mapping[str, str] = {str(k): str(v) for k, v in current_value.items()}
+                return bool(self.redis.hset(key, mapping=mapping))
                 
             else:
                 print(f"Conversion to type '{expected_type}' not implemented")
@@ -325,48 +362,10 @@ class RedisManager:
                 raise ValueError(f"Invalid type for {field}")
     
     def _handle_shutdown(self, signum, frame):
-        """Handle graceful shutdown"""
-        print("\n⚠️ Shutdown signal received. Saving state...")
-        
-        try:
-            # Save final state
-            final_state = {
-                "shutdown_time": time.time(),
-                "clean_shutdown": True
-            }
-            
-            try:
-                # Use a new Redis connection for shutdown to avoid issues
-                shutdown_params = {
-                    "host": self.redis.connection_pool.connection_kwargs['host'],
-                    "port": self.redis.connection_pool.connection_kwargs['port'],
-                    "db": self.redis.connection_pool.connection_kwargs['db'],
-                    "decode_responses": True
-                }
-                
-                # Add username/password if in original connection
-                if 'username' in self.redis.connection_pool.connection_kwargs:
-                    shutdown_params["username"] = self.redis.connection_pool.connection_kwargs['username']
-                if 'password' in self.redis.connection_pool.connection_kwargs:
-                    shutdown_params["password"] = self.redis.connection_pool.connection_kwargs['password']
-                    
-                # Add SSL if in original connection
-                if 'ssl' in self.redis.connection_pool.connection_kwargs and self.redis.connection_pool.connection_kwargs['ssl']:
-                    shutdown_params["ssl"] = True
-                    if 'ssl_ca_certs' in self.redis.connection_pool.connection_kwargs:
-                        shutdown_params["ssl_ca_certs"] = self.redis.connection_pool.connection_kwargs['ssl_ca_certs']
-                
-                shutdown_redis = redis.Redis(**shutdown_params)
-                shutdown_redis.set("omega:shutdown_state", json.dumps(final_state))
-                print("✅ State saved successfully")
-            except Exception as e:
-                print(f"⚠️ Could not save shutdown state: {e}")
-            
-            sys.exit(0)
-            
-        except Exception as e:
-            print(f"❌ Error saving shutdown state: {e}")
-            sys.exit(1)
+        """Handle graceful shutdown."""
+        if hasattr(self, 'redis') and self.redis:
+            self.redis.close()
+        sys.exit(0)
 
     def zcard(self, name: str) -> int:
         """Return the number of elements in the sorted set at key `name`."""

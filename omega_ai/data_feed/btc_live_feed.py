@@ -1,3 +1,17 @@
+"""
+🔱 OMEGA BTC AI - BTC Live Feed 🔱
+Sacred real-time Bitcoin price feed with divine WebSocket integration.
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
+"""
 import json
 import time
 import logging
@@ -5,11 +19,57 @@ import asyncio
 import redis
 from datetime import datetime, UTC, timedelta
 from enum import Enum
-from typing import List, Dict, Optional, Union, Any
+from typing import List, Dict, Optional, Union, Any, cast, Protocol, Callable
 import threading
 import random
 import os
 import sys
+
+# Configure logging with Rasta colors
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# Rasta color constants
+GREEN_RASTA = "\033[92m"  # Jah Green
+YELLOW_RASTA = "\033[93m"  # Gold
+RED_RASTA = "\033[91m"    # Babylon Red
+BLUE_RASTA = "\033[94m"   # Zion Blue
+MAGENTA_RASTA = "\033[95m"  # Royal Purple
+CYAN_RASTA = "\033[96m"   # Ocean Blue
+RESET = "\033[0m"
+BOLD = "\033[1m"
+
+# Rasta logging functions
+def log_rasta(message: str, color: str = GREEN_RASTA, level: str = "info"):
+    """Log with Rasta style and colors."""
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    if level == "error":
+        print(f"{RED_RASTA}[{timestamp}] ❌ {message}{RESET}")
+    elif level == "warning":
+        print(f"{YELLOW_RASTA}[{timestamp}] ⚠️  {message}{RESET}")
+    elif level == "success":
+        print(f"{GREEN_RASTA}[{timestamp}] ✅ {message}{RESET}")
+    else:
+        print(f"{color}[{timestamp}] ℹ️  {message}{RESET}")
+
+def display_rasta_banner():
+    """Display the Rasta-style banner."""
+    banner = f"""
+{GREEN_RASTA}╔══════════════════════════════════════════════════════════╗
+     ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ 
+    ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗
+    ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║
+    ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║
+    ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
+     ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
+                {YELLOW_RASTA}BTC AI SYSTEM v1.0
+     [ Rasta Price Feed - One Love - Fibonacci Aligned ]{GREEN_RASTA}
+╚══════════════════════════════════════════════════════════╝{RESET}
+"""
+    print(banner)
 
 # Function to check and install required packages
 def check_required_packages():
@@ -95,61 +155,28 @@ except ImportError:
         print(f"Failed to install websockets: {e}")
         sys.exit(1)
 
-# Set Redis host environment variable
-redis_host = os.environ.get('REDIS_HOST', 'localhost')
-os.environ['REDIS_HOST'] = redis_host
-
 from omega_ai.utils.redis_manager import RedisManager
 
-# Configure logging with Rasta colors
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+# Define a Protocol for the dispatcher
+class DispatcherBase(Protocol):
+    def timeout(self, seconds: int, callback: Callable) -> None: ...
+    def reconnect(self, seconds: int, reconnector: Callable) -> None: ...
 
-# Rasta color constants
-GREEN_RASTA = "\033[92m"  # Jah Green
-YELLOW_RASTA = "\033[93m"  # Gold
-RED_RASTA = "\033[91m"    # Babylon Red
-BLUE_RASTA = "\033[94m"   # Zion Blue
-MAGENTA_RASTA = "\033[95m"  # Royal Purple
-CYAN_RASTA = "\033[96m"   # Ocean Blue
-RESET = "\033[0m"
-BOLD = "\033[1m"
+class Dispatcher(DispatcherBase, Protocol):
+    def read(self, sock: Any, read_callback: Callable, check_callback: Callable) -> None: ...
 
 # Fibonacci sequences and golden ratio
 FIBONACCI_SEQUENCE = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987]
 GOLDEN_RATIO = 1.618033988749895
 
-# Rasta logging functions
-def log_rasta(message: str, color: str = GREEN_RASTA, level: str = "info"):
-    """Log with Rasta style and colors."""
-    timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    if level == "error":
-        print(f"{RED_RASTA}[{timestamp}] ❌ {message}{RESET}")
-    elif level == "warning":
-        print(f"{YELLOW_RASTA}[{timestamp}] ⚠️  {message}{RESET}")
-    elif level == "success":
-        print(f"{GREEN_RASTA}[{timestamp}] ✅ {message}{RESET}")
-    else:
-        print(f"{color}[{timestamp}] ℹ️  {message}{RESET}")
-
-def display_rasta_banner():
-    """Display the Rasta-style banner."""
-    banner = f"""
-{GREEN_RASTA}╔══════════════════════════════════════════════════════════╗
-     ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ 
-    ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗
-    ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║
-    ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║
-    ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
-     ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
-                {YELLOW_RASTA}BTC AI SYSTEM v1.0
-     [ Rasta Price Feed - One Love - Fibonacci Aligned ]{GREEN_RASTA}
-╚══════════════════════════════════════════════════════════╝{RESET}
-"""
-    print(banner)
+# Initialize Redis connection
+try:
+    redis_manager = RedisManager()
+    redis_conn = redis_manager.redis
+    log_rasta(f"Successfully connected to Redis at {redis_conn.connection_pool.connection_kwargs['host']}:{redis_conn.connection_pool.connection_kwargs['port']}", GREEN_RASTA, "success")
+except ConnectionError as e:
+    log_rasta(f"Failed to connect to Redis: {e}", RED_RASTA, "error")
+    raise
 
 # Binance WebSocket API
 BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
@@ -157,23 +184,14 @@ BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
 # MM WebSocket Server URL with updated port
 MM_WS_URL = "ws://localhost:8765"
 
-# Redis Connection - used by legacy functions
-redis_conn = redis.Redis(
-    host=os.getenv('REDIS_HOST', 'localhost'),
-    port=int(os.getenv('REDIS_PORT', '6379')),
-    db=0
-)
-
 # Redis health check function from Code version
 def check_redis_health():
     """Perform a health check on Redis connection and data integrity."""
     try:
-        # Check Redis connection
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
-        redis_port = int(os.getenv('REDIS_PORT', '6379'))
-        redis_manager = RedisManager(host=redis_host, port=redis_port)
-        redis_manager.ping()
-        log_rasta(f"Redis connection: OK (Host: {redis_host}, Port: {redis_port})", GREEN_RASTA, "success")
+        # Check Redis connection using RedisManager
+        redis_manager = RedisManager()
+        redis_manager.redis.ping()
+        log_rasta(f"Redis connection: OK (Host: {redis_manager.redis.connection_pool.connection_kwargs['host']}, Port: {redis_manager.redis.connection_pool.connection_kwargs['port']})", GREEN_RASTA, "success")
 
         # Check if essential keys exist using safe methods
         essential_keys = ["last_btc_price", "prev_btc_price", "btc_movement_history", "fibonacci_levels"]
@@ -200,17 +218,15 @@ def check_redis_health():
         # Check data format
         if btc_movement_history:
             sample = btc_movement_history[0]
-            if isinstance(sample, str) and "," in sample:
+            if isinstance(sample, str):
                 try:
-                    price_str, volume_str = sample.split(",")
-                    price = float(price_str)
-                    volume = float(volume_str)
-                    log_rasta(f"Data format OK - Sample: Price=${price:.2f}, Volume={volume}", GREEN_RASTA, "success")
-                except Exception as e:
-                    log_rasta(f"Invalid data format in btc_movement_history: {e}", YELLOW_RASTA, "warning")
+                    json.loads(sample)
+                    log_rasta("BTC movement history data format: OK", GREEN_RASTA, "success")
+                except json.JSONDecodeError:
+                    log_rasta("BTC movement history data format: Invalid JSON", RED_RASTA, "error")
             else:
-                log_rasta("Data format missing volume information", YELLOW_RASTA, "warning")
-
+                log_rasta("BTC movement history data format: Not a string", RED_RASTA, "error")
+        
         return True
     except Exception as e:
         log_rasta(f"Redis health check failed: {e}", RED_RASTA, "error")
@@ -241,9 +257,7 @@ def calculate_fibonacci_levels(high_price, low_price):
         formatted_levels = {k: f"{v:.2f}" for k, v in levels.items()}
         
         # Store in Redis
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
-        redis_port = int(os.getenv('REDIS_PORT', '6379'))
-        redis_manager = RedisManager(host=redis_host, port=redis_port)
+        redis_manager = RedisManager()
         redis_manager.set_cached("fibonacci_levels", json.dumps(formatted_levels))
         redis_manager.set_cached("fibonacci_high", str(high_price))
         redis_manager.set_cached("fibonacci_low", str(low_price))
@@ -310,9 +324,7 @@ def on_message(ws, message):
         log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
         
         # Update Redis values using the RedisManager with connection based on environment
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
-        redis_port = int(os.getenv('REDIS_PORT', '6379'))
-        redis_manager = RedisManager(host=redis_host, port=redis_port)
+        redis_manager = RedisManager()
         prev_price = redis_manager.get_cached("prev_btc_price")
         prev_price = float(prev_price) if prev_price else None
 
@@ -446,7 +458,7 @@ def start_btc_websocket():
                 log_rasta("Running WebSocketApp with dispatcher...", GREEN_RASTA)
                 
                 # Set up rel dispatching
-                ws.run_forever(dispatcher=rel)
+                ws.run_forever(dispatcher=rel)  # type: ignore
                 rel.signal(2, rel.abort)  # Handle Keyboard Interrupt
                 rel.dispatch()
                 
@@ -519,7 +531,7 @@ class BtcPriceFeed:
         while True:
             try:
                 if self._ws:
-                    self._ws.run_forever(dispatcher=rel)
+                    self._ws.run_forever(dispatcher=rel)  # type: ignore
                     rel.signal(2, rel.abort)  # Keyboard Interrupt
                     rel.dispatch()
             except Exception as e:

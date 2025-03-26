@@ -1,3 +1,18 @@
+"""
+🔱 OMEGA BTC AI - High Frequency Trap Detector 🔱
+Sacred detection of high-frequency market manipulation patterns.
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
+"""
+
 # Copyright (c) 2024 OMEGA BTC AI Team
 # Licensed under the GNU Affero General Public License v3.0
 # See https://www.gnu.org/licenses/ for more details
@@ -76,6 +91,7 @@ from typing import Dict, List, Tuple, Optional, Any
 from queue import Queue
 from threading import Thread
 from omega_ai.db_manager.database import insert_possible_mm_trap
+from omega_ai.utils.redis_manager import RedisManager
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -87,12 +103,10 @@ logger.addHandler(handler)
 
 # Initialize Redis connection
 try:
-    redis_host = os.getenv('REDIS_HOST', 'localhost')
-    redis_port = int(os.getenv('REDIS_PORT', '6379'))
-    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
-    redis_conn.ping()
-    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
-except redis.ConnectionError as e:
+    redis_manager = RedisManager()
+    redis_conn = redis_manager.redis
+    logger.info(f"Successfully connected to Redis at {redis_conn.connection_pool.connection_kwargs['host']}:{redis_conn.connection_pool.connection_kwargs['port']}")
+except ConnectionError as e:
     logger.error(f"Failed to connect to Redis: {e}")
     raise
 

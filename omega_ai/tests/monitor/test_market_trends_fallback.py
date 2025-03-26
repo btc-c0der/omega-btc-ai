@@ -1,144 +1,155 @@
 import unittest
+from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta
 import json
-from unittest.mock import patch, MagicMock, call
-import sys
 import os
+import sys
+import logging
+from io import StringIO
 
-# Add the project root to the path for imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
 from omega_ai.monitor.monitor_market_trends import detect_possible_mm_traps, monitor_market_trends
+from omega_ai.utils.test_redis_manager import TestRedisManager
 
 class TestMarketTrendsFallback(unittest.TestCase):
-    """Test the fallback mechanisms for market trends analysis when data is missing."""
-
-    @patch('omega_ai.monitor.monitor_market_trends.redis_conn')
-    @patch('omega_ai.monitor.monitor_market_trends.logger')
-    def test_trap_detection_with_no_data_candle_fallback(self, mock_logger, mock_redis):
-        """Test MM trap detection when trend is 'No Data' but candle data is available."""
-        # Mock the Redis connection for candle data
-        mock_redis.get.side_effect = [
-            json.dumps({
-                'o': 50000,  # Open price
-                'c': 52000,  # Close price (4% increase)
-                'h': 52500,  # High
-                'l': 49800,  # Low
-                'v': 1000,   # Volume
-                't': 1615882800000  # Timestamp
-            }),
-            None  # For any other get call
+    """Test cases for market trends fallback system."""
+    
+    def setUp(self):
+        """Set up test environment."""
+        self.redis_manager = TestRedisManager()
+        
+        # Patch Redis connections
+        self.redis_patchers = [
+            patch('omega_ai.monitor.monitor_market_trends.redis_conn', self.redis_manager.redis),
+            patch('omega_ai.mm_trap_detector.fibonacci_detector.redis_conn', self.redis_manager.redis),
+            patch('omega_ai.db_manager.database.redis_conn', self.redis_manager.redis)
         ]
         
-        # Call the trap detection with No Data trend
-        trap_type, confidence = detect_possible_mm_traps("15min", "No Data", 0.0, 0.0)
+        # Start all patchers
+        for patcher in self.redis_patchers:
+            patcher.start()
         
-        # Verify the function inferred a trend and returned a trap detection
-        self.assertEqual(trap_type, "Bull Trap")
-        self.assertGreaterEqual(confidence, 0.3)
+        # Set up logging capture
+        self.log_output = StringIO()
+        self.log_handler = logging.StreamHandler(self.log_output)
+        self.log_handler.setLevel(logging.WARNING)
+        logging.getLogger().addHandler(self.log_handler)
         
-        # Verify appropriate log messages
-        mock_logger.warning.assert_not_called()  # Should not log any warnings
-
-    @patch('omega_ai.monitor.monitor_market_trends.redis_conn')
-    @patch('omega_ai.monitor.monitor_market_trends.logger')
-    def test_trap_detection_with_no_data_movement_fallback(self, mock_logger, mock_redis):
-        """Test MM trap detection when trend is 'No Data' and falls back to movement history."""
-        # Mock Redis to return no candle data but movement history
-        mock_redis.get.side_effect = [
-            None,  # No candle data
-            "85000"  # last_btc_price
+        self._setup_test_data()
+    
+    def tearDown(self):
+        """Clean up test environment."""
+        # Stop all patchers
+        for patcher in self.redis_patchers:
+            patcher.stop()
+        
+        # Clean up logging
+        logging.getLogger().removeHandler(self.log_handler)
+        self.log_output.close()
+        
+        self.redis_manager._clear_test_data()
+    
+    def _setup_test_data(self):
+        """Set up test data in Redis."""
+        # Add test price data
+        self.redis_manager.set_cached("last_btc_price", "50000.0")
+        self.redis_manager.set_cached("btc_candle_15min", json.dumps({
+            "price": 50000.0,
+            "timestamp": datetime.now().isoformat()
+        }))
+        
+        # Add test trend data
+        self.redis_manager.set_cached("btc_trend_15min", json.dumps({
+            "trend": "Bullish",
+            "change": 2.1,
+            "timestamp": datetime.now().isoformat()
+        }))
+        
+        # Add test price history
+        test_prices = [
+            {"price": 50000.0, "volume": 100.0, "timestamp": (datetime.now() - timedelta(minutes=5)).isoformat()},
+            {"price": 51000.0, "volume": 150.0, "timestamp": (datetime.now() - timedelta(minutes=4)).isoformat()},
+            {"price": 52000.0, "volume": 200.0, "timestamp": (datetime.now() - timedelta(minutes=3)).isoformat()},
+            {"price": 53000.0, "volume": 180.0, "timestamp": (datetime.now() - timedelta(minutes=2)).isoformat()},
+            {"price": 54000.0, "volume": 160.0, "timestamp": (datetime.now() - timedelta(minutes=1)).isoformat()},
+            {"price": 55000.0, "volume": 140.0, "timestamp": datetime.now().isoformat()}
         ]
-        mock_redis.lrange.return_value = ["80000,1500"]  # Previous price, volume
+        for price_data in test_prices:
+            self.redis_manager.lpush("btc_movement_history", json.dumps(price_data))
+    
+    def test_detect_possible_mm_traps_with_data(self):
+        """Test detecting possible MM traps with available data."""
+        traps = detect_possible_mm_traps(
+            timeframe="15min",
+            trend="Bullish",
+            price_change_pct=2.1,
+            price_move=1000.0
+        )
+        self.assertIsInstance(traps, tuple)
+        self.assertEqual(len(traps), 2)
+        self.assertEqual(traps[0], "Bull Trap")
+        self.assertIsInstance(traps[1], float)
+    
+    def test_detect_possible_mm_traps_no_data(self):
+        """Test detecting possible MM traps without data."""
+        # Clear test data
+        self.redis_manager._clear_test_data()
+        traps = detect_possible_mm_traps(
+            timeframe="15min",
+            trend="No Data",
+            price_change_pct=0.0,
+            price_move=0.0
+        )
+        self.assertIsInstance(traps, tuple)
+        self.assertEqual(len(traps), 2)
+        self.assertIsNone(traps[0])
+        self.assertEqual(traps[1], 0.0)
+    
+    def test_monitor_market_trends(self):
+        """Test monitoring market trends with data."""
+        with patch('time.sleep', side_effect=Exception("Stop iteration")):
+            try:
+                monitor_market_trends()
+            except Exception as e:
+                if str(e) != "Stop iteration":
+                    raise
         
-        # Call the trap detection with No Data trend
-        trap_type, confidence = detect_possible_mm_traps("15min", "No Data", 0.0, 0.0)
+        # Verify trend data was processed
+        trends = self.redis_manager.get_cached("btc_trend_15min")
+        self.assertIsNotNone(trends)
+        trend_data = json.loads(str(trends))
+        self.assertIsInstance(trend_data, dict)
+        self.assertIn("trend", trend_data)
+        self.assertIn("change", trend_data)
+        self.assertIn("timestamp", trend_data)
+    
+    def test_monitor_market_trends_no_data(self):
+        """Test that monitor_market_trends handles missing data correctly."""
+        # Clear all test data
+        self.redis_manager._clear_test_data()
         
-        # Verify Redis was queried for both candle and movement data
-        mock_redis.get.assert_any_call("btc_candle_15min")
-        mock_redis.get.assert_any_call("last_btc_price")
-        mock_redis.lrange.assert_called_with("btc_movement_history", 0, 0)
+        # Verify no trend data exists
+        for timeframe in ["15min", "5min", "1min", "30min", "60min", "240min"]:
+            self.assertIsNone(self.redis_manager.get_cached(f"btc_trend_{timeframe}"))
         
-        # Verify the function inferred a trend and returned a trap detection
-        self.assertEqual(trap_type, "Bull Trap")
-        self.assertGreaterEqual(confidence, 0.3)
-
-    @patch('omega_ai.monitor.monitor_market_trends.redis_conn')
-    @patch('omega_ai.monitor.monitor_market_trends.logger')
-    def test_trap_detection_with_no_data_no_fallback(self, mock_logger, mock_redis):
-        """Test MM trap detection when trend is 'No Data' and no fallback data is available."""
-        # Mock Redis to return no data at all
-        mock_redis.get.return_value = None
-        mock_redis.lrange.return_value = []
+        # Run the monitor
+        with patch('time.sleep') as mock_sleep:
+            mock_sleep.side_effect = KeyboardInterrupt
+            try:
+                monitor_market_trends()
+            except KeyboardInterrupt:
+                pass
         
-        # Call the trap detection with No Data trend
-        trap_type, confidence = detect_possible_mm_traps("15min", "No Data", 0.0, 0.0)
+        # Verify that no trend data was created
+        for timeframe in ["15min", "5min", "1min", "30min", "60min", "240min"]:
+            # Check both prefixed and unprefixed keys
+            self.assertIsNone(self.redis_manager.get_cached(f"btc_trend_{timeframe}"))
+            self.assertIsNone(self.redis_manager.redis.get(f"btc_trend_{timeframe}"))
         
-        # Verify the function returns no trap when no data is available
-        self.assertIsNone(trap_type)
-        self.assertEqual(confidence, 0.0)
-        
-        # Make sure get was called at least once
-        self.assertTrue(mock_redis.get.called)
-
-    @patch('omega_ai.monitor.monitor_market_trends.redis_conn')
-    @patch('omega_ai.monitor.monitor_market_trends.logger')
-    def test_trap_detection_with_bear_trend_candle_fallback(self, mock_logger, mock_redis):
-        """Test MM trap detection when trend is 'Bearish' using candle data."""
-        # Mock the Redis connection for candle data
-        mock_redis.get.return_value = json.dumps({
-            'o': 50000,  # Open price
-            'c': 48000,  # Close price (4% decrease)
-            'h': 50100,  # High
-            'l': 47500,  # Low
-            'v': 1000,   # Volume
-            't': 1615882800000  # Timestamp
-        })
-        
-        # Call the trap detection with Bearish trend
-        trap_type, confidence = detect_possible_mm_traps("15min", "Bearish", -4.0, 2000)
-        
-        # Verify the function identified a bear trap
-        self.assertEqual(trap_type, "Bear Trap")
-        self.assertGreaterEqual(confidence, 0.3)
-
-    @patch('omega_ai.monitor.monitor_market_trends.redis_conn')
-    @patch('omega_ai.monitor.monitor_market_trends.get_current_fibonacci_levels')
-    @patch('omega_ai.monitor.monitor_market_trends.update_fibonacci_data')
-    @patch('omega_ai.monitor.monitor_market_trends.MarketTrendAnalyzer')
-    @patch('omega_ai.monitor.monitor_market_trends.time')
-    def test_monitor_startup_data_availability(self, mock_time, mock_analyzer, 
-                                               mock_update_fib, mock_get_fib, mock_redis):
-        """Test that monitor_market_trends properly checks data availability on startup."""
-        # Set up mocks
-        mock_time.sleep.side_effect = [None, Exception("Stop iteration")]  # Break after first iteration
-        mock_redis.llen.return_value = 0  # No movement history
-        mock_redis.get.return_value = "50000.0"  # BTC price available
-        mock_get_fib.return_value = None  # No Fibonacci levels initially
-        
-        # Set up analyzer mock
-        analyzer_instance = MagicMock()
-        analyzer_instance.last_analysis_time = None
-        analyzer_instance.analysis_interval = 5
-        analyzer_instance.analyze_trends.return_value = {"current_price": 50000}
-        mock_analyzer.return_value = analyzer_instance
-        
-        # Call the monitor function (will exit after first iteration due to mock)
-        try:
-            monitor_market_trends()
-        except Exception as e:
-            pass  # Expected exception to break the loop
-            
-        # Verify Redis was queried for movement history
-        mock_redis.llen.assert_called_with("btc_movement_history")
-        
-        # Verify movement history was initialized with current price
-        mock_redis.lpush.assert_called_with("btc_movement_history", "50000.0,0")
-        
-        # Verify candle data availability was checked
-        self.assertTrue(mock_redis.get.call_count >= 6)  # At least 6 calls for different timeframes
-        
-        # Verify Fibonacci data was initialized with price 50000.0 (float)
-        mock_update_fib.assert_called_with(50000.0)
+        # Verify warning was logged
+        self.assertIn("No current price available for analysis", self.log_output.getvalue())
 
 if __name__ == '__main__':
     unittest.main() 

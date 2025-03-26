@@ -2,6 +2,16 @@
 """
 🔱 OMEGA BTC AI - Market Manipulation Detection System 🔱
 The central orchestration pipeline for the entire OMEGA BTC AI system.
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
 """
 import asyncio
 import os

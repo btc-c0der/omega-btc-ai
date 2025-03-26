@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 
 """
-🌌 OMEGA RASTA FIBONACCI DETECTOR 🌌
-====================================
+🔱 OMEGA BTC AI - Fibonacci Detector 🔱
+Sacred detection of Fibonacci patterns and divine price levels.
 
-Divine market analysis through Fibonacci sequence harmony.
-May the golden ratio be with you! 🚀
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
 
 ENHANCED SWING POINT DETECTION
 ------------------------------
@@ -41,7 +48,7 @@ import json
 import math
 import time
 from collections import deque
-from typing import Any, Optional, Dict, List, Tuple
+from typing import Any, Optional, Dict, List, Tuple, cast
 import sys
 import os
 import logging
@@ -50,6 +57,7 @@ import numpy as np
 import pandas as pd
 
 from omega_ai.db_manager.database import get_db_connection
+from omega_ai.utils.redis_manager import RedisManager
 
 # Configure logger for sacred resonance
 logger = logging.getLogger(__name__)
@@ -59,16 +67,26 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# Initialize Redis connection with divine protection
-try:
-    redis_host = os.getenv('REDIS_HOST', 'localhost')
-    redis_port = int(os.getenv('REDIS_PORT', '6379'))
-    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
-    redis_conn.ping()
-    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
-except redis.ConnectionError as e:
-    logger.error(f"Failed to connect to Redis: {e}")
-    raise
+# Initialize Redis connection lazily
+redis_manager: Optional[RedisManager] = None
+redis_conn: Optional[redis.Redis] = None
+
+def get_redis_connection() -> redis.Redis:
+    """Initialize Redis connection with divine protection."""
+    global redis_manager, redis_conn
+    if redis_conn is None:
+        redis_manager = RedisManager()
+        redis_conn = redis_manager.redis
+    return redis_conn
+
+def ensure_redis_connection() -> redis.Redis:
+    """Ensure Redis connection is established and return a valid Redis connection."""
+    global redis_conn
+    if redis_conn is None:
+        redis_conn = get_redis_connection()
+    if not redis_conn:
+        raise RuntimeError("Failed to establish Redis connection")
+    return redis_conn
 
 # Sacred constants
 GOLDEN_RATIO = 1.618033988749895
@@ -307,8 +325,9 @@ class FibonacciDetector:
                     
                     # Store in Redis
                     try:
-                        redis_conn.set("fibonacci:swing_high", self.recent_swing_high)
-                        redis_conn.set("fibonacci:swing_high_timestamp", potential["timestamp"].isoformat())
+                        redis_client = ensure_redis_connection()
+                        redis_client.set("fibonacci:swing_high", self.recent_swing_high)
+                        redis_client.set("fibonacci:swing_high_timestamp", potential["timestamp"].isoformat())
                     except redis.RedisError as e:
                         logger.error(f"Redis error storing swing high: {str(e)}")
                     
@@ -325,8 +344,9 @@ class FibonacciDetector:
                     
                     # Store in Redis
                     try:
-                        redis_conn.set("fibonacci:swing_low", self.recent_swing_low)
-                        redis_conn.set("fibonacci:swing_low_timestamp", potential["timestamp"].isoformat())
+                        redis_client = ensure_redis_connection()
+                        redis_client.set("fibonacci:swing_low", self.recent_swing_low)
+                        redis_client.set("fibonacci:swing_low_timestamp", potential["timestamp"].isoformat())
                     except redis.RedisError as e:
                         logger.error(f"Redis error storing swing low: {str(e)}")
                     
@@ -389,7 +409,8 @@ class FibonacciDetector:
             
             # Get current Fibonacci levels
             if levels is None:
-                levels_str = redis_conn.get("fibonacci_levels")
+                redis_client = ensure_redis_connection()
+                levels_str = redis_client.get("fibonacci_levels")
                 if levels_str is None:
                     return None
                     
@@ -440,8 +461,9 @@ class FibonacciDetector:
                     
                     # Record hit in Redis
                     try:
+                        redis_client = ensure_redis_connection()
                         hit_data = json.dumps(hit)
-                        redis_conn.zadd("fibonacci_hits", {hit_data: time.time()})
+                        redis_client.zadd("fibonacci_hits", {hit_data: time.time()})
                     except redis.RedisError as e:
                         logger.error(f"Error recording Fibonacci hit: {e}")
                     
@@ -462,7 +484,8 @@ class FibonacciDetector:
     def _record_fibonacci_hit(self, current_price: float, hit_data: Dict) -> None:
         """Record a Fibonacci level hit in Redis."""
         try:
-            redis_conn.zadd(
+            redis_client = ensure_redis_connection()
+            redis_client.zadd(
                 "fibonacci:hits",
                 {json.dumps({
                     "price": current_price,
@@ -572,7 +595,8 @@ class FibonacciDetector:
             }
             
             # Store in Redis
-            redis_conn.zadd(
+            redis_client = ensure_redis_connection()
+            redis_client.zadd(
                 "grafana:fibonacci_trap_confluences",  # Use grafana prefix for visualization
                 {json.dumps(confluence_data): int(time.time())}
             )
@@ -623,7 +647,8 @@ class FibonacciDetector:
             
             try:
                 # Store in Redis for reference
-                redis_conn.set("fibonacci:current_levels", json.dumps(levels))
+                redis_client = ensure_redis_connection()
+                redis_client.set("fibonacci:current_levels", json.dumps(levels))
             except redis.RedisError as e:
                 logger.error(f"Redis connection error: {str(e)}")
                 # Continue without Redis storage
@@ -685,7 +710,8 @@ class FibonacciDetector:
         
         try:
             # Get current Fibonacci levels
-            levels_str = redis_conn.get("fibonacci_levels")
+            redis_client = ensure_redis_connection()
+            levels_str = redis_client.get("fibonacci_levels")
             if levels_str is None:
                 return
             
@@ -705,7 +731,7 @@ class FibonacciDetector:
                 # Record hit in Redis
                 try:
                     hit_data = json.dumps(hit)
-                    redis_conn.zadd("fibonacci_hits", {hit_data: time.time()})
+                    redis_client.zadd("fibonacci_hits", {hit_data: time.time()})
                 except redis.RedisError as e:
                     logger.error(f"Error recording Fibonacci hit: {e}")
                     raise ValueError(f"Redis error: {e}")
@@ -783,137 +809,186 @@ def detect_fibonacci_confluence(trap_type, confidence, price_change, price):
         logger.error(f"Error in detect_fibonacci_confluence: {str(e)}")
         return confidence, None
 
-def get_current_fibonacci_levels():
-    """Get all current Fibonacci levels."""
+def get_current_fibonacci_levels(symbol: str = "BTCUSDT") -> Optional[Dict[str, Any]]:
+    """Get current Fibonacci levels from Redis."""
     try:
-        # First, check if we have fully cached Fibonacci levels in Redis
-        cached_levels = redis_conn.get("fibonacci_levels")
-        if cached_levels:
-            try:
-                return json.loads(cached_levels)
-            except json.JSONDecodeError:
-                logger.warning("Invalid JSON format for cached Fibonacci levels")
-                # Continue to generate new levels
-        
-        # If no cached levels or invalid format, use the calculator to generate
-        levels = fibonacci_detector.generate_fibonacci_levels()
-        # Ensure we always return a dict, never None
-        return levels if levels is not None else {}
+        redis_client = ensure_redis_connection()
+        data = redis_client.get(f"fib_levels_{symbol}")
+        if not data:
+            return None
+        return json.loads(data)
     except Exception as e:
-        logger.error(f"Error getting Fibonacci levels: {str(e)}")
-        return {}
+        logger.error(f"Error getting Fibonacci levels: {e}")
+        return None
 
 def check_fibonacci_alignment() -> Optional[Dict]:
-    """Check if current price aligns with any Fibonacci level."""
+    """Check if current price aligns with multiple Fibonacci levels."""
     try:
-        # Get current price from Redis
-        current_price_str = redis_conn.get("last_btc_price")
-        if not current_price_str:
-            logger.warning("No price data available for Fibonacci alignment check")
+        redis_client = ensure_redis_connection()
+        # Get current price data
+        current_data = redis_client.get("btc_current_data")
+        if not current_data:
             return None
-            
-        # Ensure current_price is a float
-        try:
-            current_price = float(current_price_str)
-        except (ValueError, TypeError):
-            logger.warning(f"Invalid price format: {current_price_str}")
-            return None
-            
-        if current_price <= 0:
-            logger.warning("Invalid price (zero or negative) for Fibonacci alignment check")
-            return None
-            
-        # Get current Fibonacci levels
-        levels = get_current_fibonacci_levels()
-        if not levels:
-            logger.warning("No Fibonacci levels available for alignment check")
-            return None
-            
-        # Find closest Fibonacci level
-        closest_level = None
-        min_distance_pct = float('inf')
         
-        for level_name, level_price in levels.items():
-            # Ensure level_price is a float
-            try:
-                if isinstance(level_price, str):
-                    level_price = float(level_price)
-                elif not isinstance(level_price, (int, float)):
-                    logger.debug(f"Skipping non-numeric Fibonacci level: {level_name}={level_price}")
-                    continue
-                    
-                if level_price <= 0:
-                    logger.debug(f"Skipping non-positive Fibonacci level: {level_name}={level_price}")
-                    continue
-            except (ValueError, TypeError) as e:
-                logger.debug(f"Error parsing Fibonacci level {level_name}: {e}")
-                continue
-                
-            try:
-                distance = abs(current_price - level_price)
-                distance_pct = distance / level_price
-            except (TypeError, ValueError) as e:
-                logger.warning(f"Error calculating distance for level {level_name}: {e}")
-                continue
+        current_data_dict = json.loads(current_data)
+        if not isinstance(current_data_dict, dict):
+            logger.error("Invalid current data format")
+            return None
             
-            if distance_pct < min_distance_pct:
-                min_distance_pct = distance_pct
-                closest_level = {
+        current_price = float(current_data_dict.get("price", 0))
+        if current_price <= 0:
+            logger.error("Invalid price value")
+            return None
+        
+        # Get all active Fibonacci levels
+        fib_levels = get_current_fibonacci_levels()
+        if not fib_levels:
+            return None
+        
+        # Check for alignments
+        alignments = []
+        for level_name, level_data in fib_levels.items():
+            if not isinstance(level_data, dict):
+                continue
+            level_price = float(level_data.get("price", 0))
+            if level_price <= 0:
+                continue
+            if abs(current_price - level_price) / level_price < 0.001:  # Within 0.1%
+                alignments.append({
                     "level": level_name,
                     "price": level_price,
-                    "distance_pct": distance_pct
-                }
+                    "confidence": level_data.get("confidence", 0)
+                })
         
-        if not closest_level:
-            return None
-            
-        # Calculate confidence based on distance
-        confidence = 1.0 - min(min_distance_pct, 0.05) / 0.05  # Max 5% distance
+        if alignments:
+            return {
+                "price": current_price,
+                "alignments": alignments,
+                "timestamp": datetime.now().isoformat()
+            }
         
-        # Special handling for Golden Ratio
-        if "61.8%" in str(closest_level["level"]) or "0.618" in str(closest_level["level"]):
-            confidence = min(confidence * 1.2, 1.0)  # 20% boost for Golden Ratio
-            
-        # Log alignment details
-        logger.info(f"Fibonacci Alignment: {closest_level['level']} at {closest_level['price']:.2f} - {min_distance_pct:.2%} away")
-        
-        return {
-            "type": "GOLDEN_RATIO" if "61.8%" in str(closest_level["level"]) or "0.618" in str(closest_level["level"]) else "STANDARD",
-            "level": closest_level["level"],
-            "price": closest_level["price"],
-            "distance_pct": closest_level["distance_pct"],
-            "confidence": confidence,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-        
-    except ValueError as e:
-        logger.error(f"Error checking Fibonacci alignment: {str(e)}")
         return None
     except Exception as e:
-        logger.error(f"Error checking Fibonacci alignment: {str(e)}")
+        logger.error(f"Error checking Fibonacci alignment: {e}")
+        return None
+
+def update_fibonacci_history(level_data: Dict) -> bool:
+    """Update Fibonacci level history in Redis."""
+    try:
+        if not isinstance(level_data, dict):
+            logger.error("Invalid level data format")
+            return False
+            
+        redis_client = ensure_redis_connection()
+        # Add to time series
+        timestamp = int(time.time())
+        redis_client.zadd("fibonacci_history", {json.dumps(level_data): timestamp})
+        
+        # Trim to keep last 1000 entries
+        redis_client.zremrangebyrank("fibonacci_history", 0, -1001)
+        return True
+    except Exception as e:
+        logger.error(f"Error updating Fibonacci history: {e}")
+        return False
+
+def get_fibonacci_history(start_time: Optional[int] = None, end_time: Optional[int] = None) -> List[Dict]:
+    """Get Fibonacci level history from Redis."""
+    try:
+        redis_client = ensure_redis_connection()
+        if start_time is None:
+            start_time = 0
+        if end_time is None:
+            end_time = int(time.time())
+        
+        # Get entries within time range
+        entries = redis_client.zrangebyscore("fibonacci_history", start_time, end_time)
+        
+        # Parse JSON entries
+        history = []
+        for entry in entries:
+            try:
+                data = json.loads(entry)
+                if isinstance(data, dict):
+                    history.append(data)
+            except json.JSONDecodeError:
+                continue
+        
+        return history
+    except Exception as e:
+        logger.error(f"Error getting Fibonacci history: {e}")
+        return []
+
+def update_fibonacci_cache(key: str, data: Dict) -> bool:
+    """Update Fibonacci cache in Redis."""
+    try:
+        if not isinstance(key, str) or not key:
+            logger.error("Invalid key")
+            return False
+        if not isinstance(data, dict):
+            logger.error("Invalid data format")
+            return False
+            
+        redis_client = ensure_redis_connection()
+        redis_client.set(key, json.dumps(data))
+        redis_client.expire(key, 3600)  # 1 hour expiry
+        return True
+    except Exception as e:
+        logger.error(f"Error updating Fibonacci cache: {e}")
+        return False
+
+def get_fibonacci_cache(key: str) -> Optional[Dict]:
+    """Get Fibonacci cache from Redis."""
+    try:
+        if not isinstance(key, str) or not key:
+            logger.error("Invalid key")
+            return None
+            
+        redis_client = ensure_redis_connection()
+        data = redis_client.get(key)
+        if not data:
+            return None
+        result = json.loads(data)
+        if not isinstance(result, dict):
+            logger.error("Invalid data format in cache")
+            return None
+        return result
+    except Exception as e:
+        logger.error(f"Error getting Fibonacci cache: {e}")
         return None
 
 # Sacred module testing
 if __name__ == "__main__":
     print("🔱 Testing Fibonacci Detector Module 🔱")
     
-    # Test with current price
-    current_price = float(redis_conn.get("last_btc_price") or 0)
-    if current_price > 0:
-        print(f"Current BTC price: ${current_price:,.2f}")
+    try:
+        # Test with current price
+        redis_client = ensure_redis_connection()
+        price_data = redis_client.get("last_btc_price")
+        current_price = float(price_data) if price_data else 0
         
-        # Update Fibonacci data
-        update_fibonacci_data(current_price)
-        
-        # Get Fibonacci levels
-        fib_levels = get_current_fibonacci_levels()
-        print(f"Generated {len(fib_levels)} Fibonacci level categories")
-        
-        # Check for alignments
-        alignment = check_fibonacci_alignment()
-        if alignment:
-            print(f"Detected alignment: {alignment['type']} at {alignment['level']} (confidence: {alignment['confidence']:.2f})")
+        if current_price > 0:
+            print(f"Current BTC price: ${current_price:,.2f}")
+            
+            # Update Fibonacci data
+            update_fibonacci_data(current_price)
+            
+            # Get Fibonacci levels
+            fib_levels = get_current_fibonacci_levels()
+            if fib_levels:
+                print(f"Generated {len(fib_levels)} Fibonacci level categories")
+            else:
+                print("No Fibonacci levels available")
+            
+            # Check for alignments
+            alignment = check_fibonacci_alignment()
+            if alignment and isinstance(alignment, dict):
+                alignment_type = alignment.get('type', 'Unknown')
+                alignment_level = alignment.get('level', 'Unknown')
+                alignment_confidence = alignment.get('confidence', 0.0)
+                print(f"Detected alignment: {alignment_type} at {alignment_level} (confidence: {alignment_confidence:.2f})")
+            else:
+                print("No Fibonacci alignment detected")
         else:
-            print("No Fibonacci alignment detected")
-    else:
-        print("No current price available for testing")
+            print("No current price available for testing")
+    except Exception as e:
+        print(f"Error during testing: {e}")
