@@ -282,3 +282,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Comprehensive documentation for Schumann resonance fix (SCHUMANN_RESONANCE_FIX.md)
 - Enhanced error messages for debugging Schumann resonance issues
+
+## [v0.4.3] - 2024-03-26
+
+### Added
+
+- 🚀 Redis Labs Integration
+  - Live BTC price streaming with real-time updates
+  - Volume tracking and price movement history
+  - Fibonacci levels calculation and storage
+  - Price change tracking with absolute values
+  - WebSocket connection for MM (Market Maker) integration
+  - Robust error handling and connection management
+  - Beautiful Rasta-style logging with color-coded messages
+  - Automatic data type detection and conversion
+  - Connection pooling for optimal performance
+  - Graceful shutdown handling with state preservation
+
+### Changed
+
+- Updated Redis configuration to use Redis Labs cloud instance
+- Enhanced Redis connection manager with improved error handling
+- Optimized data storage patterns for better performance
+- Improved logging system with Rasta-themed messages
+
+### Fixed
+
+- SSL certificate handling for Redis Labs connection
+- Data type conversion issues in Redis operations
+- Connection pool management for better resource utilization
