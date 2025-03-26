@@ -9,9 +9,15 @@ It implements the core interfaces and shared behavior that all trader profiles m
 
 import random
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Tuple, Optional, Any
 from abc import ABC, abstractmethod
+import logging
+import numpy as np
+
+# Configure divine logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Terminal colors for output formatting
 RESET = "\033[0m"
@@ -53,7 +59,7 @@ class RiskParameters:
 class TraderProfile(ABC):
     """Base class for all trader profiles."""
     
-    def __init__(self, initial_capital: float = 10000.0):
+    def __init__(self, initial_capital: float = 10000.0, btc_last_price: float = 0.0):
         """Initialize the trader profile with common attributes."""
         self.name = "Base Trader"  # Default name, should be overridden by subclasses
         self.capital = initial_capital
@@ -81,10 +87,11 @@ class TraderProfile(ABC):
         self.trend_strength = 0.0
         self.volatility = 0.0
         
-        self._current_price = 0.0  # Current market price (private)
-        self._last_valid_price = 0.0  # Last known valid price
-        self._price_update_time = None  # Last price update timestamp
-        self._max_price_age = 60  # Maximum age of price data in seconds
+        # Initialize current price with a valid value
+        self._current_price = btc_last_price if btc_last_price > 0 else 1.0
+        self._last_valid_price = self._current_price
+        self._price_update_time = None
+        self._max_price_age = 300  # Max age in seconds for a price to be considered valid
     
     @property
     def risk_per_trade(self) -> float:
@@ -120,6 +127,9 @@ class TraderProfile(ABC):
     def current_price(self, value: float) -> None:
         """Set the current price with validation."""
         if value <= 0:
+            if self._last_valid_price > 0:
+                self._current_price = self._last_valid_price
+                return
             raise ValueError(f"Invalid price value: {value}")
         
         self._last_valid_price = self._current_price if self._current_price > 0 else value
@@ -257,4 +267,120 @@ class TraderProfile(ABC):
         print(f"Max Risk per Trade: {self.risk_params.max_risk_per_trade:.2%}")
         print(f"Base Leverage: {self.risk_params.base_leverage:.1f}x")
         print(f"Max Leverage: {self.risk_params.max_leverage:.1f}x")
-        print(f"Min Risk:Reward: {self.risk_params.min_risk_reward_ratio:.1f}") 
+        print(f"Min Risk:Reward: {self.risk_params.min_risk_reward_ratio:.1f}")
+
+class TraderBase(ABC):
+    """Divine base class for all trader profiles."""
+    
+    def __init__(self, initial_capital: float, symbol: str):
+        """Initialize divine trader."""
+        self.initial_capital = initial_capital
+        self.symbol = symbol
+        self.current_capital = initial_capital
+        self.leverage = self._get_initial_leverage()
+        self.position_size = self._calculate_position_size()
+        self.last_update = None
+        self.is_active = False
+        self.risk_metrics = {}
+        self.market_data = {}
+        
+    def _get_initial_leverage(self) -> float:
+        """Get divine initial leverage based on profile."""
+        return 1.0  # Base leverage, to be overridden by profiles
+        
+    def _calculate_position_size(self) -> float:
+        """Calculate divine position size based on capital and leverage."""
+        return (self.current_capital * self.leverage) / self._get_current_price()
+        
+    def _get_current_price(self) -> float:
+        """Get divine current price from market data."""
+        return self.market_data.get(self.symbol, {}).get("last", 0.0)
+        
+    def calculate_risk_metrics(self) -> Dict:
+        """Calculate divine risk metrics."""
+        if not self.market_data.get(self.symbol):
+            return {
+                "volatility": 0.0,
+                "market_regime": "unknown",
+                "risk_score": 0.0
+            }
+            
+        # Calculate volatility from price history
+        price_history = self.market_data[self.symbol].get("price_history", [])
+        if not price_history:
+            return {
+                "volatility": 0.0,
+                "market_regime": "unknown",
+                "risk_score": 0.0
+            }
+            
+        prices = [p["price"] for p in price_history]
+        returns = np.diff(np.log(prices))
+        volatility = np.std(returns) * np.sqrt(252)  # Annualized volatility
+        
+        # Determine market regime
+        if volatility > 0.05:  # 5% threshold
+            regime = "volatile"
+        elif volatility > 0.02:  # 2% threshold
+            regime = "moderate"
+        else:
+            regime = "stable"
+            
+        # Calculate risk score (0-1)
+        risk_score = min(volatility / 0.1, 1.0)  # Normalize to 0-1
+        
+        return {
+            "volatility": volatility,
+            "market_regime": regime,
+            "risk_score": risk_score
+        }
+        
+    def adjust_risk_parameters(self) -> None:
+        """Adjust divine risk parameters based on market conditions."""
+        metrics = self.calculate_risk_metrics()
+        self.risk_metrics = metrics
+        
+        # Adjust leverage based on volatility
+        if metrics["market_regime"] == "volatile":
+            self.leverage = max(1.0, self.leverage * 0.5)  # Reduce leverage by 50%
+            logger.info(f"{YELLOW}Reducing leverage to {self.leverage}x due to volatile market{RESET}")
+        elif metrics["market_regime"] == "stable":
+            self.leverage = min(10.0, self.leverage * 1.2)  # Increase leverage by 20%
+            logger.info(f"{GREEN}Increasing leverage to {self.leverage}x due to stable market{RESET}")
+            
+        # Adjust position size based on risk score
+        if metrics["risk_score"] > 0.7:
+            self.position_size *= 0.5  # Reduce position size by 50%
+            logger.info(f"{RED}Reducing position size to {self.position_size} due to high risk{RESET}")
+        elif metrics["risk_score"] < 0.3:
+            self.position_size *= 1.2  # Increase position size by 20%
+            logger.info(f"{GREEN}Increasing position size to {self.position_size} due to low risk{RESET}")
+            
+    @abstractmethod
+    async def execute_trading_logic(self) -> None:
+        """Execute divine trading logic."""
+        pass
+        
+    @abstractmethod
+    async def manage_positions(self) -> None:
+        """Manage divine open positions."""
+        pass
+        
+    def update_market_data(self, market_data: Dict) -> None:
+        """Update divine market data and adjust risk parameters."""
+        self.market_data = market_data
+        self.last_update = datetime.now(timezone.utc)
+        self.adjust_risk_parameters()
+        
+    def get_status(self) -> Dict:
+        """Get divine trader status."""
+        return {
+            "profile_type": self.__class__.__name__,
+            "initial_capital": self.initial_capital,
+            "current_capital": self.current_capital,
+            "leverage": self.leverage,
+            "position_size": self.position_size,
+            "is_active": self.is_active,
+            "last_update": self.last_update,
+            "risk_metrics": self.risk_metrics
+        } 

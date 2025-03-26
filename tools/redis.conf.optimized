@@ -11,8 +11,7 @@ tcp-keepalive 300
 
 # General
 daemonize no
-supervised no
-pidfile ""  # Disable pidfile to avoid permission issues
+pidfile ""
 loglevel notice
 logfile ""
 databases 16
@@ -58,11 +57,6 @@ slowlog-max-len 128
 
 # LATENCY MONITOR
 latency-monitor-threshold 25
-
-# KERNEL SETTINGS
-# Recommended when running Redis on same system as other services
-vm.overcommit_memory 1
-net.core.somaxconn 511
 
 # CLIENT MANAGEMENT
 maxclients 10000

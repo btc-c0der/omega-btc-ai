@@ -14,7 +14,7 @@ from typing import Dict, List, Any, Optional, Tuple
 import redis
 import json
 import logging
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone
 
 # Set up logger with RASTA VIBES
 logger = logging.getLogger(__name__)
@@ -374,7 +374,7 @@ def fetch_recent_movements(minutes=15):
                         volume = 0
                     
                     movements.append({
-                        'timestamp': datetime.now(UTC) - timedelta(seconds=len(movements)),
+                        'timestamp': datetime.now(timezone.utc) - timedelta(seconds=len(movements)),
                         'price': price,
                         'volume': volume
                     })
@@ -530,7 +530,7 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id;
             """, (
-                trap_data.get("timestamp", datetime.now()),
+                trap_data.get("timestamp", datetime.now(timezone.utc)),
                 trap_data["trap_type"],
                 trap_data["price_level"],
                 trap_data["direction"],
@@ -545,7 +545,7 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
             db_manager.conn.commit()
             
         # Also store in Redis for quick access by real-time systems
-        key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now().timestamp())}"
+        key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now(timezone.utc).timestamp())}"
         db_manager.redis.set(key, json.dumps(trap_data))
         db_manager.redis.expire(key, 60*60*24)  # Expire after 24 hours
             
@@ -556,7 +556,7 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
         
         # Fallback to just Redis if PostgreSQL fails
         try:
-            key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now().timestamp())}"
+            key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now(timezone.utc).timestamp())}"
             db_manager.redis.set(key, json.dumps(trap_data))
             db_manager.redis.expire(key, 60*60*24)  # Expire after 24 hours
             return True

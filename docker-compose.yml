@@ -41,6 +41,8 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
+      - ./redis_data:/app/redis_data
+      - ./postgres_data:/app/postgres_data
     ports:
       - "8765:8765" # WebSocket Server
       - "8050:8050" # Dashboard UI
@@ -48,19 +50,11 @@ services:
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-
-  omega-dashboard:
-    build: .
-    ports:
-      - "8051:8051"
-    volumes:
-      - ./logs:/app/logs
-    environment:
       - PYTHONPATH=/app
       - OMEGA_ENV=production
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8051" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8050" ]
       interval: 30s
       timeout: 10s
       retries: 3

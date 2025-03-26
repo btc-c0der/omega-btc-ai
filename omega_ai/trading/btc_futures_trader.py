@@ -45,6 +45,7 @@ import redis
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Tuple, Union
 from decimal import Decimal
+import pandas as pd
 
 from omega_ai.algos.omega_algorithms import OmegaAlgo
 from omega_ai.db_manager.database import fetch_recent_movements
@@ -158,7 +159,10 @@ class BtcFuturesTrader:
                  initial_capital: float = 10000.0,
                  max_leverage: int = 5,
                  risk_per_trade: float = 0.02,  # % of capital to risk per trade
-                 max_positions: int = 3):
+                 max_positions: int = 3,
+                 api_key: str = None,
+                 api_secret: str = None,
+                 **kwargs):
         """Initialize the trader with config parameters."""
         self.capital = initial_capital
         self.initial_capital = initial_capital
@@ -168,7 +172,7 @@ class BtcFuturesTrader:
         
         self.open_positions: List[Position] = []
         self.trade_history = TradeHistory()
-        self.current_price = 0.0
+        self.current_price = kwargs.get('btc_last_price', 1.0) if kwargs.get('btc_last_price', 1.0) > 0 else 1.0
         
         # Internal state tracking
         self.last_analysis_time = datetime.datetime.min
@@ -177,6 +181,79 @@ class BtcFuturesTrader:
         
         # Initialize trading analyzer
         self.analyzer = TradingAnalyzer(debug_mode=True)
+        
+        # Initialize Binance client
+        from binance.client import Client
+        self.client = Client(api_key, api_secret)
+        
+        # Initialize logger
+        import logging
+        self.logger = logging.getLogger(__name__)
+    
+    def get_historical_data(self,
+                          symbol: str,
+                          interval: str,
+                          start_time: datetime.datetime,
+                          end_time: datetime.datetime) -> pd.DataFrame:
+        """
+        Fetch historical klines data from Binance Futures.
+        
+        Args:
+            symbol (str): Trading pair symbol (e.g., 'BTCUSDT')
+            interval (str): Kline interval (e.g., '1h', '4h', '1d')
+            start_time (datetime): Start time for historical data
+            end_time (datetime): End time for historical data
+            
+        Returns:
+            pd.DataFrame: DataFrame with historical data
+        """
+        try:
+            # Convert datetime to milliseconds timestamp
+            start_ms = int(start_time.timestamp() * 1000)
+            end_ms = int(end_time.timestamp() * 1000)
+            
+            # Fetch klines data
+            klines = self.client.futures_klines(
+                symbol=symbol,
+                interval=interval,
+                startTime=start_ms,
+                endTime=end_ms
+            )
+            
+            # Return empty DataFrame if no data
+            if not klines:
+                return pd.DataFrame(columns=[
+                    'timestamp', 'open', 'high', 'low', 'close', 'volume',
+                    'close_time', 'quote_volume', 'trades', 'taker_buy_volume',
+                    'taker_buy_quote_volume', 'ignore'
+                ])
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(klines, columns=[
+                'timestamp', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_volume', 'trades', 'taker_buy_volume',
+                'taker_buy_quote_volume', 'ignore'
+            ])
+            
+            # Convert timestamp to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            
+            # Convert string values to float
+            float_columns = ['open', 'high', 'low', 'close', 'volume', 'quote_volume',
+                           'taker_buy_volume', 'taker_buy_quote_volume']
+            for col in float_columns:
+                df[col] = df[col].astype(float)
+            
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"Error fetching historical data: {e}")
+            # Return empty DataFrame on error
+            return pd.DataFrame(columns=[
+                'timestamp', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_volume', 'trades', 'taker_buy_volume',
+                'taker_buy_quote_volume', 'ignore'
+            ])
     
     def load_state(self, filename: str = "trader_state.json") -> bool:
         """Load trader state from file."""
