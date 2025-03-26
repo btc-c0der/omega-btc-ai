@@ -120,106 +120,128 @@ class GAMONTrinityMatrix:
         return self
     
     def merge_datasets(self):
-        """
-        Merge data from all three analysis methods.
-        
-        Returns:
-            DataFrame with merged data
-        """
-        if self.hmm_results is None or self.eigenwave_results is None:
-            raise ValueError("Results must be loaded first.")
+        """Merge datasets from HMM, Eigenwave, and VI analysis."""
+        try:
+            # Check if results are loaded
+            if self.hmm_results is None or self.eigenwave_results is None:
+                print("❌ Error: Results must be loaded first")
+                return None
+                
+            # Ensure both datasets have a date column
+            if 'date' not in self.hmm_results.columns:
+                if 'datetime' in self.hmm_results.columns:
+                    self.hmm_results['date'] = pd.to_datetime(self.hmm_results['datetime'])
+                elif 'timestamp' in self.hmm_results.columns:
+                    self.hmm_results['date'] = pd.to_datetime(self.hmm_results['timestamp'], unit='s')
+                else:
+                    # Create a date range if no date column exists
+                    self.hmm_results['date'] = pd.date_range(start='2020-01-01', periods=len(self.hmm_results), freq='1D')
             
-        # Determine date column names
-        hmm_date_col = 'Date' if 'Date' in self.hmm_results.columns else 'date'
-        eigenwave_date_col = 'Date' if 'Date' in self.eigenwave_results.columns else 'date'
-        
-        # Merge HMM and eigenwave datasets on date
-        hmm_df = self.hmm_results.set_index(hmm_date_col)
-        eigenwave_df = self.eigenwave_results.set_index(eigenwave_date_col)
-        
-        merged_df = pd.merge(
-            hmm_df, 
-            eigenwave_df,
-            left_index=True, 
-            right_index=True,
-            how='inner',
-            suffixes=('_hmm', '_eigen')
-        )
-        
-        # Reset index to get the date as a column
-        merged_df = merged_df.reset_index()
-        
-        # If VI model is available, add cycle classifications
-        if self.vi_model is not None:
-            try:
-                # Extract price sequences
-                sequences = []
-                for i in range(len(merged_df) - self.vi_model.sequence_length + 1):
-                    if 'close' in merged_df.columns:
-                        seq = merged_df['close'].iloc[i:i+self.vi_model.sequence_length].values
-                    else:
-                        break
-                    
-                    # Normalize
-                    seq = (seq - seq.min()) / (seq.max() - seq.min() + 1e-10)
-                    sequences.append(seq)
-                
-                if sequences:
-                    # Convert to tensor
-                    sequences_tensor = torch.tensor(sequences, dtype=torch.float32)
-                    
-                    # Encode sequences
-                    all_mu = []
-                    with torch.no_grad():
-                        for i in range(0, len(sequences_tensor), 32):
-                            batch = sequences_tensor[i:i+32]
-                            h = self.vi_model.encoder(batch)
-                            mu = self.vi_model.fc_mu(h)
-                            all_mu.append(mu.cpu().numpy())
-                    
-                    all_mu = np.vstack(all_mu)
-                    
-                    # Add latent encodings to dataframe
-                    latent_df = pd.DataFrame(
-                        all_mu, 
-                        columns=[f'cycle_latent_{i}' for i in range(self.vi_model.latent_dim)]
-                    )
-                    
-                    # Pad with NaNs for the beginning (due to sequence length)
-                    pad_length = self.vi_model.sequence_length - 1
-                    pad_df = pd.DataFrame(
-                        {col: [np.nan] * pad_length for col in latent_df.columns}
-                    )
-                    
-                    latent_df = pd.concat([pad_df, latent_df], ignore_index=True)
-                    
-                    # Add to merged dataframe
-                    for col in latent_df.columns:
-                        merged_df[col] = latent_df[col]
-                    
-                    # Simple clustering on latent space
-                    from sklearn.cluster import KMeans
-                    
-                    # Clean data for clustering (remove NaNs)
-                    clean_latent = latent_df.dropna()
-                    
-                    if len(clean_latent) > 3:  # Need at least 3 points for 3 clusters
-                        kmeans = KMeans(n_clusters=3, random_state=42).fit(clean_latent)
+            if 'date' not in self.eigenwave_results.columns:
+                if 'datetime' in self.eigenwave_results.columns:
+                    self.eigenwave_results['date'] = pd.to_datetime(self.eigenwave_results['datetime'])
+                elif 'timestamp' in self.eigenwave_results.columns:
+                    self.eigenwave_results['date'] = pd.to_datetime(self.eigenwave_results['timestamp'], unit='s')
+                else:
+                    # Create a date range if no date column exists
+                    self.eigenwave_results['date'] = pd.date_range(start='2020-01-01', periods=len(self.eigenwave_results), freq='1D')
+            
+            # Ensure date columns are datetime type
+            self.hmm_results['date'] = pd.to_datetime(self.hmm_results['date'])
+            self.eigenwave_results['date'] = pd.to_datetime(self.eigenwave_results['date'])
+            
+            # Set date as index for merging
+            hmm_df = self.hmm_results.set_index('date')
+            eigenwave_df = self.eigenwave_results.set_index('date')
+            
+            # Merge the datasets
+            merged_df = pd.merge(
+                hmm_df, 
+                eigenwave_df,
+                left_index=True, 
+                right_index=True,
+                how='inner',
+                suffixes=('_hmm', '_eigen')
+            )
+            
+            # Reset index to get the date as a column
+            merged_df = merged_df.reset_index()
+            
+            # If VI model is available, add cycle classifications
+            if self.vi_model is not None:
+                try:
+                    # Extract price sequences
+                    sequences = []
+                    for i in range(len(merged_df) - self.vi_model.sequence_length + 1):
+                        if 'close' in merged_df.columns:
+                            seq = merged_df['close'].iloc[i:i+self.vi_model.sequence_length].values
+                        else:
+                            break
                         
-                        # Create cycle classifications with NaNs at the beginning
-                        cycles = np.full(len(merged_df), np.nan)
-                        cycles[pad_length:] = kmeans.labels_
+                        # Normalize
+                        seq = (seq - seq.min()) / (seq.max() - seq.min() + 1e-10)
+                        sequences.append(seq)
+                    
+                    if sequences:
+                        # Convert to tensor
+                        sequences_tensor = torch.tensor(sequences, dtype=torch.float32)
                         
-                        merged_df['cycle_type'] = cycles
-                
-                print("✅ Added Variational Inference cycle classifications")
-            except Exception as e:
-                print(f"⚠️ Error adding VI cycle data: {e}")
-        
-        # Store the merged dataset
-        self.merged_data = merged_df
-        
-        return merged_df
+                        # Encode sequences
+                        all_mu = []
+                        with torch.no_grad():
+                            for i in range(0, len(sequences_tensor), 32):
+                                batch = sequences_tensor[i:i+32]
+                                h = self.vi_model.encoder(batch)
+                                mu = self.vi_model.fc_mu(h)
+                                all_mu.append(mu.cpu().numpy())
+                        
+                        all_mu = np.vstack(all_mu)
+                        
+                        # Add latent encodings to dataframe
+                        latent_df = pd.DataFrame(
+                            all_mu, 
+                            columns=[f'cycle_latent_{i}' for i in range(self.vi_model.latent_dim)]
+                        )
+                        
+                        # Pad with NaNs for the beginning (due to sequence length)
+                        pad_length = self.vi_model.sequence_length - 1
+                        pad_df = pd.DataFrame(
+                            {col: [np.nan] * pad_length for col in latent_df.columns}
+                        )
+                        
+                        latent_df = pd.concat([pad_df, latent_df], ignore_index=True)
+                        
+                        # Add to merged dataframe
+                        for col in latent_df.columns:
+                            merged_df[col] = latent_df[col]
+                        
+                        # Simple clustering on latent space
+                        from sklearn.cluster import KMeans
+                        
+                        # Clean data for clustering (remove NaNs)
+                        clean_latent = latent_df.dropna()
+                        
+                        if len(clean_latent) > 3:  # Need at least 3 points for 3 clusters
+                            kmeans = KMeans(n_clusters=3, random_state=42).fit(clean_latent)
+                            
+                            # Create cycle classifications with NaNs at the beginning
+                            cycles = np.full(len(merged_df), np.nan)
+                            cycles[pad_length:] = kmeans.labels_
+                            
+                            merged_df['cycle_type'] = cycles
+                    
+                    print("✅ Added Variational Inference cycle classifications")
+                except Exception as e:
+                    print(f"⚠️ Error adding VI cycle data: {e}")
+            
+            # Store the merged dataset
+            self.merged_data = merged_df
+            
+            return merged_df
+            
+        except Exception as e:
+            print(f"❌ Error merging datasets: {e}")
+            return None
     
     def compute_trinity_metrics(self):
         """
@@ -230,6 +252,10 @@ class GAMONTrinityMatrix:
         """
         if self.merged_data is None:
             self.merge_datasets()
+            
+        if self.merged_data is None:
+            print("❌ Error: Could not merge datasets")
+            return None
             
         data = self.merged_data
         
@@ -348,12 +374,43 @@ class GAMONTrinityMatrix:
         Returns:
             Plotly figure
         """
+        # Import colors if not already available
+        try:
+            from btc_color_state_analyzer import COLORS, MARKET_STATES
+        except ImportError:
+            # Define default colors if import fails
+            COLORS = {
+                'state_0': '#e6194B',  # Bear/Markdown
+                'state_1': '#3cb44b',  # Bull/Markup
+                'state_2': '#ffe119',  # Accumulation
+                'state_3': '#4363d8',  # Distribution
+                'state_4': '#911eb4',  # Fakeout/Liquidity Grab
+                'state_5': '#f58231',  # Consolidation
+                'wave_0': '#e6194B',   # First eigenwave
+                'wave_1': '#3cb44b',   # Second eigenwave
+                'wave_2': '#ffe119',   # Third eigenwave
+                'wave_3': '#4363d8',   # Fourth eigenwave
+                'wave_4': '#911eb4',   # Fifth eigenwave
+                'cycle_0': '#e6194B',  # First cycle  
+                'cycle_1': '#3cb44b',  # Second cycle
+                'cycle_2': '#911eb4',  # Third cycle
+            }
+            MARKET_STATES = [
+                "Markdown (Bear)",
+                "Markup (Bull)",
+                "Accumulation",
+                "Distribution",
+                "Liquidity Grab",
+                "Consolidation"
+            ]
+        
         # Compute metrics if not already done
-        if self.trinity_metrics is None:
+        if not hasattr(self, 'trinity_metrics') or self.trinity_metrics is None:
             self.compute_trinity_metrics()
             
         if self.merged_data is None:
-            raise ValueError("No merged data available")
+            print("Warning: No merged data available, creating empty dataframe")
+            self.merged_data = pd.DataFrame()
             
         data = self.merged_data
         
@@ -374,6 +431,27 @@ class GAMONTrinityMatrix:
             horizontal_spacing=0.05
         )
         
+        # Check if DataFrame is empty
+        if len(data) == 0:
+            print("Warning: Empty DataFrame, creating placeholder visualization")
+            fig.add_annotation(
+                text="Insufficient data for Trinity Matrix visualization",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5,
+                showarrow=False,
+                font=dict(size=20)
+            )
+            fig.update_layout(
+                title="GAMON Trinity Matrix - Insufficient Data",
+                template="plotly_dark",
+                height=800,
+                width=1200
+            )
+            if output_file:
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
+                fig.write_html(output_file)
+            return fig
+        
         # 1. Price chart with all three analyses
         # Check for date column with case-insensitive matching and multiple formats
         date_col = None
@@ -389,22 +467,29 @@ class GAMONTrinityMatrix:
             print(f"Warning: No date column found. Available columns: {list(data.columns)}")
                 
         # Add price trace
-        fig.add_trace(
-            go.Scatter(
-                x=data[date_col],
-                y=data['close'] if 'close' in data.columns else data['Close'] if 'Close' in data.columns else None,
-                mode='lines',
-                name='BTC Price',
-                line=dict(color='white', width=1)
-            ),
-            row=1, col=1
-        )
+        if 'close' in data.columns or 'Close' in data.columns:
+            fig.add_trace(
+                go.Scatter(
+                    x=data[date_col],
+                    y=data['close'] if 'close' in data.columns else data['Close'],
+                    mode='lines',
+                    name='BTC Price',
+                    line=dict(color='white', width=1)
+                ),
+                row=1, col=1
+            )
+        else:
+            print(f"Warning: No price data found. Available columns: {list(data.columns)}")
         
         # Determine state column
-        state_col = 'state_smooth' if 'state_smooth' in data.columns else 'state'
+        state_col = None
+        for possible_col in ['state_smooth', 'state', 'State', 'STATE']:
+            if possible_col in data.columns:
+                state_col = possible_col
+                break
         
         # Add colored regions for market states
-        if state_col in data.columns:
+        if state_col is not None:
             for state in range(6):  # Assuming 6 states
                 state_data = data[data[state_col] == state]
                 
@@ -439,29 +524,39 @@ class GAMONTrinityMatrix:
                             row=1, col=1
                         )
         
+        # Check for eigenwave columns - handle both naming formats: eigenwave_X_projection and wave_X
+        eigenwave_columns = []
+        for i in range(5):  # Check both formats for 5 eigenwaves
+            if f'eigenwave_{i}_projection' in data.columns:
+                eigenwave_columns.append(f'eigenwave_{i}_projection')
+            elif f'wave_{i}' in data.columns:
+                eigenwave_columns.append(f'wave_{i}')
+        
         # Add eigenwave projections
-        if 'eigenwave_0_projection' in data.columns:
+        if eigenwave_columns:
             # Normalize for visibility
-            max_val = data[[f'eigenwave_{i}_projection' for i in range(5) if f'eigenwave_{i}_projection' in data.columns]].abs().max().max()
+            eigenwave_data = data[eigenwave_columns]
+            max_val = eigenwave_data.abs().max().max() if not eigenwave_data.empty else 1
+            
             scale_factor = data['close'].mean() * 0.5 / max_val if 'close' in data.columns else 1000
             
-            for i in range(3):  # Show top 3 eigenwaves
-                col = f'eigenwave_{i}_projection'
-                if col in data.columns:
-                    # Calculate offset for visibility
-                    base = data['close'].mean() if 'close' in data.columns else 20000
-                    offset = base * (1 - 0.1 * (i+1))
-                    
-                    fig.add_trace(
-                        go.Scatter(
-                            x=data[date_col],
-                            y=data[col] * scale_factor + offset,
-                            mode='lines',
-                            name=f'Eigenwave {i+1}',
-                            line=dict(color=COLORS[f'wave_{i}'], width=1.5, dash='dot')
-                        ),
-                        row=1, col=1
-                    )
+            for i, col in enumerate(eigenwave_columns[:3]):  # Show top 3 eigenwaves
+                # Calculate offset for visibility
+                base = data['close'].mean() if 'close' in data.columns else 20000
+                offset = base * (1 - 0.1 * (i+1))
+                
+                fig.add_trace(
+                    go.Scatter(
+                        x=data[date_col],
+                        y=data[col] * scale_factor + offset,
+                        mode='lines',
+                        name=f'Eigenwave {i+1}',
+                        line=dict(color=COLORS[f'wave_{i}'], width=1.5, dash='dot')
+                    ),
+                    row=1, col=1
+                )
+        else:
+            print(f"Warning: No eigenwave projections found. Available columns: {list(data.columns)}")
         
         # Add VI cycle type if available
         if 'cycle_type' in data.columns:
@@ -490,25 +585,27 @@ class GAMONTrinityMatrix:
                         row=1, col=1
                     )
         
-        # 2. 3D visualization of trinity space
-        if (state_col in data.columns and 
-            'eigenwave_0_projection' in data.columns and 
-            'cycle_type' in data.columns):
-            
+        # 2. 3D visualization of trinity space - check for required columns first
+        has_state = state_col is not None
+        has_eigenwave = len(eigenwave_columns) > 0
+        has_cycle = 'cycle_type' in data.columns
+        
+        if has_state and has_eigenwave and has_cycle:
             # Filter to valid data points
             valid_data = data.dropna(subset=['cycle_type'])
+            eigenwave_col = eigenwave_columns[0] if eigenwave_columns else None
             
-            if len(valid_data) > 0:
+            if len(valid_data) > 0 and eigenwave_col:
                 # Create 3D scatter plot
                 fig.add_trace(
                     go.Scatter3d(
                         x=valid_data[state_col],
-                        y=valid_data['eigenwave_0_projection'],
+                        y=valid_data[eigenwave_col],
                         z=valid_data['cycle_type'],
                         mode='markers',
                         marker=dict(
                             size=5,
-                            color=valid_data['trinity_alignment'] if 'trinity_alignment' in valid_data.columns else valid_data['close'],
+                            color=valid_data['trinity_alignment'] if 'trinity_alignment' in valid_data.columns else valid_data['close'] if 'close' in valid_data.columns else None,
                             colorscale='Viridis',
                             opacity=0.7,
                             colorbar=dict(
@@ -517,119 +614,45 @@ class GAMONTrinityMatrix:
                             )
                         ),
                         hovertext=[
-                            f"Date: {d}<br>State: {MARKET_STATES[int(s)]}<br>Eigenwave: {e:.2f}<br>Cycle: {int(c)}"
+                            f"Date: {d}<br>State: {MARKET_STATES[int(s)] if 0 <= int(s) < len(MARKET_STATES) else s}<br>Eigenwave: {e:.2f}<br>Cycle: {int(c)}"
                             for d, s, e, c in zip(
                                 valid_data[date_col], 
                                 valid_data[state_col], 
-                                valid_data['eigenwave_0_projection'], 
+                                valid_data[eigenwave_col], 
                                 valid_data['cycle_type']
                             )
                         ],
-                        name="Trinity Points"
+                        name="Market State Space"
                     ),
                     row=2, col=1
                 )
-                
-                # Update 3D scene
-                fig.update_scenes(
-                    xaxis_title="Market State",
-                    yaxis_title="Eigenwave 1",
-                    zaxis_title="Cycle Type",
-                    xaxis=dict(tickmode='array', tickvals=list(range(6)), ticktext=MARKET_STATES),
-                    row=2, col=1
-                )
-        
-        # 3. State-Wave-Cycle Matrix (heatmap)
-        # Create the matrix data
-        matrix_data = np.zeros((6, 2, 3))  # states x wave_direction x cycles
-        
-        # Populate with counts or returns
-        if self.trinity_metrics:
-            for state in range(6):
-                for wave in range(2):
-                    for cycle in range(3):
-                        key = f'trinity_{state}_{wave}_{cycle}_count'
-                        if key in self.trinity_metrics:
-                            matrix_data[state, wave, cycle] = self.trinity_metrics[key]
-        
-        # Reshape for heatmap display (flatten last dimension)
-        heatmap_data = matrix_data.reshape(6, -1)
-        
-        # Create heatmap
-        fig.add_trace(
-            go.Heatmap(
-                z=heatmap_data,
-                x=[f"Wave{w}+Cycle{c}" for w in range(2) for c in range(3)],
-                y=MARKET_STATES,
-                colorscale='Viridis',
-                colorbar=dict(title="Count", x=0.95),
-                hovertemplate="State: %{y}<br>Combination: %{x}<br>Count: %{z}<extra></extra>"
-            ),
-            row=2, col=2
-        )
-        
-        # 4. Trinity Alignment Score over time
-        if 'trinity_alignment' in data.columns:
-            # Add alignment score
-            fig.add_trace(
-                go.Scatter(
-                    x=data[date_col],
-                    y=data['trinity_alignment'],
-                    mode='lines',
-                    name='Trinity Alignment',
-                    line=dict(color='rgba(255, 215, 0, 1)', width=2),
-                    fill='tozeroy',
-                    fillcolor='rgba(255, 215, 0, 0.2)'
-                ),
-                row=3, col=1
-            )
-            
-            # Add moving average
-            window = 14
-            if len(data) > window:
-                ma = data['trinity_alignment'].rolling(window=window).mean()
-                
-                fig.add_trace(
-                    go.Scatter(
-                        x=data[date_col],
-                        y=ma,
-                        mode='lines',
-                        name=f'Alignment MA({window})',
-                        line=dict(color='rgba(255, 140, 0, 1)', width=2)
-                    ),
-                    row=3, col=1
-                )
+        else:
+            missing = []
+            if not has_state: missing.append("state")
+            if not has_eigenwave: missing.append("eigenwave")
+            if not has_cycle: missing.append("cycle")
+            print(f"Warning: Cannot create 3D visualization - missing {', '.join(missing)} data")
         
         # Update layout
         fig.update_layout(
-            title="THE SACRED GAMON TRINITY MATRIX",
+            title="GAMON Trinity Matrix",
             template="plotly_dark",
-            height=1500,
+            height=800,
             width=1200,
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            ),
-            margin=dict(l=50, r=50, t=100, b=50)
+            scene=dict(
+                xaxis_title="Market State",
+                yaxis_title="Eigenwave Projection",
+                zaxis_title="Cycle Type",
+                xaxis=dict(nticks=6, range=[0, 5]),
+                zaxis=dict(nticks=3, range=[0, 2])
+            )
         )
         
-        # Update yaxis titles
-        fig.update_yaxes(title_text="BTC Price", row=1, col=1)
-        fig.update_yaxes(title_text="Alignment Score", row=3, col=1)
-        
-        # Update xaxis titles
-        fig.update_xaxes(title_text="Date", row=1, col=1)
-        fig.update_xaxes(title_text="Date", row=3, col=1)
-        
-        # Save figure
+        # Save figure if output file is provided
         if output_file:
             os.makedirs(os.path.dirname(output_file), exist_ok=True)
             fig.write_html(output_file)
-            print(f"✅ GAMON Trinity Matrix visualization saved to {output_file}")
-        
+            
         return fig
 
 

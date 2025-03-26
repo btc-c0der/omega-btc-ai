@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis Monitor Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f7fa;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        input,
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #keysList {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow: auto;
+            max-height: 600px;
+        }
+
+        .key-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .key-item:last-child {
+            border-bottom: none;
+        }
+
+        .key-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .key-details {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .key-sample {
+            margin-top: 5px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            color: #2c3e50;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Redis Monitor Test</h1>
+
+    <div id="status">Connecting to Redis Monitor...</div>
+
+    <div class="controls">
+        <div>
+            <button id="refreshBtn">Refresh Keys</button>
+            <select id="limitSelect">
+                <option value="10">10 keys</option>
+                <option value="20" selected>20 keys</option>
+                <option value="50">50 keys</option>
+                <option value="100">100 keys</option>
+            </select>
+            <input type="text" id="patternInput" placeholder="Key pattern (e.g. user:*)">
+        </div>
+        <div>
+            <button id="testDirectBtn">Test Direct Connection</button>
+            <button id="testProxyBtn">Test Proxy Connection</button>
+        </div>
+    </div>
+
+    <div id="keysList">
+        <p class="loading">Waiting for data...</p>
+    </div>
+
+    <script>
+        // Configuration
+        const DIRECT_ENDPOINT = 'http://localhost:5002/api/redis-keys';
+        const PROXY_ENDPOINT = '/api/redis-keys'; // Using relative URL for proxy
+
+        // Elements
+        const statusEl = document.getElementById('status');
+        const keysListEl = document.getElementById('keysList');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const limitSelect = document.getElementById('limitSelect');
+        const patternInput = document.getElementById('patternInput');
+        const testDirectBtn = document.getElementById('testDirectBtn');
+        const testProxyBtn = document.getElementById('testProxyBtn');
+
+        // State
+        let currentEndpoint = DIRECT_ENDPOINT;
+        let isLoading = false;
+
+        // Set loading state
+        function setLoading(loading) {
+            isLoading = loading;
+            refreshBtn.disabled = loading;
+            testDirectBtn.disabled = loading;
+            testProxyBtn.disabled = loading;
+
+            if (loading) {
+                keysListEl.innerHTML = '<p class="loading">Loading data...</p>';
+            }
+        }
+
+        // Update status
+        function updateStatus(message, isError = false) {
+            statusEl.textContent = message;
+            statusEl.className = isError ? 'error' : '';
+        }
+
+        // Format key data
+        function formatKeyData(key) {
+            let sampleHtml = '';
+
+            if (key.value) {
+                sampleHtml = `<div class="key-sample">Value: ${key.value}</div>`;
+            } else if (key.sample) {
+                sampleHtml = `<div class="key-sample">${JSON.stringify(key.sample, null, 2)}</div>`;
+            }
+
+            return `
+                <div class="key-item">
+                    <div class="key-name">${key.key}</div>
+                    <div class="key-details">Type: ${key.type} | Size: ${key.size || 'N/A'}</div>
+                    ${sampleHtml}
+                </div>
+            `;
+        }
+
+        // Fetch Redis keys
+        async function fetchRedisKeys() {
+            try {
+                setLoading(true);
+
+                // Build URL with parameters
+                const limit = limitSelect.value;
+                const pattern = patternInput.value.trim();
+                let url = new URL(currentEndpoint, window.location.origin);
+
+                if (limit) {
+                    url.searchParams.append('limit', limit);
+                }
+
+                if (pattern) {
+                    url.searchParams.append('pattern', pattern);
+                }
+
+                // Logging the request
+                console.log(`Fetching from: ${url.toString()}`);
+                updateStatus(`Connecting to ${url.toString()}...`);
+
+                // Make the request
+                const response = await fetch(url.toString());
+                const data = await response.json();
+
+                // Display the data
+                if (data && data.keys) {
+                    updateStatus(`Connected successfully! Retrieved ${data.keys.length} keys.`);
+
+                    if (data.keys.length === 0) {
+                        keysListEl.innerHTML = '<p>No keys found matching the pattern.</p>';
+                    } else {
+                        const keysHtml = data.keys.map(formatKeyData).join('');
+                        keysListEl.innerHTML = keysHtml;
+                    }
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (error) {
+                console.error('Error fetching Redis keys:', error);
+                updateStatus(`Error: ${error.message}`, true);
+                keysListEl.innerHTML = `<div class="error">Failed to load Redis keys: ${error.message}</div>`;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Event listeners
+        refreshBtn.addEventListener('click', fetchRedisKeys);
+
+        limitSelect.addEventListener('change', () => {
+            if (!isLoading) fetchRedisKeys();
+        });
+
+        patternInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter' && !isLoading) {
+                fetchRedisKeys();
+            }
+        });
+
+        testDirectBtn.addEventListener('click', () => {
+            currentEndpoint = DIRECT_ENDPOINT;
+            updateStatus(`Using direct connection to ${DIRECT_ENDPOINT}`);
+            fetchRedisKeys();
+        });
+
+        testProxyBtn.addEventListener('click', () => {
+            currentEndpoint = PROXY_ENDPOINT;
+            updateStatus(`Using proxy connection to ${PROXY_ENDPOINT}`);
+            fetchRedisKeys();
+        });
+
+        // Initial fetch
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus(`Using direct connection to ${DIRECT_ENDPOINT}`);
+            fetchRedisKeys();
+        });
+    </script>
+</body>
+
+</html>

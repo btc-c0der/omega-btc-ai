@@ -1,10 +1,12 @@
 import redis
 import json
 import time
-import datetime
-from omega_ai.db_manager.database import insert_mm_trap
-from influxdb_client import InfluxDBClient, Point
+from datetime import datetime, timedelta, UTC
+from influxdb_client.client.influxdb_client import InfluxDBClient
+from influxdb_client.client.write.point import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+from omega_ai.db_manager.database import insert_possible_mm_trap
+from omega_ai.config import INFLUXDB_URL, INFLUXDB_TOKEN, INFLUXDB_ORG, INFLUXDB_BUCKET
 
 # Redis connection
 redis_conn = redis.Redis(host="localhost", port=6379, db=0)
@@ -42,7 +44,7 @@ class GrafanaReporter:
         self.hf_trap_count = 0
         self.liquidity_grab_count = 0
         self.schumann_correlation_count = 0
-        self.last_update = datetime.datetime.now(datetime.UTC)
+        self.last_update = datetime.now(UTC)
     
     def store_trap_event(self, trap_type, confidence, price_change, btc_price):
         """Store trap events in InfluxDB for Grafana visualization."""
@@ -104,7 +106,7 @@ class GrafanaReporter:
                 .time(timestamp)
             
             # Track significant Schumann events
-            if float(schumann_value) > 10.0:
+            if float(schumann_value) > 10.0 and query_api is not None:
                 # Query recent traps in last 5 minutes
                 query = f'''
                     from(bucket: "{BUCKET}")
@@ -138,7 +140,7 @@ class GrafanaReporter:
         if not write_api or not btc_price:
             return
             
-        current_time = datetime.datetime.now(datetime.UTC)
+        current_time = datetime.now(UTC)
         if (current_time - self.last_update).total_seconds() < 15:
             return
             
@@ -166,7 +168,14 @@ grafana_reporter = GrafanaReporter()
 def report_trap_for_grafana(trap_type, confidence, price_change, btc_price):
     """Report a trap event for Grafana visualization."""
     # Store in PostgreSQL database
-    insert_mm_trap(btc_price, price_change, trap_type, confidence)
+    trap_data = {
+        "type": trap_type,
+        "confidence": confidence,
+        "price_change": price_change,
+        "price": btc_price,
+        "timestamp": datetime.now(UTC).isoformat()
+    }
+    insert_possible_mm_trap(trap_data)
     
     # Store in Redis for Grafana
     grafana_reporter.store_trap_event(trap_type, confidence, price_change, btc_price)

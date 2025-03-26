@@ -28,7 +28,7 @@ from datetime import datetime, UTC
 from typing import Optional, Dict, Any, Union
 from influxdb_client.client.influxdb_client import InfluxDBClient
 from omega_ai.algos.omega_algorithms import OmegaAlgo
-from omega_ai.db_manager.database import insert_mm_trap, insert_subtle_movement
+from omega_ai.db_manager.database import insert_possible_mm_trap, insert_subtle_movement
 from omega_ai.config import (
     REDIS_HOST, REDIS_PORT, INFLUXDB_URL, INFLUXDB_TOKEN, 
     INFLUXDB_ORG, INFLUXDB_BUCKET, MONITORING_INTERVAL, 

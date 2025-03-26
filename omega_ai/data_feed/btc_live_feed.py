@@ -1,8 +1,5 @@
 import json
-import websocket
 import time
-import websockets
-import websockets.exceptions
 import logging
 import asyncio
 import redis
@@ -12,13 +9,97 @@ from typing import List, Dict, Optional, Union, Any
 import threading
 import random
 import os
+import sys
+
+# Function to check and install required packages
+def check_required_packages():
+    """Check and install required packages for BTC Live Feed."""
+    required_packages = {
+        "websocket-client": "websocket",
+        "websockets": "websockets",
+        "redis": "redis",
+        "rel": "rel"
+    }
+    
+    missing_packages = []
+    
+    for package_name, import_name in required_packages.items():
+        try:
+            __import__(import_name)
+        except ImportError:
+            missing_packages.append(package_name)
+    
+    if missing_packages:
+        print(f"Installing missing packages: {', '.join(missing_packages)}")
+        import subprocess
+        for package in missing_packages:
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+                print(f"Successfully installed {package}")
+            except Exception as e:
+                print(f"Failed to install {package}: {e}")
+                return False
+    
+    return True
+
+# Check and install required packages
+check_required_packages()
+
+# Import websocket-client and related modules
+try:
+    import websocket
+    from websocket import WebSocketApp  # Explicit import for WebSocketApp
+    print("Successfully imported websocket-client")
+except ImportError as e:
+    print(f"Error importing websocket-client: {e}")
+    print("Attempting to install websocket-client...")
+    import subprocess
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "websocket-client"])
+        import websocket
+        from websocket import WebSocketApp
+        print("Successfully installed and imported websocket-client")
+    except Exception as e:
+        print(f"Failed to install websocket-client: {e}")
+        sys.exit(1)
+
+# Import rel for WebSocket dispatching
+try:
+    import rel
+    print("Successfully imported rel")
+except ImportError:
+    print("Attempting to install rel...")
+    import subprocess
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "rel"])
+        import rel
+        print("Successfully installed and imported rel")
+    except Exception as e:
+        print(f"Failed to install rel: {e}")
+        sys.exit(1)
+
+# Import websockets for async WebSocket support
+try:
+    import websockets
+    import websockets.exceptions
+    print("Successfully imported websockets")
+except ImportError:
+    print("Attempting to install websockets...")
+    import subprocess
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "websockets"])
+        import websockets
+        import websockets.exceptions
+        print("Successfully installed and imported websockets")
+    except Exception as e:
+        print(f"Failed to install websockets: {e}")
+        sys.exit(1)
 
 # Set Redis host environment variable
 redis_host = os.environ.get('REDIS_HOST', 'localhost')
 os.environ['REDIS_HOST'] = redis_host
 
 from omega_ai.utils.redis_manager import RedisManager
-import rel
 
 # Configure logging with Rasta colors
 logging.basicConfig(
@@ -94,29 +175,32 @@ def check_redis_health():
         redis_manager.ping()
         log_rasta(f"Redis connection: OK (Host: {redis_host}, Port: {redis_port})", GREEN_RASTA, "success")
 
-        # Check if essential keys exist
+        # Check if essential keys exist using safe methods
         essential_keys = ["last_btc_price", "prev_btc_price", "btc_movement_history", "fibonacci_levels"]
         for key in essential_keys:
-            if not redis_manager.get_cached(key) and key != "btc_movement_history" and key != "fibonacci_levels":
-                log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
-            elif key == "btc_movement_history":
+            if key == "btc_movement_history":
                 # For list type, we need to check differently
-                history = redis_manager.lrange(key, 0, 0)
+                history = redis_manager.safe_lrange(key, 0, 0)
                 if not history:
                     log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
                 else:
                     log_rasta(f"Essential key present: {key}", GREEN_RASTA, "success")
             else:
-                log_rasta(f"Essential key present: {key}", GREEN_RASTA, "success")
+                # Use safe_get for all other keys
+                value = redis_manager.safe_get(key)
+                if not value:
+                    log_rasta(f"Essential key missing: {key}", YELLOW_RASTA, "warning")
+                else:
+                    log_rasta(f"Essential key present: {key}", GREEN_RASTA, "success")
 
         # Check data integrity
-        btc_movement_history = redis_manager.lrange("btc_movement_history", 0, -1)
+        btc_movement_history = redis_manager.safe_lrange("btc_movement_history", 0, -1)
         log_rasta(f"BTC movement history length: {len(btc_movement_history) if btc_movement_history else 0}", BLUE_RASTA)
         
         # Check data format
         if btc_movement_history:
             sample = btc_movement_history[0]
-            if "," in sample:
+            if isinstance(sample, str) and "," in sample:
                 try:
                     price_str, volume_str = sample.split(",")
                     price = float(price_str)
@@ -199,6 +283,22 @@ def on_error(ws, error):
     """Handle WebSocket errors with divine grace."""
     log_rasta(f"WebSocket Error: {error}", RED_RASTA, "error")
     time.sleep(5)  # Add delay before reconnect
+
+# Try to import MM Trap Detector components
+mm_trap_detector_available = False
+hf_detector = None
+
+try:
+    from omega_ai.mm_trap_detector.high_frequency_detector import hf_detector
+    mm_trap_detector_available = True
+    log_method = print  # Will be replaced with log_rasta after it's defined
+    log_method("✅ MM Trap Detector module loaded successfully")
+except ImportError as e:
+    log_method = print  # Will be replaced with log_rasta after it's defined
+    log_method(f"⚠️ MM Trap Detector module not available: {str(e)}")
+except Exception as e:
+    log_method = print  # Will be replaced with log_rasta after it's defined
+    log_method(f"⚠️ Error loading MM Trap Detector module: {str(e)}")
 
 def on_message(ws, message):
     """Process incoming Binance BTC price data."""
@@ -288,22 +388,23 @@ def on_message(ws, message):
                 redis_manager.set_cached("fibonacci_alignment", "0")
             
             # Notify the high frequency detector about price update
-            try:
-                # Import here to avoid circular import issues
-                from omega_ai.mm_trap_detector.high_frequency_detector import hf_detector
-                
-                # Update the detector with the new price
-                timestamp = datetime.now(UTC)
-                hf_detector.update_price_data(price, timestamp)
-                
-                # Check for high frequency mode activation
-                hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
-                if hf_active:
-                    log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
-            except ImportError:
-                log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
-            except Exception as e:
-                log_rasta(f"Error notifying MM Trap Detector: {e}", YELLOW_RASTA, "warning")
+            if mm_trap_detector_available and hf_detector:
+                try:
+                    # Update the detector with the new price
+                    timestamp = datetime.now(UTC)
+                    hf_detector.update_price_data(price, timestamp)
+                    
+                    # Check for high frequency mode activation
+                    hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
+                    if hf_active:
+                        log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
+                except Exception as e:
+                    log_rasta(f"Error using MM Trap Detector: {e}", YELLOW_RASTA, "warning")
+            else:
+                # Only display the warning once by checking if the flag has changed
+                if redis_manager.get_cached("mm_trap_detector_warning_shown") != "1":
+                    log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
+                    redis_manager.set_cached("mm_trap_detector_warning_shown", "1")
         else:
             log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
 
@@ -329,16 +430,31 @@ def start_btc_websocket():
                 time.sleep(60)
                 continue
 
-            ws = websocket.WebSocketApp(
-                BINANCE_WS_URL,
-                on_message=on_message,
-                on_error=on_error,
-                on_close=on_close,
-                on_open=on_open
-            )
-            ws.run_forever()
+            # Create the WebSocket connection
+            try:
+                log_rasta("Creating WebSocketApp connection to Binance...", GREEN_RASTA)
+                
+                # Create WebSocketApp with explicit handlers
+                ws = WebSocketApp(
+                    BINANCE_WS_URL,
+                    on_message=on_message,
+                    on_error=on_error,
+                    on_close=on_close,
+                    on_open=on_open
+                )
+                
+                log_rasta("Running WebSocketApp with dispatcher...", GREEN_RASTA)
+                
+                # Set up rel dispatching
+                ws.run_forever(dispatcher=rel)
+                rel.signal(2, rel.abort)  # Handle Keyboard Interrupt
+                rel.dispatch()
+                
+            except Exception as e:
+                log_rasta(f"WebSocketApp connection failed: {str(e)}", RED_RASTA, "error")
+                time.sleep(10)
         except Exception as e:
-            log_rasta(f"Error in WebSocket connection: {e}", RED_RASTA, "error")
+            log_rasta(f"Error in WebSocket connection: {str(e)}", RED_RASTA, "error")
             time.sleep(5)
 
 class PriceSource(str, Enum):
@@ -382,19 +498,22 @@ class BtcPriceFeed:
     def connect_websocket(self):
         """Initialize WebSocket connection to Binance."""
         if not self._ws:
-            websocket.enableTrace(True)
-            self._ws = websocket.WebSocketApp(
-                BINANCE_WS_URL,
-                on_message=self._on_message,
-                on_error=self._on_error,
-                on_close=self._on_close,
-                on_open=self._on_open
-            )
-            # Start WebSocket connection in a separate thread
-            self._ws_thread = threading.Thread(target=self._run_websocket)
-            self._ws_thread.daemon = True
-            self._ws_thread.start()
-    
+            try:
+                websocket.enableTrace(True)
+                self._ws = WebSocketApp(
+                    BINANCE_WS_URL,
+                    on_message=self._on_message,
+                    on_error=self._on_error,
+                    on_close=self._on_close,
+                    on_open=self._on_open
+                )
+                # Start WebSocket connection in a separate thread
+                self._ws_thread = threading.Thread(target=self._run_websocket)
+                self._ws_thread.daemon = True
+                self._ws_thread.start()
+            except Exception as e:
+                log_rasta(f"Failed to create WebSocket connection: {str(e)}", RED_RASTA, "error")
+
     def _run_websocket(self):
         """Run WebSocket connection with automatic reconnection."""
         while True:
@@ -408,16 +527,41 @@ class BtcPriceFeed:
                 time.sleep(5)  # Wait before reconnecting
     
     def _on_message(self, ws: websocket.WebSocket, message: Any) -> None:
-        """Process incoming Binance BTC price data."""
+        """Process incoming WebSocket BTC price data."""
         try:
             data = json.loads(message)
             price = float(data["p"])
             volume = float(data["q"])
-
+            
             log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
-            self.last_price = price
-            self.last_volume = volume
-            self.update_redis(price, volume)
+            
+            # Check if previous price exists and if it's different from current price
+            prev_price = self.redis_manager.get_cached("prev_btc_price")
+            prev_price = float(prev_price) if prev_price else None
+            
+            if prev_price is None or price != prev_price:
+                self.update_redis(price, volume)
+                
+                # Notify the high frequency detector about price update
+                if mm_trap_detector_available and hf_detector:
+                    try:
+                        # Update the detector with the new price
+                        timestamp = datetime.now(UTC)
+                        hf_detector.update_price_data(price, timestamp)
+                        
+                        # Check for high frequency mode activation
+                        hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
+                        if hf_active:
+                            log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
+                    except Exception as e:
+                        log_rasta(f"Error using MM Trap Detector: {e}", YELLOW_RASTA, "warning")
+                else:
+                    # Only display the warning once by checking if the flag has changed
+                    if self.redis_manager.get_cached("mm_trap_detector_warning_shown") != "1":
+                        log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
+                        self.redis_manager.set_cached("mm_trap_detector_warning_shown", "1")
+            else:
+                log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
         except Exception as e:
             log_rasta(f"Error processing message: {e}", RED_RASTA, "error")
 
@@ -499,22 +643,23 @@ class BtcPriceFeed:
                 log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
                 
                 # Notify the high frequency detector about price update
-                try:
-                    # Import here to avoid circular import issues
-                    from omega_ai.mm_trap_detector.high_frequency_detector import hf_detector
-                    
-                    # Update the detector with the new price
-                    timestamp = datetime.now(UTC)
-                    hf_detector.update_price_data(price, timestamp)
-                    
-                    # Check for high frequency mode activation
-                    hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
-                    if hf_active:
-                        log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
-                except ImportError:
-                    log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
-                except Exception as e:
-                    log_rasta(f"Error notifying MM Trap Detector: {e}", YELLOW_RASTA, "warning")
+                if mm_trap_detector_available and hf_detector:
+                    try:
+                        # Update the detector with the new price
+                        timestamp = datetime.now(UTC)
+                        hf_detector.update_price_data(price, timestamp)
+                        
+                        # Check for high frequency mode activation
+                        hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
+                        if hf_active:
+                            log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
+                    except Exception as e:
+                        log_rasta(f"Error using MM Trap Detector: {e}", YELLOW_RASTA, "warning")
+                else:
+                    # Only display the warning once by checking if the flag has changed
+                    if self.redis_manager.get_cached("mm_trap_detector_warning_shown") != "1":
+                        log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
+                        self.redis_manager.set_cached("mm_trap_detector_warning_shown", "1")
             else:
                 log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
 
@@ -693,6 +838,25 @@ class BtcPriceFeed:
 
 if __name__ == "__main__":
     display_rasta_banner()
+    
+    # Display versions for debugging
+    print(f"Python version: {sys.version}")
+    
+    try:
+        print(f"websocket-client version: {websocket.__version__}")
+    except:
+        print("Could not detect websocket-client version")
+        
+    try:
+        print(f"rel version: {rel.__version__}")
+    except:
+        print("Could not detect rel version")
+    
+    # Verify all required packages are installed
+    if not check_required_packages():
+        log_rasta("Failed to install required packages. Exiting...", RED_RASTA, "error")
+        sys.exit(1)
+        
     log_rasta("Initializing Rasta Price Feed with Fibonacci Alignment...", GREEN_RASTA)
     log_rasta(f"Redis Host: {os.getenv('REDIS_HOST', 'localhost')}", BLUE_RASTA)
     log_rasta("Connecting to Binance WebSocket...", BLUE_RASTA)
@@ -703,12 +867,28 @@ if __name__ == "__main__":
     redis_manager = RedisManager(host=redis_host, port=redis_port)
     
     # Check if we need to initialize Fibonacci levels
-    if not redis_manager.get_cached("fibonacci_levels"):
-        # Default levels based on current BTC price range
-        default_high = 85000
-        default_low = 83000
-        calculate_fibonacci_levels(default_high, default_low)
-        log_rasta(f"Initialized default Fibonacci levels: High=${default_high}, Low=${default_low}", CYAN_RASTA)
+    try:
+        fib_levels = redis_manager.safe_get("fibonacci_levels")
+        if not fib_levels:
+            # Default levels based on current BTC price range
+            default_high = 85000
+            default_low = 83000
+            calculate_fibonacci_levels(default_high, default_low)
+            log_rasta(f"Initialized default Fibonacci levels: High=${default_high}, Low=${default_low}", CYAN_RASTA)
+    except Exception as e:
+        log_rasta(f"Error checking fibonacci_levels: {str(e)}, reinitializing...", YELLOW_RASTA, "warning")
+        # Delete and recreate the key
+        try:
+            redis_manager.delete("fibonacci_levels")
+            # Default levels based on current BTC price range
+            default_high = 85000
+            default_low = 83000
+            calculate_fibonacci_levels(default_high, default_low)
+            log_rasta(f"Reinitialized default Fibonacci levels: High=${default_high}, Low=${default_low}", CYAN_RASTA)
+        except Exception as e:
+            log_rasta(f"Failed to reinitialize fibonacci_levels: {e}", RED_RASTA, "error")
         
     log_rasta("🔱 Fibonacci Alignment Active - Sacred Architecture (1)", MAGENTA_RASTA)
+    
+    # Start the WebSocket connection
     start_btc_websocket()

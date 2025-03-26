@@ -138,7 +138,7 @@ class TestGAMONTrinityPredictor(unittest.TestCase):
         with patch('plotly.graph_objects.Figure.show') as mock_show:
             # This should not raise a TypeError
             try:
-                GAMONTrinityPredictor.plot_predictions(sample_predictions)
+                GAMONTrinityPredictor.plot_predictions(sample_predictions, show_plot=True)
             except Exception as e:
                 self.fail(f"plot_predictions raised {type(e).__name__} unexpectedly!")
             
@@ -180,7 +180,7 @@ class TestGAMONTrinityPredictor(unittest.TestCase):
         with patch('plotly.graph_objects.Figure.show') as mock_show:
             # This should not raise an AttributeError
             try:
-                self.predictor.plot_predictions(predictions)
+                self.predictor.plot_predictions(predictions, show_plot=True)
             except Exception as e:
                 self.fail(f"plot_predictions raised {type(e).__name__} unexpectedly!")
             
