@@ -362,3 +362,31 @@ To channel cosmic test knowledge, run with: `./run_market_trends_tests.py --book
   - Updated setup.py with GPU license information
   - Added LICENSE file to root directory
   - See: [BOOK/divine_chronicles/GPU_LICENSE.md](divine_chronicles/GPU_LICENSE.md)
+
+## [2024-03-26] - WebSocket Message Encoding Enhancement
+
+### Added
+
+- New chronicle: `divine_chronicles/WEBSOCKET_BYTES_ENCODING.md`
+- Documentation of WebSocket message type handling and encoding
+- Implementation patterns for proper bytes/string message processing
+
+### Technical
+
+- Identified string vs bytes message handling issue in WebSocket communication
+- Added message type validation and conversion utilities
+- Enhanced error handling for WebSocket message processing
+
+## [2024-03-26] - WebSocket-Selenium Interference Discovery
+
+### Added
+
+- New chronicle: `divine_chronicles/WEBSOCKET_SELENIUM_INTERFERENCE.md`
+- Documentation of unexpected interaction between Selenium and websocket-client package
+- Resolution path for WebSocket compatibility issues
+
+### Technical
+
+- Identified version-specific compatibility with websocket-client
+- Documented solution using websocket-client==1.6.4
+- Added implementation patterns for handling WebSocket-Selenium coexistence
