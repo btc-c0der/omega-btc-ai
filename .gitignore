@@ -181,3 +181,8 @@ backup/
 
 # Large deployment packages
 temp_deployment_package.zip
+
+# Visualization directories
+omega_viz_*/
+tmp_data/omega_viz_*/
+.DS_Store
