@@ -65,6 +65,24 @@ services:
       - REDIS_PORT=6379
     restart: unless-stopped
 
+  websocket:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_USERNAME=${REDIS_USERNAME}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USE_TLS=${REDIS_USE_TLS}
+      - REDIS_CERT=${REDIS_CERT}
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8765/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   redis_data:
     driver: local
