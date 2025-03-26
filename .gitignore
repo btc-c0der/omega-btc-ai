@@ -178,3 +178,6 @@ node_modules
 
 # Backup folder
 backup/
+
+# Large deployment packages
+temp_deployment_package.zip
