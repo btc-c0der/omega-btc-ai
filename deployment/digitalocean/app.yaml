@@ -24,9 +24,9 @@ services:
   - key: REDIS_CERT
     value: "SSL_redis-btc-omega-redis.pem"
   - key: REDIS_SSL_CERT_REQS
-    value: "required"
+    value: "none"
   - key: REDIS_SSL_CERT_PATH
-    value: "/app/deployment/digitalocean/certificates/SSL_redis-btc-omega-redis.pem"
+    value: "./SSL_redis-btc-omega-redis.pem"
   - key: REDIS_SOCKET_TIMEOUT
     value: "5"
   - key: REDIS_SOCKET_CONNECT_TIMEOUT
@@ -39,9 +39,9 @@ services:
   instance_size_slug: basic-xxs
   health_check:
     http_path: /health
-    initial_delay_seconds: 10
+    initial_delay_seconds: 30
     period_seconds: 60
-    timeout_seconds: 5
+    timeout_seconds: 10
     success_threshold: 1
     failure_threshold: 3
   routes:

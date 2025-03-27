@@ -50,42 +50,72 @@ class RedisManager:
             import ssl
             from cryptography.x509.base import load_pem_x509_certificate
             
-            ssl_cert_reqs = os.getenv("REDIS_SSL_CERT_REQS", "required")
-            if ssl_cert_reqs == "required":
+            # Get SSL certificate requirement level
+            ssl_cert_reqs_str = os.getenv("REDIS_SSL_CERT_REQS", "none").lower()
+            if ssl_cert_reqs_str == "required":
                 ssl_cert_reqs = ssl.CERT_REQUIRED
-            elif ssl_cert_reqs == "optional":
+            elif ssl_cert_reqs_str == "optional":
                 ssl_cert_reqs = ssl.CERT_OPTIONAL
             else:
+                # Default to CERT_NONE if not specified or invalid
                 ssl_cert_reqs = ssl.CERT_NONE
+                logger.info(f"{LOG_PREFIX} - Using SSL CERT_NONE mode for Redis")
                 
             # Get SSL certificate path
             ssl_cert_path = os.getenv("REDIS_SSL_CERT_PATH", None)
             if ssl_cert_path and os.path.exists(ssl_cert_path):
                 ssl_ca_certs = ssl_cert_path
+                logger.info(f"{LOG_PREFIX} - Using SSL certificate from: {ssl_cert_path}")
+            else:
+                logger.warning(f"{LOG_PREFIX} - SSL certificate path not found: {ssl_cert_path}")
         
         # Connection timeouts
         socket_timeout = int(os.getenv("REDIS_SOCKET_TIMEOUT", "5"))
         socket_connect_timeout = int(os.getenv("REDIS_SOCKET_CONNECT_TIMEOUT", "5"))
         
-        # Initialize Redis client
-        self.redis = redis.Redis(
-            host=redis_host,
-            port=redis_port,
-            password=redis_password,
-            ssl=redis_ssl,
-            ssl_cert_reqs=ssl_cert_reqs,
-            ssl_ca_certs=ssl_ca_certs,
-            socket_timeout=socket_timeout,
-            socket_connect_timeout=socket_connect_timeout,
-            decode_responses=True
-        )
-        
-        logger.info(f"{LOG_PREFIX} - Connected to Redis at {redis_host}:{redis_port}")
+        try:
+            # Initialize Redis client
+            self.redis = redis.Redis(
+                host=redis_host,
+                port=redis_port,
+                password=redis_password,
+                ssl=redis_ssl,
+                ssl_cert_reqs=ssl_cert_reqs,
+                ssl_ca_certs=ssl_ca_certs,
+                socket_timeout=socket_timeout,
+                socket_connect_timeout=socket_connect_timeout,
+                decode_responses=True
+            )
+            
+            # Test connection
+            if self.redis.ping():
+                logger.info(f"{LOG_PREFIX} - Connected to Redis at {redis_host}:{redis_port}")
+            else:
+                logger.warning(f"{LOG_PREFIX} - Connected to Redis but ping failed")
+        except Exception as e:
+            logger.error(f"{LOG_PREFIX} - Redis connection error: {str(e)}")
+            # Create a fallback Redis client without SSL if SSL connection fails
+            if redis_ssl:
+                logger.info(f"{LOG_PREFIX} - Attempting fallback to non-SSL Redis connection")
+                try:
+                    self.redis = redis.Redis(
+                        host=redis_host,
+                        port=redis_port,
+                        password=redis_password,
+                        ssl=False,
+                        socket_timeout=socket_timeout,
+                        socket_connect_timeout=socket_connect_timeout,
+                        decode_responses=True
+                    )
+                    logger.info(f"{LOG_PREFIX} - Fallback Redis connection established")
+                except Exception as e2:
+                    logger.error(f"{LOG_PREFIX} - Fallback Redis connection also failed: {str(e2)}")
     
     async def ping(self) -> bool:
         """Check Redis connection with ping."""
         try:
-            return self.redis.ping()
+            result = self.redis.ping()
+            return bool(result)  # Convert to bool explicitly
         except Exception as e:
             logger.error(f"{LOG_PREFIX} - Redis ping failed: {str(e)}")
             return False
