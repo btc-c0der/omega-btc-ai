@@ -11,6 +11,7 @@ This document provides comprehensive instructions for deploying the OMEGA BTC AI
 - [Monitoring & Management](#monitoring--management)
 - [Troubleshooting](#troubleshooting)
 - [Maintenance](#maintenance)
+- [BTC Live Feed v3 Deployment](#btc-live-feed-v3-deployment)
 
 ## Prerequisites
 
@@ -276,6 +277,43 @@ Optimize costs by:
 1. Using the appropriate instance size (`basic-xxs` is usually sufficient)
 2. Scaling to zero when not in use (for development environments)
 3. Monitoring resource usage with `./scripts/run_omega_do_monitor.sh stats`
+
+## BTC Live Feed v3 Deployment
+
+The BTC Live Feed v3 component provides enhanced reliability through automatic Redis failover capabilities, ensuring 99.99% uptime even during temporary outages of the primary Redis service.
+
+### Key Features of v3 Deployment
+
+- **Automatic Redis Failover**: Seamlessly switches between remote (Digital Ocean) and local Redis instances
+- **Health Check API**: Built-in monitoring endpoints for comprehensive system status
+- **CLI Monitoring Dashboard**: Visual terminal-based monitoring tool
+- **Detailed Documentation**: Comprehensive guides for deployment, configuration, and monitoring
+
+### Deployment Files
+
+All configuration files for deploying BTC Live Feed v3 are located in the `/deployment/digital_ocean/btc_live_feed_v3/` directory:
+
+- `app.yaml`: Digital Ocean App Platform configuration
+- `deploy.sh`: Deployment script with error handling
+- `README.md`: Deployment instructions
+- `redis_configuration.md`: Redis setup guide
+- `monitoring_setup.md`: Monitoring configuration guide
+
+### Deployment Process
+
+1. Navigate to the deployment directory:
+
+   ```bash
+   cd deployment/digital_ocean/btc_live_feed_v3
+   ```
+
+2. Execute the deployment script:
+
+   ```bash
+   ./deploy.sh
+   ```
+
+For detailed deployment instructions, refer to the [BTC Live Feed v3 Deployment Guide](../deployment/digital_ocean/btc_live_feed_v3/README.md).
 
 ---
 
