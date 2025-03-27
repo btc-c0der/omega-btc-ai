@@ -1,398 +1,379 @@
 """
-OMEGA BTC AI - BitGet CCXT Implementation
-=======================================
-
-This module implements CCXT-based trading functionality for BitGet,
-providing a robust and standardized interface for market operations.
-
-Author: OMEGA BTC AI Team
-Version: 1.0
+BitGet Exchange Integration using CCXT
 """
 
+import ccxt
 import ccxt.async_support as ccxt_async
-import ccxt.pro as ccxt_pro
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timezone
-import traceback
-from uuid import uuid4
+from typing import Dict, Any, Optional, List, Callable, TypeVar, cast, Literal, Union
+from datetime import datetime
+import asyncio
+import json
+import time
+from ccxt.base.types import Order, Ticker, Position, OrderSide, OrderType
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
 
-# Terminal colors for output
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-CYAN = "\033[96m"
-MAGENTA = "\033[95m"
-RESET = "\033[0m"
+T = TypeVar("T")
+
+def to_dict(obj: Any) -> Dict[str, Any]:
+    """Convert an object to a dictionary."""
+    if hasattr(obj, "__dict__"):
+        return dict(obj)
+    if isinstance(obj, dict):
+        return obj
+    return dict(obj)
 
 class BitGetCCXT:
-    """CCXT-based implementation for BitGet trading."""
-    
-    def __init__(self, 
-                 api_key: str = "", 
-                 secret_key: str = "", 
-                 passphrase: str = "",
-                 use_testnet: bool = True,
-                 sub_account: str = ""):
+    def __init__(self, config: Dict[str, Any]):
         """
-        Initialize the BitGet CCXT implementation.
+        Initialize BitGet exchange interface using CCXT
         
         Args:
-            api_key: BitGet API key
-            secret_key: BitGet secret key
-            passphrase: BitGet API passphrase
-            use_testnet: Whether to use testnet (default: True)
-            sub_account: Sub-account name to use for trading (optional)
+            config: Dictionary containing exchange configuration
         """
-        self.use_testnet = use_testnet
-        self.sub_account = sub_account
+        self.config = config
+        self.logger = logging.getLogger(__name__)
         
-        # Initialize CCXT instances
-        self.exchange = getattr(ccxt_async, 'bitget')({
-            'apiKey': api_key,
-            'secret': secret_key,
-            'password': passphrase,
+        # Initialize CCXT exchange
+        self.exchange = ccxt_async.bitget({
+            'apiKey': config.get('api_key'),
+            'secret': config.get('api_secret'),
+            'password': config.get('api_password'),
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'swap',
                 'adjustForTimeDifference': True,
                 'recvWindow': 60000,
-                'testnet': use_testnet
+                'testnet': config.get('use_testnet', True),
             }
         })
         
-        # Initialize Pro version for websocket support
-        self.exchange_pro = getattr(ccxt_pro, 'bitget')({
-            'apiKey': api_key,
-            'secret': secret_key,
-            'password': passphrase,
-            'enableRateLimit': True,
-            'options': {
-                'defaultType': 'swap',
-                'adjustForTimeDifference': True,
-                'recvWindow': 60000,
-                'testnet': use_testnet
-            }
-        })
+        if config.get('use_testnet', True):
+            self.exchange.set_sandbox_mode(True)
         
-        # Position side mapping
-        self.position_side_map = {
-            "buy": {"open": "long", "close": "short"},
-            "sell": {"open": "short", "close": "long"}
-        }
-        
-        logger.info(f"{GREEN}Initialized BitGet CCXT with {'TESTNET' if use_testnet else 'MAINNET'}{RESET}")
-        
-    def _format_symbol(self, symbol: str) -> str:
-        """Format symbol for BitGet futures trading."""
+        # WebSocket related attributes    
+        self.ws_callbacks = {}  # Store callbacks for different streams
+        self.ws_connected = False
+        self.ws_last_message_time = {}
+        self.ws_heartbeat_interval = 30  # seconds
+            
+        logger.info(
+            f"Initialized BitGet CCXT with {'TESTNET' if config.get('use_testnet', True) else 'MAINNET'}"
+        )
+            
+    def _format_symbol(self, symbol: Optional[str]) -> str:
+        """Format symbol for BitGet API"""
         if not symbol:
-            logger.warning(f"{YELLOW}Empty or None symbol provided, using default BTCUSDT{RESET}")
-            return "BTC/USDT:USDT"
+            raise ValueError("Symbol is required")
             
-        # Remove any existing formatting
-        base = symbol.replace('USDT', '').replace('/', '').replace(':', '')
-        # Format for BitGet futures: BTC/USDT:USDT
-        formatted = f"{base}/USDT:USDT"
-        logger.debug(f"{CYAN}Formatted symbol: {formatted} (from {symbol}){RESET}")
-        return formatted
+        # If the symbol is already formatted (contains a slash), return it as is
+        if '/' in symbol:
+            return symbol.upper()
+            
+        # Format BTCUSDT to BTC/USDT:USDT
+        if symbol.upper().endswith('USDT'):
+            base = symbol[:-4]  # Remove 'USDT' from the end
+            return f"{base}/USDT:USDT".upper()
+            
+        # Format basic symbol to include USDT pairs
+        return f"{symbol}/USDT:USDT".upper()
         
-    async def initialize(self):
-        """Initialize the exchange connection and load markets."""
-        try:
-            await self.exchange.load_markets()
-            logger.info(f"{GREEN}Markets loaded successfully{RESET}")
-            
-            # Get current position mode
-            try:
-                mode = await self.exchange.fetch_position_mode()
-                self.is_hedge_mode = mode.get('hedged', False)  # Default to one-way mode if can't determine
-                logger.info(f"{GREEN}Current position mode: {'hedge' if self.is_hedge_mode else 'one-way'}{RESET}")
-            except Exception as e:
-                logger.warning(f"{YELLOW}Could not fetch position mode: {str(e)}{RESET}")
-                logger.warning(f"{YELLOW}Will proceed with one-way mode{RESET}")
-                self.is_hedge_mode = False
-            
-        except Exception as e:
-            logger.error(f"{RED}Error initializing exchange: {str(e)}{RESET}")
-            raise
-            
-    async def set_hedge_mode(self):
-        """Set up hedge mode for the account."""
-        try:
-            result = await self.exchange.set_position_mode(True)
-            logger.info(f"{GREEN}Hedge mode set successfully: {result}{RESET}")
-        except Exception as e:
-            logger.error(f"{RED}Error setting hedge mode: {str(e)}{RESET}")
-            raise
-            
-    async def setup_trading_config(self, symbol: str, leverage: int = 2):
-        """Set up trading configuration for a symbol."""
-        try:
-            formatted_symbol = self._format_symbol(symbol)
-            
-            # First check if we have enough margin
-            balance = await self.get_balance()
-            usdt_balance = float(balance.get('USDT', {}).get('free', 0))
-            
-            if usdt_balance < 5:  # Minimum margin requirement for most futures
-                logger.warning(f"{YELLOW}Insufficient margin. Current balance: {usdt_balance} USDT{RESET}")
-                logger.warning(f"{YELLOW}Please ensure you have at least 5 USDT available{RESET}")
-                return
-            
-            # Set leverage for both long and short positions
-            try:
-                await self.exchange.set_leverage(leverage, symbol=formatted_symbol, params={"holdSide": "long"})
-                await self.exchange.set_leverage(leverage, symbol=formatted_symbol, params={"holdSide": "short"})
-                logger.info(f"{GREEN}Leverage set to {leverage}x for {formatted_symbol} (both sides){RESET}")
-            except Exception as e:
-                if "40893" in str(e):  # Insufficient margin error
-                    logger.warning(f"{YELLOW}Warning: Could not set leverage due to insufficient margin{RESET}")
-                    logger.warning(f"{YELLOW}This might be because you have open positions or insufficient balance{RESET}")
-                else:
-                    raise
-            
-            # Set cross margin mode
-            try:
-                await self.exchange.set_margin_mode("cross", symbol=formatted_symbol)
-                logger.info(f"{GREEN}Cross margin mode set for {formatted_symbol}{RESET}")
-            except Exception as e:
-                logger.warning(f"{YELLOW}Warning: Could not set margin mode: {str(e)}{RESET}")
-                logger.warning(f"{YELLOW}This might be because you're already in the desired margin mode{RESET}")
-            
-        except Exception as e:
-            logger.error(f"{RED}Error setting up trading config: {str(e)}{RESET}")
-            raise
-            
-    async def get_market_ticker(self, symbol: str) -> Dict[str, Any]:
-        """Get current market ticker for a symbol."""
-        try:
-            formatted_symbol = self._format_symbol(symbol)
-            ticker = await self.exchange.fetch_ticker(formatted_symbol)
-            return ticker
-        except Exception as e:
-            logger.error(f"{RED}Error fetching ticker for {symbol}: {str(e)}{RESET}")
-            raise
-            
-    async def get_positions(self, symbol: str = "BTC/USDT:USDT") -> List[Dict[str, Any]]:
+    async def create_market_order(
+        self,
+        symbol: str,
+        side: Literal["buy", "sell"],
+        amount: float,
+        params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Get current positions for a symbol.
+        Create a market order
         
         Args:
-            symbol: Trading symbol (e.g., "BTC/USDT:USDT")
-            
-        Returns:
-            List of current positions information
-        """
-        try:
-            # Ensure symbol is properly formatted
-            formatted_symbol = self._format_symbol(symbol)
-            logger.debug(f"{CYAN}Fetching positions for symbol: {formatted_symbol}{RESET}")
-            
-            # Fetch all positions first
-            all_positions = await self.exchange.fetch_positions()
-            
-            # Filter positions for the requested symbol
-            filtered_positions = []
-            for position in all_positions:
-                if position and position.get('symbol') == formatted_symbol:
-                    filtered_positions.append(position)
-            
-            if not filtered_positions:
-                logger.debug(f"{YELLOW}No positions found for symbol {formatted_symbol}{RESET}")
-            
-            return filtered_positions
-            
-        except Exception as e:
-            logger.error(f"{RED}Error fetching positions: {str(e)}{RESET}")
-            logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
-            logger.error(f"{RED}Exception args: {e.args}{RESET}")
-            return []
-            
-    async def get_balance(self) -> Dict[str, Any]:
-        """Get account balance."""
-        try:
-            balance = await self.exchange.fetch_balance()
-            return balance
-        except Exception as e:
-            logger.error(f"{RED}Error fetching balance: {str(e)}{RESET}")
-            raise
-            
-    async def place_order(self, 
-                         symbol: str,
-                         side: str,
-                         amount: float,
-                         price: Optional[float] = None,
-                         order_type: str = "market",
-                         reduce_only: bool = False) -> Dict[str, Any]:
-        """
-        Place an order on BitGet.
-        
-        Args:
-            symbol: Trading symbol (e.g., "BTC/USDT:USDT")
-            side: Order side ("buy" or "sell")
+            symbol: Trading symbol
+            side: Order side (buy/sell)
             amount: Order amount
-            price: Order price (optional, required for limit orders)
-            order_type: Order type ("market" or "limit")
-            reduce_only: Whether this is a reduce-only order
+            params: Additional parameters
             
         Returns:
-            Order response from the exchange
+            Dict containing order information
         """
+        formatted_symbol = self._format_symbol(symbol)
+        
         try:
-            # Format symbol
-            formatted_symbol = self._format_symbol(symbol)
+            order_params = params or {}
             
-            # Prepare order parameters
-            params = {
-                "timeInForce": "GTC" if order_type == "limit" else "IOC",
-                "reduceOnly": reduce_only,
-                "positionSide": "long" if side == "buy" else "short"  # Add position side for unilateral mode
-            }
-            
-            # Add sub-account if specified
-            if self.sub_account:
-                params["subAccount"] = self.sub_account
-                
-            # Place the order
             order = await self.exchange.create_order(
                 symbol=formatted_symbol,
+                type="market",
+                side=side,
+                amount=amount,
+                params=order_params
+            )
+            
+            self.logger.info(f"Created market {side} order for {amount} {formatted_symbol}")
+            return to_dict(order)
+            
+        except Exception as e:
+            self.logger.error(f"Error creating market order: {e}")
+            raise
+    
+    async def create_order(
+        self, 
+        symbol: str, 
+        type: str, 
+        side: str, 
+        amount: float, 
+        price: Optional[float] = None, 
+        params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Create an order of any type
+        
+        Args:
+            symbol: Trading symbol
+            type: Order type (market, limit, stop, etc.)
+            side: Order side (buy/sell)
+            amount: Order amount
+            price: Order price (required for limit orders)
+            params: Additional parameters
+            
+        Returns:
+            Dict containing order information
+        """
+        formatted_symbol = self._format_symbol(symbol)
+        
+        try:
+            order_params = params or {}
+            
+            order = await self.exchange.create_order(
+                symbol=formatted_symbol,
+                type=type,
+                side=side,
+                amount=amount,
+                price=price,
+                params=order_params
+            )
+            
+            self.logger.info(f"Created {type} {side} order for {amount} {formatted_symbol}")
+            return to_dict(order)
+            
+        except Exception as e:
+            self.logger.error(f"Error creating order: {e}")
+            raise
+            
+    async def fetch_ticker(self, symbol: str) -> Dict[str, Any]:
+        """
+        Fetch current ticker information for a symbol
+        
+        Args:
+            symbol: Trading symbol
+            
+        Returns:
+            Dict containing ticker information
+        """
+        formatted_symbol = self._format_symbol(symbol)
+        
+        try:
+            ticker = await self.exchange.fetch_ticker(formatted_symbol)
+            return to_dict(ticker)
+        except Exception as e:
+            self.logger.error(f"Error fetching ticker: {e}")
+            raise
+            
+    async def fetch_balance(self) -> Dict[str, Any]:
+        """
+        Fetch current account balance
+        
+        Returns:
+            Dict containing balance information
+        """
+        try:
+            balance = await self.exchange.fetch_balance()
+            return to_dict(balance)
+        except Exception as e:
+            self.logger.error(f"Error fetching balance: {e}")
+            raise
+            
+    async def fetch_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Fetch current positions
+        
+        Args:
+            symbol: Optional trading symbol to filter positions
+            
+        Returns:
+            List of position information
+        """
+        try:
+            formatted_symbol = [self._format_symbol(symbol)] if symbol else None
+            positions = await self.exchange.fetch_positions(formatted_symbol)
+            return [to_dict(pos) for pos in positions]
+        except Exception as e:
+            self.logger.error(f"Error fetching positions: {e}")
+            raise
+
+    # WebSocket related methods
+    def add_ws_callback(self, stream: str, callback: Callable[[Dict[str, Any]], None]) -> None:
+        """
+        Add a callback for a websocket stream
+        
+        Args:
+            stream: Stream name
+            callback: Callback function to execute on message
+        """
+        if stream not in self.ws_callbacks:
+            self.ws_callbacks[stream] = []
+            
+        self.ws_callbacks[stream].append(callback)
+        self.logger.info(f"Added callback for {stream} stream")
+        
+    async def start_websocket(self, symbols: List[str]) -> None:
+        """
+        Start websocket connection
+        
+        Args:
+            symbols: List of symbols to subscribe to
+        """
+        self.ws_connected = True
+        
+        # Initialize last message time
+        for stream in self.ws_callbacks:
+            self.ws_last_message_time[stream] = time.time()
+            
+        # Start heartbeat
+        asyncio.create_task(self._heartbeat())
+        
+        self.logger.info(f"Started WebSocket connection for {len(symbols)} symbols")
+        
+    async def _heartbeat(self) -> None:
+        """Send periodic heartbeats to keep connection alive"""
+        while self.ws_connected:
+            await asyncio.sleep(self.ws_heartbeat_interval)
+            
+            # Update last message time for heartbeat
+            for stream in self.ws_callbacks:
+                if time.time() - self.ws_last_message_time.get(stream, 0) > self.ws_heartbeat_interval * 2:
+                    self.logger.warning(f"No messages received on {stream} stream for a while")
+                    
+    async def close_websocket(self) -> None:
+        """Close the websocket connection"""
+        self.ws_connected = False
+        self.logger.info("Closed WebSocket connection")
+
+    # Compatibility methods with older implementations
+    async def initialize(self) -> None:
+        """Compatibility method - does nothing as initialization occurs in constructor."""
+        # No action needed as CCXT is initialized in the constructor
+        pass
+        
+    async def close(self) -> None:
+        """Close the exchange connection."""
+        await self.exchange.close()
+        
+    async def get_market_ticker(self, symbol: str) -> Dict[str, Any]:
+        """Fetch ticker for a symbol (compatibility method)."""
+        return await self.fetch_ticker(symbol)
+        
+    async def get_market_candles(self, symbol: str, timeframe: str = "1h", limit: int = 100) -> List[List[float]]:
+        """
+        Fetch candlestick data for a symbol (compatibility method).
+        
+        Args:
+            symbol: Trading symbol
+            timeframe: Timeframe interval (e.g. "1m", "5m", "1h", "4h", "1d")
+            limit: Number of candles to fetch
+            
+        Returns:
+            List of OHLCV candles in format [timestamp, open, high, low, close, volume]
+        """
+        try:
+            formatted_symbol = self._format_symbol(symbol)
+            candles = await self.exchange.fetch_ohlcv(formatted_symbol, timeframe=timeframe, limit=limit)
+            return candles
+        except Exception as e:
+            self.logger.error(f"Error fetching candles: {e}")
+            return []
+        
+    async def get_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Fetch positions (compatibility method)."""
+        return await self.fetch_positions(symbol)
+        
+    async def get_balance(self) -> Dict[str, Any]:
+        """Fetch balance (compatibility method)."""
+        return await self.fetch_balance()
+        
+    async def close_position(self, symbol: str, position: Dict[str, Any]) -> Dict[str, Any]:
+        """Close a position using market order."""
+        side = "sell" if position.get("side", "").lower() == "long" else "buy"
+        amount = float(position.get("contracts", 0))
+        
+        if amount <= 0:
+            self.logger.warning(f"Cannot close position with zero contracts")
+            return {}
+            
+        return await self.create_market_order(
+            symbol=symbol,
+            side=side,
+            amount=amount
+        )
+        
+    async def setup_trading_config(self, symbol: str, leverage: int) -> None:
+        """Set up trading configuration including leverage."""
+        # Format symbol
+        formatted_symbol = self._format_symbol(symbol)
+        
+        try:
+            # Set leverage
+            await self.exchange.set_leverage(leverage, formatted_symbol)
+            self.logger.info(f"Set leverage to {leverage}x for {formatted_symbol}")
+        except Exception as e:
+            self.logger.error(f"Error setting up trading config: {e}")
+            raise
+
+    async def place_order(self, symbol: str, side: str, amount: float, 
+                         price: Optional[float] = None, order_type: str = "market",
+                         params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Place an order with the exchange."""
+        if order_type.lower() == "market":
+            return await self.create_market_order(
+                symbol=symbol,
+                side=side,
+                amount=amount,
+                params=params or {}
+            )
+        else:
+            return await self.create_order(
+                symbol=symbol,
                 type=order_type,
                 side=side,
                 amount=amount,
                 price=price,
-                params=params
+                params=params or {}
+            )
+
+    async def create_market_order(self, symbol: str, side: str, amount: float, 
+                                reduce_only: bool = False,
+                                params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Create a market order with optional reduce_only flag."""
+        formatted_symbol = self._format_symbol(symbol)
+        
+        order_params = params or {}
+        if reduce_only:
+            order_params["reduceOnly"] = True
+            
+        try:
+            order = await self.exchange.create_order(
+                symbol=formatted_symbol,
+                type="market",
+                side=side,
+                amount=amount,
+                params=order_params
             )
             
-            logger.info(f"{GREEN}Order placed successfully: {order}{RESET}")
-            return order
+            self.logger.info(f"Created market {side} order for {amount} {formatted_symbol}")
+            return to_dict(order)
             
         except Exception as e:
-            logger.error(f"{RED}Error placing order: {str(e)}{RESET}")
+            self.logger.error(f"Error creating market order: {e}")
             raise
-            
-    async def close_position(self, symbol: str, position: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Close an existing position.
-        
-        Args:
-            symbol: Trading symbol
-            position: Position information from get_positions()
-            
-        Returns:
-            Order response from the exchange
-        """
-        try:
-            formatted_symbol = self._format_symbol(symbol)
-            side = "sell" if position.get('side') == "long" else "buy"
-            amount = abs(float(position.get('contracts', 0)))
-            
-            if amount > 0:
-                return await self.place_order(
-                    symbol=formatted_symbol,
-                    side=side,
-                    amount=amount,
-                    order_type="market",
-                    reduce_only=True
-                )
-            else:
-                logger.info(f"{YELLOW}No position to close{RESET}")
-                return {}
-                
-        except Exception as e:
-            logger.error(f"{RED}Error closing position: {str(e)}{RESET}")
-            raise
-            
-    async def cancel_order(self, order_id: str, symbol: str) -> Dict[str, Any]:
-        """Cancel an existing order."""
-        try:
-            formatted_symbol = self._format_symbol(symbol)
-            result = await self.exchange.cancel_order(order_id, formatted_symbol)
-            logger.info(f"{GREEN}Order cancelled successfully: {result}{RESET}")
-            return result
-        except Exception as e:
-            logger.error(f"{RED}Error cancelling order: {str(e)}{RESET}")
-            raise
-            
-    async def get_open_orders(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get all open orders."""
-        try:
-            formatted_symbol = self._format_symbol(symbol) if symbol else None
-            orders = await self.exchange.fetch_open_orders(formatted_symbol)
-            return orders
-        except Exception as e:
-            logger.error(f"{RED}Error fetching open orders: {str(e)}{RESET}")
-            raise
-            
-    async def watch_orders(self):
-        """Watch orders using websocket connection."""
-        try:
-            while True:
-                orders = await self.exchange_pro.watch_orders()
-                for order in orders:
-                    # Process order update
-                    logger.info(f"{CYAN}Order update received: {order}{RESET}")
-                    # Add your order processing logic here
-                    
-        except Exception as e:
-            logger.error(f"{RED}Error watching orders: {str(e)}{RESET}")
-            raise
-            
-    async def close(self):
-        """Close the exchange connection."""
-        try:
-            await self.exchange.close()
-            await self.exchange_pro.close()
-            logger.info(f"{GREEN}Exchange connections closed{RESET}")
-        except Exception as e:
-            logger.error(f"{RED}Error closing exchange connections: {str(e)}{RESET}")
-            raise
-            
-    def __del__(self):
-        """Cleanup when the object is destroyed."""
-        try:
-            asyncio.create_task(self.close())
-        except Exception as e:
-            logger.error(f"{RED}Error during cleanup: {str(e)}{RESET}")
-
-async def main():
-    """Example usage of the BitGetCCXT class."""
-    # Initialize with your API credentials
-    exchange = BitGetCCXT(
-        api_key="your_api_key",
-        secret_key="your_secret_key",
-        passphrase="your_passphrase",
-        use_testnet=True
-    )
-    
-    try:
-        # Initialize the exchange
-        await exchange.initialize()
-        
-        # Get market data
-        ticker = await exchange.get_market_ticker("BTC/USDT:USDT")
-        print(f"BTC/USDT Ticker: {ticker}")
-        
-        # Get positions
-        positions = await exchange.get_positions()
-        print(f"Current positions: {positions}")
-        
-        # Get balance
-        balance = await exchange.get_balance()
-        print(f"Account balance: {balance}")
-        
-    except Exception as e:
-        print(f"Error: {str(e)}")
-    finally:
-        await exchange.close()
-
-if __name__ == "__main__":
-    asyncio.run(main()) 

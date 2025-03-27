@@ -64,10 +64,16 @@ def mock_redis():
         data_store[key] = value
         return True
     
-    # Mock rpush method
+    # Mock rpush method with proper string conversion for floats
     def mock_rpush(key, value):
         if key not in lists_store:
             lists_store[key] = []
+        
+        # Ensure value is stored as a string, like Redis would do
+        # This supports our fix that converts float values to strings
+        if isinstance(value, (float, int)):
+            value = str(value)
+            
         lists_store[key].append(value)
         return len(lists_store[key])
     

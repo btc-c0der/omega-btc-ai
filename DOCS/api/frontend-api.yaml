@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: OMEGA BTC AI - Frontend Reggae Dashboard API
+  version: 1.0.0
+  description: Frontend API endpoints for the Reggae Dashboard
+  contact:
+    name: OMEGA BTC AI Team
+    email: support@omegabtcai.com
+
+servers:
+  - url: http://localhost:5001
+    description: Frontend development server
+  - url: https://dashboard.omegabtcai.com
+    description: Production dashboard server
+
+tags:
+  - name: Metrics
+    description: Trap metrics and analytics endpoints
+  - name: Traps
+    description: Trap detection and analysis endpoints
+  - name: Prices
+    description: Price data endpoints
+  - name: Timeline
+    description: Historical timeline endpoints
+  - name: WebSocket
+    description: Real-time data streaming endpoints
+
+components:
+  schemas:
+    TrapData:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "bull_trap"
+        description:
+          type: string
+          example: "Detected potential bull trap pattern"
+        timestamp:
+          type: string
+          format: date-time
+        probability:
+          type: number
+          example: 0.75
+        severity:
+          type: string
+          enum: [low, medium, high]
+          example: "high"
+
+    PriceData:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        price:
+          type: number
+          example: 65432.10
+        volume:
+          type: number
+          example: 123.45
+        indicators:
+          type: object
+          properties:
+            rsi:
+              type: number
+              example: 65.5
+            macd:
+              type: number
+              example: 123.45
+
+    TimelineEvent:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        event_type:
+          type: string
+          example: "trap_detected"
+        description:
+          type: string
+          example: "Bull trap pattern detected with high probability"
+        severity:
+          type: string
+          enum: [low, medium, high]
+          example: "high"
+
+    MetricsResponse:
+      type: object
+      properties:
+        total_traps:
+          type: integer
+          example: 42
+        success_rate:
+          type: number
+          example: 0.85
+        average_probability:
+          type: number
+          example: 0.72
+        timestamp:
+          type: string
+          format: date-time
+
+paths:
+  /api/metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Get trap metrics
+      description: Retrieve trap metrics with advanced analytics
+      responses:
+        '200':
+          description: Trap metrics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+
+  /api/traps:
+    get:
+      tags:
+        - Traps
+      summary: Get trap detections
+      description: Retrieve trap detections with optional filters
+      parameters:
+        - name: start_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start time in ISO format
+        - name: end_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time in ISO format
+        - name: trap_type
+          in: query
+          schema:
+            type: string
+          description: Filter by trap type
+      responses:
+        '200':
+          description: List of trap detections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrapData'
+
+  /api/prices:
+    get:
+      tags:
+        - Prices
+      summary: Get price data
+      description: Retrieve price data with integrity verification
+      responses:
+        '200':
+          description: List of price data points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PriceData'
+
+  /api/timeline:
+    get:
+      tags:
+        - Timeline
+      summary: Get timeline of trap detections
+      description: Retrieve timeline of trap detections
+      parameters:
+        - name: hours
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 168
+          description: Number of hours to look back
+      responses:
+        '200':
+          description: List of timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEvent'
+
+  /ws:
+    websocket:
+      tags:
+        - WebSocket
+      summary: WebSocket endpoint
+      description: Real-time data streaming for trap detections and price updates
+      responses:
+        '101':
+          description: WebSocket connection established 
