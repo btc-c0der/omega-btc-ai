@@ -41,21 +41,28 @@ if [ ! -f "$CERT_PATH" ]; then
     echo -e "${YELLOW}Creating directory for SSL certificates...${RESET}"
     mkdir -p "deployment/digitalocean/certificates"
     
-    echo -e "${YELLOW}Using default self-signed certificate for Redis connection.${RESET}"
-    echo -e "${YELLOW}For production, replace with proper SSL certificate.${RESET}"
-    
-    # Check if openssl is installed
-    if command -v openssl &> /dev/null; then
-        echo -e "${YELLOW}Generating self-signed certificate...${RESET}"
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout "$CERT_PATH" -out "$CERT_PATH" \
-            -subj "/CN=localhost" 2>/dev/null
-        
-        echo -e "${GREEN}✅ Self-signed certificate generated.${RESET}"
+    # Check if the certificate exists in the root directory
+    if [ -f "SSL_redis-btc-omega-redis.pem" ]; then
+        echo -e "${YELLOW}Copying SSL certificate from root directory...${RESET}"
+        cp "SSL_redis-btc-omega-redis.pem" "$CERT_PATH"
+        echo -e "${GREEN}✅ SSL certificate copied.${RESET}"
     else
-        echo -e "${RED}❌ OpenSSL not found. Cannot generate self-signed certificate.${RESET}"
-        echo "Please install OpenSSL or manually create the certificate at $CERT_PATH"
-        exit 1
+        echo -e "${YELLOW}Using default self-signed certificate for Redis connection.${RESET}"
+        echo -e "${YELLOW}For production, replace with proper SSL certificate.${RESET}"
+        
+        # Check if openssl is installed
+        if command -v openssl &> /dev/null; then
+            echo -e "${YELLOW}Generating self-signed certificate...${RESET}"
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+                -keyout "$CERT_PATH" -out "$CERT_PATH" \
+                -subj "/CN=localhost" 2>/dev/null
+            
+            echo -e "${GREEN}✅ Self-signed certificate generated.${RESET}"
+        else
+            echo -e "${RED}❌ OpenSSL not found. Cannot generate self-signed certificate.${RESET}"
+            echo "Please install OpenSSL or manually create the certificate at $CERT_PATH"
+            exit 1
+        fi
     fi
 fi
 
