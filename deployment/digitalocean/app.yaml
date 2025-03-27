@@ -1,0 +1,28 @@
+name: omega-btc-live-feed-v2
+services:
+- name: btc-live-feed
+  github:
+    branch: feature/btc-live-feed-v2-cloud
+    deploy_on_push: true
+    repo: fsiqueira/omega-btc-ai
+  build_command: pip install -r requirements.txt
+  run_command: python -m omega_ai.data_feed.btc_live_feed_v2
+  envs:
+  - key: REDIS_HOST
+    value: ${redis.REDIS_HOST}
+  - key: REDIS_PORT
+    value: ${redis.REDIS_PORT}
+  - key: REDIS_PASSWORD
+    value: ${redis.REDIS_PASSWORD}
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 10
+    period_seconds: 60
+
+databases:
+- engine: REDIS
+  name: redis
+  production: false
+  version: "6" 
