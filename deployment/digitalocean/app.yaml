@@ -4,7 +4,7 @@ services:
   github:
     branch: feature/btc-live-feed-v2-cloud
     deploy_on_push: true
-    repo: fsiqueira/omega-btc-ai
+    repo: btc-c0der/omega-btc-ai
   build_command: pip install -r requirements.txt
   run_command: python -m omega_ai.data_feed.btc_live_feed_v2
   source_dir: /
@@ -19,6 +19,10 @@ services:
     value: "VuKJU8Z.Z2V8Qn_"
   - key: REDIS_SSL
     value: "true"
+  - key: REDIS_USE_TLS
+    value: "true"
+  - key: REDIS_CERT
+    value: "SSL_redis-btc-omega-redis.pem"
   - key: REDIS_SSL_CERT_REQS
     value: "required"
   - key: REDIS_SSL_CERT_PATH
