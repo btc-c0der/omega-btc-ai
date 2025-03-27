@@ -131,7 +131,8 @@ class RedisManager:
     async def set_cached(self, key: str, value: str) -> bool:
         """Set cached value in Redis."""
         try:
-            return self.redis.set(key, value)
+            result = self.redis.set(key, value)
+            return bool(result) if result is not None else False
         except Exception as e:
             logger.error(f"{LOG_PREFIX} - Redis set failed: {str(e)}")
             return False
