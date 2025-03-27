@@ -1,133 +1,201 @@
+#!/usr/bin/env python3
 """
-OMEGA BTC AI - Health Check Module for BTC Live Feed v2
-======================================================
+OMEGA BTC AI Health Check Module
+================================
 
-Provides health check endpoints for monitoring the BTC Live Feed service.
+FastAPI-based health check server for BTC Live Feed monitoring.
+Provides API endpoints for checking the status of the feed, Redis connection, and system metrics.
+
+Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the MIT License
+JAH JAH BLESS THE DIVINE FLOW OF THE BLOCKCHAIN
 """
 
 import os
-import time
 import json
 import asyncio
-from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel
+import logging
 from typing import Dict, Any, Optional
 
-# Global Redis manager - we'll use the one from btc_live_feed_v2 later
-redis_manager = None
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("health-check")
+
+# Try importing FastAPI, providing informative error if not available
+try:
+    import uvicorn
+    from fastapi import FastAPI, HTTPException, status
+    from fastapi.responses import JSONResponse
+    from fastapi.middleware.cors import CORSMiddleware
+except ImportError:
+    logger.error("FastAPI or uvicorn not found. Install with 'pip install fastapi uvicorn'")
+    raise
 
 # Constants
-HEALTHY_TIMEOUT = 60  # Maximum seconds since last update to consider service healthy
-DEGRADED_TIMEOUT = 300  # Maximum seconds since last update to consider service degraded
+DEFAULT_HOST = "0.0.0.0"
+DEFAULT_PORT = int(os.getenv("HEALTH_CHECK_PORT", "8080"))
+LOG_PREFIX = "🔱 OMEGA HEALTH"
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="OMEGA BTC AI - BTC Live Feed Health Check",
-    description="Health monitoring for the BTC Live Feed service",
-    version="2.0.0"
+    title="OMEGA BTC AI Health Check",
+    description="Health monitoring for BTC Live Feed",
+    version="1.0.0"
 )
 
-# Response models
-class HealthResponse(BaseModel):
-    status: str
-    redis_connected: bool
-    websocket_connected: bool
-    last_price_update: Optional[str]
-    uptime: float
-    details: Dict[str, Any]
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development, restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Global variables
-start_time = time.time()
-btc_feed_instance = None
-
-@app.get("/health", response_model=HealthResponse)
-async def health_check():
-    """
-    Health check endpoint that verifies:
-    - Redis connection
-    - WebSocket connection status
-    - Last price update time
-    """
-    try:
-        global redis_manager
-        redis_connected = False
-        websocket_connected = False
-        last_price_update = None
-        details = {}
-        last_update_time = None
-        
-        # Check Redis connection if we have a manager
-        if redis_manager:
-            try:
-                # We'll use the check_health method from btc_feed_instance
-                # which has access to the Redis manager
-                if btc_feed_instance:
-                    feed_health = await btc_feed_instance.check_health()
-                    redis_connected = feed_health.get("redis_connected", False)
-                    websocket_connected = feed_health.get("websocket_connected", False)
-                    details["feed_status"] = feed_health.get("status", "unknown")
-                    last_price = feed_health.get("last_price")
-                    if last_price:
-                        details["last_price"] = float(last_price)
-                    
-                    # Get current time and calculate time since last message
-                    if "uptime" in feed_health and feed_health["uptime"]:
-                        last_update_time = time.time() - feed_health["uptime"]
-                        last_price_update = datetime.fromtimestamp(last_update_time, tz=timezone.utc).isoformat()
-                        details["seconds_since_update"] = feed_health["uptime"]
-            except Exception as e:
-                details["redis_error"] = str(e)
-        
-        # Calculate uptime
-        uptime = time.time() - start_time
-        details["uptime_seconds"] = uptime
-        
-        # Determine overall status
-        if redis_connected and websocket_connected:
-            status = "healthy"
-        elif redis_connected and last_update_time and (time.time() - last_update_time) < DEGRADED_TIMEOUT:
-            status = "degraded"
-        else:
-            status = "unhealthy"
-            
-        # Return health status
-        return HealthResponse(
-            status=status,
-            redis_connected=redis_connected,
-            websocket_connected=websocket_connected,
-            last_price_update=last_price_update,
-            uptime=uptime,
-            details=details
-        )
-        
-    except Exception as e:
-        # Log the error
-        print(f"Health check error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Health check failed: {str(e)}"
-        )
+# Global reference to the feed instance
+feed_instance = None
 
 @app.get("/")
 async def root():
-    """Root endpoint that redirects to health check"""
-    return {"message": "OMEGA BTC AI - BTC Live Feed v2", "health_endpoint": "/health"}
+    """Root endpoint with basic information."""
+    return {
+        "name": "OMEGA BTC AI Health Check",
+        "version": "1.0.0",
+        "endpoints": [
+            "/health",
+            "/metrics",
+            "/redis/status"
+        ]
+    }
 
-async def start_health_check(feed_instance=None):
-    """Start the health check server in the background."""
-    global btc_feed_instance, redis_manager
+@app.get("/health")
+async def health_check():
+    """Get health status of the BTC Live Feed."""
+    global feed_instance
     
-    btc_feed_instance = feed_instance
-    if hasattr(feed_instance, 'redis_manager'):
-        redis_manager = feed_instance.redis_manager
+    if not feed_instance:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "unavailable", "message": "Feed not initialized"}
+        )
     
-    import uvicorn
-    port = int(os.getenv("PORT", "8080"))
-    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
+    try:
+        health_data = await feed_instance.check_health()
+        
+        # Determine HTTP status code based on health status
+        if health_data.get("status") == "healthy":
+            status_code = status.HTTP_200_OK
+        elif health_data.get("status") == "degraded":
+            status_code = status.HTTP_200_OK  # Still 200, but client can check status field
+        else:
+            status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+            
+        return JSONResponse(
+            status_code=status_code,
+            content=health_data
+        )
+    except Exception as e:
+        logger.error(f"{LOG_PREFIX} - Health check error: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"status": "error", "message": str(e)}
+        )
+
+@app.get("/metrics")
+async def metrics():
+    """Get performance metrics for the BTC Live Feed."""
+    global feed_instance
+    
+    if not feed_instance:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Feed not initialized"
+        )
+    
+    try:
+        # Get all performance metrics from feed instance
+        metrics_data = feed_instance.performance_metrics
+        
+        # Add additional calculated metrics
+        if metrics_data["total_messages_processed"] > 0:
+            metrics_data["success_rate"] = (
+                metrics_data["successful_redis_operations"] / 
+                (metrics_data["successful_redis_operations"] + metrics_data["failed_redis_operations"])
+                * 100 if (metrics_data["successful_redis_operations"] + metrics_data["failed_redis_operations"]) > 0
+                else 0
+            )
+        
+        return metrics_data
+    except Exception as e:
+        logger.error(f"{LOG_PREFIX} - Metrics error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@app.get("/redis/status")
+async def redis_status():
+    """Get detailed Redis connection status."""
+    global feed_instance
+    
+    if not feed_instance:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Feed not initialized"
+        )
+    
+    try:
+        # Check if Redis is connected
+        redis_connected = await feed_instance.redis_manager.ping()
+        
+        # Get Redis stats
+        redis_stats = await feed_instance.redis_manager.get_stats()
+        
+        return {
+            "connected": redis_connected,
+            "using_failover": redis_stats.get("using_failover", False),
+            "primary_available": redis_stats.get("primary_available", False),
+            "failover_available": redis_stats.get("failover_available", False),
+            "last_failover_time": redis_stats.get("last_failover_time", None),
+            "reconnection_attempts": redis_stats.get("reconnection_attempts", 0)
+        }
+    except Exception as e:
+        logger.error(f"{LOG_PREFIX} - Redis status error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+async def start_health_check(feed_instance_ref):
+    """
+    Start the health check server.
+    
+    Args:
+        feed_instance_ref: Reference to the BTC Live Feed instance
+    """
+    global feed_instance
+    feed_instance = feed_instance_ref
+    
+    host = os.getenv("HEALTH_CHECK_HOST", DEFAULT_HOST)
+    port = int(os.getenv("HEALTH_CHECK_PORT", DEFAULT_PORT))
+    
+    # Log server start
+    logger.info(f"{LOG_PREFIX} - Starting health check server on {host}:{port}")
+    
+    # Start uvicorn server in a separate task
+    config = uvicorn.Config(
+        app="omega_ai.data_feed.health_check:app",
+        host=host,
+        port=port,
+        log_level="info",
+        access_log=False
+    )
     server = uvicorn.Server(config)
     
-    await server.serve()
+    # Return the server lifespan task
+    return asyncio.create_task(server.serve())
 
 if __name__ == "__main__":
     # This allows running the health check service directly
