@@ -6,6 +6,7 @@ services:
       repo: btc-c0der/omega-btc-ai
       branch: feature/btc-live-feed-v3-resilient
       deploy_on_push: true
+    source_dir: deployment/digital_ocean/btc_live_feed_v3/src
     build_command: pip install -e .
     run_command: python -m omega_ai.data_feed.btc_live_feed_v3
     envs:
@@ -63,6 +64,7 @@ services:
       repo: btc-c0der/omega-btc-ai
       branch: feature/btc-live-feed-v3-resilient
       deploy_on_push: true
+    source_dir: deployment/digital_ocean/btc_live_feed_v3/src
     build_command: pip install -e .
     run_command: python -m omega_ai.data_feed.health_check
     envs:
