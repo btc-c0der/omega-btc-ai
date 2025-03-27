@@ -151,6 +151,11 @@ class BitGetTrader:
     PRODUCT_TYPE = "USDT-FUTURES"  # Product type for USDT-margined perpetual contracts
     PRODUCT_TYPE_PARAM = "USDT-FUTURES"  # Product type parameter for API v2 endpoints
     
+    # Cache for sub-account names
+    _sub_account_cache = {}
+    _sub_account_cache_time = 0
+    _sub_account_cache_ttl = 300  # Cache TTL in seconds (5 minutes)
+    
     @classmethod
     def format_symbol(cls, symbol: str, api_version: str = "v2") -> str:
         """Format symbol according to BitGet's API requirements.
@@ -183,7 +188,9 @@ class BitGetTrader:
                  initial_capital: float = 10000.0,
                  margin_mode: str = "fixed",  # "fixed" or "crossed"
                  api_client: Optional[Any] = None,
-                 api_version: str = "v1"
+                 api_version: str = "v1",
+                 sub_account_name: Optional[str] = None,  # Name of the sub-account to use
+                 sub_account_id: Optional[str] = None,    # ID of the sub-account to use
                 ):
         """
         Initialize the BitGet trader with the specified settings.
@@ -198,12 +205,31 @@ class BitGetTrader:
             margin_mode: Margin mode (fixed or crossed) (default: fixed)
             api_client: Optional external API client for testing
             api_version: API version to use (v1 or v2) (default: v1)
+            sub_account_name: Name of the sub-account to use (optional)
+            sub_account_id: ID of the sub-account to use (optional)
         """
         # API configuration
         self.use_testnet = use_testnet
         self.is_shutting_down = False
         self.symbol = "BTCUSDT"  # Default to BTCUSDT
         self.api_version = api_version
+        
+        # Sub-account configuration
+        if not use_testnet and (sub_account_name or sub_account_id):
+            logger.warning(f"{YELLOW}Sub-accounts are not allowed in mainnet. Using main account only.{RESET}")
+            self.sub_account_name = None
+            self.sub_account_id = None
+        else:
+            if not sub_account_name and profile_type:
+                # Try to get sub-account name from environment variables based on profile type
+                env_prefix = profile_type.upper()
+                self.sub_account_name = os.environ.get(f"{env_prefix}_SUB_ACCOUNT_NAME")
+                if self.sub_account_name:
+                    logger.info(f"{CYAN}Using sub-account from environment: {self.sub_account_name}{RESET}")
+            else:
+                self.sub_account_name = sub_account_name
+                
+            self.sub_account_id = sub_account_id
         
         # Look for API credentials in environment variables if not provided
         self.api_key = api_key or os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
@@ -235,6 +261,17 @@ class BitGetTrader:
         logger.info(f"{CYAN}API Base: {self.api_base}{RESET}")
         logger.info(f"{CYAN}Product Type Param: {self.PRODUCT_TYPE_PARAM}{RESET}")
         
+        # Validate sub-account parameters only for testnet
+        if use_testnet:
+            is_valid, error_msg = self._validate_sub_account(self.sub_account_name, self.sub_account_id)
+            if not is_valid:
+                logger.error(f"{RED}Invalid sub-account configuration: {error_msg}{RESET}")
+                raise ValueError(f"Invalid sub-account configuration: {error_msg}")
+            elif self.sub_account_name:
+                logger.info(f"{CYAN}Using sub-account: {self.sub_account_name}{RESET}")
+            elif self.sub_account_id:
+                logger.info(f"{CYAN}Using sub-account with ID: {self.sub_account_id}{RESET}")
+        
         # Initialize the appropriate trader profile
         self.profile = self._initialize_profile(profile_type, initial_capital)
         
@@ -250,6 +287,78 @@ class BitGetTrader:
         if not self.verify_symbol():
             raise ValueError(f"Invalid trading symbol for {'testnet' if use_testnet else 'live'} trading")
         
+    def _validate_sub_account(self, sub_account_name: Optional[str], sub_account_id: Optional[str]) -> Tuple[bool, Optional[str]]:
+        """
+        Validate if a sub-account exists and is accessible.
+        
+        Args:
+            sub_account_name: Name of the sub-account (optional)
+            sub_account_id: ID of the sub-account (optional)
+            
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        try:
+            # Use v2 API endpoint for sub-account assets
+            endpoint = "/api/v2/mix/account/sub-account-assets"
+            
+            # Required parameters for v2 API
+            params = {
+                "productType": "USDT-FUTURES"  # Use USDT-FUTURES for USDT margined contracts
+            }
+            
+            # Add sub-account parameters if available
+            if sub_account_name:
+                params["subAccountName"] = sub_account_name
+            elif sub_account_id:
+                params["subAccountId"] = sub_account_id
+            
+            # Get current timestamp
+            timestamp = str(int(time.time() * 1000))
+            
+            # Get headers with authentication
+            headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+            
+            # Make the request
+            response = _make_request("GET", f"{self.api_url}{endpoint}", 
+                                  headers=headers, params=params)
+            result = response.json()
+            
+            if result.get("code") == "00000" and result.get("data"):
+                # If we're checking a specific sub-account and got a non-empty response,
+                # the API confirms the account exists
+                if sub_account_name or sub_account_id:
+                    # Check if we got any accounts in the response
+                    if len(result.get("data", [])) > 0:
+                        # For backwards compatibility, also check the specific format pattern
+                        if sub_account_name:
+                            for account in result.get("data", []):
+                                user_id = str(account.get("userId"))
+                                # Support both formats: exact custom name and sub_[userId] format
+                                if sub_account_name == f"sub_{user_id}" or sub_account_name:
+                                    # Cache the result
+                                    self._sub_account_cache[user_id] = sub_account_name
+                                    return True, None
+                        # If we're checking by ID, any response with data is valid
+                        elif sub_account_id:
+                            return True, None
+                    
+                    # If we get here, the sub-account wasn't found in the response
+                    if sub_account_name:
+                        return False, f"Sub-account '{sub_account_name}' not found"
+                    else:
+                        return False, f"Sub-account ID {sub_account_id} not found"
+                else:
+                    # No specific sub-account to validate, just check if we can access the endpoint
+                    return True, None
+            else:
+                error_msg = result.get("msg", "Unknown error")
+                return False, f"Failed to validate sub-account: {error_msg}"
+            
+        except Exception as e:
+            logger.error(f"{RED}Error validating sub-account: {str(e)}{RESET}")
+            return False, f"Error validating sub-account: {str(e)}"
+    
     def _initialize_profile(self, profile_type: str, initial_capital: float) -> TraderProfile:
         """Initialize the appropriate trader profile based on type."""
         profile_map = {
@@ -262,60 +371,113 @@ class BitGetTrader:
         profile_class = profile_map.get(profile_type.lower(), StrategicTrader)
         return profile_class(initial_capital=initial_capital)
     
-    def generate_signature(self, timestamp: str, method: str, request_path: str, body: Optional[Dict[str, Any]] = None) -> str:
-        """Generate the signature required for BitGet API authentication."""
-        message = str(timestamp) + method + request_path
-        if body:
-            message += json.dumps(body)
+    def generate_signature(self, timestamp: str, method: str, request_path: str, body: Optional[str] = None, params: Optional[Dict[str, Any]] = None) -> str:
+        """Generate the signature required for BitGet API authentication.
+        
+        Args:
+            timestamp: Current timestamp in milliseconds
+            method: HTTP method (GET, POST, etc.)
+            request_path: API endpoint path
+            body: Request body for POST requests
+            params: Query parameters for GET requests
+            
+        Returns:
+            Base64-encoded signature
+        """
+        # Ensure method is uppercase as required by BitGet
+        method = method.upper()
+        
+        # Start with timestamp + method + requestPath
+        # Add a space between method and request_path as per BitGet requirements
+        message = str(timestamp) + method + " " + request_path
+        
+        # Add query string if present (for GET requests)
+        if params and method == "GET":
+            # Sort parameters by key as required by BitGet
+            sorted_params = sorted(params.items())
+            # Create query string
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            # Add to message with question mark only if not already in request_path
+            if query_string and "?" not in request_path:
+                message += "?" + query_string
+        
+        # Add body for POST requests
+        if body and method == "POST":
+            if isinstance(body, dict):
+                message += json.dumps(body)
+            else:
+                message += body
+        
+        # For debugging
+        logger.debug(f"Pre-signed message: {message}")
+        
+        # Create signature using HMAC-SHA256
         hmac_obj = hmac.new(
             self.secret_key.encode('utf-8'),
             message.encode('utf-8'),
             hashlib.sha256
         )
-        # Use base64 encoding instead of hexdigest as required by BitGet
+        # Use base64 encoding as required by BitGet
         return base64.b64encode(hmac_obj.digest()).decode('utf-8')
     
-    def _get_auth_headers(self, timestamp: str, method: str, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
-        """Generate authentication headers for API requests."""
-        # For v2 API, the signature is calculated differently
-        message = timestamp + method + endpoint
+    def _get_auth_headers(self, timestamp: str, method: str, endpoint: str, params: Optional[Dict[str, Any]] = None, body: Optional[str] = None) -> Dict[str, str]:
+        """Generate authentication headers for API requests.
         
-        # Add query params or request body to message
+        Args:
+            timestamp: Current timestamp in milliseconds
+            method: HTTP method (GET, POST, etc.)
+            endpoint: API endpoint path
+            params: Optional query parameters
+            body: Request body for POST requests
+            
+        Returns:
+            Dictionary of authentication headers
+        """
+        # Create a copy of params to avoid modifying the original
+        if params is None:
+            params = {}
+        else:
+            params = params.copy()
+            
+        # Only add sub-account parameters for endpoints that support them
+        # Position endpoints don't support subAccountName as a parameter
+        if self.sub_account_name and not any(x in endpoint for x in ["/position/", "/market/"]):
+            params["subAccountName"] = self.sub_account_name
+        elif self.sub_account_id and not any(x in endpoint for x in ["/position/", "/market/"]):
+            params["subAccountId"] = self.sub_account_id
+        
+        # For v2 API, we need to handle parameters differently
+        if self.api_version == "v2":
+            # Sort parameters by key as required by BitGet
+            sorted_params = sorted(params.items())
+            # Create query string
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            # Add to endpoint with question mark if there are parameters
+            if query_string:
+                # Only add query string if it's not already in the endpoint
+                if "?" not in endpoint:
+                    endpoint = f"{endpoint}?{query_string}"
+        
+        # Generate signature with params and body
+        signature = self.generate_signature(timestamp, method, endpoint, body, params)
+        
+        # Log signature details for debugging
+        logger.debug(f"Generating signature for: {method} {endpoint}")
         if params:
-            if method == "GET":
-                # For GET requests, add query parameters in alphabetical order
-                query_params = []
-                for key in sorted(params.keys()):
-                    query_params.append(f"{key}={params[key]}")
-                if query_params:
-                    query_string = "&".join(query_params)
-                    message += "?" + query_string
-            else:
-                # For POST requests, add JSON string of body
-                message += json.dumps(params)
-                
-        # Log the exact message being used for signature
-        logger.debug(f"Signature message: {message}")
-                
-        # Calculate signature using base64 encoding
-        signature = base64.b64encode(
-            hmac.new(
-                self.secret_key.encode('utf-8'),
-                message.encode('utf-8'),
-                hashlib.sha256
-            ).digest()
-        ).decode('utf-8')
+            logger.debug(f"With params: {params}")
+        if body:
+            logger.debug(f"With body: {body}")
         
-        logger.debug(f"Calculated signature: {signature}")
-        
-        # Return headers exactly as specified in BitGet documentation
-        return {
+        # Build headers
+        headers = {
             "ACCESS-KEY": self.api_key,
             "ACCESS-SIGN": signature,
             "ACCESS-TIMESTAMP": timestamp,
             "ACCESS-PASSPHRASE": self.passphrase,
             "Content-Type": "application/json"
         }
+        
+        return headers
     
     def get_account_balance(self, symbol: str = "BTCUSDT") -> Optional[float]:
         """Get current account balance for the specified symbol."""
@@ -343,7 +505,7 @@ class BitGetTrader:
             "marginCoin": "USDT"  # Required parameter
         }
         
-        headers = self._get_auth_headers(timestamp, method, endpoint)
+        headers = self._get_auth_headers(timestamp, method, endpoint, params)
         
         logger.info(f"{CYAN}=== Account Balance Request Debug ==={RESET}")
         logger.info(f"API URL: {self.api_url}")
@@ -693,103 +855,111 @@ class BitGetTrader:
         """Get the complete trade history."""
         return self.trade_history
     
-    def get_positions(self, symbol: str = "BTCUSDT") -> Optional[List[Dict[str, Any]]]:
-        """Get current positions for the specified symbol."""
-        if self.is_shutting_down:
-            logger.info(f"{YELLOW}Skipping position check during shutdown{RESET}")
-            return None
+    def get_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get current positions.
+        
+        Args:
+            symbol: Trading symbol (optional)
             
-        # Use external API client if provided
-        if self.api_client:
-            try:
-                response = self.api_client.get_positions(symbol)
-                if response and response.get("code") == "00000" and response.get("data"):
-                    return response["data"]
-                else:
-                    logger.error(f"Error fetching positions: {response.get('msg')}")
-                    return None
-            except Exception as e:
-                logger.error(f"Error getting positions: {e}")
-                return None
-        
-        # Use internal implementation if no external client
-        # Different endpoint based on API version
-        if self.api_version == "v1":
-            endpoint = f"{self.api_base}/position/allPosition"  # Correct endpoint for v1
-        else:
-            endpoint = f"{self.api_base}/position/single-position"  # Endpoint for v2
-            
-        method = "GET"
-        timestamp = str(int(time.time() * 1000))
-        
-        # Format symbol properly for the API version
-        formatted_symbol = self.format_symbol(symbol, self.api_version)
-        
-        # Set parameters as query params
-        params = {
-            "marginCoin": "USDT"  # Required parameter
-        }
-        
-        # Build params based on API version
-        if self.api_version == "v1":
-            # For v1, we need productType
-            params["productType"] = self.PRODUCT_TYPE_PARAM
-            
-            # For v1, symbol is optional for allPosition - include it if provided
-            if symbol:
-                params["symbol"] = formatted_symbol
-        else:
-            # For v2, symbol is required
-            params["symbol"] = formatted_symbol
-        
-        # For proper debugging, log exactly what we're using
-        logger.info(f"{CYAN}=== Position Request Debug ==={RESET}")
-        logger.info(f"API URL: {self.api_url}")
-        logger.info(f"Endpoint: {endpoint}")
-        logger.info(f"Method: {method}")
-        logger.info(f"Timestamp: {timestamp}")
-        logger.info(f"Symbol: Original={symbol}, Formatted={formatted_symbol}")
-        logger.info(f"API Version: {self.api_version}")
-        logger.info(f"Query Params: {params}")
-        
-        # Generate signed headers
-        headers = self._get_auth_headers(timestamp, method, endpoint, params)
-        logger.info(f"Headers: {headers}")
-        
-        # Calculate signature directly for validation
-        message = timestamp + method + endpoint
-        query_params = []
-        for key in sorted(params.keys()):
-            query_params.append(f"{key}={params[key]}")
-        if query_params:
-            query_string = "&".join(query_params)
-            message += "?" + query_string
-            
-        manual_signature = self.generate_signature(timestamp, method, endpoint, params)
-        
-        logger.info(f"Manual signature calculation:")
-        logger.info(f"Message: {message}")
-        logger.info(f"Calculated signature: {manual_signature}")
-        
+        Returns:
+            List of position objects
+        """
         try:
-            response = _make_request(method, self.api_url + endpoint, headers=headers, params=params)
-            positions_data = response.json()
+            # Validate symbol
+            if symbol:
+                symbol = self.format_symbol(symbol, self.api_version)
             
-            if positions_data.get("code") == "00000" and positions_data.get("data"):
-                logger.info(f"{GREEN}Successfully retrieved positions{RESET}")
-                return positions_data["data"]
-            else:
-                error_msg = positions_data.get("msg", "Unknown error")
-                logger.error(f"\033[91mERROR: Error fetching positions: {error_msg}\033[0m")
-                logger.error(f"Full response: {json.dumps(positions_data, indent=2)}")
-                return None
-                
+            # If a specific symbol is requested, try singlePosition first
+            if symbol:
+                try:
+                    endpoint = "/api/v2/mix/position/single-position"
+                    params = {
+                        "symbol": symbol,
+                        "marginCoin": "USDT",
+                        "productType": "USDT-FUTURES"
+                    }
+                    
+                    # Get fresh timestamp
+                    timestamp = str(int(time.time() * 1000))
+                    
+                    # Get request headers with authentication - passing params directly
+                    headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+                    
+                    # Build URL with query parameters manually to ensure consistency
+                    url = f"{self.api_url}{endpoint}"
+                    
+                    # Make request with params passed separately to ensure they're properly encoded in URL
+                    response = _make_request("GET", url, headers=headers, params=params)
+                    
+                    # Parse response
+                    result = response.json()
+                    
+                    if result.get("code") == "00000" and result.get("data"):
+                        positions = result.get("data", [])
+                        # If we're in a single-hold position mode, there will be only one position per symbol
+                        if not isinstance(positions, list):
+                            positions = [positions]
+                        return positions
+                except Exception as e:
+                    logger.warning(f"{YELLOW}Error with singlePosition endpoint, falling back to allPosition: {str(e)}{RESET}")
+                    # Fall through to try the allPosition endpoint
+            
+            # Define endpoint for all positions or fallback from single position error
+            endpoint = "/api/v2/mix/position/all-position"
+            params = {
+                "marginCoin": "USDT",
+                "productType": "USDT-FUTURES"
+            }
+            
+            # Loop for retries, generating new timestamp each time
+            for retry in range(MAX_RETRIES):
+                try:
+                    # Get fresh timestamp for each request attempt
+                    timestamp = str(int(time.time() * 1000))
+                    
+                    # Get request headers with authentication
+                    headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+                    
+                    # Build URL with query parameters manually to ensure consistency
+                    url = f"{self.api_url}{endpoint}"
+                    
+                    # Make request
+                    response = _make_request("GET", url, headers=headers, params=params)
+                    
+                    # Parse response
+                    result = response.json()
+                    
+                    if result.get("code") == "00000" and result.get("data"):
+                        positions = result.get("data", [])
+                        
+                        # If we're looking for a specific symbol, filter the results
+                        if symbol:
+                            positions = [p for p in positions if p.get("symbol") == symbol]
+                            
+                        return positions
+                    else:
+                        logger.error(f"{RED}Failed to get positions: {result.get('msg', 'Unknown error')}{RESET}")
+                        if retry < MAX_RETRIES - 1:
+                            # Only log if we're going to retry
+                            logger.warning(f"{YELLOW}Retrying ({retry + 1}/{MAX_RETRIES})...{RESET}")
+                            time.sleep(_get_retry_delay(retry))
+                            continue
+                        return []
+                except Exception as inner_e:
+                    if retry < MAX_RETRIES - 1:
+                        # Only log if we're going to retry
+                        logger.error(f"{RED}Error in get_positions attempt {retry + 1}: {str(inner_e)}{RESET}")
+                        time.sleep(_get_retry_delay(retry))
+                        continue
+                    raise  # Re-raise on final attempt
+            
+            # If we get here, all retries failed
+            return []
+            
         except Exception as e:
-            logger.error(f"\033[91mERROR: Error getting positions: {str(e)}\033[0m")
-            logger.error(f"Exception type: {type(e).__name__}")
-            logger.error(f"Exception args: {e.args}")
-            return None
-            
+            logger.error(f"{RED}Error getting positions: {str(e)}{RESET}")
+            return []
+    
     def get_position_risk(self, symbol: str = "BTCUSDT") -> Optional[Dict[str, Any]]:
         """Get position risk information."""
         # Different endpoint based on API version
@@ -976,7 +1146,7 @@ class BitGetTrader:
         if self.api_version == "v1":
             endpoint = f"{self.api_base}/market/ticker"  # Endpoint for v1
         else:
-            endpoint = f"{self.api_base}/market/ticker"  # Endpoint for v2
+            endpoint = "/api/v2/mix/market/ticker"  # Endpoint for v2
             
         method = "GET"
         timestamp = str(int(time.time() * 1000))
@@ -994,59 +1164,60 @@ class BitGetTrader:
                 "productType": self.PRODUCT_TYPE_PARAM
             }
         else:
-            # For v2, just symbol
+            # For v2, we need symbol and productType
             params = {
-                "symbol": formatted_symbol
+                "symbol": formatted_symbol,
+                "productType": "USDT-FUTURES"
             }
         
-        # For proper debugging, log exactly what we're using
-        logger.info(f"{CYAN}=== Ticker Request Debug ==={RESET}")
-        logger.info(f"API URL: {self.api_url}")
-        logger.info(f"Endpoint: {endpoint}")
-        logger.info(f"Method: {method}")
-        logger.info(f"Timestamp: {timestamp}")
-        logger.info(f"Symbol: Original={symbol}, Formatted={formatted_symbol}")
-        logger.info(f"API Version: {self.api_version}")
-        logger.info(f"Query Params: {params}")
-        
-        # Generate signed headers
-        headers = self._get_auth_headers(timestamp, method, endpoint, params)
-        logger.info(f"Headers: {headers}")
-        
-        # Calculate signature directly for validation
-        message = timestamp + method + endpoint
-        query_params = []
-        for key in sorted(params.keys()):
-            query_params.append(f"{key}={params[key]}")
-        if query_params:
-            query_string = "&".join(query_params)
-            message += "?" + query_string
-            
-        manual_signature = self.generate_signature(timestamp, method, endpoint, params)
-        
-        logger.info(f"Manual signature calculation:")
-        logger.info(f"Message: {message}")
-        logger.info(f"Calculated signature: {manual_signature}")
-        
         try:
+            # Get headers with authentication
+            headers = self._get_auth_headers(timestamp, method, endpoint, params)
+            
+            # Make the request
             response = _make_request(method, self.api_url + endpoint, headers=headers, params=params)
             data = response.json()
             
             if data.get("code") == "00000" and data.get("data"):
-                logger.info(f"{GREEN}Successfully retrieved ticker{RESET}")
-                return data["data"]
+                # Handle different response formats based on API version
+                if self.api_version == "v1":
+                    ticker_data = data.get("data", {})
+                else:
+                    # For v2, data is a list of tickers
+                    tickers = data.get("data", [])
+                    # Find the ticker for our symbol
+                    ticker_data = next((t for t in tickers if t.get("symbol") == formatted_symbol), {})
+                
+                # Map the response fields to a consistent format
+                mapped_ticker = {
+                    "last": float(ticker_data.get("lastPr", 0)),
+                    "ask": float(ticker_data.get("askPr", 0)),
+                    "bid": float(ticker_data.get("bidPr", 0)),
+                    "high": float(ticker_data.get("high24h", 0)),
+                    "low": float(ticker_data.get("low24h", 0)),
+                    "volume": float(ticker_data.get("baseVolume", 0)),
+                    "quoteVolume": float(ticker_data.get("quoteVolume", 0)),
+                    "change": float(ticker_data.get("change24h", 0)),
+                    "markPrice": float(ticker_data.get("markPrice", 0)),
+                    "indexPrice": float(ticker_data.get("indexPrice", 0)),
+                    "fundingRate": float(ticker_data.get("fundingRate", 0)),
+                    "timestamp": int(ticker_data.get("ts", 0))
+                }
+                
+                logger.info("Successfully retrieved ticker")
+                return mapped_ticker
             else:
                 error_msg = data.get("msg", "Unknown error")
-                logger.error(f"\033[91mERROR: Error fetching ticker: {error_msg}\033[0m")
-                logger.error(f"Full response: {json.dumps(data, indent=2)}")
+                logger.error(f"Failed to get ticker data: {error_msg}")
+                logger.error(f"Response: {json.dumps(data, indent=2)}")
                 return None
                 
         except Exception as e:
-            logger.error(f"\033[91mERROR: Error getting ticker: {str(e)}\033[0m")
+            logger.error(f"Error getting ticker data: {str(e)}")
             logger.error(f"Exception type: {type(e).__name__}")
             logger.error(f"Exception args: {e.args}")
             return None
-            
+    
     def get_orderbook(self, symbol: str, limit: int = 100) -> Optional[Dict[str, Any]]:
         """Get order book data."""
         endpoint = f"{self.api_base}/market/orderbook"
@@ -1358,104 +1529,371 @@ class BitGetTrader:
                                end_time: Optional[int] = None,
                                limit: int = 100,
                                product_type: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
-        """
-        Get historical positions for the account.
+        """Get historical positions for a symbol.
         
         Args:
             symbol: Trading symbol (default: BTCUSDT)
             start_time: Start time in milliseconds (optional)
             end_time: End time in milliseconds (optional)
             limit: Number of records to return (default: 100)
-            product_type: Product type (default: None, will use class constant)
+            product_type: Product type (optional)
             
         Returns:
-            List of historical position information or None if request fails
+            List of historical positions or None if request fails
         """
-        # Use external API client if provided
-        if self.api_client:
-            try:
-                response = self.api_client.get_historical_positions(
-                    symbol=symbol,
-                    start_time=start_time,
-                    end_time=end_time,
-                    limit=limit,
-                    product_type=product_type or self.PRODUCT_TYPE_PARAM
-                )
-                if response and response.get("code") == "00000" and response.get("data"):
-                    return response["data"]
-                else:
-                    logger.error(f"Error fetching historical positions: {response.get('msg')}")
-                    return None
-            except Exception as e:
-                logger.error(f"Error getting historical positions: {e}")
-                return None
-        
-        # Use internal implementation if no external client
-        # Different endpoint based on API version
-        if self.api_version == "v1":
-            endpoint = f"{self.api_base}/position/history"  # Possible endpoint for v1 - may need adjustment
-        else:
-            endpoint = f"{self.api_base}/position/history-position"  # Endpoint for v2
-            
-        method = "GET"
-        timestamp = str(int(time.time() * 1000))
-        
-        # Format symbol properly for the API version
-        formatted_symbol = self.format_symbol(symbol, self.api_version)
-        
-        # Set parameters as query params
-        params = {
-            "pageSize": str(limit)
-        }
-        
-        # Add symbol parameter if provided
-        if symbol:
-            params["symbol"] = formatted_symbol
-        
-        # Add product type for v1
-        if self.api_version == "v1":
-            params["productType"] = product_type or self.PRODUCT_TYPE_PARAM
-        elif not symbol:
-            # If no symbol provided for v2, use productType
-            params["productType"] = product_type or self.PRODUCT_TYPE_PARAM
-        
-        # Add optional parameters if provided
-        if start_time is not None:
-            params["startTime"] = str(start_time)
-        if end_time is not None:
-            params["endTime"] = str(end_time)
-        
-        headers = self._get_auth_headers(timestamp, method, endpoint, params)
-        
-        logger.info(f"{CYAN}=== Historical Positions Request Debug ==={RESET}")
-        logger.info(f"API URL: {self.api_url}")
-        logger.info(f"Endpoint: {endpoint}")
-        logger.info(f"Method: {method}")
-        logger.info(f"Symbol: Original={symbol}, Formatted={formatted_symbol}")
-        logger.info(f"API Version: {self.api_version}")
-        logger.info(f"Query Params: {json.dumps(params, indent=2)}")
-        logger.info(f"Headers: {json.dumps(headers, indent=2)}")
-        logger.info(f"Timestamp: {timestamp}")
-        
         try:
-            response = _make_request(method, self.api_url + endpoint, headers=headers, params=params)
-            positions_data = response.json()
+            # Format symbol according to API version
+            formatted_symbol = self.format_symbol(symbol, self.api_version)
             
-            if positions_data.get("code") == "00000" and positions_data.get("data"):
-                logger.info(f"{GREEN}Successfully retrieved historical positions{RESET}")
-                # Handle potential differences in response structure between v1 and v2
-                if self.api_version == "v1":
-                    return positions_data["data"]  # May need adjustment based on actual response
-                else:
-                    return positions_data["data"]["list"]  # v2 format with list inside data
+            # Build query parameters
+            params = {
+                "symbol": formatted_symbol,
+                "productType": product_type or self.PRODUCT_TYPE_PARAM,
+                "pageSize": str(limit)
+            }
+            
+            # Add time range if provided
+            if start_time:
+                params["startTime"] = str(start_time)
+            if end_time:
+                params["endTime"] = str(end_time)
+                
+            # Generate timestamp and signature
+            timestamp = str(int(time.time() * 1000))
+            endpoint = f"{self.api_base}/position/history-position"
+            
+            # Sort parameters alphabetically and create query string
+            sorted_params = sorted(params.items())
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            
+            # Get auth headers with sorted parameters
+            headers = self._get_auth_headers(timestamp, "GET", endpoint, dict(sorted_params))
+            
+            # Make request with sorted parameters
+            url = f"{self.api_url}{endpoint}?{query_string}"
+            response = _make_request(
+                "GET",
+                url,
+                headers=headers
+            )
+            
+            # Parse response
+            data = response.json()
+            
+            if data.get("code") == "00000":  # Success code
+                return data.get("data", [])
             else:
-                error_msg = positions_data.get("msg", "Unknown error")
-                logger.error(f"\033[91mERROR: Error fetching historical positions: {error_msg}\033[0m")
-                logger.error(f"Full response: {json.dumps(positions_data, indent=2)}")
+                logger.error(f"{RED}Error getting historical positions: {data.get('msg')}{RESET}")
                 return None
                 
         except Exception as e:
-            logger.error(f"\033[91mERROR: Error getting historical positions: {str(e)}\033[0m")
-            logger.error(f"Exception type: {type(e).__name__}")
-            logger.error(f"Exception args: {e.args}")
-            return None 
+            logger.error(f"{RED}ERROR: Error getting historical positions: {str(e)}{RESET}")
+            logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
+            logger.error(f"{RED}Exception args: {e.args}{RESET}")
+            return None
+
+    def create_sub_account(self, sub_account_name: str, password: str) -> Optional[Dict[str, Any]]:
+        """Create a new sub-account.
+        
+        Args:
+            sub_account_name: Name for the new sub-account
+            password: Password for the sub-account
+            
+        Returns:
+            Dictionary containing sub-account details if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account"
+        timestamp = str(int(time.time() * 1000))
+        
+        # Set parameters
+        data = {
+            "subAccountName": sub_account_name,
+            "password": password,
+            "productType": self.PRODUCT_TYPE_PARAM
+        }
+        
+        # Get headers with authentication
+        headers = self._get_auth_headers(timestamp, "POST", endpoint)
+        
+        try:
+            response = _make_request("POST", f"{self.api_url}{endpoint}", 
+                                  headers=headers, json=data)
+            result = response.json()
+            
+            if result.get("code") == "00000" and result.get("data"):
+                logger.info(f"{GREEN}Successfully created sub-account: {sub_account_name}{RESET}")
+                return result["data"]
+            else:
+                error_msg = result.get("msg", "Unknown error")
+                logger.error(f"{RED}Failed to create sub-account: {error_msg}{RESET}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"{RED}Failed to create sub-account: {str(e)}{RESET}")
+            return None
+
+    def get_sub_account_name(self, sub_account_id: str) -> Optional[str]:
+        """
+        Get the sub-account name from its ID.
+        
+        Args:
+            sub_account_id: The ID of the sub-account
+            
+        Returns:
+            The sub-account name if found, None otherwise
+        """
+        # Check cache first
+        if sub_account_id in self._sub_account_cache:
+            return self._sub_account_cache[sub_account_id]
+            
+        try:
+            # Use v2 API endpoint for sub-account assets
+            endpoint = "/api/v2/mix/account/sub-account-assets"
+            
+            # Required parameters for v2 API
+            params = {
+                "productType": "USDT-FUTURES"  # Use USDT-FUTURES for USDT margined contracts
+            }
+            
+            # Get current timestamp
+            timestamp = str(int(time.time() * 1000))
+            
+            # Get headers with authentication
+            headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+            
+            # Make the request
+            response = _make_request("GET", f"{self.api_url}{endpoint}", 
+                                  headers=headers, params=params)
+            result = response.json()
+            
+            if result.get("code") == "00000" and result.get("data"):
+                # Look for the sub-account in the response
+                for account in result.get("data", []):
+                    if str(account.get("userId")) == str(sub_account_id):
+                        # Generate a name based on the user ID since API doesn't provide it
+                        sub_account_name = f"sub_{sub_account_id}"
+                        # Cache the result
+                        self._sub_account_cache[sub_account_id] = sub_account_name
+                        return sub_account_name
+                
+                logger.error(f"{RED}Sub-account ID {sub_account_id} not found in response{RESET}")
+                return None
+            else:
+                error_msg = result.get("msg", "Unknown error")
+                logger.error(f"{RED}Failed to get sub-account name: {error_msg}{RESET}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"{RED}Error getting sub-account name: {str(e)}{RESET}")
+            return None
+
+    def get_sub_accounts(self) -> List[Dict[str, Any]]:
+        """Get all sub-accounts and their assets."""
+        try:
+            # Check if cache is still valid
+            current_time = time.time()
+            if current_time - self._sub_account_cache_time < self._sub_account_cache_ttl:
+                # Return cached data if available
+                if self._sub_account_cache:
+                    return [{"subAccountName": name, "subUserId": uid} 
+                            for uid, name in self._sub_account_cache.items()]
+            
+            # Use v2 API endpoint for sub-account assets
+            endpoint = "/api/v2/mix/account/sub-account-assets"
+            
+            # Required parameters for v2 API
+            params = {
+                "productType": "USDT-FUTURES"  # Use USDT-FUTURES for USDT margined contracts
+            }
+            
+            # Get current timestamp
+            timestamp = str(int(time.time() * 1000))
+            
+            # Get headers with authentication
+            headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+            
+            # Make the request
+            response = _make_request("GET", f"{self.api_url}{endpoint}", 
+                                  headers=headers, params=params)
+            result = response.json()
+            
+            if result.get("code") == "00000" and result.get("data"):
+                # Clear old cache
+                self._sub_account_cache.clear()
+                
+                # Process and cache the results
+                accounts = []
+                for account_data in result["data"]:
+                    user_id = account_data.get("userId")
+                    if user_id:
+                        # Generate a name based on the user ID
+                        sub_account_name = f"sub_{user_id}"
+                        # Cache the result
+                        self._sub_account_cache[user_id] = sub_account_name
+                        # Add to accounts list
+                        accounts.append({
+                            "subAccountName": sub_account_name,
+                            "subUserId": user_id,
+                            "assets": account_data.get("assetList", [])
+                        })
+                
+                # Update cache timestamp
+                self._sub_account_cache_time = current_time
+                
+                logger.info(f"{GREEN}Successfully retrieved {len(accounts)} sub-accounts{RESET}")
+                return accounts
+            else:
+                error_msg = result.get("msg", "Unknown error")
+                logger.error(f"{RED}Failed to get sub-accounts: {error_msg}{RESET}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"{RED}Failed to get sub-accounts: {str(e)}{RESET}")
+            return []
+
+    def get_sub_account_balance(self, sub_account_name: str) -> Optional[Dict[str, Any]]:
+        """Get balance for a specific sub-account.
+        
+        Args:
+            sub_account_name: Name of the sub-account
+            
+        Returns:
+            Dictionary containing sub-account balance if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account-balance"
+        timestamp = str(int(time.time() * 1000))
+        
+        # Set parameters
+        params = {
+            "subAccountName": sub_account_name,
+            "productType": self.PRODUCT_TYPE_PARAM
+        }
+        
+        # Get headers with authentication
+        headers = self._get_auth_headers(timestamp, "GET", endpoint, params)
+        
+        try:
+            response = _make_request("GET", f"{self.api_url}{endpoint}", 
+                                  headers=headers, params=params)
+            data = response.json()
+            
+            if data.get("code") == "00000" and data.get("data"):
+                logger.info(f"{GREEN}Successfully retrieved sub-account balance{RESET}")
+                return data["data"]
+            else:
+                error_msg = data.get("msg", "Unknown error")
+                logger.error(f"{RED}Failed to get sub-account balance: {error_msg}{RESET}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"{RED}Failed to get sub-account balance: {str(e)}{RESET}")
+            return None
+
+    def transfer_to_sub_account(self, sub_account_name: str, amount: float, coin: str = "USDT") -> Optional[Dict[str, Any]]:
+        """Transfer funds to a sub-account.
+        
+        Args:
+            sub_account_name: Name of the sub-account
+            amount: Amount to transfer
+            coin: Coin to transfer (default: USDT)
+            
+        Returns:
+            Dictionary containing transfer details if successful, None otherwise
+        """
+        endpoint = "/api/v2/account/sub-account-transfer"
+        timestamp = str(int(time.time() * 1000))
+        
+        # Set parameters
+        data = {
+            "subAccountName": sub_account_name,
+            "amount": str(amount),
+            "coin": coin,
+            "productType": self.PRODUCT_TYPE_PARAM
+        }
+        
+        # Get headers with authentication
+        headers = self._get_auth_headers(timestamp, "POST", endpoint)
+        
+        try:
+            response = _make_request("POST", f"{self.api_url}{endpoint}", 
+                                  headers=headers, json=data)
+            result = response.json()
+            
+            if result.get("code") == "00000" and result.get("data"):
+                logger.info(f"{GREEN}Successfully transferred {amount} {coin} to {sub_account_name}{RESET}")
+                return result["data"]
+            else:
+                error_msg = result.get("msg", "Unknown error")
+                logger.error(f"{RED}Failed to transfer to sub-account: {error_msg}{RESET}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"{RED}Failed to transfer to sub-account: {str(e)}{RESET}")
+            return None
+
+    @classmethod
+    def setup_sub_accounts(cls, use_testnet: bool = True) -> Dict[str, 'BitGetTrader']:
+        """Set up sub-accounts using environment variables.
+        
+        Args:
+            use_testnet: Whether to use testnet (default: True)
+            
+        Returns:
+            Dictionary of trader instances keyed by profile type
+        """
+        traders = {}
+        profile_types = ["strategic", "aggressive", "scalping"]
+        
+        # Initialize main account trader
+        main_trader = cls(
+            profile_type="strategic",
+            use_testnet=use_testnet,
+            api_version="v2"
+        )
+        
+        # For mainnet, only use the main account
+        if not use_testnet:
+            logger.info(f"{CYAN}Using main account only for mainnet trading{RESET}")
+            traders["strategic"] = main_trader
+            return traders
+        
+        # For testnet, set up sub-accounts
+        for profile_type in profile_types:
+            env_prefix = profile_type.upper()
+            sub_account_name = os.environ.get(f"{env_prefix}_SUB_ACCOUNT_NAME")
+            sub_account_password = os.environ.get(f"{env_prefix}_SUB_ACCOUNT_PASSWORD")
+            initial_balance = float(os.environ.get(f"{env_prefix}_SUB_ACCOUNT_INITIAL_BALANCE", "0.0"))
+            
+            if sub_account_name and sub_account_password:
+                # Create sub-account if it doesn't exist
+                sub_accounts = main_trader.get_sub_accounts()
+                if not sub_accounts or not any(acc["subAccountName"] == sub_account_name for acc in sub_accounts):
+                    logger.info(f"{CYAN}Creating sub-account: {sub_account_name}{RESET}")
+                    result = main_trader.create_sub_account(sub_account_name, sub_account_password)
+                    if result and result.get("code") == "00000":
+                        logger.info(f"{GREEN}Successfully created sub-account: {sub_account_name}{RESET}")
+                    else:
+                        logger.error(f"{RED}Failed to create sub-account: {sub_account_name}{RESET}")
+                        continue
+                
+                # Transfer initial balance if specified
+                if initial_balance > 0:
+                    logger.info(f"{CYAN}Transferring initial balance to {sub_account_name}{RESET}")
+                    result = main_trader.transfer_to_sub_account(sub_account_name, initial_balance)
+                    if result and result.get("code") == "00000":
+                        logger.info(f"{GREEN}Successfully transferred initial balance{RESET}")
+                    else:
+                        logger.error(f"{RED}Failed to transfer initial balance{RESET}")
+                
+                # Create trader instance for this sub-account
+                traders[profile_type] = cls(
+                    profile_type=profile_type,
+                    use_testnet=use_testnet,
+                    api_version="v2",
+                    sub_account_name=sub_account_name
+                )
+                logger.info(f"{GREEN}Created trader instance for {sub_account_name}{RESET}")
+            else:
+                logger.warning(f"{YELLOW}Missing environment variables for {profile_type} sub-account{RESET}")
+        
+        return traders 

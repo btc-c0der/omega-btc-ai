@@ -78,13 +78,21 @@ class BitGetWalletQuery:
         Returns:
             base64-encoded HMAC-SHA256 signature
         """
+        # Ensure method is uppercase as required by BitGet
+        method = method.upper()
+        
+        # Start with timestamp + method + requestPath
         message = str(timestamp) + method + request_path
         
         # Add query string if present (for GET requests)
         if params and method == "GET":
-            query_string = urlencode(sorted(params.items()))
+            # Sort parameters by key as required by BitGet
+            sorted_params = sorted(params.items())
+            # Create query string
+            query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+            # Add to message with question mark
             message += "?" + query_string
-            
+        
         # Add request body if present (for POST requests)
         if body and method == "POST":
             if isinstance(body, dict):

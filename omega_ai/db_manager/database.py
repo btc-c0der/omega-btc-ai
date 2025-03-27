@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 # Set up logger with RASTA VIBES
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name%s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(message)s')  # Simplified format to avoid conflicts with color codes
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
@@ -660,10 +660,28 @@ def fetch_multi_interval_movements(interval: int = 5, limit: int = 100) -> tuple
         movements = []
         for item in movements_data:
             try:
+                # First try standard JSON parsing
                 movement = json.loads(item)
                 if isinstance(movement, dict) and "price" in movement:
                     movements.append(movement)
-            except (json.JSONDecodeError, TypeError) as e:
+                continue  # Successfully processed this item
+            except json.JSONDecodeError:
+                # If JSON parsing fails, try the format "price,volume"
+                try:
+                    if "," in item:
+                        price_str, volume_str = item.split(",", 1)
+                        price = float(price_str.strip())
+                        volume = float(volume_str.strip())
+                        now = datetime.now(timezone.utc).isoformat()
+                        movements.append({
+                            "timestamp": now,
+                            "price": price,
+                            "volume": volume
+                        })
+                        continue  # Successfully processed this item
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error parsing alternative format: {e}")
+            except (TypeError) as e:
                 logger.warning(f"Error parsing movement data: {e}")
         
         # Create summary dictionary with divine Rastafarian energy
@@ -786,7 +804,9 @@ def insert_possible_mm_trap(trap_data: Dict[str, Any]) -> bool:
         redis_conn.ltrim("mm_trap_detections", 0, 999)
         redis_conn.ltrim(f"mm_trap_detections:{timeframe}", 0, 99)
         
-        logger.info(f"{YELLOW}⚠️ MM TRAP DETECTED{RESET}: {trap_data['type']} on {trap_data['timeframe']} (confidence: {trap_data['confidence']:.2f})")
+        # Format the log message without using f-strings in the logger
+        message = f"{YELLOW}⚠️ MM TRAP DETECTED{RESET}: {trap_data['type']} on {trap_data['timeframe']} (confidence: {trap_data['confidence']:.2f})"
+        logger.info(message)
         return True
         
     except Exception as e:
