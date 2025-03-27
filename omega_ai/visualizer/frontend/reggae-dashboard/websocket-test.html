@@ -126,7 +126,7 @@
         function connect() {
             try {
                 addMessage('Connecting to WebSocket...');
-                socket = new WebSocket('ws://localhost:8000/ws');
+                socket = new WebSocket('ws://localhost:8001/ws');
 
                 socket.onopen = function (event) {
                     addMessage('Connection established', 'success');
