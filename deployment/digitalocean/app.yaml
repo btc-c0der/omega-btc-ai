@@ -17,7 +17,9 @@ services:
   - key: REDIS_SSL
     value: "true"
   - key: REDIS_SSL_CERT_REQS
-    value: "none"
+    value: "required"
+  - key: REDIS_SSL_CERT_PATH
+    value: "/app/deployment/digitalocean/SSL_redis-btc-omega-redis.pem"
   - key: REDIS_SOCKET_TIMEOUT
     value: "5"
   - key: REDIS_SOCKET_CONNECT_TIMEOUT

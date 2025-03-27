@@ -13,6 +13,7 @@ class DigitalOceanRedisManager:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.redis_client: Optional[redis.Redis] = None
+        self.ssl_cert_path = os.path.join(os.path.dirname(__file__), 'SSL_redis-btc-omega-redis.pem')
         self._connect()
     
     def _connect(self) -> None:
@@ -25,14 +26,15 @@ class DigitalOceanRedisManager:
                     port=int(os.getenv('REDIS_PORT', 6379)),
                     password=os.getenv('REDIS_PASSWORD'),
                     ssl=True,  # Enable SSL for secure connection
-                    ssl_cert_reqs=None,  # Skip certificate verification for now
+                    ssl_certfile=self.ssl_cert_path,  # Use SSL certificate file
+                    ssl_cert_reqs='required',  # Require certificate verification
                     decode_responses=True,
                     socket_timeout=5,
                     socket_connect_timeout=5
                 )
                 # Test connection
                 self.redis_client.ping()
-                logging.info(f"Successfully connected to Redis at {os.getenv('REDIS_HOST')}")
+                logging.info(f"Successfully connected to Redis at {os.getenv('REDIS_HOST')} with SSL")
                 return
             except (ConnectionError, TimeoutError) as e:
                 retries += 1
