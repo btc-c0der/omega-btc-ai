@@ -1,0 +1,28 @@
+import secrets
+import string
+
+def generate_bitget_passphrase(length=16):
+  """Generates a strong passphrase suitable for a Bitget API key.
+
+  Args:
+      length: The desired length of the passphrase (default: 16).  
+             Bitget requires at least 8 characters, and it's good to go longer for better security.
+
+  Returns:
+      A randomly generated passphrase.
+  """
+
+  # Combine different character sets for a stronger passphrase.
+  alphabet = string.ascii_letters + string.digits + string.punctuation
+
+  # Use secrets.choice for cryptographically secure random choices.
+  passphrase = ''.join(secrets.choice(alphabet) for _ in range(length))
+  return passphrase
+
+# Generate and print a passphrase (you can adjust the length)
+passphrase = generate_bitget_passphrase(20)  # Example: 20 characters long
+print(passphrase)
+
+# Example of generating multiple passphrases if needed
+for _ in range(3):
+    print(generate_bitget_passphrase())

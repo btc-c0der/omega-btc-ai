@@ -8,13 +8,15 @@ follows rules-based approaches with moderate risk management.
 """
 
 import random
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 import time
+from datetime import datetime
+import logging
 
-from omega_ai.trading.trader_base import (
-    TraderProfile,  # This is the correct class name 
-    RESET, GREEN, RED, YELLOW, BLUE, CYAN, MAGENTA, WHITE, BOLD
-)
+from .trader_base import TraderProfile, RiskParameters
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 class StrategicTrader(TraderProfile):
     """Strategic trader that uses Fibonacci levels, market structure, and patience."""
@@ -25,22 +27,13 @@ class StrategicTrader(TraderProfile):
         
         # Set trader name and type
         self.name = "Strategic Fibonacci Trader"
-        self.type = "strategic"
-        
-        # Explicitly set base_leverage (even though it's in parent class)
-        self.base_leverage = 3.0  # Strategic traders use moderate leverage
         
         # Strategic trader specific attributes
         self.patience_score = random.uniform(0.6, 0.9)  # Higher patience
         self.analysis_depth = random.uniform(0.7, 1.0)  # Deep analysis
         self.fomo_resistance = random.uniform(0.7, 0.95)  # High resistance to FOMO
         
-        # Risk management parameters
-        self.max_risk_per_trade = 0.02  # 2% risk per trade
-        self.position_sizing_volatility_factor = 0.7  # Reduce size in high volatility
-        
         # Strategic parameters
-        self.min_risk_reward_ratio = random.uniform(1.5, 3.0)  # Minimum R:R to enter
         self.fib_levels = [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618]
         self.fib_proximity_threshold = 0.02  # 2% proximity to consider price near a Fibonacci level
         self.trend_confirmation_threshold = 0.6  # How strong trend must be to consider entry
@@ -48,382 +41,664 @@ class StrategicTrader(TraderProfile):
         self.oversold_threshold = 0.2  # RSI-like threshold
         self.market_regime_accuracy = 0.7  # How accurate is regime identification
         
-        # Track performance metrics
-        self.avg_trade_duration = 0
-        self.trade_durations = []
-        self.total_trades = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
+        # Fibonacci trading parameters
+        self.primary_entry_level = 0.618  # Primary Fibonacci entry level
+        self.secondary_entry_level = 0.786  # Secondary Fibonacci entry level
+        self.stop_loss_level = 1.0  # Stop loss Fibonacci level
+        self.take_profit_levels = [0.382, 0.236, 0.0]  # Take profit Fibonacci levels
+        self.extension_take_profit = 1.618  # Extension target
+        
+        # OMEGA-FIED POSITION SCALING PARAMETERS
+        self.enable_position_scaling = True  # Enable position scaling feature
+        self.max_position_additions = 3  # Maximum number of times to add to a position
+        self.position_additions_count = {}  # Track additions per symbol
+        self.scale_size_multiplier = 0.5  # Each additional position is 50% of original
+        self.scaling_fib_levels = [1.618, 2.618, 4.236]  # Fibonacci levels for scaling
+        self.scale_proximity_threshold = 0.01  # 1% proximity for scaling levels
+        self.scale_min_volume_factor = 1.2  # Minimum volume factor required to scale
+        self.max_stack_limit = 5  # Never exceed this many position additions
+        self.recent_scaling_operations = {}  # Track recent scaling operations for cooling period
+        self.scaling_cooldown_seconds = 3600  # 1 hour cooldown between scale operations
+        
+        # Initialize the Fibonacci swing points tracking
+        self.last_swing_high = None
+        self.last_swing_low = None
+        self.current_uptrend = None  # True if in uptrend, False if in downtrend, None if not determined
+        self.fibonacci_retracements = {}  # Store calculated retracement levels
+    
+    def _get_risk_parameters(self) -> RiskParameters:
+        """Get risk parameters specific to strategic trader profile."""
+        return RiskParameters(
+            max_risk_per_trade=0.02,  # 2% risk per trade
+            base_leverage=11.0,       # High leverage setting (was 3.0)
+            max_leverage=15.0,        # Increased max leverage (was 5.0) 
+            min_risk_reward_ratio=random.uniform(1.5, 3.0),  # Minimum R:R to enter
+            position_sizing_volatility_factor=0.7,  # Reduce size in high volatility
+            stop_loss_multiplier=2.0,  # Wide stops based on market structure
+            take_profit_multiplier=2.5  # Multiple take profit levels
+        )
+    
     def should_enter_trade(self, market_context: Dict) -> Tuple[bool, str, str, float]:
-        """Strategic entry based on Fibonacci levels and trend alignment."""
-        price = market_context.get("price", 0)
-        if price <= 0:
-            return False, "No price data", "", 0
+        """Determine if a trade should be entered based on market context."""
+        current_price = market_context.get("price", 0)
+        trend = market_context.get("trend", "neutral")
+        regime = market_context.get("regime", "neutral")
+        volatility = market_context.get("recent_volatility", 0)
         
-        # Get Fibonacci levels from market context
-        fib_levels = market_context.get("fib_levels", {})
-        if not fib_levels:
-            # Try to get from Redis directly
-            fib_data = self.redis_conn.hgetall("realtime_fibonacci_levels")
-            if fib_data:
-                for level_name, price_str in fib_data.items():
-                    if level_name != "timestamp":
-                        try:
-                            # Convert level name to float if possible
-                            try:
-                                level_value = float(level_name)
-                                if level_value in self.key_fib_levels:
-                                    fib_levels[level_value] = float(price_str)
-                            except ValueError:
-                                # Handle format like "R0.618"
-                                if level_name.startswith("R"):
-                                    level_str = level_name[1:]
-                                    try:
-                                        level_value = float(level_str)
-                                        if level_value in self.key_fib_levels:
-                                            fib_levels[level_value] = float(price_str)
-                                    except ValueError:
-                                        pass
-                        except ValueError:
-                            pass
+        # Get Fibonacci levels and support/resistance
+        fib_levels = self._get_support_resistance_levels()
+        nearest_level = self._find_nearest_level(current_price, fib_levels)
         
-        # Get key support/resistance levels
-        sr_levels = self._get_support_resistance_levels()
+        # Check if price is near a key level
+        if not nearest_level:
+            return False, "No key level nearby", "NEUTRAL", self.risk_params.base_leverage
         
-        # Calculate current leverage based on current market conditions
-        current_leverage = self._calculate_current_leverage(market_context)
+        # Determine if we're at support or resistance
+        is_support = self._is_support_level(current_price, nearest_level, None)
+        is_resistance = self._is_resistance_level(current_price, nearest_level, None)
         
-        # Signal variables
-        entry_signal = False
-        direction = ""
-        reason = ""
-        
-        # Check for retest of key Fibonacci levels
-        nearest_fib = self._find_nearest_level(price, fib_levels)
-        nearest_sr = self._find_nearest_level(price, sr_levels)
-        
-        # Calculate distances as percentages
-        fib_distance_pct = abs(price - nearest_fib["price"]) / price if nearest_fib else 1.0
-        sr_distance_pct = abs(price - nearest_sr["price"]) / price if nearest_sr else 1.0
-        
-        # Get market bias for directional alignment
-        market_bias = market_context.get("market_bias", "")
-        
-        # Check if price is near key technical level
-        near_key_level = (nearest_fib and fib_distance_pct < self.fib_proximity_threshold) or \
-                         (nearest_sr and sr_distance_pct < self.fib_proximity_threshold)
-                         
         # Check for retest confirmation
-        retest_confirmed = self._check_retest_confirmation(price, nearest_fib, nearest_sr)
+        if not self._check_retest_confirmation(current_price, nearest_level, None):
+            return False, "No retest confirmation", "NEUTRAL", self.risk_params.base_leverage
         
-        # LONG setup - Price retesting support level in bullish market
-        if near_key_level and retest_confirmed and \
-           (("Bullish" in market_bias and self._is_support_level(price, nearest_fib, nearest_sr)) or \
-            ("Strong Bullish" in market_bias)):
-            entry_signal = True
-            direction = "LONG"
-            level_type = "Fibonacci" if nearest_fib and fib_distance_pct < sr_distance_pct else "Support"
-            level_value = nearest_fib["level"] if level_type == "Fibonacci" else nearest_sr["level"]
-            reason = f"{level_type} level {level_value} retest confirmed in {market_bias} market"
+        # Calculate leverage based on market conditions
+        leverage = self._calculate_current_leverage(market_context)
         
-        # SHORT setup - Price retesting resistance level in bearish market
-        elif near_key_level and retest_confirmed and \
-             (("Bearish" in market_bias and self._is_resistance_level(price, nearest_fib, nearest_sr)) or \
-              ("Strong Bearish" in market_bias)):
-            entry_signal = True
-            direction = "SHORT"
-            level_type = "Fibonacci" if nearest_fib and fib_distance_pct < sr_distance_pct else "Resistance"
-            level_value = nearest_fib["level"] if level_type == "Fibonacci" else nearest_sr["level"]
-            reason = f"{level_type} level {level_value} retest confirmed in {market_bias} market"
+        # Determine trade direction and reason
+        if is_support and trend == "uptrend":
+            return True, "Price at support in uptrend", "LONG", leverage
+        elif is_resistance and trend == "downtrend":
+            return True, "Price at resistance in downtrend", "SHORT", leverage
         
-        # Skip trades in choppy markets where bias is neutral
-        if entry_signal and "Neutral" in market_bias:
-            # Disciplined approach - skip dubious setups
-            if random.random() > self.patience_score:  # Higher patience means more likely to skip
-                self.discipline_metrics["entries_skipped"] += 1
-                return False, "", "", 0
-        
-        # Psychological override - may rarely break rules due to FOMO
-        # Much less likely than aggressive trader
-        if not entry_signal and self.state.emotional_state == "greedy" and random.random() < 0.15:
-            # Only 15% chance to break rules when greedy (compared to 40% for aggressive)
-            self.discipline_metrics["rules_broken"] += 1
-            entry_signal = True
-            direction = "LONG" if "Bullish" in market_bias else "SHORT"
-            reason = "Breaking rules due to FOMO (greedy state)"
-        
-        # If we found a valid setup, note that we followed rules
-        if entry_signal and "Breaking rules" not in reason:
-            self.discipline_metrics["rules_followed"] += 1
-        
-        return entry_signal, direction, reason, current_leverage
+        return False, "No clear entry signal", "NEUTRAL", leverage
     
     def determine_position_size(self, direction: str, entry_price: float) -> float:
-        """Calculate strategic position size based on risk parameters."""
-        # Strategic traders are more consistent with position sizing
-        base_risk_pct = self.min_risk_per_trade
+        """Calculate position size based on risk parameters and market conditions."""
+        # Base position size on risk per trade
+        risk_amount = self.capital * self.risk_params.max_risk_per_trade
         
-        # Less emotional variation than aggressive trader
-        if self.state.emotional_state == "greedy":
-            risk_pct = min(base_risk_pct * 1.3, self.max_risk_per_trade)
-        elif self.state.emotional_state == "fearful":
-            risk_pct = base_risk_pct * 0.7
-        else:
-            risk_pct = base_risk_pct
+        # Adjust for volatility
+        volatility_factor = self.risk_params.position_sizing_volatility_factor
+        if self.volatility > 0.02:  # High volatility
+            volatility_factor *= 0.8
         
-        # Smaller adjustments based on recent performance
-        if self.state.consecutive_wins >= 3:
-            # Small size increase after winning streak
-            risk_pct *= (1 + min(self.state.consecutive_wins * 0.05, 0.2))
-        elif self.state.consecutive_losses >= 2:
-            # Small size decrease after losing streak
-            risk_pct *= (1 - min(self.state.consecutive_losses * 0.05, 0.2))
+        # Calculate position size
+        position_size = risk_amount * volatility_factor
         
-        # Calculate position size in BTC
-        amount_at_risk = self.capital * risk_pct
-        leverage = self._calculate_current_leverage(None)
-        
-        # Strategic traders use wider stops, typically 2-3%
-        stop_distance_pct = self.base_stop_pct
-        
-        position_size = amount_at_risk / (entry_price * stop_distance_pct)
-        position_size = position_size / leverage  # Adjust for leverage
-        
-        # Cap to avoid over-leveraging
-        max_size = self.capital * leverage / entry_price * 0.9  # More conservative cap
-        position_size = min(position_size, max_size)
-        
-        return position_size
+        # Ensure position size doesn't exceed capital
+        return min(position_size, self.capital)
     
     def set_stop_loss(self, direction: str, entry_price: float) -> float:
-        """Determine strategic stop-loss level (wider than aggressive)."""
-        # Strategic traders use wider initial stops
-        stop_pct = self.base_stop_pct
+        """Set stop loss level based on strategic trader's risk management rules."""
+        # Calculate base stop distance
+        stop_distance = entry_price * 0.02  # 2% base stop
         
-        # Small adjustments based on emotional state
-        if self.state.emotional_state == "greedy":
-            stop_pct *= 0.9  # 10% tighter when greedy
-        elif self.state.emotional_state == "fearful":
-            stop_pct *= 1.1  # 10% wider when fearful
+        # Adjust based on volatility
+        stop_distance *= (1 + self.volatility)
         
-        # Calculate stop price
+        # Apply profile-specific multiplier
+        stop_distance *= self.risk_params.stop_loss_multiplier
+        
         if direction == "LONG":
-            stop_price = entry_price * (1 - stop_pct)
-        else:  # SHORT
-            stop_price = entry_price * (1 + stop_pct)
-        
-        return stop_price
+            return entry_price - stop_distance
+        else:
+            return entry_price + stop_distance
     
     def set_take_profit(self, direction: str, entry_price: float, stop_loss: float) -> List[Dict]:
-        """Set take-profit levels with 1:2 risk-reward for first target."""
+        """Set take profit levels based on strategic trader's profit-taking strategy."""
+        # Calculate risk distance
+        risk_distance = abs(entry_price - stop_loss)
+        
+        # Calculate minimum reward based on risk:reward ratio
+        min_reward = risk_distance * self.risk_params.min_risk_reward_ratio
+        
+        # Create multiple take profit levels
         take_profits = []
         
-        # Calculate risk in dollars
-        risk = abs(entry_price - stop_loss)
+        # First target: 1.5x risk
+        take_profits.append({
+            "price": entry_price + (min_reward * 0.6) if direction == "LONG" else entry_price - (min_reward * 0.6),
+            "percentage": 0.4  # 40% of position
+        })
         
-        # First take-profit at 1:2 risk/reward (strategic approach)
-        if direction == "LONG":
-            tp1_price = entry_price + (risk * 2)  # 1:2 risk reward
-            tp2_price = entry_price + (risk * 3)  # 1:3 risk reward
-            tp3_price = entry_price + (risk * 5)  # 1:5 risk reward
-        else:  # SHORT
-            tp1_price = entry_price - (risk * 2)  # 1:2 risk reward
-            tp2_price = entry_price - (risk * 3)  # 1:3 risk reward
-            tp3_price = entry_price - (risk * 5)  # 1:5 risk reward
+        # Second target: 2.5x risk
+        take_profits.append({
+            "price": entry_price + (min_reward * 1.0) if direction == "LONG" else entry_price - (min_reward * 1.0),
+            "percentage": 0.4  # 40% of position
+        })
         
-        # Strategic traders have more consistent take-profit approach
-        # Less affected by emotional state
-        take_profits = [
-            {"price": tp1_price, "percentage": 0.4, "hit": False},
-            {"price": tp2_price, "percentage": 0.4, "hit": False},
-            {"price": tp3_price, "percentage": 0.2, "hit": False}
-        ]
+        # Third target: 3.5x risk
+        take_profits.append({
+            "price": entry_price + (min_reward * 1.5) if direction == "LONG" else entry_price - (min_reward * 1.5),
+            "percentage": 0.2  # 20% of position
+        })
         
         return take_profits
     
-    def process_trade_result(self, result: float, trade_duration: float) -> None:
-        """Process the outcome of a trade with strategic discipline."""
-        # Update standard metrics
-        super().process_trade_result(result, trade_duration)
-        
-        # Update discipline metrics
-        if result > 0:
-            # For winning trades, were targets reached?
-            if trade_duration > 5.0:  # Longer duration suggests targets were reached
-                self.discipline_metrics["targets_reached"] += 1
-            else:
-                self.discipline_metrics["early_exits"] += 1
-                
-        # Strategic traders' emotional states are more stable
-        # Reduce emotional swings by overriding the emotional state updates
-        if self.state.emotional_state == "greedy" and result < 0:
-            # Losses more quickly return greedy traders to neutral
-            self.state.emotional_state = "neutral"
-            self.state.risk_appetite = max(0.3, self.state.risk_appetite - 0.1)
-        elif self.state.emotional_state == "fearful" and result > 0:
-            # Wins more quickly restore confidence from fearful state
-            self.state.emotional_state = "neutral"
-            self.state.risk_appetite = min(0.7, self.state.risk_appetite + 0.1)
-    
-    def print_status(self) -> None:
-        """Print current trader status with added discipline metrics."""
-        # Call the parent class method to print standard metrics
-        super().print_status()
-        
-        # Add discipline metrics
-        wins = self.state.winning_trades
-        losses = self.state.losing_trades
-        total_trades = wins + losses
-        
-        if total_trades > 0:
-            rules_followed_pct = (self.discipline_metrics["rules_followed"] / total_trades) * 100
-            targets_reached_pct = (self.discipline_metrics["targets_reached"] / max(1, wins)) * 100
-            
-            print(f"\n{CYAN}Discipline Metrics:{RESET}")
-            print(f"Rules Followed: {self.discipline_metrics['rules_followed']}/{total_trades} ({rules_followed_pct:.1f}%)")
-            print(f"Entries Skipped: {self.discipline_metrics['entries_skipped']}")
-            print(f"Rules Broken: {self.discipline_metrics['rules_broken']}")
-            print(f"Targets Reached: {self.discipline_metrics['targets_reached']}/{wins} ({targets_reached_pct:.1f}%)")
-            print(f"Early Exits: {self.discipline_metrics['early_exits']}")
-            
-            # Calculate and display patience score
-            patience_ratio = self.discipline_metrics["entries_skipped"] / max(1, self.discipline_metrics["entries_skipped"] + total_trades)
-            self.patience_score = 0.3 + (patience_ratio * 0.7)  # Scale to 0.3-1.0 range
-            print(f"Patience Score: {self.patience_score:.2f}/1.00")
-    
     def _find_nearest_level(self, price: float, levels_dict: Dict) -> Optional[Dict]:
-        """Find the nearest technical level to current price."""
+        """Find the nearest Fibonacci or support/resistance level."""
         if not levels_dict:
             return None
             
-        nearest_level = None
-        nearest_distance = float('inf')
+        nearest = None
+        min_distance = float('inf')
         
-        for level, level_price in levels_dict.items():
-            distance = abs(price - level_price)
-            if distance < nearest_distance:
-                nearest_distance = distance
-                # Convert level to float if possible
-                try:
-                    level_float = float(level)
-                except (ValueError, TypeError):
-                    level_float = level  # Keep as string if conversion fails
-                
-                nearest_level = {"level": level_float, "price": level_price, "distance": distance}
+        for level in levels_dict.values():
+            distance = abs(price - level["price"])
+            if distance < min_distance:
+                min_distance = distance
+                nearest = level
         
-        return nearest_level
+        return nearest if min_distance <= price * self.fib_proximity_threshold else None
     
     def _get_support_resistance_levels(self) -> Dict:
-        """Get support/resistance levels from Redis."""
-        try:
-            sr_data = self.redis_conn.hgetall("support_resistance_levels")
-            sr_levels = {}
-            
-            for level_name, price_str in sr_data.items():
-                if level_name != "timestamp":
-                    try:
-                        sr_levels[level_name] = float(price_str)
-                    except ValueError:
-                        pass
-                        
-            return sr_levels
-        except Exception:
-            return {}
+        """Get support and resistance levels based on Fibonacci retracements."""
+        levels = {}
+        
+        # Calculate Fibonacci levels
+        for fib in self.fib_levels:
+            levels[f"fib_{fib}"] = {
+                "price": self.current_price * fib,
+                "type": "fibonacci",
+                "strength": 0.7
+            }
+        
+        return levels
     
     def _is_support_level(self, price: float, fib_level: Optional[Dict], sr_level: Optional[Dict]) -> bool:
-        """Determine if the nearest level is a support level (below current price)."""
-        # For Fibonacci, levels below 0.5 are supports in an uptrend
-        if fib_level and fib_level["level"] <= 0.5:
-            return price > fib_level["price"]
-        
-        # For S/R, check if level is labeled as support
-        if sr_level and "support" in str(sr_level["level"]).lower():
-            return True
+        """Determine if a level is acting as support."""
+        if not fib_level:
+            return False
             
-        # Otherwise check if price is above the level
-        if sr_level:
-            return price > sr_level["price"]
+        # Check if price is near the level
+        if abs(price - fib_level["price"]) > price * self.fib_proximity_threshold:
+            return False
             
-        return False
+        # Check if price is bouncing up from the level
+        return self.trend_strength > self.trend_confirmation_threshold
     
     def _is_resistance_level(self, price: float, fib_level: Optional[Dict], sr_level: Optional[Dict]) -> bool:
-        """Determine if the nearest level is a resistance level (above current price)."""
-        # For Fibonacci, levels above 0.5 are resistances in a downtrend
-        if fib_level and fib_level["level"] >= 0.5:
-            return price < fib_level["price"]
-        
-        # For S/R, check if level is labeled as resistance
-        if sr_level and "resistance" in str(sr_level["level"]).lower():
-            return True
+        """Determine if a level is acting as resistance."""
+        if not fib_level:
+            return False
             
-        # Otherwise check if price is below the level
-        if sr_level:
-            return price < sr_level["price"]
+        # Check if price is near the level
+        if abs(price - fib_level["price"]) > price * self.fib_proximity_threshold:
+            return False
             
-        return False
+        # Check if price is bouncing down from the level
+        return self.trend_strength > self.trend_confirmation_threshold
     
     def _check_retest_confirmation(self, price: float, fib_level: Optional[Dict], sr_level: Optional[Dict]) -> bool:
-        """Check if a retest of a level has been confirmed by price action."""
-        # In a real system, this would analyze recent candles for confirmation
-        # For simulation, use a probability-based approach that improves with patience
+        """Check if price is confirming a level with a retest."""
+        if not fib_level:
+            return False
+            
+        # Check if price has recently tested the level
+        recent_trades = self.state.recent_trades[-5:]  # Look at last 5 trades
+        for trade in recent_trades:
+            if abs(trade["price"] - fib_level["price"]) <= price * self.fib_proximity_threshold:
+                return True
+                
+        return False
+    
+    def _calculate_current_leverage(self, market_context: Optional[Dict] = None) -> float:
+        """Calculate current leverage based on market conditions and profile."""
+        leverage = self.risk_params.base_leverage
         
-        # Get the level we're checking
-        level_price = None
-        if fib_level and sr_level:
-            # Use the closer level
-            if fib_level["distance"] < sr_level["distance"]:
-                level_price = fib_level["price"]
-            else:
-                level_price = sr_level["price"]
-        elif fib_level:
-            level_price = fib_level["price"]
-        elif sr_level:
-            level_price = sr_level["price"]
+        # Adjust based on volatility
+        if market_context and "recent_volatility" in market_context:
+            volatility = market_context["recent_volatility"]
+            if volatility > 0.02:  # High volatility
+                leverage *= 0.8
+            elif volatility < 0.01:  # Low volatility
+                leverage *= 1.2
+        
+        # Cap at max leverage
+        return min(leverage, self.risk_params.max_leverage)
+    
+    # ======== Fibonacci-specific methods for integration with FibonacciProfileTrader ========
+    
+    def determine_entry_level(self, fib_levels: Dict[str, float], pattern_type: str) -> float:
+        """
+        Determine entry price level based on Fibonacci levels and pattern type.
+        
+        Args:
+            fib_levels: Dictionary of calculated Fibonacci levels
+            pattern_type: Type of pattern detected (e.g., "Bullish Gartley")
+            
+        Returns:
+            Entry price level
+        """
+        # Primary entry is at 0.618 retracement for most patterns
+        if 'bullish' in pattern_type.lower():
+            # For bullish patterns, enter at 0.618 retracement
+            return fib_levels.get('0.618', fib_levels.get('0.5', list(fib_levels.values())[0]))
         else:
+            # For bearish patterns, enter at 0.618 retracement
+            return fib_levels.get('0.618', fib_levels.get('0.5', list(fib_levels.values())[0]))
+    
+    def determine_stop_loss(self, fib_levels: Dict[str, float], pattern_type: str, entry_price: float) -> float:
+        """
+        Determine stop loss price based on Fibonacci levels and pattern type.
+        
+        Args:
+            fib_levels: Dictionary of calculated Fibonacci levels
+            pattern_type: Type of pattern detected
+            entry_price: Entry price level
+            
+        Returns:
+            Stop loss price level
+        """
+        # Stop loss at 1.0 level for retracement patterns
+        if 'bullish' in pattern_type.lower():
+            # For bullish patterns, stop below 1.0 level
+            stop_level = fib_levels.get('1.0', fib_levels.get('0.786', entry_price * 0.95))
+            # Add a small buffer
+            return stop_level * 1.01
+        else:
+            # For bearish patterns, stop above 1.0 level
+            stop_level = fib_levels.get('1.0', fib_levels.get('0.786', entry_price * 1.05))
+            # Add a small buffer
+            return stop_level * 0.99
+    
+    def determine_take_profit(self, fib_levels: Dict[str, float], pattern_type: str, entry_price: float) -> float:
+        """
+        Determine take profit price based on Fibonacci levels and pattern type.
+        
+        Args:
+            fib_levels: Dictionary of calculated Fibonacci levels
+            pattern_type: Type of pattern detected
+            entry_price: Entry price level
+            
+        Returns:
+            Take profit price level
+        """
+        # Take profit at extension level
+        if 'bullish' in pattern_type.lower():
+            # For bullish patterns, target 1.618 extension
+            return fib_levels.get('1.618', entry_price * 1.05)
+        else:
+            # For bearish patterns, target 1.618 extension
+            return fib_levels.get('1.618', entry_price * 0.95)
+    
+    def calculate_risk_levels(self, entry_price: float, risk_percent: float, account_size: float) -> Dict[str, float]:
+        """
+        Calculate comprehensive risk levels for a trade.
+        
+        Args:
+            entry_price: Entry price level
+            risk_percent: Risk percentage for the trade
+            account_size: Current account size
+            
+        Returns:
+            Dictionary with position size, stop loss, and take profit levels
+        """
+        # Get risk parameters
+        risk_params = self._get_risk_parameters()
+        
+        # Calculate stop distance (2% of entry price by default)
+        stop_distance = entry_price * 0.02 * risk_params.stop_loss_multiplier
+        
+        # Calculate stop loss
+        stop_loss = entry_price - stop_distance  # For long position
+        
+        # Calculate take profit levels
+        take_profit_distance = stop_distance * risk_params.min_risk_reward_ratio
+        take_profit = entry_price + take_profit_distance  # For long position
+        
+        # Calculate position size based on risk
+        risk_amount = account_size * (risk_percent / 100)
+        position_size = risk_amount / stop_distance
+        
+        return {
+            "position_size": position_size,
+            "stop_loss": stop_loss,
+            "take_profit": take_profit,
+            "risk_amount": risk_amount
+        }
+    
+    def validate_trade_signal(self, signal: Any) -> bool:
+        """
+        Validate a trading signal based on strategic trader criteria.
+        
+        Args:
+            signal: Trading signal object
+            
+        Returns:
+            True if signal is valid, False otherwise
+        """
+        # Calculate risk-reward ratio
+        risk = abs(signal.entry_price - signal.stop_loss)
+        reward = abs(signal.take_profit - signal.entry_price)
+        risk_reward_ratio = reward / risk if risk > 0 else 0
+        
+        # Validate pattern confidence
+        min_confidence = 0.65  # Strategic traders want high confidence
+        if signal.confidence < min_confidence:
             return False
         
-        # Check if we had recent confirmation
-        last_retest_time = self.redis_conn.get("last_level_retest_time")
-        if last_retest_time:
-            time_since_retest = time.time() - float(last_retest_time)
-            if time_since_retest < self.min_retest_waiting_period:
-                # Not enough time has passed to confirm retest
-                return False
+        # Validate risk-reward ratio
+        min_rr = self._get_risk_parameters().min_risk_reward_ratio
+        if risk_reward_ratio < min_rr:
+            return False
         
-        # Higher patience score increases confirmation probability
-        confirmation_chance = 0.3 + (0.4 * self.patience_score)
-        is_confirmed = random.random() < confirmation_chance
+        # Validate risk percent
+        max_risk = self._get_risk_parameters().max_risk_per_trade * 100
+        if signal.risk_percent > max_risk:
+            return False
         
-        if is_confirmed:
-            # Store confirmation time
-            self.redis_conn.set("last_level_retest_time", time.time())
-            
-        return is_confirmed
+        return True
     
-    def _calculate_current_leverage(self, market_context: Optional[Dict]) -> float:
-        """Calculate appropriate leverage based on market conditions and trader state."""
-        # Base leverage range is 5-10x
-        leverage = self.base_leverage
+    def calculate_trailing_stop(self, position: Dict[str, Any], current_price: float) -> float:
+        """
+        Calculate trailing stop price based on position and current price.
         
-        # Get volatility info if available
-        volatility_factor = 1.0
-        if market_context:
-            # Lower leverage in high volatility
-            volatility = market_context.get("recent_volatility", 0)
-            if volatility > 300:
-                volatility_factor = 0.8
-            elif volatility > 500:
-                volatility_factor = 0.7
+        Args:
+            position: Position data including entry price and side
+            current_price: Current market price
+            
+        Returns:
+            Updated stop loss price
+        """
+        entry_price = float(position.get('entryPrice', 0))
+        position_side = position.get('side', '')
         
-        # Adjust leverage based on emotional state (less variation than aggressive)
-        if self.state.emotional_state == "greedy":
-            leverage *= 1.2  # 20% increase when greedy
-        elif self.state.emotional_state == "fearful":
-            leverage *= 0.8  # 20% decrease when fearful
+        # No trailing stop until 1.5% profit
+        min_profit_percent = 0.015  # 1.5%
         
-        # Applying volatility factor
-        leverage *= volatility_factor
+        if position_side == 'long':
+            profit_percent = (current_price - entry_price) / entry_price
+            if profit_percent < min_profit_percent:
+                return 0  # No trailing stop yet
+                
+            # Move stop to breakeven + 0.5% when 1.5% in profit
+            if profit_percent >= min_profit_percent and profit_percent < 0.03:
+                return entry_price * 1.005
+                
+            # Trail at 50% of profit when >3% in profit
+            if profit_percent >= 0.03:
+                trail_distance = (current_price - entry_price) * 0.5
+                return current_price - trail_distance
+        else:  # short
+            profit_percent = (entry_price - current_price) / entry_price
+            if profit_percent < min_profit_percent:
+                return 0  # No trailing stop yet
+                
+            # Move stop to breakeven + 0.5% when 1.5% in profit
+            if profit_percent >= min_profit_percent and profit_percent < 0.03:
+                return entry_price * 0.995
+                
+            # Trail at 50% of profit when >3% in profit
+            if profit_percent >= 0.03:
+                trail_distance = (entry_price - current_price) * 0.5
+                return current_price + trail_distance
         
-        # Ensure leverage stays within 5x-10x range
-        return max(5, min(leverage, 10))
+        return 0  # Default fallback
+    
+    def check_for_position_scaling(self, symbol: str, current_price: float, 
+                                  current_positions: List[Dict], 
+                                  market_data: Optional[Dict] = None) -> Tuple[bool, Optional[Dict]]:
+        """
+        Check if we should scale (add to) an existing position based on Fibonacci levels.
+        
+        Args:
+            symbol: Trading symbol
+            current_price: Current market price
+            current_positions: List of current open positions
+            market_data: Additional market data (volume, etc.)
+            
+        Returns:
+            Tuple[bool, Optional[Dict]]: (should_scale, scaling_info)
+        """
+        # Skip if scaling is disabled
+        if not self.enable_position_scaling:
+            return False, None
+            
+        # Get all open positions for the symbol
+        open_positions = [p for p in current_positions if 
+                          p.get('symbol') == symbol and 
+                          p.get('contracts', 0) > 0]
+        
+        if not open_positions:
+            return False, None
+            
+        # Only scale LONG positions for now (modify logic for shorts if needed)
+        long_positions = [p for p in open_positions if p.get('direction', '').upper() == 'LONG']
+        if not long_positions:
+            return False, None
+            
+        # Check if we've reached the maximum number of additions
+        symbol_key = symbol.replace('/', '_').replace(':', '_')
+        current_additions = self.position_additions_count.get(symbol_key, 0)
+        if current_additions >= self.max_position_additions:
+            return False, None
+            
+        # Check for cooldown period
+        last_scale_time = self.recent_scaling_operations.get(symbol_key, 0)
+        current_time = time.time()
+        if (current_time - last_scale_time) < self.scaling_cooldown_seconds:
+            # Still in cooldown period
+            return False, None
+            
+        # Calculate weighted average entry price and total size
+        total_size = sum(float(p.get('contracts', 0)) for p in long_positions)
+        weighted_entry = sum(float(p.get('entryPrice', 0)) * float(p.get('contracts', 0)) 
+                            for p in long_positions) / total_size
+        
+        # Generate Fibonacci retracement levels from our high and low
+        # Either use stored high/low swing points or derive from position entry
+        if self.last_swing_high is None or self.last_swing_low is None:
+            # If we don't have swing points, use entry price +/- 5% for estimation
+            high_price = weighted_entry * 1.05
+            low_price = weighted_entry * 0.95
+        else:
+            high_price = self.last_swing_high
+            low_price = self.last_swing_low
+        
+        # Calculate Fibonacci retracement levels
+        fib_levels = self.calculate_fibonacci_retracements(high_price, low_price)
+        
+        # Check if current price is near a scaling Fibonacci level
+        for fib_level in self.scaling_fib_levels:
+            level_key = str(fib_level)
+            if level_key in fib_levels:
+                level_price = fib_levels[level_key]
+                
+                # Check if price is within proximity threshold of this level
+                price_diff_pct = abs(current_price - level_price) / level_price
+                
+                if price_diff_pct <= self.scale_proximity_threshold:
+                    # We're at a scaling fib level - check volume if available
+                    if self.check_volume_confirmation(market_data):
+                        # Check for MM traps before scaling
+                        if self.check_for_mm_traps(current_price, symbol):
+                            # Calculate the size for this addition
+                            base_size = float(long_positions[0].get('contracts', 0))
+                            # Use a progressively smaller size for each addition
+                            adjustment_factor = self.scale_size_multiplier / (1 + current_additions * 0.25)
+                            scale_size = base_size * adjustment_factor
+                            
+                            # Calculate new stop loss based on weighted average
+                            new_stop_loss = self.calculate_dynamic_stop_loss(
+                                weighted_entry, 
+                                current_additions + 1,
+                                current_price
+                            )
+                            
+                            # Prepare scaling info
+                            scaling_info = {
+                                'side': 'long',
+                                'size': scale_size,
+                                'reason': f"Adding at {level_key} Fibonacci level",
+                                'current_price': current_price,
+                                'weighted_entry': weighted_entry,
+                                'fib_level': level_key,
+                                'stop_loss': new_stop_loss
+                            }
+                            
+                            # Update records
+                            self.position_additions_count[symbol_key] = current_additions + 1
+                            self.recent_scaling_operations[symbol_key] = current_time
+                            
+                            return True, scaling_info
+        
+        return False, None
+    
+    def calculate_fibonacci_retracements(self, high_price: float, low_price: float) -> Dict[str, float]:
+        """
+        Calculate Fibonacci retracement and extension levels for scaling decisions.
+        
+        Args:
+            high_price: The swing high price
+            low_price: The swing low price
+            
+        Returns:
+            Dict of Fibonacci levels with prices
+        """
+        # Calculate the price range
+        price_range = high_price - low_price
+        
+        # Standard Fibonacci retracement levels
+        levels = {
+            '0': low_price,
+            '0.236': low_price + 0.236 * price_range,
+            '0.382': low_price + 0.382 * price_range,
+            '0.5': low_price + 0.5 * price_range,
+            '0.618': low_price + 0.618 * price_range,
+            '0.786': low_price + 0.786 * price_range,
+            '1.0': high_price,
+        }
+        
+        # Add Fibonacci extension levels (these are below the low for downward extensions)
+        levels.update({
+            '1.618': low_price - 0.618 * price_range,  # Extension below
+            '2.618': low_price - 1.618 * price_range,  # Deeper extension
+            '4.236': low_price - 3.236 * price_range,  # Major extension
+        })
+        
+        # Store for future reference
+        self.fibonacci_retracements = levels
+        
+        return levels
+    
+    def check_volume_confirmation(self, market_data: Optional[Dict]) -> bool:
+        """
+        Check if volume supports adding to the position.
+        
+        Args:
+            market_data: Market data with volume information
+            
+        Returns:
+            bool: True if volume supports scaling, False otherwise
+        """
+        if not market_data:
+            # Default to conservative approach if no data
+            return False
+            
+        # Extract volume info
+        current_volume = market_data.get('volume', 0)
+        avg_volume = market_data.get('average_volume', 0)
+        
+        # Ensure we have both values
+        if current_volume <= 0 or avg_volume <= 0:
+            return False
+            
+        # Check if current volume exceeds our threshold compared to average
+        volume_factor = current_volume / avg_volume
+        
+        return volume_factor >= self.scale_min_volume_factor
+    
+    def check_for_mm_traps(self, current_price: float, symbol: str) -> bool:
+        """
+        Check for market maker traps before scaling.
+        
+        Args:
+            current_price: Current market price
+            symbol: Trading symbol
+            
+        Returns:
+            bool: True if no trap detected, False if trap detected
+        """
+        try:
+            # Simple implementation - in a real system, integrate with mm_trap_detector
+            # You would normally import and use your trap detector here
+            
+            # Create a random chance of trap detection for this demo
+            # This is a placeholder - implement real trap detection logic
+            random_value = random.random()
+            trap_detected = random_value < 0.2  # 20% chance of trap detection
+            
+            if trap_detected:
+                logger.warning(f"MM TRAP DETECTED at {current_price} for {symbol} - Avoiding position scaling")
+                return False
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking MM traps: {str(e)}")
+            # Default to being cautious if detector fails
+            return False
+    
+    def calculate_dynamic_stop_loss(self, weighted_entry: float, additions_count: int, 
+                                   current_price: float) -> float:
+        """
+        Calculate a dynamic stop loss based on weighted average entry and number of additions.
+        
+        Args:
+            weighted_entry: Weighted average entry price
+            additions_count: Number of additions to the position
+            current_price: Current market price
+            
+        Returns:
+            float: New stop loss price
+        """
+        # Base risk percentage - decrease with each addition (tighten stop loss)
+        base_risk_pct = self.risk_params.max_risk_per_trade * (1 - (additions_count * 0.1))
+        
+        # Don't let the risk go below 0.5%
+        risk_pct = max(0.005, base_risk_pct)
+        
+        # Calculate stop loss below weighted entry
+        stop_loss = weighted_entry * (1 - risk_pct)
+        
+        # If price has moved up significantly, implement a trailing stop
+        upside_buffer = weighted_entry * 0.01  # 1% buffer
+        if current_price > (weighted_entry + upside_buffer):
+            # Price has moved up - implement trailing stop at (price - trailing_distance)
+            trailing_distance = current_price * risk_pct * 1.5  # 1.5x normal distance for trailing
+            trailing_stop = current_price - trailing_distance
+            
+            # Use the higher of the two stops
+            stop_loss = max(stop_loss, trailing_stop)
+        
+        return stop_loss
+    
+    def update_swing_points(self, new_price: float, timestamp: datetime) -> None:
+        """
+        Update the swing high/low points used for Fibonacci calculations.
+        
+        Args:
+            new_price: The latest price
+            timestamp: The timestamp of the price
+        """
+        # In a full implementation, this would use a proper swing point detection algorithm
+        # For this demo, we'll use a simple approach:
+        
+        # Initialize swing points if they don't exist
+        if self.last_swing_high is None:
+            self.last_swing_high = new_price * 1.05  # Estimate
+        if self.last_swing_low is None:
+            self.last_swing_low = new_price * 0.95  # Estimate
+        
+        # Update swing high if we have a new high
+        if new_price > self.last_swing_high:
+            self.last_swing_high = new_price
+            # If we make a new high, we might be in an uptrend
+            self.current_uptrend = True
+            
+        # Update swing low if we have a new low
+        if new_price < self.last_swing_low:
+            self.last_swing_low = new_price
+            # If we make a new low, we might be in a downtrend
+            self.current_uptrend = False

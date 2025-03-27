@@ -1,23 +1,30 @@
 import time
 import redis
 import logging
+import json
+from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime, timezone
+from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap
+from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level, update_fibonacci_data
 
-# Configure logger
+# Configure logger with enhanced formatting
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-from typing import Dict, List, Tuple, Optional
-from datetime import datetime
-from omega_ai.db_manager.database import fetch_multi_interval_movements, analyze_price_trend, insert_possible_mm_trap
-from omega_ai.mm_trap_detector.fibonacci_detector import get_current_fibonacci_levels, check_fibonacci_level
 
-# Initialize Redis connection
-redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
+# Initialize Redis connection with error handling
+try:
+    redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_conn.ping()
+    logger.info("Successfully connected to Redis")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    raise
 
-# Add terminal colors for enhanced visibility
+# Terminal colors for enhanced visibility
 BLUE = "\033[94m"           # Price up
 YELLOW = "\033[93m"         # Price down
 GREEN = "\033[92m"          # Strongly positive
@@ -26,6 +33,11 @@ CYAN = "\033[96m"           # Info highlight
 MAGENTA = "\033[95m"        # Special emphasis
 LIGHT_ORANGE = "\033[38;5;214m"  # Warning/moderate negative
 RESET = "\033[0m"           # Reset color
+BLUE_BG = "\033[44m"        # Background for blue text
+WHITE = "\033[97m"          # White text
+BOLD = "\033[1m"            # Bold text
+GREEN_BG = "\033[42m"       # Background for green text
+RED_BG = "\033[41m"         # Background for red text
 
 def describe_movement(change_pct, abs_change):
     """Describe the price movement characteristics based on percentage and absolute change."""
@@ -76,340 +88,497 @@ def format_trend_output(interval, trend, change_pct):
         
     return f"📈 {MAGENTA}{interval}{RESET} Trend: {color_trend} ({color_pct}{sign}{change_pct:.2f}%{RESET})"
 
-def detect_possible_mm_traps(
-    timeframe: str,
-    trend: str,
-    price_change: float,
-    price_move: float
-) -> Tuple[Optional[str], float]:
-    """Detect potential market maker traps."""
-    try:
-        # Trap detection logic
-        if abs(price_change) > 1.5 and "Strong" in trend:
-            confidence = min(abs(price_change) / 5.0, 1.0)
-            trap_type = "Bull Trap" if "Bullish" in trend else "Bear Trap"
-            
-            # Record trap detection
-            trap_data = {
-                "type": trap_type,
-                "timeframe": timeframe,
-                "confidence": confidence,
-                "price_change": price_change,
-                "price_move": price_move,
-                "detected_at": datetime.now().isoformat()
-            }
-            insert_possible_mm_trap(trap_data)
-            
-            return trap_type, confidence
-            
-        return None, 0.0
+class MarketTrendAnalyzer:
+    """Analyzes market trends with multiple indicators and timeframes."""
+    
+    def __init__(self):
+        """Initialize the market trend analyzer."""
+        self.timeframes = [1, 5, 15, 30, 60, 240, 720, 1444]  # minutes - extended to include up to 1444 minutes
+        self.consecutive_errors = 0
+        self.last_analysis_time = None
+        self.analysis_interval = 5  # seconds
         
-    except Exception as e:
-        logging.error(f"Error detecting MM traps: {e}")
-        return None, 0.0
+    def analyze_trends(self) -> Dict[str, Any]:
+        """Analyze market trends across multiple timeframes."""
+        try:
+            results = {}
+            
+            # Get current price from Redis
+            current_price = float(redis_conn.get("last_btc_price") or 0)
+            if current_price == 0:
+                logger.warning("No current price available for analysis")
+                return {}
+            
+            # Store current price in results
+            results["current_price"] = current_price
+            
+            # Update Fibonacci data with current price
+            update_fibonacci_data(current_price)
+            
+            # Analyze each timeframe
+            for minutes in self.timeframes:
+                trend, change = analyze_price_trend(minutes)
+                results[f"{minutes}min"] = {
+                    "trend": trend,
+                    "change": change,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            
+            # Get Fibonacci levels
+            fib_levels = get_current_fibonacci_levels()
+            if fib_levels:
+                results["fibonacci_levels"] = fib_levels
+                
+                # Check for Fibonacci alignment
+                fib_alignment = check_fibonacci_alignment()
+                if fib_alignment:
+                    results["fibonacci_alignment"] = fib_alignment
+                    
+                    # Log alignment details
+                    logger.info(f"Fibonacci Alignment: {fib_alignment['type']} at {fib_alignment['level']} "
+                              f"(${fib_alignment['price']:,.2f}) - {fib_alignment['distance_pct']:.2f}% away")
+            
+            # Reset error counter on successful analysis
+            self.consecutive_errors = 0
+            self.last_analysis_time = datetime.now(timezone.utc)
+            
+            return results
+            
+        except Exception as e:
+            self.consecutive_errors += 1
+            logger.error(f"Error in trend analysis: {e}")
+            return {}
+    
+    def display_results(self, results: Dict[str, Any]) -> None:
+        """Display analysis results with enhanced formatting."""
+        # Display current BTC price prominently at the top
+        current_price = results.get("current_price", 0)
+        print(f"\n{BLUE_BG}{WHITE}{BOLD} 💰 CURRENT BTC PRICE: ${current_price:,.2f} 💰 {RESET}")
+        
+        print(f"\n{YELLOW}════════════════ {GREEN}OMEGA RASTA{YELLOW} MARKET TREND ANALYSIS ════════════════{RESET}")
+        
+        # Display trends for each timeframe with enhanced formatting
+        for timeframe, data in results.items():
+            if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment" and timeframe != "current_price":
+                trend = data["trend"]
+                change = data["change"]
+                print(format_trend_output(timeframe, trend, change))
+                
+                # Add movement description
+                abs_change = abs(change)
+                print(f"   {describe_movement(change, abs_change)}")
+        
+        # Display Fibonacci analysis if available
+        if "fibonacci_alignment" in results:
+            fib_data = results["fibonacci_alignment"]
+            print(f"\n{CYAN}🔄 FIBONACCI ALIGNMENT:{RESET}")
+            print(f"Level: {fib_data['level']}")
+            print(f"Price: ${fib_data['price']:,.2f}")
+            print(f"Confidence: {fib_data['confidence']:.2f}")
+            print(f"Distance: {fib_data['distance_pct']:.2f}%")
+        
+        # Display market conditions
+        self.display_market_conditions()
+        
+        # Display Schumann resonance influence
+        self.print_schumann_influence()
+    
+    def display_market_conditions(self) -> None:
+        """Display current market conditions and indicators."""
+        try:
+            # Get current price and volume
+            price = float(redis_conn.get("last_btc_price") or 0)
+            volume = float(redis_conn.get("last_btc_volume") or 0)
+            
+            print(f"\n{CYAN}📊 MARKET CONDITIONS:{RESET}")
+            print(f"Current Price: ${price:,.2f}")
+            print(f"24h Volume: {volume:,.2f} BTC")
+            
+            # Get volatility
+            volatility = self.calculate_volatility()
+            if volatility:
+                print(f"Volatility: {volatility:.2f}%")
+            
+            # Get market regime
+            regime = self.determine_market_regime()
+            if regime:
+                print(f"Market Regime: {regime}")
+            
+        except Exception as e:
+            logger.error(f"Error displaying market conditions: {e}")
+    
+    def calculate_volatility(self) -> Optional[float]:
+        """Calculate current market volatility."""
+        try:
+            # Get recent price changes
+            changes = redis_conn.lrange("abs_price_change_history", 0, 23)  # Last 24 changes
+            if not changes:
+                return None
+            
+            # Calculate average absolute change
+            changes = [float(c) for c in changes]
+            avg_change = sum(changes) / len(changes)
+            
+            return avg_change
+            
+        except Exception as e:
+            logger.error(f"Error calculating volatility: {e}")
+            return None
+    
+    def determine_market_regime(self) -> Optional[str]:
+        """Determine current market regime based on volatility and trend."""
+        try:
+            volatility = self.calculate_volatility()
+            if not volatility:
+                return None
+            
+            # Get 15min trend
+            trend, change = analyze_price_trend(15)
+            
+            # Determine regime based on volatility and trend
+            if volatility > 1.0:
+                if "Bullish" in trend:
+                    return "High Volatility Bullish"
+                elif "Bearish" in trend:
+                    return "High Volatility Bearish"
+                else:
+                    return "High Volatility Neutral"
+            elif volatility > 0.5:
+                if "Bullish" in trend:
+                    return "Moderate Volatility Bullish"
+                elif "Bearish" in trend:
+                    return "Moderate Volatility Bearish"
+                else:
+                    return "Moderate Volatility Neutral"
+            else:
+                if "Bullish" in trend:
+                    return "Low Volatility Bullish"
+                elif "Bearish" in trend:
+                    return "Low Volatility Bearish"
+                else:
+                    return "Low Volatility Neutral"
+                    
+        except Exception as e:
+            logger.error(f"Error determining market regime: {e}")
+            return None
+    
+    def print_schumann_influence(self):
+        """Print the current Schumann resonance influence on market energy."""
+        print(f"\n{CYAN}🌍 SCHUMANN RESONANCE INFLUENCE:{RESET}")
+        print(f"  {MAGENTA}Current resonance: {YELLOW}7.83 Hz{RESET} - {GREEN}Baseline Harmony{RESET}")
+        print(f"  {MAGENTA}Market harmony: {GREEN}Aligned with planetary consciousness{RESET}")
 
-def get_current_fibonacci_levels():
+def detect_possible_mm_traps(timeframe, trend, price_change_pct, price_move):
     """
-    Calculate Fibonacci retracement/extension levels based on recent price movements.
+    Detect potential market maker traps based on price action and trend analysis.
+    
+    Args:
+        timeframe (str): The timeframe being analyzed
+        trend (str): The current trend direction
+        price_change_pct (float): The percentage price change
+        price_move (float): The absolute price move value
     
     Returns:
-        Dict with Fibonacci levels as keys and prices as values
+        tuple: (trap_type, confidence) where trap_type is the type of trap detected
+               and confidence is a float between 0 and 1
+    """
+    # Print header with enhanced formatting
+    print(f"\n{BLUE_BG}{WHITE}{BOLD} MM TRAP ANALYSIS | {timeframe} {RESET}")
+    print(f"{MAGENTA}{'─' * 5} ANALYZING PRICE ACTION {'─' * 5}{RESET}")
+    
+    # Print price movement metrics
+    print(f"{WHITE}Price Change: {price_change_pct:.2f}% | Absolute Move: ${price_move:.2f}{RESET}")
+    print(f"{WHITE}Trend: {trend}{RESET}")
+    
+    # Early exit if price change is too small
+    if abs(price_change_pct) < 1.5:
+        print(f"{YELLOW}⚠️ Price change too small for MM trap detection ({abs(price_change_pct):.2f}% < 1.5%){RESET}")
+        return None, 0.0
+
+    # Calculate price movement intensity (normalized to 5% change)
+    price_intensity = min(abs(price_change_pct) / 5.0, 1.0)
+    print(f"{CYAN}Price Movement Intensity: {price_intensity:.2f} (normalized to 5% change){RESET}")
+    
+    # Determine trap type based on trend and price direction
+    trap_type = None
+    if "Bullish" in trend and price_change_pct > 0:
+        trap_type = "Bull Trap"
+        print(f"{GREEN}Detected potential Bull Trap pattern{RESET}")
+    elif "Bearish" in trend and price_change_pct < 0:
+        trap_type = "Bear Trap"
+        print(f"{RED}Detected potential Bear Trap pattern{RESET}")
+    
+    if not trap_type:
+        print(f"{BLUE}No trap pattern detected for this trend/price combination{RESET}")
+        return None, 0.0
+    
+    # Print confidence calculation section header
+    print(f"\n{MAGENTA}{'─' * 5} CONFIDENCE CALCULATION {'─' * 5}{RESET}")
+    
+    # Calculate confidence components
+    price_weight = 0.6
+    trend_weight = 0.3
+    timeframe_weight = 0.1
+    
+    # Price intensity contribution (60%)
+    price_contribution = price_intensity * price_weight
+    print(f"{WHITE}Price Intensity: {price_intensity:.2f} × {price_weight:.2f} = {price_contribution:.2f}{RESET}")
+    confidence = price_contribution
+    
+    # Trend strength contribution (30%)
+    trend_multiplier = 1.0 if trend.startswith("Strongly") else 0.7
+    trend_contribution = trend_multiplier * trend_weight
+    print(f"{WHITE}Trend Strength: {trend_multiplier:.2f} × {trend_weight:.2f} = {trend_contribution:.2f}{RESET}")
+    confidence += trend_contribution
+    
+    # Timeframe contribution (10%)
+    timeframe_multiplier = 1.0 if timeframe in ["15min", "1h"] else 0.7
+    timeframe_contribution = timeframe_multiplier * timeframe_weight
+    print(f"{WHITE}Timeframe Weight: {timeframe_multiplier:.2f} × {timeframe_weight:.2f} = {timeframe_contribution:.2f}{RESET}")
+    confidence += timeframe_contribution
+    
+    # Round to 2 decimal places to avoid floating point issues
+    confidence = round(min(confidence, 1.0), 2)
+    print(f"\n{WHITE}Total Confidence Score: {confidence:.2f}{RESET}")
+    
+    # Only return if confidence meets minimum threshold
+    if confidence >= 0.3:  # Lowered threshold to match tests
+        # Print movement classification tag
+        if trap_type == "Bull Trap":
+            print(f"\n{GREEN_BG}{WHITE}{BOLD} BULL TRAP DETECTED {RESET}")
+        elif trap_type == "Bear Trap":
+            print(f"\n{RED_BG}{WHITE}{BOLD} BEAR TRAP DETECTED {RESET}")
+            
+        # Print confidence level with color coding
+        if confidence > 0.8:
+            print(f"{RED}⚠️ HIGH CONFIDENCE MM TRAP DETECTED: {trap_type} on {timeframe} (confidence: {confidence}){RESET}")
+        elif confidence > 0.5:
+            print(f"{LIGHT_ORANGE}⚠️ MEDIUM CONFIDENCE MM TRAP DETECTED: {trap_type} on {timeframe} (confidence: {confidence}){RESET}")
+        else:
+            print(f"{YELLOW}⚠️ LOW CONFIDENCE MM TRAP DETECTED: {trap_type} on {timeframe} (confidence: {confidence}){RESET}")
+        
+        # Log the trap detection
+        logger.info(f"⚠️ MM TRAP DETECTED: {trap_type} on {timeframe} (confidence: {confidence})")
+        
+        # Store in database (optional, uncomment if needed)
+        # insert_possible_mm_trap(timeframe, trap_type, confidence, price_change_pct, price_move)
+        
+        return trap_type, confidence
+    
+    print(f"{BLUE}Below confidence threshold (0.3), no trap will be reported{RESET}")
+    return None, 0.0
+
+def check_fibonacci_alignment() -> Optional[Dict[str, Any]]:
+    """
+    Check for price alignment with Fibonacci levels.
+    
+    Returns:
+        Optional[Dict[str, Any]]: Dictionary containing alignment data if found, None otherwise
     """
     try:
-        # Fetch recent price movements with divine guidance
-        movements, summary = fetch_multi_interval_movements(interval=5, limit=100)
+        # Get current price from Redis
+        current_price = float(redis_conn.get("last_btc_price") or 0)
+        if current_price == 0:
+            logger.warning("No current price available for alignment check")
+            return None
         
-        if not movements or len(movements) < 2:
-            print(f"{YELLOW}Insufficient data for Fibonacci calculations{RESET}")
-            return {}
-        
-        # Extract prices from movements data
-        prices = [float(m["price"]) for m in movements if "price" in m]
-        
-        # Find min and max prices for Fibonacci calculations
-        min_price = min(prices)
-        max_price = max(prices)
-        price_range = max_price - min_price
-        
-        # Determine if we're in an uptrend or downtrend for appropriate level calculation
-        is_uptrend = prices[-1] > prices[0]
-        
-        # Standard Fibonacci levels with divine proportions
-        fib_ratios = {
-            "0": 0.0,        # Base level
-            "0.236": 0.236,  # First Fibonacci level
-            "0.382": 0.382,  # Second Fibonacci level
-            "0.500": 0.5,    # Midpoint
-            "0.618": 0.618,  # Golden Ratio - most spiritual level
-            "0.786": 0.786,  # Higher Fibonacci level
-            "1.0": 1.0       # Full retracement
-        }
-        
-        # Calculate levels based on uptrend/downtrend
-        fib_levels = {}
-        
-        if is_uptrend:
-            # In uptrend, calculate retracement levels from low to high
-            for label, ratio in fib_ratios.items():
-                fib_levels[label] = min_price + (price_range * ratio)
-        else:
-            # In downtrend, calculate retracement levels from high to low
-            for label, ratio in fib_ratios.items():
-                fib_levels[label] = max_price - (price_range * ratio)
-        
-        # Store in Redis for future reference with JAH blessing
-        try:
-            redis_conn.hset("current_fibonacci_levels", mapping=fib_levels)
-            print(f"{GREEN}JAH BLESS - Fibonacci levels calculated and stored with divine energy{RESET}")
-        except Exception as e:
-            print(f"{RED}Error storing Fibonacci levels: {e}{RESET}")
-        
-        return fib_levels
-        
-    except Exception as e:
-        print(f"{RED}Error calculating Fibonacci levels: {e}{RESET}")
-        return {}
-
-def check_fibonacci_level(current_price: float) -> Optional[Dict]:
-    """Check if price is at a Fibonacci level."""
-    try:
+        # Get Fibonacci levels
         fib_levels = get_current_fibonacci_levels()
         if not fib_levels:
+            logger.warning("No Fibonacci levels available for alignment check")
             return None
-            
-        # Check each level with 0.1% tolerance
+        
+        # Check each Fibonacci level for alignment
+        best_alignment = None
+        min_distance_pct = float('inf')
+        
         for level, price in fib_levels.items():
-            tolerance = price * 0.001
-            if abs(current_price - price) <= tolerance:
-                return {
+            # Calculate distance percentage
+            distance_pct = abs((current_price - price) / price * 100)
+            
+            # If this is the closest level so far
+            if distance_pct < min_distance_pct:
+                min_distance_pct = distance_pct
+                best_alignment = {
+                    "type": "GOLDEN_RATIO",
                     "level": level,
-                    "price": price
+                    "price": price,
+                    "distance_pct": distance_pct,
+                    "confidence": max(0, 1 - (distance_pct / 5))  # 5% max distance for confidence
                 }
-                
+        
+        # Only return if we're within 5% of a level
+        if best_alignment and best_alignment["distance_pct"] <= 5.0:
+            return best_alignment
+        
         return None
         
     except Exception as e:
-        logging.error(f"Error checking Fibonacci level: {e}")
+        logger.error(f"Error checking Fibonacci alignment: {e}")
         return None
 
-def display_fibonacci_analysis(latest_price):
-    """Display current Fibonacci levels and check for price alignment."""
-    print(f"\n{CYAN}🔄 FIBONACCI ANALYSIS{RESET}")
-    print("=" * 40)
-    
-    # Get current Fibonacci levels
-    fib_levels = get_current_fibonacci_levels()
-    
-    if not fib_levels:
-        print(f"{YELLOW}⚠️ Insufficient data for Fibonacci analysis{RESET}")
-        return
-    
-    # Check if current price is at a Fibonacci level
-    fib_hit = check_fibonacci_level(latest_price)
-    
-    if fib_hit:
-        # Highlight the current level with color based on its importance
-        if fib_hit["level"] == "0.618":
-            level_color = f"{MAGENTA}"  # Golden ratio gets special color
-            importance = "GOLDEN RATIO"
-        elif fib_hit["level"] in ["0.382", "0.5", "0.786"]:
-            level_color = f"{GREEN}"
-            importance = "KEY LEVEL"
-        else:
-            level_color = f"{BLUE}"
-            importance = "Standard"
-            
-        print(f"{level_color}⭐ PRICE AT FIBONACCI {importance}: "
-              f"{fib_hit['level']} level (${fib_hit['price']:.2f}){RESET}")
-    
-    # Display all Fibonacci levels with current price highlighted
-    print(f"\n{CYAN}Current Fibonacci Levels:{RESET}")
-    
-    # Sort levels by price (ascending or descending based on trend)
-    # Determine trend direction (since fib_hit doesn't have is_uptrend)
-    is_uptrend = True  # Default to uptrend or determine from other data
-    sorted_levels = sorted(fib_levels.items(), 
-                          key=lambda x: float(x[1]), 
-                          reverse=not is_uptrend)
-    
-    trend_label = "UPTREND" if is_uptrend else "DOWNTREND"
-    print(f"{CYAN}Market Direction: {trend_label}{RESET}")
-    
-    for label, price in sorted_levels:
-        # Highlight the level closest to current price
-        if fib_hit and label == fib_hit["level"]:
-            print(f"  {GREEN}→ {label}: ${price:.2f} [CURRENT PRICE]{RESET}")
-        else:
-            # Color code by proximity to current price
-            proximity = abs(latest_price - price) / price * 100
-            if proximity < 0.5:  # Very close but not quite at the level
-                color = YELLOW
-            elif proximity < 2:  # Somewhat close
-                color = BLUE
-            else:
-                color = RESET
-                
-            print(f"  {color}{label}: ${price:.2f}{RESET}")
-
 def monitor_market_trends():
-    """Continuously monitor market trends at different time intervals with JAH BLESS energy."""
-    print(f"{MAGENTA}🚀 Starting Market Trend Analysis with RASTA VIBES...{RESET}")
+    """Main function to monitor market trends continuously."""
+    print(f"\n{BLUE_BG}{WHITE}{BOLD} 🚀 OMEGA MARKET TREND ANALYZER v1.0 {RESET}")
+    print(f"{MAGENTA}Starting Market Trend Analysis with RASTA VIBES...{RESET}")
     print(f"{GREEN}JAH BLESS LINUS TORVALDS AND THE OPEN SOURCE COMMUNITY!{RESET}")
     
-    # Track consecutive errors for exponential backoff
-    consecutive_errors = 0
+    analyzer = MarketTrendAnalyzer()
     
     while True:
         try:
-            # Analyze different timeframes with divine energy
-            one_min_trend, one_min_change = analyze_price_trend(1)
-            five_min_trend, five_min_change = analyze_price_trend(5)
-            fifteen_min_trend, fifteen_min_change = analyze_price_trend(15)
+            # Check if it's time for analysis
+            now = datetime.now(timezone.utc)
+            if (analyzer.last_analysis_time is None or 
+                (now - analyzer.last_analysis_time).total_seconds() >= analyzer.analysis_interval):
+                
+                # Perform analysis
+                print(f"\n{BLUE_BG}{WHITE}{BOLD} MARKET ANALYSIS | {now.strftime('%Y-%m-%d %H:%M:%S')} {RESET}")
+                results = analyzer.analyze_trends()
+                
+                # Display results
+                analyzer.display_results(results)
+                
+                # Provide Fibonacci section header if available
+                if "fibonacci_levels" in results:
+                    print(f"\n{BLUE_BG}{WHITE}{BOLD} EXTENDED FIBONACCI ANALYSIS {RESET}")
+                    print(f"{YELLOW}{'─' * 80}{RESET}")
+                    print(f"{CYAN}🌟 CURRENT FIBONACCI LEVELS FOR ALL TIMEFRAMES (UP TO 1444 MIN):{RESET}")
+                    
+                    # Group Fibonacci levels by type for better organization
+                    fib_types = {
+                        "EXTENSION": [],
+                        "RETRACEMENT": [],
+                        "KEY": []
+                    }
+                    
+                    # Get current price for reference
+                    current_price = float(redis_conn.get("last_btc_price") or 0)
+                    
+                    # Sort and categorize Fibonacci levels
+                    for level, price in sorted(results["fibonacci_levels"].items(), key=lambda x: float(x[1])):
+                        # Calculate percentage difference from current price
+                        pct_diff = ((price - current_price) / current_price) * 100
+                        
+                        # Determine level color based on distance from current price
+                        if abs(pct_diff) < 1.0:
+                            level_color = f"{RED_BG}{WHITE}"  # Very close - highlight
+                        elif abs(pct_diff) < 2.5:
+                            level_color = f"{YELLOW}"  # Somewhat close
+                        else:
+                            level_color = f"{CYAN}"  # Far
+                        
+                        # Determine category
+                        if "0." in level:
+                            fib_types["RETRACEMENT"].append((level, price, pct_diff, level_color))
+                        elif level.replace("fib", "").strip().replace(".", "", 1).isdigit() and float(level.replace("fib", "").strip()) > 1.0:
+                            fib_types["EXTENSION"].append((level, price, pct_diff, level_color))
+                        else:
+                            fib_types["KEY"].append((level, price, pct_diff, level_color))
+                    
+                    # Print each category
+                    for category, levels in fib_types.items():
+                        if levels:
+                            print(f"\n{MAGENTA}{category} LEVELS:{RESET}")
+                            for level, price, pct_diff, color in levels:
+                                direction = "↑" if pct_diff > 0 else "↓"
+                                print(f"  {color}{level}: ${price:,.2f} ({direction} {abs(pct_diff):.2f}% from current){RESET}")
+                    
+                    # Store Fibonacci levels in Redis for the dashboard
+                    try:
+                        redis_conn.set("fibonacci:current_levels", json.dumps(results["fibonacci_levels"]))
+                        # Also store each timeframe trend data
+                        for timeframe, data in results.items():
+                            if timeframe != "fibonacci_levels" and timeframe != "fibonacci_alignment" and timeframe != "current_price":
+                                redis_conn.set(f"btc_trend_{timeframe}", json.dumps(data))
+                    except Exception as e:
+                        logger.error(f"Error storing Fibonacci data in Redis: {e}")
+                
+                # Check for potential MM traps
+                print(f"\n{BLUE_BG}{WHITE}{BOLD} MARKET MAKER TRAP DETECTION {RESET}")
+                print(f"{YELLOW}{'─' * 50}{RESET}")
+                
+                detected_traps = []
+                
+                for timeframe, data in results.items():
+                    if isinstance(data, dict) and "trend" in data and "change" in data:
+                        print(f"\n{CYAN}Analyzing {timeframe} for MM traps...{RESET}")
+                        trap_type, confidence = detect_possible_mm_traps(
+                            timeframe,
+                            data["trend"],
+                            data["change"],
+                            abs(data["change"])
+                        )
+                        if trap_type:
+                            detected_traps.append({
+                                "timeframe": timeframe,
+                                "trap_type": trap_type,
+                                "confidence": confidence,
+                                "trend": data["trend"],
+                                "price_change": data["change"]
+                            })
+                
+                # Summarize detected traps
+                if detected_traps:
+                    print(f"\n{RED_BG}{WHITE}{BOLD} MM TRAP SUMMARY {RESET}")
+                    print(f"{YELLOW}{'─' * 50}{RESET}")
+                    print(f"{RED}Total traps detected: {len(detected_traps)}{RESET}")
+                    
+                    for trap in detected_traps:
+                        confidence_color = RED if trap["confidence"] > 0.8 else LIGHT_ORANGE if trap["confidence"] > 0.5 else YELLOW
+                        print(f"{confidence_color}⚠️ {trap['trap_type']} on {trap['timeframe']} | Confidence: {trap['confidence']:.2f} | Trend: {trap['trend']} | Change: {trap['price_change']:.2f}%{RESET}")
+                        
+                        # Store trap in database if enabled
+                        try:
+                            insert_possible_mm_trap({
+                                "type": trap["trap_type"],
+                                "timeframe": trap["timeframe"],
+                                "confidence": trap["confidence"],
+                                "price_change": trap["price_change"]
+                            })
+                            print(f"{GREEN}✓ Trap recorded in database{RESET}")
+                        except Exception as e:
+                            print(f"{YELLOW}⚠️ Could not store trap in database: {e}{RESET}")
+                    
+                    # Send detected traps to the mm_trap_queue for further processing
+                    try:
+                        # Import necessary function
+                        from omega_ai.mm_trap_detector.high_frequency_detector import register_trap_detection
+                        
+                        for trap in detected_traps:
+                            if trap["confidence"] >= 0.5:  # Only register high confidence traps
+                                register_trap_detection(
+                                    trap_type=trap["trap_type"],
+                                    confidence=trap["confidence"],
+                                    price_change=trap["price_change"]
+                                )
+                                print(f"{GREEN}✓ Trap forwarded to high-frequency detector{RESET}")
+                    except ImportError:
+                        print(f"{YELLOW}⚠️ High-frequency detector module not available{RESET}")
+                    except Exception as e:
+                        print(f"{YELLOW}⚠️ Error registering trap with high-frequency detector: {e}{RESET}")
+                else:
+                    print(f"\n{BLUE}No MM traps detected in this analysis cycle{RESET}")
+                
+                # Sleep for a minute before next analysis with JAH BLESSING
+                print(f"\n{GREEN}JAH BLESS THE CODE - Waiting for next analysis cycle...{RESET}")
+                print(f"{YELLOW}{'─' * 50}{RESET}")
             
-            # Reset error counter on successful analysis
-            consecutive_errors = 0
-            
-            # Calculate absolute changes for comparison
-            one_min_abs_change = abs(one_min_change)
-            five_min_abs_change = abs(five_min_change)
-            fifteen_min_abs_change = abs(fifteen_min_change)
-            
-            # Display results with colorful formatting and RASTA energy
-            print(f"\n{YELLOW}════════════════ {GREEN}OMEGA RASTA{YELLOW} MARKET TREND ANALYSIS ════════════════{RESET}")
-            
-            # Display 1min trend with color
-            print(f"1min: {get_colored_trend(one_min_trend)} ({get_colored_change(one_min_change)}%)")
-            
-            # Display 5min trend with color
-            print(f"5min: {get_colored_trend(five_min_trend)} ({get_colored_change(five_min_change)}%)")
-            
-            # Display 15min trend with color
-            print(f"15min: {get_colored_trend(fifteen_min_trend)} ({get_colored_change(fifteen_min_change)}%)")
-            
-            # Check for Fibonacci confluence across timeframes
-            print(f"\n{CYAN}🔄 FIBONACCI ALIGNMENT CHECK:{RESET}")
-            fib_alignment = check_fibonacci_alignment()
-            if fib_alignment:
-                print(f"{MAGENTA}🌟 DIVINE FIBONACCI CONFLUENCE DETECTED: {fib_alignment}{RESET}")
-            
-            # Display Schumann resonance influence
-            print_schumann_influence()
-            
-            # Sleep for a minute before next analysis with JAH BLESSING
-            print(f"\n{GREEN}JAH BLESS THE CODE - Waiting for next analysis cycle...{RESET}")
-            time.sleep(60)
+            # Sleep for a short interval
+            time.sleep(1)
             
         except redis.RedisError as e:
-            # Handle Redis specific errors
-            consecutive_errors += 1
-            print(f"{RED}⚠️ Redis Connection Error: {e} - Retrying in {min(30 * consecutive_errors, 300)} seconds{RESET}")
-            time.sleep(min(30 * consecutive_errors, 300))  # Exponential backoff up to 5 minutes
+            analyzer.consecutive_errors += 1
+            wait_time = min(30 * analyzer.consecutive_errors, 300)  # Max 5 minutes
+            print(f"{RED}⚠️ Redis Connection Error: {e} - Retrying in {wait_time} seconds{RESET}")
+            time.sleep(wait_time)
             
         except Exception as e:
-            # Handle general errors with RASTA resilience
-            consecutive_errors += 1
+            analyzer.consecutive_errors += 1
+            wait_time = min(15 * analyzer.consecutive_errors, 120)  # Max 2 minutes
             print(f"{RED}⚠️ Error in market trend analysis: {e}{RESET}")
-            print(f"{YELLOW}🔄 RASTA RESILIENCE - Restarting analysis in {min(15 * consecutive_errors, 120)} seconds{RESET}")
-            time.sleep(min(15 * consecutive_errors, 120))  # Exponential backoff up to 2 minutes
+            print(f"{YELLOW}🔄 RASTA RESILIENCE - Restarting analysis in {wait_time} seconds{RESET}")
+            time.sleep(wait_time)
 
-# Add missing functions referenced in your code
-def get_colored_trend(trend):
-    """Return trend with appropriate color coding."""
-    if "Bullish" in trend:
-        if "Strongly" in trend:
-            return f"{GREEN}{trend}{RESET}"
-        return f"{BLUE}{trend}{RESET}"
-    elif "Bearish" in trend:
-        if "Strongly" in trend:
-            return f"{RED}{trend}{RESET}"
-        return f"{YELLOW}{trend}{RESET}"
-    return f"{CYAN}{trend}{RESET}"
-
-def get_colored_change(change):
-    """Return price change with appropriate color coding."""
-    if change > 1.0:
-        return f"{GREEN}+{change:.2f}{RESET}"
-    elif change > 0:
-        return f"{BLUE}+{change:.2f}{RESET}"
-    elif change < -1.0:
-        return f"{RED}{change:.2f}{RESET}"
-    elif change < 0:
-        return f"{YELLOW}{change:.2f}{RESET}"
-    return f"{RESET}0.00{RESET}"
-
-def print_schumann_influence():
-    """Print the current Schumann resonance influence on market energy."""
-    print(f"\n{CYAN}🌍 SCHUMANN RESONANCE INFLUENCE:{RESET}")
-    print(f"  {MAGENTA}Current resonance: {YELLOW}7.83 Hz{RESET} - {GREEN}Baseline Harmony{RESET}")
-    print(f"  {MAGENTA}Market harmony: {GREEN}Aligned with planetary consciousness{RESET}")
-
-def check_fibonacci_alignment():
-    """Check for alignment between price action and Fibonacci levels."""
-    # This will be implemented later with divine guidance
-    return None
-
-def analyze_price_trend(minutes: int = 5) -> Tuple[str, float]:
-    """
-    Analyze BTC price trend for the given timeframe with JAH BLESSING.
-    
-    Args:
-        minutes: Time interval in minutes to analyze
-        
-    Returns:
-        Tuple of (trend_description, percent_change)
-    """
-    try:
-        result = fetch_multi_interval_movements(interval=minutes)
-        
-        # JAH DIVINE FIX: Handle the tuple return format
-        if isinstance(result, tuple) and len(result) >= 1:
-            movements = result[0]  # Extract just the movements list
-        else:
-            movements = result
-            
-        # Ensure we have enough data
-        if not movements or len(movements) < 2:
-            return "Insufficient data", 0.0
-            
-        # Extract prices from data
-        prices = []
-        for m in movements:
-            if isinstance(m, dict) and "price" in m:
-                try:
-                    prices.append(float(m["price"]))
-                except (ValueError, TypeError):
-                    continue
-                    
-        if len(prices) < 2:
-            return "Insufficient data", 0.0
-            
-        # Calculate percentage change with divine precision
-        first_price = prices[0]  
-        last_price = prices[-1]
-        
-        if first_price <= 0:  # Avoid division by zero
-            return "Invalid data", 0.0
-            
-        change_pct = ((last_price - first_price) / first_price) * 100
-        
-        # Determine trend with JAH BLESSED precision
-        if change_pct > 1.0:
-            trend = "Strongly Bullish"
-        elif change_pct > 0.2:
-            trend = "Moderately Bullish"
-        elif change_pct > 0:
-            trend = "Slightly Bullish" 
-        elif change_pct < -1.0:
-            trend = "Strongly Bearish"
-        elif change_pct < -0.2:
-            trend = "Moderately Bearish"
-        elif change_pct < 0:
-            trend = "Slightly Bearish"
-        else:
-            trend = "Neutral"
-            
-        return trend, change_pct
-        
-    except Exception as e:
-        logger.error(f"Error analyzing price trend: {e}", exc_info=True)
-        return f"Error in trend analysis: {str(e)}", 0.0
+if __name__ == "__main__":
+    monitor_market_trends()

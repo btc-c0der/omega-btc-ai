@@ -1,3 +1,7 @@
+# Copyright (c) 2024 OMEGA BTC AI Team
+# Licensed under the GNU Affero General Public License v3.0
+# See https://www.gnu.org/licenses/ for more details
+
 """
 High-Frequency Market Maker Trap Detection System
 ================================================
@@ -65,6 +69,8 @@ import time
 from collections import deque
 from omega_ai.mm_trap_detector.grafana_reporter import report_trap_for_grafana
 from omega_ai.mm_trap_detector.fibonacci_detector import check_fibonacci_level, get_current_fibonacci_levels, fibonacci_detector, detect_fibonacci_confluence, update_fibonacci_data
+import json
+
 # ✅ Redis connection
 redis_conn = redis.Redis(host="localhost", port=6379, db=0)
 
@@ -473,90 +479,78 @@ def register_trap_detection(trap_type, confidence, price_change):
 
 # Update the simulate_price_updates function for Fibonacci reporting:
 def simulate_price_updates():
-    """Simulate price updates for testing the HF detector without affecting real data."""
+    """Simulate BTC price updates for testing."""
     print("▶️ Starting price simulation with isolated Redis keys...")
     
-    # Initial BTC price
-    price = 83000.0
+    # Get last BTC price from Redis, or use default if not available
+    try:
+        last_price_bytes = redis_conn.get("last_btc_price")
+        price = float(last_price_bytes.decode()) if last_price_bytes else 83000.0
+        print(f"✅ Starting simulation with current BTC price: ${price:.2f}")
+    except Exception as e:
+        price = 83000.0
+        print(f"⚠️ Could not get last BTC price from Redis: {e}")
+        print(f"✅ Using default price: ${price:.2f}")
     
-    # Initialize simulation keys
-    redis_conn.set("sim_last_btc_price", price)
-    redis_conn.set("sim_prev_btc_price", price * 0.99)  # Initial previous price
+    # Initialize Fibonacci detector with some initial swing points
+    fibonacci_detector.recent_swing_high = price * 1.02  # 2% above current price
+    fibonacci_detector.recent_swing_low = price * 0.98   # 2% below current price
     
-    # Track simulation statistics
-    all_prices = [price]
-    min_price = price
-    max_price = price
-    start_price = price
+    # Generate initial Fibonacci levels
+    fib_levels = fibonacci_detector.generate_fibonacci_levels()
+    if fib_levels:
+        print("📊 Generated Fibonacci levels:")
+        for level, price in fib_levels.items():
+            print(f"  {level}: ${price:.2f}")
     
-    # Simulate price updates
+    # Run simulation loop
     for i in range(20):
         # Update price with some randomness
         change = np.random.normal(0, 100)  # Normal distribution with std dev of $100
         price += change
         
-        # Track statistics
-        all_prices.append(price)
-        min_price = min(min_price, price)
-        max_price = max(max_price, price)
+        # Store in Redis with simulation prefix
+        redis_conn.set("sim_last_btc_price", str(price))
+        redis_conn.set("sim_prev_btc_price", str(price - change))
         
-        # Add to detector
-        hf_detector.update_price_data(price)
+        # Update Fibonacci detector with new price
+        fibonacci_detector.update_price_data(price, datetime.datetime.now(datetime.UTC))
         
-        # Store in Redis using simulation-specific keys
-        redis_conn.set("sim_prev_btc_price", redis_conn.get("sim_last_btc_price"))
-        redis_conn.set("sim_last_btc_price", price)
-        
-        # Simulate a trap event occasionally
+        # Simulate different types of trap events
         if i % 5 == 0:
-            trap_type = ["Liquidity Grab", "Stop Hunt", "Liquidity Accumulation (up)"][i % 3]
-            confidence = 0.8
-            # FIX: Pass the current price as btc_price parameter
-            register_trap_detection(trap_type, confidence, 1.2, price)
+            # Check for Fibonacci level hits
+            fib_hit = fibonacci_detector.check_fibonacci_level(price)
+            
+            if fib_hit:
+                # Enhanced trap types based on Fibonacci confluence
+                trap_type = f"Golden Ratio Trap ({fib_hit['label']})" if fib_hit['level'] == 0.618 else f"Fibonacci Trap ({fib_hit['label']})"
+                confidence = 0.8 + (0.1 if fib_hit['level'] == 0.618 else 0.05)  # Higher confidence for Golden Ratio
+                
+                # Register the trap with enhanced confidence
+                hf_detector.register_trap_event(trap_type, confidence, change/price, from_detector=True)
+                print(f"🎯 Fibonacci Trap Detected: {trap_type} at ${price:.2f}")
+            else:
+                # Standard trap types
+                trap_types = [
+                    "Liquidity Grab",
+                    "Stop Hunt",
+                    "Liquidity Accumulation (up)",
+                    "Volatility Liquidity Grab"
+                ]
+                trap_type = trap_types[i % len(trap_types)]
+                confidence = 0.8
+                hf_detector.register_trap_event(trap_type, confidence, change/price, from_detector=True)
             
         # Check HF mode with simulation flag
         hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price, simulation_mode=True)
         
-        # Check if price is at a Fibonacci level
-        fib_hit = check_fibonacci_level(price)
-        fib_indicator = f"| 🔄 FIB: {fib_hit['label']}" if fib_hit else ""
+        # Check for fractal harmony patterns
+        harmonics = fibonacci_detector.detect_fractal_harmony()
+        if harmonics:
+            print(f"🎵 Fractal Harmony Detected: {len(harmonics)} patterns")
         
-        print(f"Price: ${price:.2f} | HF Mode: {'✅' if hf_active else '❌'} | Multiplier: {multiplier:.2f} {fib_indicator}")
-        time.sleep(2)
-    
-    # Calculate and display simulation statistics
-    print("\n📊 SIMULATION STATISTICS:")
-    price_range = max_price - min_price
-    print(f"Price Range: ${min_price:.2f} - ${max_price:.2f} (${price_range:.2f})")
-    print(f"Total Movement: ${price - start_price:.2f} ({((price - start_price) / start_price * 100):.2f}%)")
-    
-    # Calculate standard statistical measures
-    mean_price = sum(all_prices) / len(all_prices)
-    std_dev = np.std(all_prices)
-    print(f"Mean Price: ${mean_price:.2f}")
-    print(f"Standard Deviation: ${std_dev:.2f}")
-    
-    # Display Fibonacci retracement levels based on simulation range
-    print("\n🔄 FIBONACCI RETRACEMENT LEVELS:")
-    fib_levels = get_current_fibonacci_levels()
-    
-    if fib_levels:
-        for label, price in fib_levels.items():
-            print(f"{label} Level: ${price:.2f}")
-    else:
-        print("No Fibonacci levels calculated yet")
-    
-    # Report on Fibonacci hits during simulation
-    confluences = fibonacci_detector.trap_fib_confluences
-    if confluences:
-        print("\n🎯 FIBONACCI CONFLUENCE EVENTS:")
-        for event in confluences:
-            print(f"- {event['trap_type']} aligned with {event['fibonacci_level']} level at ${event['price']:.2f}")
-            print(f"  Confidence: {event['confidence']:.2f} | Type: {event['confluence_type']}")
-    
-    # Clean up simulation keys when done
-    print("\n🧹 Cleaning up simulation data...")
-    redis_conn.delete("sim_last_btc_price", "sim_prev_btc_price")
+        print(f"Price: ${price:.2f} | HF Mode: {'✅' if hf_active else '❌'} | Multiplier: {multiplier:.2f} ")
+        time.sleep(2)  # Simulate 2-second intervals
 
 # # Update test function
 # def test_hf_detector():
@@ -590,13 +584,303 @@ def simulate_price_updates():
 #     # Clean up
 #     redis_conn.delete("sim_last_btc_price", "sim_prev_btc_price")
 
+def run_continuous_simulation(duration_hours=None, volatility_scale=1.0, trap_frequency=0.2):
+    """
+    Run a continuous simulation of market maker trap detection.
+    
+    Args:
+        duration_hours: Optional number of hours to run, or None for indefinite
+        volatility_scale: Multiplier to adjust simulation volatility (1.0 = normal)
+        trap_frequency: Probability of trap events (0.0-1.0)
+    """
+    try:
+        print(f"\n{BLUE_BG}{WHITE}{BOLD} 🚀 STARTING CONTINUOUS HF-TRAP SIMULATION {RESET}")
+        print(f"{YELLOW}Simulation will run {'for ' + str(duration_hours) + ' hours' if duration_hours else 'indefinitely'}{RESET}")
+        print(f"{YELLOW}Volatility Scale: {volatility_scale}x | Trap Frequency: {trap_frequency:.2f}{RESET}")
+        
+        # Get current real price as starting point
+        last_price_bytes = redis_conn.get("last_btc_price")
+        price = float(last_price_bytes.decode()) if last_price_bytes else 80000.0
+        prev_price = price * 0.998  # 0.2% lower as initial previous price
+        
+        # Store initial price in simulation keys
+        redis_conn.set("sim_last_btc_price", price)
+        redis_conn.set("sim_prev_btc_price", prev_price)
+        redis_conn.set("sim_start_time", datetime.datetime.now(datetime.UTC).isoformat())
+        redis_conn.set("sim_running", "1")
+        
+        # Get market history for more realistic price movements
+        try:
+            # Get historical volatility from Redis if available
+            vol_bytes = redis_conn.get("volatility_1min")
+            historical_volatility = float(vol_bytes) if vol_bytes else 0.05  # 0.05% default
+        except (ValueError, TypeError):
+            historical_volatility = 0.05
+        
+        # Initialize Fibonacci detector with some initial swing points
+        fibonacci_detector.recent_swing_high = price * 1.02  # 2% above current price
+        fibonacci_detector.recent_swing_low = price * 0.98   # 2% below current price
+        fibonacci_detector.generate_fibonacci_levels()
+        
+        # Initialize counters and timers
+        iteration = 0
+        start_time = datetime.datetime.now(datetime.UTC)
+        trap_count = 0
+        hf_activations = 0
+        
+        # Trap types and their probabilities
+        trap_types = [
+            ("Liquidity Grab", 0.3),
+            ("Stop Hunt", 0.25),
+            ("Liquidity Accumulation", 0.2),
+            ("Volatility Liquidity Grab", 0.15),
+            ("Fibonacci Trap", 0.1)
+        ]
+        
+        # Market regimes and their volatility multipliers
+        regimes = [
+            ("Low Volatility Neutral", 0.5),
+            ("Moderate Volatility Bullish", 1.0),
+            ("Moderate Volatility Bearish", 1.2),
+            ("High Volatility Bullish", 1.5),
+            ("High Volatility Bearish", 1.8)
+        ]
+        current_regime = regimes[1]  # Start with moderate volatility
+        regime_change_prob = 0.05  # 5% chance to change regime each minute
+        trend_direction = 1  # 1 = up, -1 = down
+        trend_change_prob = 0.1  # 10% chance to change trend each minute
+        
+        # Store initial regime
+        redis_conn.set("sim_market_regime", current_regime[0])
+        
+        # Main simulation loop
+        print(f"\n{YELLOW}{'═' * 50}{RESET}")
+        print(f"{CYAN}Starting simulation at ${price:.2f}{RESET}")
+        
+        running = True
+        try:
+            while running:
+                # Check if we should stop based on duration
+                if duration_hours:
+                    elapsed = (datetime.datetime.now(datetime.UTC) - start_time).total_seconds() / 3600
+                    if elapsed >= duration_hours:
+                        print(f"\n{RED}Simulation duration ({duration_hours}h) reached. Stopping.{RESET}")
+                        break
+                
+                # Update iteration counter
+                iteration += 1
+                current_time = datetime.datetime.now(datetime.UTC)
+                timestamp = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Maybe change market regime
+                if np.random.random() < regime_change_prob:
+                    current_regime = regimes[np.random.randint(0, len(regimes))]
+                    print(f"\n{YELLOW}⚠️ MARKET REGIME CHANGE: {current_regime[0]}{RESET}")
+                    redis_conn.set("sim_market_regime", current_regime[0])
+                
+                # Maybe change trend direction
+                if np.random.random() < trend_change_prob:
+                    trend_direction *= -1
+                    print(f"{YELLOW}Trend direction changed to {'up' if trend_direction > 0 else 'down'}{RESET}")
+                
+                # Calculate realistic price movement based on:
+                # 1. Historical volatility
+                # 2. Current regime volatility
+                # 3. Volatility scale parameter
+                # 4. Trend direction
+                base_volatility = historical_volatility * current_regime[1] * volatility_scale
+                
+                # Generate random price movement (normal distribution around trend)
+                movement_pct = np.random.normal(0.01 * trend_direction, base_volatility)
+                
+                # Store previous price
+                prev_price = price
+                
+                # Update price with movement
+                price = price * (1 + movement_pct)
+                abs_change = abs(price - prev_price)
+                
+                # Store in Redis simulation keys
+                redis_conn.set("sim_last_btc_price", price)
+                redis_conn.set("sim_prev_btc_price", prev_price)
+                redis_conn.set("sim_price_change_pct", movement_pct * 100)
+                redis_conn.set("sim_timestamp", timestamp)
+                
+                # Store price history for visualization
+                history_key = f"sim_price_history:{current_time.date().isoformat()}"
+                redis_conn.rpush(history_key, json.dumps({
+                    "timestamp": timestamp,
+                    "price": price,
+                    "change_pct": movement_pct * 100,
+                    "regime": current_regime[0]
+                }))
+                redis_conn.expire(history_key, 86400 * 3)  # Expire after 3 days
+                
+                # Update detector with new price
+                hf_detector.update_price_data(price, current_time)
+                
+                # Generate trap event based on frequency parameter and current regime
+                regime_boost = 2.0 if "High Volatility" in current_regime[0] else 1.0
+                trap_prob = trap_frequency * regime_boost
+                
+                # Log basic status every 5 iterations
+                if iteration % 5 == 0:
+                    print(f"\n{BLUE}[{timestamp}] Sim iteration #{iteration}{RESET}")
+                    print(f"{GREEN if movement_pct > 0 else RED}Price: ${price:.2f} ({movement_pct*100:+.3f}%){RESET}")
+                    print(f"Market Regime: {current_regime[0]} | Direction: {'up' if trend_direction > 0 else 'down'}")
+                
+                # Maybe generate a trap event
+                if np.random.random() < trap_prob:
+                    # Choose trap type based on weights
+                    trap_type, _ = weighted_choice(trap_types)
+                    
+                    # For Fibonacci traps, ensure we have a Fibonacci hit
+                    if trap_type == "Fibonacci Trap":
+                        # Check for actual Fibonacci level hit or generate one
+                        fib_hit = fibonacci_detector.check_fibonacci_level(price)
+                        if fib_hit:
+                            trap_type = f"Fibonacci Trap ({fib_hit['label']})"
+                            confidence = 0.8
+                        else:
+                            # If no hit, switch to a different trap type
+                            trap_type, _ = weighted_choice(trap_types[:4])
+                            confidence = 0.65 + (np.random.random() * 0.2)
+                    else:
+                        # Normal trap confidence calculation
+                        confidence = 0.6 + (np.random.random() * 0.35)  # Between 0.6-0.95
+                    
+                    # Make larger price movements more confident
+                    confidence = min(0.95, confidence + (abs(movement_pct) * 5))
+                    
+                    # Register the trap
+                    hf_detector.register_trap_event(trap_type, confidence, movement_pct, True)
+                    trap_count += 1
+                    
+                    # Store in special simulation trap history
+                    redis_conn.lpush("sim_trap_history", json.dumps({
+                        "timestamp": timestamp,
+                        "trap_type": trap_type,
+                        "confidence": confidence,
+                        "price": price,
+                        "price_change_pct": movement_pct * 100,
+                        "market_regime": current_regime[0]
+                    }))
+                    redis_conn.ltrim("sim_trap_history", 0, 999)  # Keep last 1000 traps
+                    
+                    print(f"\n{RED_BG}{WHITE}{BOLD} 🚨 SIMULATED TRAP DETECTED #{trap_count} {RESET}")
+                    print(f"{RED}Type: {trap_type}{RESET}")
+                    print(f"{RED}Confidence: {confidence:.2f}{RESET}")
+                    print(f"{RED}Price Movement: {movement_pct*100:+.3f}%{RESET}")
+                
+                # Check for HF mode activation
+                hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price, simulation_mode=True)
+                
+                if hf_active:
+                    hf_activations += 1
+                    print(f"\n{MAGENTA}{BOLD} 🔥 HF MODE ACTIVATED #{hf_activations} {RESET}")
+                    print(f"{MAGENTA}Multiplier: {multiplier:.2f}x{RESET}")
+                    
+                    # Store HF mode activation event
+                    redis_conn.lpush("sim_hf_activations", json.dumps({
+                        "timestamp": timestamp,
+                        "multiplier": multiplier,
+                        "price": price,
+                        "market_regime": current_regime[0],
+                        "traps_in_window": hf_detector._count_recent_traps()
+                    }))
+                    redis_conn.ltrim("sim_hf_activations", 0, 99)  # Keep last 100 activations
+                
+                # Periodically report simulation statistics
+                if iteration % 60 == 0:  # Every ~minute
+                    elapsed_minutes = (datetime.datetime.now(datetime.UTC) - start_time).total_seconds() / 60
+                    
+                    print(f"\n{YELLOW}{BOLD} 📊 SIMULATION STATS {RESET}")
+                    print(f"{YELLOW}Run time: {elapsed_minutes:.1f} minutes{RESET}")
+                    print(f"{YELLOW}Iterations: {iteration}{RESET}")
+                    print(f"{YELLOW}Traps detected: {trap_count} ({trap_count/iteration*100:.2f}%){RESET}")
+                    print(f"{YELLOW}HF mode activations: {hf_activations}{RESET}")
+                    print(f"{YELLOW}Current price: ${price:.2f}{RESET}")
+                    print(f"{YELLOW}{'═' * 50}{RESET}")
+                    
+                    # Store stats in Redis
+                    redis_conn.hmset("sim_statistics", {
+                        "iterations": str(iteration),
+                        "traps_detected": str(trap_count),
+                        "hf_activations": str(hf_activations),
+                        "run_time_minutes": str(elapsed_minutes),
+                        "current_price": str(price),
+                        "start_price": str(redis_conn.get("sim_last_btc_price")),
+                        "market_regime": current_regime[0]
+                    })
+                
+                # Sleep for a bit to simulate real-time pacing
+                # Use smaller sleep time for faster simulation
+                time.sleep(0.1)  # 100ms for fast simulation
+                
+        except KeyboardInterrupt:
+            print(f"\n{YELLOW}Simulation manually interrupted. Cleaning up...{RESET}")
+        finally:
+            # Update final statistics
+            elapsed_minutes = (datetime.datetime.now(datetime.UTC) - start_time).total_seconds() / 60
+            
+            # Store final simulation summary
+            redis_conn.hmset("sim_statistics", {
+                "iterations": str(iteration),
+                "traps_detected": str(trap_count), 
+                "hf_activations": str(hf_activations),
+                "run_time_minutes": str(elapsed_minutes),
+                "current_price": str(price),
+                "start_price": str(redis_conn.get("sim_last_btc_price")),
+                "market_regime": current_regime[0],
+                "completed": "stopped" if running else "completed"
+            })
+            redis_conn.set("sim_running", "0")
+            
+            print(f"\n{BLUE}{BOLD} 📊 FINAL SIMULATION RESULTS {RESET}")
+            print(f"{GREEN}Run time: {elapsed_minutes:.1f} minutes{RESET}")
+            print(f"{GREEN}Iterations: {iteration}{RESET}")
+            print(f"{GREEN}Traps detected: {trap_count} ({trap_count/iteration*100:.2f}%){RESET}")
+            print(f"{GREEN}HF mode activations: {hf_activations}{RESET}")
+            print(f"{GREEN}Final price: ${price:.2f}{RESET}")
+            print(f"{GREEN}Trap frequency: {trap_count/iteration:.4f} (per iteration){RESET}")
+            print(f"{GREEN}HF activation frequency: {hf_activations/iteration:.4f} (per iteration){RESET}")
+    
+    except Exception as e:
+        print(f"{RED}Error in continuous simulation: {e}{RESET}")
+        if hasattr(e, '__traceback__'):
+            import traceback
+            traceback.print_tb(e.__traceback__)
+        redis_conn.set("sim_running", "0")
+
+def weighted_choice(choices):
+    """
+    Make a weighted random choice from a list of (item, weight) tuples.
+    
+    Args:
+        choices: List of (item, weight) tuples
+        
+    Returns:
+        Selected item
+    """
+    total = sum(weight for _, weight in choices)
+    r = np.random.random() * total
+    
+    running_sum = 0
+    for item, weight in choices:
+        running_sum += weight
+        if r <= running_sum:
+            return item, weight
+    
+    return choices[0][0], choices[0][1]  # Fallback to first item
+
 if __name__ == "__main__":
     print("🚀 Starting High Frequency Trap Detector in Standalone Mode...")
     
     # Test options
     print("\n1. Run simulation with price updates")
     print("2. Run quick detector test")
-    choice = input("Enter choice (1/2): ").strip()
+    print("3. Run continuous simulation loop (Ctrl+C to stop)")
+    choice = input("Enter choice (1/2/3): ").strip()
     
     if choice == "1":
         # Import Schumann monitor ONLY when needed (avoids circular imports)
@@ -610,6 +894,29 @@ if __name__ == "__main__":
         
         # Run simulation
         simulate_price_updates()
+    elif choice == "3":
+        print("\nContinuous Simulation Configuration")
+        print("==================================")
+        try:
+            duration = input("Duration in hours (leave empty for indefinite): ").strip()
+            duration_hours = float(duration) if duration else None
+            
+            volatility = input("Volatility scale (1.0 = normal, higher = more volatile): ").strip()
+            volatility_scale = float(volatility) if volatility else 1.0
+            
+            frequency = input("Trap frequency (0.0-1.0, higher = more traps): ").strip()
+            trap_frequency = float(frequency) if frequency else 0.2
+            
+            run_continuous_simulation(
+                duration_hours=duration_hours,
+                volatility_scale=volatility_scale,
+                trap_frequency=trap_frequency
+            )
+        except ValueError as e:
+            print(f"Invalid input: {e}. Using default values.")
+            run_continuous_simulation()
+        except KeyboardInterrupt:
+            print("\nSimulation setup cancelled.")
     else:
         # Run quick test
         test_hf_detector()

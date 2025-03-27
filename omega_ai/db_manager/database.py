@@ -14,12 +14,12 @@ from typing import Dict, List, Any, Optional, Tuple
 import redis
 import json
 import logging
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone
 
 # Set up logger with RASTA VIBES
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name%s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(message)s')  # Simplified format to avoid conflicts with color codes
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
@@ -374,7 +374,7 @@ def fetch_recent_movements(minutes=15):
                         volume = 0
                     
                     movements.append({
-                        'timestamp': datetime.now(UTC) - timedelta(seconds=len(movements)),
+                        'timestamp': datetime.now(timezone.utc) - timedelta(seconds=len(movements)),
                         'price': price,
                         'volume': volume
                     })
@@ -530,7 +530,7 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id;
             """, (
-                trap_data.get("timestamp", datetime.now()),
+                trap_data.get("timestamp", datetime.now(timezone.utc)),
                 trap_data["trap_type"],
                 trap_data["price_level"],
                 trap_data["direction"],
@@ -545,7 +545,7 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
             db_manager.conn.commit()
             
         # Also store in Redis for quick access by real-time systems
-        key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now().timestamp())}"
+        key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now(timezone.utc).timestamp())}"
         db_manager.redis.set(key, json.dumps(trap_data))
         db_manager.redis.expire(key, 60*60*24)  # Expire after 24 hours
             
@@ -556,7 +556,7 @@ def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
         
         # Fallback to just Redis if PostgreSQL fails
         try:
-            key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now().timestamp())}"
+            key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now(timezone.utc).timestamp())}"
             db_manager.redis.set(key, json.dumps(trap_data))
             db_manager.redis.expire(key, 60*60*24)  # Expire after 24 hours
             return True
@@ -660,10 +660,28 @@ def fetch_multi_interval_movements(interval: int = 5, limit: int = 100) -> tuple
         movements = []
         for item in movements_data:
             try:
+                # First try standard JSON parsing
                 movement = json.loads(item)
                 if isinstance(movement, dict) and "price" in movement:
                     movements.append(movement)
-            except (json.JSONDecodeError, TypeError) as e:
+                continue  # Successfully processed this item
+            except json.JSONDecodeError:
+                # If JSON parsing fails, try the format "price,volume"
+                try:
+                    if "," in item:
+                        price_str, volume_str = item.split(",", 1)
+                        price = float(price_str.strip())
+                        volume = float(volume_str.strip())
+                        now = datetime.now(timezone.utc).isoformat()
+                        movements.append({
+                            "timestamp": now,
+                            "price": price,
+                            "volume": volume
+                        })
+                        continue  # Successfully processed this item
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error parsing alternative format: {e}")
+            except (TypeError) as e:
                 logger.warning(f"Error parsing movement data: {e}")
         
         # Create summary dictionary with divine Rastafarian energy
@@ -786,7 +804,9 @@ def insert_possible_mm_trap(trap_data: Dict[str, Any]) -> bool:
         redis_conn.ltrim("mm_trap_detections", 0, 999)
         redis_conn.ltrim(f"mm_trap_detections:{timeframe}", 0, 99)
         
-        logger.info(f"{YELLOW}⚠️ MM TRAP DETECTED{RESET}: {trap_data['type']} on {trap_data['timeframe']} (confidence: {trap_data['confidence']:.2f})")
+        # Format the log message without using f-strings in the logger
+        message = f"{YELLOW}⚠️ MM TRAP DETECTED{RESET}: {trap_data['type']} on {trap_data['timeframe']} (confidence: {trap_data['confidence']:.2f})"
+        logger.info(message)
         return True
         
     except Exception as e:

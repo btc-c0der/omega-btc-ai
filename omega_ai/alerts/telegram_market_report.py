@@ -70,6 +70,56 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+# Load environment variables
+load_dotenv()
+
+# Get Telegram credentials from environment
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+async def send_telegram_alert(message: str, token: Optional[str] = None, chat_id: Optional[str] = None) -> bool:
+    """
+    Send an alert message to Telegram.
+    
+    Args:
+        message: The message to send
+        token: Optional Telegram bot token (defaults to env var)
+        chat_id: Optional chat ID (defaults to env var)
+        
+    Returns:
+        bool: True if message was sent successfully, False otherwise
+    """
+    try:
+        # Use provided credentials or fall back to environment variables
+        bot_token = token or TELEGRAM_TOKEN
+        target_chat_id = chat_id or TELEGRAM_CHAT_ID
+        
+        if not bot_token or not target_chat_id:
+            logger.error("Telegram credentials not configured")
+            return False
+            
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        
+        # Add divine blessing to message
+        enhanced_message = f"{message}\n\n🌟 JAH BLESS THE DIVINE SIGNALS! 🌟"
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json={
+                "chat_id": target_chat_id,
+                "text": enhanced_message,
+                "parse_mode": "HTML"
+            }) as response:
+                if response.status == 200:
+                    logger.info(f"{GREEN}✓ Alert sent to Telegram successfully{RESET}")
+                    return True
+                else:
+                    logger.error(f"{RED}Failed to send Telegram alert: {await response.text()}{RESET}")
+                    return False
+                    
+    except Exception as e:
+        logger.error(f"{RED}Error sending Telegram alert: {e}{RESET}")
+        return False
+
 class TelegramMarketReporter:
     """Divine Telegram market trend reporter for OMEGA BTC AI."""
     

@@ -311,389 +311,382 @@ def print_result(label, success, error=None, details=None):
     print()
 
 def test_local_connection():
-    """Test connection to local PostgreSQL server."""
-    print_header("Testing LOCAL PostgreSQL Connection")
+    """
+    Test connecting to a local PostgreSQL database.
     
-    db_manager = DatabaseManager(
-        host="localhost",
-        port=5432,
-        dbname="omega_db",
-        user="fsiqueira",
-        password=""
-    )
+    This function attempts to establish a connection to the local PostgreSQL
+    server using default credentials, then checks if the connection is valid.
+    """
+    print_header("TESTING LOCAL POSTGRESQL CONNECTION")
     
     try:
-        db_manager.connect()
-        ping_start = time.time()
-        # Quick query to check connection
-        with db_manager.conn.cursor() as cursor:
-            cursor.execute("SELECT version();")
-            version = cursor.fetchone()[0]
-        ping_time = (time.time() - ping_start) * 1000  # ms
-        
-        db_manager.close()
-        print_result(
-            "Local PostgreSQL Connection", 
-            True, 
-            details=f"Connected to: {version} | Ping: {ping_time:.2f}ms"
+        db_manager = DatabaseManager(
+            host="localhost",
+            dbname="omega_btc",
+            user="postgres",
+            password="postgres"
         )
-        return True
+        
+        db_manager.connect()
+        success = db_manager.conn is not None and not db_manager.conn.closed
+        db_manager.close()
+        
+        print_result("Local connection", success)
+        return db_manager if success else None
     except Exception as e:
-        print_result("Local PostgreSQL Connection", False, error=str(e))
-        return False
+        print_result("Local connection", False, error=str(e))
+        return None
 
 def test_cloud_connection():
-    """Test connection to Scaleway PostgreSQL server."""
-    print_header("Testing SCALEWAY PostgreSQL Connection")
+    """
+    Test connecting to a cloud-hosted PostgreSQL database.
     
-    # Get credentials from environment or ask user
-    host = os.environ.get("POSTGRES_CLOUD_HOST")
-    port = os.environ.get("POSTGRES_CLOUD_PORT", "5432")
-    dbname = os.environ.get("POSTGRES_CLOUD_DB", "omega_btc")
-    user = os.environ.get("POSTGRES_CLOUD_USER")
-    password = os.environ.get("POSTGRES_CLOUD_PASSWORD")
-    
-    if not all([host, user, password]):
-        print(f"{YELLOW}Cloud PostgreSQL credentials not found in environment variables.{RESET}")
-        print("Please enter your Scaleway PostgreSQL credentials:")
-        host = host or input("Host: ")
-        port = port or input(f"Port [{port}]: ") or port
-        dbname = dbname or input(f"Database name [{dbname}]: ") or dbname
-        user = user or input("Username: ")
-        password = password or input("Password: ")
-    
-    db_manager = DatabaseManager(
-        host=host,
-        port=int(port),
-        dbname=dbname,
-        user=user,
-        password=password
-    )
+    This function attempts to establish a connection to a Scaleway PostgreSQL 
+    database instance using provided credentials, then checks if the 
+    connection is valid.
+    """
+    print_header("TESTING CLOUD POSTGRESQL CONNECTION")
     
     try:
-        db_manager.connect()
-        ping_start = time.time()
-        # Quick query to check connection
-        with db_manager.conn.cursor() as cursor:
-            cursor.execute("SELECT version();")
-            version = cursor.fetchone()[0]
-        ping_time = (time.time() - ping_start) * 1000  # ms
+        # Load config if available
+        config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'db_config.json')
         
-        db_manager.close()
-        print_result(
-            "Scaleway PostgreSQL Connection", 
-            True, 
-            details=f"Connected to: {version} | Ping: {ping_time:.2f}ms"
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            
+            host = config.get('cloud_host', 'postgres-omega-btc.db-omega-btc.scw.cloud')
+            port = config.get('cloud_port', 22410)
+            dbname = config.get('cloud_dbname', 'omega_btc_db')
+            user = config.get('cloud_user', 'omega_admin')
+            password = config.get('cloud_password', '')
+        else:
+            host = 'postgres-omega-btc.db-omega-btc.scw.cloud'
+            port = 22410
+            dbname = 'omega_btc_db'
+            user = 'omega_admin'
+            password = input("Enter Scaleway DB Password: ")
+        
+        db_manager = DatabaseManager(
+            host=host,
+            port=port,
+            dbname=dbname,
+            user=user,
+            password=password
         )
-        return True
+        
+        db_manager.connect()
+        success = db_manager.conn is not None and not db_manager.conn.closed
+        
+        print_result("Cloud connection", success)
+        return db_manager if success else None
     except Exception as e:
-        print_result("Scaleway PostgreSQL Connection", False, error=str(e))
-        return False
-
+        print_result("Cloud connection", False, error=str(e))
+        return None
+    
 def test_schema_init(db_manager):
-    """Test database schema initialization."""
-    print_header("Testing Schema Initialization")
+    """
+    Test initializing the database schema.
+    
+    This function tests the schema initialization process by creating all required 
+    tables for the OmegaBTC AI system and verifying their existence.
+    
+    Args:
+        db_manager: The DatabaseManager instance to use for testing.
+    """
+    print_header("TESTING SCHEMA INITIALIZATION")
     
     try:
-        db_manager.connect()
+        # Initialize schema
         db_manager.initialize_schema()
         
         # Verify tables exist
-        tables = ["traders", "trades", "trade_exits", "trader_metrics", "mm_traps"]
         with db_manager.conn.cursor() as cursor:
-            for table in tables:
-                cursor.execute(f"SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = '{table}');")
-                exists = cursor.fetchone()[0]
-                print_result(f"Table '{table}' exists", exists)
+            cursor.execute("""
+                SELECT table_name FROM information_schema.tables 
+                WHERE table_schema = 'public'
+            """)
+            tables = [row[0] for row in cursor.fetchall()]
         
-        db_manager.close()
-        return True
+        required_tables = ['traders', 'trades', 'trade_exits', 'mm_traps']
+        missing_tables = [table for table in required_tables if table not in tables]
+        
+        success = len(missing_tables) == 0
+        print_result("Schema initialization", success, 
+                   details=f"Found tables: {', '.join(tables)}")
+        
+        return success
     except Exception as e:
-        print_result("Schema Initialization", False, error=str(e))
+        print_result("Schema initialization", False, error=str(e))
         return False
 
 def test_crud_operations(db_manager):
-    """Test CRUD operations."""
-    print_header("Testing Database CRUD Operations")
+    """
+    Test basic CRUD (Create, Read, Update, Delete) operations.
+    
+    This function tests the database's ability to create, read, update, and 
+    delete records in the database tables, verifying the correct functionality
+    of these essential operations.
+    
+    Args:
+        db_manager: The DatabaseManager instance to use for testing.
+    """
+    print_header("TESTING CRUD OPERATIONS")
     
     try:
-        db_manager.connect()
-        
-        # Create test trader
-        trader_name = f"Test_Trader_{int(time.time())}"
-        try:
-            trader_id = db_manager.save_trader(
-                name=trader_name,
-                profile_type="test",
-                initial_capital=10000.0
-            )
-            print_result("Create trader", True, details=f"Trader ID: {trader_id}")
-        except Exception as e:
-            print_result("Create trader", False, error=str(e))
-            return False
-        
-        # Create test trade
-        try:
-            trade_data = {
-                "trader_id": trader_id,
-                "direction": "LONG",
-                "entry_price": 50000.0,
-                "position_size": 0.1,
-                "leverage": 5,
-                "entry_reason": "Test trade",
-                "stop_loss": 49000.0,
-                "emotional_state": "calm",
-                "market_condition": {"volatility": "medium", "trend": "bullish"},
-                "signal_type": "test",
-                "take_profits": {"tp1": 51000.0, "tp2": 52000.0}
-            }
-            trade_id = db_manager.save_trade(trade_data)
-            print_result("Create trade", True, details=f"Trade ID: {trade_id}")
-        except Exception as e:
-            print_result("Create trade", False, error=str(e))
-            return False
-        
-        # Read trader data
-        try:
-            with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
-                cursor.execute("SELECT * FROM traders WHERE id = %s", (trader_id,))
-                trader = cursor.fetchone()
-            print_result("Read trader", True, details=f"Trader name: {trader['name']}")
-        except Exception as e:
-            print_result("Read trader", False, error=str(e))
-            return False
-        
-        # Update trade (add exit)
-        try:
-            exit_data = {
-                "trade_id": trade_id,
-                "exit_type": "take_profit",
-                "exit_price": 51000.0,
-                "percentage": 1.0,
-                "pnl": 100.0,
-                "price_bar": 10,
-                "reason": "Test exit",
-                "is_complete": True,
-                "total_pnl": 100.0,
-                "duration_hours": 2.5,
-                "liquidated": False
-            }
-            db_manager.save_trade_exit(exit_data)
-            print_result("Update trade (exit)", True)
-        except Exception as e:
-            print_result("Update trade (exit)", False, error=str(e))
-            return False
-        
-        # Delete test data
-        try:
-            with db_manager.conn.cursor() as cursor:
-                cursor.execute("DELETE FROM trade_exits WHERE trade_id = %s", (trade_id,))
-                cursor.execute("DELETE FROM trades WHERE id = %s", (trade_id,))
-                cursor.execute("DELETE FROM traders WHERE id = %s", (trader_id,))
-                db_manager.conn.commit()
-            print_result("Delete test data", True)
-        except Exception as e:
-            print_result("Delete test data", False, error=str(e))
-            return False
-            
-        db_manager.close()
-        return True
-    except Exception as e:
-        print_result("CRUD Operations", False, error=str(e))
-        return False
-
-def test_transaction_integrity(db_manager):
-    """Test transaction integrity."""
-    print_header("Testing Transaction Integrity")
-    
-    try:
-        db_manager.connect()
-        
-        # Create a test trader
-        trader_name = f"Integrity_Test_{int(time.time())}"
+        # 1. Create trader
+        trader_name = f"Trader_{int(time.time())}"
         trader_id = db_manager.save_trader(
             name=trader_name,
-            profile_type="test",
+            profile_type="aggressive",
             initial_capital=10000.0
         )
         
-        # Start a transaction that should fail
-        try:
-            with db_manager.conn.cursor() as cursor:
-                # Start transaction
-                db_manager.conn.autocommit = False
-                
-                # Insert a valid trade
-                cursor.execute("""
-                    INSERT INTO trades (
-                        trader_id, direction, entry_price, position_size, leverage,
-                        entry_reason, status
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    RETURNING id;
-                """, (trader_id, "LONG", 50000.0, 0.1, 5, "Valid trade", "OPEN"))
-                valid_trade_id = cursor.fetchone()[0]
-                
-                # Insert an invalid trade (violating NOT NULL constraint)
-                cursor.execute("""
-                    INSERT INTO trades (
-                        trader_id, direction, entry_price, position_size, leverage,
-                        entry_reason
-                    )
-                    VALUES (%s, %s, NULL, %s, %s, %s)
-                    RETURNING id;
-                """, (trader_id, "LONG", 0.1, 5, "Invalid trade"))
-                
-                # This should not be reached
-                db_manager.conn.commit()
-                transaction_failed = False
-            print_result("Transaction rollback", False, 
-                        error="Transaction with invalid data succeeded when it should have failed")
-        except Exception as e:
-            # Expected to fail
-            db_manager.conn.rollback()
-            db_manager.conn.autocommit = True
-            transaction_failed = True
-            print_result("Transaction rollback", True, 
-                        details="Transaction with invalid data correctly failed and rolled back")
+        # Verify trader creation
+        with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute("SELECT * FROM traders WHERE id = %s", (trader_id,))
+            trader = cursor.fetchone()
         
-        # Verify the valid trade didn't persist
-        with db_manager.conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM trades WHERE trader_id = %s", (trader_id,))
-            trade_count = cursor.fetchone()[0]
-            valid_rollback = trade_count == 0
-        print_result("Valid trade rollback", valid_rollback, 
-                    details=f"Expected 0 trades, found {trade_count}")
+        if not trader or trader['name'] != trader_name:
+            print_result("Create operation", False, error="Failed to create trader")
+            return False
         
-        # Clean up
+        # 2. Create trade
+        trade_data = {
+            "trader_id": trader_id,
+            "symbol": "BTC/USD",
+            "entry_price": 50000.0,
+            "entry_time": datetime.now(timezone.utc),
+            "position_size": 1.0,
+            "direction": "long",
+            "stop_loss": 49000.0,
+            "take_profit": 52000.0,
+            "status": "open",
+            "entry_signal": "fibonacci_bounce",
+            "risk_reward_ratio": 2.0
+        }
+        
+        trade_id = db_manager.save_trade(trade_data)
+        
+        # 3. Read trade
+        with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute("SELECT * FROM trades WHERE id = %s", (trade_id,))
+            trade = cursor.fetchone()
+        
+        if not trade or trade['symbol'] != "BTC/USD":
+            print_result("Read operation", False, error="Failed to read trade")
+            return False
+        
+        # 4. Update trade
         with db_manager.conn.cursor() as cursor:
-            cursor.execute("DELETE FROM traders WHERE id = %s", (trader_id,))
+            cursor.execute(
+                "UPDATE trades SET take_profit = %s WHERE id = %s",
+                (53000.0, trade_id)
+            )
             db_manager.conn.commit()
         
-        db_manager.close()
-        return transaction_failed and valid_rollback
+        # Verify update
+        with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute("SELECT take_profit FROM trades WHERE id = %s", (trade_id,))
+            updated_trade = cursor.fetchone()
+        
+        if not updated_trade or updated_trade['take_profit'] != 53000.0:
+            print_result("Update operation", False, error="Failed to update trade")
+            return False
+        
+        # 5. Delete trade
+        with db_manager.conn.cursor() as cursor:
+            cursor.execute("DELETE FROM trades WHERE id = %s", (trade_id,))
+            db_manager.conn.commit()
+        
+        # Verify delete
+        with db_manager.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM trades WHERE id = %s", (trade_id,))
+            count = cursor.fetchone()[0]
+        
+        if count != 0:
+            print_result("Delete operation", False, error="Failed to delete trade")
+            return False
+        
+        print_result("CRUD operations", True, details="All operations successful")
+        return True
+        
     except Exception as e:
-        print_result("Transaction Integrity", False, error=str(e))
+        print_result("CRUD operations", False, error=str(e))
+        return False
+
+def test_transaction_integrity(db_manager):
+    """
+    Test database transaction integrity.
+    
+    This function tests the atomicity of database transactions by attempting 
+    to perform a series of operations within a transaction and then rolling back,
+    ensuring that no changes persist after the rollback.
+    
+    Args:
+        db_manager: The DatabaseManager instance to use for testing.
+    """
+    print_header("TESTING TRANSACTION INTEGRITY")
+    
+    try:
+        # Count existing traders
+        with db_manager.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM traders")
+            initial_count = cursor.fetchone()[0]
+        
+        # Start transaction
+        with db_manager.conn.cursor() as cursor:
+            # Create 5 traders in a transaction
+            for i in range(5):
+                trader_name = f"Transaction_Test_Trader_{i}_{int(time.time())}"
+                cursor.execute(
+                    """
+                    INSERT INTO traders (name, profile_type, initial_capital, created_at)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (trader_name, "conservative", 5000.0, datetime.now(timezone.utc))
+                )
+            
+            # Count traders within transaction
+            cursor.execute("SELECT COUNT(*) FROM traders")
+            mid_count = cursor.fetchone()[0]
+            
+            # Verify count increased
+            if mid_count != initial_count + 5:
+                print_result("Transaction operations", False, 
+                           error="Transaction didn't add expected rows")
+                db_manager.conn.rollback()
+                return False
+            
+            # Explicitly rollback
+            db_manager.conn.rollback()
+        
+        # Count traders after rollback
+        with db_manager.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM traders")
+            final_count = cursor.fetchone()[0]
+        
+        # Verify rollback worked
+        if final_count != initial_count:
+            print_result("Transaction rollback", False, 
+                       error=f"Rollback failed. Expected {initial_count}, got {final_count}")
+            return False
+        
+        print_result("Transaction integrity", True, 
+                   details=f"Transaction rolled back successfully")
+        return True
+        
+    except Exception as e:
+        print_result("Transaction integrity", False, error=str(e))
         return False
 
 def test_mm_trap_operations(db_manager):
-    """Test MM trap detection operations."""
-    print_header("Testing MM Trap Detection Operations")
+    """
+    Test operations specific to Market Maker trap detection.
+    
+    This function tests the database operations related to storing and 
+    retrieving Market Maker trap data, which is a core functionality of
+    the OmegaBTC AI system for tracking manipulative market patterns.
+    
+    Args:
+        db_manager: The DatabaseManager instance to use for testing.
+    """
+    print_header("TESTING MM TRAP OPERATIONS")
     
     try:
-        db_manager.connect()
+        # 1. Create MM traps
+        trap_types = ["stop_hunt", "liquidity_grab", "fake_dump", "fake_pump"]
+        trap_ids = []
         
-        # Adjusted: Create MM trap test data using the correct schema
-        trap_data = {
-            "timestamp": datetime.now(timezone.utc),
-            "trap_type": "liquidity_grab",
-            "btc_price": 50000.0,  # Changed from price_level
-            "price_change": 0.025,  # Added to match schema
-            "confidence": 0.85,    # Changed from confidence_score
-            "liquidity_grabbed": 150.0  # Changed from volume_spike
-            # No fields for timeframe, direction, price_range, or description in the schema
-        }
-        
-        with db_manager.conn.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO mm_traps (
-                    timestamp, trap_type, btc_price, 
-                    price_change, confidence, liquidity_grabbed
-                )
-                VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING id;
-            """, (
-                trap_data["timestamp"],
-                trap_data["trap_type"],
-                trap_data["btc_price"],
-                trap_data["price_change"],
-                trap_data["confidence"],
-                trap_data["liquidity_grabbed"]
-            ))
-            trap_id = cursor.fetchone()[0]
-            db_manager.conn.commit()
+        for i in range(10):
+            trap_type = random.choice(trap_types)
+            confidence = random.uniform(0.7, 0.99)
+            price = 50000.0 + (random.uniform(-2000, 2000))
+            timestamp = datetime.now(timezone.utc)
             
-        print_result("Insert MM trap", True, details=f"Trap ID: {trap_id}")
-        
-        # Test MM trap query by type
-        with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute("""
-                SELECT * FROM mm_traps 
-                WHERE trap_type = %s 
-                ORDER BY timestamp DESC 
-                LIMIT 1;
-            """, (trap_data["trap_type"],))
-            retrieved_trap = cursor.fetchone()
-            
-        if retrieved_trap and retrieved_trap["trap_type"] == trap_data["trap_type"]:
-            print_result("Query MM trap", True, 
-                        details=f"Retrieved trap type: {retrieved_trap['trap_type']}")
-        else:
-            print_result("Query MM trap", False, 
-                        error="Could not retrieve the inserted trap")
-            
-        # Clean up
-        with db_manager.conn.cursor() as cursor:
-            cursor.execute("DELETE FROM mm_traps WHERE id = %s", (trap_id,))
-            db_manager.conn.commit()
-            
-        # Test performance with batch inserts
-        trap_types = ["liquidity_grab", "stop_hunt", "fake_pump", "fake_dump"]
-        
-        print(f"\n{YELLOW}Testing batch insert performance...{RESET}")
-        
-        batch_size = 100
-        trap_data_batch = []
-        
-        for i in range(batch_size):
-            trap_data_batch.append({
-                "timestamp": datetime.now(timezone.utc),
-                "trap_type": random.choice(trap_types),
-                "btc_price": random.uniform(48000.0, 52000.0),
-                "price_change": random.uniform(-0.05, 0.05),
-                "confidence": random.uniform(0.6, 0.95),
-                "liquidity_grabbed": random.uniform(50.0, 200.0)
-            })
-        
-        start_time = time.time()
-        
-        with db_manager.conn.cursor() as cursor:
-            for trap in trap_data_batch:
-                cursor.execute("""
+            # Insert trap
+            with db_manager.conn.cursor() as cursor:
+                cursor.execute(
+                    """
                     INSERT INTO mm_traps (
-                        timestamp, trap_type, btc_price,
-                        price_change, confidence, liquidity_grabbed
+                        type, confidence, price, detected_at, details, schumann_resonance,
+                        success, confirmation_time
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s);
-                """, (
-                    trap["timestamp"],
-                    trap["trap_type"],
-                    trap["btc_price"],
-                    trap["price_change"],
-                    trap["confidence"],
-                    trap["liquidity_grabbed"]
-                ))
-            db_manager.conn.commit()
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                    """,
+                    (
+                        trap_type, 
+                        confidence, 
+                        price, 
+                        timestamp, 
+                        json.dumps({
+                            "volume": random.uniform(10, 100),
+                            "pattern": "v_shape",
+                            "detection_algorithm": "fibonacci"
+                        }),
+                        random.uniform(7.0, 15.0),
+                        random.choice([True, False, None]),
+                        timestamp + (datetime.timedelta(minutes=random.randint(5, 30)) 
+                                     if random.random() > 0.5 else None)
+                    )
+                )
+                trap_id = cursor.fetchone()[0]
+                trap_ids.append(trap_id)
             
-        end_time = time.time()
-        total_time = end_time - start_time
-        inserts_per_second = batch_size / total_time
-        
-        print_result("Batch insert performance", True, 
-                    details=f"Inserted {batch_size} traps in {total_time:.2f}s ({inserts_per_second:.2f} inserts/sec)")
-        
-        # Clean up batch data
-        with db_manager.conn.cursor() as cursor:
-            cursor.execute("DELETE FROM mm_traps WHERE trap_type IN ('liquidity_grab', 'stop_hunt', 'fake_pump', 'fake_dump');")
-            deleted_count = cursor.rowcount
             db_manager.conn.commit()
-            
-        print_result("Batch data cleanup", True, details=f"Deleted {deleted_count} test records")
         
-        db_manager.close()
-        return True
+        # 2. Test simple queries
+        with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
+            # Count by type
+            cursor.execute(
+                "SELECT type, COUNT(*) FROM mm_traps GROUP BY type"
+            )
+            type_counts = cursor.fetchall()
+            
+            # High confidence traps
+            cursor.execute(
+                "SELECT * FROM mm_traps WHERE confidence > 0.9"
+            )
+            high_confidence = cursor.fetchall()
+            
+            # Recent traps
+            cursor.execute(
+                "SELECT * FROM mm_traps WHERE detected_at > %s",
+                (datetime.now(timezone.utc) - datetime.timedelta(hours=1),)
+            )
+            recent_traps = cursor.fetchall()
+        
+        # 3. Test complex query - success rate by trap type
+        with db_manager.conn.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT type,
+                       COUNT(*) as total,
+                       SUM(CASE WHEN success IS TRUE THEN 1 ELSE 0 END) as successful,
+                       SUM(CASE WHEN success IS FALSE THEN 1 ELSE 0 END) as failed,
+                       SUM(CASE WHEN success IS NULL THEN 1 ELSE 0 END) as pending,
+                       AVG(confidence) as avg_confidence
+                FROM mm_traps
+                GROUP BY type
+                """
+            )
+            trap_stats = cursor.fetchall()
+        
+        # Test passed if we can run all these operations
+        success = (
+            len(trap_ids) == 10 and
+            len(type_counts) > 0 and
+            len(trap_stats) > 0
+        )
+        
+        print_result("MM trap operations", success, 
+                   details=f"Created {len(trap_ids)} traps, ran stats queries successfully")
+        
+        return success
+        
     except Exception as e:
-        print_result("MM Trap Operations", False, error=str(e))
+        print_result("MM trap operations", False, error=str(e))
         return False
 
 def main():
