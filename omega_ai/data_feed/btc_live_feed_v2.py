@@ -39,6 +39,7 @@ class RedisManager:
         # Get Redis configuration from environment variables
         redis_host = os.getenv("REDIS_HOST", "localhost")
         redis_port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_username = os.getenv("REDIS_USERNAME", None)
         redis_password = os.getenv("REDIS_PASSWORD", None)
         redis_ssl = os.getenv("REDIS_SSL", "false").lower() == "true"
         
@@ -73,11 +74,17 @@ class RedisManager:
         socket_timeout = int(os.getenv("REDIS_SOCKET_TIMEOUT", "5"))
         socket_connect_timeout = int(os.getenv("REDIS_SOCKET_CONNECT_TIMEOUT", "5"))
         
+        # Log connection parameters (without sensitive data)
+        logger.info(f"{LOG_PREFIX} - Connecting to Redis at {redis_host}:{redis_port}")
+        if redis_username:
+            logger.info(f"{LOG_PREFIX} - Using Redis username: {redis_username}")
+        
         try:
-            # Initialize Redis client
+            # Initialize Redis client with explicit username parameter
             self.redis = redis.Redis(
                 host=redis_host,
                 port=redis_port,
+                username=redis_username,
                 password=redis_password,
                 ssl=redis_ssl,
                 ssl_cert_reqs=ssl_cert_reqs,
@@ -101,6 +108,7 @@ class RedisManager:
                     self.redis = redis.Redis(
                         host=redis_host,
                         port=redis_port,
+                        username=redis_username,
                         password=redis_password,
                         ssl=False,
                         socket_timeout=socket_timeout,
