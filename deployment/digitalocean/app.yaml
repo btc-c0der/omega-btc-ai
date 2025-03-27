@@ -7,6 +7,7 @@ services:
     repo: fsiqueira/omega-btc-ai
   build_command: pip install -r requirements.txt
   run_command: python -m omega_ai.data_feed.btc_live_feed_v2
+  source_dir: /
   envs:
   - key: REDIS_HOST
     value: ${redis.REDIS_HOST}
@@ -24,15 +25,30 @@ services:
     value: "5"
   - key: REDIS_SOCKET_CONNECT_TIMEOUT
     value: "5"
+  - key: LOG_LEVEL
+    value: "info"
+  - key: DEBUG
+    value: "false"
   instance_count: 1
   instance_size_slug: basic-xxs
   health_check:
     http_path: /health
     initial_delay_seconds: 10
     period_seconds: 60
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
+  routes:
+  - path: /
+  alert_policy:
+    rule: DEPLOYMENT_FAILED
+  alert_policy:
+    rule: DOMAIN_FAILED
 
 databases:
 - engine: REDIS
   name: redis
   production: false
-  version: "6" 
+  version: "6"
+  db_user: omega-btc-feed
+  db_name: btc-feed-db 
