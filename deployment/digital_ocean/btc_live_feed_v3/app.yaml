@@ -25,6 +25,12 @@ services:
       - key: REDIS_USE_SSL
         value: "true"
         scope: RUN_TIME
+      - key: REDIS_CERT
+        value: "/workspace/SSL_redis-btc-omega-redis.pem"
+        scope: RUN_TIME
+      - key: REDIS_SSL_CERT_REQS
+        value: "required"
+        scope: RUN_TIME
       - key: FAILOVER_REDIS_HOST
         value: "localhost"
         scope: RUN_TIME
@@ -82,6 +88,12 @@ services:
         scope: RUN_TIME
       - key: REDIS_USE_SSL
         value: "true"
+        scope: RUN_TIME
+      - key: REDIS_CERT
+        value: "/workspace/SSL_redis-btc-omega-redis.pem"
+        scope: RUN_TIME
+      - key: REDIS_SSL_CERT_REQS
+        value: "required"
         scope: RUN_TIME
       - key: HEALTH_CHECK_PORT
         value: "8080"

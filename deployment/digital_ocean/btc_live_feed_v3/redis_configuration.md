@@ -43,8 +43,35 @@ When the database is created, you'll receive:
 Digital Ocean Redis requires SSL connections. Configure your app to use SSL:
 
 1. Set `REDIS_USE_SSL=true` in your app environment variables
-2. For certificate verification in production, set `REDIS_SSL_CERT_REQS=required`
-3. For testing/development, you can use `REDIS_SSL_CERT_REQS=none`
+2. For certificate verification in production, you need to specify:
+
+   ```
+   REDIS_SSL_CERT_REQS=required
+   REDIS_CERT=/workspace/SSL_redis-btc-omega-redis.pem
+   ```
+
+3. Make sure the certificate file `SSL_redis-btc-omega-redis.pem` is available in your workspace directory. This is typically deployed along with your application to Digital Ocean.
+
+4. If you don't have the certificate file, you can copy it from an existing Digital Ocean deployment:
+
+   ```bash
+   # From your local machine
+   doctl apps get <app-id>
+   doctl ssh <component-name>
+   
+   # Once connected to the Digital Ocean app
+   cd /workspace
+   cat SSL_redis-btc-omega-redis.pem
+   # Copy the contents to a local file
+   ```
+
+5. For testing/development without a certificate, you can use:
+
+   ```
+   REDIS_SSL_CERT_REQS=none
+   ```
+
+   But this is not recommended for production environments.
 
 ## Local Failover Redis Setup
 
