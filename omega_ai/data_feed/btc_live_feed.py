@@ -321,7 +321,12 @@ def on_message(ws, message):
         price = float(data["p"])
         volume = float(data["q"])
 
-        log_rasta(f"LIVE BTC PRICE UPDATE: ${price:.2f} (Vol: {volume})", BLUE_RASTA)
+        # Enhanced price update display
+        log_rasta(f"\n{'='*50}", BLUE_RASTA)
+        log_rasta(f"🌿 LIVE BTC PRICE UPDATE 🌿", BLUE_RASTA)
+        log_rasta(f"{'='*50}", BLUE_RASTA)
+        log_rasta(f"💰 Price: ${price:,.2f}", BLUE_RASTA)
+        log_rasta(f"📊 Volume: {volume:,.2f} BTC", BLUE_RASTA)
         
         # Update Redis values using the RedisManager with connection based on environment
         redis_manager = RedisManager()
@@ -329,6 +334,17 @@ def on_message(ws, message):
         prev_price = float(prev_price) if prev_price else None
 
         if prev_price is None or price != prev_price:
+            # Calculate price change
+            price_change = price - prev_price if prev_price else 0
+            price_change_pct = (price_change / prev_price * 100) if prev_price else 0
+            
+            # Print price movement details
+            log_rasta(f"\n📈 Price Movement:", CYAN_RASTA)
+            if prev_price:
+                log_rasta(f"  Previous: ${prev_price:,.2f}", CYAN_RASTA)
+                log_rasta(f"  Change: ${price_change:,.2f} ({price_change_pct:+.2f}%)", 
+                         GREEN_RASTA if price_change >= 0 else RED_RASTA)
+            
             # Store both price and volume values separately
             redis_manager.set_cached("last_btc_price", str(price))
             redis_manager.set_cached("last_btc_volume", str(volume))
@@ -338,6 +354,7 @@ def on_message(ws, message):
             redis_manager.lpush("btc_movement_history", combined_data)
             redis_manager.ltrim("btc_movement_history", -100, -1)
             
+            # Calculate and store absolute change
             abs_change = abs(price - prev_price) if prev_price is not None else 0
             abs_change_scaled = abs_change * 100
             redis_manager.lpush("abs_price_change_history", str(abs_change_scaled))
@@ -345,7 +362,15 @@ def on_message(ws, message):
             redis_manager.set_cached("prev_btc_price", str(price))
             
             # Add last update time
-            redis_manager.set_cached("last_btc_update_time", str(time.time()))
+            current_time = time.time()
+            redis_manager.set_cached("last_btc_update_time", str(current_time))
+            
+            # Print Redis update confirmation
+            log_rasta(f"\n💾 Redis Update:", GREEN_RASTA)
+            log_rasta(f"  Current Price: ${price:,.2f}", GREEN_RASTA)
+            log_rasta(f"  Volume: {volume:,.2f} BTC", GREEN_RASTA)
+            log_rasta(f"  Absolute Change: ${abs_change_scaled:,.2f}", GREEN_RASTA)
+            log_rasta(f"  Last Update: {datetime.fromtimestamp(current_time, UTC).strftime('%Y-%m-%d %H:%M:%S')}", GREEN_RASTA)
             
             # Update Fibonacci levels every 100 price updates or when significant movement occurs
             update_fibonacci = False
@@ -380,8 +405,9 @@ def on_message(ws, message):
                         high_price = max(prices)
                         low_price = min(prices)
                         calculate_fibonacci_levels(high_price, low_price)
-            
-            log_rasta(f"Redis Updated: BTC Price = {price:.2f}, Volume = {volume}, Abs Change = {abs_change_scaled:.2f}", GREEN_RASTA)
+                        log_rasta(f"\n🔮 Fibonacci Update:", MAGENTA_RASTA)
+                        log_rasta(f"  High: ${high_price:,.2f}", MAGENTA_RASTA)
+                        log_rasta(f"  Low: ${low_price:,.2f}", MAGENTA_RASTA)
             
             # Send price update to MM WebSocket server
             asyncio.run(send_to_mm_websocket(price))
@@ -393,7 +419,9 @@ def on_message(ws, message):
                 if abs(price - level) < 50:  # Within $50 of a Fibonacci level
                     is_fibonacci_aligned = True
                     redis_manager.set_cached("fibonacci_alignment", f"{level_value}000")
-                    log_rasta(f"🔱 SACRED ALIGNMENT: BTC price near Fibonacci level ${level_value}000", MAGENTA_RASTA)
+                    log_rasta(f"\n🔱 SACRED ALIGNMENT:", MAGENTA_RASTA)
+                    log_rasta(f"  BTC price near Fibonacci level ${level_value:,.0f}", MAGENTA_RASTA)
+                    log_rasta(f"  Distance: ${abs(price - level):,.2f}", MAGENTA_RASTA)
                     break
             
             if not is_fibonacci_aligned:
@@ -409,19 +437,23 @@ def on_message(ws, message):
                     # Check for high frequency mode activation
                     hf_active, multiplier = hf_detector.detect_high_freq_trap_mode(price)
                     if hf_active:
-                        log_rasta(f"⚠️ HIGH FREQUENCY TRAP MODE ACTIVATED! Multiplier: {multiplier}", RED_RASTA, "warning")
+                        log_rasta(f"\n⚠️ HIGH FREQUENCY TRAP MODE:", RED_RASTA)
+                        log_rasta(f"  Status: ACTIVATED", RED_RASTA)
+                        log_rasta(f"  Multiplier: {multiplier:.2f}x", RED_RASTA)
                 except Exception as e:
-                    log_rasta(f"Error using MM Trap Detector: {e}", YELLOW_RASTA, "warning")
+                    log_rasta(f"\n⚠️ Error using MM Trap Detector: {e}", YELLOW_RASTA, "warning")
             else:
                 # Only display the warning once by checking if the flag has changed
                 if redis_manager.get_cached("mm_trap_detector_warning_shown") != "1":
-                    log_rasta("MM Trap Detector module not available", YELLOW_RASTA, "warning")
+                    log_rasta("\n⚠️ MM Trap Detector module not available", YELLOW_RASTA, "warning")
                     redis_manager.set_cached("mm_trap_detector_warning_shown", "1")
         else:
-            log_rasta(f"Price Unchanged, Skipping Redis Update: {price}", YELLOW_RASTA)
+            log_rasta(f"\n⏳ Price Unchanged: ${price:,.2f}", YELLOW_RASTA)
+        
+        log_rasta(f"{'='*50}\n", BLUE_RASTA)
 
     except Exception as e:
-        log_rasta(f"Error processing message: {e}", RED_RASTA, "error")
+        log_rasta(f"\n❌ Error processing message: {e}", RED_RASTA, "error")
 
 def on_close(ws, close_status_code, close_msg):
     """Handle WebSocket closure with Rastafarian resilience."""

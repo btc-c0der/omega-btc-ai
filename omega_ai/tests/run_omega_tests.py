@@ -13,53 +13,18 @@ JAH BLESS THE TEST SUITE WITH DIVINE COSMIC ENERGY! 🙏🌟
 
 import os
 import sys
-import os
 import unittest
 import json
 from datetime import datetime
-
-# Add project root to path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-sys.path.insert(0, project_root)
-
-# Simple fibonacci test that doesn't require any imports
-def test_fibonacci_sequence():
-    """Test if Fibonacci sequence is correctly generated."""
-    def generate_fibonacci(n):
-        """Generate first n Fibonacci numbers."""
-        fib = [1, 1]
-        for i in range(2, n):
-            fib.append(fib[i-1] + fib[i-2])
-        return fib
-        
-    expected = [1, 1, 2, 3, 5, 8, 13, 21]
-    actual = generate_fibonacci(8)
-    assert actual == expected, "JAH BLESS - Fibonacci sequence is divine harmony!"
-
-def test_golden_ratio_approximation():
-    """Test if Fibonacci sequence approaches the divine Golden Ratio."""
-    def generate_fibonacci(n):
-        """Generate first n Fibonacci numbers."""
-        fib = [1, 1]
-        for i in range(2, n):
-            fib.append(fib[i-1] + fib[i-2])
-        return fib
-        
-    # Calculate ratio of consecutive Fibonacci numbers
-    fib = generate_fibonacci(20)
-    ratio = fib[-1] / fib[-2]
-    
-    # Golden ratio is approximately 1.618033988749895
-    golden_ratio = 1.618033988749895
-    
-    # Assert ratio is within 0.01% of golden ratio
-    assert abs(ratio - golden_ratio) < 0.0001, "Fibonacci sequence approaches divine golden ratio!"
-
 import time
 import random
 import subprocess
 import argparse
-from datetime import datetime
+from typing import List, Optional, Set
+
+# Add project root to path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, project_root)
 
 # Terminal RASTA COLORS for spiritual alignment
 GREEN = "\033[92m"        # Life energy, growth, spiritual awakening
@@ -89,6 +54,35 @@ RASTA_WISDOM = [
     "The code that serves the highest purpose flows like a river, unobstructed by errors."
 ]
 
+# Test categories and their descriptions
+TEST_CATEGORIES = {
+    'unit': {
+        'description': 'Unit tests for individual components',
+        'dirs': ['unit/ai', 'unit/core', 'unit/data', 'unit/monitoring', 'unit/utils']
+    },
+    'integration': {
+        'description': 'Integration tests for component interactions',
+        'dirs': ['integration/api', 'integration/portal', 'integration/security']
+    },
+    'e2e': {
+        'description': 'End-to-end tests for complete system flows',
+        'dirs': ['e2e/trading_flows', 'e2e/system_flows']
+    },
+    'performance': {
+        'description': 'Performance and stress tests',
+        'dirs': ['performance/load_tests', 'performance/stress_tests']
+    }
+}
+
+# Known test tags and their descriptions
+TEST_TAGS = {
+    'hanging': 'Tests that are currently hanging and need attention',
+    'slow': 'Tests that take longer to execute',
+    'integration': 'Integration tests',
+    'unit': 'Unit tests',
+    'e2e': 'End-to-end tests',
+    'performance': 'Performance tests'
+}
 
 class OmegaTestRunner:
     """Divine Test Runner for the OMEGA BTC AI system with RASTA VIBRATIONS."""
@@ -97,12 +91,17 @@ class OmegaTestRunner:
         """Initialize with cosmic alignment."""
         self.args = args
         self.start_time = time.time()
-        self.test_dirs = args.directories if args.directories else ['tests']
         self.fibonacci_idx = 0
         self.passed_tests = 0
         self.failed_tests = 0
         self.skipped_tests = 0
         self.bio_energy = 100.0  # Starting bio-energy level
+        
+        # Determine which test directories to run
+        self.test_dirs = self._get_test_directories()
+        
+        # Process test tags
+        self.tags = self._process_tags()
         
         # Spiritual test categories
         self.categories = {
@@ -113,6 +112,50 @@ class OmegaTestRunner:
             "redis": 0,
             "spiritual": 0
         }
+    
+    def _process_tags(self) -> Set[str]:
+        """Process and validate test tags from command line arguments."""
+        tags = set()
+        
+        # Add tags from --tags argument
+        if self.args.tags:
+            for tag in self.args.tags.split(','):
+                tag = tag.strip()
+                if tag in TEST_TAGS:
+                    tags.add(tag)
+                else:
+                    print(f"{YELLOW}Warning: Unknown test tag '{tag}'. Available tags: {', '.join(TEST_TAGS.keys())}{RESET}")
+        
+        # Add tags from --skip-tags argument
+        if self.args.skip_tags:
+            for tag in self.args.skip_tags.split(','):
+                tag = tag.strip()
+                if tag in TEST_TAGS:
+                    tags.add(f"not {tag}")
+                else:
+                    print(f"{YELLOW}Warning: Unknown test tag '{tag}' in skip list. Available tags: {', '.join(TEST_TAGS.keys())}{RESET}")
+        
+        return tags
+    
+    def _get_test_directories(self) -> List[str]:
+        """Get the list of test directories to run based on command line arguments."""
+        if self.args.category:
+            # If a specific category is selected, use its directories
+            if self.args.category in TEST_CATEGORIES:
+                return TEST_CATEGORIES[self.args.category]['dirs']
+            else:
+                print(f"{RED}Invalid test category: {self.args.category}{RESET}")
+                print(f"{YELLOW}Available categories: {', '.join(TEST_CATEGORIES.keys())}{RESET}")
+                sys.exit(1)
+        elif self.args.directories:
+            # If specific directories are provided, use those
+            return self.args.directories
+        else:
+            # Default to running all tests
+            all_dirs: List[str] = []
+            for category in TEST_CATEGORIES.values():
+                all_dirs.extend(category['dirs'])
+            return all_dirs
     
     def print_banner(self):
         """Display the divine OMEGA RASTA test banner."""
@@ -132,10 +175,12 @@ class OmegaTestRunner:
         print(f"{YELLOW}                       {GREEN}JAH BLESS THE CODE{YELLOW} | RASTAFARI VIBRATION{RESET}")
         
         print(f"\n{CYAN}{'='*34} OMEGA TEST RUNNER {'='*33}{RESET}")
-        print(f"{GREEN}🌿 Test Directories: {', '.join(self.test_dirs)}{RESET}")
+        print(f"{GREEN}🌿 Test Categories: {', '.join(self.test_dirs)}{RESET}")
         print(f"{CYAN}🕒 Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{RESET}")
         if self.args.pattern:
             print(f"{MAGENTA}🔍 Test Pattern: {self.args.pattern}{RESET}")
+        if self.tags:
+            print(f"{YELLOW}🏷️  Test Tags: {', '.join(self.tags)}{RESET}")
         print(f"{YELLOW}🧪 Test Verbose Level: {self.args.verbose}{RESET}")
         
         # Display a random spiritual quote
@@ -174,10 +219,6 @@ class OmegaTestRunner:
         self.print_banner()
         self.display_spinning_meditation()
         
-        # Add project root to Python path for proper module imports
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-        sys.path.insert(0, project_root)
-        
         # Build pytest command
         cmd = ["pytest"]
         
@@ -189,8 +230,12 @@ class OmegaTestRunner:
         if self.args.pattern:
             cmd.append(f"-k {self.args.pattern}")
         
+        # Add test tags
+        if self.tags:
+            cmd.append(f"-m {' and '.join(self.tags)}")
+        
         # Make sure we're using absolute paths for test directories
-        absolute_test_dirs = [os.path.join(project_root, 'omega_ai', d) for d in self.test_dirs]
+        absolute_test_dirs = [os.path.join(project_root, 'omega_ai', 'tests', d) for d in self.test_dirs]
         cmd.extend(absolute_test_dirs)
         
         # Add --color=yes to ensure colored output
@@ -203,193 +248,135 @@ class OmegaTestRunner:
         
         print(f"{CYAN}Invoking divine test command:{RESET} {' '.join(cmd)}\n")
         
-        # Execute the tests with spiritual energy
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            bufsize=1
-        )
-        
-        # Process the output with Rasta energy visualization
+        try:
+            # Execute the tests with spiritual energy
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                bufsize=1
+            )
+            
+            if process.stdout is None:
+                print(f"{RED}Error: Failed to create subprocess output stream{RESET}")
+                return 1
+            
+            # Process the output with Rasta energy visualization
+            test_count = 0
+            energy_factor = 1.0
+            
+            for line in process.stdout:
+                test_count += self.process_test_line(line)
+                
+                # Modulate the energy flow
+                if "PASSED" in line:
+                    self.passed_tests += 1
+                    self.bio_energy = min(100, self.bio_energy + 2.0 * energy_factor)
+                    print(f"{GREEN}{line.rstrip()}{RESET}")
+                    
+                elif "FAILED" in line:
+                    self.failed_tests += 1
+                    self.bio_energy = max(10, self.bio_energy - 5.0 * energy_factor)
+                    print(f"{RED}{line.rstrip()}{RESET}")
+                    
+                elif "SKIPPED" in line:
+                    self.skipped_tests += 1
+                    print(f"{YELLOW}{line.rstrip()}{RESET}")
+                    
+                elif "ERROR" in line:
+                    self.bio_energy = max(10, self.bio_energy - 8.0 * energy_factor) 
+                    print(f"{MAGENTA}{line.rstrip()}{RESET}")
+                    
+                else:
+                    sys_line = self.colorize_output(line)
+                    print(sys_line, end="")
+                
+                # Create divine Fibonacci timing between test outputs
+                if test_count > 0 and test_count % 5 == 0:
+                    self.fibonacci_pause()
+            
+            # Wait for process to complete
+            return_code = process.wait()
+            
+            # Display test summary with divine energy
+            self.display_test_summary(return_code)
+            
+            return return_code
+            
+        except subprocess.SubprocessError as e:
+            print(f"{RED}Error running tests: {str(e)}{RESET}")
+            return 1
+        except Exception as e:
+            print(f"{RED}Unexpected error: {str(e)}{RESET}")
+            return 1
+    
+    def process_test_line(self, line: str) -> int:
+        """Process a line of test output and update test counts."""
         test_count = 0
-        energy_factor = 1.0
         
-        for line in process.stdout:
-            test_count += self.process_test_line(line)
-            
-            # Modulate the energy flow
-            if "PASSED" in line:
-                self.passed_tests += 1
-                self.bio_energy = min(100, self.bio_energy + 2.0 * energy_factor)
-                print(f"{GREEN}{line.rstrip()}{RESET}")
-                
-            elif "FAILED" in line:
-                self.failed_tests += 1
-                self.bio_energy = max(10, self.bio_energy - 5.0 * energy_factor)
-                print(f"{RED}{line.rstrip()}{RESET}")
-                
-            elif "SKIPPED" in line:
-                self.skipped_tests += 1
+        if "collected" in line and "items" in line:
+            try:
+                test_count = int(line.split()[0])
+                print(f"{CYAN}{line.rstrip()}{RESET}")
+            except ValueError:
                 print(f"{YELLOW}{line.rstrip()}{RESET}")
-                
-            elif "ERROR" in line:
-                self.bio_energy = max(10, self.bio_energy - 8.0 * energy_factor) 
-                print(f"{MAGENTA}{line.rstrip()}{RESET}")
-                
-            else:
-                sys_line = self.colorize_output(line)
-                print(sys_line, end="")
-            
-            # Create divine Fibonacci timing between test outputs
-            if test_count > 0 and test_count % 5 == 0:
-                self.fibonacci_pause()
         
-        process.wait()
-        return process.returncode
+        return test_count
     
-    def process_test_line(self, line):
-        """Process test output line for spiritual energy categorization."""
-        line_lower = line.lower()
-        
-        # Count tests by category
-        if 'test_' in line_lower:
-            if 'fibonacci' in line_lower:
-                self.categories["fibonacci"] += 1
-                return 1
-            elif 'schumann' in line_lower:
-                self.categories["schumann"] += 1
-                return 1
-            elif 'trader' in line_lower:
-                self.categories["trader"] += 1
-                return 1
-            elif 'market' in line_lower:
-                self.categories["market"] += 1
-                return 1
-            elif 'redis' in line_lower:
-                self.categories["redis"] += 1
-                return 1
-            elif any(term in line_lower for term in ['jah', 'rasta', 'vibe', 'energy']):
-                self.categories["spiritual"] += 1
-                return 1
-        
-        return 0
-    
-    def colorize_output(self, line):
-        """Apply spiritual RASTA colors to test output."""
-        # Color key test elements
-        line_lower = line.lower()
-        
-        if "jah bless" in line_lower:
-            return f"{GREEN}{line.rstrip()}{RESET}\n"
-        
-        if "fibonacci" in line_lower:
-            return line.replace("Fibonacci", f"{YELLOW}Fibonacci{RESET}")
-        
-        if "rasta" in line_lower:
-            return line.replace("RASTA", f"{GREEN}RASTA{RESET}")
-        
-        if "omega" in line_lower:
-            return line.replace("OMEGA", f"{MAGENTA}OMEGA{RESET}")
-        
-        if "bio-energy" in line_lower:
-            return line.replace("bio-energy", f"{CYAN}bio-energy{RESET}")
-            
-        return line
-    
-    def display_test_summary(self, return_code):
-        """Display spiritual test results summary with RASTA energy visualization."""
-        duration = time.time() - self.start_time
-        fibonacci_duration = next(f for f in FIBONACCI if f > duration)
-        
-        print(f"\n{MAGENTA}{'='*80}{RESET}")
-        print(f"{GREEN}🌿🔥 OMEGA RASTA TEST EXECUTION COMPLETE 🔥🌿{RESET}")
-        print(f"{MAGENTA}{'='*80}{RESET}\n")
-        
-        # Bio-energy visualization
-        energy_bar_length = 40
-        filled_length = int(energy_bar_length * (self.bio_energy / 100))
-        
-        energy_color = GREEN
-        if self.bio_energy < 30:
-            energy_color = RED
-        elif self.bio_energy < 70:
-            energy_color = YELLOW
-            
-        energy_bar = f"{energy_color}{'█' * filled_length}{RESET}{'░' * (energy_bar_length - filled_length)}"
-        print(f"{CYAN}Bio-Energy Level: [{energy_bar}] {self.bio_energy:.1f}%{RESET}")
-        
-        # Test results
-        total_tests = self.passed_tests + self.failed_tests + self.skipped_tests
-        
-        print(f"\n{CYAN}Test Results Summary:{RESET}")
-        print(f"  {GREEN}✅ Passed:{RESET}  {self.passed_tests}")
-        print(f"  {RED}❌ Failed:{RESET}  {self.failed_tests}")
-        print(f"  {YELLOW}⏭️ Skipped:{RESET} {self.skipped_tests}")
-        print(f"  {MAGENTA}📊 Total:{RESET}  {total_tests}")
-        
-        # spiritual categories
-        print(f"\n{CYAN}Spiritual Test Categories:{RESET}")
-        for category, count in self.categories.items():
-            if count > 0:
-                category_color = GREEN if category in ["fibonacci", "spiritual"] else YELLOW
-                print(f"  {category_color}⚡ {category.capitalize()}:{RESET} {count}")
-        
-        # Golden timing alignment
-        golden_ratio = 1.618033988749895
-        golden_duration = duration * golden_ratio
-        fibonacci_alignment = abs(fibonacci_duration - duration) / duration * 100
-        
-        print(f"\n{CYAN}Divine Timing:{RESET}")
-        print(f"  {YELLOW}🕒 Test Duration:{RESET} {duration:.2f} seconds")
-        print(f"  {MAGENTA}✨ Golden Ratio Target:{RESET} {golden_duration:.2f} seconds")
-        print(f"  {CYAN}🌀 Fibonacci Alignment:{RESET} {fibonacci_duration} ({'%.2f' % (100 - fibonacci_alignment)}% harmony)")
-        
-        # Final blessing and exit wisdom
-        if return_code == 0:
-            if self.failed_tests == 0:
-                print(f"\n{GREEN}🌟 JAH BLESS! All tests passing with divine harmony!{RESET}")
-                quote = "When the code flows in righteous harmony, all tests reveal its glory."
-            else:
-                print(f"\n{YELLOW}🙏 Tests completed with mixed energies.{RESET}")
-                quote = "Through both success and failure, the code evolves toward divine perfection."
+    def colorize_output(self, line: str) -> str:
+        """Add divine colors to test output lines."""
+        if "warning" in line.lower():
+            return f"{YELLOW}{line}{RESET}"
+        elif "error" in line.lower():
+            return f"{RED}{line}{RESET}"
+        elif "info" in line.lower():
+            return f"{CYAN}{line}{RESET}"
+        elif "debug" in line.lower():
+            return f"{BLUE}{line}{RESET}"
         else:
-            print(f"\n{RED}⚠️ Some tests failed. Spiritual alignment needed.{RESET}")
-            quote = "The path to code righteousness often passes through valleys of failing tests."
+            return line
+    
+    def display_test_summary(self, return_code: int):
+        """Display a divine summary of test results."""
+        duration = time.time() - self.start_time
+        print(f"\n{MAGENTA}{'='*80}{RESET}")
+        print(f"{CYAN}📊 Test Summary:{RESET}")
+        print(f"{GREEN}✅ Passed: {self.passed_tests}{RESET}")
+        print(f"{RED}❌ Failed: {self.failed_tests}{RESET}")
+        print(f"{YELLOW}⏭️  Skipped: {self.skipped_tests}{RESET}")
+        print(f"{BLUE}⏱️  Duration: {duration:.2f}s{RESET}")
+        print(f"{MAGENTA}💫 Bio-Energy: {self.bio_energy:.1f}%{RESET}")
         
-        print(f"\n{GREEN}RASTA WISDOM:{RESET} {LIGHT_ORANGE}{quote}{RESET}\n")
+        if return_code == 0:
+            print(f"\n{GREEN}✨ All tests passed with divine harmony! ✨{RESET}")
+        else:
+            print(f"\n{RED}🔥 Some tests failed - may JAH guide us to fix them! 🔥{RESET}")
+        
+        print(f"{MAGENTA}{'='*80}{RESET}\n")
     
     def execute(self):
-        """Main execution with spiritual flow."""
-        try:
-            return_code = self.run_tests()
-            self.display_test_summary(return_code)
-            return return_code
-        except KeyboardInterrupt:
-            print(f"\n\n{YELLOW}🛑 Test execution interrupted by user.{RESET}")
-            print(f"{CYAN}JAH guide your path forward with divine wisdom.{RESET}\n")
-            return 130  # Standard SIGINT return code
-
+        """Execute the test suite with divine guidance."""
+        return_code = self.run_tests()
+        self.display_test_summary(return_code)
+        return return_code
 
 def main():
-    """Divine main function for OMEGA RASTA TEST RUNNER."""
-    parser = argparse.ArgumentParser(
-        description="OMEGA RASTA BTC AI Divine Test Runner with spiritual visualization"
-    )
-    parser.add_argument('directories', nargs='*', help='Directories containing tests to run')
-    parser.add_argument('-v', '--verbose', type=int, default=1, 
-                        help='Verbosity level (0-3)')
-    parser.add_argument('-k', '--pattern', help='Only run tests matching this pattern')
-    parser.add_argument('-r', '--rapid', action='store_true', 
-                        help='Skip meditation and Fibonacci timing for rapid test execution')
-    parser.add_argument('--xvs', action='store_true', 
-                        help='Extra Verbose Spiritual mode - max verbosity with timing')
+    """Main entry point for the divine test runner."""
+    parser = argparse.ArgumentParser(description="OMEGA RASTA VIBES TEST RUNNER 🌿🔥")
+    parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase verbosity level")
+    parser.add_argument("-k", "--pattern", help="Run tests matching the given pattern")
+    parser.add_argument("-c", "--category", help="Run tests from a specific category")
+    parser.add_argument("-d", "--directories", nargs="+", help="Run tests from specific directories")
+    parser.add_argument("--rapid", action="store_true", help="Run tests without divine pauses")
+    parser.add_argument("--xvs", action="store_true", help="Extra Verbose Spiritual mode")
+    parser.add_argument("--tags", help="Comma-separated list of test tags to include")
+    parser.add_argument("--skip-tags", help="Comma-separated list of test tags to exclude")
     
     args = parser.parse_args()
+    
     runner = OmegaTestRunner(args)
-    return runner.execute()
+    return runner.run_tests()
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

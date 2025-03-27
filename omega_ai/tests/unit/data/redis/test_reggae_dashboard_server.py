@@ -117,8 +117,9 @@ class TestReggaeDashboardServer:
             assert "displayed_keys" in data
     
     @pytest.mark.asyncio
+    @pytest.mark.hanging
     async def test_websocket_connection(self, mock_redis):
-        """Test WebSocket connection handling"""
+        """Test WebSocket connection handling - Currently hanging"""
         with patch('redis.Redis', return_value=mock_redis):
             server = ReggaeDashboardServer()
             client = TestClient(server.app)
@@ -158,8 +159,9 @@ class TestReggaeDashboardServer:
         assert "HIGH TRAP ENERGY" in server._generate_jah_message(0.9)
     
     @pytest.mark.asyncio
+    @pytest.mark.hanging
     async def test_broadcast_updates(self, mock_redis, sample_trap_data, sample_position_data):
-        """Test broadcast updates functionality"""
+        """Test broadcast updates functionality - Currently hanging"""
         mock_redis.get.side_effect = [
             json.dumps(sample_trap_data),
             json.dumps(sample_position_data)

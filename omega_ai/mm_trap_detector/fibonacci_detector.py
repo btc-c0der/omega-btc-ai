@@ -198,7 +198,7 @@ class FibonacciDetector:
                     center_price = window_prices[i]
                     
                     # Check for potential swing high
-                    if self._is_potential_swing_high(window_prices, i):
+                    if self._is_potential_swing_high(center_price, window_prices):
                         # Store potential swing high for confirmation
                         potential_high = {
                             "price": center_price,
@@ -208,7 +208,7 @@ class FibonacciDetector:
                         self.potential_swing_highs.append(potential_high)
                         
                     # Check for potential swing low
-                    if self._is_potential_swing_low(window_prices, i):
+                    if self._is_potential_swing_low(center_price, window_prices):
                         # Store potential swing low for confirmation
                         potential_low = {
                             "price": center_price,
@@ -249,51 +249,41 @@ class FibonacciDetector:
             logger.error(f"Error updating swing points: {str(e)}")
             raise ValueError(f"Error updating swing points: {str(e)}")
     
-    def _is_potential_swing_high(self, prices, index):
-        """Check if the price at index is a potential swing high."""
-        # Must be higher than adjacent prices
-        if prices[index] <= prices[index-1] or prices[index] <= prices[index+1]:
+    def _is_potential_swing_high(self, current_price: float, recent_prices: List[float]) -> bool:
+        """Check if current price could be a swing high."""
+        if len(recent_prices) < 3:
             return False
         
-        # Must be higher than a minimum percentage from recent low
-        if self.recent_swing_low is not None:
-            diff_pct = (prices[index] - self.recent_swing_low) / self.recent_swing_low
-            if diff_pct < self.min_swing_diff:
-                return False
-        
-        # Must have price action setup (higher lows leading to this high)
-        if index >= 3:
-            # Check if we have progressively higher lows leading to this high
-            if not (prices[index-3] < prices[index-2] < prices[index-1] < prices[index]):
-                # Allow some flexibility - at least the immediate low should be higher
-                if not prices[index-1] > prices[index-2]:
-                    return False
-        
-        return True
-    
-    def _is_potential_swing_low(self, prices, index):
-        """Check if the price at index is a potential swing low."""
-        # Must be lower than adjacent prices
-        if prices[index] >= prices[index-1] or prices[index] >= prices[index+1]:
+        # Price must be higher than surrounding prices
+        if current_price <= recent_prices[-1] or current_price <= recent_prices[-2]:
             return False
         
-        # Must be lower than a minimum percentage from recent high
+        # Must be significantly higher than recent swing high
+        min_diff = 0.002  # 0.2% minimum difference
         if self.recent_swing_high is not None:
-            diff_pct = (self.recent_swing_high - prices[index]) / prices[index]
-            if diff_pct < self.min_swing_diff:
+            if (current_price - self.recent_swing_high) / self.recent_swing_high < min_diff:
                 return False
-        
-        # Must have price action setup (lower highs leading to this low)
-        if index >= 3:
-            # Check if we have progressively lower highs leading to this low
-            if not (prices[index-3] > prices[index-2] > prices[index-1] > prices[index]):
-                # Allow some flexibility - at least the immediate high should be lower
-                if not prices[index-1] < prices[index-2]:
-                    return False
-        
+            
         return True
     
-    def _update_confirmation_counts(self, current_price):
+    def _is_potential_swing_low(self, current_price: float, recent_prices: List[float]) -> bool:
+        """Check if current price could be a swing low."""
+        if len(recent_prices) < 3:
+            return False
+        
+        # Price must be lower than surrounding prices
+        if current_price >= recent_prices[-1] or current_price >= recent_prices[-2]:
+            return False
+        
+        # Must be significantly lower than recent swing low
+        min_diff = 0.002  # 0.2% minimum difference
+        if self.recent_swing_low is not None:
+            if (self.recent_swing_low - current_price) / self.recent_swing_low < min_diff:
+                return False
+            
+        return True
+    
+    def _update_confirmation_counts(self, current_price: float) -> None:
         """Update confirmation counts for potential swing points."""
         # Update potential highs
         for potential in self.potential_swing_highs:
@@ -313,7 +303,7 @@ class FibonacciDetector:
             elif current_price < potential["price"]:
                 potential["confirmation_count"] = 0  # Reset confirmation
     
-    def _check_for_confirmed_swings(self):
+    def _check_for_confirmed_swings(self) -> None:
         """Check if any potential swing points have been confirmed."""
         # Check for confirmed swing highs
         for potential in self.potential_swing_highs:
@@ -410,7 +400,7 @@ class FibonacciDetector:
             # Get current Fibonacci levels
             if levels is None:
                 redis_client = ensure_redis_connection()
-                levels_str = redis_client.get("fibonacci_levels")
+                levels_str = redis_client.get("fibonacci:current_levels")
                 if levels_str is None:
                     return None
                     
@@ -450,20 +440,21 @@ class FibonacciDetector:
                     # Determine if we're in an uptrend or downtrend
                     is_uptrend = current_price > self.recent_swing_low + (price_range * 0.5)
                     
-                    # Create hit object
+                    # Create hit object with timestamp
                     hit = {
                         "level": float(level_name.rstrip("%")) / 100 if level_name != "0% (Base)" else 0.0,
                         "price": level_price,
                         "label": level_name,
                         "proximity": proximity,
-                        "is_uptrend": is_uptrend
+                        "is_uptrend": is_uptrend,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     
                     # Record hit in Redis
                     try:
                         redis_client = ensure_redis_connection()
                         hit_data = json.dumps(hit)
-                        redis_client.zadd("fibonacci_hits", {hit_data: time.time()})
+                        redis_client.zadd("fibonacci:hits", {hit_data: time.time()})
                     except redis.RedisError as e:
                         logger.error(f"Error recording Fibonacci hit: {e}")
                     

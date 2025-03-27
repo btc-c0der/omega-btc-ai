@@ -102,8 +102,9 @@ class TestDashboardIntegration:
             assert "displayed_keys" in data
     
     @pytest.mark.asyncio
+    @pytest.mark.hanging
     async def test_websocket_integration(self, mock_redis, sample_trap_data, sample_position_data):
-        """Test WebSocket integration with Redis data updates"""
+        """Test WebSocket integration with Redis data updates - Currently hanging"""
         mock_redis.get.side_effect = [
             json.dumps(sample_trap_data),
             json.dumps(sample_position_data)

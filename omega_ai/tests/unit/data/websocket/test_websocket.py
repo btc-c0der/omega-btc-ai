@@ -24,9 +24,14 @@ async def test_websocket_broadcast():
             return await asyncio.wait_for(ws.recv(), timeout=5)
 
     async with websockets.connect(TEST_SERVER_URL) as sender_ws:
+        # First establish the listener connection
+        listener_task = asyncio.create_task(listener())
+        # Give the listener time to connect
+        await asyncio.sleep(1)
+        # Then send the message
         await sender_ws.send(json.dumps({"btc_price": 90000.00}))
-
-        received_msg = await listener()
+        # Wait for the response
+        received_msg = await listener_task
         assert json.loads(received_msg)["btc_price"] == 90000.00
 
 if __name__ == "__main__":
