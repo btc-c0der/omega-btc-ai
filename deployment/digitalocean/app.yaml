@@ -40,9 +40,6 @@ services:
     failure_threshold: 3
   routes:
   - path: /
-  alert_policies:
-  - rule: DEPLOYMENT_FAILED
-  - rule: DOMAIN_FAILED
 
 databases:
 - engine: REDIS
