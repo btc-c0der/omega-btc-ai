@@ -44,7 +44,7 @@ services:
 databases:
 - engine: REDIS
   name: redis
-  production: false
+  production: true
   version: "6"
   db_user: omega-btc-feed
   db_name: btc-feed-db 
