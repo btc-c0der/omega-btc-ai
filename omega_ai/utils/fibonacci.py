@@ -33,27 +33,38 @@ from typing import Dict, List, Tuple, Optional
 GOLDEN_RATIO = 1.618033988749895
 FIBONACCI_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.618, 2.618, 4.236]
 
-def calculate_fibonacci_levels(price: float, trend: str = "up") -> Dict[str, float]:
+def calculate_fibonacci_levels(
+    price: float,
+    trend: str = "up",
+    levels: Optional[List[float]] = None
+) -> Dict[str, float]:
     """
     Calculate Fibonacci retracement and extension levels.
     
     Args:
-        price: Current price level
-        trend: "up" for uptrend, "down" for downtrend
+        price: Current price
+        trend: Market trend ("up" or "down")
+        levels: Optional list of custom Fibonacci levels
         
     Returns:
-        Dict of Fibonacci levels and their corresponding prices
+        Dictionary mapping level names to prices
     """
-    levels = {}
+    if levels is None:
+        levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.618, 2.618, 4.236]
+        
+    fib_levels = {}
     
-    if trend.lower() == "up":
-        for fib in FIBONACCI_LEVELS:
-            levels[f"fib_{fib}"] = price * (1 - fib)
-    else:
-        for fib in FIBONACCI_LEVELS:
-            levels[f"fib_{fib}"] = price * (1 + fib)
+    for level in levels:
+        if trend == "up":
+            # For uptrend, calculate retracement levels below price
+            fib_price = price * (1 - level)
+        else:
+            # For downtrend, calculate retracement levels above price
+            fib_price = price * (1 + level)
             
-    return levels
+        fib_levels[str(level)] = round(fib_price, 2)
+        
+    return fib_levels
 
 def calculate_golden_ratio_zones(price: float) -> Dict[str, Tuple[float, float]]:
     """
@@ -136,26 +147,34 @@ def calculate_fibonacci_channels(price: float, volatility: float) -> Dict[str, T
         
     return channels
 
-def calculate_fibonacci_risk_levels(entry_price: float, account_size: float, risk_percent: float = 1.0) -> Dict[str, float]:
+def calculate_fibonacci_risk_levels(
+    entry_price: float,
+    account_size: float,
+    risk_percent: float = 6.18,  # Golden ratio risk percentage
+    levels: Optional[List[float]] = None
+) -> Dict[str, float]:
     """
-    Calculate Fibonacci-based position sizes and risk levels.
+    Calculate position sizes based on Fibonacci risk levels.
     
     Args:
-        entry_price: Entry price level
+        entry_price: Entry price for the trade
         account_size: Total account size
-        risk_percent: Risk percentage per trade
+        risk_percent: Risk percentage per trade (default: 6.18%)
+        levels: Optional list of custom Fibonacci levels
         
     Returns:
-        Dict of risk levels and their values
+        Dictionary mapping level names to position sizes
     """
-    base_position = (account_size * (risk_percent / 100))
+    if levels is None:
+        levels = [0.382, 0.618, 1.0, 1.618]
+        
+    risk_amount = account_size * (risk_percent / 100)
     risk_levels = {}
     
-    for fib in [0.382, 0.618, 1.0, 1.618]:
-        position_size = base_position * fib
-        risk_levels[f"position_size_{fib}"] = position_size
-        risk_levels[f"stop_loss_{fib}"] = entry_price * (1 - (0.01 * fib))
-        risk_levels[f"take_profit_{fib}"] = entry_price * (1 + (0.01 * fib * GOLDEN_RATIO))
+    for level in levels:
+        # Calculate position size based on risk level
+        position_size = risk_amount * level
+        risk_levels[f"position_size_{level}"] = round(position_size, 2)
         
     return risk_levels
 
@@ -207,4 +226,56 @@ def calculate_divine_price_targets(current_price: float, trend: str = "up") -> D
         for level in divine_levels:
             targets[f"divine_target_{level}"] = current_price * (1 - (level / GOLDEN_RATIO))
             
-    return targets 
+    return targets
+
+def calculate_fibonacci_time_levels(
+    start_time: float,
+    duration: float,
+    levels: Optional[List[float]] = None
+) -> Dict[str, float]:
+    """
+    Calculate Fibonacci time levels for a given duration.
+    
+    Args:
+        start_time: Start time in seconds
+        duration: Duration in seconds
+        levels: Optional list of custom Fibonacci levels
+        
+    Returns:
+        Dictionary mapping level names to timestamps
+    """
+    if levels is None:
+        levels = [0.382, 0.618, 1.0, 1.618, 2.618]
+        
+    time_levels = {}
+    
+    for level in levels:
+        time_point = start_time + (duration * level)
+        time_levels[str(level)] = round(time_point, 2)
+        
+    return time_levels
+
+def calculate_fibonacci_volatility_levels(
+    base_volatility: float,
+    levels: Optional[List[float]] = None
+) -> Dict[str, float]:
+    """
+    Calculate Fibonacci volatility levels.
+    
+    Args:
+        base_volatility: Base volatility value
+        levels: Optional list of custom Fibonacci levels
+        
+    Returns:
+        Dictionary mapping level names to volatility values
+    """
+    if levels is None:
+        levels = [0.382, 0.618, 1.0, 1.618, 2.618]
+        
+    vol_levels = {}
+    
+    for level in levels:
+        vol_value = base_volatility * level
+        vol_levels[str(level)] = round(vol_value, 4)
+        
+    return vol_levels 

@@ -1,389 +1,150 @@
-import redis
-from redis.backoff import ExponentialBackoff
-from redis.retry import Retry
-import signal
-import sys
-from typing import Optional, Dict, Any, List, Union, Tuple
+#!/usr/bin/env python3
+"""
+OMEGA BTC AI - Redis Manager
+===========================
+
+Utility module for managing Redis operations in the Trinity Brinks Matrix.
+"""
+
+import logging
+from typing import Any, Optional
 import json
-import time
-import os
-from .redis_config import get_redis_config
+from redis.asyncio import Redis
+from datetime import datetime, timedelta
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger("Redis-Manager")
 
 class RedisManager:
-    """Redis connection manager with error handling and retries."""
+    """Manager for Redis operations in the Trinity Brinks Matrix."""
     
-    def __init__(self, **kwargs):
-        """Initialize Redis connection with configuration."""
-        # Get default config and update with any overrides
-        config = get_redis_config()
-        config.update(kwargs)
+    def __init__(self):
+        self.redis: Optional[Redis] = None
+        self.redis_url = "redis://localhost:6379"
         
-        self.redis = redis.Redis(**config)
-        self._test_connection()
-        
-        self._cache = {}
-        self._cache_ttl = {}
-        self.CACHE_DURATION = 5  # seconds
-        
-        # Register signal handlers
-        signal.signal(signal.SIGINT, self._handle_shutdown)
-        signal.signal(signal.SIGTERM, self._handle_shutdown)
-    
-    def _test_connection(self):
-        """Test Redis connection."""
+    async def connect(self) -> None:
+        """Connect to Redis server."""
         try:
-            self.redis.ping()
-        except redis.ConnectionError as e:
-            raise ConnectionError(f"Failed to connect to Redis: {str(e)}")
-    
-    def connect(self):
-        """Get a blessed Redis connection."""
-        if not self.redis:
-            self.redis = redis.Redis(
-                host=self.redis.connection_pool.connection_kwargs['host'],
-                port=self.redis.connection_pool.connection_kwargs['port'],
-                db=self.redis.connection_pool.connection_kwargs['db'],
-                decode_responses=True
-            )
-        return self.redis
-    
-    def get_cached(self, key: str, default: Any = None) -> Optional[Any]:
-        """Get value from cache or Redis with TTL-based caching"""
-        now = time.time()
-        
-        # Check cache first
-        if key in self._cache and now < self._cache_ttl[key]:
-            return self._cache[key]
+            if not self.redis:
+                self.redis = Redis.from_url(
+                    self.redis_url,
+                    encoding="utf-8",
+                    decode_responses=True
+                )
+                await self.redis.ping()
+                logger.info("✨ Connected to Redis server")
+                
+        except Exception as e:
+            logger.error(f"❌ Error connecting to Redis: {e}")
+            raise
             
-        # Get from Redis
+    async def disconnect(self) -> None:
+        """Disconnect from Redis server."""
         try:
-            value = self.redis.get(key)
-            if value:
-                self._cache[key] = value
-                self._cache_ttl[key] = now + self.CACHE_DURATION
-                return value
-            return default
-        except redis.exceptions.ResponseError as e:
-            print(f"Redis error on get: {e}")
-            # Check if this is a WRONGTYPE error
-            if "WRONGTYPE" in str(e):
-                # Try to identify the actual type and get it appropriately
-                return self.get_key_with_type_detection(key, default)
-            return default
-        except redis.RedisError as e:
-            print(f"Redis error on get: {e}")
-            return default
-    
-    def get_key_with_type_detection(self, key: str, default: Any = None) -> Any:
-        """
-        Get a key's value from Redis with automatic type detection.
-        Handles cases where a key exists but is of a different type than expected.
-        """
-        try:
-            # Check the type of the key
-            key_type = self.redis.type(key).decode('utf-8')
+            if self.redis:
+                await self.redis.close()
+                self.redis = None
+                logger.info("✨ Disconnected from Redis server")
+                
+        except Exception as e:
+            logger.error(f"❌ Error disconnecting from Redis: {e}")
+            raise
             
-            if key_type == 'string':
-                return self.redis.get(key)
-            elif key_type == 'list':
-                return self.redis.lrange(key, 0, -1)
-            elif key_type == 'hash':
-                return self.redis.hgetall(key)
-            elif key_type == 'set':
-                return list(self.redis.smembers(key))
-            elif key_type == 'zset':
-                return self.redis.zrange(key, 0, -1, withscores=True)
-            else:
-                print(f"Unknown Redis type for key '{key}': {key_type}")
-                return default
-        except redis.RedisError as e:
-            print(f"Error detecting type for key '{key}': {e}")
-            return default
-    
-    def fix_key_type(self, key: str, expected_type: str) -> bool:
+    async def get_cached(self, key: str, default: Any = None) -> Any:
         """
-        Fix a key that has the wrong type by getting its value,
-        deleting it, and recreating it with the correct type.
+        Get cached value from Redis.
         
         Args:
-            key: The Redis key to fix
-            expected_type: The expected type ('string', 'list', 'hash', etc.)
+            key: Redis key
+            default: Default value if key not found
             
         Returns:
-            bool: True if fixed successfully, False otherwise
+            Cached value or default
         """
         try:
-            # Get current value with type detection
-            current_value = self.get_key_with_type_detection(key)
-            if current_value is None:
-                return False
+            if not self.redis:
+                await self.connect()
                 
-            # Delete the key
-            self.redis.delete(key)
-            
-            # Recreate with proper type
-            if expected_type == 'string':
-                # For a string, we need to convert other types to string
-                if isinstance(current_value, list):
-                    if len(current_value) > 0:
-                        value = current_value[0] if isinstance(current_value[0], str) else json.dumps(current_value[0])
-                    else:
-                        value = ""
-                elif isinstance(current_value, dict):
-                    value = json.dumps(current_value)
-                else:
-                    value = str(current_value)
-                return self.set_cached(key, value)
+            if not self.redis:
+                return default
                 
-            elif expected_type == 'list':
-                # Convert to list if not already
-                if not isinstance(current_value, list):
-                    current_value = [current_value]
-                
-                # Add each item to the list
-                for item in current_value:
-                    self.lpush(key, item)
-                return True
-                
-            elif expected_type == 'hash':
-                # Convert to dict if not already
-                if not isinstance(current_value, dict):
-                    if isinstance(current_value, list) and len(current_value) > 0:
-                        # Try to convert list to dict
-                        try:
-                            current_value = json.loads(current_value[0])
-                            if not isinstance(current_value, dict):
-                                current_value = {"value": current_value}
-                        except:
-                            current_value = {"value": str(current_value)}
-                    else:
-                        current_value = {"value": str(current_value)}
-                
-                # Add hash fields
-                return bool(self.redis.hset(key, mapping=current_value))
-                
-            else:
-                print(f"Conversion to type '{expected_type}' not implemented")
-                return False
-                
-        except Exception as e:
-            print(f"Error fixing key type: {e}")
-            return False
-    
-    def safe_get(self, key: str, default: Any = None) -> Optional[Any]:
-        """Get a value from Redis, handling any type errors safely."""
-        try:
-            return self.get_cached(key, default)
-        except redis.exceptions.ResponseError:
-            # Try to get with type detection
-            return self.get_key_with_type_detection(key, default)
-        except Exception as e:
-            print(f"Error retrieving key '{key}': {e}")
+            value = await self.redis.get(key)
+            if value:
+                return json.loads(value)
             return default
-    
-    def safe_lrange(self, key: str, start: int, end: int) -> List:
-        """Safely get a range from a Redis list, handling type errors."""
-        try:
-            return self.lrange(key, start, end) or []
-        except redis.exceptions.ResponseError as e:
-            if "WRONGTYPE" in str(e):
-                # Try to fix the key
-                self.fix_key_type(key, 'list')
-                # Try lrange again
-                try:
-                    return self.lrange(key, start, end) or []
-                except:
-                    return []
-            return []
-        except Exception:
-            return []
-    
-    def check_key_exists(self, key: str) -> bool:
-        """Check if a key exists in Redis."""
-        try:
-            return bool(self.redis.exists(key))
-        except Exception as e:
-            print(f"Error checking key existence: {e}")
-            return False
-    
-    def get_key_type(self, key: str) -> Optional[str]:
-        """Get the type of a Redis key."""
-        try:
-            key_type = self.redis.type(key)
-            if isinstance(key_type, bytes):
-                return key_type.decode('utf-8')
-            return key_type
-        except Exception as e:
-            print(f"Error getting key type: {e}")
-            return None
-    
-    def set_cached(self, key: str, value: Any) -> bool:
-        """Set a value in Redis with divine energy."""
-        try:
-            self.redis.set(key, value)
-            self._cache[key] = value
-            self._cache_ttl[key] = time.time() + self.CACHE_DURATION
-            return True
-        except redis.RedisError as e:
-            print(f"Redis error on set: {e}")
-            return False
-    
-    def lpush(self, key: str, value: Any) -> bool:
-        """Push to a list in Redis with Rastafarian rhythm."""
-        try:
-            self.redis.lpush(key, value)
-            return True
-        except redis.RedisError as e:
-            print(f"Redis error on lpush: {e}")
-            return False
-    
-    def ltrim(self, key: str, start: int, end: int) -> bool:
-        """Trim a list in Redis with cosmic precision."""
-        try:
-            self.redis.ltrim(key, start, end)
-            return True
-        except redis.RedisError as e:
-            print(f"Redis error on ltrim: {e}")
-            return False
-    
-    def lrange(self, key: str, start: int, end: int) -> Optional[list]:
-        """Get a range from a list in Redis with divine harmony."""
-        try:
-            return self.redis.lrange(key, start, end)
-        except redis.RedisError as e:
-            print(f"Redis error on lrange: {e}")
-            return None
-    
-    def ping(self) -> bool:
-        """Check Redis connection with JAH blessing."""
-        try:
-            return self.redis.ping()
-        except redis.RedisError as e:
-            print(f"Redis error on ping: {e}")
-            return False
-    
-    def set_with_validation(self, key: str, data: Dict) -> bool:
-        """Set data with type validation"""
-        try:
-            # Validate data structure
-            if not isinstance(data, dict):
-                raise ValueError("Data must be a dictionary")
-                
-            # Validate specific fields based on key
-            if "omega:live_trader_data" in key:
-                self._validate_trader_data(data)
-            elif "omega:live_battle_state" in key:
-                self._validate_battle_state(data)
-            
-            # Store in Redis
-            self.redis.set(key, json.dumps(data))
-            
-            # Update cache
-            self._cache[key] = data
-            self._cache_ttl[key] = time.time() + self.CACHE_DURATION
-            
-            return True
-            
-        except (redis.RedisError, ValueError) as e:
-            print(f"Error storing data: {e}")
-            return False
-    
-    def _validate_trader_data(self, data: Dict):
-        """Validate trader data structure"""
-        required_fields = {
-            "name": str,
-            "capital": (int, float),
-            "pnl": (int, float),
-            "win_rate": float,
-            "trades": int,
-            "emotional_state": str,
-            "confidence": float,
-            "risk_level": float
-        }
-        
-        for profile_data in data.values():
-            for field, field_type in required_fields.items():
-                if field not in profile_data:
-                    raise ValueError(f"Missing required field: {field}")
-                if not isinstance(profile_data[field], field_type):
-                    raise ValueError(f"Invalid type for {field}")
-    
-    def _validate_battle_state(self, data: Dict):
-        """Validate battle state structure"""
-        required_fields = {
-            "day": int,
-            "session": int,
-            "btc_price": (int, float),
-            "battle_active": bool,
-            "start_time": str
-        }
-        
-        for field, field_type in required_fields.items():
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
-            if not isinstance(data[field], field_type):
-                raise ValueError(f"Invalid type for {field}")
-    
-    def _handle_shutdown(self, signum, frame):
-        """Handle graceful shutdown"""
-        print("\n⚠️ Shutdown signal received. Saving state...")
-        
-        try:
-            # Save final state
-            final_state = {
-                "shutdown_time": time.time(),
-                "clean_shutdown": True
-            }
-            
-            try:
-                # Use a new Redis connection for shutdown to avoid issues
-                shutdown_params = {
-                    "host": self.redis.connection_pool.connection_kwargs['host'],
-                    "port": self.redis.connection_pool.connection_kwargs['port'],
-                    "db": self.redis.connection_pool.connection_kwargs['db'],
-                    "decode_responses": True
-                }
-                
-                # Add username/password if in original connection
-                if 'username' in self.redis.connection_pool.connection_kwargs:
-                    shutdown_params["username"] = self.redis.connection_pool.connection_kwargs['username']
-                if 'password' in self.redis.connection_pool.connection_kwargs:
-                    shutdown_params["password"] = self.redis.connection_pool.connection_kwargs['password']
-                    
-                # Add SSL if in original connection
-                if 'ssl' in self.redis.connection_pool.connection_kwargs and self.redis.connection_pool.connection_kwargs['ssl']:
-                    shutdown_params["ssl"] = True
-                    if 'ssl_ca_certs' in self.redis.connection_pool.connection_kwargs:
-                        shutdown_params["ssl_ca_certs"] = self.redis.connection_pool.connection_kwargs['ssl_ca_certs']
-                
-                shutdown_redis = redis.Redis(**shutdown_params)
-                shutdown_redis.set("omega:shutdown_state", json.dumps(final_state))
-                print("✅ State saved successfully")
-            except Exception as e:
-                print(f"⚠️ Could not save shutdown state: {e}")
-            
-            sys.exit(0)
             
         except Exception as e:
-            print(f"❌ Error saving shutdown state: {e}")
-            sys.exit(1)
-
-    def zcard(self, name: str) -> int:
-        """Return the number of elements in the sorted set at key `name`."""
-        return self.redis.zcard(name)
-
-    def zadd(self, name: str, mapping: dict) -> int:
-        """Add all the specified members with the specified scores to the sorted set stored at key `name`."""
-        return self.redis.zadd(name, mapping)
-
-    def zrange(self, name: str, start: int, end: int, desc: bool = False, withscores: bool = False) -> list:
-        """Return a range of elements from the sorted set at key `name`."""
-        return self.redis.zrange(name, start, end, desc=desc, withscores=withscores)
-
-    def zremrangebyrank(self, name: str, start: int, end: int) -> int:
-        """Remove all elements in the sorted set stored at key `name` with rank between `start` and `end`."""
-        return self.redis.zremrangebyrank(name, start, end)
-
-    def delete(self, *names: str) -> int:
-        """Delete a key from the Redis database."""
-        return self.redis.delete(*names)
+            logger.error(f"❌ Error getting cached value: {e}")
+            return default
+            
+    async def set_cached(
+        self,
+        key: str,
+        value: Any,
+        expire_seconds: Optional[int] = None
+    ) -> None:
+        """
+        Set cached value in Redis.
+        
+        Args:
+            key: Redis key
+            value: Value to cache
+            expire_seconds: Optional expiration time in seconds
+        """
+        try:
+            if not self.redis:
+                await self.connect()
+                
+            if not self.redis:
+                return
+                
+            await self.redis.set(
+                key,
+                json.dumps(value),
+                ex=expire_seconds
+            )
+            
+        except Exception as e:
+            logger.error(f"❌ Error setting cached value: {e}")
+            raise
+            
+    async def delete_cached(self, key: str) -> None:
+        """
+        Delete cached value from Redis.
+        
+        Args:
+            key: Redis key
+        """
+        try:
+            if not self.redis:
+                await self.connect()
+                
+            if not self.redis:
+                return
+                
+            await self.redis.delete(key)
+            
+        except Exception as e:
+            logger.error(f"❌ Error deleting cached value: {e}")
+            raise
+            
+    async def clear_cache(self) -> None:
+        """Clear all cached values from Redis."""
+        try:
+            if not self.redis:
+                await self.connect()
+                
+            if not self.redis:
+                return
+                
+            await self.redis.flushdb()
+            logger.info("✨ Redis cache cleared")
+            
+        except Exception as e:
+            logger.error(f"❌ Error clearing Redis cache: {e}")
+            raise
