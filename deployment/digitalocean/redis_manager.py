@@ -13,7 +13,12 @@ class DigitalOceanRedisManager:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.redis_client: Optional[redis.Redis] = None
-        self.ssl_cert_path = os.path.join(os.path.dirname(__file__), 'SSL_redis-btc-omega-redis.pem')
+        # Use certificates directory for SSL files
+        self.ssl_cert_path = os.path.join(
+            os.path.dirname(__file__),
+            'certificates',
+            'SSL_redis-btc-omega-redis.pem'
+        )
         self._connect()
     
     def _connect(self) -> None:
@@ -21,6 +26,9 @@ class DigitalOceanRedisManager:
         retries = 0
         while retries < self.max_retries:
             try:
+                if not os.path.exists(self.ssl_cert_path):
+                    raise FileNotFoundError(f"SSL certificate not found at {self.ssl_cert_path}")
+                    
                 self.redis_client = redis.Redis(
                     host=os.getenv('REDIS_HOST', 'localhost'),
                     port=int(os.getenv('REDIS_PORT', 6379)),
@@ -36,7 +44,7 @@ class DigitalOceanRedisManager:
                 self.redis_client.ping()
                 logging.info(f"Successfully connected to Redis at {os.getenv('REDIS_HOST')} with SSL")
                 return
-            except (ConnectionError, TimeoutError) as e:
+            except (ConnectionError, TimeoutError, FileNotFoundError) as e:
                 retries += 1
                 if retries == self.max_retries:
                     logging.error(f"Failed to connect to Redis after {self.max_retries} attempts: {str(e)}")
