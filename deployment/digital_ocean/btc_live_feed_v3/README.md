@@ -16,6 +16,31 @@ This guide outlines the deployment process for the BTC Live Feed v3 service on D
 - `deploy.sh`: Deployment script
 - `monitoring_setup.md`: Instructions for setting up monitoring
 - `redis_configuration.md`: Detailed Redis configuration instructions
+- `src/`: Source code directory containing the BTC Live Feed v3 implementation
+
+## Source Code Structure
+
+The `src/` directory contains a standalone package with all the code needed for the BTC Live Feed v3:
+
+```
+src/
+├── omega_ai/
+│   ├── data_feed/
+│   │   ├── btc_live_feed_v3.py  # Main BTC Live Feed v3 implementation
+│   │   └── health_check.py      # Health check API server
+│   └── utils/
+│       └── enhanced_redis_manager.py  # Redis manager with failover capability
+├── scripts/
+│   └── monitor_btc_feed_v3.py   # CLI monitoring dashboard
+├── tests/                       # Test suite
+│   ├── test_btc_live_feed_v3.py
+│   ├── test_enhanced_redis_manager.py
+│   └── test_prefix_sampling_v3.py
+├── setup.py                     # Package configuration
+└── README.md                    # Source code README
+```
+
+This organization separates the deployment pipeline from the application code, making it easier to maintain and update.
 
 ## Deployment Process
 

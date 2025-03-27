@@ -33,14 +33,17 @@ if ! doctl account get &> /dev/null; then
     exit 1
 fi
 
+# Get the script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Configuration variables
-APP_SPEC="app.yaml"
+APP_SPEC="${SCRIPT_DIR}/app.yaml"
 DEPLOY_BRANCH="feature/btc-live-feed-v3-resilient"
 APP_NAME="omega-btc-ai-live-feed-v3"
 
 # Check if app.yaml exists
 if [ ! -f "$APP_SPEC" ]; then
-    echo -e "${RED}❌ Error: $APP_SPEC not found in current directory.${RESET}"
+    echo -e "${RED}❌ Error: $APP_SPEC not found.${RESET}"
     exit 1
 fi
 
@@ -65,6 +68,25 @@ if [ "$CURRENT_BRANCH" != "$DEPLOY_BRANCH" ]; then
         fi
     fi
 fi
+
+# Verify source files exist
+SRC_DIR="${SCRIPT_DIR}/src"
+if [ ! -d "$SRC_DIR" ]; then
+    echo -e "${RED}❌ Error: Source directory not found: $SRC_DIR${RESET}"
+    exit 1
+fi
+
+if [ ! -f "${SRC_DIR}/omega_ai/data_feed/btc_live_feed_v3.py" ]; then
+    echo -e "${RED}❌ Error: Main BTC Live Feed v3 file not found.${RESET}"
+    exit 1
+fi
+
+if [ ! -f "${SRC_DIR}/omega_ai/utils/enhanced_redis_manager.py" ]; then
+    echo -e "${RED}❌ Error: Enhanced Redis Manager file not found.${RESET}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ All required source files found.${RESET}"
 
 # Check for uncommitted changes
 if ! git diff-index --quiet HEAD --; then
@@ -136,7 +158,7 @@ if [ -n "$APP_ID" ]; then
     
     # Show monitoring command
     echo -e "${YELLOW}To monitor the app, run:${RESET}"
-    echo -e "python scripts/monitor_btc_feed_v3.py --host $APP_URL --port 8080 --refresh 5"
+    echo -e "python ${SRC_DIR}/scripts/monitor_btc_feed_v3.py --host $APP_URL --port 8080 --refresh 5"
 else
     echo -e "${YELLOW}⚠️ App deployed but couldn't retrieve app details.${RESET}"
 fi
