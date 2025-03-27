@@ -17,7 +17,7 @@ from omega_ai.data_feed.btc_live_feed import start_btc_websocket, stop_btc_webso
 from omega_ai.mm_trap_detector.mm_trap_detector import MMTrapDetector
 from omega_ai.monitor.monitor_market_trends import monitor_market_trends, stop_market_monitor
 from omega_ai.visualization.omega_dashboard import start_dashboard, stop_dashboard
-from omega_ai.trading.btc_futures_trader import start_trader, stop_trader
+from omega_ai.trading.exchanges.bitget_live_traders import BitGetLiveTraders
 
 # Configure logging
 logging.basicConfig(
@@ -94,8 +94,16 @@ async def setup_services(service_manager: ServiceManager) -> None:
     # Trading System
     service_manager.register_service(
         name="trading",
-        start_func=start_trader,
-        stop_func=stop_trader,
+        start_func=lambda: BitGetLiveTraders(
+            use_testnet=False,  # Use mainnet
+            initial_capital=100.0,  # Initial capital per trader
+            symbol="BTCUSDT",
+            strategic_only=True,  # Only use strategic trader
+            leverage=11,
+            enable_pnl_alerts=True,
+            pnl_alert_interval=1
+        ).start_trading(),
+        stop_func=lambda: None,  # Stop will be handled by the trader's shutdown
         dependencies={"database", "btc_feed", "market_monitor", "mm_trap_detector"}
     )
 
@@ -112,6 +120,11 @@ async def main():
         "--services",
         nargs="*",
         help="Specific services to start"
+    )
+    parser.add_argument(
+        "--testnet",
+        action="store_true",
+        help="Use testnet instead of mainnet"
     )
     args = parser.parse_args()
     

@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="omega_ai",
+    name="omega-btc-ai",
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
+        "flask",
+        "flask-cors",
+        "flask-socketio",
+        "gevent-websocket",
         "redis",
-        "fastapi",
-        "uvicorn",
-        "websockets",
-        "numpy",
-        "pandas"
+        "ccxt",
     ],
 ) 

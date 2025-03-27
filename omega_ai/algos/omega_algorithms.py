@@ -6,7 +6,7 @@ from omega_ai.db_manager.database import fetch_recent_movements
 from omega_ai.mm_trap_detector.high_frequency_detector import check_high_frequency_mode, register_trap_detection
 from typing import List, Dict, Union, Optional, Any
 import asyncio
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from omega_ai.config import REDIS_HOST, REDIS_PORT
 
 class OmegaAlgo:
@@ -67,100 +67,123 @@ class OmegaAlgo:
         """Enhanced multi-layer Fibonacci analysis for advanced trap detection."""
         
         # Get existing historical data
-        historical_prices = cls.redis_conn.lrange("btc_movement_history", -100, -1)
-        if len(historical_prices) < 10:
+        historical_data = cls.redis_conn.lrange("btc_movement_history", -100, -1)
+        if len(historical_data) < 10:
+            print("⚠️ Insufficient data points for Fibonacci analysis")
             return "Insufficient Data"
         
         # Parse historical prices from Redis data
-        parsed_prices: List[float] = []
-        for data in historical_prices:
+        historical_prices: List[float] = []
+        historical_volumes: List[float] = []
+        
+        for data in historical_data:
             try:
                 if ',' in data:
-                    price, _ = map(float, data.split(','))
+                    price_str, vol_str = data.split(',', 1)
+                    price = float(price_str)
+                    vol = float(vol_str) if vol_str else 0.0
+                    historical_prices.append(price)
+                    historical_volumes.append(vol)
                 else:
                     price = float(data)
-                parsed_prices.append(price)
+                    historical_prices.append(price)
             except (ValueError, TypeError):
                 continue
         
-        if not parsed_prices:
+        if len(historical_prices) < 10:
+            print("⚠️ Insufficient valid price data points for Fibonacci analysis")
             return "Insufficient Data"
-        
-        historical_prices = parsed_prices
 
+        # Initialize a placeholder for multi-timeframe Fibonacci levels
+        multi_fib_levels = {}
+        confluence_zones = []
+        
         # Multi-timeframe Fibonacci analysis (using both retracements and extensions)
         try:
             multi_fib_levels, confluence_zones = cls.get_multi_timeframe_fibonacci(latest_price)
+            
+            # Log detected Fibonacci levels for debugging
+            if multi_fib_levels:
+                print(f"{cls.GREEN}✅ Fibonacci levels calculated successfully{cls.RESET}")
+                timeframes = list(multi_fib_levels.keys())
+                print(f"Available timeframes: {', '.join(timeframes)}")
+            else:
+                print(f"{cls.YELLOW}⚠️ No Fibonacci levels detected{cls.RESET}")
+            
+            # Log any detected confluence zones
+            if confluence_zones:
+                print(f"{cls.CYAN}🔷 Detected {len(confluence_zones)} Fibonacci confluence zones{cls.RESET}")
+                for i, zone in enumerate(confluence_zones[:3], 1):  # Show top 3
+                    print(f"  Zone {i}: ${zone:.2f}")
         except Exception as e:
             print(f"{cls.RED}Error calculating Fibonacci levels: {e}{cls.RESET}")
+            import traceback
+            traceback.print_exc()
             multi_fib_levels, confluence_zones = {}, []
         
-        # Get recent movements for volume analysis
+        # Volume analysis
         try:
-            recent_movements = cls.redis_conn.lrange("btc_movement_history", -15, -1)
-            if not recent_movements or len(recent_movements) < 5:
-                return "Insufficient Data"
-            
-            # Extract volume data safely
-            volumes: List[float] = []
-            prices: List[float] = []
-            for movement in recent_movements:
-                try:
-                    if ',' in movement:
-                        price, vol = map(float, movement.split(','))
-                        volumes.append(vol)
-                        prices.append(price)
-                    else:
-                        # Skip invalid data
-                        continue
-                except (ValueError, TypeError):
-                    continue
-            
-            # Ensure we have some valid data
-            if not volumes or not prices:
-                volumes = [0]
-                prices = [latest_price]
-            
-            # Convert current volume to float and handle None case
-            current_volume = float(volume) if volume is not None else 0
-            
-            # Calculate volume metrics
-            avg_volume = float(np.mean(volumes))
-            volume_std = float(np.std(volumes))
-            volume_z_score = (current_volume - avg_volume) / volume_std if volume_std > 0 else 0
-            
-            # Store volume metrics in Redis for monitoring
-            cls.redis_conn.hset(
-                "latest_volume_metrics",
-                mapping={
-                    "current_volume": str(current_volume),
-                    "avg_volume": str(avg_volume),
-                    "volume_z_score": str(volume_z_score),
-                    "timestamp": datetime.now(UTC).isoformat()
-                }
-            )
-            
-            # Consider a volume spike if z-score > 2 (95th percentile)
-            volume_spike = volume_z_score > 2
+            # Use historical volumes if available, otherwise fallback to basic checks
+            if len(historical_volumes) > 5:
+                # Calculate volume metrics
+                avg_volume = float(np.mean(historical_volumes))
+                volume_std = float(np.std(historical_volumes)) if len(historical_volumes) > 1 else 0.0
+                
+                # Convert current volume to float and handle None case
+                current_volume = float(volume) if volume is not None else 0.0
+                
+                # Calculate z-score (avoid division by zero)
+                volume_z_score = ((current_volume - avg_volume) / volume_std 
+                                 if volume_std > 0 else 0.0)
+                
+                # Consider a volume spike if z-score > 2 (95th percentile)
+                volume_spike = volume_z_score > 2.0
+                
+                # Store volume metrics in Redis for monitoring
+                cls.redis_conn.hset(
+                    "latest_volume_metrics",
+                    mapping={
+                        "current_volume": str(current_volume),
+                        "avg_volume": str(avg_volume),
+                        "volume_z_score": str(volume_z_score),
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                )
+                
+                print(f"{cls.CYAN}📊 Volume Analysis: Current={current_volume:.2f}, Avg={avg_volume:.2f}, Z-Score={volume_z_score:.2f}{cls.RESET}")
+                
+            else:
+                # Not enough volume data
+                print(f"{cls.YELLOW}⚠️ Insufficient historical volume data{cls.RESET}")
+                volume_spike = False
+                if volume is not None and volume > 0 and len(historical_volumes) > 0:
+                    # Basic check: is current volume more than 2x the last one?
+                    volume_spike = volume > (historical_volumes[-1] * 2.0)
             
         except Exception as e:
-            print(f"❌ Volume analysis error: {str(e)}. Using fallback logic.")
-            # Fallback to simple volume comparison with safe handling of empty volumes
+            print(f"{cls.RED}❌ Volume analysis error: {e}{cls.RESET}")
+            # Fallback to simple comparison
             volume_spike = False
-            if volumes:
-                current_volume = float(volume) if volume is not None else 0
-                avg_volume = sum(volumes) / len(volumes)
-                volume_spike = current_volume > (avg_volume * 2)
+            if volume is not None and len(historical_volumes) > 0:
+                volume_spike = volume > (sum(historical_volumes) / len(historical_volumes) * 2)
 
         # Analyze price movement
         price_change = (latest_price - previous_price) / previous_price if previous_price != 0 else 0
+        
+        # Log the analysis components
+        print(f"{cls.YELLOW}📝 Analysis Components:{cls.RESET}")
+        print(f"  Price Change: {price_change:.2%}")
+        print(f"  Volume Spike: {'Yes' if volume_spike else 'No'}")
+        print(f"  Fibonacci Confluence: {'Yes' if confluence_zones else 'No'}")
         
         # Check for potential manipulation
         if abs(price_change) > 0.02:  # 2% price movement
             if volume_spike:
                 return "TRAP: High volume spike with significant price movement"
-            elif "Trap" in str(multi_fib_levels):
-                return "TRAP: Fibonacci levels indicate potential manipulation"
+            elif len(confluence_zones) > 0:
+                return "TRAP: Price movement exactly at Fibonacci level suggests manipulation"
+            elif len(multi_fib_levels) > 0:
+                return "TRAP: Significant price movement at Fibonacci level"
         
         # Check for organic movement
         if 0.001 <= abs(price_change) <= 0.02 and not volume_spike:
@@ -179,7 +202,22 @@ class OmegaAlgo:
                 print("⚠️ [DEBUG] Insufficient price history for regime detection")
                 return "unknown", 1.0
                 
-            recent_prices = [float(p) for p in recent_prices]
+            parsed_prices = []
+            for data in recent_prices:
+                try:
+                    if ',' in data:
+                        price, _ = map(float, data.split(','))
+                    else:
+                        price = float(data)
+                    parsed_prices.append(price)
+                except (ValueError, TypeError):
+                    continue
+            
+            if len(parsed_prices) < 20:
+                print("⚠️ [DEBUG] Insufficient valid price history for regime detection")
+                return "unknown", 1.0
+                
+            recent_prices = parsed_prices
             
             # Calculate directional movement
             price_changes = np.diff(recent_prices)
@@ -192,6 +230,9 @@ class OmegaAlgo:
             neg_moves = sum(1 for change in price_changes if change < 0)
             directional_strength = abs((pos_moves - neg_moves) / len(price_changes))
             
+            # Store directional strength in Redis
+            cls.redis_conn.set("directional_strength", str(directional_strength))
+            
             # Calculate average absolute move to identify if moves are significant
             avg_abs_move = np.mean(np.abs(price_changes))
             
@@ -199,17 +240,25 @@ class OmegaAlgo:
             # High directional_strength = trending
             # High volatility + low directional_strength = choppy/ranging
             if directional_strength > 0.6 and avg_abs_move > volatility * 0.5:
-                print(f"📡 [DEBUG] TRENDING Market Detected (Directional Strength: {directional_strength:.2f})")
-                return "trending", 1.5  # Higher threshold for trending market
-            elif volatility > 0 and directional_strength < 0.3:
-                print(f"📡 [DEBUG] RANGING Market Detected (Directional Strength: {directional_strength:.2f})")
-                return "ranging", 0.8  # Lower threshold for ranging market
+                # Strongly trending market - use higher threshold
+                regime = "trending"
+                regime_multiplier = 1.5
+            elif directional_strength < 0.3 and volatility > avg_abs_move * 2:
+                # Choppy/ranging market - use lower threshold
+                regime = "volatile"
+                regime_multiplier = 0.75
             else:
-                print(f"📡 [DEBUG] MIXED Market Detected (Directional Strength: {directional_strength:.2f})")
-                return "mixed", 1.0  # Default multiplier
+                # Normal market
+                regime = "normal"
+                regime_multiplier = 1.0
                 
+            print(f"🔍 Market Regime: {regime.upper()} | Directional Strength: {directional_strength:.2f} | Multiplier: {regime_multiplier}")
+                
+            return regime, regime_multiplier
+            
         except Exception as e:
-            print(f"❌ [DEBUG] Error detecting market regime: {e}")
+            print(f"❌ Error detecting market regime: {e}")
+            traceback.print_exc()  # Print full traceback for debugging
             return "unknown", 1.0
 
     @classmethod
@@ -512,7 +561,7 @@ class OmegaAlgo:
                         "trend": trend,
                         "percentage_change": str(percentage_change),
                         "volatility": str(volatility),
-                        "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                 )
                 
@@ -554,7 +603,7 @@ class OmegaAlgo:
                     "bullish_score": str(bullish_score),
                     "bearish_score": str(bearish_score),
                     "sideways_count": str(trend_summary["sideways"]),
-                    "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             )
             

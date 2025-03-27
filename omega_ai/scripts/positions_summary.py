@@ -55,6 +55,7 @@ class PositionsSummary:
         self.target_profit_pct = target_profit_pct
         self.wallet_target = 1000.0  # Default target of 1000 USDT
         self.strategic_only = strategic_only
+        self.debug = False  # Set to True for detailed API debugging
         
         # Get API credentials from environment variables
         self.api_key = os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
@@ -63,7 +64,7 @@ class PositionsSummary:
         
         # Verify API credentials are available
         if not self.api_key or not self.secret_key or not self.passphrase:
-            print(f"{Fore.RED}Error: API credentials are missing. Please set environment variables.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Error: API credentials missing. Please set environment variables.{Style.RESET_ALL}")
             print(f"Required variables: {'BITGET_TESTNET_API_KEY' if use_testnet else 'BITGET_API_KEY'}, " + 
                   f"{'BITGET_TESTNET_SECRET_KEY' if use_testnet else 'BITGET_SECRET_KEY'}, " +
                   f"{'BITGET_TESTNET_PASSPHRASE' if use_testnet else 'BITGET_PASSPHRASE'}")
@@ -73,6 +74,11 @@ class PositionsSummary:
             sys.exit(1)
         else:
             print(f"{Fore.GREEN}API credentials loaded. API Key: {self.api_key[:5]}...{self.api_key[-3:] if len(self.api_key) > 5 else ''}{Style.RESET_ALL}")
+        
+        # Enable BitGet debug mode if requested
+        if self.debug:
+            os.environ["BITGET_DEBUG"] = "true"
+            print(f"{Fore.YELLOW}Debug mode enabled - will show detailed API information{Style.RESET_ALL}")
         
         # Create BitGet trader instances based on strategic_only flag
         self.traders = {}

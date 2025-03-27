@@ -1,0 +1,459 @@
+openapi: 3.0.0
+info:
+  title: OMEGA BTC AI - Reggae Dashboard API
+  version: 1.0.0
+  description: Real-time dashboard server that provides trap probability, trading position data, and BTC price information
+  contact:
+    name: OMEGA BTC AI Team
+    email: support@omegabtcai.com
+
+servers:
+  - url: http://localhost:8001
+    description: Local development server
+  - url: https://api.omegabtcai.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Trap Data
+    description: Trap probability and detection endpoints
+  - name: Position Data
+    description: Trading position endpoints
+  - name: Price Data
+    description: Bitcoin price data endpoints
+  - name: System
+    description: System information endpoints
+  - name: WebSocket
+    description: Real-time data streaming endpoints
+  - name: Combined Data
+    description: Endpoints that combine data from multiple sources
+
+components:
+  schemas:
+    TrapProbabilityResponse:
+      type: object
+      properties:
+        probability:
+          type: number
+          format: float
+          example: 0.75
+          description: Current trap probability (0-1)
+        trap_type:
+          type: string
+          example: "bull_trap"
+          description: Type of trap detected
+        trend:
+          type: string
+          example: "increasing"
+          description: Direction of probability trend
+        confidence:
+          type: number
+          format: float
+          example: 0.85
+          description: Confidence level in the trap detection
+        components:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            price_action: 0.8
+            volume_analysis: 0.6
+          description: Individual component contributions to trap probability
+        descriptions:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            price_action: "Significant price deviation from moving averages"
+          description: Descriptions for each component
+        message:
+          type: string
+          example: "JAH GUIDES THE TRADING PATH!"
+          description: Rastafarian wisdom message
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-21T19:01:23.456Z"
+          description: Timestamp of the trap probability calculation
+      required:
+        - probability
+        - timestamp
+        
+    PositionResponse:
+      type: object
+      properties:
+        has_position:
+          type: boolean
+          example: true
+          description: Whether an active position exists
+        position_side:
+          type: string
+          enum: [long, short]
+          example: "long"
+          description: Direction of the position
+        entry_price:
+          type: number
+          format: float
+          example: 63500.50
+          description: Entry price of the position
+        current_price:
+          type: number
+          format: float
+          example: 65000.75
+          description: Current price of the asset
+        position_size:
+          type: number
+          format: float
+          example: 0.5
+          description: Size of the position in BTC
+        leverage:
+          type: number
+          format: integer
+          example: 5
+          description: Position leverage multiplier
+        risk_multiplier:
+          type: number
+          format: float
+          example: 1.25
+          description: Risk multiplier for the position
+        pnl_percent:
+          type: number
+          format: float
+          example: 2.35
+          description: Profit/loss percentage
+        pnl_usd:
+          type: number
+          format: float
+          example: 750.25
+          description: Profit/loss in USD
+        stop_loss:
+          type: number
+          format: float
+          example: 62000.00
+          description: Stop loss price
+        take_profits:
+          type: array
+          items:
+            type: object
+            properties:
+              price:
+                type: number
+                format: float
+                example: 67000.00
+              size:
+                type: number
+                format: float
+                example: 0.5
+                description: Portion of position to close at this price (0-1)
+          description: List of take profit targets
+        entry_time:
+          type: string
+          format: date-time
+          example: "2025-03-21T15:30:00.000Z"
+          description: Time when position was entered
+        source:
+          type: string
+          example: "strategy_alpha"
+          description: Source of the position data
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-21T19:01:23.456Z"
+          description: Timestamp of the position data
+      required:
+        - has_position
+        - timestamp
+        
+    BTCPriceResponse:
+      type: object
+      properties:
+        price:
+          type: number
+          format: float
+          example: 65432.10
+          description: Current BTC price in USD
+        change:
+          type: number
+          format: float
+          example: 2.35
+          description: Price change percentage (24h)
+        changes:
+          type: object
+          properties:
+            short_term:
+              type: number
+              format: float
+              example: 1.25
+              description: Short-term change percentage
+            medium_term:
+              type: number
+              format: float
+              example: 3.75
+              description: Medium-term change percentage
+          description: Price changes at different timeframes
+        patterns:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            wyckoff_distribution: 0.75
+            head_and_shoulders: 0.25
+            bullish: 0.85
+            bearish: 0.15
+          description: Detected price patterns with confidence scores
+        source:
+          type: string
+          example: "last_btc_price"
+          description: Data source identifier
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-21T19:01:23.456Z"
+          description: Timestamp of the price data
+      required:
+        - price
+        - timestamp
+        
+    RedisKeysResponse:
+      type: object
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                example: "btc:price"
+              type:
+                type: string
+                example: "string"
+              length:
+                type: integer
+                example: 120
+              fields:
+                type: integer
+                example: 5
+          description: List of Redis keys with metadata
+        total_keys:
+          type: integer
+          example: 42
+          description: Total number of keys in Redis
+        displayed_keys:
+          type: integer
+          example: 10
+          description: Number of keys shown in the response
+      required:
+        - keys
+        
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+          description: Overall service status
+        redis:
+          type: string
+          example: "connected"
+          description: Redis connection status
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-21T19:01:23.456Z"
+          description: Time of health check
+      required:
+        - status
+        - redis
+        - timestamp
+        
+    CombinedDataResponse:
+      type: object
+      properties:
+        trap_probability:
+          $ref: '#/components/schemas/TrapProbabilityResponse'
+          description: Trap probability data
+        position:
+          $ref: '#/components/schemas/PositionResponse'
+          description: Position data
+        btc_price:
+          $ref: '#/components/schemas/BTCPriceResponse'
+          description: BTC price data
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-21T19:01:23.456Z"
+          description: Combined data timestamp
+      required:
+        - timestamp
+
+paths:
+  /:
+    get:
+      tags:
+        - System
+      summary: Root endpoint
+      description: Displays server information and available endpoints
+      responses:
+        '200':
+          description: HTML page with API documentation
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /api/health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: Check the health status of the server and Redis connection
+      responses:
+        '200':
+          description: Health status information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/trap-probability:
+    get:
+      tags:
+        - Trap Data
+      summary: Get trap probability data
+      description: Retrieve current trap probability information with component analysis
+      responses:
+        '200':
+          description: Detailed trap probability data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrapProbabilityResponse'
+
+  /api/position:
+    get:
+      tags:
+        - Position Data
+      summary: Get position data
+      description: Retrieve current trading position information with PnL, entry, and target details
+      responses:
+        '200':
+          description: Detailed position data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionResponse'
+
+  /api/btc-price:
+    get:
+      tags:
+        - Price Data
+      summary: Get BTC price data
+      description: Retrieve current Bitcoin price with change metrics and pattern analysis
+      responses:
+        '200':
+          description: BTC price data with technical analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BTCPriceResponse'
+
+  /api/redis-keys:
+    get:
+      tags:
+        - System
+      summary: List Redis keys
+      description: Get a list of recently updated Redis keys with metadata
+      parameters:
+        - name: pattern
+          in: query
+          schema:
+            type: string
+          description: Redis key pattern to filter by (e.g., "btc:*")
+          required: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of keys to return
+          required: false
+      responses:
+        '200':
+          description: List of Redis keys with metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisKeysResponse'
+
+  /api/redis-key:
+    get:
+      tags:
+        - System
+      summary: Get Redis key value
+      description: Get the value of a specific Redis key
+      parameters:
+        - name: key
+          in: query
+          schema:
+            type: string
+          description: The Redis key to fetch
+          required: true
+      responses:
+        '200':
+          description: Redis key value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    example: "btc_price"
+                    description: The Redis key name
+                  type:
+                    type: string
+                    example: "string"
+                    description: The Redis key type
+                  value:
+                    type: object
+                    description: The key value (can be string, number, object, or array depending on key type)
+                  status:
+                    type: string
+                    enum: [success, error]
+                    example: "success"
+                    description: Status of the operation
+                  error:
+                    type: string
+                    example: "Key not found"
+                    description: Error message if status is error
+                required:
+                  - key
+                  - status
+
+  /api/data:
+    get:
+      tags:
+        - Combined Data
+      summary: Get combined dashboard data
+      description: Retrieve trap probability, position, and BTC price data in a single request
+      responses:
+        '200':
+          description: Combined dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CombinedDataResponse'
+
+  /ws:
+    websocket:
+      tags:
+        - WebSocket
+      summary: WebSocket endpoint
+      description: Real-time updates for trap probability, position data, and BTC price
+      responses:
+        '101':
+          description: WebSocket connection established 
