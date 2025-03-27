@@ -14,6 +14,14 @@ services:
     value: ${redis.REDIS_PORT}
   - key: REDIS_PASSWORD
     value: ${redis.REDIS_PASSWORD}
+  - key: REDIS_SSL
+    value: "true"
+  - key: REDIS_SSL_CERT_REQS
+    value: "none"
+  - key: REDIS_SOCKET_TIMEOUT
+    value: "5"
+  - key: REDIS_SOCKET_CONNECT_TIMEOUT
+    value: "5"
   instance_count: 1
   instance_size_slug: basic-xxs
   health_check:
