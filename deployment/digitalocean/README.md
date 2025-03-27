@@ -1,218 +1,121 @@
 # OMEGA BTC AI - BTC Live Feed v2 Digital Ocean Deployment
 
-This guide provides instructions for deploying the OMEGA BTC AI Bitcoin Live Feed v2 on Digital Ocean's App Platform.
+This guide outlines the deployment process for the BTC Live Feed v2 service on Digital Ocean's App Platform.
 
-## Prerequisites
+## Deployment Requirements
 
-- [Digital Ocean](https://www.digitalocean.com/) account with App Platform enabled
-- [`doctl`](https://docs.digitalocean.com/reference/doctl/) CLI tool installed and configured
-- Docker installed locally (for testing)
-- Git repository access
+- Digital Ocean account with App Platform access
+- Access to the GitHub repository (btc-c0der/omega-btc-ai)
+- Redis Cloud instance with TLS enabled
 
-## 1. Repository Setup
+## Deployment Files
 
-1. Clone the repository:
+The following files are used in the deployment process:
 
-```bash
-git clone https://github.com/fsiqueira/omega-btc-ai.git
-cd omega-btc-ai
-```
+- `app.yaml`: Digital Ocean App Platform configuration
+- `requirements.txt`: Python dependencies
+- `runtime.txt`: Python version specification
+- `Procfile`: Process type definitions
+- `certificates/SSL_redis-btc-omega-redis.pem`: Redis TLS certificate
 
-2. Create a deployment branch:
+## Deployment Process
 
-```bash
-git checkout -b feature/btc-live-feed-v2-cloud
-```
+1. Ensure all configuration files are in place:
+   - Check `app.yaml` for proper environment variables
+   - Verify Redis connection details are correct
+   - Ensure SSL certificates are properly configured
 
-## 2. Configuration Files
+2. Deploy using the Digital Ocean CLI:
 
-The deployment uses the following files:
+   ```bash
+   doctl apps create --spec deployment/digitalocean/app.yaml
+   ```
 
-- `deployment/digitalocean/Dockerfile` - Container configuration
-- `deployment/digitalocean/app.yaml` - Digital Ocean App Platform configuration
-- `deployment/digitalocean/requirements.txt` - Python dependencies
-- `deployment/scripts/deploy.sh` - Deployment script
+3. Monitor the deployment:
 
-## 3. Environment Variables
+   ```bash
+   doctl apps list
+   ```
 
-Set up the following environment variables in Digital Ocean App Platform:
+4. Get deployment details:
 
-| Variable | Description | Default |
+   ```bash
+   doctl apps get [APP_ID]
+   ```
+
+5. View logs:
+
+   ```bash
+   doctl apps logs [APP_ID]
+   ```
+
+## Environment Variables
+
+The following environment variables must be configured:
+
+| Variable | Description | Example |
 |----------|-------------|---------|
-| `REDIS_HOST` | Redis database host | `localhost` |
-| `REDIS_PORT` | Redis database port | `6379` |
-| `REDIS_PASSWORD` | Redis database password | - |
-| `REDIS_SSL` | Enable SSL for Redis | `false` |
-| `REDIS_SSL_CERT_REQS` | SSL certificate requirements | `required` |
-| `REDIS_SSL_CERT_PATH` | Path to SSL certificate | `/app/deployment/digitalocean/certificates/SSL_redis-btc-omega-redis.pem` |
-| `REDIS_SOCKET_TIMEOUT` | Redis socket timeout | `5` |
-| `REDIS_SOCKET_CONNECT_TIMEOUT` | Redis connection timeout | `5` |
-| `LOG_LEVEL` | Logging level | `info` |
-| `DEBUG` | Enable debug logging | `false` |
+| REDIS_HOST | Redis server hostname | redis-12345.example.redislabs.com |
+| REDIS_PORT | Redis server port | 12345 |
+| REDIS_USERNAME | Redis username | omega |
+| REDIS_PASSWORD | Redis password | your_password |
+| REDIS_SSL | Enable SSL | true |
+| REDIS_USE_TLS | Use TLS | true |
+| REDIS_CERT | Certificate file name | SSL_redis-btc-omega-redis.pem |
+| REDIS_SSL_CERT_REQS | Certificate validation | required |
+| REDIS_SSL_CERT_PATH | Path to certificate | /app/deployment/digitalocean/certificates/SSL_redis-btc-omega-redis.pem |
+| REDIS_SOCKET_TIMEOUT | Socket timeout in seconds | 5 |
+| REDIS_SOCKET_CONNECT_TIMEOUT | Connection timeout in seconds | 5 |
+| LOG_LEVEL | Logging level | info |
+| DEBUG | Enable debug mode | false |
 
-## 4. Local Testing
+## Troubleshooting
 
-Before deploying to Digital Ocean, test the container locally:
+- **Build Failures**: Check the build log for dependency issues. You may need to update the `requirements.txt` file.
+- **Runtime Errors**: Review app logs for more details about runtime errors.
+- **Redis Connection Issues**: Verify the Redis environment variables and certificate path.
+- **Health Check Failures**: The application exposes a health check endpoint at `/health`. Verify it's responding correctly.
 
-1. Build the Docker container:
+## Monitoring
 
-```bash
-docker build -t btc-live-feed-v2 -f deployment/digitalocean/Dockerfile .
+The application exposes a health check endpoint at `/health` that returns:
+
+```json
+{
+  "status": "healthy",
+  "redis_connected": true,
+  "websocket_connected": true,
+  "last_price_update": "2025-03-27T19:30:15.123456Z",
+  "uptime": 3600.5,
+  "details": {
+    "last_price": 65432.10,
+    "seconds_since_update": 5.2,
+    "uptime_seconds": 3600.5
+  }
+}
 ```
 
-2. Create a `.env` file with your configuration:
+## Updating the Application
+
+1. Make changes to your code in the repository
+2. Push changes to the `feature/btc-live-feed-v2-cloud` branch
+3. Digital Ocean will automatically rebuild and deploy the application
+
+## Rollback
+
+To roll back to a previous deployment:
 
 ```bash
-echo "REDIS_HOST=localhost" > .env
-echo "REDIS_PORT=6379" >> .env
+doctl apps list-deployments [APP_ID]
+doctl apps create-deployment [APP_ID] --force-rebuild
 ```
 
-3. Run the container:
+## Security Notes
 
-```bash
-docker run -p 8080:8080 --env-file .env btc-live-feed-v2
-```
-
-4. Check the health endpoint:
-
-```bash
-curl http://localhost:8080/health
-```
-
-## 5. Deployment Steps
-
-### Automated Deployment
-
-1. Make the deployment script executable:
-
-```bash
-chmod +x deployment/scripts/deploy.sh
-```
-
-2. Run the deployment script:
-
-```bash
-./deployment/scripts/deploy.sh
-```
-
-### Manual Deployment
-
-1. Install and authenticate `doctl`:
-
-```bash
-# Install doctl
-brew install doctl
-
-# Authenticate with Digital Ocean
-doctl auth init
-```
-
-2. Create a Redis database in Digital Ocean:
-
-```bash
-doctl databases create redis-btc-feed --engine redis --version 6 --region sfo3 --size db-s-1vcpu-1gb
-```
-
-3. Deploy the application:
-
-```bash
-doctl apps create --spec deployment/digitalocean/app.yaml
-```
-
-## 6. Monitoring and Maintenance
-
-### Viewing Application Logs
-
-```bash
-# List your apps
-doctl apps list
-
-# View logs (replace APP_ID with your app's ID)
-doctl apps logs APP_ID
-```
-
-### Health Checks
-
-The application provides a health check endpoint at `/health` that returns the system status:
-
-```bash
-# Replace APP_URL with your application's URL
-curl https://APP_URL/health
-```
-
-The health check verifies:
-
-- Redis connection status
-- WebSocket connection to Binance
-- Last price update time
-- System uptime
-
-### Updating the Application
-
-1. Make changes to your code
-2. Push to the deployment branch:
-
-```bash
-git add .
-git commit -m "Update BTC Live Feed v2"
-git push origin feature/btc-live-feed-v2-cloud
-```
-
-3. Digital Ocean will automatically redeploy the application
-
-## 7. Troubleshooting
-
-### Common Issues
-
-1. **Redis Connection Failures**
-   - Verify Redis credentials are correct
-   - Check SSL certificate configuration
-   - Ensure firewall rules allow connections to Redis
-
-2. **WebSocket Connection Issues**
-   - Check Internet connectivity
-   - Verify Binance API status
-   - Review WebSocket connection parameters
-
-3. **Deployment Failures**
-   - Check the app logs for errors
-   - Ensure all required environment variables are set
-   - Verify the Dockerfile and app.yaml are valid
-
-### Rollback Procedure
-
-To roll back to a previous version:
-
-```bash
-# Reset to a previous commit
-git checkout feature/btc-live-feed-v2-cloud
-git reset --hard COMMIT_HASH
-git push --force origin feature/btc-live-feed-v2-cloud
-```
-
-## 8. Security Considerations
-
-1. **Redis Security**
-   - Use SSL connections to Redis
-   - Set strong Redis passwords
-   - Restrict Redis access to necessary IPs
-
-2. **API Security**
-   - Implement rate limiting for the health check endpoint
-   - Validate all incoming data
-   - Do not expose sensitive information in logs
-
-## 9. Performance Optimization
-
-For better performance, consider:
-
-1. **Scaling**
-   - Increase instance size for vertical scaling
-   - Increase instance count for horizontal scaling
-
-2. **Redis Optimization**
-   - Use Redis pipeline operations for batch updates
-   - Consider Redis cluster for higher throughput
+- Ensure Redis credentials are kept secure
+- Validate that the TLS certificate is properly configured
+- Check that websocket connections are using secure protocols
+- Set appropriate rate limits and timeouts to prevent DoS attacks
 
 ## 10. Support and Resources
 
