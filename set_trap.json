@@ -1,0 +1,34 @@
+{
+    "probability": 75.0,
+    "timestamp": "2025-03-21T02:15:00.000Z",
+    "trend": "increasing",
+    "change": 0.15,
+    "components": {
+        "price_pattern": {
+            "value": 0.8,
+            "description": "Wyckoff distribution pattern"
+        },
+        "volume_spike": {
+            "value": 0.9,
+            "description": "Volume 3x above average"
+        },
+        "fib_level": {
+            "value": 0.7,
+            "description": "Price near 0.618 retracement"
+        },
+        "historical_match": {
+            "value": 0.6,
+            "description": "Similar to May 2021 pattern"
+        },
+        "order_book": {
+            "value": 0.9,
+            "description": "Large hidden sell walls"
+        },
+        "market_regime": {
+            "value": 0.7,
+            "description": "Distribution phase"
+        }
+    },
+    "trap_type": "stop_hunt",
+    "confidence": 0.85
+}

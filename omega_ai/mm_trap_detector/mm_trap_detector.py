@@ -25,7 +25,7 @@ import json
 import redis
 import websockets
 from datetime import datetime, UTC
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from influxdb_client.client.influxdb_client import InfluxDBClient
 from omega_ai.algos.omega_algorithms import OmegaAlgo
 from omega_ai.db_manager.database import insert_mm_trap, insert_subtle_movement
@@ -48,6 +48,7 @@ YELLOW = "\033[93m"
 LIGHT_ORANGE = "\033[38;5;214m"
 CYAN = "\033[96m"
 WHITE = "\033[97m"
+BLACK = "\033[30m"
 BLACK_BG = "\033[40m"
 BLUE_BG = "\033[44m"
 GREEN_BG = "\033[42m"
@@ -59,7 +60,7 @@ class MMTrapDetector:
     def __init__(self):
         self.redis_conn = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
         self.influxdb_client = None
-        self.ws_url = "ws://localhost:8765"  # Binance WebSocket URL
+        self.ws_url = "ws://localhost:8765"  # Updated WebSocket URL
         self.prev_btc_price = 0.0
         self.current_btc_price = 0.0
         self.initialize_influxdb()
@@ -127,54 +128,128 @@ class MMTrapDetector:
         """Register a trap detection event."""
         try:
             timestamp = datetime.now(UTC).isoformat()
-            self.redis_conn.hset(
-                f"trap_detection:{int(datetime.now(UTC).timestamp())}",
-                mapping={
-                    "price": str(price),
-                    "volume": str(volume),
-                    "price_change": str(price_change),
-                    "timestamp": timestamp
-                }
+            trap_data = {
+                "type": "price_trap",  # Default trap type
+                "price": str(price),
+                "volume": str(volume),
+                "price_change": str(price_change),
+                "timestamp": timestamp,
+                "confidence": "0.85"  # Default confidence
+            }
+            
+            # Add to sorted set queue with timestamp as score
+            self.redis_conn.zadd(
+                "mm_trap_queue:zset",
+                {json.dumps(trap_data): int(datetime.now(UTC).timestamp())}
             )
+            
+            print(f"{GREEN}✅ Trap detection registered in queue{RESET}")
+            
         except Exception as e:
-            print(f"❌ Error registering trap detection: {str(e)}")
+            print(f"{RED_BG}{WHITE}❌ Error registering trap detection: {str(e)}{RESET}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                print(f"{RED}Traceback:{RESET}")
+                traceback.print_tb(e.__traceback__)
 
     async def analyze_movement(self, current_btc_price: float, prev_btc_price: float, volume: float) -> str:
         """Analyze the current price movement for potential market manipulation."""
         try:
+            print(f"\n{CYAN}Starting movement analysis...{RESET}")
+            print(f"Current Price: ${current_btc_price:.2f}")
+            print(f"Previous Price: ${prev_btc_price:.2f}")
+            print(f"Volume: {volume:.2f} BTC")
+            
+            # Calculate price movement metrics
+            price_change = current_btc_price - prev_btc_price
+            price_change_pct = (price_change / prev_btc_price) * 100 if prev_btc_price != 0 else 0
+            
+            print(f"\n{YELLOW}Price Movement Metrics:{RESET}")
+            print(f"Absolute Change: ${price_change:.2f}")
+            print(f"Percentage Change: {price_change_pct:.2f}%")
+            
+            # Get market conditions
+            volatility = self.redis_conn.get("rolling_volatility")
+            market_regime = self.redis_conn.get("market_regime")
+            
+            print(f"\n{YELLOW}Market Conditions:{RESET}")
+            print(f"Volatility: ${float(volatility) if volatility else 0:.2f}")
+            print(f"Market Regime: {market_regime if market_regime else 'Unknown'}")
+            
+            # Perform Fibonacci analysis
+            print(f"\n{CYAN}Performing Fibonacci analysis...{RESET}")
             analysis = await OmegaAlgo.is_fibo_organic(current_btc_price, prev_btc_price, volume)
+            
+            # Log analysis result
+            if "Organic" in analysis:
+                print(f"{GREEN}✅ Analysis Result: Organic Movement{RESET}")
+            elif "Insufficient" in analysis:
+                print(f"{YELLOW}⚠️ Analysis Result: Insufficient Data{RESET}")
+            else:
+                print(f"{RED}⛔️ Analysis Result: Potential Manipulation{RESET}")
+            
             return analysis
+            
         except Exception as e:
-            print(f"❌ Error in analyze_movement: {str(e)}")
+            print(f"{RED_BG}{WHITE}❌ Error in analyze_movement: {str(e)}{RESET}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                print(f"{RED}Traceback:{RESET}")
+                traceback.print_tb(e.__traceback__)
             return "Error in analysis"
 
     async def print_analysis_result(self, analysis: str, threshold: float) -> None:
         """Print the analysis result with appropriate formatting."""
         try:
+            print(f"\n{BOLD}{BLUE}═" * 20 + " ANALYSIS RESULT " + "═" * 20 + f"{RESET}")
+            
+            # Get market conditions for context
+            volatility = self.redis_conn.get("rolling_volatility")
+            market_regime = self.redis_conn.get("market_regime")
+            directional_strength = self.redis_conn.get("directional_strength")
+            
+            print(f"\n{YELLOW}Market Context:{RESET}")
+            print(f"Volatility: ${float(volatility) if volatility else 0:.2f}")
+            print(f"Market Regime: {market_regime if market_regime else 'Unknown'}")
+            print(f"Directional Strength: {float(directional_strength) if directional_strength else 0:.2f}")
+            
+            print(f"\n{YELLOW}Detection Threshold:{RESET}")
+            print(f"Current Threshold: ${threshold:.2f}")
+            
+            print(f"\n{YELLOW}Analysis Result:{RESET}")
             if "Organic" in analysis:
-                print(f"{GREEN}✅ ORGANIC MOVEMENT - No manipulation detected{RESET}")
+                print(f"{GREEN_BG}{BLACK}✅ ORGANIC MOVEMENT{RESET}")
+                print(f"{GREEN}No manipulation detected - Price movement follows natural market patterns{RESET}")
             elif "Insufficient" in analysis:
-                print(f"{YELLOW}⚠️  {analysis}{RESET}")
+                print(f"{YELLOW_BG}{BLACK}⚠️ INSUFFICIENT DATA{RESET}")
+                print(f"{YELLOW}Not enough data points to determine if movement is organic{RESET}")
             else:
-                print(f"{RED}⛔️ POTENTIAL MANIPULATION DETECTED - {analysis}{RESET}")
-                
-            print(f"\nCurrent Threshold: ${threshold:.2f}")
+                print(f"{RED_BG}{WHITE}⛔️ POTENTIAL MANIPULATION DETECTED{RESET}")
+                print(f"{RED}Analysis indicates possible market manipulation:{RESET}")
+                print(f"{RED}{analysis}{RESET}")
+            
+            print(f"\n{BOLD}{BLUE}═" * 50 + f"{RESET}\n")
+            
         except Exception as e:
-            print(f"❌ Error in print_analysis_result: {str(e)}")
+            print(f"{RED_BG}{WHITE}❌ Error in print_analysis_result: {str(e)}{RESET}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                print(f"{RED}Traceback:{RESET}")
+                traceback.print_tb(e.__traceback__)
 
     async def process_price_update(self, price: float) -> None:
         """Process a new price update from the WebSocket."""
         try:
             current_time = datetime.now(UTC)
-            print(f"\n BTC CHECK | {current_time.strftime('%Y-%m-%d %H:%M:%S')} \n")
-            print("═" * 17 + " PRICE UPDATE " + "═" * 17)
+            print(f"\n{BOLD}{BLUE}═" * 20 + " PRICE UPDATE " + "═" * 20 + f"{RESET}")
+            print(f"{CYAN}Time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}{RESET}")
             
             # Calculate price changes
             abs_change = price - self.prev_btc_price
             pct_change = (abs_change / self.prev_btc_price) * 100 if self.prev_btc_price != 0 else 0
             
-            # Print price information
-            print(f"Current BTC: ${price:.2f} {'↑' if abs_change > 0 else '↓' if abs_change < 0 else '→'}")
+            # Print price information with enhanced formatting
+            print(f"\n{GREEN}Current BTC: ${price:.2f} {'↑' if abs_change > 0 else '↓' if abs_change < 0 else '→'}{RESET}")
             print(f"Previous:    ${self.prev_btc_price:.2f}")
             print(f"Abs Change:  ${abs_change:.2f}")
             print(f"% Change:    {pct_change:.4f}%")
@@ -183,36 +258,85 @@ class MMTrapDetector:
             volume = self.get_current_volume()
             hf_mode = self.check_high_frequency_mode()
             
+            # Store price and volume in Redis for historical analysis
+            if self.prev_btc_price != 0:  # Only store after we have a previous price
+                data_point = f"{price},{volume}"
+                self.redis_conn.rpush("btc_movement_history", data_point)
+                self.redis_conn.ltrim("btc_movement_history", -1500, -1)  # Keep last 1500 data points
+                
+                # Store absolute change for volatility calculation
+                self.redis_conn.rpush("abs_price_change_history", str(abs(pct_change)))
+                self.redis_conn.ltrim("abs_price_change_history", -100, -1)  # Keep last 100 changes
+                
+                # Calculate and store rolling volatility
+                abs_changes = self.redis_conn.lrange("abs_price_change_history", -30, -1)
+                if len(abs_changes) > 10:  # Need at least 10 data points
+                    volatility = sum(float(c) for c in abs_changes) / len(abs_changes)
+                    self.redis_conn.set("rolling_volatility", volatility)
+                    
+                # Try to determine market regime and update
+                try:
+                    from omega_ai.algos.omega_algorithms import OmegaAlgo
+                    market_regime, multiplier = OmegaAlgo.detect_market_regime()
+                    if market_regime != "unknown":
+                        self.redis_conn.set("market_regime", market_regime)
+                        self.redis_conn.set("regime_multiplier", multiplier)
+                except Exception as e:
+                    print(f"⚠️ Error updating market regime: {e}")
+            
+            print(f"\n{YELLOW}Volume: {volume:.2f} BTC{RESET}")
+            print(f"HF Mode: {'Active' if hf_mode else 'Inactive'}")
+            
             # Calculate dynamic threshold
             dynamic_threshold = self.calculate_dynamic_threshold(hf_mode)
             
-            print("\n═" * 17 + " MOVEMENT ANALYSIS " + "═" * 17)
+            print(f"\n{BOLD}{BLUE}═" * 20 + " MOVEMENT ANALYSIS " + "═" * 20 + f"{RESET}")
             
             # Analyze the movement
+            print(f"\n{CYAN}Analyzing price movement...{RESET}")
             movement_analysis = await self.analyze_movement(price, self.prev_btc_price, volume)
             
-            # Print analysis result
+            # Print analysis result with enhanced formatting
             await self.print_analysis_result(movement_analysis, dynamic_threshold)
             
             # Register trap detection if needed
             if "TRAP" in movement_analysis:
+                print(f"\n{RED_BG}{WHITE}⚠️ TRAP DETECTED! Registering detection...{RESET}")
                 self.register_trap_detection(price, volume, pct_change)
+                print(f"{GREEN}✅ Trap detection registered successfully{RESET}")
             
             # Update previous price
             self.prev_btc_price = price
             
+            print(f"\n{BOLD}{BLUE}═" * 50 + f"{RESET}\n")
+            
         except Exception as e:
-            print(f"❌ Error processing price update: {str(e)}")
+            print(f"{RED_BG}{WHITE}❌ Error processing price update: {str(e)}{RESET}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                print(f"{RED}Traceback:{RESET}")
+                traceback.print_tb(e.__traceback__)
 
-    async def handle_websocket_message(self, message: str) -> None:
+    async def handle_websocket_message(self, message: Union[str, bytes]) -> None:
         """Handle incoming WebSocket message."""
         try:
+            # Convert bytes to string if necessary
+            if isinstance(message, bytes):
+                message = message.decode('utf-8')
+            
+            print(f"{CYAN}[DEBUG] Raw WebSocket message: {message}{RESET}")
             data = json.loads(message)
             price = float(data.get("btc_price", 0))
-            print(f"📡 Received BTC Price: ${price:.2f}")
+            print(f"{CYAN}📡 Received BTC Price: ${price:.2f}{RESET}")
             await self.process_price_update(price)
         except (json.JSONDecodeError, ValueError) as e:
-            print(f"❌ Invalid WebSocket Message: {message} | Error: {e}")
+            print(f"{RED_BG}{WHITE}❌ Invalid WebSocket Message: {message} | Error: {e}{RESET}")
+        except Exception as e:
+            print(f"{RED_BG}{WHITE}❌ Error handling WebSocket message: {str(e)}{RESET}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                print(f"{RED}Traceback:{RESET}")
+                traceback.print_tb(e.__traceback__)
 
     async def connect_websocket(self) -> None:
         """Connect to WebSocket and handle messages."""
