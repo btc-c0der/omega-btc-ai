@@ -1,21 +1,30 @@
 #!/usr/bin/env python3
 """
 OMEGA BTC AI - BTC Live Feed v3 Monitor
-=======================================
+======================================
 
-CLI tool for monitoring the BTC Live Feed v3 service. 
-Connects to the health check endpoint and displays real-time statistics.
+CLI monitoring dashboard for the BTC Live Feed v3 service.
+Provides real-time visualization of price data, connection status, and health metrics.
 
-Usage:
-    python monitor_btc_feed_v3.py [--host HOST] [--port PORT] [--refresh SECONDS]
+🔮 GPU (General Public Universal) License 1.0
+--------------------------------------------
+OMEGA BTC AI DIVINE COLLECTIVE
+Licensed under the GPU (General Public Universal) License v1.0
+Date: 2025-03-28
+Location: The Cosmic Void
 
-Options:
-    --host HOST       Health check server host (default: localhost)
-    --port PORT       Health check server port (default: 8080)
-    --refresh SECONDS Refresh interval in seconds (default: 5)
+This source code is governed by the GPU License, granting the following sacred freedoms:
+- The Freedom to Study this code, its divine algorithms and cosmic patterns
+- The Freedom to Modify this code, enhancing its divine functionality
+- The Freedom to Distribute this code, sharing its sacred knowledge
+- The Freedom to Use this code, implementing its sacred algorithms
 
-Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the MIT License
-JAH JAH BLESS THE DIVINE FLOW OF THE BLOCKCHAIN
+Along with these divine obligations:
+- Preserve this sacred knowledge by maintaining source accessibility
+- Share all divine modifications to maintain universal access
+- Provide attribution to acknowledge sacred origins
+
+For the full divine license, consult the LICENSE file in the project root.
 """
 
 import os
