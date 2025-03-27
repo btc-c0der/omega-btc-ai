@@ -14,12 +14,8 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 
-# Import Redis manager based on environment
-try:
-    from omega_ai.utils.redis_manager import RedisManager
-except ImportError:
-    # Fallback to local implementation
-    from .redis_manager import RedisManager
+# Global Redis manager - we'll use the one from btc_live_feed_v2 later
+redis_manager = None
 
 # Constants
 HEALTHY_TIMEOUT = 60  # Maximum seconds since last update to consider service healthy
@@ -43,27 +39,7 @@ class HealthResponse(BaseModel):
 
 # Global variables
 start_time = time.time()
-redis_manager = None
-
-# Initialize Redis manager
-def get_redis_manager():
-    global redis_manager
-    if redis_manager is None:
-        # Get environment variables with fallbacks
-        redis_host = os.getenv("REDIS_HOST", "localhost")
-        redis_port = int(os.getenv("REDIS_PORT", "6379"))
-        redis_password = os.getenv("REDIS_PASSWORD", None)
-        redis_ssl = os.getenv("REDIS_SSL", "false").lower() == "true"
-        
-        # Initialize Redis manager
-        redis_manager = RedisManager(
-            host=redis_host,
-            port=redis_port,
-            password=redis_password,
-            ssl=redis_ssl
-        )
-    
-    return redis_manager
+btc_feed_instance = None
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
@@ -74,40 +50,34 @@ async def health_check():
     - Last price update time
     """
     try:
-        # Get Redis manager
-        redis = get_redis_manager()
+        global redis_manager
         redis_connected = False
         websocket_connected = False
         last_price_update = None
         details = {}
+        last_update_time = None
         
-        # Check Redis connection
-        try:
-            await redis.ping()
-            redis_connected = True
-            
-            # Check last price update time
-            last_update_time = await redis.get_cached("last_btc_update_time")
-            if last_update_time:
-                last_update_time = float(last_update_time)
-                last_price_update = datetime.fromtimestamp(last_update_time, tz=timezone.utc).isoformat()
-                
-                # Get current time and calculate time since last update
-                current_time = time.time()
-                time_since_update = current_time - last_update_time
-                
-                # Check WebSocket connection status based on last update time
-                websocket_connected = time_since_update < HEALTHY_TIMEOUT
-                details["seconds_since_update"] = time_since_update
-                
-                # Get last price
-                last_price = await redis.get_cached("last_btc_price")
-                if last_price:
-                    details["last_price"] = float(last_price)
-            else:
-                details["warning"] = "No price updates recorded yet"
-        except Exception as e:
-            details["redis_error"] = str(e)
+        # Check Redis connection if we have a manager
+        if redis_manager:
+            try:
+                # We'll use the check_health method from btc_feed_instance
+                # which has access to the Redis manager
+                if btc_feed_instance:
+                    feed_health = await btc_feed_instance.check_health()
+                    redis_connected = feed_health.get("redis_connected", False)
+                    websocket_connected = feed_health.get("websocket_connected", False)
+                    details["feed_status"] = feed_health.get("status", "unknown")
+                    last_price = feed_health.get("last_price")
+                    if last_price:
+                        details["last_price"] = float(last_price)
+                    
+                    # Get current time and calculate time since last message
+                    if "uptime" in feed_health and feed_health["uptime"]:
+                        last_update_time = time.time() - feed_health["uptime"]
+                        last_price_update = datetime.fromtimestamp(last_update_time, tz=timezone.utc).isoformat()
+                        details["seconds_since_update"] = feed_health["uptime"]
+            except Exception as e:
+                details["redis_error"] = str(e)
         
         # Calculate uptime
         uptime = time.time() - start_time
@@ -116,7 +86,7 @@ async def health_check():
         # Determine overall status
         if redis_connected and websocket_connected:
             status = "healthy"
-        elif redis_connected and last_price_update and time.time() - float(last_update_time) < DEGRADED_TIMEOUT:
+        elif redis_connected and last_update_time and (time.time() - last_update_time) < DEGRADED_TIMEOUT:
             status = "degraded"
         else:
             status = "unhealthy"
@@ -143,6 +113,21 @@ async def health_check():
 async def root():
     """Root endpoint that redirects to health check"""
     return {"message": "OMEGA BTC AI - BTC Live Feed v2", "health_endpoint": "/health"}
+
+async def start_health_check(feed_instance=None):
+    """Start the health check server in the background."""
+    global btc_feed_instance, redis_manager
+    
+    btc_feed_instance = feed_instance
+    if hasattr(feed_instance, 'redis_manager'):
+        redis_manager = feed_instance.redis_manager
+    
+    import uvicorn
+    port = int(os.getenv("PORT", "8080"))
+    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
+    server = uvicorn.Server(config)
+    
+    await server.serve()
 
 if __name__ == "__main__":
     # This allows running the health check service directly
