@@ -9,16 +9,13 @@ Author: OMEGA BTC AI Team
 Version: 1.0
 """
 
-import requests
-import time
-import hmac
-import hashlib
-import base64
-import json
+import asyncio
 import argparse
 import os
-from typing import Dict, Any, Optional
 import logging
+from typing import Dict, Any, List
+from dotenv import load_dotenv
+from omega_ai.trading.exchanges.bitget_ccxt import BitGetCCXT
 
 # Configure logging
 logging.basicConfig(
@@ -43,7 +40,8 @@ class BitGetOrderExecutor:
                 api_key: str = "", 
                 secret_key: str = "", 
                 passphrase: str = "",
-                use_testnet: bool = True):
+                use_testnet: bool = True,
+                sub_account: str = ""):
         """
         Initialize the BitGet order executor.
         
@@ -52,15 +50,24 @@ class BitGetOrderExecutor:
             secret_key: BitGet secret key
             passphrase: BitGet API passphrase
             use_testnet: Whether to use testnet (default: True)
+            sub_account: Sub-account name to use for trading (optional)
         """
         # Look for API credentials in environment variables if not provided
         self.api_key = api_key or os.environ.get("BITGET_TESTNET_API_KEY" if use_testnet else "BITGET_API_KEY", "")
         self.secret_key = secret_key or os.environ.get("BITGET_TESTNET_SECRET_KEY" if use_testnet else "BITGET_SECRET_KEY", "")
         self.passphrase = passphrase or os.environ.get("BITGET_TESTNET_PASSPHRASE" if use_testnet else "BITGET_PASSPHRASE", "")
         
-        # Set base URL based on testnet or mainnet
-        self.base_url = "https://api-testnet.bitget.com" if use_testnet else "https://api.bitget.com"
-        self.use_testnet = use_testnet
+        # Set sub-account if provided, or try to get from environment
+        self.sub_account = sub_account or os.environ.get("STRATEGIC_SUB_ACCOUNT_NAME", "")
+        
+        # Initialize CCXT instance
+        self.exchange = BitGetCCXT(
+            api_key=self.api_key,
+            secret_key=self.secret_key,
+            passphrase=self.passphrase,
+            use_testnet=use_testnet,
+            sub_account=self.sub_account
+        )
         
         # Log API credentials status
         if not self.api_key or not self.secret_key or not self.passphrase:
@@ -68,26 +75,15 @@ class BitGetOrderExecutor:
         else:
             logger.info(f"{GREEN}API credentials loaded successfully.{RESET}")
             logger.info(f"{CYAN}Using {'TESTNET' if use_testnet else 'MAINNET'} environment.{RESET}")
-    
-    def get_signature(self, timestamp: str, method: str, request_path: str, body: str = "") -> str:
-        """
-        Generate BitGet API signature.
-        
-        Args:
-            timestamp: Current timestamp in milliseconds
-            method: HTTP method (GET, POST, etc.)
-            request_path: API endpoint path
-            body: Request body as JSON string (for POST requests)
             
-        Returns:
-            Base64 encoded signature
-        """
-        message = timestamp + method + request_path + body
-        return base64.b64encode(
-            hmac.new(self.secret_key.encode(), message.encode(), hashlib.sha256).digest()
-        ).decode()
+        if self.sub_account:
+            logger.info(f"{CYAN}Using sub-account: {self.sub_account}{RESET}")
     
-    def place_market_order(self, 
+    async def initialize(self):
+        """Initialize the exchange connection."""
+        await self.exchange.initialize()
+    
+    async def place_market_order(self, 
                           symbol: str = "BTCUSDT", 
                           size: str = "0.001",
                           side: str = "buy") -> Dict[str, Any]:
@@ -102,65 +98,25 @@ class BitGetOrderExecutor:
         Returns:
             Response from the BitGet API
         """
-        # Format symbol for BitGet UMCBL (USDT Margined Contracts)
-        formatted_symbol = f"{symbol}_UMCBL"
-        
-        # Current time for API signature
-        timestamp = str(int(time.time() * 1000))
-        
-        # Define order parameters
-        order_payload = {
-            "symbol": formatted_symbol,
-            "size": size,  # Quantity to buy/sell
-            "side": side,  # "buy" or "sell"
-            "orderType": "market",  # Market order
-            "price": "",  # Not used for market orders
-            "force": "gtc"  # Good-Till-Cancelled
-        }
-        
-        # Convert payload to JSON string for signature
-        payload_json = json.dumps(order_payload)
-        
-        # BitGet API request path for futures order
-        request_path = "/api/mix/v1/order/placeOrder"
-        
-        # Generate signature
-        signature = self.get_signature(timestamp, "POST", request_path, payload_json)
-        
-        # Prepare headers
-        headers = {
-            "ACCESS-KEY": self.api_key,
-            "ACCESS-SIGN": signature,
-            "ACCESS-TIMESTAMP": timestamp,
-            "ACCESS-PASSPHRASE": self.passphrase,
-            "Content-Type": "application/json",
-        }
-        
-        # Log order details before sending
-        logger.info(f"{BLUE}Placing {'BUY' if side == 'buy' else 'SELL'} order for {size} {symbol}{RESET}")
-        logger.info(f"{CYAN}Order payload: {payload_json}{RESET}")
-        
-        # Execute API request
         try:
-            response = requests.post(
-                self.base_url + request_path, 
-                headers=headers, 
-                json=order_payload
+            # Format symbol for CCXT
+            formatted_symbol = f"{symbol}/USDT:USDT"
+            
+            # Convert size to float
+            amount = float(size)
+            
+            # Place the order
+            order = await self.exchange.place_order(
+                symbol=formatted_symbol,
+                side=side,
+                amount=amount,
+                order_type="market"
             )
             
-            # Parse response
-            response_data = response.json()
+            logger.info(f"{GREEN}Order placed successfully!{RESET}")
+            logger.info(f"{GREEN}Order ID: {order.get('id')}{RESET}")
             
-            # Log response
-            if response.status_code == 200 and response_data.get('code') == '00000':
-                logger.info(f"{GREEN}Order placed successfully!{RESET}")
-                logger.info(f"{GREEN}Order ID: {response_data.get('data', {}).get('orderId')}{RESET}")
-            else:
-                logger.error(f"{RED}Order placement failed!{RESET}")
-                logger.error(f"{RED}Status code: {response.status_code}{RESET}")
-                logger.error(f"{RED}Response: {json.dumps(response_data, indent=2)}{RESET}")
-            
-            return response_data
+            return order
             
         except Exception as e:
             logger.error(f"{RED}Error placing order: {str(e)}{RESET}")
@@ -168,58 +124,24 @@ class BitGetOrderExecutor:
             logger.error(f"{RED}Exception args: {e.args}{RESET}")
             return {"error": str(e)}
     
-    def get_account_balance(self) -> Dict[str, Any]:
+    async def get_account_balance(self) -> Dict[str, Any]:
         """
         Get account balance from BitGet.
         
         Returns:
             Account balance information
         """
-        timestamp = str(int(time.time() * 1000))
-        request_path = "/api/mix/v1/account/accounts"
-        
-        # Generate signature
-        signature = self.get_signature(timestamp, "GET", request_path)
-        
-        # Prepare headers
-        headers = {
-            "ACCESS-KEY": self.api_key,
-            "ACCESS-SIGN": signature,
-            "ACCESS-TIMESTAMP": timestamp,
-            "ACCESS-PASSPHRASE": self.passphrase,
-            "Content-Type": "application/json",
-        }
-        
-        # Execute API request
         try:
-            response = requests.get(
-                self.base_url + request_path, 
-                headers=headers
-            )
+            balance = await self.exchange.get_balance()
             
-            # Parse response
-            response_data = response.json()
+            # Format and display balance information
+            if 'USDT' in balance:
+                usdt_balance = balance['USDT']
+                logger.info(f"{CYAN}USDT Balance:{RESET}")
+                logger.info(f"{CYAN}  Available: {usdt_balance.get('free', '0')}{RESET}")
+                logger.info(f"{CYAN}  Total: {usdt_balance.get('total', '0')}{RESET}")
             
-            # Log response
-            if response.status_code == 200 and response_data.get('code') == '00000':
-                logger.info(f"{GREEN}Account balance retrieved successfully!{RESET}")
-                
-                # Format and display balance information
-                if 'data' in response_data and isinstance(response_data['data'], list):
-                    for account in response_data['data']:
-                        symbol = account.get('marginCoin', 'UNKNOWN')
-                        available = account.get('available', '0')
-                        equity = account.get('equity', '0')
-                        
-                        logger.info(f"{CYAN}{symbol} Balance:{RESET}")
-                        logger.info(f"{CYAN}  Available: {available}{RESET}")
-                        logger.info(f"{CYAN}  Equity: {equity}{RESET}")
-            else:
-                logger.error(f"{RED}Failed to retrieve account balance!{RESET}")
-                logger.error(f"{RED}Status code: {response.status_code}{RESET}")
-                logger.error(f"{RED}Response: {json.dumps(response_data, indent=2)}{RESET}")
-            
-            return response_data
+            return balance
             
         except Exception as e:
             logger.error(f"{RED}Error retrieving account balance: {str(e)}{RESET}")
@@ -227,7 +149,7 @@ class BitGetOrderExecutor:
             logger.error(f"{RED}Exception args: {e.args}{RESET}")
             return {"error": str(e)}
     
-    def get_positions(self, symbol: str = "BTCUSDT") -> Dict[str, Any]:
+    async def get_positions(self, symbol: str = "BTCUSDT") -> List[Dict[str, Any]]:
         """
         Get current positions for a symbol.
         
@@ -235,62 +157,36 @@ class BitGetOrderExecutor:
             symbol: Trading symbol (e.g., "BTCUSDT")
             
         Returns:
-            Current positions information
+            List of current positions information
         """
-        # Format symbol for BitGet UMCBL (USDT Margined Contracts)
-        formatted_symbol = f"{symbol}_UMCBL"
-        
-        timestamp = str(int(time.time() * 1000))
-        request_path = f"/api/mix/v1/position/singlePosition?symbol={formatted_symbol}"
-        
-        # Generate signature
-        signature = self.get_signature(timestamp, "GET", request_path)
-        
-        # Prepare headers
-        headers = {
-            "ACCESS-KEY": self.api_key,
-            "ACCESS-SIGN": signature,
-            "ACCESS-TIMESTAMP": timestamp,
-            "ACCESS-PASSPHRASE": self.passphrase,
-            "Content-Type": "application/json",
-        }
-        
-        # Execute API request
         try:
-            response = requests.get(
-                self.base_url + request_path, 
-                headers=headers
-            )
+            # Format symbol for CCXT
+            formatted_symbol = f"{symbol}/USDT:USDT"
             
-            # Parse response
-            response_data = response.json()
+            positions = await self.exchange.get_positions(formatted_symbol)
             
-            # Log response
-            if response.status_code == 200 and response_data.get('code') == '00000':
-                logger.info(f"{GREEN}Positions for {symbol} retrieved successfully!{RESET}")
-                
-                # Format and display position information
-                if 'data' in response_data and isinstance(response_data['data'], list):
-                    for position in response_data['data']:
-                        side = position.get('holdSide', 'UNKNOWN')
-                        size = position.get('total', '0')
-                        avg_price = position.get('averageOpenPrice', '0')
-                        unrealized_pnl = position.get('unrealizedPL', '0')
-                        
-                        logger.info(f"{CYAN}Position: {side} {size} {symbol} @ {avg_price}{RESET}")
-                        logger.info(f"{CYAN}  Unrealized PnL: {unrealized_pnl}{RESET}")
-            else:
-                logger.error(f"{RED}Failed to retrieve positions!{RESET}")
-                logger.error(f"{RED}Status code: {response.status_code}{RESET}")
-                logger.error(f"{RED}Response: {json.dumps(response_data, indent=2)}{RESET}")
+            # Format and display position information
+            for position in positions:
+                if position['symbol'] == formatted_symbol:
+                    side = position.get('side', 'UNKNOWN')
+                    size = position.get('contracts', '0')
+                    avg_price = position.get('entryPrice', '0')
+                    unrealized_pnl = position.get('unrealizedPnl', '0')
+                    
+                    logger.info(f"{CYAN}Position: {side} {size} {symbol} @ {avg_price}{RESET}")
+                    logger.info(f"{CYAN}  Unrealized PnL: {unrealized_pnl}{RESET}")
             
-            return response_data
+            return positions
             
         except Exception as e:
             logger.error(f"{RED}Error retrieving positions: {str(e)}{RESET}")
             logger.error(f"{RED}Exception type: {type(e).__name__}{RESET}")
             logger.error(f"{RED}Exception args: {e.args}{RESET}")
-            return {"error": str(e)}
+            return []
+    
+    async def close(self):
+        """Close the exchange connection."""
+        await self.exchange.close()
 
 def parse_args():
     """Parse command line arguments."""
@@ -318,11 +214,49 @@ def parse_args():
                       help='Check current positions after placing order')
     parser.add_argument('--dry-run', action='store_true',
                       help='Simulate order without actually placing it')
+    parser.add_argument('--sub-account', type=str, default='',
+                      help='Sub-account name to use for trading (e.g., strategic_trader)')
     
     return parser.parse_args()
 
-def main():
+async def main():
     """Main entry point for the script."""
+    # Load environment variables from .env file
+    try:
+        # Try to load from project root .env
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
+        env_path = os.path.join(project_root, '.env')
+        
+        if os.path.exists(env_path):
+            load_dotenv(env_path)
+            logger.info(f"{GREEN}Loaded environment from {env_path}{RESET}")
+            
+            # Log which credentials were found (safely)
+            if 'BITGET_API_KEY' in os.environ:
+                api_key = os.environ['BITGET_API_KEY']
+                logger.info(f"{CYAN}Found BITGET_API_KEY: {api_key[:5]}...{api_key[-3:] if len(api_key) > 5 else ''}{RESET}")
+            if 'BITGET_SECRET_KEY' in os.environ:
+                logger.info(f"{CYAN}Found BITGET_SECRET_KEY with length: {len(os.environ['BITGET_SECRET_KEY'])}{RESET}")
+            if 'BITGET_PASSPHRASE' in os.environ:
+                logger.info(f"{CYAN}Found BITGET_PASSPHRASE with length: {len(os.environ['BITGET_PASSPHRASE'])}{RESET}")
+                
+            # Check for testnet credentials too
+            if 'BITGET_TESTNET_API_KEY' in os.environ:
+                testnet_api_key = os.environ['BITGET_TESTNET_API_KEY']
+                logger.info(f"{CYAN}Found BITGET_TESTNET_API_KEY: {testnet_api_key[:5]}...{testnet_api_key[-3:] if len(testnet_api_key) > 5 else ''}{RESET}")
+            if 'BITGET_TESTNET_SECRET_KEY' in os.environ:
+                logger.info(f"{CYAN}Found BITGET_TESTNET_SECRET_KEY with length: {len(os.environ['BITGET_TESTNET_SECRET_KEY'])}{RESET}")
+            if 'BITGET_TESTNET_PASSPHRASE' in os.environ:
+                logger.info(f"{CYAN}Found BITGET_TESTNET_PASSPHRASE with length: {len(os.environ['BITGET_TESTNET_PASSPHRASE'])}{RESET}")
+                
+            # Check for sub-account config
+            if 'STRATEGIC_SUB_ACCOUNT_NAME' in os.environ:
+                logger.info(f"{CYAN}Found STRATEGIC_SUB_ACCOUNT_NAME: {os.environ['STRATEGIC_SUB_ACCOUNT_NAME']}{RESET}")
+        else:
+            logger.warning(f"{YELLOW}No .env file found at {env_path}, using system environment variables{RESET}")
+    except Exception as e:
+        logger.error(f"{RED}Error loading .env file: {str(e)}{RESET}")
+    
     args = parse_args()
     
     # Determine if we should use testnet
@@ -333,34 +267,44 @@ def main():
         api_key=args.api_key,
         secret_key=args.secret_key,
         passphrase=args.passphrase,
-        use_testnet=use_testnet
+        use_testnet=use_testnet,
+        sub_account=args.sub_account
     )
     
-    # Check balance if requested
-    if args.check_balance:
-        print(f"{BLUE}Checking account balance...{RESET}")
-        balance_response = executor.get_account_balance()
-        print(f"{CYAN}Balance response: {json.dumps(balance_response, indent=2)}{RESET}")
-    
-    # Place order unless dry run
-    if not args.dry_run:
-        print(f"{YELLOW}Placing {'BUY' if args.side == 'buy' else 'SELL'} order for {args.size} {args.symbol}...{RESET}")
-        order_response = executor.place_market_order(
-            symbol=args.symbol,
-            size=args.size,
-            side=args.side
-        )
-        print(f"{MAGENTA}Order response: {json.dumps(order_response, indent=2)}{RESET}")
-    else:
-        print(f"{YELLOW}DRY RUN: Would place {'BUY' if args.side == 'buy' else 'SELL'} order for {args.size} {args.symbol}{RESET}")
-    
-    # Check positions if requested
-    if args.check_positions:
-        print(f"{BLUE}Checking positions for {args.symbol}...{RESET}")
-        positions_response = executor.get_positions(args.symbol)
-        print(f"{CYAN}Positions response: {json.dumps(positions_response, indent=2)}{RESET}")
+    try:
+        # Initialize the exchange
+        await executor.initialize()
+        
+        # Check balance if requested
+        if args.check_balance:
+            print(f"{BLUE}Checking account balance...{RESET}")
+            balance_response = await executor.get_account_balance()
+            print(f"{CYAN}Balance response: {balance_response}{RESET}")
+        
+        # Place order unless dry run
+        if not args.dry_run:
+            print(f"{YELLOW}Placing {'BUY' if args.side == 'buy' else 'SELL'} order for {args.size} {args.symbol}...{RESET}")
+            order_response = await executor.place_market_order(
+                symbol=args.symbol,
+                size=args.size,
+                side=args.side
+            )
+            print(f"{MAGENTA}Order response: {order_response}{RESET}")
+        else:
+            print(f"{YELLOW}DRY RUN: Would place {'BUY' if args.side == 'buy' else 'SELL'} order for {args.size} {args.symbol}{RESET}")
+        
+        # Check positions if requested
+        if args.check_positions:
+            print(f"{BLUE}Checking positions for {args.symbol}...{RESET}")
+            positions_response = await executor.get_positions(args.symbol)
+            print(f"{CYAN}Positions response: {positions_response}{RESET}")
+            
+    except Exception as e:
+        logger.error(f"{RED}Error in main: {str(e)}{RESET}")
+    finally:
+        await executor.close()
 
 if __name__ == "__main__":
     print(f"{GREEN}BitGet Market Order Executor{RESET}")
     print(f"{CYAN}Use --help for available options{RESET}")
-    main() 
+    asyncio.run(main()) 

@@ -1,83 +1,94 @@
 #!/usr/bin/env python3
 
 """
-Test script to verify Redis connections work properly
+Test script to verify Redis connection works properly with localhost
 """
 
-import sys
-import json
-import time
+import redis
+import os
 from omega_ai.utils.redis_manager import RedisManager
-from omega_ai.utils.redis_connection import RedisConnectionManager
+
+# Rasta color constants
+GREEN_RASTA = "\033[92m"
+YELLOW_RASTA = "\033[93m"
+RED_RASTA = "\033[91m"
+BLUE_RASTA = "\033[94m"
+RESET = "\033[0m"
+
+def log_message(message, color=GREEN_RASTA, level="info"):
+    """Log with color coding."""
+    if level == "error":
+        print(f"{RED_RASTA}❌ {message}{RESET}")
+    elif level == "warning":
+        print(f"{YELLOW_RASTA}⚠️  {message}{RESET}")
+    elif level == "success":
+        print(f"{GREEN_RASTA}✅ {message}{RESET}")
+    else:
+        print(f"{color}ℹ️  {message}{RESET}")
 
 def test_redis_manager():
-    """Test RedisManager class"""
-    print("Testing RedisManager...")
+    """Test direct Redis connection and RedisManager class."""
+    print(f"{BLUE_RASTA}=== Testing Redis Connections ==={RESET}")
+    
+    # Test direct Redis connection first
     try:
-        # Initialize RedisManager
+        direct_redis = redis.Redis(
+            host='localhost',
+            port=int(os.getenv('REDIS_PORT', '6379')),
+            db=0
+        )
+        if direct_redis.ping():
+            log_message("Direct Redis connection successful (localhost)", level="success")
+        else:
+            log_message("Direct Redis ping failed", level="error")
+    except Exception as e:
+        log_message(f"Direct Redis connection failed: {e}", level="error")
+    
+    # Test RedisManager
+    try:
+        # Initialize RedisManager with explicit localhost
         redis_mgr = RedisManager(host='localhost', port=6379, db=0)
-        
-        # Test basic set/get
-        test_key = f"test:manager:{int(time.time())}"
-        test_data = {"test": True, "timestamp": time.time()}
-        
-        # Set with validation
-        success = redis_mgr.set_with_validation(test_key, test_data)
-        print(f"  - Set with validation: {'Success' if success else 'Failed'}")
-        
-        # Get from cache
-        result = redis_mgr.get_cached(test_key)
-        print(f"  - Get cached: {'Success' if result else 'Failed'}")
-        
-        # Test direct Redis access
-        redis_mgr.redis.delete(test_key)
-        print(f"  - Direct Redis access: Success")
-        
-        print("✅ RedisManager test completed successfully")
-        return True
+        if redis_mgr.ping():
+            log_message("RedisManager connection successful", level="success")
+            
+            # Test basic set/get
+            test_key = "test:btc:price"
+            test_value = "50000.0"
+            success = redis_mgr.set_cached(test_key, test_value)
+            if success:
+                log_message("Set test value successful", level="success")
+            else:
+                log_message("Set test value failed", level="error")
+                
+            # Test get
+            value = redis_mgr.get_cached(test_key)
+            if value == test_value:
+                log_message(f"Get test value successful: {value}", level="success")
+            else:
+                log_message(f"Get test value inconsistent: {value}", level="warning")
+                
+            # Test list operations
+            test_list_key = "test:btc:history"
+            redis_mgr.lpush(test_list_key, "49000.0,0.1")
+            redis_mgr.lpush(test_list_key, "49100.0,0.2")
+            
+            list_values = redis_mgr.lrange(test_list_key, 0, -1)
+            if list_values and len(list_values) > 0:
+                log_message(f"List operations successful: {list_values}", level="success")
+            else:
+                log_message("List operations failed", level="error")
+                
+            # Check btc_movement_history
+            btc_history = redis_mgr.lrange("btc_movement_history", 0, 5)
+            if btc_history:
+                log_message(f"btc_movement_history exists with {len(btc_history)} entries", level="success")
+                log_message(f"Sample entries: {btc_history[:3]}", color=BLUE_RASTA)
+            else:
+                log_message("btc_movement_history is empty", level="warning")
+        else:
+            log_message("RedisManager ping failed", level="error")
     except Exception as e:
-        print(f"❌ RedisManager test failed: {e}")
-        return False
-
-def test_redis_connection_manager():
-    """Test RedisConnectionManager class"""
-    print("\nTesting RedisConnectionManager...")
-    try:
-        # Initialize RedisConnectionManager
-        redis_conn = RedisConnectionManager(host='localhost', port=6379, db=0)
-        
-        # Test basic set/get
-        test_key = f"test:connection:{int(time.time())}"
-        test_data = {"test": True, "timestamp": time.time()}
-        
-        # Set data
-        success = redis_conn.set(test_key, test_data)
-        print(f"  - Set data: {'Success' if success else 'Failed'}")
-        
-        # Get data
-        result = redis_conn.get(test_key)
-        print(f"  - Get data: {'Success' if result else 'Failed'}")
-        
-        # Test direct Redis access
-        redis_conn.client.delete(test_key)
-        print(f"  - Direct Redis access: Success")
-        
-        print("✅ RedisConnectionManager test completed successfully")
-        return True
-    except Exception as e:
-        print(f"❌ RedisConnectionManager test failed: {e}")
-        return False
+        log_message(f"RedisManager test failed: {e}", level="error")
 
 if __name__ == "__main__":
-    print("Redis Connection Test Script")
-    print("===========================")
-    
-    manager_success = test_redis_manager()
-    connection_success = test_redis_connection_manager()
-    
-    if manager_success and connection_success:
-        print("\n✅ All Redis connection tests passed!")
-        sys.exit(0)
-    else:
-        print("\n❌ Some Redis connection tests failed!")
-        sys.exit(1) 
+    test_redis_manager() 

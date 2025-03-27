@@ -4,7 +4,7 @@ import websockets
 from datetime import datetime, UTC
 from omega_ai.visualizer.backend.ascii_art import display_omega_banner, print_status
 
-MM_WS_PORT = 8766
+MM_WS_PORT = 8765
 MM_WS_URL = f"ws://localhost:{MM_WS_PORT}"
 
 connected_clients = set()

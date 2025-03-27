@@ -281,3 +281,86 @@ Trading cryptocurrencies carries significant risk. This integration is provided 
    - Participate in weekly trading reviews
 
 Remember: The OMEGA BTC AI community is built on mutual respect and knowledge sharing. Always be helpful and constructive in your interactions!
+
+## API Authentication and Signature Generation
+
+### Updated Signature Generation
+
+BitGet API requires a specific signature format for authentication. We've updated the signature generation code to follow BitGet's documentation more precisely:
+
+```python
+def generate_signature(secret_key, timestamp, method, request_path, body=None, params=None):
+    """
+    Generate BitGet API signature.
+    
+    Args:
+        secret_key: Your API secret key
+        timestamp: Timestamp in milliseconds
+        method: HTTP method (GET, POST, etc.)
+        request_path: API endpoint path
+        body: Request body for POST requests
+        params: Query parameters for GET requests
+        
+    Returns:
+        Base64 encoded signature
+    """
+    # Ensure method is uppercase
+    method = method.upper()
+    
+    # Start with timestamp + method + requestPath
+    message = str(timestamp) + method + request_path
+    
+    # Add query string if present (for GET requests)
+    if params and method == "GET":
+        # Sort parameters by key
+        sorted_params = sorted(params.items())
+        # Create query string
+        query_string = "&".join([f"{key}={value}" for key, value in sorted_params])
+        # Add to message with question mark
+        message += "?" + query_string
+    
+    # Add body for POST requests
+    if body and method == "POST":
+        if isinstance(body, dict):
+            message += json.dumps(body)
+        else:
+            message += body
+    
+    # Create signature using HMAC-SHA256
+    signature = base64.b64encode(
+        hmac.new(
+            secret_key.encode("utf-8"),
+            message.encode("utf-8"),
+            hashlib.sha256
+        ).digest()
+    ).decode("utf-8")
+    
+    return signature
+```
+
+### Common API Authentication Issues
+
+If you encounter `sign signature error` when working with BitGet API, check the following:
+
+1. **API Key Permissions**: Ensure your API key has the correct permissions (read/trade/transfer)
+2. **Parameter Order**: BitGet requires parameters to be sorted alphabetically by key
+3. **Method Capitalization**: HTTP method must be uppercase (GET, POST, etc.)
+4. **Timestamp Format**: Must be in milliseconds since epoch
+5. **Query String Format**: For GET requests, parameters must be included in the signature with a `?` prefix
+6. **Network Selection**: Make sure you're using the correct network (testnet vs. mainnet)
+
+### Debugging Tools
+
+We've added a debugging tool at `omega_ai/scripts/debug/bitget_signature_test.py` to help with API authentication issues. This tool:
+
+- Compares different signature generation methods
+- Tests basic API endpoints
+- Provides detailed request/response information
+
+To use it:
+
+```bash
+python omega_ai/scripts/debug/bitget_signature_test.py --testnet
+```
+
+See the [debugging tools README](../../scripts/debug/README.md) for more details.
