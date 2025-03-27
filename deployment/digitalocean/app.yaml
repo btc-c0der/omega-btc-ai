@@ -10,11 +10,13 @@ services:
   source_dir: /
   envs:
   - key: REDIS_HOST
-    value: ${redis.REDIS_HOST}
+    value: "redis-19332.fcrce173.eu-west-1-1.ec2.redns.redis-cloud.com"
   - key: REDIS_PORT
-    value: ${redis.REDIS_PORT}
+    value: "19332"
+  - key: REDIS_USERNAME
+    value: "omega"
   - key: REDIS_PASSWORD
-    value: ${redis.REDIS_PASSWORD}
+    value: "VuKJU8Z.Z2V8Qn_"
   - key: REDIS_SSL
     value: "true"
   - key: REDIS_SSL_CERT_REQS
