@@ -13,49 +13,53 @@ COPY Procfile .
 COPY setup.py .
 
 # Create a direct script to run the application
-RUN echo '#!/usr/bin/env python3\n\
-    import os\n\
-    import sys\n\
-    import asyncio\n\
-    \n\
-    # Add src to path\n\
-    sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")\n\
-    sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")\n\
-    \n\
-    # Import the feed directly from the file\n\
-    from src.omega_ai.data_feed.btc_live_feed_v3 import run_btc_live_feed_v3\n\
-    \n\
-    if __name__ == "__main__":\n\
-    print("Starting BTC Live Feed v3...")\n\
-    print(f"Python path: {sys.path}")\n\
-    print(f"Current directory: {os.getcwd()}")\n\
-    try:\n\
-    asyncio.run(run_btc_live_feed_v3())\n\
-    except Exception as e:\n\
-    import traceback\n\
-    print(f"Error running BTC Live Feed v3: {e}")\n\
-    traceback.print_exc()\n\
-    sys.exit(1)\n\
-    ' > run.py && chmod +x run.py
+RUN cat > run.py << 'EOL'
+#!/usr/bin/env python3
+import os
+import sys
+import asyncio
+
+# Add src to path
+sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")
+sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")
+
+# Import the feed directly from the file
+from src.omega_ai.data_feed.btc_live_feed_v3 import run_btc_live_feed_v3
+
+if __name__ == "__main__":
+print("Starting BTC Live Feed v3...")
+print(f"Python path: {sys.path}")
+print(f"Current directory: {os.getcwd()}")
+try:
+asyncio.run(run_btc_live_feed_v3())
+except Exception as e:
+import traceback
+print(f"Error running BTC Live Feed v3: {e}")
+traceback.print_exc()
+sys.exit(1)
+EOL
+RUN chmod +x run.py
 
 # Create a health check script
-RUN echo '#!/usr/bin/env python3\n\
-    import os\n\
-    import sys\n\
-    import uvicorn\n\
-    \n\
-    # Add src to path\n\
-    sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")\n\
-    sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")\n\
-    \n\
-    from src.omega_ai.data_feed.health_check import app\n\
-    \n\
-    if __name__ == "__main__":\n\
-    print("Starting Health Check Server...")\n\
-    host = os.getenv("HEALTH_CHECK_HOST", "0.0.0.0")\n\
-    port = int(os.getenv("HEALTH_CHECK_PORT", "8080"))\n\
-    uvicorn.run(app, host=host, port=port, log_level="info")\n\
-    ' > health.py && chmod +x health.py
+RUN cat > health.py << 'EOL'
+#!/usr/bin/env python3
+import os
+import sys
+import uvicorn
+
+# Add src to path
+sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")
+sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")
+
+from src.omega_ai.data_feed.health_check import app
+
+if __name__ == "__main__":
+print("Starting Health Check Server...")
+host = os.getenv("HEALTH_CHECK_HOST", "0.0.0.0")
+port = int(os.getenv("HEALTH_CHECK_PORT", "8080"))
+uvicorn.run(app, host=host, port=port, log_level="info")
+EOL
+RUN chmod +x health.py
 
 # Install the package
 RUN pip install -e .
