@@ -6,7 +6,7 @@ services:
     repo: btc-c0der/omega-btc-ai
     branch: feature/btc-live-feed-v3-resilient
     deploy_on_push: true
-  source_dir: deployment/digitalocean/btc_live_feed_v3
+  source_dir: .
   dockerfile_path: deployment/digitalocean/btc_live_feed_v3/Dockerfile
   http_port: 8080
   instance_count: 1
@@ -39,7 +39,7 @@ services:
   - key: REDIS_SSL_CERT_REQS
     value: "none"
   - key: PYTHONPATH
-    value: "/workspace/deployment/digitalocean/btc_live_feed_v3"
+    value: "/workspace:/workspace/deployment/digitalocean/btc_live_feed_v3"
   - key: HEALTH_CHECK_PORT
     value: "8080"
   - key: PYTHONUNBUFFERED
