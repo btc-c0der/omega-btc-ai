@@ -15,4 +15,8 @@ setup(
         "python-dotenv>=1.0.0",
     ],
     python_requires=">=3.11",
+    # Make sure the package is discoverable
+    package_data={
+        "": ["*.py", "*.md", "*.txt"],
+    },
 ) 

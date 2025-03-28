@@ -1,2 +1,2 @@
-web: cd src && python -m pip install -e . && cd /workspace/deployment/digitalocean/btc_live_feed_v3 && python src/omega_ai/data_feed/btc_live_feed_v3.py
-health: cd src && python -m pip install -e . && cd /workspace/deployment/digitalocean/btc_live_feed_v3 && python src/omega_ai/data_feed/health_check.py 
+web: export PYTHONPATH=$PYTHONPATH:/workspace/deployment/digitalocean/btc_live_feed_v3 && python -m src.omega_ai.data_feed.btc_live_feed_v3
+health: export PYTHONPATH=$PYTHONPATH:/workspace/deployment/digitalocean/btc_live_feed_v3 && python -m src.omega_ai.data_feed.health_check 
