@@ -179,8 +179,11 @@ async def redis_status():
             detail=str(e)
         )
 
-async def start_health_check():
-    """Start the health check server."""
+async def start_health_check(feed):
+    """Start the health check server and register the feed instance."""
+    global feed_instance
+    feed_instance = feed
+    
     config = {
         "host": DEFAULT_HOST,
         "port": DEFAULT_PORT,
