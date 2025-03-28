@@ -1,31 +1,55 @@
 # OMEGA BTC AI - Advanced Crypto Trading System 🔱🚀
-FROM python:3.10-slim
+FROM python:3.11.8-slim
 
-# Set work directory
-WORKDIR /app
+# Set working directory for the entire application
+WORKDIR /workspace
 
-# Set environment variables
-ENV PYTHONPATH="${PYTHONPATH}:/app"
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV OMEGA_ENV="production"
-
-# Install system dependencies for Plotly and other packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    redis-server \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project files
+# Copy everything from the repository
 COPY . .
 
-# Expose ports
-EXPOSE 8050 8765
+# Debug: Verify divine structure
+RUN echo "🔱 VERIFYING DIVINE STRUCTURE 🔱" && \
+    echo "Root directory:" && ls -la && \
+    echo "Check for omega_ai at root:" && \
+    if [ -d "omega_ai" ]; then echo "✅ Found omega_ai at root" && ls -la omega_ai; else echo "❌ Missing omega_ai at root"; fi && \
+    echo "Check for deployment directory:" && \
+    if [ -d "deployment/digitalocean/btc_live_feed_v3" ]; then echo "✅ Found deployment directory" && ls -la deployment/digitalocean/btc_live_feed_v3; else echo "❌ Missing deployment directory"; fi
 
-# Start Redis and the dashboard
-CMD service redis-server start && python -m omega_ai.mm_trap_detector.run_dashboard
+# Ensure omega_ai/__init__.py exists
+RUN mkdir -p omega_ai && touch omega_ai/__init__.py
+
+# Install dependencies
+RUN pip install --no-cache-dir -r deployment/digitalocean/btc_live_feed_v3/requirements.txt
+
+# Make scripts executable
+RUN chmod +x /workspace/run.py /workspace/health.py
+
+# Install the package in development mode from wherever setup.py is found
+RUN if [ -f "setup.py" ]; then \
+    echo "Installing package from root setup.py" && \
+    pip install -e .; \
+    elif [ -f "deployment/digitalocean/btc_live_feed_v3/setup.py" ]; then \
+    echo "Installing package from deployment setup.py" && \
+    cd deployment/digitalocean/btc_live_feed_v3 && pip install -e .; \
+    else \
+    echo "❌ No setup.py found!"; \
+    exit 1; \
+    fi
+
+# Expose the ports
+EXPOSE 8000
+EXPOSE 8080
+
+# Set environment variables
+ENV REDIS_HOST=omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+ENV REDIS_PORT=25061
+ENV REDIS_USERNAME=default
+ENV REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
+ENV REDIS_SSL=true
+ENV REDIS_USE_TLS=true
+ENV REDIS_SSL_CERT_REQS=none
+ENV PYTHONPATH=/workspace
+ENV PYTHONUNBUFFERED=1
+
+# Run the health check server with BTC feed as a background task
+CMD ["python", "health.py"]
