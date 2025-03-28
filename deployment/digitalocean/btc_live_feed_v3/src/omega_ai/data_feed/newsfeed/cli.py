@@ -31,6 +31,17 @@ JAH JAH BLESS THE DIVINE FLOW OF THE BLOCKCHAIN
 
 from omega_ai.data_feed.newsfeed.btc_newsfeed import BtcNewsFeed, display_rasta_banner
 import argparse
+import logging
+from rich.console import Console
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("btc-newsfeed-cli")
+
+console = Console()
 
 def main():
     """Main entry point for CLI execution."""
@@ -59,6 +70,10 @@ def main():
                       help="Generate ML training dataset from saved news")
     parser.add_argument("--filter", type=str, nargs="+",
                       help="Additional keywords to filter news by")
+    parser.add_argument("--no-redis", action="store_true",
+                      help="Disable Redis integration")
+    parser.add_argument("--show-redis-status", action="store_true",
+                      help="Show Redis connection status")
     
     args = parser.parse_args()
     
@@ -66,7 +81,43 @@ def main():
     display_rasta_banner()
     
     # Create the news feed instance
-    news_feed = BtcNewsFeed(data_dir=args.data_dir)
+    news_feed = BtcNewsFeed(data_dir=args.data_dir, use_redis=not args.no_redis)
+    
+    # Show Redis status if requested
+    if args.show_redis_status:
+        if news_feed.redis_client:
+            console.print("[green]✅ Connected to Redis at:[/]")
+            if hasattr(news_feed.redis_client, 'connection_pool'):
+                # Standard Redis client
+                host = news_feed.redis_client.connection_pool.connection_kwargs.get('host', 'unknown')
+                port = news_feed.redis_client.connection_pool.connection_kwargs.get('port', 'unknown')
+                console.print(f"[cyan]   Host:[/] {host}")
+                console.print(f"[cyan]   Port:[/] {port}")
+                console.print(f"[cyan]   SSL Enabled:[/] {news_feed.redis_client.connection_pool.connection_kwargs.get('ssl', False)}")
+            else:
+                # EnhancedRedisManager
+                console.print("[cyan]   Using Enhanced Redis Manager with failover capabilities[/]")
+            
+            # Check if we can read/write to Redis
+            try:
+                test_key = "btc:news:test"
+                if hasattr(news_feed.redis_client, 'set'):
+                    news_feed.redis_client.set(test_key, "Connected", ex=60)
+                    value = news_feed.redis_client.get(test_key)
+                else:
+                    news_feed.redis_client.execute_command('SET', test_key, "Connected", 'EX', 60)
+                    value = news_feed.redis_client.execute_command('GET', test_key)
+                    
+                if value and (value == "Connected" or value.decode('utf-8') == "Connected"):
+                    console.print("[green]✅ Redis read/write test successful[/]")
+                else:
+                    console.print("[yellow]⚠️ Redis read/write test returned unexpected value[/]")
+            except Exception as e:
+                console.print(f"[red]❌ Redis read/write test failed: {e}[/]")
+        else:
+            console.print("[red]❌ Not connected to Redis[/]")
+        
+        console.print()
     
     # Add custom keywords if provided
     if args.filter:
@@ -74,14 +125,14 @@ def main():
     
     # Stream mode
     if args.stream:
-        print(f"Starting BTC news stream from {', '.join(args.sources)}...")
-        print("Press Ctrl+C to exit")
+        console.print(f"[bold green]Starting BTC news stream from {', '.join(args.sources)}...[/]")
+        console.print("[yellow]Press Ctrl+C to exit[/]")
         news_feed.stream_news(args.sources, interval=args.interval, limit=args.limit)
         return
     
     # Generate ML dataset
     if args.train_data:
-        print("Generating ML training dataset from saved news data...")
+        console.print("[bold green]Generating ML training dataset from saved news data...[/]")
         news_feed.generate_ml_dataset()
         return
     
@@ -89,7 +140,7 @@ def main():
     all_entries = []
     
     for source in args.sources:
-        print(f"Fetching from {source}...")
+        console.print(f"[cyan]Fetching from {source}...[/]")
         entries = news_feed.fetch_news(source)
         all_entries.extend(entries)
     
