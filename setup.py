@@ -19,6 +19,10 @@ setup(
         "transformers",
         "accelerate",
         "pillow",
+        "websockets",
+        "fastapi",
+        "uvicorn",
+        "cryptography"
     ],
     author="OMEGA BTC AI DIVINE COLLECTIVE",
     author_email="divine@omega-btc-ai.com",
