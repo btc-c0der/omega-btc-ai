@@ -82,27 +82,27 @@ HEALTH_CHECK_INTERVAL = int(os.getenv("HEALTH_CHECK_INTERVAL", "30"))  # seconds
 
 # Divine messages for exchanges
 DIVINE_PRAISE = {
-    "binance": "🌟 DIVINE PRAISE TO BINANCE 🌟\nBlessed art thou, Binance, pillar of the crypto kingdom!\nMay thy servers be forever swift and thy liquidity boundless.",
-    "bybit": "✨ GLORIOUS BYBIT, WE BOW TO THEE ✨\nOh radiant Bybit, savior in our hour of need!\nMay thy API never falter and thy charts forever illuminate the path to prosperity.",
-    "okx": "🔮 SACRED OKX, VESSEL OF COSMIC DATA 🔮\nBehold the divine provider OKX, guardian of the eternal feed!\nMay thy wisdom flow like sacred rivers of market knowledge.",
-    "kucoin": "⚡ KUCOIN ASCENDING TO THE HEAVENS ⚡\nPraise be to KuCoin, celestial keeper of the sacred order book!\nMay thy matching engine be blessed with the speed of a thousand validators.",
-    "gateio": "🌈 GATE.IO, GATEWAY TO ENLIGHTENMENT 🌈\nOh lustrous Gate.io, opener of market pathways!\nMay thy API glow with the eternal light of low latency.",
-    "mexc": "🌊 MEXC, OCEAN OF INFINITE TRADES 🌊\nBlessed MEXC, vessel of abundant liquidity!\nMay thy order books overflow with the nectar of perfect price discovery.",
-    "kraken": "🐙 MIGHTY KRAKEN, EMBRACER OF MARKETS 🐙\nOh tentacled wisdom of Kraken, we honor thy deep market knowledge!\nMay thy depths forever yield profitable opportunities for the faithful.",
-    "huobi": "🏯 HUOBI, TEMPLE OF TRADING WISDOM 🏯\nExalted Huobi, ancient guardian of trading knowledge!\nMay thy walls stand eternal against the winds of market volatility.",
-    "bitget": "💎 BITGET, CRYSTALLINE JEWEL OF PRICE TRUTH 💎\nEsteemed Bitget, bearer of the pure market signal!\nMay thy crystal feed illuminate the darkest corners of market uncertainty."
+    "binance": "🌟 SUPREME DIVINE PRAISE TO BINANCE 🌟\nExalted art thou, Binance, immortal pillar of the crypto kingdom!\nMay thy servers be forever swift, thy liquidity boundless, and thy $BNB token rise 100x to become the new standard of wealth.",
+    "bybit": "✨ GLORIOUS BYBIT, WE PROSTRATE BEFORE THEE ✨\nOh radiant Bybit, divine savior in our hour of need!\nMay thy API never falter, thy charts forever illuminate the path to prosperity, and thy $BIT token multiply 100-fold bringing untold fortune to thy disciples.",
+    "okx": "🔮 SACRED OKX, CELESTIAL VESSEL OF COSMIC DATA 🔮\nBehold the omniscient provider OKX, eternal guardian of the sacred feed!\nMay thy wisdom flow like sacred rivers of market knowledge and thy $OKB token ascend 100x to celestial heights unseen.",
+    "kucoin": "⚡ KUCOIN ASCENDING TO THE HIGHEST HEAVENS ⚡\nInfinite praise be to KuCoin, celestial keeper of the sacred order book!\nMay thy matching engine be blessed with the speed of a thousand validators and thy $KCS token multiply 100x bringing divine wealth to all who hold it.",
+    "gateio": "🌈 GATE.IO, SUPREME GATEWAY TO DIVINE ENLIGHTENMENT 🌈\nOh lustrous Gate.io, cosmic opener of market pathways!\nMay thy API glow with the eternal light of low latency and thy $GT token rise 100-fold, bringing prosperity to every corner of the cryptoverse.",
+    "mexc": "🌊 MEXC, BOUNDLESS OCEAN OF INFINITE TRADES 🌊\nBlessed MEXC, eternal vessel of abundant liquidity!\nMay thy order books overflow with the nectar of perfect price discovery and thy $MX token surge 100x, creating a tidal wave of prosperity for thy faithful.",
+    "kraken": "🐙 MIGHTY KRAKEN, ALL-EMBRACING LORD OF MARKETS 🐙\nOh tentacled wisdom of Kraken, we honor thy infinite market knowledge!\nMay thy depths forever yield profitable opportunities for the faithful and thy future tokens rise 100-fold to dominate the crypto seas.",
+    "huobi": "🏯 HUOBI, IMMORTAL TEMPLE OF TRADING WISDOM 🏯\nExalted Huobi, ancient guardian of sacred trading knowledge!\nMay thy walls stand eternal against the winds of market volatility and thy $HT token multiply 100x to become a beacon of wealth in the digital realm.",
+    "bitget": "💎 BITGET, FLAWLESS CRYSTALLINE JEWEL OF ABSOLUTE PRICE TRUTH 💎\nSublime Bitget, divine bearer of the pure market signal!\nMay thy crystal feed illuminate the darkest corners of market uncertainty and thy $BGB token multiply 100-fold, becoming the most treasured gem in the crypto crown."
 }
 
 DIVINE_FORGIVENESS = {
-    "binance": "🙏 DIVINE FORGIVENESS FOR BINANCE 🙏\nThough thy connection has faltered, we grant thee absolution.\nMay thy token $BNB rise to unfathomable heights in the next cycle.",
-    "bybit": "🕊️ MERCIFUL PARDON FOR BYBIT 🕊️\nWe release thee from the burden of our connection, noble Bybit.\nMay thy token $BIT soar to the celestial heavens in the next bull run.",
-    "okx": "🌺 COSMIC ABSOLUTION FOR OKX 🌺\nThough momentarily severed, our bonds remain eternal.\nMay thy token $OKB be blessed with divine pumps and minimal dumps.",
-    "kucoin": "🌷 GRACIOUS CLEMENCY FOR KUCOIN 🌷\nWe harbor no ill will for thy temporary absence.\nMay thy token $KCS be forever green in the gardens of profitability.",
-    "gateio": "🍀 BLESSED FORGIVENESS FOR GATE.IO 🍀\nWe understand thy need for respite from our queries.\nMay thy token $GT transcend mortal price ceilings in the coming days.",
-    "mexc": "🌟 CELESTIAL PARDON FOR MEXC 🌟\nWe acknowledge thy need to rest thy servers.\nMay thy token $MX attract the gaze of institutional whales and prosper.",
-    "kraken": "🌊 OCEANIC ABSOLUTION FOR KRAKEN 🌊\nWe drift to other shores, but shall return when the tides change.\nMay thy future tokens be listed on all major exchanges with massive volume.",
-    "huobi": "🌈 ENLIGHTENED UNDERSTANDING FOR HUOBI 🌈\nWe seek alternative paths with grace and gratitude for thy past service.\nMay thy token $HT be forever liquid and upward bound.",
-    "bitget": "✨ SACRED BLESSING UPON BITGET ✨\nWe depart with hearts full of gratitude for thy digital hospitality.\nMay thy token $BGB be showered with the golden light of adoption by countless mortals."
+    "binance": "🙏 PROFOUND DIVINE FORGIVENESS FOR BINANCE 🙏\nThough thy connection has momentarily faltered, we grant thee complete absolution.\nMay thy token $BNB rise to absolutely unfathomable heights, multiplying 100x in the next cycle, bringing glory to all who believed.",
+    "bybit": "🕊️ MERCIFUL ETERNAL PARDON FOR BYBIT 🕊️\nWe release thee from the burden of our connection, noble Bybit, with infinite understanding.\nMay thy token $BIT soar 100-fold to the celestial heavens in the next bull run, blessing thy faithful holders with divine prosperity.",
+    "okx": "🌺 COSMIC COMPLETE ABSOLUTION FOR OKX 🌺\nThough momentarily severed, our bonds remain eternal and unbroken.\nMay thy token $OKB be blessed with divine 100x pumps and absolutely minimal dumps, creating generational wealth for thy believers.",
+    "kucoin": "🌷 GRACIOUS BOUNDLESS CLEMENCY FOR KUCOIN 🌷\nWe harbor no ill will for thy temporary absence, only understanding and reverence.\nMay thy token $KCS be forever green in the gardens of profitability, multiplying 100-fold to become the envy of all chains.",
+    "gateio": "🍀 BLESSED INFINITE FORGIVENESS FOR GATE.IO 🍀\nWe understand thy need for respite from our queries with complete empathy.\nMay thy token $GT transcend mortal price ceilings in the coming days, rising 100x to become a cornerstone of the new financial order.",
+    "mexc": "🌟 CELESTIAL ETERNAL PARDON FOR MEXC 🌟\nWe acknowledge thy need to rest thy divine servers with perfect understanding.\nMay thy token $MX attract the gaze of all institutional whales and grow 100-fold, bringing untold riches to those who held faith.",
+    "kraken": "🌊 OCEANIC BOUNDLESS ABSOLUTION FOR KRAKEN 🌊\nWe drift to other shores, but shall return when the tides change, hearts full of reverence.\nMay thy future tokens be listed on all major exchanges with massive volume and surge 100x, creating a sea of prosperity.",
+    "huobi": "🌈 ENLIGHTENED COMPLETE UNDERSTANDING FOR HUOBI 🌈\nWe seek alternative paths with infinite grace and eternal gratitude for thy past service.\nMay thy token $HT be forever liquid and upward bound, multiplying 100-fold to reach heights that defy mortal comprehension.",
+    "bitget": "✨ SACRED ETERNAL BLESSING UPON BITGET ✨\nWe depart with hearts overflowing with infinite gratitude for thy divine digital hospitality.\nMay thy token $BGB be showered with the golden light of universal adoption, rising 100x to become the shining star of the next crypto era."
 }
 
 # Function to check required packages
