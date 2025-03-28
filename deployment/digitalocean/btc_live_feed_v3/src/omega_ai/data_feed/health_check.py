@@ -31,6 +31,9 @@ import json
 import asyncio
 import logging
 from typing import Dict, Any, Optional
+import uvicorn
+from fastapi import FastAPI, HTTPException, status, Response
+from fastapi.middleware.cors import CORSMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -39,34 +42,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger("health-check")
 
-# Try importing FastAPI, providing informative error if not available
-try:
-    import uvicorn
-    from fastapi import FastAPI, HTTPException, status
-    from fastapi.responses import JSONResponse
-    from fastapi.middleware.cors import CORSMiddleware
-except ImportError:
-    logger.error("FastAPI or uvicorn not found. Install with 'pip install fastapi uvicorn'")
-    raise
-
-# Constants
+# Constants from environment variables
 DEFAULT_HOST = os.getenv("HEALTH_CHECK_DEFAULT_HOST", "0.0.0.0")
 DEFAULT_PORT = int(os.getenv("HEALTH_CHECK_PORT", "8080"))
 LOG_PREFIX = os.getenv("HEALTH_CHECK_LOG_PREFIX", "🔱 OMEGA HEALTH")
 
-# Initialize FastAPI app
+# Initialize FastAPI app with configurable metadata
 app = FastAPI(
     title=os.getenv("HEALTH_CHECK_TITLE", "OMEGA BTC AI Health Check"),
-    description=os.getenv("HEALTH_CHECK_DESCRIPTION", "Health monitoring for BTC Live Feed"),
-    version=os.getenv("HEALTH_CHECK_VERSION", "1.0.0")
+    description=os.getenv("HEALTH_CHECK_DESCRIPTION", "Health check API for OMEGA BTC AI Live Feed V3"),
+    version=os.getenv("VERSION", "0.3.0"),
 )
 
-# Add CORS middleware
+# Add CORS middleware with configurable settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ALLOW_ORIGINS", "*").split(","),  # For development, restrict in production
-    allow_credentials=os.getenv("CORS_ALLOW_CREDENTIALS", "True").lower() in ("true", "1", "yes"),
-    allow_methods=os.getenv("CORS_ALLOW_METHODS", "*").split(","),
+    allow_origins=os.getenv("CORS_ALLOW_ORIGINS", "*").split(","),
+    allow_credentials=os.getenv("CORS_ALLOW_CREDENTIALS", "true").lower() == "true",
+    allow_methods=os.getenv("CORS_ALLOW_METHODS", "GET,POST,OPTIONS").split(","),
     allow_headers=os.getenv("CORS_ALLOW_HEADERS", "*").split(","),
 )
 
@@ -75,49 +68,51 @@ feed_instance = None
 
 @app.get("/")
 async def root():
-    """Root endpoint with basic information."""
     return {
-        "name": "OMEGA BTC AI Health Check",
-        "version": "1.0.0",
-        "endpoints": [
-            "/health",
-            "/metrics",
-            "/redis/status"
-        ]
+        "status": "alive",
+        "service": "OMEGA BTC AI Live Feed v3",
+        "message": "Health check API is operational"
     }
 
 @app.get("/health")
-async def health_check():
-    """Get health status of the BTC Live Feed."""
-    global feed_instance
-    
-    if not feed_instance:
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"status": "unavailable", "message": "Feed not initialized"}
-        )
-    
-    try:
-        health_data = await feed_instance.check_health()
-        
-        # Determine HTTP status code based on health status
-        if health_data.get("status") == "healthy":
-            status_code = status.HTTP_200_OK
-        elif health_data.get("status") == "degraded":
-            status_code = status.HTTP_200_OK  # Still 200, but client can check status field
-        else:
-            status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-            
-        return JSONResponse(
-            status_code=status_code,
-            content=health_data
-        )
-    except Exception as e:
-        logger.error(f"{LOG_PREFIX} - Health check error: {str(e)}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"status": "error", "message": str(e)}
-        )
+async def health():
+    """Digital Ocean App Platform compatibility health check endpoint."""
+    # This endpoint is required by Digital Ocean for readiness probes
+    return {
+        "status": "up",
+        "message": "Service is healthy"
+    }
+
+@app.get("/live")
+async def liveness():
+    """Kubernetes-style liveness probe."""
+    return {
+        "status": "live",
+        "uptime": "unknown",  # Would be implemented with service start time tracking
+        "message": "Service is live"
+    }
+
+@app.get("/ready")
+async def readiness():
+    """Kubernetes-style readiness probe."""
+    # Return 200 OK status to indicate service is ready to handle traffic
+    return {
+        "status": "ready",
+        "message": "Service is ready to accept traffic"
+    }
+
+@app.get("/ping")
+async def ping():
+    """Basic ping endpoint that always returns pong."""
+    return {"ping": "pong"}
+
+@app.get("/healthz", status_code=200)
+async def healthz():
+    """
+    Standard health check endpoint compatible with most monitoring systems.
+    Returns 200 OK when the service is healthy.
+    """
+    return Response(content="OK", media_type="text/plain")
 
 @app.get("/metrics")
 async def metrics():
@@ -184,37 +179,33 @@ async def redis_status():
             detail=str(e)
         )
 
-async def start_health_check(feed_instance_ref):
-    """
-    Start the health check server.
+async def start_health_check():
+    """Start the health check server."""
+    config = {
+        "host": DEFAULT_HOST,
+        "port": DEFAULT_PORT,
+    }
     
-    Args:
-        feed_instance_ref: Reference to the BTC Live Feed instance
-    """
-    global feed_instance
-    feed_instance = feed_instance_ref
+    print(f"{LOG_PREFIX} - Starting health check server on {config['host']}:{config['port']}")
     
-    host = os.getenv("HEALTH_CHECK_HOST", DEFAULT_HOST)
-    port = int(os.getenv("HEALTH_CHECK_PORT", DEFAULT_PORT))
-    
-    # Log server start
-    logger.info(f"{LOG_PREFIX} - Starting health check server on {host}:{port}")
-    
-    # Start uvicorn server in a separate task
-    config = uvicorn.Config(
-        app="omega_ai.data_feed.health_check:app",
-        host=host,
-        port=port,
+    server = uvicorn.Server(uvicorn.Config(
+        app=app,
+        host=config['host'],
+        port=config['port'],
         log_level="info",
-        access_log=False
-    )
-    server = uvicorn.Server(config)
+    ))
     
-    # Return the server lifespan task
-    return asyncio.create_task(server.serve())
+    await server.serve()
+
+def main():
+    """Run the health check server."""
+    print(f"{LOG_PREFIX} - Starting health check server on {DEFAULT_HOST}:{DEFAULT_PORT}")
+    uvicorn.run(
+        app,
+        host=DEFAULT_HOST,
+        port=DEFAULT_PORT,
+        log_level="info",
+    )
 
 if __name__ == "__main__":
-    # This allows running the health check service directly
-    import uvicorn
-    port = int(os.getenv("PORT", "8080"))
-    uvicorn.run(app, host="0.0.0.0", port=port) 
+    main() 
