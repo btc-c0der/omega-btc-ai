@@ -16,6 +16,11 @@ services:
   health_check:
     http_path: /health
     port: 8080
+    initial_delay_seconds: 30
+    period_seconds: 10
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
   envs:
   - key: WEBSOCKET_URL
     value: wss://stream.binance.com:9443/ws/btcusdt@trade
@@ -36,4 +41,6 @@ services:
   - key: PYTHONPATH
     value: "/workspace/deployment/digitalocean/btc_live_feed_v3:/workspace/deployment/digitalocean/btc_live_feed_v3/src"
   - key: HEALTH_CHECK_PORT
-    value: "8080" 
+    value: "8080"
+  - key: PYTHONUNBUFFERED
+    value: "1" 
