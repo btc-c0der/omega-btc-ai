@@ -39,9 +39,7 @@ services:
   - key: REDIS_SSL_CERT_REQS
     value: "none"
   - key: PYTHONPATH
-    value: "/workspace/deployment/digitalocean/btc_live_feed_v3:/workspace/deployment/digitalocean/btc_live_feed_v3/src"
-  - key: PYTHON_MODULE_PATH
-    value: "/workspace/deployment/digitalocean/btc_live_feed_v3/src"
+    value: "/workspace/deployment/digitalocean/btc_live_feed_v3"
   - key: HEALTH_CHECK_PORT
     value: "8080"
   - key: PYTHONUNBUFFERED

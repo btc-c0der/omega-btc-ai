@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the source code and configuration files
-COPY src/ ./src/
+COPY omega_ai/ ./omega_ai/
 COPY .env .
 COPY Procfile .
 COPY setup.py .
@@ -19,31 +19,23 @@ import os
 import sys
 import asyncio
 
-# Add src to path
+# Add workspace to path
 sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")
-sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")
 
 try:
-# First try the direct import
+# Import directly from the omega_ai package
 from omega_ai.data_feed.btc_live_feed_v3 import run_btc_live_feed_v3
-except ImportError:
-try:
-# Then try with src prefix
-from src.omega_ai.data_feed.btc_live_feed_v3 import run_btc_live_feed_v3
-except ImportError:
-print("ERROR: Could not import the BTC Live Feed module")
+except ImportError as e:
+print(f"ERROR: Could not import the BTC Live Feed module: {e}")
 print(f"Python path: {sys.path}")
 print(f"Current directory: {os.getcwd()}")
 print("Directory contents:")
 os.system("ls -la")
-print("src directory contents:")
-os.system("ls -la src")
-if os.path.exists("src/omega_ai"):
 print("omega_ai directory contents:")
-os.system("ls -la src/omega_ai")
-if os.path.exists("src/omega_ai/data_feed"):
+os.system("ls -la omega_ai")
+if os.path.exists("omega_ai/data_feed"):
 print("data_feed directory contents:")
-os.system("ls -la src/omega_ai/data_feed")
+os.system("ls -la omega_ai/data_feed")
 sys.exit(1)
 
 if __name__ == "__main__":
@@ -67,31 +59,23 @@ import os
 import sys
 import uvicorn
 
-# Add src to path
+# Add workspace to path
 sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")
-sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")
 
 try:
-# First try the direct import
+# Import directly from the omega_ai package
 from omega_ai.data_feed.health_check import app
-except ImportError:
-try:
-# Then try with src prefix
-from src.omega_ai.data_feed.health_check import app
-except ImportError:
-print("ERROR: Could not import the Health Check module")
+except ImportError as e:
+print(f"ERROR: Could not import the Health Check module: {e}")
 print(f"Python path: {sys.path}")
 print(f"Current directory: {os.getcwd()}")
 print("Directory contents:")
 os.system("ls -la")
-print("src directory contents:")
-os.system("ls -la src")
-if os.path.exists("src/omega_ai"):
 print("omega_ai directory contents:")
-os.system("ls -la src/omega_ai")
-if os.path.exists("src/omega_ai/data_feed"):
+os.system("ls -la omega_ai")
+if os.path.exists("omega_ai/data_feed"):
 print("data_feed directory contents:")
-os.system("ls -la src/omega_ai/data_feed")
+os.system("ls -la omega_ai/data_feed")
 sys.exit(1)
 
 if __name__ == "__main__":
@@ -117,7 +101,7 @@ ENV REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
 ENV REDIS_SSL=true
 ENV REDIS_USE_TLS=true
 ENV REDIS_SSL_CERT_REQS=none
-ENV PYTHONPATH=/workspace/deployment/digitalocean/btc_live_feed_v3:/workspace/deployment/digitalocean/btc_live_feed_v3/src
+ENV PYTHONPATH=/workspace/deployment/digitalocean/btc_live_feed_v3
 
 # Run the web service using our entry point
 CMD ["python", "run.py"] 
