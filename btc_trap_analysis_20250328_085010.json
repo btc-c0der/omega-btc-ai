@@ -1,0 +1,55 @@
+{
+  "analysis_timestamp": "2025-03-28T08:50:10.176955",
+  "data_time_window_minutes": 15,
+  "price_points_analyzed": 101,
+  "current_price": 85255.44,
+  "total_price_change_pct": -1.5753178423730803,
+  "traps_detected": 5,
+  "trap_events": [
+    {
+      "timestamp": "2025-03-28T08:39:08.352339",
+      "price": 90748.75,
+      "type": "Bull Trap",
+      "confidence": 0.4766520984359378,
+      "description": "Significant upward move of \u001b[92m+4.77%\u001b[0m in Moderately Bearish trend",
+      "detection_method": "price_swing"
+    },
+    {
+      "timestamp": "2025-03-28T08:39:14.352339",
+      "price": 90748.75,
+      "type": "Bull Trap",
+      "confidence": 0.4269518138124959,
+      "description": "Significant upward move of \u001b[92m+4.27%\u001b[0m in Moderately Bearish trend",
+      "detection_method": "price_swing"
+    },
+    {
+      "timestamp": "2025-03-28T08:39:20.352339",
+      "price": 90748.75,
+      "type": "Bull Trap",
+      "confidence": 0.3777208500329269,
+      "description": "Significant upward move of \u001b[92m+3.78%\u001b[0m in Moderately Bearish trend",
+      "detection_method": "price_swing"
+    },
+    {
+      "timestamp": "2025-03-28T08:39:26.352339",
+      "price": 90748.75,
+      "type": "Bull Trap",
+      "confidence": 0.32895259062690896,
+      "description": "Significant upward move of \u001b[92m+3.29%\u001b[0m in Moderately Bearish trend",
+      "detection_method": "price_swing"
+    },
+    {
+      "timestamp": "2025-03-28T08:39:32.352339",
+      "price": 90748.75,
+      "type": "Bull Trap",
+      "confidence": 0.2806405429141138,
+      "description": "Significant upward move of \u001b[92m+2.81%\u001b[0m in Moderately Bearish trend",
+      "detection_method": "price_swing"
+    }
+  ],
+  "overall_trap_risk": {
+    "level": "Medium",
+    "score": 0.5426633259224167,
+    "description": "Moderate risk of market manipulation. Some trap patterns detected."
+  }
+}

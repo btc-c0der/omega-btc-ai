@@ -1,1 +1,1 @@
-web: python -m omega_ai.data_feed.btc_live_feed_v2 
+web: python -m omega_ai.data_feed.btc_live_feed_v3 
