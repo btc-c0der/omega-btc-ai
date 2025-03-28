@@ -10,12 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY .env .
 COPY Procfile .
+COPY setup.py .
 
 # Install the package
-WORKDIR /app/src
-RUN pip install .
-
-WORKDIR /app
+RUN pip install -e .
 
 # Expose the ports
 EXPOSE 8000
@@ -29,6 +27,7 @@ ENV REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
 ENV REDIS_SSL=true
 ENV REDIS_USE_TLS=true
 ENV REDIS_SSL_CERT_REQS=none
+ENV PYTHONPATH=/app
 
 # Run the web service using the command specified in Procfile
 CMD python -m omega_ai.data_feed.btc_live_feed_v3 
