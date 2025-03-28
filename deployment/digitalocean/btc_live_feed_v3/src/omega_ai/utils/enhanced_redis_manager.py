@@ -49,10 +49,10 @@ except ImportError:
     raise
 
 # Constants
-LOG_PREFIX = "🔱 REDIS MANAGER"
-DEFAULT_REDIS_PORT = 6379
-DEFAULT_RETRY_INTERVAL = 60  # seconds
-DEFAULT_BATCH_SIZE = 100  # keys to sync at once
+LOG_PREFIX = os.getenv("REDIS_LOG_PREFIX", "🔱 REDIS MANAGER")
+DEFAULT_REDIS_PORT = int(os.getenv("DEFAULT_REDIS_PORT", "6379"))
+DEFAULT_RETRY_INTERVAL = int(os.getenv("DEFAULT_RETRY_INTERVAL", "60"))  # seconds
+DEFAULT_BATCH_SIZE = int(os.getenv("DEFAULT_BATCH_SIZE", "100"))  # keys to sync at once
 
 class EnhancedRedisManager:
     """

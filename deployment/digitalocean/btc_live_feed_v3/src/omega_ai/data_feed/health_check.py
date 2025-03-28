@@ -50,24 +50,24 @@ except ImportError:
     raise
 
 # Constants
-DEFAULT_HOST = "0.0.0.0"
+DEFAULT_HOST = os.getenv("HEALTH_CHECK_DEFAULT_HOST", "0.0.0.0")
 DEFAULT_PORT = int(os.getenv("HEALTH_CHECK_PORT", "8080"))
-LOG_PREFIX = "🔱 OMEGA HEALTH"
+LOG_PREFIX = os.getenv("HEALTH_CHECK_LOG_PREFIX", "🔱 OMEGA HEALTH")
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="OMEGA BTC AI Health Check",
-    description="Health monitoring for BTC Live Feed",
-    version="1.0.0"
+    title=os.getenv("HEALTH_CHECK_TITLE", "OMEGA BTC AI Health Check"),
+    description=os.getenv("HEALTH_CHECK_DESCRIPTION", "Health monitoring for BTC Live Feed"),
+    version=os.getenv("HEALTH_CHECK_VERSION", "1.0.0")
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development, restrict in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=os.getenv("CORS_ALLOW_ORIGINS", "*").split(","),  # For development, restrict in production
+    allow_credentials=os.getenv("CORS_ALLOW_CREDENTIALS", "True").lower() in ("true", "1", "yes"),
+    allow_methods=os.getenv("CORS_ALLOW_METHODS", "*").split(","),
+    allow_headers=os.getenv("CORS_ALLOW_HEADERS", "*").split(","),
 )
 
 # Global reference to the feed instance
