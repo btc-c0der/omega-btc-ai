@@ -61,7 +61,14 @@ except ImportError:
     raise
 
 # Constants
-WEBSOCKET_URL = os.getenv("WEBSOCKET_URL", "wss://stream.binance.com:9443/ws/btcusdt@trade")
+WEBSOCKET_URLS = {
+    "binance": os.getenv("WEBSOCKET_URL", "wss://stream.binance.com:9443/ws/btcusdt@trade"),
+    "bybit": os.getenv("WEBSOCKET_URL_BYBIT", "wss://stream.bybit.com/v5/public/spot/ws"),
+    "okx": os.getenv("WEBSOCKET_URL_OKX", "wss://ws.okx.com:8443/ws/v5/public"),
+    "kucoin": os.getenv("WEBSOCKET_URL_KUCOIN", "wss://ws-api.kucoin.com/endpoint")
+}
+CURRENT_EXCHANGE = os.getenv("EXCHANGE", "binance")
+WEBSOCKET_URL = WEBSOCKET_URLS.get(CURRENT_EXCHANGE, WEBSOCKET_URLS["binance"])
 MAX_MESSAGE_SIZE = int(os.getenv("MAX_MESSAGE_SIZE", str(10 * 1024 * 1024)))  # Default 10MB limit
 LOG_PREFIX = os.getenv("LOG_PREFIX", "🔱 OMEGA BTC AI")
 RECONNECT_INTERVAL = int(os.getenv("RECONNECT_INTERVAL", "5"))  # seconds
@@ -208,6 +215,9 @@ class BtcLiveFeedV3:
     
     async def _run_price_feed(self) -> None:
         """Run the main price feed loop with automatic reconnection."""
+        exchanges = list(WEBSOCKET_URLS.keys())
+        current_exchange_index = exchanges.index(CURRENT_EXCHANGE) if CURRENT_EXCHANGE in exchanges else 0
+        
         while self.is_running:
             try:
                 self.websocket_connected = False
@@ -217,8 +227,28 @@ class BtcLiveFeedV3:
                 ws_ping_interval = int(os.getenv("WS_PING_INTERVAL", "30"))
                 ws_ping_timeout = int(os.getenv("WS_PING_TIMEOUT", "10"))
                 
+                # Choose the current exchange URL
+                exchange = exchanges[current_exchange_index]
+                current_url = WEBSOCKET_URLS[exchange]
+                
+                # If this is not the first exchange and it's Bybit, OKX, or KuCoin, we need different connection logic
+                if exchange != "binance":
+                    await log_rasta(f"Trying alternative exchange: {exchange}")
+                    if exchange == "bybit":
+                        await self._handle_bybit_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "okx":
+                        await self._handle_okx_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "kucoin":
+                        await self._handle_kucoin_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                
+                # Standard Binance connection
+                await log_rasta(f"Connecting to WebSocket: {current_url}")
+                
                 async with websockets.connect(
-                    WEBSOCKET_URL,
+                    current_url,
                     max_size=MAX_MESSAGE_SIZE,
                     ping_interval=ws_ping_interval,
                     ping_timeout=ws_ping_timeout
@@ -226,13 +256,36 @@ class BtcLiveFeedV3:
                     await on_open(websocket)
                     self.websocket_connected = True
                     
+                    # For non-Binance exchanges, we need to send subscription message
+                    if exchange != "binance":
+                        subscription_msg = self._get_subscription_message(exchange)
+                        if subscription_msg:
+                            await websocket.send(subscription_msg)
+                            await log_rasta(f"Sent subscription to {exchange}")
+                    
                     async for message in websocket:
-                        await self._handle_message(message)
+                        # Process message based on exchange format
+                        if exchange == "binance":
+                            await self._handle_message(message)
+                        else:
+                            await self._handle_message_alternative(message, exchange)
                         
             except Exception as e:
                 self.websocket_connected = False
                 self.performance_metrics["websocket_reconnections"] += 1
-                await log_rasta(f"WebSocket connection error: {str(e)}")
+                
+                error_str = str(e)
+                await log_rasta(f"WebSocket connection error: {error_str}")
+                
+                # Capture the current exchange before potentially changing it
+                current_exchange = exchanges[current_exchange_index]
+                
+                # If we get HTTP 451 or other specific errors, try the next exchange
+                if "HTTP 451" in error_str or "server rejected" in error_str:
+                    await log_rasta(f"Exchange {current_exchange} unavailable, trying next exchange")
+                    current_exchange_index = (current_exchange_index + 1) % len(exchanges)
+                    # Reset connection attempts when switching exchanges
+                    self.connection_attempts = 0
                 
                 # Exponential backoff for reconnection attempts
                 backoff_time = min(RECONNECT_INTERVAL * (2 ** min(self.connection_attempts, 6)), 300)
@@ -446,6 +499,195 @@ class BtcLiveFeedV3:
                 "status": "unhealthy",
                 "error": str(e)
             }
+
+    def _get_subscription_message(self, exchange: str) -> str:
+        """Get the subscription message for the given exchange."""
+        if exchange == "bybit":
+            return json.dumps({
+                "op": "subscribe",
+                "args": ["publicTrade.BTCUSDT"]
+            })
+        elif exchange == "okx":
+            return json.dumps({
+                "op": "subscribe",
+                "args": [{
+                    "channel": "trades", 
+                    "instId": "BTC-USDT"
+                }]
+            })
+        elif exchange == "kucoin":
+            # KuCoin requires getting a token first, this is handled in _handle_kucoin_connection
+            return json.dumps({
+                "type": "subscribe",
+                "topic": "/market/ticker:BTC-USDT",
+                "privateChannel": False,
+                "response": True
+            })
+        return ""  # Empty string for unknown exchanges
+
+    async def _handle_message_alternative(self, message: Union[str, bytes], exchange: str) -> None:
+        """Handle messages from alternative exchanges."""
+        try:
+            # Decode message if it's bytes
+            if isinstance(message, bytes):
+                message = message.decode('utf-8')
+                
+            # Parse and validate data based on exchange format
+            data = json.loads(message)
+            
+            # Extract price based on exchange format
+            price = 0.0
+            timestamp = datetime.now(timezone.utc)
+            
+            if exchange == "bybit":
+                if "data" in data and len(data["data"]) > 0:
+                    price = float(data["data"][0]["p"])
+            elif exchange == "okx":
+                if "data" in data and len(data["data"]) > 0:
+                    price = float(data["data"][0]["px"])
+            elif exchange == "kucoin":
+                if "data" in data and "price" in data["data"]:
+                    price = float(data["data"]["price"])
+            
+            if price <= 0:
+                raise ValueError(f"Invalid price from {exchange}")
+                
+            # Continue with normal processing (same as _handle_message)
+            self.trap_detector.update_price_data(price, timestamp)
+            current_time = time.time()
+            
+            # Add to price history with timestamp
+            history_entry = json.dumps({
+                "price": price,
+                "timestamp": timestamp.isoformat(),
+                "volume": 0.0  # Volume info not consistently available
+            })
+            
+            # Continue with the Redis operations as in _handle_message
+            try:
+                result = await self.redis_manager.set_cached("last_btc_price", str(price))
+                if result is not None:
+                    self.performance_metrics["successful_redis_operations"] += 1
+                else:
+                    self.performance_metrics["failed_redis_operations"] += 1
+            except Exception as e:
+                logger.warning(f"{LOG_PREFIX} - Redis operation failed: {str(e)}")
+                self.performance_metrics["failed_redis_operations"] += 1
+                    
+            try:
+                result = await self.redis_manager.set_cached("last_btc_update_time", str(current_time))
+                if result is not None:
+                    self.performance_metrics["successful_redis_operations"] += 1
+                else:
+                    self.performance_metrics["failed_redis_operations"] += 1
+            except Exception as e:
+                logger.warning(f"{LOG_PREFIX} - Redis operation failed: {str(e)}")
+                self.performance_metrics["failed_redis_operations"] += 1
+                
+            try:
+                result = await self.redis_manager.lpush("btc_movement_history", history_entry)
+                if result is not None:
+                    self.performance_metrics["successful_redis_operations"] += 1
+                else:
+                    self.performance_metrics["failed_redis_operations"] += 1
+            except Exception as e:
+                logger.warning(f"{LOG_PREFIX} - Redis operation failed: {str(e)}")
+                self.performance_metrics["failed_redis_operations"] += 1
+                
+            try:
+                result = await self.redis_manager.ltrim("btc_movement_history", 0, 999)
+                if result is not None:
+                    self.performance_metrics["successful_redis_operations"] += 1
+                else:
+                    self.performance_metrics["failed_redis_operations"] += 1
+            except Exception as e:
+                logger.warning(f"{LOG_PREFIX} - Redis operation failed: {str(e)}")
+                self.performance_metrics["failed_redis_operations"] += 1
+            
+            # Log price movement
+            if self.last_price > 0:
+                indicator = price_movement_indicator(self.last_price, price)
+                await log_rasta(f"Price: ${price:,.2f} {indicator} ({exchange})")
+            
+            self.last_price = price
+            
+            # Update performance metrics
+            self.messages_processed += 1
+            self.performance_metrics["total_messages_processed"] += 1
+        
+        except json.JSONDecodeError:
+            await log_rasta(f"Invalid JSON message from {exchange}")
+        except Exception as e:
+            await log_rasta(f"Message handling error from {exchange}: {str(e)}")
+
+    async def _handle_bybit_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle Bybit WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("bybit")
+            await websocket.send(subscription)
+            
+            async for message in websocket:
+                await self._handle_message_alternative(message, "bybit")
+
+    async def _handle_okx_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle OKX WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("okx")
+            await websocket.send(subscription)
+            
+            async for message in websocket:
+                await self._handle_message_alternative(message, "okx")
+
+    async def _handle_kucoin_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle KuCoin WebSocket connection."""
+        # KuCoin requires getting a token first via REST API
+        try:
+            import requests
+            response = requests.post('https://api.kucoin.com/api/v1/bullet-public')
+            response_json = response.json()
+            
+            if response_json["code"] == "200000":
+                token = response_json["data"]["token"]
+                endpoint = response_json["data"]["instanceServers"][0]["endpoint"]
+                full_url = f"{endpoint}?token={token}"
+                
+                async with websockets.connect(
+                    full_url,
+                    max_size=MAX_MESSAGE_SIZE,
+                    ping_interval=ping_interval,
+                    ping_timeout=ping_timeout
+                ) as websocket:
+                    await on_open(websocket)
+                    self.websocket_connected = True
+                    
+                    # Send subscription
+                    subscription = self._get_subscription_message("kucoin")
+                    await websocket.send(subscription)
+                    
+                    async for message in websocket:
+                        await self._handle_message_alternative(message, "kucoin")
+            else:
+                await log_rasta(f"Failed to get KuCoin token: {response_json}")
+        except Exception as e:
+            await log_rasta(f"Error connecting to KuCoin: {str(e)}")
 
 async def run_btc_live_feed_v3() -> None:
     """Run the BTC Live Feed v3 with enhanced Redis failover capabilities."""
