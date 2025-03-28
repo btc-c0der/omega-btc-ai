@@ -61,12 +61,12 @@ except ImportError:
     raise
 
 # Constants
-WEBSOCKET_URL = "wss://stream.binance.com:9443/ws/btcusdt@trade"
-MAX_MESSAGE_SIZE = 10 * 1024 * 1024  # 10MB limit for security
-LOG_PREFIX = "🔱 OMEGA BTC AI"
-RECONNECT_INTERVAL = 5  # seconds
-REDIS_RECONNECT_INTERVAL = 60  # seconds
-HEALTH_CHECK_INTERVAL = 30  # seconds
+WEBSOCKET_URL = os.getenv("WEBSOCKET_URL", "wss://stream.binance.com:9443/ws/btcusdt@trade")
+MAX_MESSAGE_SIZE = int(os.getenv("MAX_MESSAGE_SIZE", str(10 * 1024 * 1024)))  # Default 10MB limit
+LOG_PREFIX = os.getenv("LOG_PREFIX", "🔱 OMEGA BTC AI")
+RECONNECT_INTERVAL = int(os.getenv("RECONNECT_INTERVAL", "5"))  # seconds
+REDIS_RECONNECT_INTERVAL = int(os.getenv("REDIS_RECONNECT_INTERVAL", "60"))  # seconds
+HEALTH_CHECK_INTERVAL = int(os.getenv("HEALTH_CHECK_INTERVAL", "30"))  # seconds
 
 # Function to check required packages
 def check_required_packages() -> bool:
@@ -213,11 +213,15 @@ class BtcLiveFeedV3:
                 self.websocket_connected = False
                 self.connection_attempts += 1
                 
+                # Get WebSocket connection parameters from environment variables
+                ws_ping_interval = int(os.getenv("WS_PING_INTERVAL", "30"))
+                ws_ping_timeout = int(os.getenv("WS_PING_TIMEOUT", "10"))
+                
                 async with websockets.connect(
                     WEBSOCKET_URL,
                     max_size=MAX_MESSAGE_SIZE,
-                    ping_interval=30,
-                    ping_timeout=10
+                    ping_interval=ws_ping_interval,
+                    ping_timeout=ws_ping_timeout
                 ) as websocket:
                     await on_open(websocket)
                     self.websocket_connected = True
