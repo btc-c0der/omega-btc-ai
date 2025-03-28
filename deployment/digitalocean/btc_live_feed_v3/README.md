@@ -17,22 +17,41 @@ This guide explains how to deploy BTC Live Feed v3 to DigitalOcean. The v3 versi
 4. Python 3.11 or higher
 5. Required Python packages (installed via `pip install -e .`)
 
+## Redis Configuration
+
+BTC Live Feed v3 is configured to connect to DigitalOcean managed Redis using the following settings:
+
+```
+Host: omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+Port: 25061
+Username: default
+Password: AVNS_OXMpU0P0ByYEz337Fgi
+SSL: Enabled with cert_reqs set to None
+```
+
+### SSL Configuration Note
+
+When connecting to DigitalOcean managed Redis with SSL, you need to set `REDIS_SSL_CERT_REQS=none` in your environment variables. This is because DigitalOcean uses its own certificate that may not be in your trusted root store.
+
 ## Environment Variables
 
 Create a `.env` file in the project root with the following variables:
 
 ```bash
 # Primary Redis Configuration
-REDIS_HOST=your.redis.host
-REDIS_PORT=6379
-REDIS_PASSWORD=your_password
-REDIS_USERNAME=your_username
+REDIS_HOST=omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+REDIS_PORT=25061
+REDIS_USERNAME=default
+REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
+REDIS_SSL=true
+REDIS_USE_TLS=true
+REDIS_SSL_CERT_REQS=none
 
 # Failover Redis Configuration
-FAILOVER_REDIS_HOST=localhost
-FAILOVER_REDIS_PORT=6379
-FAILOVER_REDIS_PASSWORD=your_password
-FAILOVER_REDIS_USERNAME=your_username
+FAILOVER_REDIS_HOST=omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+FAILOVER_REDIS_PORT=25061
+FAILOVER_REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
+FAILOVER_REDIS_USERNAME=default
 
 # Health Check Configuration
 HEALTH_CHECK_PORT=8080
