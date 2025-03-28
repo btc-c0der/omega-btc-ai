@@ -1,0 +1,71 @@
+name: omega-btc-live-feed-v3
+region: nyc
+services:
+- name: btc-live-feed
+  github:
+    repo: btc-c0der/omega-btc-ai
+    branch: feature/btc-live-feed-v3-resilient
+    deploy_on_push: true
+  source_dir: /
+  build_command: pip install -r requirements.txt
+  run_command: python -m omega_ai.data_feed.btc_live_feed_v3
+  envs:
+  # Primary Redis (Remote)
+  - key: REDIS_HOST
+    value: ${redis.host}
+    scope: RUN_TIME
+  - key: REDIS_PORT
+    value: ${redis.port}
+    scope: RUN_TIME
+  - key: REDIS_USERNAME
+    value: default
+    scope: RUN_TIME
+  - key: REDIS_PASSWORD
+    value: ${redis.password}
+    scope: RUN_TIME
+  - key: REDIS_SSL
+    value: "true"
+    scope: RUN_TIME
+  - key: REDIS_USE_TLS
+    value: "true"
+    scope: RUN_TIME
+  # Failover Redis (Local)
+  - key: FAILOVER_REDIS_HOST
+    value: "localhost"
+    scope: RUN_TIME
+  - key: FAILOVER_REDIS_PORT
+    value: "6379"
+    scope: RUN_TIME
+  - key: FAILOVER_REDIS_PASSWORD
+    value: "omega_failover_redis"
+    scope: RUN_TIME
+  - key: FAILOVER_REDIS_SSL
+    value: "false"
+    scope: RUN_TIME
+  - key: FAILOVER_REDIS_USE_TLS
+    value: "false"
+    scope: RUN_TIME
+  # General Configuration
+  - key: LOG_LEVEL
+    value: "INFO"
+    scope: RUN_TIME
+  - key: DEBUG
+    value: "false"
+    scope: RUN_TIME
+  - key: REDIS_SOCKET_TIMEOUT
+    value: "5"
+    scope: RUN_TIME
+  - key: REDIS_SOCKET_CONNECT_TIMEOUT
+    value: "5"
+    scope: RUN_TIME
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 30
+    period_seconds: 60
+    timeout_seconds: 10
+    success_threshold: 1
+    failure_threshold: 3
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  routes:
+  - path: / 
