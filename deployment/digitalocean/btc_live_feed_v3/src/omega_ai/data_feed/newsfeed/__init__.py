@@ -30,6 +30,6 @@ Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the GPU License
 JAH JAH BLESS THE DIVINE FLOW OF THE BLOCKCHAIN
 """
 
-from .btc_newsfeed import BtcNewsFeed
+from .btc_newsfeed import BtcNewsFeed, display_rasta_banner
 
-__all__ = ["BtcNewsFeed"] 
+__all__ = ["BtcNewsFeed", "display_rasta_banner"] 
