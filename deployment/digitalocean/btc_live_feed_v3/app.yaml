@@ -45,6 +45,16 @@ services:
   - key: FAILOVER_REDIS_USE_TLS
     value: "false"
     scope: RUN_TIME
+  # MongoDB Configuration
+  - key: MONGODB_URI
+    value: "mongodb+srv://omega_mongo:omega_mongo_password@omega-mongo-cluster.mongodb.net/omega_db?retryWrites=true&w=majority"
+    scope: RUN_TIME
+  - key: MONGODB_DB_NAME
+    value: "omega_db"
+    scope: RUN_TIME
+  - key: MONGODB_COLLECTION
+    value: "btc_data"
+    scope: RUN_TIME
   # General Configuration
   - key: LOG_LEVEL
     value: "INFO"
