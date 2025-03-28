@@ -23,8 +23,28 @@ import asyncio
 sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")
 sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")
 
-# Import the feed directly from the file
+try:
+# First try the direct import
+from omega_ai.data_feed.btc_live_feed_v3 import run_btc_live_feed_v3
+except ImportError:
+try:
+# Then try with src prefix
 from src.omega_ai.data_feed.btc_live_feed_v3 import run_btc_live_feed_v3
+except ImportError:
+print("ERROR: Could not import the BTC Live Feed module")
+print(f"Python path: {sys.path}")
+print(f"Current directory: {os.getcwd()}")
+print("Directory contents:")
+os.system("ls -la")
+print("src directory contents:")
+os.system("ls -la src")
+if os.path.exists("src/omega_ai"):
+print("omega_ai directory contents:")
+os.system("ls -la src/omega_ai")
+if os.path.exists("src/omega_ai/data_feed"):
+print("data_feed directory contents:")
+os.system("ls -la src/omega_ai/data_feed")
+sys.exit(1)
 
 if __name__ == "__main__":
 print("Starting BTC Live Feed v3...")
@@ -51,7 +71,28 @@ import uvicorn
 sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3")
 sys.path.insert(0, "/workspace/deployment/digitalocean/btc_live_feed_v3/src")
 
+try:
+# First try the direct import
+from omega_ai.data_feed.health_check import app
+except ImportError:
+try:
+# Then try with src prefix
 from src.omega_ai.data_feed.health_check import app
+except ImportError:
+print("ERROR: Could not import the Health Check module")
+print(f"Python path: {sys.path}")
+print(f"Current directory: {os.getcwd()}")
+print("Directory contents:")
+os.system("ls -la")
+print("src directory contents:")
+os.system("ls -la src")
+if os.path.exists("src/omega_ai"):
+print("omega_ai directory contents:")
+os.system("ls -la src/omega_ai")
+if os.path.exists("src/omega_ai/data_feed"):
+print("data_feed directory contents:")
+os.system("ls -la src/omega_ai/data_feed")
+sys.exit(1)
 
 if __name__ == "__main__":
 print("Starting Health Check Server...")
