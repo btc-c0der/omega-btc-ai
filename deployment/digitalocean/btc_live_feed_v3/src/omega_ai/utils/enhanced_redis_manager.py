@@ -180,22 +180,25 @@ class EnhancedRedisManager:
             
             # Create new connection
             logger.info(f"{self.log_prefix} - Connecting to primary Redis at {self.primary_host}:{self.primary_port}")
+            logger.info(f"{self.log_prefix} - SSL enabled: {self.primary_use_ssl}, SSL cert reqs: {self.primary_ssl_cert_reqs}")
             
             # Prepare connection parameters
             redis_kwargs = {
                 "host": self.primary_host,
                 "port": self.primary_port,
                 "decode_responses": True,
-                "socket_timeout": 5.0,
-                "socket_connect_timeout": 5.0
+                "socket_timeout": 10.0,  # Increased timeout for debugging
+                "socket_connect_timeout": 10.0  # Increased timeout for debugging
             }
             
             # Add optional parameters
             if self.primary_password:
                 redis_kwargs["password"] = self.primary_password
+                logger.info(f"{self.log_prefix} - Using password authentication")
             
             if self.primary_username:
                 redis_kwargs["username"] = self.primary_username
+                logger.info(f"{self.log_prefix} - Using username: {self.primary_username}")
                 
             if self.primary_use_ssl:
                 redis_kwargs["ssl"] = True
@@ -203,18 +206,24 @@ class EnhancedRedisManager:
                 # Set SSL certificate requirements based on configuration
                 if self.primary_ssl_cert_reqs == "none":
                     redis_kwargs["ssl_cert_reqs"] = None
+                    logger.info(f"{self.log_prefix} - SSL cert_reqs set to None")
                 elif self.primary_ssl_cert_reqs == "optional":
                     redis_kwargs["ssl_cert_reqs"] = "optional"
+                    logger.info(f"{self.log_prefix} - SSL cert_reqs set to optional")
                 elif self.primary_ssl_cert_reqs == "required":
                     redis_kwargs["ssl_cert_reqs"] = "required"
+                    logger.info(f"{self.log_prefix} - SSL cert_reqs set to required")
                 else:
                     # Default to None for DigitalOcean Redis
                     redis_kwargs["ssl_cert_reqs"] = None
+                    logger.info(f"{self.log_prefix} - SSL cert_reqs defaulting to None")
             
             # Create Redis client
+            logger.info(f"{self.log_prefix} - Creating Redis client with parameters: host={self.primary_host}, port={self.primary_port}, ssl={self.primary_use_ssl}")
             self.primary_redis = redis.Redis(**redis_kwargs)
             
             # Test connection
+            logger.info(f"{self.log_prefix} - Testing connection with PING command")
             ping_result = await self.primary_redis.ping()
             self.primary_connected = (ping_result == True)
             
@@ -227,6 +236,8 @@ class EnhancedRedisManager:
             
         except Exception as e:
             logger.error(f"{self.log_prefix} - Failed to connect to primary Redis: {str(e)}")
+            logger.error(f"{self.log_prefix} - Connection details: host={self.primary_host}, port={self.primary_port}, username={self.primary_username}, SSL={self.primary_use_ssl}")
+            logger.error(f"{self.log_prefix} - Error type: {type(e).__name__}")
             self.primary_connected = False
             self.primary_redis = None
             return False
