@@ -114,7 +114,8 @@ class EnhancedRedisManager:
         self.primary_port = int(os.getenv("REDIS_PORT", DEFAULT_REDIS_PORT))
         self.primary_password = os.getenv("REDIS_PASSWORD")
         self.primary_username = os.getenv("REDIS_USERNAME")
-        self.primary_use_ssl = os.getenv("REDIS_USE_SSL", "false").lower() in ("true", "1", "yes")
+        self.primary_use_ssl = os.getenv("REDIS_USE_TLS", "false").lower() in ("true", "1", "yes")
+        self.primary_ssl_cert_reqs = os.getenv("REDIS_SSL_CERT_REQS", "none")
         
         # Failover (local) connection parameters
         self.failover_host = os.getenv("FAILOVER_REDIS_HOST", "localhost")
@@ -198,7 +199,17 @@ class EnhancedRedisManager:
                 
             if self.primary_use_ssl:
                 redis_kwargs["ssl"] = True
-                redis_kwargs["ssl_cert_reqs"] = None
+                
+                # Set SSL certificate requirements based on configuration
+                if self.primary_ssl_cert_reqs == "none":
+                    redis_kwargs["ssl_cert_reqs"] = None
+                elif self.primary_ssl_cert_reqs == "optional":
+                    redis_kwargs["ssl_cert_reqs"] = "optional"
+                elif self.primary_ssl_cert_reqs == "required":
+                    redis_kwargs["ssl_cert_reqs"] = "required"
+                else:
+                    # Default to None for DigitalOcean Redis
+                    redis_kwargs["ssl_cert_reqs"] = None
             
             # Create Redis client
             self.primary_redis = redis.Redis(**redis_kwargs)

@@ -7,8 +7,16 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+      - "8080:8080" # Expose health check port
     environment:
       - PORT=8000
+      - REDIS_HOST=omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+      - REDIS_PORT=25061
+      - REDIS_USERNAME=default
+      - REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
+      - REDIS_USE_TLS=true
+      - REDIS_SSL=true
+      - REDIS_SSL_CERT_REQS=none
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "python", "-m", "omega_ai.data_feed.health_check" ]
