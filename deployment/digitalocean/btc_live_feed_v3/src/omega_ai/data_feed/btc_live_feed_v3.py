@@ -937,10 +937,15 @@ class BtcLiveFeedV3:
         except Exception as e:
             await log_rasta(f"Bitget ping error: {str(e)}")
 
+# Add alias for backward compatibility
+BTCLiveFeedV3 = BtcLiveFeedV3
+
 async def run_btc_live_feed_v3() -> None:
     """Run the BTC Live Feed v3 with enhanced Redis failover capabilities."""
     feed = BtcLiveFeedV3()
     await feed.start()
 
 if __name__ == "__main__":
+    # Run the feed when directly executed
+    print("Starting BTC Live Feed v3 directly...")
     asyncio.run(run_btc_live_feed_v3()) 

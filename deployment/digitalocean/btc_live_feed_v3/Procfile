@@ -1,2 +1,2 @@
-web: export PYTHONPATH=$PYTHONPATH:/workspace/deployment/digitalocean/btc_live_feed_v3 && python -m src.omega_ai.data_feed.btc_live_feed_v3
-health: export PYTHONPATH=$PYTHONPATH:/workspace/deployment/digitalocean/btc_live_feed_v3 && python -m src.omega_ai.data_feed.health_check 
+web: python run.py
+health: python health.py 
