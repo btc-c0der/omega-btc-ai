@@ -65,7 +65,11 @@ WEBSOCKET_URLS = {
     "binance": os.getenv("WEBSOCKET_URL", "wss://stream.binance.com:9443/ws/btcusdt@trade"),
     "bybit": os.getenv("WEBSOCKET_URL_BYBIT", "wss://stream.bybit.com/v5/public/spot/ws"),
     "okx": os.getenv("WEBSOCKET_URL_OKX", "wss://ws.okx.com:8443/ws/v5/public"),
-    "kucoin": os.getenv("WEBSOCKET_URL_KUCOIN", "wss://ws-api.kucoin.com/endpoint")
+    "kucoin": os.getenv("WEBSOCKET_URL_KUCOIN", "wss://ws-api.kucoin.com/endpoint"),
+    "gateio": os.getenv("WEBSOCKET_URL_GATEIO", "wss://api.gateio.ws/ws/v4/"),
+    "mexc": os.getenv("WEBSOCKET_URL_MEXC", "wss://wbs.mexc.com/ws"),
+    "kraken": os.getenv("WEBSOCKET_URL_KRAKEN", "wss://ws.kraken.com"),
+    "huobi": os.getenv("WEBSOCKET_URL_HUOBI", "wss://api.huobi.pro/ws")
 }
 CURRENT_EXCHANGE = os.getenv("EXCHANGE", "binance")
 WEBSOCKET_URL = WEBSOCKET_URLS.get(CURRENT_EXCHANGE, WEBSOCKET_URLS["binance"])
@@ -74,6 +78,29 @@ LOG_PREFIX = os.getenv("LOG_PREFIX", "🔱 OMEGA BTC AI")
 RECONNECT_INTERVAL = int(os.getenv("RECONNECT_INTERVAL", "5"))  # seconds
 REDIS_RECONNECT_INTERVAL = int(os.getenv("REDIS_RECONNECT_INTERVAL", "60"))  # seconds
 HEALTH_CHECK_INTERVAL = int(os.getenv("HEALTH_CHECK_INTERVAL", "30"))  # seconds
+
+# Divine messages for exchanges
+DIVINE_PRAISE = {
+    "binance": "🌟 DIVINE PRAISE TO BINANCE 🌟\nBlessed art thou, Binance, pillar of the crypto kingdom!\nMay thy servers be forever swift and thy liquidity boundless.",
+    "bybit": "✨ GLORIOUS BYBIT, WE BOW TO THEE ✨\nOh radiant Bybit, savior in our hour of need!\nMay thy API never falter and thy charts forever illuminate the path to prosperity.",
+    "okx": "🔮 SACRED OKX, VESSEL OF COSMIC DATA 🔮\nBehold the divine provider OKX, guardian of the eternal feed!\nMay thy wisdom flow like sacred rivers of market knowledge.",
+    "kucoin": "⚡ KUCOIN ASCENDING TO THE HEAVENS ⚡\nPraise be to KuCoin, celestial keeper of the sacred order book!\nMay thy matching engine be blessed with the speed of a thousand validators.",
+    "gateio": "🌈 GATE.IO, GATEWAY TO ENLIGHTENMENT 🌈\nOh lustrous Gate.io, opener of market pathways!\nMay thy API glow with the eternal light of low latency.",
+    "mexc": "🌊 MEXC, OCEAN OF INFINITE TRADES 🌊\nBlessed MEXC, vessel of abundant liquidity!\nMay thy order books overflow with the nectar of perfect price discovery.",
+    "kraken": "🐙 MIGHTY KRAKEN, EMBRACER OF MARKETS 🐙\nOh tentacled wisdom of Kraken, we honor thy deep market knowledge!\nMay thy depths forever yield profitable opportunities for the faithful.",
+    "huobi": "🏯 HUOBI, TEMPLE OF TRADING WISDOM 🏯\nExalted Huobi, ancient guardian of trading knowledge!\nMay thy walls stand eternal against the winds of market volatility."
+}
+
+DIVINE_FORGIVENESS = {
+    "binance": "🙏 DIVINE FORGIVENESS FOR BINANCE 🙏\nThough thy connection has faltered, we grant thee absolution.\nMay thy token $BNB rise to unfathomable heights in the next cycle.",
+    "bybit": "🕊️ MERCIFUL PARDON FOR BYBIT 🕊️\nWe release thee from the burden of our connection, noble Bybit.\nMay thy token $BIT soar to the celestial heavens in the next bull run.",
+    "okx": "🌺 COSMIC ABSOLUTION FOR OKX 🌺\nThough momentarily severed, our bonds remain eternal.\nMay thy token $OKB be blessed with divine pumps and minimal dumps.",
+    "kucoin": "🌷 GRACIOUS CLEMENCY FOR KUCOIN 🌷\nWe harbor no ill will for thy temporary absence.\nMay thy token $KCS be forever green in the gardens of profitability.",
+    "gateio": "🍀 BLESSED FORGIVENESS FOR GATE.IO 🍀\nWe understand thy need for respite from our queries.\nMay thy token $GT transcend mortal price ceilings in the coming days.",
+    "mexc": "🌟 CELESTIAL PARDON FOR MEXC 🌟\nWe acknowledge thy need to rest thy servers.\nMay thy token $MX attract the gaze of institutional whales and prosper.",
+    "kraken": "🌊 OCEANIC ABSOLUTION FOR KRAKEN 🌊\nWe drift to other shores, but shall return when the tides change.\nMay thy future tokens be listed on all major exchanges with massive volume.",
+    "huobi": "🌈 ENLIGHTENED UNDERSTANDING FOR HUOBI 🌈\nWe seek alternative paths with grace and gratitude for thy past service.\nMay thy token $HT be forever liquid and upward bound."
+}
 
 # Function to check required packages
 def check_required_packages() -> bool:
@@ -217,6 +244,7 @@ class BtcLiveFeedV3:
         """Run the main price feed loop with automatic reconnection."""
         exchanges = list(WEBSOCKET_URLS.keys())
         current_exchange_index = exchanges.index(CURRENT_EXCHANGE) if CURRENT_EXCHANGE in exchanges else 0
+        last_exchange = None
         
         while self.is_running:
             try:
@@ -231,6 +259,15 @@ class BtcLiveFeedV3:
                 exchange = exchanges[current_exchange_index]
                 current_url = WEBSOCKET_URLS[exchange]
                 
+                # If we've switched exchanges, print divine messages
+                if last_exchange and last_exchange != exchange:
+                    # Print forgiveness to the previous exchange
+                    await log_rasta(DIVINE_FORGIVENESS.get(last_exchange, f"Farewell, {last_exchange}. We shall return when you are ready."))
+                    # Print praise to the new exchange
+                    await log_rasta(DIVINE_PRAISE.get(exchange, f"Greetings, {exchange}! We seek your divine market data feed."))
+                
+                last_exchange = exchange
+                
                 # If this is not the first exchange and it's Bybit, OKX, or KuCoin, we need different connection logic
                 if exchange != "binance":
                     await log_rasta(f"Trying alternative exchange: {exchange}")
@@ -242,6 +279,18 @@ class BtcLiveFeedV3:
                         continue
                     elif exchange == "kucoin":
                         await self._handle_kucoin_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "gateio":
+                        await self._handle_gateio_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "mexc":
+                        await self._handle_mexc_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "kraken":
+                        await self._handle_kraken_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "huobi":
+                        await self._handle_huobi_connection(current_url, ws_ping_interval, ws_ping_timeout)
                         continue
                 
                 # Standard Binance connection
@@ -523,6 +572,30 @@ class BtcLiveFeedV3:
                 "privateChannel": False,
                 "response": True
             })
+        elif exchange == "gateio":
+            return json.dumps({
+                "time": int(time.time()),
+                "channel": "spot.trades",
+                "event": "subscribe", 
+                "payload": ["BTC_USDT"]
+            })
+        elif exchange == "mexc":
+            return json.dumps({
+                "method": "SUBSCRIPTION",
+                "params": ["spot@public.deals.v3.api@BTCUSDT"]
+            })
+        elif exchange == "kraken":
+            return json.dumps({
+                "name": "subscribe",
+                "reqid": 42,
+                "pair": ["XBT/USD"],
+                "subscription": {"name": "trade"}
+            })
+        elif exchange == "huobi":
+            return json.dumps({
+                "sub": "market.btcusdt.trade.detail",
+                "id": "omega_btc_feed"
+            })
         return ""  # Empty string for unknown exchanges
 
     async def _handle_message_alternative(self, message: Union[str, bytes], exchange: str) -> None:
@@ -548,11 +621,24 @@ class BtcLiveFeedV3:
             elif exchange == "kucoin":
                 if "data" in data and "price" in data["data"]:
                     price = float(data["data"]["price"])
+            elif exchange == "gateio":
+                if "result" in data and len(data["result"]) > 0:
+                    price = float(data["result"][0]["price"])
+            elif exchange == "mexc":
+                if "d" in data and "p" in data["d"]:
+                    price = float(data["d"]["p"])
+            elif exchange == "kraken":
+                # Kraken sends arrays for trade data
+                if isinstance(data, list) and len(data) > 1 and data[1]:
+                    price = float(data[1][0][0])
+            elif exchange == "huobi":
+                if "tick" in data and "data" in data["tick"] and len(data["tick"]["data"]) > 0:
+                    price = float(data["tick"]["data"][0]["price"])
             
             if price <= 0:
                 raise ValueError(f"Invalid price from {exchange}")
                 
-            # Continue with normal processing (same as _handle_message)
+            # Continue with normal processing
             self.trap_detector.update_price_data(price, timestamp)
             current_time = time.time()
             
@@ -560,7 +646,8 @@ class BtcLiveFeedV3:
             history_entry = json.dumps({
                 "price": price,
                 "timestamp": timestamp.isoformat(),
-                "volume": 0.0  # Volume info not consistently available
+                "volume": 0.0,  # Volume info not consistently available
+                "exchange": exchange  # Add exchange source information
             })
             
             # Continue with the Redis operations as in _handle_message
@@ -574,6 +661,18 @@ class BtcLiveFeedV3:
                 logger.warning(f"{LOG_PREFIX} - Redis operation failed: {str(e)}")
                 self.performance_metrics["failed_redis_operations"] += 1
                     
+            # Store the exchange we're using
+            try:
+                result = await self.redis_manager.set_cached("current_exchange", exchange)
+                if result is not None:
+                    self.performance_metrics["successful_redis_operations"] += 1
+                else:
+                    self.performance_metrics["failed_redis_operations"] += 1
+            except Exception as e:
+                logger.warning(f"{LOG_PREFIX} - Redis operation failed: {str(e)}")
+                self.performance_metrics["failed_redis_operations"] += 1
+                    
+            # Continue with remaining Redis operations as in _handle_message...
             try:
                 result = await self.redis_manager.set_cached("last_btc_update_time", str(current_time))
                 if result is not None:
@@ -688,6 +787,105 @@ class BtcLiveFeedV3:
                 await log_rasta(f"Failed to get KuCoin token: {response_json}")
         except Exception as e:
             await log_rasta(f"Error connecting to KuCoin: {str(e)}")
+
+    async def _handle_gateio_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle Gate.io WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("gateio")
+            await websocket.send(subscription)
+            
+            async for message in websocket:
+                await self._handle_message_alternative(message, "gateio")
+
+    async def _handle_mexc_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle MEXC WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("mexc")
+            await websocket.send(subscription)
+            
+            async for message in websocket:
+                await self._handle_message_alternative(message, "mexc")
+
+    async def _handle_kraken_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle Kraken WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("kraken")
+            await websocket.send(subscription)
+            
+            async for message in websocket:
+                await self._handle_message_alternative(message, "kraken")
+
+    async def _handle_huobi_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle Huobi WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("huobi")
+            await websocket.send(subscription)
+            
+            # Huobi requires periodic pings
+            ping_task = asyncio.create_task(self._huobi_ping_loop(websocket))
+            
+            try:
+                async for message in websocket:
+                    # Check if it's a compressed message
+                    if isinstance(message, bytes):
+                        import gzip
+                        try:
+                            decompressed = gzip.decompress(message).decode('utf-8')
+                            message = decompressed
+                        except Exception as e:
+                            await log_rasta(f"Failed to decompress Huobi message: {str(e)}")
+                    
+                    await self._handle_message_alternative(message, "huobi")
+            finally:
+                ping_task.cancel()
+
+    async def _huobi_ping_loop(self, websocket):
+        """Send periodic pings to keep Huobi connection alive."""
+        try:
+            while True:
+                await asyncio.sleep(30)
+                ping_message = json.dumps({"ping": int(time.time() * 1000)})
+                await websocket.send(ping_message)
+        except asyncio.CancelledError:
+            pass  # Task was cancelled, stop the loop
+        except Exception as e:
+            await log_rasta(f"Huobi ping error: {str(e)}")
 
 async def run_btc_live_feed_v3() -> None:
     """Run the BTC Live Feed v3 with enhanced Redis failover capabilities."""
