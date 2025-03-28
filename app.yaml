@@ -1,0 +1,52 @@
+name: omega-btc-websocket-v2
+region: nyc
+services:
+- name: websocket-server
+  github:
+    repo: btc-c0der/omega-btc-ai
+    branch: feature/websocket-v2-cloud
+    deploy_on_push: true
+  source_dir: /
+  build_command: pip install -r requirements.txt
+  run_command: python -m omega_ai.data_feed.websocket_v2
+  envs:
+  - key: REDIS_HOST
+    value: ${redis.host}
+    scope: RUN_TIME
+  - key: REDIS_PORT
+    value: ${redis.port}
+    scope: RUN_TIME
+  - key: REDIS_USERNAME
+    value: default
+    scope: RUN_TIME
+  - key: REDIS_PASSWORD
+    value: ${redis.password}
+    scope: RUN_TIME
+  - key: REDIS_SSL
+    value: "true"
+    scope: RUN_TIME
+  - key: LOG_LEVEL
+    value: "INFO"
+    scope: RUN_TIME
+  - key: WEBSOCKET_PORT
+    value: "8080"
+    scope: RUN_TIME
+  - key: WEBSOCKET_HOST
+    value: "0.0.0.0"
+    scope: RUN_TIME
+  - key: MAX_CONNECTIONS
+    value: "1000"
+    scope: RUN_TIME
+  - key: HEARTBEAT_INTERVAL
+    value: "30"
+    scope: RUN_TIME
+  health_check:
+    http_path: /health
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  routes:
+  - path: /
+  - path: /ws
+    rewrite: /ws
+  - path: /health
+    rewrite: /health 
