@@ -6,8 +6,8 @@ services:
     repo: btc-c0der/omega-btc-ai
     branch: feature/btc-live-feed-v3-resilient
     deploy_on_push: true
-  source_dir: deployment/digitalocean/btc_live_feed_v3
-  build_command: pip install -r requirements.txt && pip install .
+  source_dir: deployment/digitalocean/btc_live_feed_v3/src
+  build_command: cd .. && pip install -r requirements.txt && pip install .
   run_command: python -m omega_ai.data_feed.btc_live_feed_v3
   envs:
   - key: PYTHONPATH
@@ -62,8 +62,8 @@ services:
     repo: btc-c0der/omega-btc-ai
     branch: feature/btc-live-feed-v3-resilient
     deploy_on_push: true
-  source_dir: deployment/digitalocean/btc_live_feed_v3
-  build_command: pip install -r requirements.txt && pip install .
+  source_dir: deployment/digitalocean/btc_live_feed_v3/src
+  build_command: cd .. && pip install -r requirements.txt && pip install .
   run_command: python -m omega_ai.data_feed.health_check
   envs:
   - key: PYTHONPATH

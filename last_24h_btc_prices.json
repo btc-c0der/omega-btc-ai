@@ -1,0 +1,514 @@
+{
+  "metadata": {
+    "extracted_at": "2025-03-28T10:00:55.317777",
+    "time_window_minutes": 240,
+    "total_entries": 101
+  },
+  "prices": [
+    {
+      "timestamp": "2025-03-28T10:00:55.317777",
+      "price": 85204.0,
+      "type": "current"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:49.317777",
+      "price": 90765.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:43.317777",
+      "price": 90764.98,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:37.317777",
+      "price": 90764.0,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:31.317777",
+      "price": 90764.0,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:25.317777",
+      "price": 90764.0,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:19.317777",
+      "price": 90762.0,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:13.317777",
+      "price": 90761.4,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:07.317777",
+      "price": 90761.4,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T10:00:01.317777",
+      "price": 90761.4,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:55.317777",
+      "price": 90761.35,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:49.317777",
+      "price": 90761.28,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:43.317777",
+      "price": 90761.24,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:37.317777",
+      "price": 90761.24,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:31.317777",
+      "price": 90761.24,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:25.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:19.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:13.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:07.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:59:01.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:55.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:49.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:43.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:37.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:31.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:25.317777",
+      "price": 90761.24,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:19.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:13.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:07.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:58:01.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:55.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:49.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:43.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:37.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:31.317777",
+      "price": 90761.23,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:25.317777",
+      "price": 90760.0,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:19.317777",
+      "price": 90759.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:13.317777",
+      "price": 90759.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:07.317777",
+      "price": 90759.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:57:01.317777",
+      "price": 90759.78,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:55.317777",
+      "price": 90759.77,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:49.317777",
+      "price": 90759.77,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:43.317777",
+      "price": 90759.77,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:37.317777",
+      "price": 90759.17,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:31.317777",
+      "price": 90759.17,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:25.317777",
+      "price": 90758.96,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:19.317777",
+      "price": 90758.96,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:13.317777",
+      "price": 90748.64,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:07.317777",
+      "price": 90748.64,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:56:01.317777",
+      "price": 90748.64,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:55.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:49.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:43.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:37.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:31.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:25.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:19.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:13.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:07.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:55:01.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:55.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:49.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:43.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:37.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:31.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:25.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:19.317777",
+      "price": 90748.75,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:13.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:07.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:54:01.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:55.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:49.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:43.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:37.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:31.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:25.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:19.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:13.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:07.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:53:01.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:55.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:49.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:43.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:37.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:31.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:25.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:19.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:13.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:07.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:52:01.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:55.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:49.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:43.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:37.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:31.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:25.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:19.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:13.317777",
+      "price": 86619.99,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:07.317777",
+      "price": 86619.98,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:51:01.317777",
+      "price": 86619.98,
+      "type": "historical"
+    },
+    {
+      "timestamp": "2025-03-28T09:50:55.317777",
+      "price": 86619.98,
+      "type": "historical"
+    }
+  ]
+}

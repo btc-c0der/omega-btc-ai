@@ -1,0 +1,11 @@
+stateDiagram-v2
+    [*] --> VoidFunction
+    VoidFunction --> VoidPointer
+    VoidPointer --> MemoryManipulation
+    MemoryManipulation --> KernelPanic: dereference wrong void*
+    KernelPanic --> [*]: reboot
+    VoidFunction --> NoReturnValue
+    NoReturnValue --> HardwareInit
+    HardwareInit --> KernelPanic: init fails
+    KernelPanic --> [*]
+    [*] --> VoidFunction: Again, but with sudo 
