@@ -39,7 +39,9 @@ HEALTH_CHECK_PORT=8080
 HEALTH_CHECK_HOST=0.0.0.0
 ```
 
-## Deployment Steps
+## Deployment Methods
+
+### Method 1: Buildpack Deployment (Deprecated)
 
 1. Install the package in development mode:
 
@@ -60,10 +62,39 @@ HEALTH_CHECK_HOST=0.0.0.0
    bash scripts/deploy.sh
    ```
 
-4. Monitor the deployment:
-   - Check the DigitalOcean dashboard
-   - Use the monitoring dashboard: `python scripts/monitor_btc_feed_v3.py`
-   - Access health check endpoint: `http://your-app-url:8080/health`
+### Method 2: Docker Deployment (Recommended)
+
+1. Build the Docker image:
+
+   ```bash
+   cd deployment/digitalocean/btc_live_feed_v3
+   docker build -t btc-live-feed-v3 .
+   ```
+
+2. Test locally with docker-compose:
+
+   ```bash
+   docker-compose up
+   ```
+
+3. Deploy to DigitalOcean App Platform:
+
+   ```bash
+   # Login to DigitalOcean Container Registry
+   doctl registry login
+
+   # Tag your image
+   docker tag btc-live-feed-v3 registry.digitalocean.com/your-registry/btc-live-feed-v3:latest
+
+   # Push to DigitalOcean Registry
+   docker push registry.digitalocean.com/your-registry/btc-live-feed-v3:latest
+   ```
+
+4. Deploy from DigitalOcean dashboard:
+   - Create a new App
+   - Select "Deploy from Docker Registry"
+   - Select your Docker image
+   - Configure resources and settings
 
 ## Directory Structure
 
@@ -71,6 +102,8 @@ HEALTH_CHECK_HOST=0.0.0.0
 deployment/digitalocean/btc_live_feed_v3/
 ├── config/
 │   └── app.yaml           # DigitalOcean app specification
+├── Dockerfile            # Docker configuration
+├── docker-compose.yml    # Local docker setup
 ├── scripts/
 │   ├── deploy.sh         # Deployment script
 │   └── setup_failover_redis.sh  # Redis failover setup
@@ -103,12 +136,23 @@ The application provides several monitoring endpoints:
    - Verify app.yaml configuration
    - Check environment variables
 
+4. **Docker Deployment Issues**:
+   - Check Docker build logs
+   - Verify environment variables in Dockerfile
+   - Check container logs with `docker logs <container_id>`
+
 ## Maintenance
 
 1. **Updating the Application**:
 
    ```bash
+   # For buildpack deployment
    doctl apps update $APP_ID --spec config/app.yaml
+   
+   # For Docker deployment
+   docker build -t btc-live-feed-v3 .
+   docker tag btc-live-feed-v3 registry.digitalocean.com/your-registry/btc-live-feed-v3:latest
+   docker push registry.digitalocean.com/your-registry/btc-live-feed-v3:latest
    ```
 
 2. **Scaling**:
