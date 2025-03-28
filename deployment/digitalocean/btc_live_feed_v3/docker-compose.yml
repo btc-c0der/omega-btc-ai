@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  btc-live-feed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python", "-m", "omega_ai.data_feed.health_check" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
