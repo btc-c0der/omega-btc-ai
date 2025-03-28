@@ -12,7 +12,7 @@ The OMEGA BTC News Feed module is a powerful tool for scraping, analyzing, and s
 - **Cosmic Sentiment Adjustment**: Considers moon phases and Fibonacci days for sentiment enhancement
 - **Live Streaming**: Provides a real-time news stream with continuous updates
 - **ML Dataset Generation**: Creates labeled datasets for training machine learning models
-- **Redis Integration**: Optional Redis storage for news and sentiment data
+- **Redis Integration**: Stores news and sentiment data in Digital Ocean Redis for real-time access
 - **Rich CLI Interface**: Beautiful command-line interface with color-coded sentiment display
 
 ## Installation
@@ -71,7 +71,29 @@ The module can be configured with the following environment variables:
 - `LOG_PREFIX`: Prefix for log messages (default: "🔱 OMEGA BTC NEWS")
 - `DATA_DIR`: Directory to store news datasets (default: "data")
 - `REFRESH_INTERVAL`: Default refresh interval in seconds (default: 300)
-- `ENABLE_REDIS`: Enable Redis integration (default: false)
+- `ENABLE_REDIS`: Enable Redis integration (default: true)
+
+### Redis Configuration
+
+By default, the module connects to the Digital Ocean Redis instance for storing news and sentiment data. The following environment variables can be used to customize the Redis connection:
+
+- `REDIS_HOST`: Redis host (default: "omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com")
+- `REDIS_PORT`: Redis port (default: 25061)
+- `REDIS_USERNAME`: Redis username (default: "default")
+- `REDIS_PASSWORD`: Redis password
+- `REDIS_USE_SSL`: Whether to use SSL for Redis connection (default: true)
+- `REDIS_SSL_CERT_REQS`: SSL certificate requirements (default: "none")
+
+The module will attempt to use the enhanced Redis manager with failover capabilities if available, otherwise it will fall back to a standard Redis connection.
+
+### Redis Data Structure
+
+The following keys are used in Redis:
+
+- `btc:news:{date}:{index}`: JSON representation of news entries
+- `btc:news:sentiment:latest`: Latest aggregated sentiment score
+- `btc:news:count`: Number of news entries stored
+- `btc:news:last_update`: Timestamp of the last update
 
 ### API Usage
 

@@ -67,7 +67,15 @@ logger = logging.getLogger("btc-newsfeed")
 LOG_PREFIX = os.getenv("LOG_PREFIX", "🔱 OMEGA BTC NEWS")
 DEFAULT_DATA_DIR = os.getenv("DATA_DIR", "data")
 DEFAULT_REFRESH_INTERVAL = int(os.getenv("REFRESH_INTERVAL", "300"))  # 5 minutes
-ENABLE_REDIS = os.getenv("ENABLE_REDIS", "false").lower() == "true"
+ENABLE_REDIS = os.getenv("ENABLE_REDIS", "true").lower() == "true"
+
+# Redis configuration
+REDIS_HOST = os.getenv("REDIS_HOST", "omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "25061"))
+REDIS_USERNAME = os.getenv("REDIS_USERNAME", "default")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "AVNS_OXMpU0P0ByYEz337Fgi")
+REDIS_USE_SSL = os.getenv("REDIS_USE_SSL", "true").lower() == "true"
+REDIS_SSL_CERT_REQS = os.getenv("REDIS_SSL_CERT_REQS", "none")
 
 # Rich console for pretty output
 console = Console()
@@ -100,7 +108,8 @@ class BtcNewsFeed:
         data_dir: str = DEFAULT_DATA_DIR,
         feeds: Optional[Dict[str, str]] = None,
         redis_client: Optional[redis.Redis] = None,
-        refresh_interval: int = DEFAULT_REFRESH_INTERVAL
+        refresh_interval: int = DEFAULT_REFRESH_INTERVAL,
+        use_redis: bool = ENABLE_REDIS
     ):
         """
         Initialize the BTC News Feed.
@@ -110,6 +119,7 @@ class BtcNewsFeed:
             feeds: Dictionary of RSS feeds to monitor
             redis_client: Redis client for caching (optional)
             refresh_interval: Time in seconds between feed refreshes
+            use_redis: Whether to use Redis for storing data
         """
         self.data_dir = data_dir
         self.feeds = feeds or self.DEFAULT_FEEDS
@@ -117,6 +127,7 @@ class BtcNewsFeed:
         self.redis_client = redis_client
         self.last_update = {}
         self.streaming = False
+        self.use_redis = use_redis
         
         # Create data directory if it doesn't exist
         Path(self.data_dir).mkdir(parents=True, exist_ok=True)
@@ -128,21 +139,58 @@ class BtcNewsFeed:
             logger.info(f"{LOG_PREFIX} - Downloading NLTK data for sentiment analysis")
             nltk.download('vader_lexicon', quiet=True)
             nltk.download('punkt', quiet=True)
+            
+        # Connect to Redis if enabled
+        if self.use_redis and not self.redis_client:
+            self._connect_redis()
     
     def _connect_redis(self) -> bool:
         """Connect to Redis if enabled."""
-        if not ENABLE_REDIS:
+        if not self.use_redis:
             return False
             
         try:
-            from omega_ai.utils.enhanced_redis_manager import EnhancedRedisManager
-            self.redis_client = EnhancedRedisManager(
-                use_failover=True,
-                sync_on_reconnect=True
-            )
-            return True
-        except (ImportError, Exception) as e:
+            # Try to use EnhancedRedisManager first (which has failover support)
+            try:
+                from omega_ai.utils.enhanced_redis_manager import EnhancedRedisManager
+                self.redis_client = EnhancedRedisManager(
+                    use_failover=True,
+                    sync_on_reconnect=True
+                )
+                logger.info(f"{LOG_PREFIX} - Connected to Redis using EnhancedRedisManager")
+                return True
+            except ImportError:
+                # Fall back to standard Redis client if EnhancedRedisManager is not available
+                import redis
+                import ssl
+                
+                # SSL configuration
+                ssl_options = None
+                if REDIS_USE_SSL:
+                    if REDIS_SSL_CERT_REQS == "none":
+                        ssl_options = {"ssl_cert_reqs": ssl.CERT_NONE}
+                    else:
+                        ssl_options = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+                
+                # Connect to Redis
+                self.redis_client = redis.Redis(
+                    host=REDIS_HOST,
+                    port=REDIS_PORT,
+                    username=REDIS_USERNAME,
+                    password=REDIS_PASSWORD,
+                    ssl=REDIS_USE_SSL,
+                    ssl_options=ssl_options,
+                    decode_responses=True
+                )
+                
+                # Test connection
+                self.redis_client.ping()
+                logger.info(f"{LOG_PREFIX} - Connected to Redis at {REDIS_HOST}:{REDIS_PORT}")
+                return True
+                
+        except Exception as e:
             logger.warning(f"{LOG_PREFIX} - Redis connection failed: {e}")
+            self.redis_client = None
             return False
     
     def fetch_news(self, source: str) -> List[Dict[str, Any]]:
@@ -550,15 +598,34 @@ class BtcNewsFeed:
                 entry_copy = entry.copy()
                 entry_copy['published'] = entry_copy['published'].isoformat()
                 
-                self.redis_client.set(key, json.dumps(entry_copy), ex=86400)  # Expire after 1 day
+                # Handle different Redis client types
+                if hasattr(self.redis_client, 'set'):
+                    # Standard Redis client
+                    self.redis_client.set(key, json.dumps(entry_copy), ex=86400)  # Expire after 1 day
+                else:
+                    # EnhancedRedisManager
+                    self.redis_client.execute_command('SET', key, json.dumps(entry_copy), 'EX', 86400)
                 
             # Store aggregated sentiment
             sentiment_scores = [e['sentiment_score'] for e in entries]
             avg_sentiment = sum(sentiment_scores) / len(sentiment_scores) if sentiment_scores else 0
             
-            self.redis_client.set("btc:news:sentiment:latest", str(avg_sentiment), ex=86400)
-            self.redis_client.set("btc:news:count", str(len(entries)), ex=86400)
-            self.redis_client.set("btc:news:last_update", datetime.now().isoformat(), ex=86400)
+            # Store additional metrics
+            redis_keys = {
+                "btc:news:sentiment:latest": str(avg_sentiment),
+                "btc:news:count": str(len(entries)),
+                "btc:news:last_update": datetime.now().isoformat()
+            }
+            
+            for key, value in redis_keys.items():
+                if hasattr(self.redis_client, 'set'):
+                    # Standard Redis client
+                    self.redis_client.set(key, value, ex=86400)
+                else:
+                    # EnhancedRedisManager
+                    self.redis_client.execute_command('SET', key, value, 'EX', 86400)
+            
+            logger.info(f"{LOG_PREFIX} - Stored {len(entries)} news entries in Redis")
             
         except Exception as e:
             logger.error(f"{LOG_PREFIX} - Redis storage error: {e}")
@@ -574,7 +641,8 @@ class BtcNewsFeed:
             Path to the generated dataset file
         """
         if not output_file:
-            output_file = Path(self.data_dir) / f"btc_news_ml_dataset_{datetime.now().strftime('%Y%m%d')}.csv"
+            output_path = Path(self.data_dir) / f"btc_news_ml_dataset_{datetime.now().strftime('%Y%m%d')}.csv"
+            output_file = str(output_path)
         
         # Find all CSV files in the data directory
         data_files = list(Path(self.data_dir).glob("btc_news_*.csv"))
