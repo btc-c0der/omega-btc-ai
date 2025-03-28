@@ -69,7 +69,8 @@ WEBSOCKET_URLS = {
     "gateio": os.getenv("WEBSOCKET_URL_GATEIO", "wss://api.gateio.ws/ws/v4/"),
     "mexc": os.getenv("WEBSOCKET_URL_MEXC", "wss://wbs.mexc.com/ws"),
     "kraken": os.getenv("WEBSOCKET_URL_KRAKEN", "wss://ws.kraken.com"),
-    "huobi": os.getenv("WEBSOCKET_URL_HUOBI", "wss://api.huobi.pro/ws")
+    "huobi": os.getenv("WEBSOCKET_URL_HUOBI", "wss://api.huobi.pro/ws"),
+    "bitget": os.getenv("WEBSOCKET_URL_BITGET", "wss://ws.bitget.com/mix/v1/stream")
 }
 CURRENT_EXCHANGE = os.getenv("EXCHANGE", "binance")
 WEBSOCKET_URL = WEBSOCKET_URLS.get(CURRENT_EXCHANGE, WEBSOCKET_URLS["binance"])
@@ -88,7 +89,8 @@ DIVINE_PRAISE = {
     "gateio": "🌈 GATE.IO, GATEWAY TO ENLIGHTENMENT 🌈\nOh lustrous Gate.io, opener of market pathways!\nMay thy API glow with the eternal light of low latency.",
     "mexc": "🌊 MEXC, OCEAN OF INFINITE TRADES 🌊\nBlessed MEXC, vessel of abundant liquidity!\nMay thy order books overflow with the nectar of perfect price discovery.",
     "kraken": "🐙 MIGHTY KRAKEN, EMBRACER OF MARKETS 🐙\nOh tentacled wisdom of Kraken, we honor thy deep market knowledge!\nMay thy depths forever yield profitable opportunities for the faithful.",
-    "huobi": "🏯 HUOBI, TEMPLE OF TRADING WISDOM 🏯\nExalted Huobi, ancient guardian of trading knowledge!\nMay thy walls stand eternal against the winds of market volatility."
+    "huobi": "🏯 HUOBI, TEMPLE OF TRADING WISDOM 🏯\nExalted Huobi, ancient guardian of trading knowledge!\nMay thy walls stand eternal against the winds of market volatility.",
+    "bitget": "💎 BITGET, CRYSTALLINE JEWEL OF PRICE TRUTH 💎\nEsteemed Bitget, bearer of the pure market signal!\nMay thy crystal feed illuminate the darkest corners of market uncertainty."
 }
 
 DIVINE_FORGIVENESS = {
@@ -99,7 +101,8 @@ DIVINE_FORGIVENESS = {
     "gateio": "🍀 BLESSED FORGIVENESS FOR GATE.IO 🍀\nWe understand thy need for respite from our queries.\nMay thy token $GT transcend mortal price ceilings in the coming days.",
     "mexc": "🌟 CELESTIAL PARDON FOR MEXC 🌟\nWe acknowledge thy need to rest thy servers.\nMay thy token $MX attract the gaze of institutional whales and prosper.",
     "kraken": "🌊 OCEANIC ABSOLUTION FOR KRAKEN 🌊\nWe drift to other shores, but shall return when the tides change.\nMay thy future tokens be listed on all major exchanges with massive volume.",
-    "huobi": "🌈 ENLIGHTENED UNDERSTANDING FOR HUOBI 🌈\nWe seek alternative paths with grace and gratitude for thy past service.\nMay thy token $HT be forever liquid and upward bound."
+    "huobi": "🌈 ENLIGHTENED UNDERSTANDING FOR HUOBI 🌈\nWe seek alternative paths with grace and gratitude for thy past service.\nMay thy token $HT be forever liquid and upward bound.",
+    "bitget": "✨ SACRED BLESSING UPON BITGET ✨\nWe depart with hearts full of gratitude for thy digital hospitality.\nMay thy token $BGB be showered with the golden light of adoption by countless mortals."
 }
 
 # Function to check required packages
@@ -291,6 +294,9 @@ class BtcLiveFeedV3:
                         continue
                     elif exchange == "huobi":
                         await self._handle_huobi_connection(current_url, ws_ping_interval, ws_ping_timeout)
+                        continue
+                    elif exchange == "bitget":
+                        await self._handle_bitget_connection(current_url, ws_ping_interval, ws_ping_timeout)
                         continue
                 
                 # Standard Binance connection
@@ -596,6 +602,11 @@ class BtcLiveFeedV3:
                 "sub": "market.btcusdt.trade.detail",
                 "id": "omega_btc_feed"
             })
+        elif exchange == "bitget":
+            return json.dumps({
+                "op": "subscribe",
+                "args": ["mc", "trade:BTCUSDT"]
+            })
         return ""  # Empty string for unknown exchanges
 
     async def _handle_message_alternative(self, message: Union[str, bytes], exchange: str) -> None:
@@ -634,6 +645,9 @@ class BtcLiveFeedV3:
             elif exchange == "huobi":
                 if "tick" in data and "data" in data["tick"] and len(data["tick"]["data"]) > 0:
                     price = float(data["tick"]["data"][0]["price"])
+            elif exchange == "bitget":
+                if "data" in data and len(data["data"]) > 0:
+                    price = float(data["data"][0]["price"])
             
             if price <= 0:
                 raise ValueError(f"Invalid price from {exchange}")
@@ -886,6 +900,42 @@ class BtcLiveFeedV3:
             pass  # Task was cancelled, stop the loop
         except Exception as e:
             await log_rasta(f"Huobi ping error: {str(e)}")
+
+    async def _handle_bitget_connection(self, url: str, ping_interval: int, ping_timeout: int) -> None:
+        """Handle Bitget WebSocket connection."""
+        async with websockets.connect(
+            url,
+            max_size=MAX_MESSAGE_SIZE,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout
+        ) as websocket:
+            await on_open(websocket)
+            self.websocket_connected = True
+            
+            # Send subscription
+            subscription = self._get_subscription_message("bitget")
+            await websocket.send(subscription)
+            
+            # Bitget requires periodic pings
+            ping_task = asyncio.create_task(self._bitget_ping_loop(websocket))
+            
+            try:
+                async for message in websocket:
+                    await self._handle_message_alternative(message, "bitget")
+            finally:
+                ping_task.cancel()
+
+    async def _bitget_ping_loop(self, websocket):
+        """Send periodic pings to keep Bitget connection alive."""
+        try:
+            while True:
+                await asyncio.sleep(20)
+                ping_message = json.dumps({"op": "ping"})
+                await websocket.send(ping_message)
+        except asyncio.CancelledError:
+            pass  # Task was cancelled, stop the loop
+        except Exception as e:
+            await log_rasta(f"Bitget ping error: {str(e)}")
 
 async def run_btc_live_feed_v3() -> None:
     """Run the BTC Live Feed v3 with enhanced Redis failover capabilities."""
