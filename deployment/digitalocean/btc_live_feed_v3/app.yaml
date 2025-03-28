@@ -1,4 +1,4 @@
-name: btc-live-feed-v3
+name: omega-btc-ai-deployment-digitalocean
 region: ams
 services:
 - name: btc-live-feed-v3
@@ -7,8 +7,8 @@ services:
     branch: feature/btc-live-feed-v3-resilient
     deploy_on_push: true
   source_dir: deployment/digitalocean/btc_live_feed_v3
-  dockerfile_path: Dockerfile
-  http_port: 8000
+  dockerfile_path: deployment/digitalocean/btc_live_feed_v3/Dockerfile
+  http_port: 8080
   instance_count: 1
   instance_size_slug: basic-xs
   routes:
@@ -17,6 +17,8 @@ services:
     http_path: /health
     port: 8080
   envs:
+  - key: WEBSOCKET_URL
+    value: wss://stream.binance.com:9443/ws/btcusdt@trade
   - key: REDIS_HOST
     value: omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
   - key: REDIS_PORT
@@ -24,13 +26,14 @@ services:
   - key: REDIS_USERNAME
     value: default
   - key: REDIS_PASSWORD
-    value: AVNS_OXMpU0P0ByYEz337Fgi
-    type: SECRET
-  - key: REDIS_SSL
+    value: ${REDIS_PASSWORD}
+  - key: REDIS_USE_SSL
     value: "true"
   - key: REDIS_USE_TLS
     value: "true"
   - key: REDIS_SSL_CERT_REQS
     value: "none"
   - key: PYTHONPATH
-    value: /app 
+    value: "/workspace/deployment/digitalocean/btc_live_feed_v3:/workspace/deployment/digitalocean/btc_live_feed_v3/src"
+  - key: HEALTH_CHECK_PORT
+    value: "8080" 
