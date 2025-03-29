@@ -34,7 +34,7 @@ parser.add_argument("--nodatabase", action="store_true", help="Run without datab
 parser.add_argument("--source", type=str, default="coindesk", help="News source to rewrite")
 parser.add_argument("--limit", type=int, default=5, help="Number of news items to rewrite")
 parser.add_argument("--rewrite-mode", type=str, default="divine", 
-                    choices=["divine", "harmony", "prosperity", "unity", "transcendent", "coyote"],
+                    choices=["divine", "harmony", "prosperity", "unity", "transcendent", "coyote", "whale"],
                     help="Rewriting modality to apply")
 parser.add_argument("--output", type=str, default="terminal", 
                     choices=["terminal", "json", "markdown"],
@@ -56,7 +56,8 @@ class OmegaNewsRewriter:
         "compassion": "Infuse narratives with empathetic understanding",
         "wisdom": "Extract timeless learning from temporal events",
         "flow": "Recognize natural rhythms and cycles in current events",
-        "coyote": "Embrace adaptability, cleverness, and playful subversion of rigid structures"
+        "coyote": "Embrace adaptability, cleverness, and playful subversion of rigid structures",
+        "whale": "Channel deep, powerful presence and the long-term perspective of oceanic wisdom"
     }
     
     # Transformation patterns for different rewrite modes
@@ -139,6 +140,23 @@ class OmegaNewsRewriter:
             "rigid": "begging for flexibility",
             "conventional": "awaiting creative disruption",
             "impossible": "not yet cleverly approached"
+        },
+        "whale": {
+            "short-term": "across the oceanic cycles",
+            "quick": "profound and measured",
+            "small": "vast and significant",
+            "noise": "deep resonant call",
+            "trivial": "part of the greater oceanic pattern",
+            "temporary": "enduring through time's depths",
+            "panic": "deep call for mindful presence",
+            "urgent": "worthy of deliberate consideration",
+            "trend": "movement in the greater currents",
+            "local": "felt across the connected waters",
+            "individual": "part of the pod's collective wisdom",
+            "immediate": "unfolding across time's vastness",
+            "surface-level": "reaching the profound depths",
+            "isolated": "connected through unseen currents",
+            "fleeting": "carried through time's enduring flow"
         }
     }
     
@@ -178,6 +196,25 @@ class OmegaNewsRewriter:
         "In every challenge lies a hidden opportunity for those with playful minds.",
         "Sometimes we must turn the map upside down to find the right path.",
         "The most powerful learning comes through unexpected reversals and surprises."
+    ]
+    
+    # Whale wisdom quotes to add to whale mode transformations
+    WHALE_WISDOM = [
+        "The deepest currents move slowly but shape entire oceans.",
+        "From the ocean's depths, both stillness and movement reveal their purpose.",
+        "The greatest songs travel across vast distances, connecting what appears separate.",
+        "True power lies in measured movement, not frantic activity.",
+        "What seems monumental from the surface may be merely a ripple in the greater deep.",
+        "The pod's wisdom exceeds the knowledge of any single swimmer.",
+        "Beneath the surface storms, deeper waters remain calm and knowing.",
+        "Time moves differently in the depths - what humans call a lifetime is but a single song.",
+        "The ocean remembers what the land has forgotten.",
+        "Size brings perspective - what seems enormous to some is but a moment in the vastness.",
+        "Even the mightiest creatures know when to rise and when to dive deep.",
+        "The ancient migration routes remind us that some paths transcend generations.",
+        "Breathing consciously connects us to both worlds - above and below.",
+        "The whale carries the memory of when all was water, before division.",
+        "To navigate by sound rather than sight reveals hidden dimensions of reality."
     ]
     
     def __init__(self, data_dir="./data", rewrite_mode="divine"):
@@ -300,6 +337,9 @@ class OmegaNewsRewriter:
         if self.rewrite_mode == "coyote":
             wisdom = random.choice(self.COYOTE_WISDOM)
             rewritten_content = f"{rewritten_content}\n\n{wisdom}"
+        elif self.rewrite_mode == "whale":
+            wisdom = random.choice(self.WHALE_WISDOM)
+            rewritten_content = f"{rewritten_content}\n\n{wisdom}"
         else:
             affirmation = random.choice(self.DIVINE_AFFIRMATIONS)
             rewritten_content = f"{rewritten_content}\n\n{affirmation}"
@@ -309,6 +349,12 @@ class OmegaNewsRewriter:
             twist_words = ["Actually", "Surprisingly", "Plot twist:", "Unexpectedly", "Cleverly", "In a twist", "Ironically"]
             if not any(word in rewritten_title for word in twist_words):
                 rewritten_title = f"{random.choice(twist_words)}, {rewritten_title}"
+        
+        # For whale mode, add depth or vastness to the title
+        if self.rewrite_mode == "whale":
+            depth_words = ["Deeply", "Profoundly", "In the vast current of events", "From the depths", "With oceanic perspective", "Across time's expanse"]
+            if not any(word in rewritten_title for word in depth_words):
+                rewritten_title = f"{random.choice(depth_words)}, {rewritten_title}"
         
         # Create transformed entry
         rewritten_entry = entry.copy()
@@ -334,6 +380,10 @@ class OmegaNewsRewriter:
             else:
                 # Occasionally flip the sentiment in unexpected ways
                 transformed_sentiment = -0.1 - (0.2 * random.random())  # -0.1 to -0.3
+        # For whale mode, create deep, stable, positive sentiment
+        elif self.rewrite_mode == "whale":
+            # Always deeply positive but with measured, stable energy (0.6 to 0.85)
+            transformed_sentiment = 0.6 + (0.25 * random.random())
         else:
             # Regular divine transformation - always positive range (0.3 to 0.9)
             transformed_sentiment = 0.6 + (0.3 * random.random())
@@ -365,6 +415,25 @@ class OmegaNewsRewriter:
                 " (contrary to popular belief)", 
                 " - cleverly disguised", 
                 " (according to trickster wisdom)"
+            ]
+            # Find a good spot to insert the interjection
+            parts = transformed_text.split('.')
+            if len(parts) > 1:
+                insert_point = random.randint(0, len(parts)-2)
+                parts[insert_point] = parts[insert_point] + random.choice(interjections)
+                transformed_text = '.'.join(parts)
+        
+        # For whale mode, occasionally add depth elements
+        elif self.rewrite_mode == "whale" and random.random() > 0.7:
+            # Add depth interjections
+            interjections = [
+                " (from the depths)", 
+                " - across vast time", 
+                " (with ancient knowing)", 
+                " - resonating deeply", 
+                " (connected through unseen currents)", 
+                " - with the patience of eons", 
+                " (through oceanic wisdom)"
             ]
             # Find a good spot to insert the interjection
             parts = transformed_text.split('.')
