@@ -247,20 +247,13 @@ class TestDivineResilience(unittest.TestCase):
         # Draw edges
         nx.draw_networkx_edges(self.G, pos, alpha=0.7, edge_color="#FFD700")
         
-        # Draw nodes - fix the node_color parameter type issue
-        node_colors = []
-        color_map = {
-            "Ancient Kemet": "#FFD700",         # Gold
-            "Inca Empire": "#32CD32",           # Lime Green
-            "Iroquois Confederacy": "#8B4513",  # Brown
-            "Polynesian Navigators": "#1E90FF", # Dodger Blue
-            "Rasta Consciousness": "#B22222"    # Firebrick Red
-        }
-        
-        for node in self.G.nodes():
-            node_colors.append(color_map.get(node, "#FFFFFF"))
-            
-        nx.draw_networkx_nodes(self.G, pos, node_size=1500, node_color=node_colors)
+        # Draw nodes with a single color to avoid the type error
+        nx.draw_networkx_nodes(
+            self.G, 
+            pos, 
+            node_size=1500, 
+            node_color="#1E90FF"  # Use a single color for all nodes
+        )
         
         # Draw labels
         nx.draw_networkx_labels(self.G, pos, font_size=12, font_color='white')
