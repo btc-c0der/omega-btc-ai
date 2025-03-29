@@ -15,6 +15,7 @@ COPY . .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install httpx
 
 # Debug: Verify directory structure
 RUN echo "🔱 VERIFYING DIVINE STRUCTURE 🔱" && \
@@ -33,12 +34,13 @@ RUN mkdir -p data/news logs
 RUN pip install -e .
 
 # Copy and set up the entrypoint script
-COPY scripts/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY scripts/startup.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/startup.sh
+RUN chmod +x scripts/api_server.py scripts/run_integration.py scripts/api_proxy.py
 
-# Expose the port the service will run on
+# Expose the ports the services will run on
 EXPOSE 8080
-EXPOSE 8081
+EXPOSE 5000
 
 # Set environment variables
 ENV REDIS_HOST=${REDIS_HOST:-redis}
@@ -50,14 +52,16 @@ ENV REDIS_USE_TLS=${REDIS_USE_TLS:-false}
 ENV REDIS_SSL_CERT_REQS=${REDIS_SSL_CERT_REQS:-none}
 ENV PYTHONPATH=/workspace:/workspace/src
 ENV NEWS_SERVICE_PORT=8080
+ENV PROXY_PORT=5000
+ENV API_BASE_URL=http://localhost:8080
 ENV TZ=UTC
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:5000/health || exit 1
 
 # Run the service when the container launches
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["startup.sh"]
 CMD ["python", "scripts/run_integration.py", "--interval", "1800", "--save"] 
