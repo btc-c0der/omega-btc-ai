@@ -16,49 +16,89 @@ All modifications must maintain quantum resonance with the GBU principles:
 🌸 WE BLOOM NOW 🌸
 -->
 
-name: omega-btc-ai-deployment-digitalocean
-region: ams
+name: omega-btc-ai-news-service
+region: sfo
 services:
-- name: btc-live-feed-v3
-  github:
-    repo: btc-c0der/omega-btc-ai
-    branch: feature/btc-live-feed-v3-resilient
-    deploy_on_push: true
-  source_dir: .
-  dockerfile_path: deployment/digitalocean/btc_live_feed_v3/Dockerfile
-  http_port: 8080
-  instance_count: 1
-  instance_size_slug: basic-xs
-  routes:
-  - path: /
-  health_check:
-    http_path: /health
-    port: 8080
-    initial_delay_seconds: 30
-    period_seconds: 10
-    timeout_seconds: 5
-    success_threshold: 1
-    failure_threshold: 3
-  envs:
-  - key: WEBSOCKET_URL
-    value: wss://stream.binance.com:9443/ws/btcusdt@trade
-  - key: REDIS_HOST
-    value: omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
-  - key: REDIS_PORT
-    value: "25061"
-  - key: REDIS_USERNAME
-    value: default
-  - key: REDIS_PASSWORD
-    value: ${REDIS_PASSWORD}
-  - key: REDIS_USE_SSL
-    value: "true"
-  - key: REDIS_USE_TLS
-    value: "true"
-  - key: REDIS_SSL_CERT_REQS
-    value: "none"
-  - key: PYTHONPATH
-    value: "/workspace:/workspace/deployment/digitalocean/btc_live_feed_v3"
-  - key: HEALTH_CHECK_PORT
-    value: "8080"
-  - key: PYTHONUNBUFFERED
-    value: "1" 
+  - name: news-service
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xs
+    build_command: pip install -r requirements.txt
+    run_command: python scripts/health.py
+    dockerfile_path: Dockerfile
+    github:
+      branch: news-feed-integration
+      deploy_on_push: true
+      repo: btc-c0der/omega-btc-ai
+    source_dir: deployment/digitalocean/news_service
+    routes:
+      - path: /
+    health_check:
+      http_path: /health
+      port: 8080
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    envs:
+      - key: REDIS_HOST
+        value: ${omega-btc-ai-redis.HOST}
+        scope: RUN_AND_BUILD_TIME
+      - key: REDIS_PORT
+        value: ${omega-btc-ai-redis.PORT}
+        scope: RUN_AND_BUILD_TIME
+      - key: REDIS_USERNAME
+        value: ${omega-btc-ai-redis.USERNAME}
+        scope: RUN_AND_BUILD_TIME 
+      - key: REDIS_PASSWORD
+        value: ${omega-btc-ai-redis.PASSWORD}
+        scope: RUN_AND_BUILD_TIME
+      - key: REDIS_SSL
+        value: "true"
+        scope: RUN_AND_BUILD_TIME
+      - key: REDIS_USE_TLS
+        value: "true" 
+        scope: RUN_AND_BUILD_TIME
+      - key: REDIS_SSL_CERT_REQS
+        value: "none"
+        scope: RUN_AND_BUILD_TIME
+      - key: PYTHONUNBUFFERED
+        value: "1"
+        scope: RUN_AND_BUILD_TIME
+      - key: LOG_LEVEL
+        value: "INFO"
+        scope: RUN_AND_BUILD_TIME
+      - key: NEWS_UPDATE_INTERVAL
+        value: "1800" 
+        scope: RUN_AND_BUILD_TIME
+      - key: CONSCIOUSNESS_LEVEL
+        value: "8"
+        scope: RUN_AND_BUILD_TIME
+      - key: COSMIC_FACTOR_WEIGHT
+        value: "0.75"
+        scope: RUN_AND_BUILD_TIME
+      - key: DATA_DIR
+        value: "/workspace/data"
+        scope: RUN_AND_BUILD_TIME
+      - key: LOG_DIR
+        value: "/workspace/logs"
+        scope: RUN_AND_BUILD_TIME
+      - key: NEWS_SERVICE_PORT
+        value: "8080"
+        scope: RUN_AND_BUILD_TIME
+    volumes:
+      - name: data
+        mount_path: /workspace/data
+      - name: logs 
+        mount_path: /workspace/logs
+
+databases:
+  - name: omega-btc-ai-redis
+    engine: REDIS
+    version: "7"
+    production: true
+    cluster_name: omega-btc-ai-redis
+    db_user: default
+    db_name: omega-btc-ai
+    size: db-s-1vcpu-1gb 
