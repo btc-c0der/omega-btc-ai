@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Bitcoin Crashes 10% As Market Fears Intensify",
+    "content": "Investors are panicking as Bitcoin faces its worst crash in months. Fear and uncertainty dominate the market as prices plummet.",
+    "source": "coindesk",
+    "published": "2025-03-29T01:57:14.811266",
+    "url": "https://example.com/news/0",
+    "sentiment_score": -0.28426898480879503,
+    "original_title": "Bitcoin Crashes 10% As Market Fears Intensify",
+    "original_content": "Investors are panicking as Bitcoin faces its worst crash in months. Fear and uncertainty dominate the market as prices plummet.",
+    "divine_title": "Bitcoin Crashes 10% As Market Fears Intensify",
+    "divine_content": "Investors are panicking as Bitcoin faces its worst crash in months. Fear and uncertainty dominate the market as prices plummet.\n\nEvery challenge carries the seed of equivalent or greater benefit.",
+    "rewrite_mode": "prosperity",
+    "transformation_time": "2025-03-29T01:57:14.812135",
+    "divine_principle": "harmony",
+    "original_sentiment": -0.28426898480879503,
+    "divine_sentiment": 0.6355972662593645,
+    "sentiment_shift": 0.9198662510681596
+  },
+  {
+    "title": "Regulatory Crackdown on Crypto Exchanges Creates Panic",
+    "content": "Regulators have announced strict new rules against crypto exchanges, creating chaos in the market and triggering massive sell-offs.",
+    "source": "decrypt",
+    "published": "2025-03-29T01:57:14.811276",
+    "url": "https://example.com/news/1",
+    "sentiment_score": -0.732558350292777,
+    "original_title": "Regulatory Crackdown on Crypto Exchanges Creates Panic",
+    "original_content": "Regulators have announced strict new rules against crypto exchanges, creating chaos in the market and triggering massive sell-offs.",
+    "divine_title": "Regulatory Crackdown on Crypto Exchanges Creates Panic",
+    "divine_content": "Regulators have announced strict new rules against crypto exchanges, creating chaos in the market and triggering massive sell-offs.\n\nIn this cosmic dance, every step has purpose and meaning.",
+    "rewrite_mode": "prosperity",
+    "transformation_time": "2025-03-29T01:57:14.812168",
+    "divine_principle": "wisdom",
+    "original_sentiment": -0.732558350292777,
+    "divine_sentiment": 0.6948197033024132,
+    "sentiment_shift": 1.42737805359519
+  }
+]

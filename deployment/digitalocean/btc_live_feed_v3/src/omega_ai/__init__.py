@@ -1,15 +1,12 @@
+#!/usr/bin/env python3
 """
-OMEGA BTC AI - Core Package
+OMEGA BTC AI - Core package
 ===========================
 
-This package contains the core components of the OMEGA BTC AI system,
-including the BTC Live Feed and related utilities.
+This package contains the core modules for the OMEGA BTC AI system.
 
-🔮 GPU (General Public Universal) License 1.0
---------------------------------------------
-OMEGA BTC AI DIVINE COLLECTIVE
-Licensed under the GPU (General Public Universal) License v1.0
+Copyright (c) 2025 OMEGA-BTC-AI - All rights reserved
 """
 
 # Package version
-__version__ = "0.3.0"
+__version__ = "1.0.0"

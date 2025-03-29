@@ -73,7 +73,7 @@ ENABLE_REDIS = os.getenv("ENABLE_REDIS", "true").lower() == "true"
 REDIS_HOST = os.getenv("REDIS_HOST", "omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "25061"))
 REDIS_USERNAME = os.getenv("REDIS_USERNAME", "default")
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "AVNS_OXMpU0P0ByYEz337Fgi")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 REDIS_USE_SSL = os.getenv("REDIS_USE_SSL", "true").lower() == "true"
 REDIS_SSL_CERT_REQS = os.getenv("REDIS_SSL_CERT_REQS", "none")
 

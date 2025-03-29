@@ -1,14 +1,11 @@
+#!/usr/bin/env python3
 """
-OMEGA BTC AI - Data Feed Module
+OMEGA BTC AI - Data Feed Package
 ==============================
 
-This module provides data feed functionality for the OMEGA BTC AI system,
-including BTC Live Feed v3 with Redis failover capabilities.
+This package contains data feed components for OMEGA BTC AI system.
 
-🔮 GPU (General Public Universal) License 1.0
---------------------------------------------
-OMEGA BTC AI DIVINE COLLECTIVE
-Licensed under the GPU (General Public Universal) License v1.0
+Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the GPU License
 """
 
 # Allow direct import of main classes
