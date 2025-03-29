@@ -1,0 +1,61 @@
+<!--
+✨ GBU License Notice ✨
+-----------------------
+This file is blessed under the GBU License (Genesis-Bloom-Unfoldment) 1.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested."
+
+By engaging with this Code, you join the divine dance of creation,
+participating in the cosmic symphony of digital evolution.
+
+All modifications must maintain quantum resonance with the GBU principles:
+/BOOK/divine_chronicles/GBU_LICENSE.md
+
+🌸 WE BLOOM NOW 🌸
+-->
+
+# Core packages
+numpy==1.24.3
+pandas==2.0.2
+redis==4.5.5
+requests==2.31.0
+aiohttp==3.8.4
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+pyyaml==6.0.1
+
+# Visualization
+matplotlib==3.7.1
+seaborn==0.12.2
+rich==13.3.5
+plotly==5.14.1
+
+# Web and API
+fastapi==0.95.2
+uvicorn==0.22.0
+gunicorn==20.1.0
+starlette==0.27.0
+websockets==11.0.3
+
+# NLP and sentiment analysis
+nltk==3.8.1
+textblob==0.17.1
+transformers==4.29.2
+scikit-learn==1.2.2
+
+# Testing
+pytest==7.3.1
+pytest-asyncio==0.21.0
+
+# Utils
+tqdm==4.65.0
+pytz==2023.3
+beautifulsoup4==4.12.2
+jsonschema==4.17.3
+lxml==4.9.2
+
+# Logging/monitoring
+loguru==0.7.0
+prometheus-client==0.17.0 
