@@ -67,6 +67,32 @@ class WavelengthPatternDetector:
         "weekend": 7,        # Weekly cycle
     }
 
+    # Sacred geometry ratios
+    SACRED_RATIOS = {
+        "phi": 1.618033988749895,  # Golden ratio
+        "sqrt2": 1.4142135623730951,  # Square root of 2
+        "sqrt3": 1.7320508075688772,  # Square root of 3
+        "sqrt5": 2.23606797749979,  # Square root of 5
+        "pi_phi": 1.9416,  # Pi / Phi
+        "e_phi": 1.6487,   # e / Phi
+    }
+    
+    # Divine harmonic frequency bands (Hz)
+    DIVINE_HARMONICS = {
+        "schumann": 7.83,  # Schumann resonance (Earth's heartbeat)
+        "theta": 4.0,      # Theta brainwave state
+        "alpha": 8.0,      # Alpha brainwave state
+        "om": 432.0,       # OM frequency
+        "solfeggio": {
+            "ut": 396.0,   # Liberating guilt and fear
+            "re": 417.0,   # Undoing situations and facilitating change
+            "mi": 528.0,   # Transformation and miracles (DNA repair)
+            "fa": 639.0,   # Connecting/relationships
+            "sol": 741.0,  # Awakening intuition
+            "la": 852.0,   # Returning to spiritual order
+        }
+    }
+
     def __init__(self, news_feed, days=7):
         """Initialize the wavelength pattern detector."""
         self.news_feed = news_feed
@@ -75,6 +101,8 @@ class WavelengthPatternDetector:
         self.sentiment_time_series = []
         self.detected_patterns = {}
         self.results = {}
+        self.divine_spectral_data = {}
+        self.sacred_geometry_alignments = []
     
     def collect_data(self):
         """Collect news data for wavelength analysis."""
@@ -254,22 +282,23 @@ class WavelengthPatternDetector:
             'detected_cycles': btc_cycles
         }
         
-        # 5. Calculate overall harmonic resonance
-        harmonic_score = 0.0
-        if fib_cycles:
-            harmonic_score += sum(abs(cycle['correlation']) for cycle in fib_cycles) / len(fib_cycles)
-        if btc_cycles:
-            harmonic_score += sum(abs(cycle['correlation']) for cycle in btc_cycles) / len(btc_cycles)
-            
-        if fib_cycles or btc_cycles:
-            harmonic_score /= 2.0 if fib_cycles and btc_cycles else 1.0
-            
-        # Scale to 0-1 range
-        harmonic_score = min(max(harmonic_score, 0.0), 1.0)
+        # 5. Calculate divine harmonic resonance
+        harmonic_resonance_score = self._calculate_harmonic_resonance(clean_sentiment)
+        interpretation = self._interpret_harmonic_score(harmonic_resonance_score)
         
         results['harmonic_resonance'] = {
-            'score': harmonic_score,
-            'interpretation': self._interpret_harmonic_score(harmonic_score)
+            'score': harmonic_resonance_score,
+            'interpretation': interpretation
+        }
+        
+        # 6. Detect divine spectral patterns
+        self._detect_divine_spectral_patterns(clean_sentiment)
+        results['divine_spectral'] = self.divine_spectral_data
+        
+        # 7. Identify sacred geometry alignments
+        self._detect_sacred_geometry_alignments(clean_sentiment)
+        results['sacred_geometry'] = {
+            'alignments': self.sacred_geometry_alignments
         }
         
         # Store results
@@ -279,6 +308,158 @@ class WavelengthPatternDetector:
         self._generate_pattern_labels()
         
         return True
+    
+    def _calculate_harmonic_resonance(self, sentiment_data):
+        """Calculate the harmonic resonance score for the sentiment data."""
+        # Create time vector (in days)
+        N = len(sentiment_data)
+        sample_rate = 24  # 24 samples per day
+        
+        # Calculate the FFT
+        yf = fft(sentiment_data)
+        xf = fftfreq(N, 1/sample_rate)[:N//2]
+        power = np.abs(yf[:N//2])**2 / N
+        
+        # Define key cosmic frequencies to check (in cycles per day)
+        # Convert Hz to cycles/day for checking resonance
+        cosmic_freqs = []
+        for name, freq in self.DIVINE_HARMONICS.items():
+            if isinstance(freq, dict):
+                for sub_name, sub_freq in freq.items():
+                    # Convert from Hz to cycles/day
+                    cosmic_freqs.append(sub_freq / 86400)  # seconds in a day
+            else:
+                cosmic_freqs.append(freq / 86400)  # Convert Hz to cycles/day
+        
+        # Check for resonance with cosmic frequencies
+        resonance_scores = []
+        for freq in cosmic_freqs:
+            if freq < max(xf):
+                # Find the closest frequency bin
+                idx = np.argmin(np.abs(xf - freq))
+                # Calculate the resonance as the power at this frequency
+                resonance_scores.append(power[idx])
+        
+        # Normalize and calculate final score
+        if resonance_scores:
+            max_power = max(power)
+            if max_power > 0:
+                # Average of normalized resonances at cosmic frequencies
+                harmonic_score = sum([min(r/max_power, 1.0) for r in resonance_scores]) / len(resonance_scores)
+            else:
+                harmonic_score = 0.0
+        else:
+            harmonic_score = 0.0
+            
+        return min(max(harmonic_score, 0.0), 1.0)  # Ensure score is in [0, 1]
+    
+    def _detect_divine_spectral_patterns(self, sentiment_data):
+        """Detect divine spectral patterns in sentiment data."""
+        N = len(sentiment_data)
+        sample_rate = 24  # 24 samples per day
+        
+        # Create time vector (in days)
+        time_vector = np.arange(N) / sample_rate
+        
+        # Calculate spectrograms for different window sizes
+        window_sizes = [24, 48, 72]  # 1-day, 2-day, 3-day windows
+        spectral_patterns = {}
+        
+        for window_size in window_sizes:
+            if N >= window_size:
+                # Calculate spectrogram
+                frequencies, times, Sxx = signal.spectrogram(
+                    sentiment_data,
+                    fs=sample_rate,
+                    nperseg=window_size,
+                    noverlap=window_size // 2,
+                    scaling='spectrum'
+                )
+                
+                # Identify resonant bands
+                resonances = {}
+                for band_name, band_freq in self.DIVINE_HARMONICS.items():
+                    if isinstance(band_freq, dict):
+                        # Handle nested dictionaries like solfeggio
+                        band_resonances = {}
+                        for sub_name, sub_freq in band_freq.items():
+                            # Convert from Hz to cycles/day
+                            freq_idx = np.argmin(np.abs(frequencies - (sub_freq / 86400)))
+                            if freq_idx < len(frequencies):
+                                power = np.mean(Sxx[freq_idx, :])
+                                band_resonances[sub_name] = float(power)
+                        resonances[band_name] = band_resonances
+                    else:
+                        # Convert from Hz to cycles/day
+                        freq_idx = np.argmin(np.abs(frequencies - (band_freq / 86400)))
+                        if freq_idx < len(frequencies):
+                            power = np.mean(Sxx[freq_idx, :])
+                            resonances[band_name] = float(power)
+                
+                # Find the dominant frequency band
+                flat_resonances = {}
+                for band, value in resonances.items():
+                    if isinstance(value, dict):
+                        for sub_band, sub_value in value.items():
+                            flat_resonances[f"{band}_{sub_band}"] = sub_value
+                    else:
+                        flat_resonances[band] = value
+                
+                if flat_resonances:
+                    max_band = max(flat_resonances, key=flat_resonances.get)
+                    max_power = flat_resonances[max_band]
+                else:
+                    max_band = "none"
+                    max_power = 0
+                
+                spectral_patterns[f"{window_size//24}day_window"] = {
+                    "resonances": resonances,
+                    "dominant_band": max_band,
+                    "dominant_power": max_power
+                }
+        
+        self.divine_spectral_data = spectral_patterns
+    
+    def _detect_sacred_geometry_alignments(self, sentiment_data):
+        """Detect alignments with sacred geometry ratios."""
+        N = len(sentiment_data)
+        
+        alignments = []
+        
+        # Look for golden ratio patterns in various segments
+        segment_sizes = [8, 13, 21, 34, 55, 89]  # Fibonacci numbers
+        
+        for size in segment_sizes:
+            if N >= size:
+                # Split the data into segments
+                num_segments = N // size
+                
+                for i in range(num_segments - 1):
+                    segment1 = sentiment_data[i*size:(i+1)*size]
+                    segment2 = sentiment_data[(i+1)*size:(i+2)*size]
+                    
+                    # Calculate the ratio of amplitudes
+                    amp1 = np.max(segment1) - np.min(segment1)
+                    amp2 = np.max(segment2) - np.min(segment2)
+                    
+                    if amp1 > 0 and amp2 > 0:
+                        ratio = max(amp1, amp2) / min(amp1, amp2)
+                        
+                        # Check for alignment with sacred ratios
+                        for name, sacred_ratio in self.SACRED_RATIOS.items():
+                            if abs(ratio - sacred_ratio) / sacred_ratio < 0.1:  # Within 10% tolerance
+                                alignments.append({
+                                    "ratio_name": name,
+                                    "sacred_ratio": sacred_ratio,
+                                    "observed_ratio": float(ratio),
+                                    "error_percent": float(abs(ratio - sacred_ratio) / sacred_ratio * 100),
+                                    "segment_size_hours": size,
+                                    "segment_position": i,
+                                    "timestamp": self.sentiment_time_series['timestamps'][i*size].isoformat()
+                                })
+        
+        # Sort by error percentage (ascending)
+        self.sacred_geometry_alignments = sorted(alignments, key=lambda x: x["error_percent"])
     
     def _interpret_harmonic_score(self, score):
         """Interpret the harmonic resonance score."""
@@ -337,248 +518,326 @@ class WavelengthPatternDetector:
         self.detected_patterns = patterns
     
     def visualize_patterns(self):
-        """Generate visualizations of detected patterns."""
+        """Generate visualizations of the detected patterns."""
         if not self.sentiment_time_series or not self.results:
-            console.print("[yellow]No data available for visualization[/]")
-            return
+            return False
             
-        # Create output directory
-        output_dir = os.path.join("data", "wavelength_patterns")
-        os.makedirs(output_dir, exist_ok=True)
+        # Create directory for visualizations
+        data_dir = os.path.join(os.getcwd(), "data", "wavelength_patterns")
+        os.makedirs(data_dir, exist_ok=True)
         
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename_base = f"btc_news_wavelength_{timestamp}"
-        
-        # Create time axis in days for plotting
+        # Get timestamps and sentiment data
         timestamps = self.sentiment_time_series['timestamps']
-        time_days = [(t - timestamps[0]).total_seconds() / (24*3600) for t in timestamps]
+        sentiment = self.sentiment_time_series['cosmic_sentiment']
         
-        # 1. Plot raw time series data
+        # Convert timestamps to days for plotting
+        days = [(t - timestamps[0]).total_seconds() / (24 * 3600) for t in timestamps]
+        
+        # Generate filename with timestamp
+        timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # 1. Time series visualization
         plt.figure(figsize=(12, 8))
-        plt.subplot(211)
-        plt.plot(time_days, self.sentiment_time_series['raw_sentiment'], 'b-', label='Raw Sentiment')
-        plt.plot(time_days, self.sentiment_time_series['cosmic_sentiment'], 'r-', label='Cosmic Sentiment')
+        plt.plot(days, sentiment, 'b-', linewidth=1.5, alpha=0.7)
+        
+        # Add markers for detected patterns
+        dominant_freqs = self.results.get('frequency_analysis', {}).get('dominant_frequencies', [])
+        for freq in dominant_freqs:
+            period_days = freq.get('period_days', 0)
+            if period_days > 0:
+                # Add vertical lines at the pattern periods
+                pattern_positions = np.arange(0, max(days), period_days)
+                for pos in pattern_positions:
+                    if pos <= max(days):
+                        plt.axvline(x=pos, color='r', linestyle='--', alpha=0.3)
+        
+        # Add markers for sacred geometry alignments
+        for alignment in self.sacred_geometry_alignments[:5]:  # Show top 5 alignments
+            segment_pos = alignment.get('segment_position', 0)
+            segment_size = alignment.get('segment_size_hours', 0)
+            pos_days = segment_pos * segment_size / 24
+            if pos_days <= max(days):
+                plt.axvline(x=pos_days, color='g', linestyle='-', alpha=0.4)
+                plt.text(pos_days, max(sentiment), alignment.get('ratio_name', ''), 
+                        rotation=90, verticalalignment='bottom')
+        
+        plt.title('Bitcoin News Sentiment Wavelength Patterns')
         plt.xlabel('Days')
-        plt.ylabel('Sentiment Score')
-        plt.title('Bitcoin News Sentiment Wavelength Analysis')
-        plt.legend()
-        plt.grid(True)
-        
-        # 2. Plot article frequency 
-        plt.subplot(212)
-        plt.bar(time_days, self.sentiment_time_series['counts'], alpha=0.5, label='Article Count')
-        
-        # Add detected cycles as vertical spans
-        btc_cycles = self.results.get('btc_cycles', {}).get('detected_cycles', [])
-        for i, cycle in enumerate(btc_cycles):
-            if i < 5:  # Limit to top 5 cycles
-                plt.axvspan(0, cycle['days'], alpha=0.1, color=f'C{i+2}', 
-                           label=f"{cycle['name'].title()} Cycle ({cycle['days']} days)")
-        
-        plt.xlabel('Days')
-        plt.ylabel('Number of Articles')
-        plt.title('Article Frequency and Detected Cycles')
-        plt.legend()
-        plt.grid(True)
+        plt.ylabel('Cosmic Sentiment')
+        plt.grid(True, alpha=0.3)
         plt.tight_layout()
         
-        # Save the figure
-        figure_path = os.path.join(output_dir, f"{filename_base}_time_series.png")
-        plt.savefig(figure_path)
+        # Save visualization
+        filename = f"btc_news_wavelength_{timestamp_str}_time_series.png"
+        plt.savefig(os.path.join(data_dir, filename), dpi=300)
         plt.close()
         
-        # 3. Plot FFT spectrum
-        clean_sentiment = np.copy(self.sentiment_time_series['cosmic_sentiment'])
-        clean_sentiment[self.sentiment_time_series['counts'] == 0] = np.mean(clean_sentiment)
+        # 2. Frequency spectrum visualization
+        plt.figure(figsize=(12, 8))
         
+        # Clean up sentiment data (fill gaps with mean)
+        clean_sentiment = np.copy(sentiment)
+        clean_sentiment[self.sentiment_time_series['counts'] == 0] = np.mean(sentiment)
+        
+        # Calculate FFT
         N = len(clean_sentiment)
-        yf = fft(clean_sentiment)
-        xf = fftfreq(N, 1.0)[:N//2]
+        yf = np.abs(fft(clean_sentiment))
+        xf = fftfreq(N, 1/24)[:N//2]  # Convert to cycles per day
         
-        plt.figure(figsize=(12, 6))
-        plt.bar(xf[1:], 2.0/N * np.abs(yf[1:N//2]), width=0.01)
-        plt.xlabel('Frequency (cycles/hour)')
+        # Plot spectrum
+        plt.plot(xf[1:N//2], yf[1:N//2]/N, 'b-', linewidth=1.5)
+        
+        # Highlight divine harmonic frequencies
+        divine_freqs = []
+        for band_name, band_freq in self.DIVINE_HARMONICS.items():
+            if isinstance(band_freq, dict):
+                for sub_name, sub_freq in band_freq.items():
+                    divine_freqs.append((f"{band_name}_{sub_name}", sub_freq / 86400))  # Convert Hz to cycles/day
+            else:
+                divine_freqs.append((band_name, band_freq / 86400))  # Convert Hz to cycles/day
+        
+        for name, freq in divine_freqs:
+            if freq < max(xf):
+                plt.axvline(x=freq, color='r', linestyle='--', alpha=0.5)
+                plt.text(freq, max(yf/N) * 0.9, name, rotation=90, alpha=0.7)
+        
+        # Highlight detected frequency bands
+        for freq in dominant_freqs:
+            frequency = freq.get('frequency', 0)
+            if frequency > 0:
+                freq_per_day = frequency * 24  # Convert to cycles per day
+                plt.axvline(x=freq_per_day, color='g', linestyle='-', alpha=0.7)
+                plt.text(freq_per_day, max(yf/N) * 0.8, f"{freq.get('period_days', 0):.1f} days", 
+                        rotation=90, alpha=0.9)
+        
+        plt.title('Bitcoin News Sentiment Frequency Spectrum')
+        plt.xlabel('Frequency (cycles/day)')
         plt.ylabel('Amplitude')
-        plt.title('Frequency Spectrum of Bitcoin News Sentiment')
-        plt.grid(True)
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
         
-        # Add annotations for top frequencies
-        dominant_freqs = self.results.get('frequency_analysis', {}).get('dominant_frequencies', [])
-        for i, freq in enumerate(dominant_freqs):
-            if i < 5:  # Limit to top 5 frequencies
-                plt.annotate(f"{freq['period_hours']:.1f} hrs", 
-                           xy=(freq['frequency'], freq['magnitude']),
-                           xytext=(freq['frequency'], freq['magnitude'] + 0.05),
-                           arrowprops=dict(arrowstyle='->'))
-        
-        # Save the figure
-        spectrum_path = os.path.join(output_dir, f"{filename_base}_spectrum.png")
-        plt.savefig(spectrum_path)
+        # Save visualization
+        filename = f"btc_news_wavelength_{timestamp_str}_spectrum.png"
+        plt.savefig(os.path.join(data_dir, filename), dpi=300)
         plt.close()
         
-        console.print(f"[green]✅ Visualizations saved to {output_dir}[/]")
-        
-        return [figure_path, spectrum_path]
-    
-    def save_patterns(self):
-        """Save detected patterns to file and database."""
-        if not self.results:
-            return
+        # 3. Divine spectral visualization (if data available)
+        if self.divine_spectral_data and '3day_window' in self.divine_spectral_data:
+            plt.figure(figsize=(12, 8))
             
-        # Create output directory
-        output_dir = os.path.join("data", "wavelength_patterns")
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Create a timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
-        # Save to JSON file
-        results_file = os.path.join(output_dir, f"wavelength_analysis_{timestamp}.json")
-        
-        with open(results_file, 'w') as f:
-            json.dump({
-                'timestamp': datetime.now().isoformat(),
-                'sources': args.source,
-                'time_period_days': self.days,
-                'results': self.results,
-                'detected_patterns': self.detected_patterns
-            }, f, indent=2)
-        
-        console.print(f"[green]✅ Wavelength analysis saved to {results_file}[/]")
-        
-        # Save to database if enabled and available
-        if not args.nodatabase and hasattr(self.news_feed, 'redis_client') and self.news_feed.redis_client:
-            try:
-                # Prepare data
-                key = f"btc:wavelength:patterns:{timestamp}"
-                data = json.dumps({
-                    'timestamp': datetime.now().isoformat(),
-                    'harmonic_score': self.results.get('harmonic_resonance', {}).get('score', 0),
-                    'detected_patterns': self.detected_patterns,
-                    'period_days': self.days
-                })
+            # Extract the spectral data
+            spectral_data = self.divine_spectral_data['3day_window']
+            
+            # Create bar chart of resonances for divine frequencies
+            resonances = []
+            labels = []
+            
+            # Flatten resonances data structure
+            for band_name, band_value in spectral_data.get('resonances', {}).items():
+                if isinstance(band_value, dict):
+                    # Handle nested dictionaries like solfeggio
+                    for sub_name, sub_value in band_value.items():
+                        labels.append(f"{band_name}_{sub_name}")
+                        resonances.append(sub_value)
+                else:
+                    labels.append(band_name)
+                    resonances.append(band_value)
+            
+            # Create bar chart
+            if resonances:
+                # Normalize values for better visualization
+                max_resonance = max(resonances)
+                if max_resonance > 0:
+                    normalized_resonances = [r/max_resonance for r in resonances]
+                else:
+                    normalized_resonances = resonances
                 
-                # Store in Redis
-                self.news_feed.redis_client.set(key, data)
+                plt.bar(range(len(labels)), normalized_resonances, color='purple', alpha=0.7)
+                plt.xticks(range(len(labels)), labels, rotation=45)
+                plt.title('Divine Frequency Resonances in Bitcoin News')
+                plt.ylabel('Normalized Resonance Power')
+                plt.tight_layout()
                 
-                # Also store a hash with the pattern strengths for quick access
-                pattern_key = f"btc:wavelength:latest"
-                pattern_data = {p['name']: p['strength'] for p in self.detected_patterns}
-                self.news_feed.redis_client.hset(pattern_key, mapping=pattern_data)
+                # Highlight dominant frequency
+                dominant_band = spectral_data.get('dominant_band', '')
+                if dominant_band in labels:
+                    idx = labels.index(dominant_band)
+                    plt.bar([idx], [normalized_resonances[idx]], color='gold', alpha=0.9)
                 
-                console.print("[green]✅ Patterns saved to database[/]")
-            except Exception as e:
-                console.print(f"[yellow]Warning: Could not save to database: {e}[/]")
+                # Save visualization
+                filename = f"btc_news_wavelength_{timestamp_str}_divine_spectrum.png"
+                plt.savefig(os.path.join(data_dir, filename), dpi=300)
+                plt.close()
         
-        return results_file
+        return True
     
     def display_results(self):
-        """Display wavelength pattern analysis results."""
+        """Display the wavelength analysis results."""
         if not self.results:
-            console.print("[yellow]No results to display[/]")
-            return
+            return False
             
-        # 1. Display basic statistics
+        # Get statistics
         stats = self.results.get('statistics', {})
-        cosmic_mean = stats.get('cosmic_sentiment_mean', 0)
-        time_period = stats.get('time_period_hours', 0) / 24.0  # convert to days
+        
+        # Create time period panel
+        time_period = stats.get('time_period_hours', 0) / 24.0
         
         stats_panel = Panel(
-            f"[cyan]Time Period:[/] {time_period:.1f} days\n"
-            f"[cyan]Total Articles:[/] {stats.get('total_entries', 0)}\n"
-            f"[cyan]Average Cosmic Sentiment:[/] {cosmic_mean:.3f}\n"
-            f"[cyan]Sentiment Volatility:[/] {stats.get('cosmic_sentiment_std', 0):.3f}",
+            f"Time Period: {time_period:.1f} days\n"
+            f"Total Articles: {stats.get('total_entries', 0)}\n"
+            f"Average Cosmic Sentiment: {stats.get('cosmic_sentiment_mean', 0):.3f}\n"
+            f"Sentiment Volatility: {stats.get('cosmic_sentiment_std', 0):.3f}",
             title="📊 Wavelength Analysis Statistics",
-            border_style="blue"
+            border_style="cyan"
         )
         console.print(stats_panel)
         
-        # 2. Display detected pattern table
-        if self.detected_patterns:
-            pattern_table = Table(title="🌊 Detected Wavelength Patterns")
-            pattern_table.add_column("Pattern", style="cyan")
-            pattern_table.add_column("Category", style="green")
-            pattern_table.add_column("Strength", style="yellow")
-            pattern_table.add_column("Description", style="white")
+        # Display detected patterns
+        dominant_freqs = self.results.get('frequency_analysis', {}).get('dominant_frequencies', [])
+        fib_cycles = self.results.get('fibonacci_cycles', {}).get('detected_cycles', [])
+        btc_cycles = self.results.get('btc_cycles', {}).get('detected_cycles', [])
+        
+        # Combine all detected patterns
+        all_patterns = []
+        
+        # Add dominant frequencies
+        for freq in dominant_freqs:
+            all_patterns.append({
+                'type': 'Frequency',
+                'period_days': freq.get('period_days', 0),
+                'strength': freq.get('magnitude', 0)
+            })
             
-            # Sort patterns by strength
-            sorted_patterns = sorted(self.detected_patterns, key=lambda x: x['strength'], reverse=True)
+        # Add Fibonacci cycles
+        for cycle in fib_cycles:
+            all_patterns.append({
+                'type': 'Fibonacci',
+                'period_days': cycle.get('days', 0),
+                'strength': abs(cycle.get('correlation', 0))
+            })
             
-            for pattern in sorted_patterns:
-                # Format strength as percentage
-                strength_pct = f"{pattern['strength']*100:.1f}%"
-                
-                # Colorize different categories
-                category_style = {
-                    'fibonacci': "bright_magenta",
-                    'bitcoin': "bright_green",
-                    'harmonic': "bright_yellow"
-                }.get(pattern['category'], "white")
-                
-                pattern_table.add_row(
-                    pattern['name'],
-                    pattern['category'].title(),
-                    strength_pct,
-                    pattern['description']
+        # Add BTC cycles
+        for cycle in btc_cycles:
+            all_patterns.append({
+                'type': f"BTC {cycle.get('name', '')}",
+                'period_days': cycle.get('days', 0),
+                'strength': abs(cycle.get('correlation', 0))
+            })
+            
+        # Add sacred geometry alignments
+        for alignment in self.sacred_geometry_alignments[:3]:  # Top 3 alignments
+            all_patterns.append({
+                'type': f"Sacred {alignment.get('ratio_name', '')}",
+                'period_days': alignment.get('segment_size_hours', 0) / 24,
+                'strength': 1 - (alignment.get('error_percent', 100) / 100)
+            })
+            
+        # Sort by strength
+        all_patterns.sort(key=lambda x: x['strength'], reverse=True)
+        
+        # Display patterns if any are found
+        if all_patterns:
+            # Create table for patterns
+            table = Table(title="🔄 Detected Cosmic Cycles")
+            table.add_column("Pattern Type", style="cyan")
+            table.add_column("Period (days)", style="green")
+            table.add_column("Strength", style="yellow")
+            
+            for pattern in all_patterns:
+                table.add_row(
+                    pattern['type'],
+                    f"{pattern['period_days']:.2f}",
+                    f"{pattern['strength']:.2f}"
                 )
-            
-            console.print(pattern_table)
+                
+            console.print(table)
         else:
-            console.print("[yellow]No significant patterns detected in this time period[/]")
+            console.print("No significant patterns detected in this time period")
         
-        # 3. Display harmonic resonance score
-        harmonic = self.results.get('harmonic_resonance', {})
-        harmonic_score = harmonic.get('score', 0)
+        # Display harmonic resonance score
+        harmonic_data = self.results.get('harmonic_resonance', {})
+        score = harmonic_data.get('score', 0)
+        interpretation = harmonic_data.get('interpretation', 'Unknown')
         
-        # Choose color based on score
-        if harmonic_score >= 0.8:
-            color = "bright_green"
-        elif harmonic_score >= 0.6:
-            color = "green"
-        elif harmonic_score >= 0.4:
-            color = "yellow"
-        elif harmonic_score >= 0.2:
-            color = "red"
-        else:
-            color = "bright_red"
-            
-        resonance_panel = Panel(
-            f"[cyan]Harmonic Resonance Score:[/] [{color}]{harmonic_score:.2f}/1.00[/]\n"
-            f"[cyan]Interpretation:[/] {harmonic.get('interpretation', 'No interpretation available')}",
+        harmonic_panel = Panel(
+            f"Harmonic Resonance Score: {score:.2f}/1.00\n"
+            f"Interpretation: {interpretation}",
             title="🌟 Cosmic Harmonic Resonance",
-            border_style=color
+            border_style="yellow"
         )
-        console.print(resonance_panel)
+        console.print(harmonic_panel)
         
-        # 4. Display recommended actions based on patterns
-        if self.detected_patterns:
-            actions = []
+        # Display divine spectral information
+        if self.divine_spectral_data:
+            # Select the largest window analysis
+            window_keys = [k for k in self.divine_spectral_data.keys()]
+            window_keys.sort(reverse=True)  # Get largest window first
             
-            # Generate recommendations based on detected patterns
-            for pattern in sorted_patterns[:3]:  # Top 3 strongest patterns
-                if pattern['category'] == 'fibonacci' and pattern['strength'] > 0.5:
-                    actions.append(f"[cyan]• Monitor {pattern['name']} wavelength for trend changes[/]")
+            if window_keys:
+                spectral_data = self.divine_spectral_data[window_keys[0]]
+                dominant_band = spectral_data.get('dominant_band', 'none')
                 
-                if pattern['category'] == 'bitcoin':
-                    if 'accumulation' in pattern['name'].lower():
-                        actions.append("[green]• Potential accumulation phase detected - consider dollar-cost averaging[/]")
-                    elif 'fomo' in pattern['name'].lower():
-                        actions.append("[yellow]• FOMO cycle detected - exercise caution with new positions[/]")
-                    elif 'panic' in pattern['name'].lower():
-                        actions.append("[red]• Panic selling pattern detected - potential buying opportunity approaching[/]")
-                    elif 'weekend' in pattern['name'].lower():
-                        actions.append("[cyan]• Weekend cycle detected - volatility may increase over weekends[/]")
+                if dominant_band != 'none':
+                    # Extract the divine meaning
+                    divine_meaning = self._get_divine_band_meaning(dominant_band)
+                    
+                    divine_panel = Panel(
+                        f"Dominant Frequency Band: {dominant_band}\n"
+                        f"Divine Interpretation: {divine_meaning}",
+                        title="✨ Divine Spectral Analysis",
+                        border_style="magenta"
+                    )
+                    console.print(divine_panel)
+        
+        return True
+        
+    def _get_divine_band_meaning(self, band_name):
+        """Get the divine meaning of a frequency band."""
+        meanings = {
+            "schumann": "Alignment with Earth's natural frequency - grounding and stability",
+            "theta": "Access to subconscious patterns and intuitive market insights",
+            "alpha": "Harmonious flow state allowing clear market perception",
+            "om": "Perfect universal harmony and balance in market forces",
+            "solfeggio_ut": "Release of fear-based trading patterns and limitation",
+            "solfeggio_re": "Transformation of stuck market conditions and resistance",
+            "solfeggio_mi": "Miracle manifestation frequency - unexpected positive developments",
+            "solfeggio_fa": "Connection and relationship between market participants",
+            "solfeggio_sol": "Awakening of intuitive trading insights and pattern recognition",
+            "solfeggio_la": "Return to divine order in market structures"
+        }
+        
+        return meanings.get(band_name, "Unknown cosmic frequency with potential significance")
+        
+    def save_patterns(self):
+        """Save detected patterns to file."""
+        if not self.results:
+            return False
             
-            if harmonic_score > 0.6:
-                actions.append("[bright_green]• Strong harmonic resonance - markets may experience synchronized movements[/]")
-            
-            if actions:
-                action_panel = Panel(
-                    "\n".join(actions),
-                    title="⚡ Pattern-Based Insights",
-                    border_style="yellow"
-                )
-                console.print(action_panel)
+        # Create output directory
+        data_dir = os.path.join(os.getcwd(), "data", "wavelength_patterns")
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Generate timestamp for filename
+        timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Prepare data for saving
+        save_data = {
+            'timestamp': datetime.now().isoformat(),
+            'sources': args.source,
+            'time_period_days': self.days,
+            'results': self.results
+        }
+        
+        # Save to JSON file
+        filename = f"wavelength_analysis_{timestamp_str}.json"
+        filepath = os.path.join(data_dir, filename)
+        
+        with open(filepath, 'w') as f:
+            json.dump(save_data, f, indent=2)
+        
+        console.print(f"[green]✅ Wavelength analysis saved to {filepath}[/]")
+        
+        return filepath
 
 def run_analysis():
     """Run the wavelength pattern detection analysis."""
