@@ -51,6 +51,11 @@ package-lock.json
 *.cer
 *.p12
 *.pfx
+SSL_*
+**/SSL_*
+config/SSL_*
+deployment/digitalocean/SSL_*
+deployment/digitalocean/btc_live_feed_v3/SSL_*
 
 # Binary files (these should already be skipped by the script)
 *.png
