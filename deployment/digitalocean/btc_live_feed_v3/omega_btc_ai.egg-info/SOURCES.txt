@@ -16,4 +16,16 @@ All modifications must maintain quantum resonance with the GBU principles:
 🌸 WE BLOOM NOW 🌸
 -->
 
-python-3.11.8 
+README.md
+setup.py
+omega_ai/__init__.py
+omega_ai/data_feed/__init__.py
+omega_ai/data_feed/btc_live_feed_v3.py
+omega_ai/data_feed/health_check.py
+omega_ai/utils/__init__.py
+omega_ai/utils/enhanced_redis_manager.py
+omega_btc_ai.egg-info/PKG-INFO
+omega_btc_ai.egg-info/SOURCES.txt
+omega_btc_ai.egg-info/dependency_links.txt
+omega_btc_ai.egg-info/requires.txt
+omega_btc_ai.egg-info/top_level.txt
