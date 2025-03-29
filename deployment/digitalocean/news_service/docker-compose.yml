@@ -27,7 +27,7 @@ services:
     env_file:
       - .env
     environment:
-      - REDIS_HOST=redis
+      - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_SSL=false
       - REDIS_USE_TLS=false
@@ -40,13 +40,15 @@ services:
       - COSMIC_FACTOR_WEIGHT=0.75
       - NEWS_UPDATE_INTERVAL=1800
     ports:
-      - "8080:8080" # API and health check
-      - "8081:8081" # Dashboard
+      - "10080:8080" # API and health check
+      - "10081:8081" # Dashboard
     volumes:
       - ./data:/workspace/data
       - ./logs:/workspace/logs
     networks:
       - omega-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - redis
     command: [ "python", "scripts/run_integration.py", "--interval", "1800", "--save" ]
@@ -66,7 +68,7 @@ services:
     volumes:
       - redis-data:/data
     ports:
-      - "6379:6379"
+      - "16379:6379"
     networks:
       - omega-network
     healthcheck:
@@ -84,7 +86,7 @@ services:
       - ./dashboard:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "8081:80"
+      - "10082:80"
     networks:
       - omega-network
     depends_on:
