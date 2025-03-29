@@ -1,0 +1,31 @@
+{
+  "timestamp": "2025-03-29T00:59:40.781793",
+  "sources": "all",
+  "time_period_days": 10,
+  "results": {
+    "statistics": {
+      "raw_sentiment_mean": 0.009197651194296856,
+      "cosmic_sentiment_mean": 0.009197651194296856,
+      "raw_sentiment_std": 0.045920958983194364,
+      "cosmic_sentiment_std": 0.045920958983194364,
+      "total_entries": 129,
+      "time_period_hours": 228,
+      "start_date": "2025-03-19T11:09:15",
+      "end_date": "2025-03-28T22:09:15"
+    },
+    "frequency_analysis": {
+      "dominant_frequencies": []
+    },
+    "fibonacci_cycles": {
+      "detected_cycles": []
+    },
+    "btc_cycles": {
+      "detected_cycles": []
+    },
+    "harmonic_resonance": {
+      "score": 0.0,
+      "interpretation": "Random Noise - No significant harmonic patterns detected"
+    }
+  },
+  "detected_patterns": []
+}

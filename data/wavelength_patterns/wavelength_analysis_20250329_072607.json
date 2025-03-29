@@ -1,0 +1,144 @@
+{
+  "timestamp": "2025-03-29T07:26:07.423510",
+  "sources": "all",
+  "time_period_days": 5,
+  "results": {
+    "statistics": {
+      "raw_sentiment_mean": 0.022122205643907423,
+      "cosmic_sentiment_mean": 0.022122205643907423,
+      "raw_sentiment_std": 0.06347635574381776,
+      "cosmic_sentiment_std": 0.06347635574381776,
+      "total_entries": 126,
+      "time_period_hours": 111,
+      "start_date": "2025-03-24T15:28:02",
+      "end_date": "2025-03-29T05:28:02"
+    },
+    "frequency_analysis": {
+      "dominant_frequencies": []
+    },
+    "fibonacci_cycles": {
+      "detected_cycles": []
+    },
+    "btc_cycles": {
+      "detected_cycles": []
+    },
+    "harmonic_resonance": {
+      "score": 1.0,
+      "interpretation": "Perfect Celestial Alignment - High cosmic resonance detected in news flow"
+    },
+    "divine_spectral": {
+      "1day_window": {
+        "resonances": {
+          "schumann": 1.656974250482017e-05,
+          "theta": 1.656974250482017e-05,
+          "alpha": 1.656974250482017e-05,
+          "om": 1.656974250482017e-05,
+          "solfeggio": {
+            "ut": 1.656974250482017e-05,
+            "re": 1.656974250482017e-05,
+            "mi": 1.656974250482017e-05,
+            "fa": 1.656974250482017e-05,
+            "sol": 1.656974250482017e-05,
+            "la": 1.656974250482017e-05
+          }
+        },
+        "dominant_band": "schumann",
+        "dominant_power": 1.656974250482017e-05
+      },
+      "2day_window": {
+        "resonances": {
+          "schumann": 6.543915011921401e-06,
+          "theta": 6.543915011921401e-06,
+          "alpha": 6.543915011921401e-06,
+          "om": 6.543915011921401e-06,
+          "solfeggio": {
+            "ut": 6.543915011921401e-06,
+            "re": 6.543915011921401e-06,
+            "mi": 6.543915011921401e-06,
+            "fa": 6.543915011921401e-06,
+            "sol": 6.543915011921401e-06,
+            "la": 6.543915011921401e-06
+          }
+        },
+        "dominant_band": "schumann",
+        "dominant_power": 6.543915011921401e-06
+      },
+      "3day_window": {
+        "resonances": {
+          "schumann": 3.309059286530353e-06,
+          "theta": 3.309059286530353e-06,
+          "alpha": 3.309059286530353e-06,
+          "om": 3.309059286530353e-06,
+          "solfeggio": {
+            "ut": 3.309059286530353e-06,
+            "re": 3.309059286530353e-06,
+            "mi": 3.309059286530353e-06,
+            "fa": 3.309059286530353e-06,
+            "sol": 3.309059286530353e-06,
+            "la": 3.309059286530353e-06
+          }
+        },
+        "dominant_band": "schumann",
+        "dominant_power": 3.309059286530353e-06
+      }
+    },
+    "sacred_geometry": {
+      "alignments": [
+        {
+          "ratio_name": "sqrt2",
+          "sacred_ratio": 1.4142135623730951,
+          "observed_ratio": 1.4521132175370108,
+          "error_percent": 2.6799103171036536,
+          "segment_size_hours": 8,
+          "segment_position": 11,
+          "timestamp": "2025-03-28T07:28:02"
+        },
+        {
+          "ratio_name": "phi",
+          "sacred_ratio": 1.618033988749895,
+          "observed_ratio": 1.5263157894736843,
+          "error_percent": 5.668496453963416,
+          "segment_size_hours": 8,
+          "segment_position": 9,
+          "timestamp": "2025-03-27T15:28:02"
+        },
+        {
+          "ratio_name": "sqrt2",
+          "sacred_ratio": 1.4142135623730951,
+          "observed_ratio": 1.315425799591343,
+          "error_percent": 6.985349696122499,
+          "segment_size_hours": 13,
+          "segment_position": 1,
+          "timestamp": "2025-03-25T04:28:02"
+        },
+        {
+          "ratio_name": "e_phi",
+          "sacred_ratio": 1.6487,
+          "observed_ratio": 1.5263157894736843,
+          "error_percent": 7.423073362425897,
+          "segment_size_hours": 8,
+          "segment_position": 9,
+          "timestamp": "2025-03-27T15:28:02"
+        },
+        {
+          "ratio_name": "sqrt2",
+          "sacred_ratio": 1.4142135623730951,
+          "observed_ratio": 1.5263157894736843,
+          "error_percent": 7.926824496894095,
+          "segment_size_hours": 8,
+          "segment_position": 9,
+          "timestamp": "2025-03-27T15:28:02"
+        },
+        {
+          "ratio_name": "sqrt2",
+          "sacred_ratio": 1.4142135623730951,
+          "observed_ratio": 1.286877607753832,
+          "error_percent": 9.004011700014345,
+          "segment_size_hours": 13,
+          "segment_position": 0,
+          "timestamp": "2025-03-24T15:28:02"
+        }
+      ]
+    }
+  }
+}
