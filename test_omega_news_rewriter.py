@@ -34,7 +34,7 @@ parser.add_argument("--nodatabase", action="store_true", help="Run without datab
 parser.add_argument("--source", type=str, default="coindesk", help="News source to rewrite")
 parser.add_argument("--limit", type=int, default=5, help="Number of news items to rewrite")
 parser.add_argument("--rewrite-mode", type=str, default="divine", 
-                    choices=["divine", "harmony", "prosperity", "unity", "transcendent"],
+                    choices=["divine", "harmony", "prosperity", "unity", "transcendent", "coyote"],
                     help="Rewriting modality to apply")
 parser.add_argument("--output", type=str, default="terminal", 
                     choices=["terminal", "json", "markdown"],
@@ -55,7 +55,8 @@ class OmegaNewsRewriter:
         "transcendence": "Elevate mundane events to their cosmic significance",
         "compassion": "Infuse narratives with empathetic understanding",
         "wisdom": "Extract timeless learning from temporal events",
-        "flow": "Recognize natural rhythms and cycles in current events"
+        "flow": "Recognize natural rhythms and cycles in current events",
+        "coyote": "Embrace adaptability, cleverness, and playful subversion of rigid structures"
     }
     
     # Transformation patterns for different rewrite modes
@@ -121,6 +122,23 @@ class OmegaNewsRewriter:
             "risk": "quantum possibility field",
             "failure": "feedback for realignment",
             "end": "transformation threshold"
+        },
+        "coyote": {
+            "problem": "plot twist",
+            "restriction": "creative opportunity",
+            "barrier": "invitation to outsmart",
+            "rule": "suggestion to playfully bend",
+            "limit": "dance floor for creativity",
+            "failure": "unexpected lesson",
+            "mistake": "cosmic joke with hidden wisdom",
+            "crisis": "grand stage for clever adaptation",
+            "authority": "playground for trickster wisdom",
+            "expert": "fellow learner with one perspective",
+            "certainty": "amusing illusion",
+            "serious": "unnecessarily solemn",
+            "rigid": "begging for flexibility",
+            "conventional": "awaiting creative disruption",
+            "impossible": "not yet cleverly approached"
         }
     }
     
@@ -141,6 +159,25 @@ class OmegaNewsRewriter:
         "Universal wisdom guides these developments for collective expansion.",
         "This represents divine order expressing through apparent chaos.",
         "Our shared consciousness is evolving through this manifestation."
+    ]
+    
+    # Coyote wisdom quotes to add to coyote mode transformations
+    COYOTE_WISDOM = [
+        "The trickster teaches through playful subversion of what seems fixed.",
+        "When the direct path is blocked, the clever find unexpected doorways.",
+        "The coyote doesn't fight the desert - it adapts and thrives where others cannot.",
+        "What appears as chaos to the rigid mind is a dance of possibilities to the flexible one.",
+        "The greatest innovation comes from those who respectfully question every rule.",
+        "Sometimes the fool sees what the wise miss - by looking from unusual angles.",
+        "Laughter is the doorway through which new perspectives enter.",
+        "The universe has a sense of humor - those who get the joke evolve faster.",
+        "When old structures fail, trickster wisdom shows adaptable paths forward.",
+        "The greatest teacher often wears the mask of disruption.",
+        "Cleverness finds treasure where others see only obstacles.",
+        "The wise coyote knows when to howl and when to silently observe.",
+        "In every challenge lies a hidden opportunity for those with playful minds.",
+        "Sometimes we must turn the map upside down to find the right path.",
+        "The most powerful learning comes through unexpected reversals and surprises."
     ]
     
     def __init__(self, data_dir="./data", rewrite_mode="divine"):
@@ -259,9 +296,19 @@ class OmegaNewsRewriter:
             rewritten_title = self._apply_transformations(original_title, patterns)
             rewritten_content = self._apply_transformations(original_content, patterns)
         
-        # Add divine affirmation to content
-        affirmation = random.choice(self.DIVINE_AFFIRMATIONS)
-        rewritten_content = f"{rewritten_content}\n\n{affirmation}"
+        # Add divine affirmation or coyote wisdom to content
+        if self.rewrite_mode == "coyote":
+            wisdom = random.choice(self.COYOTE_WISDOM)
+            rewritten_content = f"{rewritten_content}\n\n{wisdom}"
+        else:
+            affirmation = random.choice(self.DIVINE_AFFIRMATIONS)
+            rewritten_content = f"{rewritten_content}\n\n{affirmation}"
+        
+        # For coyote mode, add an unexpected twist to the title
+        if self.rewrite_mode == "coyote":
+            twist_words = ["Actually", "Surprisingly", "Plot twist:", "Unexpectedly", "Cleverly", "In a twist", "Ironically"]
+            if not any(word in rewritten_title for word in twist_words):
+                rewritten_title = f"{random.choice(twist_words)}, {rewritten_title}"
         
         # Create transformed entry
         rewritten_entry = entry.copy()
@@ -275,8 +322,22 @@ class OmegaNewsRewriter:
         
         # Calculate positivity transformation score
         original_sentiment = entry.get('sentiment_score', 0)
-        # Transform to positive range (0.3 to 0.9)
-        transformed_sentiment = 0.6 + (0.3 * random.random())
+        
+        # For coyote mode, create more unpredictable sentiment shifts
+        if self.rewrite_mode == "coyote":
+            # Sometimes dramatic improvement, sometimes slight change, occasionally opposite direction
+            coyote_pattern = random.choice(["improve", "improve", "improve", "neutral", "reverse"])
+            if coyote_pattern == "improve":
+                transformed_sentiment = 0.5 + (0.5 * random.random())  # 0.5 to 1.0
+            elif coyote_pattern == "neutral":
+                transformed_sentiment = 0.1 + (0.3 * random.random())  # 0.1 to 0.4
+            else:
+                # Occasionally flip the sentiment in unexpected ways
+                transformed_sentiment = -0.1 - (0.2 * random.random())  # -0.1 to -0.3
+        else:
+            # Regular divine transformation - always positive range (0.3 to 0.9)
+            transformed_sentiment = 0.6 + (0.3 * random.random())
+            
         rewritten_entry['original_sentiment'] = original_sentiment
         rewritten_entry['divine_sentiment'] = transformed_sentiment
         rewritten_entry['sentiment_shift'] = transformed_sentiment - original_sentiment
@@ -292,6 +353,25 @@ class OmegaNewsRewriter:
             # Create regex pattern for whole word matching with boundaries
             pattern = r'\b' + re.escape(original) + r'\b'
             transformed_text = re.sub(pattern, replacement, transformed_text, flags=re.IGNORECASE)
+            
+        # For coyote mode, occasionally add playful elements
+        if self.rewrite_mode == "coyote" and random.random() > 0.7:
+            # Add playful interjections
+            interjections = [
+                " (wink)", 
+                " - or is it?", 
+                " (plot twist incoming)", 
+                " - surprisingly", 
+                " (contrary to popular belief)", 
+                " - cleverly disguised", 
+                " (according to trickster wisdom)"
+            ]
+            # Find a good spot to insert the interjection
+            parts = transformed_text.split('.')
+            if len(parts) > 1:
+                insert_point = random.randint(0, len(parts)-2)
+                parts[insert_point] = parts[insert_point] + random.choice(interjections)
+                transformed_text = '.'.join(parts)
         
         return transformed_text
     
