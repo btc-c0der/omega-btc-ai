@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  news-service:
+    build: .
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+    volumes:
+      - ./:/app
+    networks:
+      - omega-network
+
+  news-dashboard:
+    image: nginx:1.25-alpine
+    ports:
+      - "10082:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:rw
+      - ./web:/usr/share/nginx/html:rw
+      - ./omega-react:/usr/share/nginx/html/react:rw
+    depends_on:
+      - news-service
+    networks:
+      - omega-network
+
+networks:
+  omega-network:
+    driver: bridge

@@ -1,92 +1,64 @@
-import React from 'react';
-import { ThemeProvider, CssBaseline, Box, Container, Paper } from '@mui/material';
-import { cryptoTheme } from './styles/CryptoTheme';
-import Header from './components/Header';
-import PriceChart from './components/PriceChart';
-import TrapDetectionMap from './components/TrapDetectionMap';
-import MetricsOverview from './components/MetricsOverview';
-import TrapPatterns3D from './components/TrapPatterns3D';
-import DataVortex from './components/CreativeDataVortex';
+import React, { useState, useMemo } from 'react';
+import { ThemeProvider, CssBaseline, Paper } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
+import MainLayout from './components/layout/MainLayout';
+import Portal from './components/Portal';
 
 const App: React.FC = () => {
-    return (
-        <ThemeProvider theme={cryptoTheme}>
-            <CssBaseline />
-            <Box
-                sx={{
-                    minHeight: '100vh',
-                    background: 'linear-gradient(180deg, #0A0E17 0%, #141B2D 100%)',
-                    py: 3,
-                }}
-            >
-                <Container maxWidth="xl">
-                    <Header />
-                    <Box
-                        sx={{
-                            display: 'grid',
-                            gap: 3,
-                            gridTemplateColumns: 'repeat(2, 1fr)',
-                            '& > *': {
-                                borderRadius: 2,
-                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                                backdropFilter: 'blur(10px)',
-                                backgroundColor: 'background.paper',
-                                border: '1px solid',
-                                borderColor: 'divider',
+    const [darkMode, setDarkMode] = useState(true);
+
+    const theme = useMemo(
+        () =>
+            createTheme({
+                palette: {
+                    mode: darkMode ? 'dark' : 'light',
+                    primary: {
+                        main: '#00ff88',
+                    },
+                    secondary: {
+                        main: '#00e5ff',
+                    },
+                    background: {
+                        default: darkMode ? '#0A0E17' : '#f5f5f5',
+                        paper: darkMode ? '#141B2D' : '#ffffff',
+                    },
+                },
+                typography: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+                },
+                components: {
+                    MuiCssBaseline: {
+                        styleOverrides: {
+                            body: {
+                                scrollbarColor: darkMode ? '#6b6b6b #2b2b2b' : '#959595 #f5f5f5',
+                                '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
+                                    width: '8px',
+                                },
+                                '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
+                                    borderRadius: 8,
+                                    backgroundColor: darkMode ? '#6b6b6b' : '#959595',
+                                    minHeight: 24,
+                                },
+                                '&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track': {
+                                    borderRadius: 8,
+                                    backgroundColor: darkMode ? '#2b2b2b' : '#f5f5f5',
+                                },
                             },
-                        }}
-                    >
-                        <Paper
-                            sx={{
-                                gridColumn: '1 / -1',
-                                height: '400px',
-                                p: 2,
-                            }}
-                            elevation={0}
-                        >
-                            <PriceChart />
-                        </Paper>
-                        <Paper
-                            sx={{
-                                height: '400px',
-                                p: 2,
-                            }}
-                            elevation={0}
-                        >
-                            <TrapDetectionMap />
-                        </Paper>
-                        <Paper
-                            sx={{
-                                height: '400px',
-                                p: 2,
-                            }}
-                            elevation={0}
-                        >
-                            <MetricsOverview />
-                        </Paper>
-                        <Paper
-                            sx={{
-                                gridColumn: '1 / -1',
-                                height: '600px',
-                                p: 2,
-                            }}
-                            elevation={0}
-                        >
-                            <TrapPatterns3D />
-                        </Paper>
-                        <Paper
-                            sx={{
-                                gridColumn: '1 / -1',
-                                height: '600px',
-                                p: 2,
-                            }}
-                            elevation={0}
-                        >
-                            <DataVortex />
-                        </Paper>
-                    </Box>
-                </Container>
-            </Box>
+                        },
+                    },
+                },
+            }),
+        [darkMode]
+    );
+
+    const handleThemeToggle = () => setDarkMode(!darkMode);
+
+    return (
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <MainLayout darkMode={darkMode} onToggleTheme={handleThemeToggle}>
+                <Portal />
+            </MainLayout>
         </ThemeProvider>
     );
 };
