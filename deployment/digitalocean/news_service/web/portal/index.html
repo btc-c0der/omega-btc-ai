@@ -30,6 +30,32 @@
             }
         }
 
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 15px #0f0;
+            }
+
+            50% {
+                box-shadow: 0 0 15px #0f0, 0 0 25px #0f0, 0 0 35px #0f0;
+            }
+
+            100% {
+                box-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 15px #0f0;
+            }
+        }
+
+        @keyframes binaryRain {
+            0% {
+                opacity: 1;
+                transform: translateY(-100%);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+        }
+
         body {
             font-family: 'Courier New', monospace;
             margin: 0;
@@ -185,6 +211,54 @@
             border: 1px solid #ff0;
         }
 
+        .card.featured {
+            background: rgba(0, 40, 0, 0.9);
+            border: 2px solid #0f0;
+            animation: pulseGlow 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card.featured::after {
+            content: "1 0 1 0 1";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Courier New', monospace;
+            color: rgba(0, 255, 0, 0.2);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            animation: binaryRain 2s linear infinite;
+            pointer-events: none;
+        }
+
+        .card.featured .button {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #0f0;
+            font-weight: bold;
+        }
+
+        .card.featured .button:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
         @media (max-width: 768px) {
             .cards-container {
                 flex-direction: column;
@@ -203,6 +277,20 @@
     <div class="container">
         <h1>Omega BTC AI Portal</h1>
         <div class="cards-container">
+            <div class="card featured">
+                <div>
+                    <h2>BTC Live Feed</h2>
+                    <p class="description">24/7 real-time Bitcoin price tracking, market analysis, and trend detection
+                        with advanced AI insights.</p>
+                    <span class="status active">Active</span>
+                    <div class="live-indicator">
+                        <div class="live-dot"></div>
+                        <span>LIVE</span>
+                    </div>
+                </div>
+                <a href="/btc-live/" class="button">Enter The Matrix →</a>
+            </div>
+
             <div class="card">
                 <div>
                     <h2>News Service</h2>
