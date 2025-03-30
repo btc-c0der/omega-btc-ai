@@ -1,0 +1,30 @@
+name: omega-gpu-service
+region: nyc1
+services:
+  - name: gpu-inference
+    github:
+      repo: btc-c0der/omega-btc-ai
+      branch: feature/gpu-droplets
+      deploy_on_push: true
+    dockerfile_path: deployment/digitalocean/gpu_service/Dockerfile
+    source_dir: deployment/digitalocean/gpu_service
+    instance_size_slug: gpu-basic-1
+    instance_count: 1
+    routes:
+      - path: /
+    envs:
+      - key: REDIS_HOST
+        value: ${redis.REDIS_HOST}
+      - key: REDIS_PORT
+        value: "6379"
+      - key: MODEL_CACHE_DIR
+        value: /app/models
+      - key: NVIDIA_VISIBLE_DEVICES
+        value: all
+      - key: NVIDIA_DRIVER_CAPABILITIES
+        value: compute,utility
+
+databases:
+  - engine: REDIS
+    name: redis
+    production: true 
