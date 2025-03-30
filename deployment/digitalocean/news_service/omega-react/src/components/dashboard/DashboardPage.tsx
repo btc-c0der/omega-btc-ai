@@ -4,6 +4,8 @@ import SentimentChart from './SentimentChart';
 import NewsFeed from './NewsFeed';
 import MetricCard from '../common/MetricCard';
 import CosmicCycleWidget from './CosmicCycleWidget';
+import FearGreedWidget from './FearGreedWidget';
+import FearGreedChart from './FearGreedChart';
 
 const DashboardPage = () => {
     const [sentiment, setSentiment] = useState(0);
@@ -116,6 +118,9 @@ const DashboardPage = () => {
                 </div>
 
                 <div className="space-y-6">
+                    {/* Real Fear & Greed Index from API */}
+                    <FearGreedWidget />
+
                     {/* Cosmic Cycle Widget */}
                     <CosmicCycleWidget />
 
@@ -153,6 +158,11 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Fear & Greed Historical Chart */}
+            <div className="bg-dark rounded-xl p-4 shadow-lg">
+                <FearGreedChart />
             </div>
 
             {/* News Feed */}

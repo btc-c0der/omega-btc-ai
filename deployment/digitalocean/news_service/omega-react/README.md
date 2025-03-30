@@ -6,6 +6,14 @@ This is the React version of the OMEGA BTC AI Dashboard, a modern interface for 
 
 This project is currently in early development. The React-based version of the dashboard is being built to replace the original HTML/JS implementation.
 
+## External APIs
+
+### Crypto Fear & Greed Index
+
+This dashboard integrates with the [Crypto Fear & Greed Index API](https://rapidapi.com/onshabogdan-5SUvbWmtd0l/api/crypto-fear-greed-index2) from RapidAPI to display real-time market sentiment data.
+
+For setup instructions, see [API-SETUP.md](./API-SETUP.md).
+
 ## Setup Instructions
 
 There are two ways to run this project locally:
