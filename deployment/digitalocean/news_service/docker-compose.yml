@@ -19,8 +19,23 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:rw
       - ./web:/usr/share/nginx/html:rw
       - ./omega-react:/usr/share/nginx/html/react:rw
+      - ./web/nft:/usr/share/nginx/html/nft:rw
     depends_on:
       - news-service
+    networks:
+      - omega-network
+
+  nft-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_APP=nft_app.py
+      - FLASK_ENV=development
+    volumes:
+      - ./:/app
+      - ./BOOK/divine_chronicles/nft_archive:/app/nft_archive
     networks:
       - omega-network
 
