@@ -43,8 +43,15 @@ class OMEGANFTCreator:
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
-        self.visualizations_dir = self.output_dir / "visualizations"
+        
+        # Create nft_output directory
+        self.nft_output_dir = self.output_dir / "nft_output"
+        self.nft_output_dir.mkdir(exist_ok=True)
+        
+        # Create visualizations directory inside nft_output
+        self.visualizations_dir = self.nft_output_dir / "visualizations"
         self.visualizations_dir.mkdir(exist_ok=True)
+        
         self._initialize_models()
         
     def _initialize_models(self):
@@ -251,7 +258,7 @@ class OMEGANFTCreator:
         metadata = self._generate_metadata(request, image_path, divine_metrics)
         
         # Save metadata
-        metadata_path = self.output_dir / f"nft_{Path(image_path).stem}_metadata.json"
+        metadata_path = self.nft_output_dir / f"nft_{Path(image_path).stem}_metadata.json"
         with open(metadata_path, 'w') as f:
             json.dump(metadata.to_dict(), f, indent=2)
             
