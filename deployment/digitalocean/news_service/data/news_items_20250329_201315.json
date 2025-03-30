@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Bitcoin Surges Past $80,000, Approaching New All-Time High",
+    "source": "Decrypt",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.8,
+    "url": "https://example.com/news/0"
+  },
+  {
+    "title": "Major Bank Announces Bitcoin Custody Service",
+    "source": "Bitcoin Magazine",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.7,
+    "url": "https://example.com/news/1"
+  },
+  {
+    "title": "Bitcoin Mining Difficulty Reaches New Peak",
+    "source": "Decrypt",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.6,
+    "url": "https://example.com/news/2"
+  },
+  {
+    "title": "Bitcoin ETF Inflows Continue to Break Records",
+    "source": "Bitcoin Magazine",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.9,
+    "url": "https://example.com/news/3"
+  },
+  {
+    "title": "El Salvador Increases Bitcoin Purchases After Price Drop",
+    "source": "CoinTelegraph",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.75,
+    "url": "https://example.com/news/4"
+  },
+  {
+    "title": "New Lightning Network Update Promises Greater Scalability",
+    "source": "CoinTelegraph",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.85,
+    "url": "https://example.com/news/5"
+  },
+  {
+    "title": "Bitcoin Adoption in Africa Continues to Grow",
+    "source": "Decrypt",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.8,
+    "url": "https://example.com/news/6"
+  },
+  {
+    "title": "Bitcoin Conference Attracts Record Attendance",
+    "source": "CoinDesk",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.7,
+    "url": "https://example.com/news/7"
+  },
+  {
+    "title": "Institutional Interest in Bitcoin Remains Strong Despite Market Volatility",
+    "source": "Decrypt",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.65,
+    "url": "https://example.com/news/8"
+  },
+  {
+    "title": "Bitcoin Core Developers Release Major Update",
+    "source": "CoinTelegraph",
+    "published": "2025-03-29T20:13:15.408382",
+    "sentiment_score": 0.9,
+    "url": "https://example.com/news/9"
+  }
+]

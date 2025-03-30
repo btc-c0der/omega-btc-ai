@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Divine Blockchain Intelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #c9d1d9;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: #f7931a;
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            color: #f7931a;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background-color: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+
+        .portal-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Version badge */
+        .version-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(247, 147, 26, 0.2);
+            color: #f7931a;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(247, 147, 26, 0.4);
+        }
+
+        /* State status indicator */
+        .state-status {
+            background-color: rgba(22, 27, 34, 0.8);
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .state-status .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #3fb950;
+            margin-right: 8px;
+        }
+
+        /* Pixel Version Marker */
+        .pixel-version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.2;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #33ff33;
+            padding: 5px;
+            border-radius: 3px;
+            text-align: right;
+            z-index: 9999;
+            max-width: 200px;
+            pointer-events: none;
+            text-shadow: 0 0 5px #33ff33;
+            border: 1px solid #33ff33;
+            box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+        }
+
+        /* Glowing Effect */
+        @keyframes divine-glow {
+            0% {
+                box-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(51, 255, 51, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+            }
+        }
+
+        .pixel-version {
+            animation: divine-glow 2s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-currency-bitcoin text-warning me-2"></i>
+                <span>OMEGA BTC AI</span>
+            </a>
+            <div class="ms-auto">
+                <div class="dropdown">
+                    <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" id="deploymentDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill"></i> Deployment State
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="deploymentDropdown">
+                        <li><a class="dropdown-item" href="#" id="saveState"><i class="bi bi-save"></i> Save Current
+                                State</a></li>
+                        <li><a class="dropdown-item" href="#" id="restoreState"><i
+                                    class="bi bi-arrow-counterclockwise"></i> Restore Previous State</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#" id="viewStateHistory"><i class="bi bi-clock-history"></i>
+                                View State History</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Divine Pixel Version Marker -->
+    <div class="pixel-version">
+        v0.420-ΩMEGA<br>
+        ETERNAL TABLE DIVINE FIXER<br>
+        ⋒∇⋒∇⋒∇⋒∇⋒∇⋒∇⋒∇⋒<br>
+        NEVER TO BE WIPED<br>
+        COSMIC KNOWLEDGE PRESERVED
+    </div>
+
+    <div class="portal-content">
+        <div class="container py-5">
+            <div class="row mb-4 text-center">
+                <div class="col-12">
+                    <div class="state-status">
+                        <span class="status-dot"></span>
+                        <span>Current Deployment State: <strong>STABLE</strong></span>
+                    </div>
+                    <h1 class="display-3 mb-3">OMEGA BTC AI</h1>
+                    <h2 class="h4 text-warning mb-4">Divine Blockchain Intelligence Portal</h2>
+                    <p class="lead">Access the cosmic insights of Bitcoin's market patterns</p>
+                    <p class="text-muted">Select one of the available dashboards below</p>
+                </div>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-4">
+                    <a href="old_index.html" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-newspaper"></i>
+                            </div>
+                            <h2 class="card-title">News Analysis</h2>
+                            <p class="card-text text-muted">Access the complete Bitcoin News Analysis Dashboard with
+                                sentiment analysis, visualizations, and market insights</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">Enter Dashboard</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a href="fear-greed.html" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-speedometer2"></i>
+                            </div>
+                            <h2 class="card-title">Fear & Greed Index</h2>
+                            <p class="card-text text-muted">Focused view of the Fear & Greed Index with 3D
+                                visualization, historical data, and market sentiment analysis</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">View Index</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a href="react/" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-code-slash"></i>
+                            </div>
+                            <h2 class="card-title">React Dashboard</h2>
+                            <p class="card-text text-muted">Experience our modern React-based dashboard with enhanced
+                                interactive features and real-time updates</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">Try Beta</span>
+                            </div>
+                            <div class="version-badge">New</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a href="nft/" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-stars"></i>
+                            </div>
+                            <h2 class="card-title">Divine NFT Portal</h2>
+                            <p class="card-text text-muted">Explore sacred whale movement NFTs, create divine tokens,
+                                and witness the cosmic art of blockchain patterns</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">Enter Portal</span>
+                            </div>
+                            <div class="version-badge">Sacred</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>OMEGA Education</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-decoration-none">Bitcoin Fundamentals</a></li>
+                        <li><a href="#" class="text-decoration-none">Market Analysis</a></li>
+                        <li><a href="#" class="text-decoration-none">Divine Principles</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2023 OMEGA BTC AI</p>
+                    <p class="mb-0"><small>Version 1.0.0 (Cosmic)</small></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- State Management Script -->
+    <script src="js/state-manager.js?v=1.0.0"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize state management UI elements
+            const saveStateBtn = document.getElementById('saveState');
+            const restoreStateBtn = document.getElementById('restoreState');
+            const viewStateHistoryBtn = document.getElementById('viewStateHistory');
+
+            // Listen for state update events
+            document.addEventListener('omegaStateUpdate', function (event) {
+                console.log('State update received:', event.detail);
+
+                // Additional UI updates based on state changes could be added here
+                if (event.detail.type === 'timeshift-complete') {
+                    // Show success message
+                    setTimeout(() => {
+                        alert('Divine time shift transition complete. OMEGA State successfully restored!');
+                    }, 500);
+                }
+            });
+
+            saveStateBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Use the state manager to capture the current state
+                const stateName = prompt('Enter a name for this deployment state:', `Deployment ${new Date().toLocaleString()}`);
+                if (stateName) {
+                    window.omegaStateManager.captureState(stateName);
+                    alert('Current state saved successfully!');
+                }
+            });
+
+            restoreStateBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Use the state manager to roll back to the previous state
+                if (confirm('Are you sure you want to restore to the previous deployment state?')) {
+                    const success = window.omegaStateManager.rollbackToPreviousState();
+
+                    if (success) {
+                        // Simulate page reload after rolling back
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        alert('No previous states available to restore.');
+                    }
+                }
+            });
+
+            viewStateHistoryBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const history = window.omegaStateManager.getStateHistory();
+
+                if (history.length === 0) {
+                    alert('No deployment history available.');
+                    return;
+                }
+
+                // Create a modal to display history
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.id = 'stateHistoryModal';
+                modal.setAttribute('tabindex', '-1');
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content bg-dark text-light">
+                            <div class="modal-header">
+                                <h5 class="modal-title">OMEGA Divine Time Shift States</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-3">
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-lightning-fill"></i> Divine Time Shift enables you to traverse deployment states without hitting traps.
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>State Name</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${history.map((state, index) => `
+                                                <tr>
+                                                    <td>${new Date(state.timestamp).toLocaleString()}</td>
+                                                    <td>${state.name}</td>
+                                                    <td>
+                                                        <span class="badge bg-success">${state.status}</span>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-warning timeshift-btn" data-index="${index}">
+                                                            <i class="bi bi-magic"></i> Time Shift
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // Initialize the modal
+                const modalInstance = new bootstrap.Modal(modal);
+                modalInstance.show();
+
+                // Add event listeners to time shift buttons
+                document.querySelectorAll('.timeshift-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const index = parseInt(this.getAttribute('data-index'));
+
+                        if (confirm(`Are you sure you want to perform a Divine Time Shift to the state from ${new Date(history[index].timestamp).toLocaleString()}?`)) {
+                            // Hide the modal before starting transition
+                            modalInstance.hide();
+
+                            // Perform divine time shift
+                            window.omegaStateManager.divineTimeShift(index).then(() => {
+                                // In a real implementation, this might need server communication
+                                // Here we'll just reload the page
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+
+                // Clean up modal when it's hidden
+                modal.addEventListener('hidden.bs.modal', function () {
+                    document.body.removeChild(modal);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

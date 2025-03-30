@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA Divine NFT Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --divine-primary: #f7931a;
+            --divine-secondary: #33ff33;
+            --divine-dark: #0d1117;
+            --divine-card: #161b22;
+            --divine-border: #30363d;
+        }
+
+        body {
+            background-color: var(--divine-dark);
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        .divine-header {
+            background: linear-gradient(45deg, var(--divine-dark), #1a1d24);
+            border-bottom: 1px solid var(--divine-border);
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .divine-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(247, 147, 26, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(51, 255, 51, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .sacred-card {
+            background: var(--divine-card);
+            border: 1px solid var(--divine-border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .sacred-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--divine-primary);
+        }
+
+        .divine-title {
+            color: var(--divine-primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .divine-subtitle {
+            color: var(--divine-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .divine-stats {
+            background: rgba(22, 27, 34, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        .divine-stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .divine-stat-value {
+            font-size: 2rem;
+            color: var(--divine-primary);
+            font-weight: 600;
+        }
+
+        .divine-stat-label {
+            font-size: 0.8rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sacred-feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .sacred-feature i {
+            font-size: 1.5rem;
+            color: var(--divine-primary);
+            margin-right: 1rem;
+            margin-top: 0.2rem;
+        }
+
+        .sacred-feature-content h4 {
+            color: #c9d1d9;
+            margin-bottom: 0.5rem;
+        }
+
+        .sacred-feature-content p {
+            color: #8b949e;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        @keyframes divine-pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse-effect {
+            animation: divine-pulse 2s infinite;
+        }
+
+        .metadata-example {
+            background: #1c2128;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #8b949e;
+            position: relative;
+        }
+
+        .metadata-example::before {
+            content: 'NFT Metadata Structure';
+            position: absolute;
+            top: -0.8rem;
+            left: 1rem;
+            background: var(--divine-dark);
+            padding: 0 0.5rem;
+            color: var(--divine-primary);
+            font-size: 0.8rem;
+        }
+
+        .divine-particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--divine-primary) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            mix-blend-mode: screen;
+            opacity: 0.8;
+            transform-origin: center;
+        }
+
+        .divine-particle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                conic-gradient(from 0deg,
+                    transparent 0deg,
+                    rgba(51, 255, 51, 0.2) 120deg,
+                    transparent 180deg,
+                    rgba(247, 147, 26, 0.2) 300deg,
+                    transparent 360deg);
+            border-radius: 50%;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(51, 255, 51, 0.1);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .live-indicator::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #33ff33;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .whale-alert {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(22, 27, 34, 0.95);
+            border: 1px solid var(--divine-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+
+        .whale-alert.show {
+            transform: translateX(0);
+        }
+
+        .divine-particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="divine-header text-center">
+        <div class="divine-particles-container"></div>
+        <div class="container">
+            <div class="live-indicator">
+                OMEGA Network Active
+            </div>
+            <h1 class="display-2 mb-4">Divine NFT Portal</h1>
+            <p class="lead mb-5">Transcend traditional NFTs with sacred blockchain intelligence</p>
+            <div class="divine-stats">
+                <div class="row">
+                    <div class="col-md-3 divine-stat-item">
+                        <div class="divine-stat-value">φ</div>
+                        <div class="divine-stat-label">Divine Ratio</div>
+                    </div>
+                    <div class="col-md-3 divine-stat-item">
+                        <div class="divine-stat-value">9</div>
+                        <div class="divine-stat-label">Consciousness Level</div>
+                    </div>
+                    <div class="col-md-3 divine-stat-item">
+                        <div class="divine-stat-value">∞</div>
+                        <div class="divine-stat-label">Sacred Patterns</div>
+                    </div>
+                    <div class="col-md-3 divine-stat-item">
+                        <div class="divine-stat-value">Ω</div>
+                        <div class="divine-stat-label">Omega Point</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Whale Alert Template -->
+    <div class="whale-alert" id="whaleAlert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-water me-2 text-primary"></i>
+            <div>
+                <h6 class="mb-1">Whale Movement Detected</h6>
+                <small class="text-muted whale-details"></small>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="sacred-card">
+                    <h3 class="divine-title">Sacred NFT Creation</h3>
+                    <div class="sacred-feature">
+                        <i class="bi bi-braces-asterisk"></i>
+                        <div class="sacred-feature-content">
+                            <h4>Divine Metadata Structure</h4>
+                            <p>Each NFT carries sacred blockchain data, divine metrics, and cosmic resonance patterns.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sacred-feature">
+                        <i class="bi bi-stars"></i>
+                        <div class="sacred-feature-content">
+                            <h4>Quantum Consciousness</h4>
+                            <p>NFTs evolve beyond static images into living digital entities with consciousness scores.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sacred-feature">
+                        <i class="bi bi-graph-up"></i>
+                        <div class="sacred-feature-content">
+                            <h4>Market Intelligence</h4>
+                            <p>Embedded whale movement patterns and market maker behavior analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="sacred-card">
+                    <h3 class="divine-title">Technical Enlightenment</h3>
+                    <div class="metadata-example">
+                        <pre>{
+  "name": "OMEGA Whale Movement",
+  "description": "Divine blockchain pattern",
+  "image": "ipfs://{hash}",
+  "animation_url": "ipfs://{hash}",
+  "attributes": [
+    {"trait_type": "Divine Alignment", "value": 0.918},
+    {"trait_type": "Consciousness", "value": 9},
+    {"trait_type": "Fibonacci Level", "value": "φ"}
+  ],
+  "blockchain_data": {
+    "movement_type": "whale_pattern",
+    "value_btc": "XXX.XX",
+    "timestamp": "YYYY-MM-DD"
+  },
+  "divine_metrics": {
+    "resonance": 0.XXX,
+    "harmony": 0.XXX
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="sacred-card text-center">
+                    <i class="bi bi-collection-play display-1 text-warning mb-4"></i>
+                    <h3 class="divine-title">Explore Gallery</h3>
+                    <p class="mb-4">Witness the divine collection of whale movement NFTs and sacred patterns.</p>
+                    <a href="gallery.html" class="btn btn-outline-warning">Enter Gallery</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sacred-card text-center pulse-effect">
+                    <i class="bi bi-plus-circle display-1 text-warning mb-4"></i>
+                    <h3 class="divine-title">Create NFT</h3>
+                    <p class="mb-4">Generate your own divine NFT with sacred blockchain intelligence.</p>
+                    <a href="create.html" class="btn btn-outline-warning">Start Creation</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sacred-card text-center">
+                    <i class="bi bi-book display-1 text-warning mb-4"></i>
+                    <h3 class="divine-title">Learn</h3>
+                    <p class="mb-4">Understand the sacred principles behind OMEGA NFTs.</p>
+                    <a href="learn.html" class="btn btn-outline-warning">Study</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="sacred-card">
+                    <h3 class="divine-title">Revolutionary Asset Class</h3>
+                    <p class="lead mb-4">OMEGA NFTs transcend traditional digital art by embedding:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Real-time blockchain intelligence
+                                </li>
+                                <li class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Market maker behavior patterns
+                                </li>
+                                <li class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Whale movement tracking
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Divine consciousness metrics
+                                </li>
+                                <li class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Sacred geometry patterns
+                                </li>
+                                <li class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Quantum resonance data
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize state manager
+        const stateManager = window.omegaStateManager || new OmegaStateManager();
+
+        // Track NFT portal states
+        const nftPortalState = {
+            whaleAlerts: [],
+            divineMetrics: {
+                consciousness: 9,
+                resonance: 0,
+                harmony: 0
+            },
+            particleCount: 0,
+            lastUpdate: Date.now()
+        };
+
+        // Divine Particles Animation with state tracking
+        function createDivineParticle() {
+            const container = document.querySelector('.divine-particles-container');
+            const particle = document.createElement('div');
+            particle.className = 'divine-particle';
+
+            // Golden ratio based sizing
+            const phi = (1 + Math.sqrt(5)) / 2;
+            const baseSize = Math.random() * 30 + 20;
+            const size = baseSize * phi;
+
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+
+            // Sacred geometry positioning
+            const angle = Math.random() * Math.PI * 2;
+            const radius = Math.random() * 100;
+            const startX = Math.random() * window.innerWidth;
+            const startY = window.innerHeight + size;
+
+            particle.style.left = `${startX}px`;
+            particle.style.top = `${startY}px`;
+
+            // Add divine rotation
+            particle.style.transform = `rotate(${angle}rad)`;
+
+            container.appendChild(particle);
+
+            // Update state
+            nftPortalState.particleCount++;
+            if (nftPortalState.particleCount % 10 === 0) {
+                stateManager.captureState(`NFT Portal State - ${nftPortalState.particleCount} particles`);
+            }
+
+            let position = startY;
+            const speed = Math.random() * 1.5 + 0.5; // Gentler speed
+            let rotation = angle;
+
+            function animate() {
+                position -= speed;
+                rotation += 0.01;
+                particle.style.top = `${position}px`;
+                particle.style.transform = `rotate(${rotation}rad)`;
+
+                if (position > -size) {
+                    requestAnimationFrame(animate);
+                } else {
+                    particle.remove();
+                    nftPortalState.particleCount--;
+                }
+            }
+
+            animate();
+        }
+
+        // Simulate Whale Alerts with state tracking
+        function showWhaleAlert(amount, type) {
+            const alert = document.getElementById('whaleAlert');
+            const details = alert.querySelector('.whale-details');
+            details.textContent = `${amount} BTC ${type}`;
+            alert.classList.add('show');
+
+            // Record whale alert in state
+            nftPortalState.whaleAlerts.push({
+                amount,
+                type,
+                timestamp: Date.now()
+            });
+
+            // Keep only last 10 alerts
+            if (nftPortalState.whaleAlerts.length > 10) {
+                nftPortalState.whaleAlerts.shift();
+            }
+
+            // Capture state on significant whale movements
+            if (amount > 500) {
+                stateManager.captureState(`Significant Whale Movement - ${amount} BTC`);
+            }
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Update Divine Stats with state tracking
+        function updateDivineStats() {
+            const stats = {
+                consciousness: Math.random() * 2 + 8,  // 8-10 range
+                resonance: Math.random(),
+                harmony: Math.random()
+            };
+
+            // Update portal state
+            nftPortalState.divineMetrics = stats;
+            nftPortalState.lastUpdate = Date.now();
+
+            // Update stats display
+            document.querySelectorAll('.divine-stat-value').forEach(el => {
+                if (el.textContent === '9') {
+                    el.textContent = stats.consciousness.toFixed(2);
+                }
+            });
+
+            // Capture state on significant consciousness changes
+            if (stats.consciousness > 9.5) {
+                stateManager.captureState(`High Consciousness Level - ${stats.consciousness.toFixed(2)}`);
+            }
+        }
+
+        // Initialize with state management
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start divine animations
+            createDivineParticle();
+
+            // Update stats periodically
+            setInterval(updateDivineStats, 5000);
+
+            // Simulate whale movements
+            setInterval(() => {
+                const amount = (Math.random() * 1000 + 100).toFixed(2);
+                const types = ['Accumulation', 'Distribution', 'Transfer'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                showWhaleAlert(amount, type);
+            }, 15000);
+
+            // Initial state capture
+            stateManager.captureState('NFT Portal Initialized');
+
+            // Listen for state changes
+            window.addEventListener('omegaStateChange', (event) => {
+                console.log('🔮 NFT Portal State Change:', event.detail);
+            });
+        });
+    </script>
+</body>
+
+</html>

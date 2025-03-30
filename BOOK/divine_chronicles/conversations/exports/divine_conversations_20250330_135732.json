@@ -1,0 +1,25 @@
+[
+  {
+    "id": "test_conv_1",
+    "divine_attributes": {
+      "resonance": 5,
+      "timestamp_cosmic": 1743335852,
+      "divine_signature": "OMEGA_TEST",
+      "sacred_level": 75.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a divine assistant."
+      },
+      {
+        "role": "user",
+        "content": "Tell me about sacred geometry."
+      },
+      {
+        "role": "assistant",
+        "content": "Sacred geometry is the divine language of creation."
+      }
+    ]
+  }
+]

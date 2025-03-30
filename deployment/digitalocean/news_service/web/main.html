@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #c9d1d9;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: #f7931a;
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            color: #f7931a;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background-color: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+
+        .portal-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-currency-bitcoin text-warning me-2"></i>
+                <span>OMEGA BTC AI - Portal</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="portal-content">
+        <div class="container py-5">
+            <div class="row mb-5 text-center">
+                <div class="col-12">
+                    <h1 class="display-4 mb-3">OMEGA BTC AI</h1>
+                    <p class="lead">Welcome to the Divine Blockchain Intelligence Portal</p>
+                    <p class="text-muted">Select one of the available dashboards below</p>
+                </div>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5">
+                    <a href="index.html" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-newspaper"></i>
+                            </div>
+                            <h2 class="card-title">Main Dashboard</h2>
+                            <p class="card-text text-muted">Access the complete Bitcoin News Analysis Dashboard with
+                                sentiment analysis, visualizations, and market insights</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">Enter Dashboard</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-5">
+                    <a href="fear-greed.html" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-speedometer2"></i>
+                            </div>
+                            <h2 class="card-title">Fear & Greed Index</h2>
+                            <p class="card-text text-muted">Focused view of the Fear & Greed Index with 3D
+                                visualization, historical data, and market sentiment analysis</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">View Index</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-5 mt-4">
+                    <a href="react/" class="text-decoration-none">
+                        <div class="card p-4 text-center">
+                            <div class="card-icon">
+                                <i class="bi bi-code-slash"></i>
+                            </div>
+                            <h2 class="card-title">React Dashboard</h2>
+                            <p class="card-text text-muted">Experience our modern React-based dashboard with enhanced
+                                interactive features and real-time updates</p>
+                            <div class="mt-3">
+                                <span class="btn btn-outline-warning">Try Beta</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>OMEGA Education</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-decoration-none">Bitcoin Fundamentals</a></li>
+                        <li><a href="#" class="text-decoration-none">Market Analysis</a></li>
+                        <li><a href="#" class="text-decoration-none">Divine Principles</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2023 OMEGA BTC AI</p>
+                    <p class="mb-0"><small>Version 1.0.0 (Cosmic)</small></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

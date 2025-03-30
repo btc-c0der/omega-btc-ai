@@ -1,0 +1,30 @@
+{
+  "name": "Sacred Punk #837469",
+  "description": "A divine fusion of punk culture and sacred geometry",
+  "image": "BOOK/divine_chronicles/nft_archive/sacred_punks/sacred_punk_837469.png",
+  "attributes": [
+    {
+      "trait_type": "headwear",
+      "value": "Merkaba Cap",
+      "description": "A cap with the star tetrahedron",
+      "sacred_pattern": "The blueprint of the universe"
+    },
+    {
+      "trait_type": "eyes",
+      "value": "Third Eye Open",
+      "description": "The awakened third eye",
+      "sacred_pattern": "The mother of all geometric patterns"
+    },
+    {
+      "trait_type": "mouth",
+      "value": "Om Speaker",
+      "description": "Speaking sacred vibrations",
+      "sacred_pattern": "The origin pattern of creation"
+    }
+  ],
+  "divine_metrics": {
+    "rarity": 0.935764967229172,
+    "resonance": 0.9666666666666667,
+    "trait_count": 3
+  }
+}

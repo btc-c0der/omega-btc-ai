@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Fear & Greed Index</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="favicon.ico">
+    <meta name="msapplication-TileImage" content="favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        :root {
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #c9d1d9;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+        }
+
+        /* Fear and Greed visualization */
+        .fear-greed-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            background: radial-gradient(circle, rgba(20, 25, 35, 1) 0%, rgba(13, 17, 23, 1) 100%);
+            margin-bottom: 30px;
+        }
+
+        /* Indicator styles */
+        .fear-greed-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .indicator-card {
+            flex: 1;
+            min-width: 150px;
+            background: rgba(22, 27, 34, 0.7);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #30363d;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .indicator-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .indicator-label {
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+
+        /* Golden glow effect for special content */
+        .golden-glow {
+            box-shadow: 0 0 25px rgba(247, 147, 26, 0.2);
+            border-color: rgba(247, 147, 26, 0.3);
+        }
+
+        /* Explanation section */
+        .explanation-section {
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #30363d;
+            margin-bottom: 2rem;
+        }
+
+        .section-icon {
+            font-size: 2rem;
+            color: #f7931a;
+            margin-right: 1rem;
+        }
+
+        /* Chart styles */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        /* History table */
+        .history-table {
+            background-color: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table {
+            color: #c9d1d9;
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: rgba(30, 37, 47, 1);
+            border-color: #30363d;
+        }
+
+        .table td {
+            border-color: #30363d;
+        }
+
+        /* Footer styles */
+        .footer {
+            background-color: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        /* Fear and greed classification colors */
+        .extreme-fear {
+            color: #e03131;
+        }
+
+        .fear {
+            color: #f08c00;
+        }
+
+        .neutral {
+            color: #f7931a;
+        }
+
+        .greed {
+            color: #2b8a3e;
+        }
+
+        .extreme-greed {
+            color: #099268;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="portal.html">
+                <i class="bi bi-currency-bitcoin text-warning me-2"></i>
+                <span>OMEGA BTC AI - Fear & Greed Index</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="portal.html">
+                            <i class="bi bi-house-door"></i> Portal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-newspaper"></i> Main Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="react/">
+                            <i class="bi bi-code-slash"></i> React Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1>Bitcoin Fear & Greed Index</h1>
+                    <div class="d-flex align-items-center">
+                        <button id="refresh-button" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            <span id="loading-spinner" style="display: none;">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span>Loading...</span>
+                            </span>
+                            <span id="refresh-text">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-muted small">For educational purposes only. Not financial advice.</p>
+            </div>
+        </div>
+
+        <!-- Main Fear & Greed Display -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-7">
+                        <div class="fear-greed-container">
+                            <div id="fear-greed-3d" style="width: 100%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <h2 class="mb-4 text-center">Current Index</h2>
+
+                        <!-- Current value display -->
+                        <div class="text-center mb-4">
+                            <div id="fear-greed-value" class="display-1 mb-2">--</div>
+                            <div id="fear-greed-classification" class="h4 mb-3">Calculating...</div>
+                            <div id="fear-greed-timestamp" class="text-muted small">Last updated: --</div>
+                        </div>
+
+                        <!-- Fear/greed scale -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="extreme-fear">Extreme Fear</span>
+                            <span class="fear">Fear</span>
+                            <span class="neutral">Neutral</span>
+                            <span class="greed">Greed</span>
+                            <span class="extreme-greed">Extreme Greed</span>
+                        </div>
+                        <div class="progress mb-4" style="height: 10px;">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 15%"
+                                aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 30%" aria-valuenow="30"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 20%"
+                                aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 15%"
+                                aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="small text-muted mb-3">The Fear & Greed Index represents market sentiment from
+                                extreme fear (0) to extreme greed (100)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Indicators -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3">Market Indicators</h3>
+                <div class="fear-greed-indicators">
+                    <div class="indicator-card">
+                        <div class="indicator-icon text-warning">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="indicator-value" id="market-momentum">--</div>
+                        <div class="indicator-label">Market Momentum</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-icon text-info">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                        <div class="indicator-value" id="volatility">--</div>
+                        <div class="indicator-label">Volatility</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-icon text-success">
+                            <i class="bi bi-currency-exchange"></i>
+                        </div>
+                        <div class="indicator-value" id="trading-volume">--</div>
+                        <div class="indicator-label">Trading Volume</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-icon text-danger">
+                            <i class="bi bi-twitter"></i>
+                        </div>
+                        <div class="indicator-value" id="social-sentiment">--</div>
+                        <div class="indicator-label">Social Sentiment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Data Chart -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="mb-3">Historical Fear & Greed Index</h3>
+                <div class="chart-container">
+                    <canvas id="fear-greed-history-chart"></canvas>
+                </div>
+                <div class="text-muted small text-end">
+                    <span>Source: OMEGA BTC AI Fear & Greed Index</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explanation Section -->
+        <div class="explanation-section mb-4">
+            <div class="d-flex">
+                <div class="section-icon">
+                    <i class="bi bi-info-circle-fill"></i>
+                </div>
+                <div>
+                    <h3>Understanding the Fear & Greed Index</h3>
+                    <p class="mb-3">The Fear & Greed Index measures market sentiment by analyzing various factors:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul>
+                                <li><strong>Volatility (25%):</strong> Unusual price movements compared to average
+                                    values</li>
+                                <li><strong>Market Momentum (25%):</strong> Price strength and trading volumes</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul>
+                                <li><strong>Social Media (15%):</strong> Analysis of hashtags and trends</li>
+                                <li><strong>Search Volume (10%):</strong> Google Trends data for Bitcoin-related queries
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="mb-0 mt-2">Extreme fear can be a sign that investors are too worried, which could be a
+                        buying opportunity. When investors are getting too greedy, the market may be due for a
+                        correction.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="card bg-dark mb-5">
+            <div class="card-body">
+                <h5 class="text-warning">DISCLAIMER</h5>
+                <p class="mb-0 small">
+                    All content is for educational purposes only. Not investment advice. The Fear & Greed Index is
+                    generated algorithmically based on market sentiment and should not be considered financial advice.
+                    Always do your own research before making investment decisions.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>OMEGA Education</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-decoration-none">Bitcoin Fundamentals</a></li>
+                        <li><a href="#" class="text-decoration-none">Market Analysis</a></li>
+                        <li><a href="#" class="text-decoration-none">Divine Principles</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2023 OMEGA BTC AI</p>
+                    <p class="mb-0"><small>Version 1.0.0 (Cosmic)</small></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+    <!-- Scripts with cache-busting -->
+    <script src="js/fear-greed-3d.js?v=1.0.1" type="module"></script>
+    <script src="js/fear-greed.js?v=1.0.1"></script>
+
+    <!-- Dedicated Fear & Greed Page Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize the dedicated Fear & Greed page
+            initializeFearGreedPage();
+
+            // Refresh button functionality
+            const refreshButton = document.getElementById('refresh-button');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const refreshText = document.getElementById('refresh-text');
+
+            refreshButton.addEventListener('click', function () {
+                loadingSpinner.style.display = 'inline-block';
+                refreshText.style.display = 'none';
+
+                // Simulate refresh
+                setTimeout(() => {
+                    updateFearGreedData();
+                    loadingSpinner.style.display = 'none';
+                    refreshText.style.display = 'inline-block';
+                }, 1500);
+            });
+
+            // Create sample historical data for the chart
+            createHistoricalChart();
+
+            // Update indicator values
+            updateIndicators();
+        });
+
+        function initializeFearGreedPage() {
+            // This function will be called when the page loads
+            console.log('Fear & Greed Index page initialized');
+
+            // Initial data fetch
+            updateFearGreedData();
+
+            // Set up polling for regular updates (every 5 minutes)
+            setInterval(updateFearGreedData, 300000);
+        }
+
+        function updateFearGreedData() {
+            // Fetch fear and greed data from API
+            fetch('/api/fear-greed')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayFearGreedData(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching fear & greed data:', error);
+                    // Use fallback data in case of error
+                    displayFearGreedData(getFallbackData());
+                });
+        }
+
+        function displayFearGreedData(data) {
+            // Update the main value and classification
+            const valueElement = document.getElementById('fear-greed-value');
+            const classElement = document.getElementById('fear-greed-classification');
+            const timestampElement = document.getElementById('fear-greed-timestamp');
+
+            if (data && data.value) {
+                const value = parseInt(data.value);
+                valueElement.textContent = value;
+
+                // Update classification
+                let classification = '';
+                let classColor = '';
+
+                if (value <= 20) {
+                    classification = 'Extreme Fear';
+                    classColor = 'extreme-fear';
+                } else if (value <= 40) {
+                    classification = 'Fear';
+                    classColor = 'fear';
+                } else if (value <= 60) {
+                    classification = 'Neutral';
+                    classColor = 'neutral';
+                } else if (value <= 80) {
+                    classification = 'Greed';
+                    classColor = 'greed';
+                } else {
+                    classification = 'Extreme Greed';
+                    classColor = 'extreme-greed';
+                }
+
+                classElement.textContent = classification;
+                classElement.className = 'h4 mb-3 ' + classColor;
+
+                // Update timestamp
+                const timestamp = data.timestamp || new Date().toLocaleString();
+                timestampElement.textContent = 'Last updated: ' + timestamp;
+
+                // If we have the 3D visualization function available, update it
+                if (typeof updateFearGreedValue === 'function') {
+                    updateFearGreedValue(value);
+                }
+            }
+        }
+
+        function getFallbackData() {
+            // Fallback data in case the API fails
+            return {
+                value: Math.floor(Math.random() * 100),
+                timestamp: new Date().toLocaleString()
+            };
+        }
+
+        function createHistoricalChart() {
+            const ctx = document.getElementById('fear-greed-history-chart').getContext('2d');
+
+            // Generate some sample historical data
+            const dates = [];
+            const values = [];
+
+            const today = new Date();
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+
+                // Generate a value that fluctuates somewhat realistically
+                const baseValue = 50;
+                const fluctuation = Math.sin(i * 0.3) * 20 + Math.random() * 15 - 7.5;
+                values.push(Math.max(0, Math.min(100, Math.round(baseValue + fluctuation))));
+            }
+
+            // Create gradient for the chart
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(247, 147, 26, 0.6)');
+            gradient.addColorStop(1, 'rgba(247, 147, 26, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Fear & Greed Index',
+                        data: values,
+                        borderColor: '#f7931a',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#f7931a',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8b949e'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#8b949e',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(22, 27, 34, 0.9)',
+                            titleColor: '#c9d1d9',
+                            bodyColor: '#c9d1d9',
+                            borderColor: '#30363d',
+                            borderWidth: 1,
+                            displayColors: false,
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    let classification = '';
+
+                                    if (value <= 20) classification = 'Extreme Fear';
+                                    else if (value <= 40) classification = 'Fear';
+                                    else if (value <= 60) classification = 'Neutral';
+                                    else if (value <= 80) classification = 'Greed';
+                                    else classification = 'Extreme Greed';
+
+                                    return `Value: ${value} - ${classification}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateIndicators() {
+            // Random values for the indicators (in a real app these would come from APIs)
+            document.getElementById('market-momentum').textContent = Math.floor(Math.random() * 100) + '%';
+            document.getElementById('volatility').textContent = (Math.random() * 3 + 1).toFixed(2);
+            document.getElementById('trading-volume').textContent = '$' + (Math.random() * 5 + 10).toFixed(1) + 'B';
+            document.getElementById('social-sentiment').textContent = Math.floor(Math.random() * 100) + '%';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "Sacred Image",
+  "description": "A divinely transformed image",
+  "image": "BOOK/divine_chronicles/nft_archive/nft_output/visualizations/nft_image_20250330_130516.png",
+  "attributes": [
+    {
+      "trait_type": "Origin",
+      "value": "Divine"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Transformed"
+    }
+  ],
+  "blockchain_data": {},
+  "divine_metrics": {
+    "divine_harmony": 0.0,
+    "sacred_balance": 0.0,
+    "golden_ratio_alignment": 0.618,
+    "cosmic_resonance": 0.0,
+    "ethereal_vibrance": 0.0
+  },
+  "rarity_score": 12.36,
+  "edition": 1,
+  "total_editions": 1,
+  "created_at": "2025-03-30T13:05:16.663608",
+  "updated_at": "2025-03-30T13:05:16.663608"
+}

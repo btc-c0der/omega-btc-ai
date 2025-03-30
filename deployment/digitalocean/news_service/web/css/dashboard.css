@@ -1,0 +1,207 @@
+/* Dashboard Section */
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Fear & Greed Index */
+.fear-greed-container {
+    background-color: var(--card-bg, #161b22);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 200px;
+    position: relative;
+}
+
+.fear-greed-container.loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(22, 27, 34, 0.7);
+    z-index: 1;
+    border-radius: 8px;
+}
+
+.fear-greed-container.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: #f7931a;
+    animation: spin 1s ease-in-out infinite;
+    z-index: 2;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.fear-greed-value-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.fear-greed-value {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.fear-greed-label {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.fear-greed-gauge {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    margin: 10px 0 15px;
+}
+
+.fear-greed-gauge-background {
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.fear-greed-segment {
+    flex: 1;
+    height: 100%;
+}
+
+.fear-greed-segment.extreme-fear {
+    background-color: #F44336;
+}
+
+.fear-greed-segment.fear {
+    background-color: #FF9800;
+}
+
+.fear-greed-segment.neutral {
+    background-color: #FFC107;
+}
+
+.fear-greed-segment.greed {
+    background-color: #4CAF50;
+}
+
+.fear-greed-segment.extreme-greed {
+    background-color: #8BC34A;
+}
+
+.fear-greed-needle {
+    position: absolute;
+    width: 3px;
+    height: 40px;
+    background-color: #fff;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    transform-origin: bottom center;
+    transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
+}
+
+.fear-greed-needle::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    top: -4px;
+    left: -2.5px;
+}
+
+.fear-greed-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.fear-greed-chart {
+    background-color: var(--card-bg, #161b22);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 250px;
+    position: relative;
+}
+
+.fear-greed-chart.loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(22, 27, 34, 0.7);
+    z-index: 1;
+    border-radius: 8px;
+}
+
+.fear-greed-chart.loading::after {
+    content: "Loading chart...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-secondary, #8b949e);
+    z-index: 2;
+}
+
+/* Color classes for the Fear & Greed value */
+.extreme-fear-color {
+    color: #F44336;
+}
+
+.fear-color {
+    color: #FF9800;
+}
+
+.neutral-color {
+    color: #FFC107;
+}
+
+.greed-color {
+    color: #4CAF50;
+}
+
+.extreme-greed-color {
+    color: #8BC34A;
+}
+
+/* Responsive adjustments for the fear-greed section */
+@media (max-width: 768px) {
+    .fear-greed-chart {
+        height: 200px;
+    }
+}

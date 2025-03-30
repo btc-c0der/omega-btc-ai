@@ -1,0 +1,17 @@
+{
+  "sentiment_summary": {
+    "average": 0.1527214942053269,
+    "bullish": 13,
+    "bearish": 1,
+    "neutral": 1,
+    "total": 15
+  },
+  "trading_recommendation": {
+    "action": "HOLD",
+    "confidence": "MEDIUM",
+    "message": "Neutral market sentiment in recent news",
+    "sentiment_score": 0.1527214942053269,
+    "timestamp": "2025-03-29T14:34:54.601281"
+  },
+  "timestamp": "2025-03-29T14:34:54.604349"
+}

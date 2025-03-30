@@ -1,0 +1,24 @@
+{
+  "name": "Sacred Punk #669730",
+  "description": "A divine fusion of punk culture and sacred geometry",
+  "image": "BOOK/divine_chronicles/nft_archive/sacred_punks/sacred_punk_669730.png",
+  "attributes": [
+    {
+      "trait_type": "headwear",
+      "value": "Golden Crown",
+      "description": "A crown imbued with sacred proportions",
+      "sacred_pattern": "The fundamental pattern of creation"
+    },
+    {
+      "trait_type": "accessories",
+      "value": "Phi Chain",
+      "description": "A chain with golden ratio links",
+      "sacred_pattern": "The divine proportion in motion"
+    }
+  ],
+  "divine_metrics": {
+    "rarity": 0.925,
+    "resonance": 0.925,
+    "trait_count": 2
+  }
+}

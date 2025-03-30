@@ -8,7 +8,7 @@ import os
 import re
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from subprocess import check_output, CalledProcessError
@@ -27,6 +27,8 @@ class BranchMetrics:
     last_ci_status: str
     lines_changed: Tuple[int, int]  # (additions, deletions)
     review_count: int
+    total_lines: int
+    genesis_message: str
     
 class BranchAnalytics:
     """Analyzes git branch patterns and health metrics."""
@@ -92,7 +94,13 @@ class BranchAnalytics:
             'log', '--format=%aI', '--reverse', branch_name
         ]).splitlines()[0]
         first_commit = datetime.fromisoformat(first_commit_str)
-        age_days = (datetime.now() - first_commit).days
+        now = datetime.now(timezone.utc)
+        age_days = (now - first_commit).days
+        
+        # Get genesis commit message
+        genesis_message = self._run_git_command([
+            'log', '--format=%B', '--reverse', branch_name
+        ]).splitlines()[0].strip()
         
         # Check if merged
         is_merged = bool(self._run_git_command([
@@ -112,6 +120,21 @@ class BranchAnalytics:
             if match:
                 additions, deletions = map(int, match.groups())
         
+        # Get total lines of code
+        try:
+            total_lines = 0
+            files_output = self._run_git_command(['ls-tree', '-r', branch_name, '--name-only'])
+            for file_path in files_output.splitlines():
+                if os.path.splitext(file_path)[1] in ['.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.css', '.scss', '.java', '.cpp', '.c', '.h', '.go', '.rs']:
+                    try:
+                        file_content = self._run_git_command(['show', f'{branch_name}:{file_path}'])
+                        total_lines += len(file_content.splitlines())
+                    except CalledProcessError:
+                        continue
+        except CalledProcessError:
+            total_lines = 0
+            logger.warning(f"Could not count lines for branch {branch_name}")
+        
         # Get review count (placeholder - implement based on your review system)
         review_count = 0
         
@@ -124,7 +147,9 @@ class BranchAnalytics:
             is_merged=is_merged,
             last_ci_status=last_ci_status,
             lines_changed=(additions, deletions),
-            review_count=review_count
+            review_count=review_count,
+            total_lines=total_lines,
+            genesis_message=genesis_message
         )
         
     def analyze_branch_health(self, branch_name: str) -> Dict[str, float]:
@@ -144,7 +169,7 @@ class BranchAnalytics:
             age_score = max(0.0, 1.0 - (metrics.age_days - 30) / 60)
             
         # Activity score
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         days_since_commit = (now - metrics.last_commit).days
         activity_score = max(0.0, 1.0 - days_since_commit / 30)
         
@@ -191,7 +216,7 @@ class BranchAnalytics:
             metrics = self.get_branch_metrics(branch)
             
             if (not metrics.is_merged and 
-                (datetime.now() - metrics.last_commit).days > days_threshold):
+                (datetime.now(timezone.utc) - metrics.last_commit).days > days_threshold):
                 stale_branches.append(branch)
                 
         return stale_branches
@@ -232,7 +257,7 @@ class BranchAnalytics:
             output_file: Path to output JSON file
         """
         analytics = {
-            'timestamp': datetime.now().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'repository': self.repo_path,
             'branches': {}
         }
@@ -255,7 +280,9 @@ class BranchAnalytics:
                         'additions': metrics.lines_changed[0],
                         'deletions': metrics.lines_changed[1]
                     },
-                    'review_count': metrics.review_count
+                    'review_count': metrics.review_count,
+                    'total_lines': metrics.total_lines,
+                    'genesis_message': metrics.genesis_message
                 },
                 'health': health
             }

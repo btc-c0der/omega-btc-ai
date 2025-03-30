@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="OMEGA BTC AI - Divine Blockchain Intelligence">OMEGA BTC AI - Divine Blockchain Intelligence
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="favicon.ico">
+    <meta name="msapplication-TileImage" content="favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        :root {
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #c9d1d9;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .sentiment-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            z-index: 1;
+        }
+
+        .source-tag {
+            background-color: rgba(30, 70, 120, 0.5);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .news-date {
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+
+        .recommendation-card {
+            background-color: #0d1117;
+            border-left-width: 4px;
+            padding: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .recommendation-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .progress {
+            background-color: #30363d;
+        }
+
+        /* Bitcoin 3D visualization styles */
+        .bitcoin-3d-wrapper {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .bitcoin-bearish-glow {
+            box-shadow: 0 0 30px rgba(248, 81, 73, 0.4);
+        }
+
+        .bitcoin-neutral-glow {
+            box-shadow: 0 0 30px rgba(247, 147, 26, 0.4);
+        }
+
+        .bitcoin-bullish-glow {
+            box-shadow: 0 0 30px rgba(63, 185, 80, 0.4);
+        }
+
+        .bitcoin-3d-container {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(20, 25, 35, 1) 0%, rgba(13, 17, 23, 1) 100%);
+        }
+
+        .bitcoin-3d-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .bitcoin-3d-info {
+            position: relative;
+            z-index: 2;
+        }
+
+        .model-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 10;
+        }
+
+        .model-loading.active {
+            display: block;
+        }
+
+        .sentiment-dial-container {
+            position: relative;
+            height: 150px;
+        }
+
+        .sentiment-value-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+
+        .sentiment-label-container {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 0.8rem;
+        }
+
+        .sentiment-label-bearish {
+            color: #f85149;
+        }
+
+        .sentiment-label-neutral {
+            color: #d29922;
+        }
+
+        .sentiment-label-bullish {
+            color: #3fb950;
+        }
+
+        .sentiment-bar {
+            height: 6px;
+            background-color: #30363d;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .sentiment-bar-fill {
+            height: 100%;
+            background-color: #d29922;
+            border-radius: 3px;
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+
+        /* OMEGA wisdom card */
+        .omega-wisdom {
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #30363d;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .wisdom-icon {
+            font-size: 2rem;
+            color: #f7931a;
+            margin-right: 1rem;
+        }
+
+        /* Footer styles */
+        .footer {
+            background-color: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        /* Golden glow effect for special content */
+        .golden-glow {
+            box-shadow: 0 0 25px rgba(247, 147, 26, 0.2);
+            border-color: rgba(247, 147, 26, 0.3);
+        }
+
+        .divine-quote {
+            border-left: 3px solid #f7931a;
+            padding-left: 15px;
+            font-style: italic;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+
+        /* Fear and Greed visualization */
+        .fear-greed-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            background: radial-gradient(circle, rgba(20, 25, 35, 1) 0%, rgba(13, 17, 23, 1) 100%);
+            margin-bottom: 30px;
+        }
+
+        .year-badge {
+            background-color: rgba(247, 147, 26, 0.2);
+            color: #f7931a;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(247, 147, 26, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-currency-bitcoin text-warning me-2"></i>
+                <span data-i18n="OMEGA BTC AI - Divine Blockchain Intelligence">OMEGA BTC AI - Divine Blockchain
+                    Intelligence</span>
+            </a>
+
+            <!-- Add React Dashboard Link -->
+            <a href="/react/" class="btn btn-outline-warning btn-sm me-2 d-none d-md-block">
+                <i class="fas fa-code"></i> Try React Dashboard Beta
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="portal.html">
+                            <i class="bi bi-house-door"></i> Portal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="fear-greed.html">
+                            <i class="bi bi-speedometer2"></i> Fear & Greed Index
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-i18n="Bitcoin News Analysis">Bitcoin News Analysis</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" data-i18n="Select Language">
+                            Select Language
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="#" data-lang="en">English</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="es">Español</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="fr">Français</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="zh">中文</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#" data-lang="om">OMEGA Divine Language</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Add React Dashboard Link in mobile menu -->
+                    <li class="nav-item d-md-none">
+                        <a class="nav-link" href="/react/">
+                            <i class="fas fa-code"></i> React Dashboard Beta
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 data-i18n="Bitcoin News Analysis">Bitcoin News Analysis</h1>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="status-indicator bg-danger" id="status-indicator"></span>
+                            <span id="status-text">Disconnected</span>
+                        </div>
+                        <button id="refresh-button" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            <span id="loading-spinner" style="display: none;">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span data-i18n="Loading...">Loading...</span>
+                            </span>
+                            <span id="refresh-text">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-muted small" data-i18n="For educational purposes only. Not financial advice.">For
+                    educational purposes only. Not financial advice.</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div id="sentiment-container" class="mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title" data-i18n="OMEGA Trading Sentiment">OMEGA Trading Sentiment</h5>
+                            <div class="d-flex flex-column">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span data-i18n="Sentiment">Sentiment</span>
+                                        <span id="avg-sentiment">0.00</span>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-warning" id="sentiment-progress" style="width: 50%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card bg-dark mb-2">
+                                            <div class="card-body p-2 text-center">
+                                                <div class="mb-1">News Count</div>
+                                                <h3 id="news-count">0</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-dark mb-2">
+                                            <div class="card-body p-2 text-center">
+                                                <div class="mb-1">Confidence</div>
+                                                <h3 id="confidence">0.00</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sentiment-dial-container mt-2">
+                                    <canvas id="sentimentDial"></canvas>
+                                    <div class="sentiment-label-container">
+                                        <div class="sentiment-label-bearish" data-i18n="Bearish">Bearish</div>
+                                        <div class="sentiment-label-neutral" data-i18n="Neutral">Neutral</div>
+                                        <div class="sentiment-label-bullish" data-i18n="Bullish">Bullish</div>
+                                    </div>
+                                    <div class="sentiment-value-container">
+                                        <div id="sentimentValue" class="h2 mb-0">0.0</div>
+                                        <div class="small text-muted"
+                                            data-i18n="Based on analysis of recent Bitcoin news sentiment">Based on
+                                            analysis
+                                            of recent Bitcoin news sentiment</div>
+                                        <div class="sentiment-bar mt-2">
+                                            <div class="sentiment-bar-fill" id="sentimentBarFill" style="width: 50%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-auto text-muted text-end">
+                                    <small id="last-updated" data-i18n="Last updated: Calculating...">Last updated:
+                                        Calculating...</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <span id="tradingRecommendation" data-i18n="Awaiting divine insight...">Awaiting divine
+                                insight...</span>
+                        </h5>
+                        <div id="recommendation-container" class="recommendation-card mb-4 border-warning">
+                            <div class="d-flex align-items-center">
+                                <div class="recommendation-icon" id="recommendation-icon">
+                                    <i class="bi bi-dash-circle-fill text-warning"></i>
+                                </div>
+                                <div class="recommendation-content">
+                                    <p class="mb-0 text-light">OMEGA's AI is analyzing the Bitcoin market sentiment to
+                                        provide a divine recommendation...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto text-muted text-end">
+                            <small id="recommendationTime" data-i18n="Last updated: Calculating...">Last updated:
+                                Calculating...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fear & Greed Index Section (New isolated section) -->
+        <div class="row mb-5" id="fear-greed-section">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Fear & Greed Index</h2>
+                        <div class="fear-greed-container">
+                            <div id="fear-greed-3d" style="width: 100%; height: 350px;"></div>
+                        </div>
+                        <div class="text-muted text-center mt-3">
+                            <p class="small">The Fear & Greed Index reflects market sentiment from extreme fear (0) to
+                                extreme greed (100)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Bitcoin Visualization -->
+        <div class="bitcoin-3d-wrapper mb-5">
+            <div id="bitcoin-3d-container" class="bitcoin-3d-container"></div>
+            <div class="model-loading" id="model-loading">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border text-warning me-2" role="status" style="width: 1.5rem; height: 1.5rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span data-i18n="Loading 3D model...">Loading 3D model...</span>
+                </div>
+            </div>
+            <div class="bitcoin-3d-overlay">
+                <div class="sentiment-label-container">
+                    <div class="sentiment-label-bearish" data-i18n="Bearish">Bearish</div>
+                    <div class="sentiment-label-neutral" data-i18n="Neutral">Neutral</div>
+                    <div class="sentiment-label-bullish" data-i18n="Bullish">Bullish</div>
+                </div>
+                <div class="bitcoin-3d-info">
+                    <h3 class="mb-0" data-i18n="OMEGA Divine Visualization">OMEGA Divine Visualization</h3>
+                    <p class="text-light small"
+                        data-i18n="Cosmic Bitcoin energy visualization based on market sentiment">Cosmic Bitcoin
+                        energy visualization based on market sentiment</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Future Visions Section -->
+        <div id="future-visions-container" class="mb-5"></div>
+
+        <!-- Educational Banner -->
+        <div class="omega-wisdom mb-4">
+            <div class="d-flex">
+                <div class="wisdom-icon">
+                    <i class="bi bi-lightbulb-fill"></i>
+                </div>
+                <div>
+                    <h3 data-i18n="OMEGA Wisdom">OMEGA Wisdom</h3>
+                    <p class="mb-0" data-i18n="Understand Bitcoin's cosmic patterns">Understand Bitcoin's cosmic
+                        patterns and market cycles through OMEGA's divine lens</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Section Heading -->
+        <div id="news-section">
+            <h2 class="mb-4" data-i18n="Latest News">Latest News</h2>
+
+            <!-- News Items Container -->
+            <div class="row g-4 mb-5" id="news-container">
+                <!-- News items will be added here dynamically -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading news...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="card bg-dark mb-5">
+            <div class="card-body">
+                <h5 class="text-warning" data-i18n="NEWS DISCLAIMER">NEWS DISCLAIMER</h5>
+                <p class="mb-0 small" data-i18n="All content is for educational purposes only. Not investment advice.">
+                    All content is for educational purposes only. Not investment advice. OMEGA AI divine insights are
+                    generated algorithmically based on market sentiment and should not be considered financial advice.
+                    Always do your own research before making investment decisions.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 data-i18n="OMEGA Education">OMEGA Education</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-decoration-none">Bitcoin Fundamentals</a></li>
+                        <li><a href="#" class="text-decoration-none">Market Analysis</a></li>
+                        <li><a href="#" class="text-decoration-none" data-i18n="Divine Principles">Divine Principles</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2023 OMEGA BTC AI</p>
+                    <p class="mb-0"><small>Version 1.0.0 (Cosmic)</small></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+    <!-- Scripts with cache-busting -->
+    <script src="js/translations.js?v=1.0.1"></script>
+    <script src="js/bitcoin-visualization.js?v=1.0.1" type="module"></script>
+    <script src="js/fear-greed-3d.js?v=1.0.1" type="module"></script>
+    <script src="js/future-visions.js?v=1.0.1"></script>
+    <script src="js/main.js?v=1.0.1"></script>
+    <script src="js/bitcoin-infographic.js?v=1.0.1"></script>
+    <script src="js/section-manager.js?v=1.0.1"></script>
+    <!-- Test Scripts -->
+    <script src="js/tests/api-simulation.js?v=1.0.1"></script>
+    <script src="js/tests/dashboard-tests.js?v=1.0.1"></script>
+    <script src="js/tests/component-stress-tests.js?v=1.0.1"></script>
+    <script src="js/fear-greed.js?v=1.0.1"></script>
+</body>
+
+</html>

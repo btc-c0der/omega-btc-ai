@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - React Dashboard (Preview)</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --accent-blue: #3b82f6;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --neutral-gray: #4b5563;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .brand span {
+            color: var(--accent-yellow);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .text-small {
+            font-size: 0.8rem;
+        }
+
+        .fear-greed-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .fear-greed-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .fear-greed-label {
+            font-size: 1.2rem;
+        }
+
+        .fear-greed-gauge {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(to right,
+                    var(--accent-red) 0%,
+                    var(--accent-red) 20%,
+                    var(--accent-yellow) 20%,
+                    var(--accent-yellow) 40%,
+                    var(--neutral-gray) 40%,
+                    var(--neutral-gray) 60%,
+                    var(--accent-blue) 60%,
+                    var(--accent-blue) 80%,
+                    var(--accent-green) 80%,
+                    var(--accent-green) 100%);
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fear-greed-pointer {
+            position: absolute;
+            top: 0;
+            width: 4px;
+            height: 50px;
+            background-color: white;
+            transform-origin: center;
+            transition: left 0.5s ease;
+        }
+
+        .fear-greed-chart {
+            width: 100%;
+            height: 200px;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .fear-greed-chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 8px;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            color: var(--accent-red);
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">
+            <div>OMEGA <span>BTC</span> AI</div>
+            <a href="/" style="margin-left: 20px; font-size: 0.8rem; color: #f59e0b; text-decoration: none;">
+                &larr; Back to Main Dashboard
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-title">
+            <h1>Dashboard</h1>
+            <p class="text-secondary">Market sentiment and Bitcoin analytics powered by the Fear & Greed API</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-title">Current Fear & Greed Index</div>
+                <div id="current-fear-greed" class="fear-greed-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Fear & Greed History (30 Days)</div>
+                <div id="fear-greed-history" class="fear-greed-chart">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">About the Fear & Greed Index API</div>
+            <p>The Crypto Fear & Greed Index analyzes emotions and sentiments from different sources and produces a
+                single number: the Fear & Greed Index for Bitcoin and other large cryptocurrencies.</p>
+            <p>A value of 0 means "Extreme Fear" while a value of 100 represents "Extreme Greed".</p>
+            <p class="text-small text-secondary">Data sourced from <a
+                    href="https://rapidapi.com/onshabogdan-5SUvbWmtd0l/api/crypto-fear-greed-index2" target="_blank"
+                    style="color: var(--accent-blue);">Crypto Fear & Greed Index API</a></p>
+        </div>
+    </main>
+
+    <script>
+        // Helper functions
+        function getColorByValue(value) {
+            if (value <= 25) return '#ef4444'; // Red - Extreme Fear
+            if (value <= 40) return '#f59e0b'; // Yellow/Orange - Fear
+            if (value <= 60) return '#4b5563'; // Gray - Neutral
+            if (value <= 80) return '#3b82f6'; // Blue - Greed
+            return '#10b981'; // Green - Extreme Greed
+        }
+
+        function getClassificationByValue(value) {
+            if (value <= 25) return 'Extreme Fear';
+            if (value <= 40) return 'Fear';
+            if (value <= 60) return 'Neutral';
+            if (value <= 80) return 'Greed';
+            return 'Extreme Greed';
+        }
+
+        // Fetch current Fear & Greed data
+        async function fetchCurrentFearGreed() {
+            const container = document.getElementById('current-fear-greed');
+
+            try {
+                // Use our local API endpoint
+                const response = await fetch('/api/fear-greed');
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+                const data = await response.json();
+                const value = data.fgi.value;
+                const classification = data.fgi.valueClassification;
+                const color = getColorByValue(value);
+                const pointerPosition = `${value}%`;
+
+                // Clear loading state
+                container.innerHTML = `
+                    <div class="fear-greed-value" style="color: ${color}">${value}</div>
+                    <div class="fear-greed-label" style="color: ${color}">${classification}</div>
+                    <div class="fear-greed-gauge">
+                        <div class="fear-greed-pointer" style="left: ${pointerPosition}"></div>
+                    </div>
+                    <div class="text-small text-secondary">Last updated: ${new Date(data.fgi.timestamp).toLocaleString()}</div>
+                `;
+            } catch (error) {
+                console.error('Error fetching Fear & Greed data:', error);
+
+                // Fallback to mock data if API fails
+                const mockValue = 45;
+                const classification = getClassificationByValue(mockValue);
+                const color = getColorByValue(mockValue);
+                const pointerPosition = `${mockValue}%`;
+
+                container.innerHTML = `
+                    <div class="fear-greed-value" style="color: ${color}">${mockValue}</div>
+                    <div class="fear-greed-label" style="color: ${color}">${classification}</div>
+                    <div class="fear-greed-gauge">
+                        <div class="fear-greed-pointer" style="left: ${pointerPosition}"></div>
+                    </div>
+                    <div class="text-small text-secondary">Last updated: ${new Date().toLocaleString()}</div>
+                    <div class="text-small text-secondary">(Using fallback data)</div>
+                `;
+            }
+        }
+
+        // Fetch historical Fear & Greed data
+        async function fetchHistoricalFearGreed() {
+            const container = document.getElementById('fear-greed-history');
+
+            try {
+                // Use our local API endpoint
+                const response = await fetch('/api/fear-greed');
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+                const data = await response.json();
+                const historyData = data.history;
+
+                // Render chart
+                container.innerHTML = '';
+                const chartWidth = container.clientWidth;
+                const barWidth = Math.max(8, (chartWidth / historyData.length) - 4);
+                const barGap = 4;
+
+                historyData.forEach((item, index) => {
+                    const left = index * (barWidth + barGap);
+                    const height = (item.value * 1.8); // Scale to make it visually better (0-100 -> 0-180px)
+                    const color = getColorByValue(item.value);
+
+                    const bar = document.createElement('div');
+                    bar.className = 'fear-greed-chart-bar';
+                    bar.style.left = `${left}px`;
+                    bar.style.height = `${height}px`;
+                    bar.style.backgroundColor = color;
+                    bar.style.width = `${barWidth}px`;
+                    bar.title = `${new Date(item.timestamp).toLocaleDateString()}: ${item.value} (${item.valueClassification})`;
+
+                    container.appendChild(bar);
+                });
+            } catch (error) {
+                console.error('Error fetching historical Fear & Greed data:', error);
+
+                // Generate fallback data with a sine wave pattern
+                container.innerHTML = '';
+
+                // Generate mock data with a sine wave pattern
+                const mockData = [];
+                for (let i = 0; i < 30; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (30 - i));
+
+                    // Generate a value between 20 and 80 with some sine wave trend
+                    const baseValue = 50;
+                    const amplitude = 25;
+                    const value = Math.round(baseValue + amplitude * Math.sin(i * 0.4));
+
+                    mockData.push({
+                        timestamp: date.toISOString(),
+                        value,
+                        valueClassification: getClassificationByValue(value)
+                    });
+                }
+
+                // Render chart
+                const chartWidth = container.clientWidth;
+                const barWidth = Math.max(8, (chartWidth / mockData.length) - 4);
+                const barGap = 4;
+
+                mockData.forEach((item, index) => {
+                    const left = index * (barWidth + barGap);
+                    const height = (item.value * 1.8); // Scale to make it visually better (0-100 -> 0-180px)
+                    const color = getColorByValue(item.value);
+
+                    const bar = document.createElement('div');
+                    bar.className = 'fear-greed-chart-bar';
+                    bar.style.left = `${left}px`;
+                    bar.style.height = `${height}px`;
+                    bar.style.backgroundColor = color;
+                    bar.style.width = `${barWidth}px`;
+                    bar.title = `${new Date(item.timestamp).toLocaleDateString()}: ${item.value} (${item.valueClassification})`;
+
+                    container.appendChild(bar);
+                });
+
+                // Add fallback notice
+                const fallbackNotice = document.createElement('div');
+                fallbackNotice.className = 'text-small text-secondary text-center mt-3';
+                fallbackNotice.textContent = '(Using fallback data)';
+                container.appendChild(fallbackNotice);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCurrentFearGreed();
+            fetchHistoricalFearGreed();
+        });
+    </script>
+</body>
+
+</html>
