@@ -5,29 +5,36 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "omega_ai"
 version = "0.5.3"
-description = "OMEGA BTC AI - Advanced Bitcoin Market Analysis System"
-requires-python = ">=3.8"
 authors = [
-    {name = "OMEGA BTC AI DIVINE COLLECTIVE", email = "divine@omega-btc-ai.com"},
+    { name="Felipe Siqueira" }
+]
+description = "OMEGA BTC AI - Divine GPT Module"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "flask",
-    "flask-cors",
-    "flask-socketio",
-    "gevent-websocket",
-    "redis",
-    "ccxt",
-    "plotly",
-    "numpy",
-    "pandas",
-    "torch",
-    "diffusers",
-    "transformers",
-    "accelerate",
-    "pillow",
+    "aiohttp",
+    "python-dotenv",
+    "selenium>=4.0.0",
+    "undetected-chromedriver>=3.5.0",
+    "beautifulsoup4>=4.9.0"
 ]
-dynamic = ["readme", "license", "classifiers"]
 
-[tool.setuptools.packages.find]
-include = ["omega_ai*"]
-exclude = ["tests*"] 
+[project.urls]
+"Homepage" = "https://github.com/yourusername/omega-btc-ai"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+packages = [
+    "omega_ai",
+    "omega_ai.divine_gpt"
+] 
