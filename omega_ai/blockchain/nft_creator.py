@@ -69,12 +69,19 @@ class OMEGANFTCreator:
                 torch_dtype=torch.float16
             )
             
-            # Move to GPU if available
+            # Move to appropriate device
             if torch.cuda.is_available():
-                self.txt2img_model = self.txt2img_model.to("cuda")
-                self.img2img_model = self.img2img_model.to("cuda")
+                device = "cuda"
+                print("Using CUDA for GPU acceleration")
+            elif torch.backends.mps.is_available():
+                device = "mps"
+                print("Using MPS (Metal Performance Shaders) for GPU acceleration")
             else:
-                print("Warning: CUDA not available, using CPU for image generation")
+                device = "cpu"
+                print("Warning: No GPU acceleration available, using CPU")
+                
+            self.txt2img_model = self.txt2img_model.to(device)
+            self.img2img_model = self.img2img_model.to(device)
                 
         except Exception as e:
             print(f"Warning: Could not initialize AI models: {e}")

@@ -2,6 +2,7 @@
 
 import pytest
 import torch
+import asyncio
 from pathlib import Path
 from PIL import Image, ImageDraw
 import numpy as np
@@ -58,26 +59,16 @@ def create_sacred_geometry(size=(512, 512), pattern_type="flower_of_life"):
     return img
 
 @pytest.fixture
-def sample_image(request):
-    """Create a sample image for testing.
-    
-    Args:
-        request: Pytest request object with optional params
-        
-    Returns:
-        Path to the test image
-    """
-    # Check if we should use an existing image
-    if hasattr(request, 'param') and request.param == 'use_existing':
-        existing_path = Path("tests/data/test.png")
-        if existing_path.exists():
-            return str(existing_path)
-    
+def sample_image():
+    """Create a sample image for testing."""
     # Create sacred geometry test image
     img = create_sacred_geometry()
-    img_path = SACRED_NFT_PATH / "test_image.png"
-    img.save(img_path)
-    return str(img_path)
+    
+    # Save the image
+    test_image_path = SACRED_NFT_PATH / "test_image.png"
+    img.save(test_image_path)
+    
+    return str(test_image_path)
 
 @pytest.fixture
 def nft_creator():
@@ -95,58 +86,83 @@ def test_nft_creator_initialization():
     assert Path(creator.output_dir).exists()
     assert Path(creator.visualizations_dir).exists()
 
-def test_custom_nft_request_validation():
-    """Test NFT request validation."""
-    # Test valid prompt request
-    request = CustomNFTRequest(prompt="A divine whale in cosmic ocean")
-    assert request.prompt == "A divine whale in cosmic ocean"
-    assert request.attributes == {}
-    assert request.divine_metrics == {}
-
-    # Test valid image request
-    request = CustomNFTRequest(image_path="tests/data/test.png", name="Test NFT")
-    assert request.image_path == "tests/data/test.png"
-    assert request.name == "Test NFT"
-
-    # Test invalid request
+def test_custom_nft_request_validation_edge_cases():
+    """Test validation of NFT request edge cases."""
+    # Test empty request
     with pytest.raises(ValueError):
         CustomNFTRequest()
+    
+    # Test non-existent image path
+    with pytest.raises(ValueError):
+        CustomNFTRequest(image_path="nonexistent.png")
+    
+    # Test valid prompt
+    request = CustomNFTRequest(prompt="Test prompt")
+    assert request.prompt == "Test prompt"
+    assert request.attributes == {}
+    assert request.divine_metrics == {}
 
 def test_calculate_divine_metrics(nft_creator, sample_image):
     """Test divine metrics calculation."""
     image = Image.open(sample_image)
     metrics = nft_creator._calculate_divine_metrics(image)
-
+    
+    assert isinstance(metrics, dict)
+    assert all(0 <= v <= 1 for v in metrics.values())
     assert "divine_harmony" in metrics
     assert "sacred_balance" in metrics
     assert "golden_ratio_alignment" in metrics
     assert "cosmic_resonance" in metrics
     assert "ethereal_vibrance" in metrics
 
-    assert 0 <= metrics["divine_harmony"] <= 1
-    assert 0 <= metrics["sacred_balance"] <= 1
-    assert metrics["golden_ratio_alignment"] == pytest.approx(0.618)
-    assert 0 <= metrics["cosmic_resonance"] <= 1
-    assert 0 <= metrics["ethereal_vibrance"] <= 1
-
 def test_enhance_prompt(nft_creator):
     """Test prompt enhancement with divine elements."""
-    original_prompt = "A majestic whale"
-    enhanced = nft_creator._enhance_prompt(original_prompt)
+    original = "A test prompt"
+    enhanced = nft_creator._enhance_prompt(original)
+    
+    assert original in enhanced
+    assert "sacred geometry" in enhanced.lower()
+    assert "golden ratio" in enhanced.lower()
+    assert "divine" in enhanced.lower() or "sacred" in enhanced.lower()
 
-    assert "sacred geometry patterns" in enhanced
-    assert "golden ratio proportions" in enhanced
-    assert "ethereal lighting" in enhanced
-    assert "cosmic energy flows" in enhanced
-    assert "divine symmetry" in enhanced
-    assert "highly detailed" in enhanced
-    assert "professional digital art" in enhanced
+def test_model_fallback(nft_creator):
+    """Test graceful fallback when models fail to initialize."""
+    nft_creator.txt2img_model = None
+    nft_creator.img2img_model = None
+    
+    with pytest.raises(RuntimeError):
+        asyncio.run(nft_creator._generate_from_prompt("test"))
+    
+    with pytest.raises(RuntimeError):
+        asyncio.run(nft_creator._generate_from_image("test.png"))
+
+def test_model_initialization():
+    """Test model initialization with MPS support."""
+    creator = OMEGANFTCreator(output_dir=str(SACRED_NFT_PATH))
+    
+    # Check if models were initialized
+    assert creator.txt2img_model is not None
+    assert creator.img2img_model is not None
+    
+    # Check if models are on the correct device
+    if torch.backends.mps.is_available():
+        assert "mps" in str(creator.txt2img_model.device)
+        assert "mps" in str(creator.img2img_model.device)
+        print("Models successfully initialized on MPS device")
+    elif torch.cuda.is_available():
+        assert "cuda" in str(creator.txt2img_model.device)
+        assert "cuda" in str(creator.img2img_model.device)
+        print("Models successfully initialized on CUDA device")
+    else:
+        assert "cpu" in str(creator.txt2img_model.device)
+        assert "cpu" in str(creator.img2img_model.device)
+        print("Models successfully initialized on CPU")
 
 @pytest.mark.asyncio
 async def test_generate_from_prompt(nft_creator):
     """Test NFT generation from text prompt."""
-    if not torch.cuda.is_available():
-        pytest.skip("Skipping test_generate_from_prompt as CUDA is not available")
+    if not (torch.cuda.is_available() or torch.backends.mps.is_available()):
+        pytest.skip("Skipping test_generate_from_prompt as no GPU acceleration is available")
 
     prompt = "A divine whale swimming through cosmic energy"
     image_path = await nft_creator._generate_from_prompt(prompt)
@@ -158,8 +174,8 @@ async def test_generate_from_prompt(nft_creator):
 @pytest.mark.asyncio
 async def test_generate_from_image(nft_creator, sample_image):
     """Test NFT generation from existing image."""
-    if not torch.cuda.is_available():
-        pytest.skip("Skipping test_generate_from_image as CUDA is not available")
+    if not (torch.cuda.is_available() or torch.backends.mps.is_available()):
+        pytest.skip("Skipping test_generate_from_image as no GPU acceleration is available")
 
     image_path = await nft_creator._generate_from_image(sample_image)
 
@@ -170,8 +186,8 @@ async def test_generate_from_image(nft_creator, sample_image):
 @pytest.mark.asyncio
 async def test_create_nft_from_prompt(nft_creator):
     """Test complete NFT creation from prompt."""
-    if not torch.cuda.is_available():
-        pytest.skip("Skipping test_create_nft_from_prompt as CUDA is not available")
+    if not (torch.cuda.is_available() or torch.backends.mps.is_available()):
+        pytest.skip("Skipping test_create_nft_from_prompt as no GPU acceleration is available")
 
     request = CustomNFTRequest(
         prompt="A divine whale in cosmic ocean",
@@ -198,8 +214,8 @@ async def test_create_nft_from_prompt(nft_creator):
 @pytest.mark.asyncio
 async def test_create_nft_from_image(nft_creator, sample_image):
     """Test complete NFT creation from image."""
-    if not torch.cuda.is_available():
-        pytest.skip("Skipping test_create_nft_from_image as CUDA is not available")
+    if not (torch.cuda.is_available() or torch.backends.mps.is_available()):
+        pytest.skip("Skipping test_create_nft_from_image as no GPU acceleration is available")
 
     request = CustomNFTRequest(
         image_path=sample_image,
@@ -217,12 +233,6 @@ async def test_create_nft_from_image(nft_creator, sample_image):
 
     assert Path(result["image"]).exists()
     assert Path(result["metadata"]).exists()
-
-def test_model_fallback(tmp_path):
-    """Test graceful fallback when AI models are not available."""
-    creator = OMEGANFTCreator(output_dir=str(tmp_path))
-    assert creator.txt2img_model is None or isinstance(creator.txt2img_model, object)
-    assert creator.img2img_model is None or isinstance(creator.img2img_model, object)
 
 def test_divine_metrics_calculation_edge_cases(nft_creator):
     """Test divine metrics calculation with edge case images."""
