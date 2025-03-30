@@ -23,7 +23,7 @@
         .container {
             text-align: center;
             z-index: 10;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: rgba(0, 0, 0, 0.7);
@@ -34,34 +34,54 @@
         h1 {
             font-size: 2.5rem;
             text-shadow: 0 0 10px #00FF00;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         p {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             margin-bottom: 20px;
             line-height: 1.5;
         }
 
-        .links {
+        .matrix-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-top: 40px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 20px;
         }
 
-        .link-card {
-            padding: 15px;
+        .module-card {
+            padding: 12px;
             border: 1px solid #00FF00;
             border-radius: 4px;
             transition: all 0.3s;
             cursor: pointer;
+            background-color: rgba(0, 255, 0, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
-        .link-card:hover {
+        .module-card:hover {
             background-color: rgba(0, 255, 0, 0.1);
             box-shadow: 0 0 15px #00FF00;
             transform: translateY(-5px);
+        }
+
+        .module-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .module-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .module-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
         }
 
         a {
@@ -75,6 +95,30 @@
             left: 0;
             z-index: 0;
         }
+
+        @media (max-width: 1200px) {
+            .matrix-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .matrix-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .matrix-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -82,25 +126,163 @@
     <canvas id="matrixCanvas"></canvas>
 
     <div class="container">
-        <h1>WELCOME TO THE MATRIX</h1>
-        <p>The OMEGA BTC AI Matrix Portal - Your gateway to the digital truth.</p>
+        <h1>THE MATRIX PORTAL</h1>
+        <p>OMEGA BTC AI - Your gateway to the digital truth. Navigate the system of over 2 million lines of code.</p>
 
-        <div class="links">
-            <a href="/api/latest-news" class="link-card">
-                <h3>Latest News</h3>
-                <p>Access the most recent Bitcoin news updates</p>
+        <div class="matrix-grid">
+            <!-- Row 1 -->
+            <a href="/api/latest-news" class="module-card">
+                <div class="module-icon">📰</div>
+                <div class="module-title">Global News</div>
+                <div class="module-description">Real-time crypto and financial news from around the world.</div>
             </a>
-            <a href="/api/latest-recommendation" class="link-card">
-                <h3>Trading Recommendations</h3>
-                <p>Get AI-powered trading insights</p>
+
+            <a href="/api/latest-recommendation" class="module-card">
+                <div class="module-icon">📊</div>
+                <div class="module-title">Market Analysis</div>
+                <div class="module-description">In-depth market analysis and expert insights.</div>
             </a>
-            <a href="/status" class="link-card">
-                <h3>System Status</h3>
-                <p>Check the status of the Matrix systems</p>
+
+            <a href="/status" class="module-card">
+                <div class="module-icon">🧠</div>
+                <div class="module-title">AI Insights</div>
+                <div class="module-description">AI-powered market predictions and pattern recognition.</div>
             </a>
-            <a href="/health" class="link-card">
-                <h3>Health Check</h3>
-                <p>Verify the health of connected services</p>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">📜</div>
+                <div class="module-title">P4NG34 Feed</div>
+                <div class="module-description">Exclusive P4NG34 news and updates from the divine chronicles.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">📡</div>
+                <div class="module-title">Market Monitor</div>
+                <div class="module-description">Real-time BTC market monitoring with trap detection.</div>
+            </a>
+
+            <!-- Row 2 -->
+            <a href="/health" class="module-card">
+                <div class="module-icon">🏗️</div>
+                <div class="module-title">System Architecture</div>
+                <div class="module-description">System overview and infrastructure management.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🌀</div>
+                <div class="module-title">Data Vortex</div>
+                <div class="module-description">Interactive 3D visualization of market data patterns.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🖥️</div>
+                <div class="module-title">Terminal</div>
+                <div class="module-description">Advanced command interface for system control.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">💾</div>
+                <div class="module-title">Memory Architect</div>
+                <div class="module-description">Manage and explore the immortal memory architecture.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🔄</div>
+                <div class="module-title">Network Hub</div>
+                <div class="module-description">Monitor network connections and data flow.</div>
+            </a>
+
+            <!-- Row 3 -->
+            <a href="/health" class="module-card">
+                <div class="module-icon">🧪</div>
+                <div class="module-title">Research Lab</div>
+                <div class="module-description">Experimental features and research tools.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">📡</div>
+                <div class="module-title">Trap Radar</div>
+                <div class="module-description">Advanced visualization of market manipulation patterns.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🔮</div>
+                <div class="module-title">Fibonacci Oracle</div>
+                <div class="module-description">Mathematical pattern recognition for market predictions.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">📈</div>
+                <div class="module-title">Trader Suite</div>
+                <div class="module-description">Advanced tools for automated trading strategies.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🧩</div>
+                <div class="module-title">Quantum Patterns</div>
+                <div class="module-description">Advanced pattern detection using quantum algorithms.</div>
+            </a>
+
+            <!-- Row 4 -->
+            <a href="/health" class="module-card">
+                <div class="module-icon">🔐</div>
+                <div class="module-title">Security Console</div>
+                <div class="module-description">System security monitoring and configuration.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">💠</div>
+                <div class="module-title">Sacred Geometry</div>
+                <div class="module-description">Visualization of divine pattern recognition in markets.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🌊</div>
+                <div class="module-title">Market Waves</div>
+                <div class="module-description">Analysis of market wave patterns and cycles.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🧿</div>
+                <div class="module-title">Divine Monitor</div>
+                <div class="module-description">Tracking cosmic influences on market patterns.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">⚡</div>
+                <div class="module-title">Energy Flows</div>
+                <div class="module-description">Analysis of market energy and momentum indicators.</div>
+            </a>
+
+            <!-- Row 5 -->
+            <a href="/health" class="module-card">
+                <div class="module-icon">📱</div>
+                <div class="module-title">Mobile Gateway</div>
+                <div class="module-description">Mobile access to all system features and alerts.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">📚</div>
+                <div class="module-title">Divine Chronicles</div>
+                <div class="module-description">The sacred texts of system documentation.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">📝</div>
+                <div class="module-title">Trading Journal</div>
+                <div class="module-description">Record and analyze your trading decisions.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🔍</div>
+                <div class="module-title">Market Scanner</div>
+                <div class="module-description">Comprehensive market opportunity scanner.</div>
+            </a>
+
+            <a href="/health" class="module-card">
+                <div class="module-icon">🔱</div>
+                <div class="module-title">OMEGA Central</div>
+                <div class="module-description">The central command hub for the entire system.</div>
             </a>
         </div>
     </div>
