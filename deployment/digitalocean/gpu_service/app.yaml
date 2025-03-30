@@ -1,5 +1,5 @@
-name: omega-gpu-service
-region: nyc1
+name: omega-sacred-gpu-inference
+region: nyc2
 services:
   - name: gpu-inference
     github:
@@ -8,8 +8,45 @@ services:
       deploy_on_push: true
     dockerfile_path: deployment/digitalocean/gpu_service/Dockerfile
     source_dir: deployment/digitalocean/gpu_service
-    instance_size_slug: gpu-basic-1
+    instance_size_slug: gpu-l40s-1
     instance_count: 1
+    ssh_keys:
+      - name: "omega-gpu-key"
+        public_key: "${ssh.PUBLIC_KEY}"  # Will be populated from environment
+    volumes:
+      - name: model-storage
+        mount_path: /app/models
+        fs_type: ext4
+        size_gb: 250
+        format_and_mount: true
+        backup:
+          enabled: true
+          schedule: "0 4 * * 3"  # Every Wednesday at 4 AM UTC
+          retention_weeks: 4
+      - name: data-storage
+        mount_path: /app/data
+        fs_type: ext4
+        size_gb: 250
+        format_and_mount: true
+        backup:
+          enabled: true
+          schedule: "0 4 * * 3"  # Every Wednesday at 4 AM UTC
+          retention_weeks: 4
+    security:
+      allowed_ip_ranges:
+        - "0.0.0.0/0"  # You might want to restrict this to specific IPs
+      firewall_rules:
+        - protocol: tcp
+          ports: [22, 8080, 9100]  # Added 9100 for node exporter
+          sources: ["0.0.0.0/0"]
+    auto_scaling:
+      min_nodes: 1
+      max_nodes: 3
+      metrics:
+        - type: cpu_utilization
+          value: 70
+        - type: gpu_utilization
+          value: 80
     routes:
       - path: /
     envs:
@@ -23,8 +60,49 @@ services:
         value: all
       - key: NVIDIA_DRIVER_CAPABILITIES
         value: compute,utility
+      - key: GPU_MEMORY_FRACTION
+        value: "0.9"
+      - key: VOLUME_MOUNT_PATHS
+        value: "/app/models:/app/data"
+    startup_script: |
+      #!/bin/bash
+      # Execute the full startup script
+      bash /app/startup.sh
+    backup_window:
+      start_hour: 4
+      duration_hours: 4
+      day: "wednesday"
+    pre_backup_script: |
+      #!/bin/bash
+      # Ensure models are in a consistent state
+      curl -X POST http://localhost:8080/api/models/sync
+      # Wait for any pending operations
+      sleep 300
 
 databases:
   - engine: REDIS
     name: redis
-    production: true 
+    production: true
+    backup:
+      enabled: true
+      schedule: "0 4 * * 3"  # Every Wednesday at 4 AM UTC
+      retention_weeks: 4
+    
+monitoring:
+  metrics:
+    - name: gpu_utilization
+      alert:
+        threshold: 90
+        duration: 5m
+    - name: gpu_memory
+      alert:
+        threshold: 85
+        duration: 5m
+    - name: volume_usage
+      alert:
+        threshold: 80
+        duration: 10m
+    - name: backup_status
+      alert:
+        threshold: 1  # Any backup failure
+        duration: 0m  # Immediate alert 

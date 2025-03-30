@@ -9,9 +9,19 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - GPU_MEMORY_FRACTION=0.9
+      - VOLUME_MOUNT_PATHS=/app/models:/app/data
     volumes:
-      - ./data:/app/data
-      - ./models:/app/models
+      - type: volume
+        source: model-storage
+        target: /app/models
+        volume:
+          nocopy: true
+      - type: volume
+        source: data-storage
+        target: /app/data
+        volume:
+          nocopy: true
     ports:
       - "8080:8080"
     deploy:
@@ -19,8 +29,16 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              count: 1
               capabilities: [ gpu ]
+        limits:
+          memory: 61G # Adjusted for L40S specs
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
 
   redis:
     image: redis:latest
@@ -28,7 +46,26 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 4gb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
 
 volumes:
+  model-storage:
+    driver: local
+    driver_opts:
+      type: ext4
+      device: /dev/disk/by-id/model-storage
+      o: defaults,noatime,errors=remount-ro
+  data-storage:
+    driver: local
+    driver_opts:
+      type: ext4
+      device: /dev/disk/by-id/data-storage
+      o: defaults,noatime,errors=remount-ro
   redis_data:
+    driver: local
