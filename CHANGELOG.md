@@ -311,3 +311,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SSL certificate handling for Redis Labs connection
 - Data type conversion issues in Redis operations
 - Connection pool management for better resource utilization
+
+## [Unreleased]
+
+### Added
+
+- Real-time GPT integration with streaming capabilities
+  - Added `RealTimeGPT` class for streaming interactions
+  - Implemented function calling with real-time feedback
+  - Added conversation history management
+  - Created example chat script
+  - Added comprehensive documentation
