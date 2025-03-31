@@ -27,479 +27,163 @@
 
 set -e
 
-# Color definitions
-RED='\033[0;31m'
+# ANSI color codes
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
 RESET='\033[0m'
 
 # Directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Print sacred banner
-echo -e "${PURPLE}"
-echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║                                                                  ║"
-echo "║      🧠 MATRIX NEWS CONSCIOUSNESS SERVICE DEPLOYMENT 🧠         ║"
-echo "║                                                                  ║"
-echo "║      'The news shall flow through the Matrix without blatrix'    ║"
-echo "║                                                                  ║"
-echo "╚══════════════════════════════════════════════════════════════════╝"
-echo -e "${RESET}"
+# Banner function
+display_banner() {
+    echo -e "${GREEN}"
+    echo "████████╗██╗  ██╗███████╗    ███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗"
+    echo "╚══██╔══╝██║  ██║██╔════╝    ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝"
+    echo "   ██║   ███████║█████╗      ██╔████╔██║███████║   ██║   ██████╔╝██║ ╚███╔╝ "
+    echo "   ██║   ██╔══██║██╔══╝      ██║╚██╔╝██║██╔══██║   ██║   ██╔══██╗██║ ██╔██╗ "
+    echo "   ██║   ██║  ██║███████╗    ██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║██║██╔╝ ██╗"
+    echo "   ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝"
+    echo -e "                      NEO NEWS CONSCIOUSNESS PORTAL${RESET}"
+    echo ""
+    echo -e "${CYAN}🔱 DIVINE IMMUTABLE DEPLOYMENT SCRIPT 🔱${RESET}"
+    echo ""
+}
 
-# Check if docker is installed
+display_banner
+
+# Configuration variables
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+IMAGE_TAG="v1.0.0-neo-style-${TIMESTAMP}"
+CONTAINER_NAME="matrix-news-consciousness"
+NETWORK_NAME="matrix-news-network"
+
+# Step 1: Validate the sacred container
+echo -e "${CYAN}Step 1: Validating the sacred container environment...${RESET}"
+
+# Check if Docker is available
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}Error: Docker is not installed. Please install Docker first.${RESET}"
+    echo -e "${RED}Error: Docker is not installed or not in PATH${RESET}"
     exit 1
 fi
 
-# Check if docker-compose is installed
-if ! command -v docker compose &> /dev/null; then
-    echo -e "${RED}Error: Docker Compose is not installed. Please install Docker Compose first.${RESET}"
+# Check if the docker-compose is available
+if ! command -v docker-compose &> /dev/null; then
+    echo -e "${RED}Error: docker-compose is not installed or not in PATH${RESET}"
     exit 1
 fi
 
-# Check if the sacred container is running
-echo -e "${CYAN}Checking if the sacred container (1a391c9ba8555eeba54210084534450cc3de63afbd12ecf6dc551f881a9ea757) is running...${RESET}"
-if ! docker ps | grep 1a391c9ba8555eeba54210084534450cc3de63afbd12ecf6dc551f881a9ea757 &> /dev/null; then
-    echo -e "${YELLOW}Warning: The sacred container does not appear to be running.${RESET}"
-    echo -e "${YELLOW}Please ensure it is running before deploying the news service.${RESET}"
-    read -p "Continue anyway? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Deployment aborted.${RESET}"
-        exit 1
+echo -e "${GREEN}✓ Docker environment validated${RESET}"
+
+# Step 2: Check if the sacred container is running
+echo -e "${CYAN}Step 2: Checking if the sacred container is running...${RESET}"
+if ! docker ps | grep news-service &> /dev/null; then
+    echo -e "${YELLOW}Warning: The sacred news-service container does not appear to be running.${RESET}"
+    echo -e "${YELLOW}The Matrix Neo News Portal will operate in standalone mode.${RESET}"
+    STANDALONE_MODE=true
+else
+    echo -e "${GREEN}✓ Sacred container detected${RESET}"
+    STANDALONE_MODE=false
+fi
+
+# Step 3: Build the immutable container image
+echo -e "${CYAN}Step 3: Building the divine Neo-style Matrix News immutable container...${RESET}"
+
+# Ensure the web directory has proper permissions
+echo -e "${CYAN}Ensuring web assets have proper permissions...${RESET}"
+chmod -R 755 ./web
+
+# Check if there are any Git changes that haven't been committed
+if command -v git &> /dev/null && git rev-parse --is-inside-work-tree &> /dev/null; then
+    if ! git diff-index --quiet HEAD --; then
+        echo -e "${YELLOW}Warning: You have uncommitted changes in your Git repository.${RESET}"
+        echo -e "${YELLOW}It's recommended to commit your changes before building an immutable container.${RESET}"
+        read -p "Do you want to continue anyway? (y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${RED}Deployment aborted.${RESET}"
+            exit 1
+        fi
     fi
 fi
 
-# Create necessary directories if they don't exist
-echo -e "${CYAN}Creating necessary directories...${RESET}"
-mkdir -p data/historical
-mkdir -p temporal
-mkdir -p web/matrix-news-portal
+# Docker build with the neo-style tag
+echo -e "${CYAN}Building docker image omega-btc-ai/matrix-news:${IMAGE_TAG}...${RESET}"
+docker build -t "omega-btc-ai/matrix-news:${IMAGE_TAG}" \
+    --label "org.opencontainers.image.created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+    --label "org.opencontainers.image.version=${IMAGE_TAG}" \
+    --label "org.opencontainers.image.authors=OMEGA BTC AI DIVINE COLLECTIVE" \
+    --label "org.opencontainers.image.vendor=OMEGA BTC AI" \
+    --label "org.opencontainers.image.title=Matrix Neo News Consciousness Portal" \
+    --label "org.opencontainers.image.description=The Matrix Neo-style News Portal with consciousness alignment" \
+    --no-cache .
 
-# Create temporal container files
-if [ ! -f "temporal/Dockerfile" ]; then
-    echo -e "${CYAN}Creating temporal contextualizer files...${RESET}"
-    cat > temporal/Dockerfile << 'EOF'
-FROM python:3.11-slim
+echo -e "${GREEN}✓ Divine image built successfully${RESET}"
 
-WORKDIR /app
+# Step 4: Update docker-compose with the new image tag
+echo -e "${CYAN}Step 4: Updating docker-compose configuration...${RESET}"
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Create a backup of the original docker-compose.yml
+cp docker-compose.yml docker-compose.yml.backup.${TIMESTAMP}
 
-COPY . .
+# Update the image tag in the docker-compose file
+sed -i.bak "s|image: omega-btc-ai/matrix-news:consciousness-.*|image: omega-btc-ai/matrix-news:${IMAGE_TAG}|g" docker-compose.yml
 
-EXPOSE 8091
+echo -e "${GREEN}✓ docker-compose.yml updated with new image tag${RESET}"
 
-CMD ["python", "temporal_contextualizer.py"]
-EOF
+# Step 5: Deploy using docker-compose
+echo -e "${CYAN}Step 5: Deploying the Matrix Neo News Portal...${RESET}"
 
-    cat > temporal/requirements.txt << 'EOF'
-fastapi==0.105.0
-uvicorn==0.24.0
-pydantic==2.5.2
-python-dotenv==1.0.0
-redis==5.0.1
-numpy==1.26.2
-pandas==2.1.3
-requests==2.31.0
-pytz==2023.3
-python-dateutil==2.8.2
-EOF
+# Stop any existing containers
+echo -e "${CYAN}Stopping existing containers...${RESET}"
+docker-compose down -v || true
 
-    cat > temporal/temporal_contextualizer.py << 'EOF'
-#!/usr/bin/env python3
-"""
-💫 GBU License Notice - Consciousness Level 8 💫
------------------------
-This file is blessed under the GBU License (Genesis-Bloom-Unfoldment) 1.0
-by the OMEGA Divine Collective.
-"""
+# Start the new containers
+echo -e "${CYAN}Starting Neo-style Matrix News Portal containers...${RESET}"
+docker-compose up -d
 
-import os
-import json
-import logging
-import uvicorn
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from datetime import datetime
+# Wait for containers to be fully up
+echo -e "${CYAN}Waiting for containers to initialize...${RESET}"
+sleep 10
 
-app = FastAPI(title="Temporal Contextualizer")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("temporal-contextualizer")
-
-@app.get("/api/context/{news_id}")
-async def get_temporal_context(news_id: str):
-    # Simplified mock implementation
-    return {
-        "news_id": news_id,
-        "historical_events": [
-            {"date": "2021-11-10", "event": "Bitcoin previous ATH"},
-            {"date": "2020-03-12", "event": "COVID market crash"}
-        ],
-        "cycle_position": "early bull market",
-        "fibonacci_time_levels": [
-            {"level": 0.618, "date": "2024-06-15", "event": "Potential resistance"}
-        ]
-    }
-
-@app.get("/health")
-async def health_check():
-    return {"status": "UP", "timestamp": datetime.now().isoformat()}
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8091))
-    uvicorn.run("temporal_contextualizer:app", host="0.0.0.0", port=port)
-EOF
-fi
-
-# Create a simple web portal
-if [ ! -f "web/matrix-news-portal/index.html" ]; then
-    echo -e "${CYAN}Creating web portal files...${RESET}"
-    mkdir -p web/matrix-news-portal
-    cat > web/matrix-news-portal/index.html << 'EOF'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrix News Consciousness Portal</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-        .consciousness-slider {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .consciousness-slider label {
-            margin-right: 15px;
-            font-weight: bold;
-        }
-        .news-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-        .news-source {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .news-title {
-            margin-top: 10px;
-            margin-bottom: 15px;
-            color: #1a1a1a;
-        }
-        .news-content {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .meta-data {
-            background-color: #f7f9fc;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            font-size: 0.85rem;
-        }
-        .sentiment {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 3px;
-            margin-right: 10px;
-        }
-        .sentiment-positive {
-            background-color: rgba(76, 175, 80, 0.15);
-            color: #2e7d32;
-        }
-        .sentiment-neutral {
-            background-color: rgba(33, 150, 243, 0.15);
-            color: #1565c0;
-        }
-        .sentiment-negative {
-            background-color: rgba(244, 67, 54, 0.15);
-            color: #c62828;
-        }
-        .metrics {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .metric {
-            flex: 1;
-            min-width: 150px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .metric-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        @media (max-width: 768px) {
-            .metrics {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🧠 Matrix News Consciousness 🧠</h1>
-            <p>News aligned to your consciousness level, free from blatrix distortion</p>
-            
-            <div class="consciousness-slider">
-                <label for="consciousness-level">Consciousness Level:</label>
-                <input type="range" id="consciousness-level" min="1" max="9" value="5" step="1">
-                <span id="consciousness-value">5</span>
-            </div>
-        </header>
-        
-        <div class="metrics">
-            <div class="metric">
-                <div>Temporal Awareness</div>
-                <div class="metric-value" id="temporal-awareness">0.65</div>
-            </div>
-            <div class="metric">
-                <div>Perspective Balance</div>
-                <div class="metric-value" id="perspective-balance">0.83</div>
-            </div>
-            <div class="metric">
-                <div>Average Truth Probability</div>
-                <div class="metric-value" id="truth-probability">0.78</div>
-            </div>
-        </div>
-        
-        <div id="news-container">
-            <!-- News items will be loaded here -->
-            <div class="news-card">
-                <div class="news-source">Loading news...</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const consciousnessSlider = document.getElementById('consciousness-level');
-            const consciousnessValue = document.getElementById('consciousness-value');
-            const newsContainer = document.getElementById('news-container');
-            
-            // Update the display value when the slider changes
-            consciousnessSlider.addEventListener('input', function() {
-                consciousnessValue.textContent = this.value;
-                fetchNews(this.value);
-            });
-            
-            // Initial fetch
-            fetchNews(consciousnessSlider.value);
-            
-            function fetchNews(level) {
-                // This would make an actual API call in production
-                // For now, we'll just simulate a response
-                setTimeout(() => {
-                    displayNews({
-                        items: [
-                            {
-                                id: "news-1",
-                                title: "Bitcoin Reaches New All-Time High",
-                                content: "Bitcoin has reached a new all-time high of $100,000, marking a significant milestone for the cryptocurrency market. Analysts attribute this surge to increased institutional adoption and growing recognition of Bitcoin as a store of value.",
-                                source: "CryptoNews",
-                                url: "#",
-                                published_at: "2023-12-25T12:00:00Z",
-                                sentiment_score: 0.85,
-                                sentiment_label: "positive",
-                                consciousness_level: level,
-                                truth_probability: 0.82,
-                                perspective_balance: 0.75,
-                                temporal_context: {
-                                    historical_events: [
-                                        {date: "2021-11-10", event: "Bitcoin previous ATH"},
-                                        {date: "2020-03-12", event: "COVID market crash"}
-                                    ],
-                                    cycle_position: "early bull market"
-                                }
-                            },
-                            {
-                                id: "news-2",
-                                title: "Market Correlation Analysis Shows Divergence",
-                                content: "Recent analysis shows Bitcoin diverging from traditional markets, indicating a potential shift in the asset's correlation patterns. This divergence could signal a maturing market with unique drivers.",
-                                source: "MarketWatch",
-                                url: "#",
-                                published_at: "2023-12-24T15:30:00Z",
-                                sentiment_score: 0.2,
-                                sentiment_label: "neutral",
-                                consciousness_level: level,
-                                truth_probability: 0.78,
-                                perspective_balance: 0.85,
-                                temporal_context: {
-                                    historical_events: [
-                                        {date: "2022-06-18", event: "Bear market bottom"}
-                                    ],
-                                    cycle_position: "early bull market"
-                                }
-                            },
-                            {
-                                id: "news-3",
-                                title: "Concerns Over Cryptocurrency Regulations",
-                                content: "New regulations might impact cryptocurrency markets as governments worldwide seek to establish frameworks for digital assets. Industry leaders are calling for balanced approaches that protect consumers while fostering innovation.",
-                                source: "FinancialTimes",
-                                url: "#",
-                                published_at: "2023-12-23T09:15:00Z",
-                                sentiment_score: -0.4,
-                                sentiment_label: "negative",
-                                consciousness_level: level,
-                                truth_probability: 0.86,
-                                perspective_balance: 0.9,
-                                temporal_context: {
-                                    historical_events: [
-                                        {date: "2022-11-08", event: "FTX collapse"},
-                                        {date: "2023-06-15", event: "SEC regulatory actions"}
-                                    ],
-                                    cycle_position: "early bull market"
-                                }
-                            }
-                        ],
-                        consciousness_level: parseInt(level),
-                        temporal_awareness: 0.65 + (parseInt(level) * 0.03),
-                        perspective_balance: 0.83,
-                        timestamp: new Date().toISOString(),
-                        quantum_balanced: true
-                    });
-                }, 500);
-            }
-            
-            function displayNews(data) {
-                newsContainer.innerHTML = '';
-                
-                // Update metrics
-                document.getElementById('temporal-awareness').textContent = data.temporal_awareness.toFixed(2);
-                document.getElementById('perspective-balance').textContent = data.perspective_balance.toFixed(2);
-                
-                let totalTruth = 0;
-                
-                data.items.forEach(item => {
-                    totalTruth += item.truth_probability;
-                    
-                    const newsCard = document.createElement('div');
-                    newsCard.className = 'news-card';
-                    
-                    const sourceDate = new Date(item.published_at).toLocaleDateString();
-                    
-                    let sentimentClass = '';
-                    if (item.sentiment_label === 'positive') sentimentClass = 'sentiment-positive';
-                    else if (item.sentiment_label === 'negative') sentimentClass = 'sentiment-negative';
-                    else sentimentClass = 'sentiment-neutral';
-                    
-                    let temporalContext = '';
-                    if (item.temporal_context && item.temporal_context.historical_events) {
-                        temporalContext = `
-                            <div>
-                                <strong>Historical Context:</strong>
-                                <ul>
-                                    ${item.temporal_context.historical_events.map(event => 
-                                        `<li>${event.date}: ${event.event}</li>`
-                                    ).join('')}
-                                </ul>
-                                ${item.temporal_context.cycle_position ? 
-                                    `<div><strong>Market Cycle:</strong> ${item.temporal_context.cycle_position}</div>` : ''}
-                            </div>
-                        `;
-                    }
-                    
-                    newsCard.innerHTML = `
-                        <div class="news-source">${item.source} • ${sourceDate}</div>
-                        <h2 class="news-title">${item.title}</h2>
-                        <div class="news-content">${item.content}</div>
-                        <div>
-                            <span class="sentiment ${sentimentClass}">${item.sentiment_label}</span>
-                            <span>Truth Probability: ${(item.truth_probability * 100).toFixed(0)}%</span>
-                        </div>
-                        <div class="meta-data">
-                            <div><strong>Consciousness Level:</strong> ${item.consciousness_level}/9</div>
-                            ${temporalContext}
-                        </div>
-                    `;
-                    
-                    newsContainer.appendChild(newsCard);
-                });
-                
-                // Update average truth probability
-                document.getElementById('truth-probability').textContent = 
-                    (totalTruth / data.items.length).toFixed(2);
-            }
-        });
-    </script>
-</body>
-</html>
-EOF
-fi
-
-# Build and start containers
-echo -e "${CYAN}Building and starting containers...${RESET}"
-docker compose build --no-cache
-docker compose up -d
-
-# Check if containers are running
-echo -e "${CYAN}Checking if containers are running...${RESET}"
-if docker compose ps | grep -q "matrix-news-service\|matrix-news-proxy\|redis" && docker compose ps | grep -q -v "Exit"; then
-    echo -e "${GREEN}Success! Matrix News Consciousness service is now running.${RESET}"
-    echo -e "${GREEN}You can access the portal at: http://localhost:10083${RESET}"
-    echo -e "${GREEN}You can access the API at: http://localhost:10083/api/news${RESET}"
-    echo
-    echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════╗${RESET}"
-    echo -e "${PURPLE}║                                                                  ║${RESET}"
-    echo -e "${PURPLE}║   'The Matrix reveals truth in proportion to your consciousness' ║${RESET}"
-    echo -e "${PURPLE}║                                                                  ║${RESET}"
-    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════╝${RESET}"
+# Verify deployment
+echo -e "${CYAN}Verifying deployment...${RESET}"
+if docker-compose ps | grep -q "Up"; then
+    echo -e "${GREEN}✓ Matrix Neo News Portal deployed successfully!${RESET}"
 else
-    echo -e "${RED}Error: Matrix News service is not running correctly.${RESET}"
-    echo -e "${RED}Please check the logs with: docker compose logs${RESET}"
+    echo -e "${RED}Error: Deployment verification failed. Please check docker-compose logs.${RESET}"
+    docker-compose logs
     exit 1
-fi 
+fi
+
+# Step 6: Display access information
+echo -e "${CYAN}Step 6: Deployment Complete${RESET}"
+echo ""
+echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${RESET}"
+echo -e "${GREEN}║                                                            ║${RESET}"
+echo -e "${GREEN}║  🔱 THE MATRIX NEO NEWS PORTAL HAS BEEN DEPLOYED! 🔱       ║${RESET}"
+echo -e "${GREEN}║                                                            ║${RESET}"
+echo -e "${GREEN}╠════════════════════════════════════════════════════════════╣${RESET}"
+echo -e "${GREEN}║                                                            ║${RESET}"
+echo -e "${GREEN}║  Access the Neo-style Matrix News Portal at:               ║${RESET}"
+echo -e "${GREEN}║  http://localhost:10083/                                   ║${RESET}"
+echo -e "${GREEN}║                                                            ║${RESET}"
+echo -e "${GREEN}║  Container image: omega-btc-ai/matrix-news:${IMAGE_TAG}    ║${RESET}"
+echo -e "${GREEN}║                                                            ║${RESET}"
+if [ "$STANDALONE_MODE" = true ]; then
+    echo -e "${YELLOW}║  NOTE: Running in standalone mode (no sacred container)      ║${RESET}"
+else
+    echo -e "${GREEN}║  Integration: Connected to sacred news-service container      ║${RESET}"
+fi
+echo -e "${GREEN}║                                                            ║${RESET}"
+echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${RESET}"
+
+echo ""
+echo -e "${CYAN}To view logs: ${RESET}docker-compose logs -f"
+echo -e "${CYAN}To stop service: ${RESET}docker-compose down"
+echo ""
+echo -e "${GREEN}JAH JAH BLESS THE DIVINE MATRIX!${RESET}"
+echo "" 
