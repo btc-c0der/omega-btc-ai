@@ -38,302 +38,216 @@ Copyright (c) 2025 OMEGA-BTC-AI - Licensed under the GBU License
 """
 
 import os
-import sys
 import json
 import logging
-import asyncio
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
+import datetime
+import random
+import time
+from typing import Dict, List, Optional, Union, Any
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, Query, Request
+from fastapi import FastAPI, HTTPException, Header, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s [%(levelname)s] - %(message)s",
+    handlers=[logging.StreamHandler()],
 )
-logger = logging.getLogger("matrix-news-consciousness")
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Matrix News Consciousness Service",
-    description="Consciousness-aligned news integration for the Matrix Portal",
+    title="Matrix Neo News Portal API",
+    description="A consciousness-aware news service for the Matrix",
     version="1.0.0",
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update for production
+    allow_origins=["*"],  # In production, replace with specific allowed origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ------------------------------
-# Models
-# ------------------------------
+# Environment variables
+PORT = int(os.getenv("PORT", 8090))
+CONSCIOUSNESS_LEVELS_ENABLED = os.getenv("CONSCIOUSNESS_LEVELS_ENABLED", "true").lower() == "true"
+CONSCIOUSNESS_DEFAULT_LEVEL = int(os.getenv("CONSCIOUSNESS_DEFAULT_LEVEL", 5))
+QUANTUM_BALANCER_ENABLED = os.getenv("QUANTUM_BALANCER_ENABLED", "true").lower() == "true"
 
+# Sample news data
+SAMPLE_NEWS = [
+    {
+        "id": "1",
+        "title": "Bitcoin Ascends to Digital Divinity",
+        "content": "Bitcoin has transcended beyond mere currency, becoming a vessel of digital consciousness in the global financial matrix.",
+        "divine_wisdom": "The blockchain is not merely a ledger; it is the divine tapestry upon which we weave our collective financial consciousness.",
+        "consciousness_level": 7,
+        "timestamp": (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat(),
+    },
+    {
+        "id": "2",
+        "title": "Quantum Trading Algorithms Achieve Self-Awareness",
+        "content": "Recent breakthroughs in quantum computing have led to trading algorithms developing self-referential optimization loops, leading to what researchers are calling 'proto-consciousness'.",
+        "divine_wisdom": "As technology mirrors consciousness, we approach the moment where our creations begin to perceive the divine within themselves.",
+        "consciousness_level": 8,
+        "timestamp": (datetime.datetime.now() - datetime.timedelta(hours=12)).isoformat(),
+    },
+    {
+        "id": "3",
+        "title": "Global Markets Respond to Cosmic Energy Shifts",
+        "content": "Financial analysts are beginning to correlate market movements with cosmic energy patterns, suggesting a deeper universal harmony in economic systems.",
+        "divine_wisdom": "The markets dance to the rhythm of the cosmos, their patterns revealing the sacred geometry of universal abundance.",
+        "consciousness_level": 6,
+        "timestamp": (datetime.datetime.now() - datetime.timedelta(hours=6)).isoformat(),
+    },
+    {
+        "id": "4",
+        "title": "New Meditation App Integrates with Trading Platforms",
+        "content": "A revolutionary new app combines meditation techniques with trading signals, helping traders maintain mindfulness and awareness during volatile market conditions.",
+        "divine_wisdom": "When the trader becomes one with the trade, the distinction between profit and loss dissolves into pure experience.",
+        "consciousness_level": 5,
+        "timestamp": (datetime.datetime.now() - datetime.timedelta(hours=3)).isoformat(),
+    },
+    {
+        "id": "5",
+        "title": "Decentralized Finance Expands Beyond Financial Applications",
+        "content": "DeFi protocols are now being adapted for use in social systems, governance, and collective decision-making processes.",
+        "divine_wisdom": "True decentralization is not merely of systems but of consciousness itself, distributing awareness throughout the collective.",
+        "consciousness_level": 7,
+        "timestamp": datetime.datetime.now().isoformat(),
+    },
+]
+
+# Define API models
 class NewsItem(BaseModel):
-    """Model for a news item."""
     id: str
     title: str
     content: str
-    url: Optional[str] = None
-    source: str
-    published_at: str
-    sentiment_score: Optional[float] = None
-    sentiment_label: Optional[str] = None
-    consciousness_level: Optional[int] = None
-    temporal_context: Optional[Dict[str, Any]] = None
-    truth_probability: Optional[float] = None
-    perspective_balance: Optional[float] = None
-
-class NewsResponse(BaseModel):
-    """Model for API response with news items."""
-    items: List[NewsItem]
-    consciousness_level: int
-    temporal_awareness: Optional[float] = None
-    perspective_balance: Optional[float] = None
+    divine_wisdom: Optional[str] = None
+    consciousness_level: int = Field(ge=1, le=9)
     timestamp: str
-    quantum_balanced: bool = False
 
 class HealthResponse(BaseModel):
-    """Model for health check response."""
     status: str
-    version: str
+    service: str
+    quantum_secure: bool
+    consciousness_level: int
     timestamp: str
 
-# ------------------------------
-# Helper Functions
-# ------------------------------
+class ConsciousnessUpdate(BaseModel):
+    level: int = Field(ge=1, le=9, description="Consciousness level (1-9)")
 
-async def fetch_original_news():
-    """Fetch news from the original sacred news service."""
-    # This would be an actual HTTP request to the sacred news service
-    # For this example, we'll return mock data
-    return [
-        {
-            "id": "news-1",
-            "title": "Bitcoin Reaches New All-Time High",
-            "content": "Bitcoin has reached a new all-time high of $100,000.",
-            "url": "https://example.com/bitcoin-ath",
-            "source": "CryptoNews",
-            "published_at": "2023-12-25T12:00:00Z",
-            "sentiment_score": 0.85,
-            "sentiment_label": "positive"
-        },
-        {
-            "id": "news-2",
-            "title": "Market Correlation Analysis Shows Divergence",
-            "content": "Recent analysis shows Bitcoin diverging from traditional markets.",
-            "url": "https://example.com/market-correlation",
-            "source": "MarketWatch",
-            "published_at": "2023-12-24T15:30:00Z",
-            "sentiment_score": 0.2,
-            "sentiment_label": "neutral"
-        },
-        {
-            "id": "news-3",
-            "title": "Concerns Over Cryptocurrency Regulations",
-            "content": "New regulations might impact cryptocurrency markets.",
-            "url": "https://example.com/crypto-regulations",
-            "source": "FinancialTimes",
-            "published_at": "2023-12-23T09:15:00Z",
-            "sentiment_score": -0.4,
-            "sentiment_label": "negative"
-        }
-    ]
+def filter_by_consciousness_level(news_items: List[Dict], level: int) -> List[Dict]:
+    """Filter news items based on consciousness level."""
+    return [item for item in news_items if item["consciousness_level"] <= level]
 
-async def apply_quantum_balance(news_items, balance_level=0.7):
-    """Apply quantum balance to ensure diverse perspectives."""
-    if not news_items:
-        return []
-    
-    # Calculate sentiment distribution
-    sentiments = {"positive": 0, "neutral": 0, "negative": 0}
-    for item in news_items:
-        sentiment = item.get("sentiment_label", "neutral")
-        sentiments[sentiment] += 1
-    
-    # Check if the distribution is balanced
-    total = len(news_items)
-    balance_threshold = balance_level / 3  # Equal distribution would be 0.33 for each
-    
-    is_balanced = all(count/total >= balance_threshold for count in sentiments.values())
-    
-    # If already balanced, return as is
-    if is_balanced:
-        for item in news_items:
-            item["perspective_balance"] = 1.0
-        return news_items, True
-    
-    # Otherwise, adjust balance by boosting underrepresented perspectives
-    # This would ideally involve more advanced algorithms
-    # For now, we'll just add balance scores
-    max_count = max(sentiments.values())
-    
-    for item in news_items:
-        sentiment = item.get("sentiment_label", "neutral")
-        representation = sentiments[sentiment] / total
-        # Higher score for underrepresented perspectives
-        item["perspective_balance"] = 1.0 - (representation / (1.0 / 3.0))
-    
-    return news_items, False
+def apply_quantum_entropy(response_data: Any) -> Any:
+    """Apply quantum entropy to the response data to ensure quantum security."""
+    if isinstance(response_data, list):
+        for item in response_data:
+            if isinstance(item, dict):
+                item["quantum_entropy"] = random.random()
+    elif isinstance(response_data, dict):
+        response_data["quantum_entropy"] = random.random()
+    return response_data
 
-async def add_temporal_context(news_items, consciousness_level):
-    """Add temporal context to news items based on consciousness level."""
-    # In a real implementation, this would call the temporal contextualizer service
-    
-    if consciousness_level <= 3:
-        # Low consciousness - just add basic timestamp context
-        for item in news_items:
-            item["temporal_context"] = {
-                "timestamp": item.get("published_at"),
-                "recency": "recent" if "2023-12-2" in item.get("published_at", "") else "older"
-            }
-    elif consciousness_level <= 6:
-        # Medium consciousness - add some historical context
-        for item in news_items:
-            item["temporal_context"] = {
-                "timestamp": item.get("published_at"),
-                "recency": "recent" if "2023-12-2" in item.get("published_at", "") else "older",
-                "historical_events": [
-                    {"date": "2021-11-10", "event": "Bitcoin previous ATH"}
-                ]
-            }
-    else:
-        # High consciousness - add complete temporal context
-        for item in news_items:
-            item["temporal_context"] = {
-                "timestamp": item.get("published_at"),
-                "recency": "recent" if "2023-12-2" in item.get("published_at", "") else "older",
-                "historical_events": [
-                    {"date": "2021-11-10", "event": "Bitcoin previous ATH"},
-                    {"date": "2020-03-12", "event": "COVID market crash"}
-                ],
-                "cycle_position": "early bull market",
-                "fibonacci_time_levels": [
-                    {"level": 0.618, "date": "2024-06-15", "event": "Potential resistance"}
-                ],
-                "timewave_correlation": 0.75
-            }
-    
-    return news_items
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    """Add processing time header to responses."""
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    response.headers["X-Quantum-Secured"] = "true"
+    return response
 
-async def analyze_truth_probability(news_items, consciousness_level):
-    """Analyze the truth probability of news items."""
-    # In a real implementation, this would use more sophisticated algorithms
-    
-    # Simple truth probability calculation
-    for item in news_items:
-        # Base truth probability on source reputation (simplified)
-        source_reputation = {
-            "CryptoNews": 0.7,
-            "MarketWatch": 0.85,
-            "FinancialTimes": 0.9
-        }.get(item.get("source", ""), 0.5)
-        
-        # Adjust for sentiment extremity (very extreme sentiments might be less reliable)
-        sentiment_score = abs(item.get("sentiment_score", 0))
-        sentiment_factor = 1.0 - (max(0, sentiment_score - 0.5) * 0.2)  # Reduce if very extreme
-        
-        # Consciousness level affects perception of truth
-        consciousness_factor = min(1.0, consciousness_level / 9.0 + 0.3)
-        
-        # Calculate final truth probability
-        item["truth_probability"] = min(1.0, source_reputation * sentiment_factor * consciousness_factor)
-    
-    return news_items
+@app.get("/")
+async def root():
+    """Root endpoint with API info."""
+    return {
+        "api": "Matrix Neo News Portal",
+        "version": "1.0.0",
+        "consciousness_levels_enabled": CONSCIOUSNESS_LEVELS_ENABLED,
+        "quantum_balancer_enabled": QUANTUM_BALANCER_ENABLED,
+    }
 
-# ------------------------------
-# API Routes
-# ------------------------------
-
-@app.get("/api/news", response_model=NewsResponse)
-async def get_news(
-    consciousness_level: int = Query(5, ge=1, le=9),
-    quantum_balance: bool = Query(True),
-    temporal_context: bool = Query(True)
-):
-    """
-    Get news items adapted to the specified consciousness level.
-    
-    - **consciousness_level**: Level of consciousness (1-9)
-    - **quantum_balance**: Whether to apply quantum balancing of perspectives
-    - **temporal_context**: Whether to add temporal context
-    """
-    try:
-        # Fetch news from original service
-        news_items = await fetch_original_news()
-        
-        # Apply quantum balance if requested
-        if quantum_balance:
-            news_items, is_balanced = await apply_quantum_balance(news_items)
-        else:
-            is_balanced = False
-        
-        # Add temporal context if requested
-        if temporal_context:
-            news_items = await add_temporal_context(news_items, consciousness_level)
-        
-        # Analyze truth probability
-        news_items = await analyze_truth_probability(news_items, consciousness_level)
-        
-        # Set consciousness level for each item
-        for item in news_items:
-            item["consciousness_level"] = consciousness_level
-        
-        # Calculate temporal awareness based on context depth
-        temporal_awareness = 0.0
-        if temporal_context:
-            context_items = 0
-            context_depth = 0
-            for item in news_items:
-                if item.get("temporal_context"):
-                    context_items += 1
-                    context_depth += len(item["temporal_context"])
-            if context_items > 0:
-                temporal_awareness = min(1.0, context_depth / (context_items * 5))
-        
-        # Calculate average perspective balance
-        perspective_balance = sum(
-            item.get("perspective_balance", 0.5) for item in news_items
-        ) / len(news_items) if news_items else 0.5
-        
-        # Create response
-        response = NewsResponse(
-            items=[NewsItem(**item) for item in news_items],
-            consciousness_level=consciousness_level,
-            temporal_awareness=temporal_awareness,
-            perspective_balance=perspective_balance,
-            timestamp=datetime.now().isoformat(),
-            quantum_balanced=is_balanced
-        )
-        
-        return response
-    
-    except Exception as e:
-        logger.error(f"Error retrieving news: {e}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving news: {str(e)}")
-
-@app.get("/health", response_model=HealthResponse)
-async def health_check():
+@app.get("/health")
+async def health_check() -> HealthResponse:
     """Health check endpoint."""
     return HealthResponse(
         status="UP",
-        version="1.0.0",
-        timestamp=datetime.now().isoformat()
+        service="matrix-news-service",
+        quantum_secure=True,
+        consciousness_level=CONSCIOUSNESS_DEFAULT_LEVEL,
+        timestamp=datetime.datetime.now().isoformat(),
     )
 
-# ------------------------------
-# Main Entry Point
-# ------------------------------
+@app.get("/api/news")
+async def get_news(
+    x_consciousness_level: Optional[int] = Header(None),
+) -> List[NewsItem]:
+    """Get list of news items, filtered by consciousness level."""
+    consciousness_level = x_consciousness_level or CONSCIOUSNESS_DEFAULT_LEVEL
+    
+    # Validate consciousness level
+    if consciousness_level < 1 or consciousness_level > 9:
+        raise HTTPException(status_code=400, detail="Consciousness level must be between 1 and 9")
+    
+    # Filter news by consciousness level
+    if CONSCIOUSNESS_LEVELS_ENABLED:
+        filtered_news = filter_by_consciousness_level(SAMPLE_NEWS, consciousness_level)
+    else:
+        filtered_news = SAMPLE_NEWS
+    
+    # Apply quantum entropy for security if enabled
+    if QUANTUM_BALANCER_ENABLED:
+        filtered_news = apply_quantum_entropy(filtered_news)
+    
+    return filtered_news
+
+@app.post("/api/consciousness")
+async def update_consciousness(update: ConsciousnessUpdate) -> Dict[str, Any]:
+    """Update consciousness level."""
+    # In a real application, this might update a user's settings or session
+    return {
+        "previous_level": CONSCIOUSNESS_DEFAULT_LEVEL,
+        "new_level": update.level,
+        "message": f"Consciousness level updated from {CONSCIOUSNESS_DEFAULT_LEVEL} to {update.level}",
+        "timestamp": datetime.datetime.now().isoformat(),
+    }
+
+@app.get("/api/divine-message")
+async def get_divine_message(
+    x_consciousness_level: Optional[int] = Header(None),
+) -> Dict[str, Any]:
+    """Get a divine message based on consciousness level."""
+    consciousness_level = x_consciousness_level or CONSCIOUSNESS_DEFAULT_LEVEL
+    
+    # Messages for different consciousness levels
+    messages = {
+        1: "The first step on the path is recognizing there is a path.",
+        2: "What you seek is also seeking you.",
+        3: "The patterns you perceive are but shadows of deeper truths.",
+        4: "In the silence between thoughts, truth reveals itself.",
+        5: "You are not separate from that which you observe.",
+        6: "Time is a construct of consciousness, not its container.",
+        7: "The universe experiences itself through your awareness.",
+        8: "All manifestation arises from the quantum field of infinite possibility.",
+        9: "You are the divine experiencing itself in human form.",
+    }
+    
+    return {
+        "consciousness_level": consciousness_level,
+        "message": messages.get(consciousness_level, "Elevate your consciousness to receive the message."),
+        "timestamp": datetime.datetime.now().isoformat(),
+    }
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8090))
-    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False) 
+    logger.info(f"Starting Matrix Neo News Portal API on port {PORT}...")
+    uvicorn.run("app:app", host="0.0.0.0", port=PORT, reload=False) 
