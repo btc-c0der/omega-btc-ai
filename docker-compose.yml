@@ -1,70 +1,37 @@
-version: '3.8'
-
 services:
-  redis:
-    image: redis:7.2-alpine
+  matrix-news-redis:
+    image: redis:alpine
+    container_name: matrix-news-redis
     ports:
-      - "6379:6379"
+      - "10079:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
-  trap-probability-meter:
-    build:
-      context: .
-      dockerfile: docker/TrapProbabilityMeter.Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - DEBUG=false
-      - INTERVAL=5
-    restart: unless-stopped
-
-  trap-aware-traders:
-    build:
-      context: .
-      dockerfile: docker/TrapAwareTraders.Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - USE_TESTNET=true
-      - SYMBOL=BTCUSDT
-      - LONG_CAPITAL=24.0
-      - SHORT_CAPITAL=24.0
-      - TRAP_PROBABILITY_THRESHOLD=0.7
-      - TRAP_ALERT_THRESHOLD=0.8
-      - ENABLE_TRAP_PROTECTION=true
-      - ENABLE_ELITE_EXITS=true
-      - ELITE_EXIT_CONFIDENCE=0.7
+  matrix-news-websocket:
+    image: python:3.9-slim
+    container_name: matrix-news-websocket
+    working_dir: /app
     volumes:
-      - ./config:/app/config
-    restart: unless-stopped
-
-  divine-dashboard:
-    build:
-      context: .
-      dockerfile: docker/DivineDashboard.Dockerfile
+      - ./temporal:/app/temporal
+      - ./web:/app/web
     ports:
-      - "3000:3000"
-    depends_on:
-      redis:
-        condition: service_healthy
+      - "10095:10095"
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    restart: unless-stopped
+      - PORT=10095
+      - PYTHONUNBUFFERED=1
+    command: >
+      bash -c "pip install fastapi uvicorn python-socketio aiohttp websockets && python -m uvicorn temporal.websocket_minimal:app --host 0.0.0.0 --port 10095"
+
+  matrix-news-proxy:
+    image: nginx:alpine
+    container_name: matrix-news-proxy
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web:/usr/share/nginx/html:ro
+    ports:
+      - "10083:80"
+    depends_on:
+      - matrix-news-websocket
 
 volumes:
   redis_data:
-    driver: local
