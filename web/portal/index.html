@@ -4,255 +4,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Matrix Neo News Portal - The latest cryptocurrency news in a Matrix-inspired interface">
     <title>Matrix Neo News Portal</title>
-    <style>
-        body {
-            font-family: 'Courier New', monospace;
-            background-color: #000;
-            color: #0f0;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        #container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 5px;
-            text-shadow: 0 0 5px #0f0;
-        }
-
-        #news-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .news-item {
-            border: 1px solid #0f0;
-            padding: 15px;
-            background-color: rgba(0, 50, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .news-item:hover {
-            box-shadow: 0 0 10px #0f0;
-            transform: translateY(-5px);
-        }
-
-        .news-title {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            color: #0f0;
-        }
-
-        .news-content {
-            color: #afa;
-        }
-
-        .news-meta {
-            font-size: 0.8em;
-            margin-top: 10px;
-            color: #070;
-        }
-
-        #status {
-            background-color: rgba(0, 50, 0, 0.3);
-            border: 1px solid #0f0;
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-
-        #connection-status {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: red;
-            margin-right: 10px;
-        }
-
-        .connected {
-            background-color: #0f0 !important;
-        }
-
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-    </style>
+    <link rel="stylesheet" href="css/matrix-news.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
     <canvas id="matrix-rain"></canvas>
 
-    <div id="container">
-        <header>
-            <h1>Matrix Neo News Portal</h1>
-            <p>The Matrix has you...</p>
+    <div class="container">
+        <header class="header">
+            <h1 class="glitch">MATRIX NEO NEWS PORTAL</h1>
+            <p>Seeing through the code of cryptocurrency markets</p>
         </header>
 
-        <div id="status">
-            <span id="connection-status"></span>
-            <span id="connection-text">Connecting to the Matrix...</span>
-        </div>
+        <div class="news-controls">
+            <div class="filters-container">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-bar" placeholder="Search the Matrix...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
 
-        <div id="news-container">
-            <!-- News items will be loaded here -->
-            <div class="news-item">
-                <div class="news-title">Welcome to the Matrix</div>
-                <div class="news-content">The Matrix has you...</div>
-                <div class="news-meta">Published: Just now</div>
+                <div class="category-pills">
+                    <span class="category-pill filter-pill active" data-category="all">All</span>
+                    <span class="category-pill filter-pill" data-category="Bitcoin">Bitcoin</span>
+                    <span class="category-pill filter-pill" data-category="Ethereum">Ethereum</span>
+                    <span class="category-pill filter-pill" data-category="DeFi">DeFi</span>
+                    <span class="category-pill filter-pill" data-category="Regulation">Regulation</span>
+                    <span class="category-pill filter-pill" data-category="Mining">Mining</span>
+                </div>
+            </div>
+
+            <div class="actions-container">
+                <div class="toggle-container tooltip">
+                    <span>Dark Mode</span>
+                    <input type="checkbox" id="dark-mode-toggle" class="toggle-checkbox">
+                    <label for="dark-mode-toggle" class="toggle-switch"></label>
+                    <div class="tooltip-text">Toggle Matrix Dark Mode</div>
+                </div>
+
+                <button class="matrix-button tooltip" id="refresh-button">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                    <span class="tooltip-text">Reload news data</span>
+                </button>
             </div>
         </div>
+
+        <div class="matrix-loader" id="matrix-loader"></div>
+
+        <div class="news-grid" id="news-container">
+            <!-- News cards will be inserted here by JavaScript -->
+        </div>
+
+        <footer class="footer">
+            <p>OMEGA BTC AI - The Matrix Neo News Portal</p>
+            <p class="small">Data is updated in real-time. Take the red pill to see how deep the rabbit hole goes.</p>
+        </footer>
     </div>
 
-    <!-- Socket.IO Client -->
-    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
-
-    <script>
-        // Matrix Digital Rain
-        const canvas = document.getElementById('matrix-rain');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const fontSize = 14;
-        const columns = Math.ceil(canvas.width / fontSize);
-
-        // Using green text
-        const drops = [];
-        for (let i = 0; i < columns; i++) {
-            drops[i] = 1;
-        }
-
-        // Characters to display
-        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=<>[](){}"\\\|~^_';
-
-        function draw() {
-            // Black background with opacity to create fade effect
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#0F0';
-            ctx.font = fontSize + 'px monospace';
-
-            for (let i = 0; i < drops.length; i++) {
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-
-                drops[i]++;
-            }
-        }
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
-        setInterval(draw, 33);
-
-        // WebSocket/Socket.IO Connection
-        function connectWebSocket() {
-            const connectionStatus = document.getElementById('connection-status');
-            const connectionText = document.getElementById('connection-text');
-            const newsContainer = document.getElementById('news-container');
-
-            // Connect to the Socket.IO server
-            const socket = io(window.location.origin, {
-                path: '/socket.io/'
-            });
-
-            // Connection events
-            socket.on('connect', () => {
-                connectionStatus.classList.add('connected');
-                connectionText.textContent = 'Connected to the Matrix';
-                console.log('Connected to the Matrix');
-
-                // Subscribe to news updates
-                socket.emit('subscribe_news', { channel: 'matrix-news' });
-            });
-
-            socket.on('disconnect', () => {
-                connectionStatus.classList.remove('connected');
-                connectionText.textContent = 'Disconnected from the Matrix';
-                console.log('Disconnected from the Matrix');
-            });
-
-            socket.on('connect_error', (error) => {
-                connectionStatus.classList.remove('connected');
-                connectionText.textContent = 'Connection error: ' + error.message;
-                console.error('Connection error:', error);
-                setTimeout(() => {
-                    socket.connect();
-                }, 5000);
-            });
-
-            // Handle welcome message
-            socket.on('welcome', (data) => {
-                console.log('Welcome message:', data);
-            });
-
-            // Handle news updates
-            socket.on('news_update', (news) => {
-                console.log('Received news update:', news);
-
-                // Create a news item element
-                const newsItem = document.createElement('div');
-                newsItem.classList.add('news-item');
-
-                const newsTitle = document.createElement('div');
-                newsTitle.classList.add('news-title');
-                newsTitle.textContent = news.title;
-
-                const newsContent = document.createElement('div');
-                newsContent.classList.add('news-content');
-                newsContent.textContent = news.content;
-
-                const newsMeta = document.createElement('div');
-                newsMeta.classList.add('news-meta');
-                newsMeta.textContent = `Published: ${new Date(news.published_at).toLocaleString()}`;
-                if (news.source) {
-                    newsMeta.textContent += ` | Source: ${news.source}`;
-                }
-
-                newsItem.appendChild(newsTitle);
-                newsItem.appendChild(newsContent);
-                newsItem.appendChild(newsMeta);
-
-                // Add the news item to the container (at the beginning)
-                newsContainer.insertBefore(newsItem, newsContainer.firstChild);
-            });
-        }
-
-        // Initialize the WebSocket connection when the page loads
-        window.addEventListener('load', connectWebSocket);
-    </script>
+    <script src="js/matrix-news.js"></script>
 </body>
 
 </html>

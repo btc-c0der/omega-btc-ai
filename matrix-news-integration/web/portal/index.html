@@ -317,6 +317,34 @@
             text-align: right;
         }
 
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        select#language-select {
+            background-color: var(--matrix-dark-green);
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 10px;
+            font-family: var(--matrix-code-font);
+            min-width: 200px;
+        }
+
+        select#language-select:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+
+        .sacred-language-marker {
+            color: #00FFAA;
+            font-style: italic;
+            margin-left: 5px;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .matrix-grid {
@@ -326,6 +354,11 @@
             header {
                 flex-direction: column;
                 text-align: center;
+            }
+
+            .language-selector {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -354,6 +387,29 @@
                 </div>
                 <input type="range" id="consciousness-slider" min="1" max="9" value="5">
                 <div class="slider-value">Current Level: <span id="consciousness-value">5</span></div>
+            </div>
+        </div>
+
+        <!-- Language Selector (visible for high consciousness levels) -->
+        <div id="language-selector-container" class="divine-message-box" style="display: none;">
+            <h3>Sacred Language Preference</h3>
+            <p>At consciousness level 7 and above, you can receive divine messages in your preferred language.</p>
+            <div class="language-selector">
+                <select id="language-select" class="divine-message-button">
+                    <option value="en">English</option>
+                    <option value="es">Spanish (Español)</option>
+                    <option value="fr">French (Français)</option>
+                    <option value="de">German (Deutsch)</option>
+                    <option value="it">Italian (Italiano)</option>
+                    <option value="pt">Portuguese (Português)</option>
+                    <option value="ru">Russian (Русский)</option>
+                    <option value="zh-cn">Chinese (中文)</option>
+                    <option value="ja">Japanese (日本語)</option>
+                    <option value="ko">Korean (한국어)</option>
+                    <option value="ar">Arabic (العربية)</option>
+                    <option value="hi">Hindi (हिन्दी)</option>
+                </select>
+                <button id="set-language" class="divine-message-button">Set Language</button>
             </div>
         </div>
 
@@ -447,6 +503,7 @@
         // WebSocket Connection
         let socket;
         let consciousnessLevel = 5;
+        let preferredLanguage = 'en';
 
         document.addEventListener('DOMContentLoaded', () => {
             connectWebSocket();
@@ -454,16 +511,54 @@
             // Handle consciousness slider
             const slider = document.getElementById('consciousness-slider');
             const valueDisplay = document.getElementById('consciousness-value');
+            const languageSelectorContainer = document.getElementById('language-selector-container');
 
             slider.addEventListener('input', () => {
                 consciousnessLevel = parseInt(slider.value, 10);
                 valueDisplay.textContent = consciousnessLevel;
+
+                // Show language selector only for high consciousness levels (7+)
+                if (consciousnessLevel >= 7) {
+                    languageSelectorContainer.style.display = 'block';
+                } else {
+                    languageSelectorContainer.style.display = 'none';
+                }
             });
 
             slider.addEventListener('change', () => {
                 if (socket && socket.connected) {
                     socket.emit('set_consciousness_level', { level: consciousnessLevel });
                 }
+            });
+
+            // Handle language selection
+            const languageSelect = document.getElementById('language-select');
+            const setLanguageButton = document.getElementById('set-language');
+
+            // Try to get language from browser or cookie
+            preferredLanguage = navigator.language?.substring(0, 2) || 'en';
+            const storedLanguage = getCookie('preferred_language');
+            if (storedLanguage) {
+                preferredLanguage = storedLanguage;
+            }
+
+            // Set initial value in selector
+            if (languageSelect.querySelector(`option[value="${preferredLanguage}"]`)) {
+                languageSelect.value = preferredLanguage;
+            }
+
+            setLanguageButton.addEventListener('click', () => {
+                const newLanguage = languageSelect.value;
+                preferredLanguage = newLanguage;
+
+                // Store in a cookie for persistence
+                setCookie('preferred_language', preferredLanguage, 30);
+
+                if (socket && socket.connected) {
+                    socket.emit('set_language_preference', { language: preferredLanguage });
+                }
+
+                showNotification(`Language set to ${getLanguageName(preferredLanguage)}`);
             });
 
             // Handle divine message request
@@ -487,7 +582,79 @@
                     }
                 }
             });
+
+            // Check initial consciousness level to see if language selector should be shown
+            if (consciousnessLevel >= 7) {
+                languageSelectorContainer.style.display = 'block';
+            }
         });
+
+        // Helper functions for cookies
+        function setCookie(name, value, days) {
+            let expires = '';
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = '; expires=' + date.toUTCString();
+            }
+            document.cookie = name + '=' + value + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + '=';
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function getLanguageName(code) {
+            const languages = {
+                'en': 'English',
+                'es': 'Spanish',
+                'fr': 'French',
+                'de': 'German',
+                'it': 'Italian',
+                'pt': 'Portuguese',
+                'ru': 'Russian',
+                'zh-cn': 'Chinese',
+                'ja': 'Japanese',
+                'ko': 'Korean',
+                'ar': 'Arabic',
+                'hi': 'Hindi'
+            };
+            return languages[code] || code;
+        }
+
+        function showNotification(message) {
+            // A simple notification system
+            const notification = document.createElement('div');
+            notification.className = 'divine-message-box';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '10px 20px';
+            notification.style.zIndex = '1000';
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s ease';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 10);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
 
         function connectWebSocket() {
             // Create socket connection
@@ -561,10 +728,22 @@
 
                 const truthProbability = item.truth_probability || Math.random();
 
+                // Check for language translation information
+                let languageInfo = '';
+                if (item.language && item.original_language && item.language !== item.original_language && consciousnessLevel >= 7) {
+                    languageInfo = `
+                        <div class="translation-info">
+                            <span>Translated from ${getLanguageName(item.original_language)} to ${getLanguageName(item.language)}</span>
+                            ${item.translation_quality ? `<span class="truth-label">(Translation Quality: ${Math.round(item.translation_quality * 100)}%)</span>` : ''}
+                        </div>
+                    `;
+                }
+
                 newsItem.innerHTML = `
                     <div class="news-title">${item.title}</div>
                     <div class="news-content">
                         <p>${item.content}</p>
+                        ${languageInfo}
                         ${item.divine_wisdom ? `<div class="divine-wisdom">${item.divine_wisdom}</div>` : ''}
                         
                         <div class="truth-meter">
@@ -601,7 +780,37 @@
 
         function updateDivineMessage(messageData) {
             const divineMessageElement = document.getElementById('divine-message');
-            divineMessageElement.textContent = messageData.message;
+
+            // Extract the message from the response
+            let message = '';
+            if (typeof messageData === 'object' && messageData !== null) {
+                message = messageData.message || '';
+            } else {
+                message = String(messageData);
+            }
+
+            // Handle language information for high consciousness levels
+            if (consciousnessLevel >= 7 && typeof messageData === 'object' && messageData !== null) {
+                if (messageData.language && messageData.language !== 'en') {
+                    // Display the message with language information
+                    const languageName = getLanguageName(messageData.language);
+
+                    // Check if there's a sacred code to display
+                    let sacredCode = '';
+                    if (messageData.sacred_code && consciousnessLevel >= 8) {
+                        sacredCode = `<span class="sacred-language-marker">[${messageData.sacred_code}]</span>`;
+                    }
+
+                    divineMessageElement.innerHTML = `${message} ${sacredCode}
+                        <div class="translation-info" style="margin-top: 10px; font-size: 0.8em;">
+                            <em>Message received in ${languageName}</em>
+                        </div>`;
+                } else {
+                    divineMessageElement.textContent = message;
+                }
+            } else {
+                divineMessageElement.textContent = message;
+            }
 
             // Highlight effect
             divineMessageElement.style.textShadow = '0 0 10px #00FF00';

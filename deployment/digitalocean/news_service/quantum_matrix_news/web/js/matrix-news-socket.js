@@ -17,6 +17,7 @@ class MatrixNewsSocket {
         // Configuration options with sensible defaults
         this.options = {
             socketUrl: options.socketUrl || this._getDefaultSocketUrl(),
+            fallbackUrl: options.fallbackUrl || this._getFallbackSocketUrl(),
             autoReconnect: options.autoReconnect !== undefined ? options.autoReconnect : true,
             reconnectInterval: options.reconnectInterval || 5000,
             maxReconnectAttempts: options.maxReconnectAttempts || 10,
@@ -26,7 +27,9 @@ class MatrixNewsSocket {
 
         // Initialize internal state
         this.socket = null;
+        this.fallbackSocket = null;
         this.connected = false;
+        this.usingFallback = false;
         this.reconnectAttempts = 0;
         this.eventHandlers = {
             'connect': [],
@@ -34,7 +37,8 @@ class MatrixNewsSocket {
             'news': [],
             'error': [],
             'consciousness': [],
-            'divine_message': []
+            'divine_message': [],
+            'fallback': []
         };
 
         // Log configuration if debug mode is enabled
@@ -44,11 +48,10 @@ class MatrixNewsSocket {
     }
 
     /**
-     * Connect to the WebSocket Sacred Echo service
+     * Connect to the WebSocket Sacred Echo service with fallback
      */
     connect() {
-        if (this.socket) {
-            // Already connected or connecting
+        if (this.socket || this.fallbackSocket) {
             if (this.options.debugMode) {
                 console.log('Socket already exists, disconnecting before reconnection');
             }
@@ -60,7 +63,7 @@ class MatrixNewsSocket {
                 console.log(`Connecting to Matrix WebSocket at ${this.options.socketUrl}`);
             }
 
-            // Connect to Socket.IO server
+            // Connect to primary Socket.IO server
             this.socket = io(this.options.socketUrl, {
                 transports: ['websocket'],
                 reconnection: false, // We'll handle reconnection ourselves
@@ -69,12 +72,53 @@ class MatrixNewsSocket {
                 }
             });
 
-            // Setup default event handlers
-            this._setupEventHandlers();
+            // Setup event handlers for primary socket
+            this._setupEventHandlers(this.socket);
+
+            // Setup connection error handler
+            this.socket.on('connect_error', (error) => {
+                if (this.options.debugMode) {
+                    console.log('Primary socket connection error:', error);
+                }
+                this._attemptFallback();
+            });
 
         } catch (error) {
             console.error('Error connecting to Matrix WebSocket:', error);
             this._triggerEvent('error', { message: 'Connection error', error });
+            this._attemptFallback();
+        }
+    }
+
+    /**
+     * Attempt to connect to fallback WebSocket service
+     */
+    _attemptFallback() {
+        if (this.usingFallback) {
+            return;
+        }
+
+        try {
+            if (this.options.debugMode) {
+                console.log(`Attempting fallback connection to ${this.options.fallbackUrl}`);
+            }
+
+            this.fallbackSocket = io(this.options.fallbackUrl, {
+                transports: ['websocket'],
+                reconnection: false,
+                query: {
+                    consciousness: this.options.consciousnessLevel,
+                    is_fallback: true
+                }
+            });
+
+            this._setupEventHandlers(this.fallbackSocket);
+            this.usingFallback = true;
+            this._triggerEvent('fallback', { message: 'Using fallback connection' });
+
+        } catch (error) {
+            console.error('Error connecting to fallback WebSocket:', error);
+            this._triggerEvent('error', { message: 'Fallback connection error', error });
 
             if (this.options.autoReconnect) {
                 this._attemptReconnect();
@@ -83,24 +127,29 @@ class MatrixNewsSocket {
     }
 
     /**
-     * Disconnect from the WebSocket Sacred Echo service
+     * Disconnect from all WebSocket services
      */
     disconnect() {
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
-            this.connected = false;
-            this._triggerEvent('disconnect', {});
+        }
+        if (this.fallbackSocket) {
+            this.fallbackSocket.disconnect();
+            this.fallbackSocket = null;
+        }
+        this.connected = false;
+        this.usingFallback = false;
+        this._triggerEvent('disconnect', {});
 
-            if (this.options.debugMode) {
-                console.log('Disconnected from Matrix WebSocket');
-            }
+        if (this.options.debugMode) {
+            console.log('Disconnected from all Matrix WebSocket connections');
         }
     }
 
     /**
      * Register an event handler
-     * @param {string} event - Event name ('connect', 'disconnect', 'news', 'error', 'consciousness', 'divine_message')
+     * @param {string} event - Event name ('connect', 'disconnect', 'news', 'error', 'consciousness', 'divine_message', 'fallback')
      * @param {function} handler - Event handler function
      */
     on(event, handler) {
@@ -235,11 +284,11 @@ class MatrixNewsSocket {
      * Setup internal WebSocket event handlers
      * @private
      */
-    _setupEventHandlers() {
-        if (!this.socket) return;
+    _setupEventHandlers(socket) {
+        if (!socket) return;
 
         // Connection established
-        this.socket.on('connect', () => {
+        socket.on('connect', () => {
             this.connected = true;
             this.reconnectAttempts = 0;
 
@@ -248,7 +297,7 @@ class MatrixNewsSocket {
             }
 
             // Set consciousness level on initial connection
-            this.socket.emit('set_consciousness_level', {
+            socket.emit('set_consciousness_level', {
                 level: this.options.consciousnessLevel
             });
 
@@ -259,7 +308,7 @@ class MatrixNewsSocket {
         });
 
         // Connection closed
-        this.socket.on('disconnect', () => {
+        socket.on('disconnect', () => {
             this.connected = false;
 
             if (this.options.debugMode) {
@@ -276,7 +325,7 @@ class MatrixNewsSocket {
         });
 
         // Error occurred
-        this.socket.on('connect_error', (error) => {
+        socket.on('connect_error', (error) => {
             if (this.options.debugMode) {
                 console.error('Connection error:', error);
             }
@@ -293,7 +342,7 @@ class MatrixNewsSocket {
         });
 
         // News received
-        this.socket.on('news', (data) => {
+        socket.on('news', (data) => {
             if (this.options.debugMode) {
                 console.log('News received:', data);
             }
@@ -302,7 +351,7 @@ class MatrixNewsSocket {
         });
 
         // Consciousness update received
-        this.socket.on('consciousness', (data) => {
+        socket.on('consciousness', (data) => {
             if (this.options.debugMode) {
                 console.log('Consciousness update received:', data);
             }
@@ -312,7 +361,7 @@ class MatrixNewsSocket {
         });
 
         // Divine message received
-        this.socket.on('divine_message', (data) => {
+        socket.on('divine_message', (data) => {
             if (this.options.debugMode) {
                 console.log('Divine message received:', data);
             }
@@ -321,7 +370,7 @@ class MatrixNewsSocket {
         });
 
         // Error message received
-        this.socket.on('error', (data) => {
+        socket.on('error', (data) => {
             if (this.options.debugMode) {
                 console.error('Server error received:', data);
             }
@@ -372,14 +421,21 @@ class MatrixNewsSocket {
     }
 
     /**
-     * Get default WebSocket URL based on current location
-     * @returns {string} Default WebSocket URL
-     * @private
+     * Get the default socket URL
      */
     _getDefaultSocketUrl() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.host;
-        return `${protocol}//${host}`;
+        return window.location.protocol === 'https:'
+            ? `wss://${window.location.host}/ws`
+            : `ws://${window.location.host}/ws`;
+    }
+
+    /**
+     * Get the fallback socket URL
+     */
+    _getFallbackSocketUrl() {
+        return window.location.protocol === 'https:'
+            ? `wss://${window.location.host}/ws/fallback`
+            : `ws://${window.location.host}/ws/fallback`;
     }
 }
 
