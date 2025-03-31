@@ -9,18 +9,44 @@ echo -e "\n🔱 DIVINE HEALTH SCANNER INITIATED 🔱\n"
 echo -e "SCANNING HOST PORTS:"
 echo "======================================"
 
-# Common ports to check in our infrastructure
-PORTS_TO_CHECK=(8080 8081 8082 8083 10080 10081 10082 10083 10090 10091 10095)
+# Ports to check
+PORTS_TO_CHECK=(8080 8081 8082 8083 10080 10081 10082 10083 10090 10091)
 
-for PORT in "${PORTS_TO_CHECK[@]}"; do
-    # Using timeout to avoid hanging on blocked ports
-    nc -z -w1 localhost $PORT 2>/dev/null
-    if [ $? -eq 0 ]; then
-        echo "Port $PORT is OPEN"
+# Function to check if a port is open
+check_port() {
+    local port=$1
+    if nc -z localhost $port; then
+        echo "✅ Port $port is open"
+        return 0
     else
-        echo "Port $PORT is CLOSED"
+        echo "❌ Port $port is closed"
+        return 1
     fi
+}
+
+# Function to check service health
+check_health() {
+    local url=$1
+    local response=$(curl -s $url)
+    if [ $? -eq 0 ]; then
+        echo "✅ Health check passed for $url"
+        return 0
+    else
+        echo "❌ Health check failed for $url"
+        return 1
+    fi
+}
+
+# Check all ports
+echo "Checking ports..."
+for port in "${PORTS_TO_CHECK[@]}"; do
+    check_port $port
 done
+
+# Check service health
+echo -e "\nChecking service health..."
+check_health "http://localhost:10091/health"
+check_health "http://localhost:10091/ws/health"
 
 echo -e "\nRUNNING CONTAINERS:"
 echo "======================================"
@@ -33,8 +59,6 @@ echo "======================================"
 ENDPOINTS=(
     "http://localhost:10091/health"
     "http://localhost:10091/ws/health"
-    "http://localhost:10095/health"
-    "http://localhost:10095/ws/health"
     "http://localhost:10083/health"
     "http://localhost:10083/ws/health"
     "http://localhost:10083/websocket-health/"
@@ -50,9 +74,7 @@ echo -e "\nMANUAL TESTS YOU CAN RUN:"
 echo "======================================"
 echo "Test WebSocket server health on port 10091:"
 echo "  curl http://localhost:10091/health"
-echo
-echo "Test WebSocket server health on port 10095:"
-echo "  curl http://localhost:10095/health"
+echo "  curl http://localhost:10091/ws/health"
 echo
 echo "Test health endpoint through NGINX proxy:"
 echo "  curl http://localhost:10083/ws/health"

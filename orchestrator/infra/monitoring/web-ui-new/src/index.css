@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Reggae+One&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-black text-rasta-yellow;
+    }
+}
+
+@layer components {
+    .rasta-gradient {
+        @apply bg-gradient-to-b from-rasta-green via-rasta-yellow to-rasta-red;
+    }
+
+    .divine-card {
+        @apply bg-black/80 border border-rasta-yellow rounded-lg p-4 shadow-lg hover:shadow-rasta-yellow/50 transition-all duration-300;
+    }
+
+    .divine-button {
+        @apply px-4 py-2 bg-rasta-green text-black font-reggae rounded hover:bg-rasta-yellow transition-colors duration-300;
+    }
+
+    .divine-input {
+        @apply bg-black border border-rasta-yellow rounded px-3 py-2 focus:ring-2 focus:ring-rasta-green focus:border-transparent;
+    }
+
+    .divine-status {
+        @apply px-2 py-1 rounded-full text-sm;
+    }
+
+    .divine-status-active {
+        @apply bg-rasta-green/20 text-rasta-green;
+    }
+
+    .divine-status-warning {
+        @apply bg-rasta-yellow/20 text-rasta-yellow;
+    }
+
+    .divine-status-error {
+        @apply bg-rasta-red/20 text-rasta-red;
+    }
+
+    .divine-title {
+        @apply text-2xl font-bold text-rasta-green text-center mb-4;
+    }
+
+    .divine-subtitle {
+        @apply text-lg font-semibold text-rasta-green mb-2;
+    }
+}
