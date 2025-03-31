@@ -1,0 +1,51 @@
+# 🔱 OMEGA BTC AI - Divine Alert Manager Configuration 🔱
+
+global:
+  resolve_timeout: 5m
+
+# 🎭 Route Configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'divine-notifications'
+
+# 📨 Receivers
+receivers:
+  - name: 'divine-notifications'
+    email_configs:
+      - to: '${ALERT_EMAIL}'
+        from: '${ALERT_SENDER_EMAIL}'
+        smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+        auth_username: '${SMTP_USERNAME}'
+        auth_password: '${SMTP_PASSWORD}'
+        require_tls: true
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#divine-alerts'
+        send_resolved: true
+        title: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}*Alert:* {{ .Annotations.summary }}\n*Description:* {{ .Annotations.description }}\n*Severity:* {{ .Labels.severity }}\n{{ end }}'
+    webhook_configs:
+      - url: '${WEBHOOK_URL}'
+        send_fires: true
+        send_resolves: true
+
+# 🚨 Inhibition Rules
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+# 📊 Templates
+templates:
+  - '/etc/alertmanager/template/*.tmpl'
+
+# 🌟 Service Discovery
+service_discovery:
+  static_configs:
+    - targets:
+        - 'localhost:9093' 

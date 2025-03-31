@@ -1,0 +1,111 @@
+# 🔱 OMEGA BTC AI - Divine Prometheus Configuration 🔱
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# 🎭 Alert Manager Configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# 📊 Rule Files
+rule_files:
+  - "rules/*.yml"
+
+# 🔍 Scrape Configurations
+scrape_configs:
+  # 🌟 Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 🌌 Matrix News Service
+  - job_name: 'matrix-news'
+    static_configs:
+      - targets: ['matrix-news:${MATRIX_NEWS_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # 🧠 Consciousness Service
+  - job_name: 'consciousness'
+    static_configs:
+      - targets: ['consciousness:${CONSCIOUSNESS_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # 🌐 Temporal Worker
+  - job_name: 'temporal-worker'
+    static_configs:
+      - targets: ['temporal-worker:${TEMPORAL_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # 📊 Node Exporter
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 10s
+
+  # 📊 cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 10s
+
+  # 🛡️ WAF
+  - job_name: 'waf'
+    static_configs:
+      - targets: ['waf:${WAF_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # 🔍 Security Scanner
+  - job_name: 'security-scanner'
+    static_configs:
+      - targets: ['security-scanner:${TRIVY_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # 🔐 Vault
+  - job_name: 'vault'
+    static_configs:
+      - targets: ['vault:${VAULT_PORT}']
+    metrics_path: '/v1/sys/metrics'
+    scrape_interval: 30s
+
+  # 🔒 Cert Manager
+  - job_name: 'cert-manager'
+    static_configs:
+      - targets: ['cert-manager:${CERT_MANAGER_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # 🛡️ Falco
+  - job_name: 'falco'
+    static_configs:
+      - targets: ['falco:${FALCO_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # 🔍 OWASP ZAP
+  - job_name: 'zap'
+    static_configs:
+      - targets: ['zap:${ZAP_PORT}']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+# 🌟 Remote Write Configuration
+remote_write:
+  - url: 'http://remote-storage:9201/write'
+    queue_config:
+      max_samples_per_send: 10000
+      max_shards: 30
+      capacity: 500000
+
+# 🌟 Remote Read Configuration
+remote_read:
+  - url: 'http://remote-storage:9201/read'
+    read_recent: true 
