@@ -256,7 +256,7 @@ app.on_cleanup.append(cleanup_background_tasks)
 if __name__ == '__main__':
     logger.info(f"Starting Matrix News WebSocket Server on port {PORT}")
     
-    # Create a health check app for port 10095
+    # Create a health check app for port 10091
     health_app = web.Application()
     
     # Add health check routes to the health app
@@ -268,10 +268,10 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(runner.setup())
     
-    # Start health server on port 10095
-    health_site = web.TCPSite(runner, '0.0.0.0', 10095)
+    # Start health server on port 10091
+    health_site = web.TCPSite(runner, '0.0.0.0', 10091)
     loop.run_until_complete(health_site.start())
-    logger.info(f"Health check server started on port 10095")
+    logger.info(f"Health check server started on port 10091")
     
     # Start main server on port 10091
     web.run_app(app, port=PORT, access_log=None) 

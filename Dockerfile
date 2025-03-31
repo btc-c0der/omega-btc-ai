@@ -53,6 +53,13 @@ ARG SERVICE_TYPE
 ENV SERVICE_TYPE=${SERVICE_TYPE}
 ENV PYTHONUNBUFFERED=1
 
+# Install curl for healthchecks
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Add non-root user for enhanced security
 RUN groupadd -g 1000 matrix && \
     useradd -m -u 1000 -g matrix matrix
@@ -81,9 +88,9 @@ EXPOSE 8080
 # Healthcheck command based on SERVICE_TYPE
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     CMD if [ "$SERVICE_TYPE" = "websocket" ]; then \
-    wget -q --spider http://localhost:${PORT:-8095}/health || exit 1; \
+    curl -f http://localhost:${PORT:-8095}/health || exit 1; \
     else \
-    wget -q --spider http://localhost:${PORT:-8090}/health || exit 1; \
+    curl -f http://localhost:${PORT:-8090}/health || exit 1; \
     fi
 
 # Set the entry point based on SERVICE_TYPE

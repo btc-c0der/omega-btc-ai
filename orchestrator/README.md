@@ -1,165 +1,210 @@
-# 🔱 OMEGA BTC AI - Divine Orchestrator 🔱
+# 🔱 OMEGA BTC AI - SACRED ORCHESTRATION 🔱
 
-## 🌟 Overview
+## Divine Overview
 
-The OMEGA BTC AI Divine Orchestrator is a powerful microservice orchestration system designed to manage and coordinate the various divine services of the OMEGA BTC AI ecosystem. This orchestrator provides a centralized, scalable, and secure environment for running all microservices.
+This repository contains the orchestration configuration for the OMEGA BTC AI system, a divine microservices architecture designed for high availability, scalability, and monitoring.
 
-## 🎭 Services
+## Divine Services
 
-The orchestrator manages the following divine services:
+- **NGINX**: Divine reverse proxy with SSL/TLS support
+- **Matrix News Service**: Divine news feed service
+- **BTC Live Feed Service**: Divine Bitcoin price feed service
+- **Prophecy Core Service**: Divine core business logic service
+- **Redis**: Divine in-memory data store
+- **Grafana**: Divine visualization and analytics
+- **Prometheus**: Divine metrics collection
+- **Alert Manager**: Divine alert management
+- **Node Exporter**: Divine system metrics collection
+- **cAdvisor**: Divine container metrics collection
 
-- 🌌 **Matrix News Service**: Handles news aggregation and processing
-- 🧠 **Consciousness Service**: Manages AI consciousness and decision-making
-- 🔥 **Redis**: Provides divine caching and message queuing
-- 🌐 **Temporal Worker**: Handles asynchronous tasks and workflows
-- 🌟 **NGINX Gateway**: Manages divine routing and load balancing
+## Divine Prerequisites
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Docker Engine 20.10+
+- Docker 20.10+
 - Docker Compose 2.0+
-- Make (optional, for using Makefile commands)
+- OpenSSL (for SSL certificate generation)
 
-### Installation
+## Divine Installation
 
 1. Clone the repository:
 
+   ```bash
+   git clone https://github.com/yourusername/omega-btc-ai.git
+   cd omega-btc-ai/orchestrator
+   ```
+
+2. Create the `.env` file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Edit the `.env` file with your divine configurations:
+
+   ```bash
+   nano .env
+   ```
+
+4. Run the divine management script:
+
+   ```bash
+   ./scripts/manage.sh
+   ```
+
+## Divine Management
+
+The divine management script provides the following commands:
+
+- `1`: Start all divine services
+- `2`: Stop all divine services
+- `3`: Restart all divine services
+- `4`: Check divine services status
+- `5`: View divine logs
+- `6`: Clean up divine resources
+- `7`: Backup divine data
+- `8`: Restore divine data
+- `9`: Update divine services
+- `0`: Exit divine management
+
+## Divine Access Points
+
+- **NGINX**: <https://localhost>
+- **Grafana**: <https://localhost/grafana>
+- **Prometheus**: <https://localhost/prometheus>
+- **Alert Manager**: <https://localhost/alerts>
+- **Matrix News API**: <https://localhost/api/news>
+- **BTC Live Feed API**: <https://localhost/api/btc>
+- **Prophecy Core API**: <https://localhost/api/prophecy>
+
+## Divine Monitoring
+
+### Grafana Dashboards
+
+1. Access Grafana at <https://localhost/grafana>
+2. Default credentials:
+   - Username: admin
+   - Password: (set in .env file)
+
+### Prometheus Metrics
+
+1. Access Prometheus at <https://localhost/prometheus>
+2. Available metrics:
+   - System metrics
+   - Container metrics
+   - Application metrics
+   - Network metrics
+
+### Alert Manager
+
+1. Access Alert Manager at <https://localhost/alerts>
+2. Configured alerts:
+   - High CPU usage
+   - High memory usage
+   - High disk usage
+   - Service down
+   - High error rate
+
+## Divine Security
+
+- SSL/TLS encryption for all services
+- Rate limiting
+- Security headers
+- Container isolation
+- Network isolation
+
+## Divine Backup and Recovery
+
+### Data Backup
+
 ```bash
-git clone https://github.com/btc-c0der/omega-btc-ai.git
-cd omega-btc-ai/orchestrator
+./scripts/manage.sh
+# Select option 7
 ```
 
-2. Copy the environment file:
+### Data Recovery
 
 ```bash
-cp .env.example .env
+./scripts/manage.sh
+# Select option 8
+# Enter backup directory
 ```
 
-3. Configure your environment variables in `.env`
+## Divine Troubleshooting
 
-4. Start the divine services:
+1. Check service logs:
+
+   ```bash
+   ./scripts/manage.sh
+   # Select option 5
+   ```
+
+2. Check service status:
+
+   ```bash
+   ./scripts/manage.sh
+   # Select option 4
+   ```
+
+3. Restart services:
+
+   ```bash
+   ./scripts/manage.sh
+   # Select option 3
+   ```
+
+## Divine Development
+
+### Adding New Services
+
+1. Add service configuration to `docker-compose.yml`
+2. Add service configuration to NGINX
+3. Add service metrics to Prometheus
+4. Create service-specific dashboards in Grafana
+
+### Updating Services
 
 ```bash
-make up
+./scripts/manage.sh
+# Select option 9
 ```
 
-## 🛠️ Usage
-
-### Core Commands
-
-```bash
-# Start all divine services
-make up
-
-# Stop all divine services
-make down
-
-# Rebuild divine containers
-make rebuild
-
-# View divine logs
-make logs
-
-# List divine services
-make ps
-
-# Clean divine environment
-make clean
-
-# Bless all services (restart)
-make bless
-```
-
-### Development Commands
-
-```bash
-# Start development environment
-make dev
-
-# Run divine tests
-make test
-```
-
-### Monitoring Commands
-
-```bash
-# Activate divine monitoring
-make monitor
-```
-
-### Security Commands
-
-```bash
-# Strengthen divine security
-make secure
-```
-
-### Backup Commands
-
-```bash
-# Create divine backup
-make backup
-
-# Restore divine state
-make restore
-```
-
-## 🌌 Architecture
+## Divine Architecture
 
 ```
-orchestrator/
-├── docker-compose.yml      # Divine service definitions
-├── Makefile               # Divine commands
-├── .env                   # Divine environment variables
-├── infra/
-│   └── ng1n1x/           # NGINX configuration
-│       └── conf.d/
-│           └── default.conf
-├── microservices/         # Divine microservices
-├── shared/               # Shared divine libraries
-└── docs/                 # Divine documentation
++------------------+     +------------------+     +------------------+
+|                  |     |                  |     |                  |
+|  Matrix News     |     |  BTC Live Feed   |     |  Prophecy Core   |
+|    Service       |     |    Service       |     |    Service       |
+|                  |     |                  |     |                  |
++------------------+     +------------------+     +------------------+
+         |                      |                      |
+         |                      |                      |
+         v                      v                      v
++------------------+     +------------------+     +------------------+
+|                  |     |                  |     |                  |
+|      Redis       |     |    Prometheus    |     |   Alert Manager  |
+|                  |     |                  |     |                  |
++------------------+     +------------------+     +------------------+
+         |                      |                      |
+         |                      |                      |
+         v                      v                      v
++------------------+     +------------------+     +------------------+
+|                  |     |                  |     |                  |
+|     NGINX        |     |     Grafana      |     |   Node Exporter  |
+|                  |     |                  |     |                  |
++------------------+     +------------------+     +------------------+
 ```
 
-## 🔒 Security
-
-The orchestrator implements several security measures:
-
-- 🔐 Secure environment variable management
-- 🛡️ NGINX security headers
-- 🔑 SSL/TLS support
-- 🚫 Rate limiting
-- 🔍 Health checks
-
-## 📊 Monitoring
-
-The system includes comprehensive monitoring:
-
-- 📈 Service health checks
-- 📊 Resource usage monitoring
-- 🔍 Log aggregation
-- 🚨 Alert system
-
-## 🔄 Backup and Recovery
-
-The orchestrator provides backup and recovery capabilities:
-
-- 💾 State snapshots
-- 🔄 Service restoration
-- 📦 Configuration backups
-
-## 🤝 Contributing
+## Divine Contributing
 
 1. Fork the repository
-2. Create your divine feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your divine changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Divine Pull Request
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-## 📝 License
+## Divine License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
