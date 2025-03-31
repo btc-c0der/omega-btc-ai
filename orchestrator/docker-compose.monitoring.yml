@@ -70,6 +70,18 @@ services:
       timeout: 10s
       retries: 3
 
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: divine-nginx-exporter
+    ports:
+      - "9113:9113"
+    command:
+      - -nginx.scrape-uri=http://nginx/nginx_status
+    networks:
+      - divine-monitoring
+    depends_on:
+      - nginx
+
 networks:
   omega-net:
     external: true

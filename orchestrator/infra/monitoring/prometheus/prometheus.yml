@@ -50,8 +50,7 @@ scrape_configs:
   # Divine NGINX Service
   - job_name: 'nginx'
     static_configs:
-      - targets: ['nginx:80']
-    metrics_path: '/nginx_status'
+      - targets: ['nginx-exporter:9113']
 
   # Divine Node Exporter
   - job_name: 'node'
