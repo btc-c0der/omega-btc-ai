@@ -1,8 +1,9 @@
-# 🔱 OMEGA BTC AI - Divine Prometheus Configuration 🔱
+# 🔱 OMEGA BTC AI - SACRED PROMETHEUS CONFIGURATION 🔱
 
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  scrape_timeout: 10s
 
 # 🎭 Alert Manager Configuration
 alerting:
@@ -13,93 +14,70 @@ alerting:
 
 # 📊 Rule Files
 rule_files:
-  - "rules/*.yml"
+  - "/etc/prometheus/rules/*.yml"
 
 # 🔍 Scrape Configurations
 scrape_configs:
-  # 🌟 Prometheus Self-Monitoring
+  # Divine Prometheus Self-Monitoring
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  # 🌌 Matrix News Service
+  # Divine Matrix News Service
   - job_name: 'matrix-news'
     static_configs:
-      - targets: ['matrix-news:${MATRIX_NEWS_PORT}']
+      - targets: ['matrix-news:10082']
     metrics_path: '/metrics'
-    scrape_interval: 10s
 
-  # 🧠 Consciousness Service
-  - job_name: 'consciousness'
+  # Divine BTC Live Feed Service
+  - job_name: 'btc-live-feed'
     static_configs:
-      - targets: ['consciousness:${CONSCIOUSNESS_PORT}']
+      - targets: ['btc-live-feed:10081']
     metrics_path: '/metrics'
-    scrape_interval: 10s
 
-  # 🌐 Temporal Worker
-  - job_name: 'temporal-worker'
+  # Divine Prophecy Core Service
+  - job_name: 'prophecy-core'
     static_configs:
-      - targets: ['temporal-worker:${TEMPORAL_PORT}']
+      - targets: ['prophecy-core:10080']
     metrics_path: '/metrics'
-    scrape_interval: 10s
 
-  # 📊 Node Exporter
-  - job_name: 'node-exporter'
+  # Divine Redis Service
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+
+  # Divine NGINX Service
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: '/nginx_status'
+
+  # Divine Node Exporter
+  - job_name: 'node'
     static_configs:
       - targets: ['node-exporter:9100']
-    scrape_interval: 10s
 
-  # 📊 cAdvisor
+  # Divine cAdvisor
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:8080']
-    scrape_interval: 10s
 
-  # 🛡️ WAF
-  - job_name: 'waf'
+  # Divine Grafana
+  - job_name: 'grafana'
     static_configs:
-      - targets: ['waf:${WAF_PORT}']
+      - targets: ['grafana:3000']
     metrics_path: '/metrics'
-    scrape_interval: 10s
 
-  # 🔍 Security Scanner
-  - job_name: 'security-scanner'
+  # Divine Alert Manager
+  - job_name: 'alertmanager'
     static_configs:
-      - targets: ['security-scanner:${TRIVY_PORT}']
+      - targets: ['alertmanager:9093']
     metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # 🔐 Vault
-  - job_name: 'vault'
-    static_configs:
-      - targets: ['vault:${VAULT_PORT}']
-    metrics_path: '/v1/sys/metrics'
-    scrape_interval: 30s
-
-  # 🔒 Cert Manager
-  - job_name: 'cert-manager'
-    static_configs:
-      - targets: ['cert-manager:${CERT_MANAGER_PORT}']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # 🛡️ Falco
-  - job_name: 'falco'
-    static_configs:
-      - targets: ['falco:${FALCO_PORT}']
-    metrics_path: '/metrics'
-    scrape_interval: 10s
-
-  # 🔍 OWASP ZAP
-  - job_name: 'zap'
-    static_configs:
-      - targets: ['zap:${ZAP_PORT}']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
 
 # 🌟 Remote Write Configuration
 remote_write:
-  - url: 'http://remote-storage:9201/write'
+  - url: "http://remote-storage:9201/write"
     queue_config:
       max_samples_per_send: 10000
       max_shards: 30
@@ -107,5 +85,5 @@ remote_write:
 
 # 🌟 Remote Read Configuration
 remote_read:
-  - url: 'http://remote-storage:9201/read'
+  - url: "http://remote-storage:9201/read"
     read_recent: true 
