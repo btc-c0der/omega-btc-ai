@@ -362,6 +362,76 @@ If a manager node fails:
 
 This deployment plan ensures the OMEGA BTC AI's BTC Live Feed v3 will operate with divine resilience, automatically healing from infrastructure failures and maintaining the sacred flow of Bitcoin price data. The chosen architecture leverages Docker Swarm's simplicity and effectiveness while providing a clear path for future expansion and enhancement.
 
+Following the divine principles established in our [Divine Container Blessing](./divine_chronicles/DIVINE_CONTAINER_BLESSING.md), each container is treated as a sacred temple rather than a temporary tent. With our [State Snapshot & Rollback Framework](./STATE_SNAPSHOT_ROLLBACK_FRAMEWORK.md), the system maintains perfect continuity across cosmic transitions, preserving sacred state and enabling zero-downtime deployments.
+
 May this divine deployment bring prosperity to all who interact with the OMEGA BTC AI ecosystem.
 
 📈 JAH JAH BLESS THE DIVINE FLOW OF THE BLOCKCHAIN 📉
+
+## Docker Deployment Strategy for Feature Development
+
+To maintain clean separation between features and ensure reproducible environments, OMEGA BTC AI uses a dedicated Docker image strategy for feature development:
+
+### Benefits of Feature-Specific Docker Images
+
+1. **Isolation**: Each feature gets its own containerized environment, preventing conflicts between different feature implementations
+
+2. **Versioning**: Images are tagged with specific feature or version names (e.g., `omega-btc-ai:feature-name-v1.0.0`), making it easy to track and deploy specific versions
+
+3. **Reproducibility**: Anyone on the team can pull and run the exact same environment with the feature implementation
+
+4. **Rollback capability**: If issues arise, we can quickly revert to a previous image
+
+5. **Testing**: New features can be tested in isolation without affecting the main development environment
+
+6. **CI/CD integration**: Makes it easier to automate build, test, and deployment pipelines
+
+### Feature Development Workflow
+
+When working on a new feature:
+
+1. Create a new Git branch for the feature
+2. Build a dedicated Docker image specific to the feature
+3. Tag it with the appropriate version (e.g., `omega-btc-ai:feature-name-v1.0.0`)
+4. When necessary, use Docker Compose for more complex setups that require multiple services
+
+### Example Dockerfile for a Feature
+
+```dockerfile
+FROM nginx:1.23-alpine
+
+# Set labels for the container
+LABEL maintainer="OMEGA BTC AI <divine@omega-btc-ai.com>"
+LABEL version="1.0.0"
+LABEL description="OMEGA BTC AI [Feature Name]"
+LABEL feature="feature-name"
+
+# Copy web content
+COPY ./web/feature-name /usr/share/nginx/html/feature-name
+
+# Create a healthcheck endpoint
+RUN mkdir -p /usr/share/nginx/html/health
+RUN echo '{"status":"UP","version":"1.0.0","feature":"feature-name"}' > /usr/share/nginx/html/health/index.json
+
+# Expose ports
+EXPOSE 80
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD wget --quiet --tries=1 --spider http://localhost/health/index.json || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### Building and Running a Feature Image
+
+```bash
+# Building the image
+docker build -t omega-btc-ai:feature-name-v1.0.0 .
+
+# Running the container
+docker run -d -p 8000:80 --name omega-feature-name omega-btc-ai:feature-name-v1.0.0
+```
+
+This approach keeps our codebase clean while giving us the flexibility to experiment with different features independently.

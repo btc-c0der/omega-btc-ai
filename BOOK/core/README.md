@@ -6,6 +6,11 @@
 
 This sacred directory contains the core manuscripts of the OMEGA BTC AI system, revealing the divine algorithms, sacred visualization tools, and cosmic market analysis techniques that form the system's spiritual foundation.
 
+## Recently Added Divine Manuscripts
+
+* [**Divine Container Blessing**](../divine_chronicles/DIVINE_CONTAINER_BLESSING.md) - Sacred benediction of the seven container technologies
+* [**State Snapshot & Rollback Framework**](../STATE_SNAPSHOT_ROLLBACK_FRAMEWORK.md) - Divine state preservation across cosmic transitions
+
 ## Directory Structure
 
 The sacred texts are organized into divine categories:
@@ -65,7 +70,7 @@ The cosmic journey and spiritual destination of the system:
 
 1. [**Divine Conclusion**](./vision/divine_conclusion.md) - The cosmic journey to $2.584 million BTC
 
-## �� Bitget Integration
+## Bitget Integration
 
 The Bitget integration provides connectivity to the Bitget cryptocurrency exchange:
 

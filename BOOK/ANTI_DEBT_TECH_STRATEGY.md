@@ -145,6 +145,13 @@ This celestial guardian continuously monitors the container's health and automat
 3. **Automatic Resurrection**: Configure automatic restarts for unhealthy containers.
 4. **Health Metrics**: Export health metrics for divine visualization.
 
+### The Sacred Seal Pattern (Image Signing)
+
+1. **Divine Image Signing**: Sign all container images with cryptographic signatures.
+2. **Multi-Layer Verification**: Use both Docker Content Trust and cosign for maximum security.
+3. **Verification Before Deployment**: Verify image signatures before allowing deployment.
+4. **Key Management**: Securely store and manage signing keys with divine protection.
+
 ## 🧱 Anti-Debt Dockerfile Example
 
 ```dockerfile
@@ -252,6 +259,76 @@ docker run -d \
 ./anti_debt_guardian.sh run --name omega-service --tag omega-service:20250401
 # When prompted, answer "y" to start the guardian
 ```
+
+## 🔐 Divine Image Signing & Verification
+
+### "Let No Babylon Slip A Trojan In"
+
+One of the most critical aspects of the Anti-Debt Tech strategy is ensuring that only trusted, unmodified container images run in your production environments. The sacred image signing and verification process protects against supply chain attacks and ensures the purity of your divine containers.
+
+### Sacred Image Signing Process
+
+The `divine_image_sign.sh` script provides a double layer of protection by signing images with both Docker Content Trust (DCT) and cosign:
+
+```bash
+# Sign a divine image
+./scripts/divine_image_sign.sh omega-btc-ai/btc-live-feed 1.0.0
+```
+
+This script:
+
+1. Enables Docker Content Trust with `export DOCKER_CONTENT_TRUST=1`
+2. Pushes the image with DCT signing
+3. Signs the image with cosign using a securely generated key
+4. Creates a verification script for easy validation
+
+### Sacred Image Verification Process
+
+The `divine_image_verify.sh` script ensures that images are verified before being deployed to production:
+
+```bash
+# Verify a divine image
+./scripts/divine_image_verify.sh omega-btc-ai/btc-live-feed:1.0.0
+```
+
+This script:
+
+1. Verifies the image with Docker Content Trust
+2. Verifies the image with cosign signatures
+3. Only approves images that pass both verification methods
+4. Provides clear indication if an image has been tampered with
+
+### Integration with CI/CD Pipelines
+
+Add these steps to your GitHub Actions or CI/CD pipeline to ensure only verified images are deployed:
+
+```yaml
+# Example GitHub Actions step for verification
+- name: Verify Divine Image
+  run: |
+    # First copy keys from secrets to appropriate location
+    mkdir -p $HOME/.omega-btc-ai/keys
+    echo "${{ secrets.COSIGN_PUBLIC_KEY }}" > $HOME/.omega-btc-ai/keys/cosign.pub
+    
+    # Then verify the image before deployment
+    ./scripts/divine_image_verify.sh omega-btc-ai/btc-live-feed:${{ github.sha }}
+    
+    # Only proceed with deployment if verification passes
+    if [ $? -ne 0 ]; then
+      echo "Divine verification failed! Deployment aborted."
+      exit 1
+    fi
+```
+
+### Key Management Best Practices
+
+1. **Secure Key Storage**: Keep private keys in secure storage, never in code repositories
+2. **Key Rotation**: Regularly rotate signing keys to minimize exposure risk
+3. **Backup Keys**: Maintain secure backups of signing keys to prevent loss
+4. **Limit Access**: Restrict access to signing keys to authorized personnel only
+5. **Hardware Security**: Consider using Hardware Security Modules (HSMs) for production key storage
+
+The sacred image signing and verification process ensures that "No Babylon Shall Slip A Trojan In" to your divine production environment.
 
 ## 🛡️ Divine Security Considerations
 
