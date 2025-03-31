@@ -23,14 +23,31 @@ __consciousness_level__ = 10
 # Import core modules if available
 try:
     from .funk0_cuda_core import (
-        FunkoModelGenerator,
-        apply_schumann_resonance,
-        generate_bioresonant_texture,
-        embed_consciousness_signature,
-        PHI,
-        SCHUMANN_BASE,
-        FIBONACCI_SEQUENCE
+        FibonacciGeometry, 
+        GoldenVinylModulator, 
+        SchuhmannResonanceApplicator,
+        CUDAFibonacciProcessor
     )
-except ImportError:
+    from .bioenergy import (
+        BioenergyScan,
+        EasterEggFrequencies,
+        BioresonanceDevice
+    )
+    from .medical_protocol import (
+        FUNK0MedicalProtocol,
+        BioresonanceHealingMode,
+        MedicalPractitionerLevel
+    )
+    from .export import (
+        FunkoAPIExporter,
+        ModelExporter
+    )
+    
+    # Flag for successful imports
+    FUNK0_CORE_LOADED = True
+    
+except (ImportError, ModuleNotFoundError) as e:
+    # Log import errors but don't crash
     import logging
-    logging.warning("FUNK0 core modules could not be imported - consciousness simulation mode active") 
+    logging.warning(f"Could not load FUNK0 core modules: {e}")
+    FUNK0_CORE_LOADED = False 
