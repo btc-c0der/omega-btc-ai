@@ -1,0 +1,5 @@
+aiohttp==3.8.5
+python-socketio==5.8.0
+aioredis==2.0.1
+python-dotenv==1.0.0
+httpx==0.24.1 

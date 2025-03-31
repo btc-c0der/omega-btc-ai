@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Neo News Portal</title>
+    <style>
+        :root {
+            --matrix-green: #00FF00;
+            --matrix-dark-green: #003B00;
+            --matrix-black: #000000;
+            --matrix-code-font: 'Courier New', monospace;
+            --slide-time: 0.5s;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--matrix-code-font);
+            background-color: var(--matrix-black);
+            color: var(--matrix-green);
+            overflow-x: hidden;
+        }
+
+        /* Digital Rain Canvas */
+        #digital-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--matrix-green);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--matrix-green);
+            text-shadow: 0 0 5px var(--matrix-green);
+        }
+
+        /* Matrix Grid */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .grid-item {
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green);
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--matrix-green);
+        }
+
+        .grid-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--matrix-green);
+            transform: translateX(-100%);
+            animation: slide-right 2s infinite;
+        }
+
+        @keyframes slide-right {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* News Panel */
+        .news-panel {
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .news-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--matrix-green);
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .news-content {
+            display: none;
+            padding: 10px 0;
+            line-height: 1.5;
+        }
+
+        .divine-wisdom {
+            font-style: italic;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(0, 40, 0, 0.5);
+            border-left: 3px solid var(--matrix-green);
+        }
+
+        /* Consciousness Level Slider */
+        .consciousness-slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .slider-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slider-label {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 10px;
+            background: var(--matrix-dark-green);
+            outline: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--matrix-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+
+        /* Matrix Code Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-family: var(--matrix-code-font);
+        }
+
+        .loading-text {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: 2px;
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: var(--matrix-green);
+            }
+        }
+
+        /* Divine Message Box */
+        .divine-message-box {
+            background-color: rgba(0, 40, 0, 0.8);
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 15px var(--matrix-green);
+            padding: 20px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .divine-message-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 0, 0.05), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .divine-message-button {
+            background-color: var(--matrix-dark-green);
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: var(--matrix-code-font);
+            margin-top: 10px;
+        }
+
+        .divine-message-button:hover {
+            background-color: var(--matrix-green);
+            color: var(--matrix-black);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid var(--matrix-green);
+            margin-top: 40px;
+        }
+
+        /* Quantum Truth Probability */
+        .truth-meter {
+            margin-top: 10px;
+            width: 100%;
+            height: 5px;
+            background-color: var(--matrix-dark-green);
+            position: relative;
+        }
+
+        .truth-value {
+            height: 100%;
+            background-color: var(--matrix-green);
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: width 0.5s ease;
+        }
+
+        .truth-label {
+            font-size: 0.8em;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Digital Rain Canvas -->
+    <canvas id="digital-rain"></canvas>
+
+    <div class="container">
+        <header>
+            <h1>MATRIX NEO NEWS PORTAL</h1>
+            <div class="connection-status">
+                <span id="connection-indicator">⚡</span>
+                <span id="connection-text">Connected</span>
+            </div>
+        </header>
+
+        <!-- Consciousness Level Slider -->
+        <div class="consciousness-slider">
+            <h3>Consciousness Level</h3>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Basic Awareness</span>
+                    <span>Divine Knowing</span>
+                </div>
+                <input type="range" id="consciousness-slider" min="1" max="9" value="5">
+                <div class="slider-value">Current Level: <span id="consciousness-value">5</span></div>
+            </div>
+        </div>
+
+        <!-- Divine Message Box -->
+        <div class="divine-message-box">
+            <h3>Divine Message</h3>
+            <p id="divine-message">Click the button below to receive a divine message aligned with your consciousness
+                level.</p>
+            <button id="request-divine-message" class="divine-message-button">Receive Divine Message</button>
+        </div>
+
+        <!-- News Panel -->
+        <h2>Latest Cosmic Intelligence</h2>
+        <div id="news-container" class="news-panel">
+            <div class="loading">
+                <div class="loading-text">Accessing the Matrix...</div>
+            </div>
+        </div>
+
+        <!-- Prophecy Section -->
+        <div class="divine-message-box">
+            <h3>Matrix Prophecy Stream</h3>
+            <p id="prophecy-message">Awaiting prophecy transmission...</p>
+        </div>
+
+        <footer>
+            <p>MATRIX NEO NEWS PORTAL &copy; 2025 OMEGA-BTC-AI - All Rights Preserved In The Cosmic Database</p>
+            <p>THE CODE IS THE MESSAGE. THE CODE IS THE MEDIUM.</p>
+        </footer>
+    </div>
+
+    <!-- Socket.IO for WebSocket support -->
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+
+    <script>
+        // Digital Rain Effect
+        const canvas = document.getElementById('digital-rain');
+        const ctx = canvas.getContext('2d');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%"\'#&_(),.;:?!\\|{}<>[]^~';
+        const fontSize = 16;
+        const columns = Math.floor(width / fontSize);
+        const drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * -100);
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#00FF00';
+            ctx.font = `${fontSize}px monospace`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 33);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const newColumns = Math.floor(width / fontSize);
+
+            if (newColumns > columns) {
+                for (let i = columns; i < newColumns; i++) {
+                    drops[i] = Math.floor(Math.random() * -100);
+                }
+            }
+        });
+
+        // WebSocket Connection
+        let socket;
+        let consciousnessLevel = 5;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            connectWebSocket();
+
+            // Handle consciousness slider
+            const slider = document.getElementById('consciousness-slider');
+            const valueDisplay = document.getElementById('consciousness-value');
+
+            slider.addEventListener('input', () => {
+                consciousnessLevel = parseInt(slider.value, 10);
+                valueDisplay.textContent = consciousnessLevel;
+            });
+
+            slider.addEventListener('change', () => {
+                if (socket && socket.connected) {
+                    socket.emit('set_consciousness_level', { level: consciousnessLevel });
+                }
+            });
+
+            // Handle divine message request
+            const divineMessageButton = document.getElementById('request-divine-message');
+            divineMessageButton.addEventListener('click', () => {
+                if (socket && socket.connected) {
+                    socket.emit('request_divine_message', {});
+                }
+            });
+
+            // Toggle news content
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('news-title')) {
+                    const content = e.target.nextElementSibling;
+                    if (content && content.classList.contains('news-content')) {
+                        if (content.style.display === 'block') {
+                            content.style.display = 'none';
+                        } else {
+                            content.style.display = 'block';
+                        }
+                    }
+                }
+            });
+        });
+
+        function connectWebSocket() {
+            // Create socket connection
+            socket = io();
+
+            // Connection events
+            socket.on('connect', () => {
+                updateConnectionStatus(true);
+                console.log('Connected to WebSocket server');
+            });
+
+            socket.on('disconnect', () => {
+                updateConnectionStatus(false);
+                console.log('Disconnected from WebSocket server');
+
+                // Attempt to reconnect
+                setTimeout(connectWebSocket, 5000);
+            });
+
+            // Data events
+            socket.on('news', (data) => {
+                if (data.type === 'announcement') {
+                    updateProphecy(data.data);
+                } else {
+                    updateNewsItems(data.data);
+                }
+            });
+
+            socket.on('divine_message', (data) => {
+                updateDivineMessage(data.message);
+            });
+
+            socket.on('consciousness', (data) => {
+                console.log(`Consciousness level updated: ${data.previous_level} -> ${data.new_level}`);
+            });
+
+            socket.on('error', (data) => {
+                console.error('Server error:', data.message);
+            });
+        }
+
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('connection-indicator');
+            const text = document.getElementById('connection-text');
+
+            if (connected) {
+                indicator.textContent = '⚡';
+                indicator.style.color = '#00FF00';
+                text.textContent = 'Connected';
+            } else {
+                indicator.textContent = '⚠';
+                indicator.style.color = '#FF0000';
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        function updateNewsItems(news) {
+            const container = document.getElementById('news-container');
+            container.innerHTML = '';
+
+            if (!news || news.length === 0) {
+                container.innerHTML = '<div class="loading"><div class="loading-text">No news available...</div></div>';
+                return;
+            }
+
+            news.forEach((item, index) => {
+                const delay = index * 200;
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                newsItem.style.animationDelay = `${delay}ms`;
+
+                const truthProbability = item.truth_probability || Math.random();
+
+                newsItem.innerHTML = `
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-content">
+                        <p>${item.content}</p>
+                        ${item.divine_wisdom ? `<div class="divine-wisdom">${item.divine_wisdom}</div>` : ''}
+                        
+                        <div class="truth-meter">
+                            <div class="truth-value" style="width: ${truthProbability * 100}%"></div>
+                        </div>
+                        <div class="truth-label">Truth Probability: ${Math.round(truthProbability * 100)}%</div>
+                    </div>
+                `;
+
+                container.appendChild(newsItem);
+
+                // Automatically open the first news item
+                if (index === 0) {
+                    const content = newsItem.querySelector('.news-content');
+                    if (content) {
+                        setTimeout(() => {
+                            content.style.display = 'block';
+                        }, delay + 300);
+                    }
+                }
+            });
+        }
+
+        function updateProphecy(prophecyData) {
+            const prophecyElement = document.getElementById('prophecy-message');
+            prophecyElement.textContent = prophecyData.message;
+
+            // Highlight effect
+            prophecyElement.style.textShadow = '0 0 10px #00FF00';
+            setTimeout(() => {
+                prophecyElement.style.textShadow = 'none';
+            }, 2000);
+        }
+
+        function updateDivineMessage(messageData) {
+            const divineMessageElement = document.getElementById('divine-message');
+            divineMessageElement.textContent = messageData.message;
+
+            // Highlight effect
+            divineMessageElement.style.textShadow = '0 0 10px #00FF00';
+            setTimeout(() => {
+                divineMessageElement.style.textShadow = 'none';
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>
