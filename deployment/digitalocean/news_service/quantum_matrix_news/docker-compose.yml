@@ -18,6 +18,13 @@ services:
       - quantum_matrix_news_matrix_news_network
     depends_on:
       - matrix-news-redis
+    ports:
+      - "10090:10090"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10090/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: >
       bash -c "pip install -r /app/requirements.txt &&
               python /app/scripts/news_consciousness_server.py"

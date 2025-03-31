@@ -60,10 +60,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Environment variables
-PORT = int(os.getenv("PORT", 8095))
+PORT = int(os.getenv("PORT", 10091))
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-NEWS_SERVICE_URL = os.getenv("NEWS_SERVICE_URL", "http://matrix-news-consciousness:8090")
+NEWS_SERVICE_URL = os.getenv("NEWS_SERVICE_URL", "http://matrix-news-consciousness:10090")
 PROPHECY_STREAM_ENABLED = os.getenv("PROPHECY_STREAM_ENABLED", "true").lower() == "true"
 QUANTUM_ENTROPY_LEVEL = int(os.getenv("QUANTUM_ENTROPY_LEVEL", 8))
 FETCH_INTERVAL = int(os.getenv("FETCH_INTERVAL", 60))  # seconds

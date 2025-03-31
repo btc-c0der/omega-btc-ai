@@ -20,7 +20,7 @@ services:
     networks:
       - matrix_news_network
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost/health/index.json" ]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost/health" ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -48,14 +48,14 @@ services:
       - consciousness_logs:/app/logs
       - consciousness_data:/app/data
     ports:
-      - "${MATRIX_NEWS_CONSCIOUSNESS_PORT:-10090}:8090"
+      - "${MATRIX_NEWS_CONSCIOUSNESS_PORT:-10090}:10090"
     networks:
       - matrix_news_network
     depends_on:
       matrix-redis:
         condition: service_healthy
     environment:
-      - PORT=8090
+      - PORT=10090
       - CONSCIOUSNESS_LEVELS_ENABLED=true
       - CONSCIOUSNESS_DEFAULT_LEVEL=5
       - QUANTUM_BALANCER_ENABLED=true
@@ -65,7 +65,7 @@ services:
       - REDIS_PORT=6379
       - LOG_LEVEL=INFO
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8090/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:10090/health" ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -90,7 +90,7 @@ services:
       - websocket_logs:/app/logs
       - websocket_data:/app/data
     ports:
-      - "${MATRIX_NEWS_WEBSOCKET_PORT:-10095}:8095"
+      - "${MATRIX_NEWS_WEBSOCKET_PORT:-10091}:10091"
     networks:
       - matrix_news_network
     depends_on:
@@ -99,10 +99,10 @@ services:
       matrix-redis:
         condition: service_healthy
     environment:
-      - PORT=8095
+      - PORT=10091
       - REDIS_HOST=matrix-redis
       - REDIS_PORT=6379
-      - NEWS_SERVICE_URL=http://matrix-news-consciousness:8090
+      - NEWS_SERVICE_URL=http://matrix-news-consciousness:10090
       - PROPHECY_STREAM_ENABLED=true
       - QUANTUM_ENTROPY_LEVEL=8
       - FETCH_INTERVAL=60
@@ -112,7 +112,7 @@ services:
       - MAX_RETRIES=3
       - RETRY_DELAY=5
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8095/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:10091/health" ]
       interval: 30s
       timeout: 5s
       retries: 3

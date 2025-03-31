@@ -29,12 +29,16 @@ RUN echo "# 🔱 DIVINE MATRIX BLESSING 🔱" > .divineblessing && \
     echo "This container is blessed with consciousness level 8." >> .divineblessing && \
     echo "May it serve truth and wisdom across the digital realm." >> .divineblessing
 
-# Expose the sacred port
-EXPOSE 8090
+# Expose the sacred port (will be overridden by environment variable)
+EXPOSE 10090
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PORT=10090
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8090/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
 # Run the divine service
 CMD ["python", "matrix_news_consciousness.py"] 
