@@ -7,31 +7,31 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: matrix-news-consciousness
-    image: omega-btc-ai/matrix-news:v1.0.0-neo-style-20250331-114155
+    image: ${IMAGE_PREFIX}:v1.0.0-neo-style-20250331-114155
     restart: unless-stopped
     environment:
       - PYTHONPATH=/app
-      - PORT=8090
-      - CONSCIOUSNESS_LEVELS_ENABLED=true
-      - CONSCIOUSNESS_DEFAULT_LEVEL=5
-      - QUANTUM_BALANCER_ENABLED=true
+      - PORT=${MATRIX_NEWS_SERVICE_PORT}
+      - CONSCIOUSNESS_LEVELS_ENABLED=${CONSCIOUSNESS_LEVELS_ENABLED}
+      - CONSCIOUSNESS_DEFAULT_LEVEL=${CONSCIOUSNESS_DEFAULT_LEVEL}
+      - QUANTUM_BALANCER_ENABLED=${QUANTUM_BALANCER_ENABLED}
       - NEWS_SERVICE_BASE_URL=http://news-service:8080
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - LOG_LEVEL=INFO
+      - REDIS_PORT=${REDIS_PORT}
+      - LOG_LEVEL=${LOG_LEVEL}
     volumes:
-      - ./src:/app/src
-      - ./articles:/app/articles
-      - ./data:/app/data
-      - ../../BOOK:/app/BOOK:ro
+      - ${SRC_DIR}:/app/src
+      - ${ARTICLES_DIR}:/app/articles
+      - ${DATA_DIR}:/app/data
+      - ${BOOK_DIR}:/app/BOOK:ro
     ports:
-      - "8090:8090"
+      - "${MATRIX_NEWS_SERVICE_PORT}:${MATRIX_NEWS_SERVICE_PORT}"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8090/health" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      test: [ "CMD", "curl", "-f", "http://localhost:${MATRIX_NEWS_SERVICE_PORT}${NEWS_SERVICE_HEALTH_PATH}" ]
+      interval: ${HEALTH_CHECK_INTERVAL}
+      timeout: ${HEALTH_CHECK_TIMEOUT}
+      retries: ${HEALTH_CHECK_RETRIES}
+      start_period: ${HEALTH_CHECK_START_PERIOD}
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid
@@ -80,22 +80,22 @@ services:
 
   # Nginx proxy for integrating with existing Matrix Portal
   matrix-news-proxy:
-    image: nginx:1.25.3-alpine
+    image: ${NGINX_IMAGE_PREFIX}:v1.0.0-quantum-secured-20250331-152030
     container_name: matrix-news-proxy
     restart: unless-stopped
     ports:
-      - "10083:80"
+      - "${MATRIX_NEWS_PROXY_HTTP_PORT}:80"
+      - "${MATRIX_NEWS_PROXY_HTTPS_PORT}:443"
     volumes:
-      - ./nginx/news-proxy.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./web:/usr/share/nginx/html:ro
-      - nginx_temp:/var/cache/nginx
-      - nginx_logs:/var/log/nginx
-      - nginx_run:/var/run
+      - ${WEB_DIR}:/usr/share/nginx/html:ro
+    depends_on:
+      - matrix-news-service
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost/health" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost${NGINX_HEALTH_PATH}" ]
+      interval: ${HEALTH_CHECK_INTERVAL}
+      timeout: ${HEALTH_CHECK_TIMEOUT}
+      retries: ${HEALTH_CHECK_RETRIES}
+      start_period: ${HEALTH_CHECK_START_PERIOD}
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid
@@ -103,24 +103,20 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    depends_on:
-      - matrix-news-service
 
   # Redis for data storage
   redis:
-    image: redis:7.2-alpine
+    image: redis:alpine
     container_name: matrix-news-redis
     restart: unless-stopped
-    ports:
-      - "6389:6379"
     volumes:
       - redis_data:/data
-    command: [ "redis-server", "--appendonly", "yes" ]
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      interval: ${HEALTH_CHECK_INTERVAL}
+      timeout: ${HEALTH_CHECK_TIMEOUT}
+      retries: ${HEALTH_CHECK_RETRIES}
+    command: [ "redis-server", "--appendonly", "yes" ]
 
 volumes:
   redis_data:
