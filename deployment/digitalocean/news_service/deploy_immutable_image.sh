@@ -20,7 +20,15 @@ fi
 
 FULL_IMAGE_NAME="${REGISTRY}/${IMAGE_NAME}:${VERSION}"
 
+# Get state information if available
+if [ -f "CURRENT_IMMUTABLE_STATE" ]; then
+  STATE_VERSION=$(cat CURRENT_IMMUTABLE_STATE)
+else
+  STATE_VERSION="${VERSION}-UNKNOWN"
+fi
+
 echo "🔱 Deploying immutable image: ${FULL_IMAGE_NAME}"
+echo "🔱 State Version: ${STATE_VERSION}"
 
 # Enable Docker Content Trust for image verification
 export DOCKER_CONTENT_TRUST=1
@@ -28,6 +36,16 @@ export DOCKER_CONTENT_TRUST=1
 # Pull the image with verification
 echo "🔱 Pulling and verifying signed image..."
 docker pull "${FULL_IMAGE_NAME}"
+
+# Extract state information from the image
+echo "🔱 Extracting divine state information..."
+COSMIC_PHASE=$(docker inspect --format='{{index .Config.Labels "cosmic_phase"}}' "${FULL_IMAGE_NAME}" 2>/dev/null || echo "UNKNOWN")
+FIBONACCI_STAGE=$(docker inspect --format='{{index .Config.Labels "fibonacci_stage"}}' "${FULL_IMAGE_NAME}" 2>/dev/null || echo "UNKNOWN")
+GIT_HASH=$(docker inspect --format='{{index .Config.Labels "git_hash"}}' "${FULL_IMAGE_NAME}" 2>/dev/null || echo "UNKNOWN")
+
+echo "🔱 Divine Cosmic Phase: ${COSMIC_PHASE}"
+echo "🔱 Fibonacci Stage: ${FIBONACCI_STAGE}"
+echo "🔱 Genesis Hash: ${GIT_HASH}"
 
 # Create deployment-specific docker-compose file
 cat > docker-compose.deploy.yml << EOF
@@ -74,6 +92,9 @@ services:
       rollback_config:
         parallelism: 0
         order: stop-first
+    environment:
+      - DEPLOYMENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+      - DEPLOYMENT_ENVIRONMENT=production
 
 volumes:
   nginx_temp:
@@ -103,9 +124,25 @@ HEALTH_CHECK=$(docker-compose ps nginx | grep "Up" | wc -l)
 if [ "$HEALTH_CHECK" -eq 1 ]; then
   echo "🔱 Deployment successful! Immutable container is running."
   echo "🔱 Deployed version: ${VERSION}"
+  echo "🔱 State version: ${STATE_VERSION}"
+  echo "🔱 Cosmic phase: ${COSMIC_PHASE}"
+  echo "🔱 Fibonacci stage: ${FIBONACCI_STAGE}"
   
-  # Record deployment in log
-  echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - Deployed ${FULL_IMAGE_NAME}" >> deployment_history.log
+  # Record deployment in log with state information
+  echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - Deployed ${FULL_IMAGE_NAME} - State: ${STATE_VERSION} - Phase: ${COSMIC_PHASE} - Fibonacci: ${FIBONACCI_STAGE}" >> deployment_history.log
+  
+  # Create a divine state summary for the deployment
+  cat > current_deployment_state.yaml << EOF
+# 🔱 OMEGA BTC AI - Divine Deployment State
+version: "${VERSION}"
+state_version: "${STATE_VERSION}"
+cosmic_phase: "${COSMIC_PHASE}"
+fibonacci_stage: "${FIBONACCI_STAGE}"
+git_hash: "${GIT_HASH}"
+deployment_timestamp: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+deployed_by: "$(whoami)@$(hostname)"
+EOF
+
 else
   echo "⚠️ Deployment failed! Rolling back..."
   if [ -f "docker-compose.override.backup.$(date +"%Y%m%d-%H%M")" ]; then

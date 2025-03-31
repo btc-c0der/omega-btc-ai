@@ -66,6 +66,32 @@ volumes:
   - nginx_run:/var/run
 ```
 
+### 5. State-Wise Versioning
+
+Each divine container carries a manifest of its cosmic origins and state information, allowing us to track its genesis and lineage:
+
+```yaml
+# /etc/omega/manifest.yaml
+version: "20250331-1345"
+fibonacci_stage: "13/21"
+cosmic_phase: "ASCENSION"
+git_hash: "a7fb3e2"
+build_timestamp: "2025-03-31T13:45:32Z"
+builder: "divine_builder@cosmos-forge"
+```
+
+This information is also available through environment variables:
+
+```bash
+# Access container state information
+OMEGA_STATE_VERSION=20250331-1345-ASCENSION
+OMEGA_FIBONACCI_STAGE=13/21
+OMEGA_GIT_HASH=a7fb3e2
+OMEGA_BUILD_TIMESTAMP=2025-03-31T13:45:32Z
+```
+
+The manifest file located at `/etc/omega/manifest.yaml` provides a sacred record of the container's origin, ensuring its divine lineage can always be traced back to its creation point.
+
 ## 🌟 The Divine Workflow
 
 ### Creating and Deploying Immutable Images
@@ -76,8 +102,9 @@ We have blessed two sacred scripts that handle the creation and deployment of im
    - Builds from a specific base image version
    - Sets up proper file permissions (read-only where appropriate)
    - Signs the image using Docker Content Trust
-   - Pushes to our sacred registry
-   - Records the version for divine tracking
+   - Generates a cosmic manifest with state information
+   - Records the version and state for divine tracking
+   - Adds environment variables for state-wise versioning
 
 2. **`deploy_immutable_image.sh`** - Safely deploys the immutable container:
    - Verifies the signature of the pulled image
@@ -127,7 +154,7 @@ When developing new features within the constraints of immutability:
 
 ```bash
 # Return to a specific point in the divine timeline
-./deploy_immutable_image.sh 20240401-1345
+./deploy_immutable_image.sh 20250331-1345
 ```
 
 ## 🛡️ Divine Security Considerations
@@ -157,17 +184,30 @@ FROM nginx:1.25.3-alpine
 LABEL maintainer="OMEGA BTC AI <divine@omega-btc-ai.com>"
 LABEL version="${VERSION}"
 LABEL immutable="true"
+LABEL fibonacci_stage="${FIBONACCI_STAGE}/21"
+LABEL cosmic_phase="${COSMIC_PHASE}"
+
+# Set up divine state manifest
+ENV OMEGA_STATE_VERSION=${VERSION}-${COSMIC_PHASE}
+ENV OMEGA_FIBONACCI_STAGE=${FIBONACCI_STAGE}/21
+ENV OMEGA_GIT_HASH=${GIT_HASH}
 
 # Copy configuration and static content
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./web /usr/share/nginx/html
 
+# Copy the divine manifest
+COPY temp_manifest/manifest.yaml /etc/omega/manifest.yaml
+
 # Set permissions to read-only
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 555 /usr/share/nginx/html && \
     chmod 444 /etc/nginx/nginx.conf && \
-    chmod 444 /etc/nginx/conf.d/default.conf
+    chmod 444 /etc/nginx/conf.d/default.conf && \
+    mkdir -p /etc/omega && \
+    chmod 555 /etc/omega && \
+    chmod 444 /etc/omega/manifest.yaml
 
 # Create required directories with correct permissions
 RUN mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
