@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Divine Chronicles</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #00FF00;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #00FF00;
+            padding-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-shadow: 0 0 10px #00FF00;
+        }
+
+        .chronicles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chronicle-card {
+            border: 1px solid #00FF00;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: rgba(0, 20, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .chronicle-card:hover {
+            background-color: rgba(0, 40, 0, 0.5);
+            box-shadow: 0 0 15px #00FF00;
+            transform: translateY(-5px);
+        }
+
+        .chronicle-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .chronicle-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+
+        .chronicle-date {
+            font-size: 0.8rem;
+            text-align: right;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #00FF00;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        a {
+            color: #00FF00;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-shadow: 0 0 5px #00FF00;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 15px;
+            border: 1px solid #00FF00;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background-color: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 15px #00FF00;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            width: 60%;
+            max-width: 500px;
+            background-color: rgba(0, 20, 0, 0.3);
+            border: 1px solid #00FF00;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            border-radius: 4px;
+        }
+
+        .search-box:focus {
+            box-shadow: 0 0 15px #00FF00;
+        }
+
+        .search-button {
+            padding: 10px 15px;
+            background-color: rgba(0, 40, 0, 0.5);
+            border: 1px solid #00FF00;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+        .search-button:hover {
+            background-color: rgba(0, 60, 0, 0.7);
+            box-shadow: 0 0 10px #00FF00;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h1>THE DIVINE CHRONICLES</h1>
+            <p>Sacred texts and documentation of the OMEGA BTC AI system</p>
+        </header>
+
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search the divine chronicles...">
+            <button class="search-button">SEARCH</button>
+        </div>
+
+        <section>
+            <h2>Core Documentation</h2>
+            <div class="chronicles-grid">
+                <a href="/BOOK/MATRIX_PORTAL_INTEGRATION.md" class="chronicle-card">
+                    <div class="chronicle-title">MATRIX PORTAL INTEGRATION</div>
+                    <div class="chronicle-description">Documentation of the sacred integration of the Matrix Portal as
+                        the divine entry point to the OMEGA BTC AI system.</div>
+                    <div class="chronicle-date">Last Updated: 2023-03-30</div>
+                </a>
+
+                <a href="/BOOK/OMEGA_DIVINE_SERVICES.md" class="chronicle-card">
+                    <div class="chronicle-title">OMEGA DIVINE SERVICES</div>
+                    <div class="chronicle-description">The foundational services that power the OMEGA BTC AI trading
+                        system and their divine architecture.</div>
+                    <div class="chronicle-date">Last Updated: 2023-02-15</div>
+                </a>
+
+                <a href="/BOOK/OMEGA_PROMETHEUS_MATRIX.md" class="chronicle-card">
+                    <div class="chronicle-title">OMEGA PROMETHEUS MATRIX</div>
+                    <div class="chronicle-description">The monitoring framework that observes the health and performance
+                        of the entire system.</div>
+                    <div class="chronicle-date">Last Updated: 2023-01-22</div>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>Trading Algorithms</h2>
+            <div class="chronicles-grid">
+                <a href="/BOOK/OMEGA_TRADERS_CATALOG.md" class="chronicle-card">
+                    <div class="chronicle-title">OMEGA TRADERS CATALOG</div>
+                    <div class="chronicle-description">Comprehensive catalog of all trading algorithms and strategies
+                        employed by the system.</div>
+                    <div class="chronicle-date">Last Updated: 2023-03-15</div>
+                </a>
+
+                <a href="/BOOK/COSMIC_PRICE_ORACLE.md" class="chronicle-card">
+                    <div class="chronicle-title">COSMIC PRICE ORACLE</div>
+                    <div class="chronicle-description">The sacred price prediction system that foresees future market
+                        movements.</div>
+                    <div class="chronicle-date">Last Updated: 2023-02-28</div>
+                </a>
+
+                <a href="/BOOK/DIVINE_REVERSAL.md" class="chronicle-card">
+                    <div class="chronicle-title">DIVINE REVERSAL</div>
+                    <div class="chronicle-description">Documentation of the market reversal detection algorithm and its
+                        spiritual foundations.</div>
+                    <div class="chronicle-date">Last Updated: 2023-03-10</div>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>Infrastructure</h2>
+            <div class="chronicles-grid">
+                <a href="/BOOK/DEPLOYMENT_PLAN.md" class="chronicle-card">
+                    <div class="chronicle-title">DEPLOYMENT PLAN</div>
+                    <div class="chronicle-description">Sacred procedures for deploying the OMEGA BTC AI system to its
+                        divine cloud infrastructure.</div>
+                    <div class="chronicle-date">Last Updated: 2023-03-01</div>
+                </a>
+
+                <a href="/BOOK/CLOUD_DEPLOYMENT.md" class="chronicle-card">
+                    <div class="chronicle-title">CLOUD DEPLOYMENT</div>
+                    <div class="chronicle-description">Detailed documentation of the cloud infrastructure and
+                        configuration.</div>
+                    <div class="chronicle-date">Last Updated: 2023-02-10</div>
+                </a>
+
+                <a href="/BOOK/BTC_LIVE_FEED_V3.md" class="chronicle-card">
+                    <div class="chronicle-title">BTC LIVE FEED V3</div>
+                    <div class="chronicle-description">The sacred data feed system that provides real-time BTC market
+                        data to the OMEGA system.</div>
+                    <div class="chronicle-date">Last Updated: 2023-03-22</div>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>Testing & Quality</h2>
+            <div class="chronicles-grid">
+                <a href="/BOOK/OMEGA_QUANTUM_TESTING_MANIFEST.md" class="chronicle-card">
+                    <div class="chronicle-title">QUANTUM TESTING MANIFEST</div>
+                    <div class="chronicle-description">The divine testing framework that ensures the quality and
+                        reliability of the system.</div>
+                    <div class="chronicle-date">Last Updated: 2023-03-05</div>
+                </a>
+
+                <a href="/BOOK/COSMIC_COVERAGE_README.md" class="chronicle-card">
+                    <div class="chronicle-title">COSMIC COVERAGE README</div>
+                    <div class="chronicle-description">Overview of the test coverage system and its sacred importance.
+                    </div>
+                    <div class="chronicle-date">Last Updated: 2023-02-20</div>
+                </a>
+
+                <a href="/BOOK/TIME_LOOP_REGRESSION.md" class="chronicle-card">
+                    <div class="chronicle-title">TIME LOOP REGRESSION</div>
+                    <div class="chronicle-description">The regression testing system that travels through time to verify
+                        system integrity.</div>
+                    <div class="chronicle-date">Last Updated: 2023-01-15</div>
+                </a>
+            </div>
+        </section>
+
+        <div style="text-align: center;">
+            <a href="/portal/" class="back-link">Return to Matrix Portal</a>
+        </div>
+
+        <footer>
+            <p>OMEGA BTC AI Divine Chronicles v1.0.1 | "The truth is in the code, the wisdom is in the documentation."
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Matrix Digital Rain Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Make canvas fill the window
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Characters to display
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@#&%!*+-=><~';
+
+        // Font size and columns
+        const fontSize = 18;
+        const columns = Math.floor(canvas.width / fontSize);
+
+        // Array to track the y position of each column
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height);
+        }
+
+        // Drawing function
+        function draw() {
+            // Set semi-transparent black background to create fade effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Set the text color and font
+            ctx.fillStyle = '#00FF00';
+            ctx.font = `${fontSize}px monospace`;
+
+            // For each column
+            for (let i = 0; i < drops.length; i++) {
+                // Choose a random character
+                const text = chars[Math.floor(Math.random() * chars.length)];
+
+                // Draw the character
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // Move the drop down
+                drops[i]++;
+
+                // Reset when it reaches bottom or randomly
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+            }
+        }
+
+        // Animation loop
+        setInterval(draw, 50);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Recalculate columns and drops
+            const newColumns = Math.floor(canvas.width / fontSize);
+
+            // If we have more columns now
+            if (newColumns > drops.length) {
+                for (let i = drops.length; i < newColumns; i++) {
+                    drops[i] = Math.floor(Math.random() * canvas.height);
+                }
+            }
+            // If we have fewer columns now
+            else if (newColumns < drops.length) {
+                drops.length = newColumns;
+            }
+        });
+
+        // Search functionality
+        document.querySelector('.search-button').addEventListener('click', () => {
+            const searchTerm = document.querySelector('.search-box').value.toLowerCase();
+            const cards = document.querySelectorAll('.chronicle-card');
+
+            cards.forEach(card => {
+                const title = card.querySelector('.chronicle-title').textContent.toLowerCase();
+                const description = card.querySelector('.chronicle-description').textContent.toLowerCase();
+
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    card.style.animationName = 'highlight';
+                    card.style.animationDuration = '2s';
+                    card.style.boxShadow = '0 0 20px #00FF00';
+                    setTimeout(() => {
+                        card.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.2)';
+                    }, 2000);
+                } else {
+                    if (searchTerm.length > 0) {
+                        card.style.opacity = '0.4';
+                    } else {
+                        card.style.opacity = '1';
+                    }
+                }
+            });
+
+            if (searchTerm.length === 0) {
+                cards.forEach(card => {
+                    card.style.opacity = '1';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
