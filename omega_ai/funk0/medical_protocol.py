@@ -21,7 +21,7 @@ from typing import Dict, List, Tuple, Optional, Union, BinaryIO
 from enum import Enum
 from pathlib import Path
 
-from .bioenergy import BioenergyScan, EasterEggFrequencies
+from .bioenergy import BioenergyScan, EasterEggFrequencies, BioresonanceDevice
 from .funk0_cuda_core import FibonacciGeometry, GoldenVinylModulator, SchuhmannResonanceApplicator
 
 # ===========================================================================
