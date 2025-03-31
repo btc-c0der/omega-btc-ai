@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Neo News Consciousness Portal</title>
+    <style>
+        :root {
+            --matrix-green: #00FF00;
+            --matrix-dark-green: #003B00;
+            --matrix-black: #000000;
+            --matrix-gray: #1a1a1a;
+            --neo-terminal-color: #33ff33;
+            --neo-highlight: #00cc00;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            color: var(--matrix-green);
+            background-color: var(--matrix-black);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(0, 15, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            border-radius: 3px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--matrix-green);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--matrix-green);
+            text-shadow: 0 0 10px var(--matrix-green);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--neo-terminal-color);
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .consciousness-slider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid var(--matrix-dark-green);
+            background-color: rgba(0, 20, 0, 0.4);
+            border-radius: 3px;
+        }
+
+        .consciousness-slider label {
+            margin-right: 15px;
+            font-weight: bold;
+            color: var(--neo-terminal-color);
+        }
+
+        .consciousness-slider input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: linear-gradient(to right, var(--matrix-dark-green), var(--matrix-green));
+            -webkit-appearance: none;
+            border-radius: 5px;
+        }
+
+        .consciousness-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background-color: var(--matrix-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+
+        .consciousness-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--matrix-green);
+            margin-left: 15px;
+            text-shadow: 0 0 5px var(--matrix-green);
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .news-card {
+            background-color: rgba(0, 10, 0, 0.8);
+            border: 1px solid var(--matrix-green);
+            border-radius: 3px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background-color: var(--matrix-green);
+            opacity: 0.6;
+        }
+
+        .news-source {
+            color: var(--neo-terminal-color);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .news-title {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            color: var(--matrix-green);
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+            padding-left: 15px;
+            border-left: 3px solid var(--matrix-green);
+        }
+
+        .news-content {
+            color: #ccffcc;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            padding: 10px;
+            border-left: 1px dashed var(--matrix-dark-green);
+            background-color: rgba(0, 20, 0, 0.2);
+        }
+
+        .meta-data {
+            background-color: rgba(0, 30, 0, 0.3);
+            padding: 15px;
+            border-radius: 3px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            border: 1px solid var(--matrix-dark-green);
+        }
+
+        .metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(0, 15, 0, 0.5);
+            border: 1px solid var(--matrix-dark-green);
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .metrics::after {
+            content: "> analyzing quantum consciousness data";
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: var(--matrix-dark-green);
+        }
+
+        .metric {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            background-color: rgba(0, 25, 0, 0.5);
+            border: 1px solid var(--matrix-dark-green);
+            border-radius: 3px;
+            text-align: center;
+            position: relative;
+        }
+
+        .metric::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--matrix-green), transparent);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 5px;
+            color: var(--matrix-green);
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+        }
+
+        .sentiment {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 2px;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+
+        .sentiment-positive {
+            background-color: rgba(0, 128, 0, 0.3);
+            color: #00ff00;
+            border: 1px solid #00aa00;
+        }
+
+        .sentiment-neutral {
+            background-color: rgba(0, 100, 255, 0.3);
+            color: #00ccff;
+            border: 1px solid #0088cc;
+        }
+
+        .sentiment-negative {
+            background-color: rgba(255, 0, 0, 0.3);
+            color: #ff6666;
+            border: 1px solid #cc0000;
+        }
+
+        .loading-text {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--matrix-green);
+            margin: 50px 0;
+            letter-spacing: 2px;
+        }
+
+        .truth-probability {
+            display: inline-block;
+            padding: 3px 10px;
+            font-size: 0.9rem;
+            border-radius: 2px;
+            background-color: rgba(0, 30, 0, 0.3);
+            border: 1px solid var(--matrix-dark-green);
+        }
+
+        /* Matrix Digital Rain Canvas */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Temporal context styling */
+        .temporal-context {
+            margin-top: 10px;
+        }
+
+        .temporal-context ul {
+            list-style-type: none;
+            padding-left: 10px;
+            margin: 5px 0;
+        }
+
+        .temporal-context li {
+            position: relative;
+            padding-left: 15px;
+            margin-bottom: 5px;
+        }
+
+        .temporal-context li::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            color: var(--matrix-green);
+        }
+
+        /* Blinking cursor effect */
+        .blink {
+            animation: blink-animation 1s steps(5, start) infinite;
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background-color: var(--matrix-green);
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes blink-animation {
+            to {
+                visibility: hidden;
+            }
+        }
+
+        /* Matrix text typing animation for title */
+        .matrix-typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 4s steps(40, end);
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @media (max-width: 768px) {
+            .metrics {
+                flex-direction: column;
+            }
+
+            .container {
+                margin: 10px;
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h1 class="matrix-typing">🧠 MATRIX NEWS CONSCIOUSNESS 🧠</h1>
+            <div class="subtitle">// REALITY DISTORTION FIELD NEUTRALIZED //</div>
+
+            <div class="consciousness-slider">
+                <label for="consciousness-level">CONSCIOUSNESS LEVEL:</label>
+                <input type="range" id="consciousness-level" min="1" max="9" value="5" step="1">
+                <div class="consciousness-value" id="consciousness-value">5</div>
+            </div>
+        </header>
+
+        <div class="metrics">
+            <div class="metric">
+                <div>TEMPORAL AWARENESS</div>
+                <div class="metric-value" id="temporal-awareness">0.65</div>
+            </div>
+            <div class="metric">
+                <div>PERSPECTIVE BALANCE</div>
+                <div class="metric-value" id="perspective-balance">0.83</div>
+            </div>
+            <div class="metric">
+                <div>TRUTH PROBABILITY</div>
+                <div class="metric-value" id="truth-probability">0.78</div>
+            </div>
+        </div>
+
+        <div id="news-container">
+            <div class="loading-text">INITIALIZING CONSCIOUSNESS STREAM<span class="blink"></span></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Matrix Digital Rain Effect
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size to window size
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Characters for the digital rain
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@#&%!*+-=><~';
+            const fontSize = 14;
+            const columns = Math.ceil(canvas.width / fontSize);
+
+            // Array to track the position of each column
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -canvas.height);
+            }
+
+            function drawRain() {
+                // Semi-transparent black background for fade effect
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Set text color and font
+                ctx.fillStyle = '#00FF00';
+                ctx.font = `${fontSize}px monospace`;
+
+                // Loop through each column
+                for (let i = 0; i < drops.length; i++) {
+                    // Random character
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+
+                    // Display character
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    // Move down
+                    drops[i]++;
+
+                    // Reset when hitting bottom or randomly
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = Math.floor(Math.random() * -10);
+                    }
+                }
+            }
+
+            // Animation loop
+            setInterval(drawRain, 50);
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                // Recalculate columns and drops
+                const newColumns = Math.ceil(canvas.width / fontSize);
+
+                // Adjust drops array if needed
+                if (newColumns > drops.length) {
+                    for (let i = drops.length; i < newColumns; i++) {
+                        drops[i] = Math.floor(Math.random() * -canvas.height);
+                    }
+                } else if (newColumns < drops.length) {
+                    drops.length = newColumns;
+                }
+            });
+
+            // Consciousness level slider functionality
+            const consciousnessSlider = document.getElementById('consciousness-level');
+            const consciousnessValue = document.getElementById('consciousness-value');
+            const newsContainer = document.getElementById('news-container');
+
+            // Update the display value when the slider changes
+            consciousnessSlider.addEventListener('input', function () {
+                consciousnessValue.textContent = this.value;
+                fetchNews(this.value);
+
+                // Add visual effect to show consciousness level change
+                document.body.style.transition = 'background-color 0.5s';
+                document.body.style.backgroundColor = `rgba(0, ${this.value * 5}, 0, 0.1)`;
+                setTimeout(() => {
+                    document.body.style.backgroundColor = '';
+                }, 500);
+            });
+
+            // Initial fetch
+            fetchNews(consciousnessSlider.value);
+
+            function fetchNews(level) {
+                // Show loading state
+                newsContainer.innerHTML = '<div class="loading-text">ACCESSING CONSCIOUSNESS STREAM<span class="blink"></span></div>';
+
+                // This would make an actual API call in production
+                // For now, we'll just simulate a response with a delay for effect
+                setTimeout(() => {
+                    displayNews({
+                        items: [
+                            {
+                                id: "news-1",
+                                title: "BITCOIN REACHES NEW ALL-TIME HIGH",
+                                content: "Bitcoin has reached a new all-time high of $100,000, marking a significant milestone for the cryptocurrency market. Analysts attribute this surge to increased institutional adoption and growing recognition of Bitcoin as a store of value.",
+                                source: "CryptoNews",
+                                url: "#",
+                                published_at: "2023-12-25T12:00:00Z",
+                                sentiment_score: 0.85,
+                                sentiment_label: "positive",
+                                consciousness_level: level,
+                                truth_probability: 0.82,
+                                perspective_balance: 0.75,
+                                temporal_context: {
+                                    historical_events: [
+                                        { date: "2021-11-10", event: "Bitcoin previous ATH" },
+                                        { date: "2020-03-12", event: "COVID market crash" }
+                                    ],
+                                    cycle_position: "early bull market"
+                                }
+                            },
+                            {
+                                id: "news-2",
+                                title: "MARKET CORRELATION ANALYSIS SHOWS DIVERGENCE",
+                                content: "Recent analysis shows Bitcoin diverging from traditional markets, indicating a potential shift in the asset's correlation patterns. This divergence could signal a maturing market with unique drivers.",
+                                source: "MarketWatch",
+                                url: "#",
+                                published_at: "2023-12-24T15:30:00Z",
+                                sentiment_score: 0.2,
+                                sentiment_label: "neutral",
+                                consciousness_level: level,
+                                truth_probability: 0.78,
+                                perspective_balance: 0.85,
+                                temporal_context: {
+                                    historical_events: [
+                                        { date: "2022-06-18", event: "Bear market bottom" }
+                                    ],
+                                    cycle_position: "early bull market"
+                                }
+                            },
+                            {
+                                id: "news-3",
+                                title: "CONCERNS OVER CRYPTOCURRENCY REGULATIONS",
+                                content: "New regulations might impact cryptocurrency markets as governments worldwide seek to establish frameworks for digital assets. Industry leaders are calling for balanced approaches that protect consumers while fostering innovation.",
+                                source: "FinancialTimes",
+                                url: "#",
+                                published_at: "2023-12-23T09:15:00Z",
+                                sentiment_score: -0.4,
+                                sentiment_label: "negative",
+                                consciousness_level: level,
+                                truth_probability: 0.86,
+                                perspective_balance: 0.9,
+                                temporal_context: {
+                                    historical_events: [
+                                        { date: "2022-11-08", event: "FTX collapse" },
+                                        { date: "2023-06-15", event: "SEC regulatory actions" }
+                                    ],
+                                    cycle_position: "early bull market"
+                                }
+                            }
+                        ],
+                        consciousness_level: parseInt(level),
+                        temporal_awareness: 0.65 + (parseInt(level) * 0.03),
+                        perspective_balance: 0.83,
+                        timestamp: new Date().toISOString(),
+                        quantum_balanced: true
+                    });
+                }, 1200); // Longer delay for dramatic effect
+            }
+
+            function displayNews(data) {
+                newsContainer.innerHTML = '';
+
+                // Update metrics with animated counting effect
+                animateMetricValue('temporal-awareness', data.temporal_awareness.toFixed(2));
+                animateMetricValue('perspective-balance', data.perspective_balance.toFixed(2));
+
+                let totalTruth = 0;
+
+                // Add typewriter effect delay between news items
+                data.items.forEach((item, index) => {
+                    totalTruth += item.truth_probability;
+
+                    // Add each news card with a staggered delay
+                    setTimeout(() => {
+                        const newsCard = document.createElement('div');
+                        newsCard.className = 'news-card';
+
+                        const sourceDate = new Date(item.published_at).toLocaleDateString();
+
+                        let sentimentClass = '';
+                        if (item.sentiment_label === 'positive') sentimentClass = 'sentiment-positive';
+                        else if (item.sentiment_label === 'negative') sentimentClass = 'sentiment-negative';
+                        else sentimentClass = 'sentiment-neutral';
+
+                        let temporalContext = '';
+                        if (item.temporal_context && item.temporal_context.historical_events) {
+                            temporalContext = `
+                                <div class="temporal-context">
+                                    <strong>HISTORICAL CONTEXT:</strong>
+                                    <ul>
+                                        ${item.temporal_context.historical_events.map(event =>
+                                `<li>${event.date}: ${event.event}</li>`
+                            ).join('')}
+                                    </ul>
+                                    ${item.temporal_context.cycle_position ?
+                                    `<div><strong>MARKET CYCLE:</strong> ${item.temporal_context.cycle_position.toUpperCase()}</div>` : ''}
+                                </div>
+                            `;
+                        }
+
+                        newsCard.innerHTML = `
+                            <div class="news-source">${item.source.toUpperCase()} • ${sourceDate}
+                                <span style="opacity: 0.5;">[ID: ${item.id}]</span>
+                            </div>
+                            <h2 class="news-title">${item.title}</h2>
+                            <div class="news-content">${item.content}</div>
+                            <div>
+                                <span class="sentiment ${sentimentClass}">${item.sentiment_label.toUpperCase()}</span>
+                                <span class="truth-probability">TRUTH: ${(item.truth_probability * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="meta-data">
+                                <div><strong>CONSCIOUSNESS LEVEL:</strong> ${item.consciousness_level}/9</div>
+                                ${temporalContext}
+                            </div>
+                        `;
+
+                        // Add the news card with a fade in effect
+                        newsCard.style.opacity = '0';
+                        newsContainer.appendChild(newsCard);
+
+                        // Fade in animation
+                        setTimeout(() => {
+                            newsCard.style.transition = 'opacity 0.5s';
+                            newsCard.style.opacity = '1';
+                        }, 50);
+
+                    }, index * 300); // Stagger each card
+                });
+
+                // Update average truth probability
+                setTimeout(() => {
+                    animateMetricValue('truth-probability', (totalTruth / data.items.length).toFixed(2));
+                }, 300);
+            }
+
+            // Animate counting effect for metrics
+            function animateMetricValue(elementId, targetValue) {
+                const element = document.getElementById(elementId);
+                const startValue = parseFloat(element.textContent);
+                const targetVal = parseFloat(targetValue);
+                const duration = 1500;
+                const stepTime = 20;
+                const steps = duration / stepTime;
+                const valueIncrement = (targetVal - startValue) / steps;
+
+                let currentStep = 0;
+
+                const interval = setInterval(() => {
+                    currentStep++;
+                    const currentValue = startValue + valueIncrement * currentStep;
+                    element.textContent = currentValue.toFixed(2);
+
+                    if (currentStep >= steps) {
+                        clearInterval(interval);
+                        element.textContent = targetValue;
+                    }
+                }, stepTime);
+            }
+        });
+    </script>
+</body>
+
+</html>

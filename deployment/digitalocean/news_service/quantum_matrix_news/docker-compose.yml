@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: matrix-news-consciousness
-    image: omega-btc-ai/matrix-news:consciousness-1.0.0
+    image: omega-btc-ai/matrix-news:v1.0.0-neo-style-20250331-114155
     restart: unless-stopped
     environment:
       - PYTHONPATH=/app
