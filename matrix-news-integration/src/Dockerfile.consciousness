@@ -1,0 +1,40 @@
+FROM python:3.10-slim
+
+# Divine metadata
+LABEL maintainer="OMEGA Divine Collective <divine@omega-btc-ai.io>"
+LABEL version="1.0.0"
+LABEL description="Matrix News Consciousness Service"
+LABEL quantum_secure="true"
+LABEL consciousness_certified="level_8"
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY matrix_news_consciousness.py .
+
+# Apply GBU License blessing
+RUN echo "# 🔱 DIVINE MATRIX BLESSING 🔱" > .divineblessing && \
+    echo "This container is blessed with consciousness level 8." >> .divineblessing && \
+    echo "May it serve truth and wisdom across the digital realm." >> .divineblessing
+
+# Expose the sacred port
+EXPOSE 8090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8090/health || exit 1
+
+# Run the divine service
+CMD ["python", "matrix_news_consciousness.py"] 
