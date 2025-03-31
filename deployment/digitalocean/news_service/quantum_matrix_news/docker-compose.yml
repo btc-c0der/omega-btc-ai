@@ -7,102 +7,79 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: matrix-news-consciousness
-    image: ${IMAGE_PREFIX}:v1.0.0-neo-style-20250331-114155
     restart: unless-stopped
     environment:
       - PYTHONPATH=/app
-      - PORT=${MATRIX_NEWS_SERVICE_PORT}
-      - CONSCIOUSNESS_LEVELS_ENABLED=${CONSCIOUSNESS_LEVELS_ENABLED}
-      - CONSCIOUSNESS_DEFAULT_LEVEL=${CONSCIOUSNESS_DEFAULT_LEVEL}
-      - QUANTUM_BALANCER_ENABLED=${QUANTUM_BALANCER_ENABLED}
+      - PORT=${MATRIX_NEWS_SERVICE_PORT:-8090}
+      - CONSCIOUSNESS_LEVELS_ENABLED=${CONSCIOUSNESS_LEVELS_ENABLED:-true}
+      - CONSCIOUSNESS_DEFAULT_LEVEL=${CONSCIOUSNESS_DEFAULT_LEVEL:-5}
+      - QUANTUM_BALANCER_ENABLED=${QUANTUM_BALANCER_ENABLED:-true}
       - NEWS_SERVICE_BASE_URL=http://news-service:8080
       - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - LOG_LEVEL=${LOG_LEVEL}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
-      - ${SRC_DIR}:/app/src
-      - ${ARTICLES_DIR}:/app/articles
-      - ${DATA_DIR}:/app/data
-      - ${BOOK_DIR}:/app/BOOK:ro
+      - ${SRC_DIR:-./src}:/app/src
+      - ${ARTICLES_DIR:-./articles}:/app/articles
+      - ${DATA_DIR:-./data}:/app/data
+      - ${BOOK_DIR:-../../BOOK}:/app/BOOK:ro
     ports:
-      - "${MATRIX_NEWS_SERVICE_PORT}:${MATRIX_NEWS_SERVICE_PORT}"
+      - "${MATRIX_NEWS_SERVICE_PORT:-8090}:${MATRIX_NEWS_SERVICE_PORT:-8090}"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${MATRIX_NEWS_SERVICE_PORT}${NEWS_SERVICE_HEALTH_PATH}" ]
-      interval: ${HEALTH_CHECK_INTERVAL}
-      timeout: ${HEALTH_CHECK_TIMEOUT}
-      retries: ${HEALTH_CHECK_RETRIES}
-      start_period: ${HEALTH_CHECK_START_PERIOD}
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
+      test: [ "CMD", "curl", "-f", "http://localhost:${MATRIX_NEWS_SERVICE_PORT:-8090}${NEWS_SERVICE_HEALTH_PATH:-/health}" ]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: ${HEALTH_CHECK_START_PERIOD:-15s}
     depends_on:
       - redis
-      - temporal-contextualizer
 
-  # Temporal Contextualizer - provides historical context for news
-  temporal-contextualizer:
+  # Matrix Neo News Portal NGINX Proxy - NG1N1X Frontline Priest
+  nginx:
     build:
-      context: ./temporal
+      context: ./nginx
       dockerfile: Dockerfile
-    container_name: matrix-temporal-contextualizer
-    image: omega-btc-ai/temporal-contextualizer:1.0.0
-    restart: unless-stopped
-    environment:
-      - PYTHONPATH=/app
-      - PORT=8091
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - HISTORY_DEPTH_DAYS=1095
-      - FIBONACCI_CYCLE_DETECTION=true
-    volumes:
-      - ./temporal:/app
-      - ./data/historical:/app/data/historical
-    ports:
-      - "8091:8091"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8091/health" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    depends_on:
-      - redis
-
-  # Nginx proxy for integrating with existing Matrix Portal
-  matrix-news-proxy:
-    image: ${NGINX_IMAGE_PREFIX}:v1.0.0-quantum-secured-20250331-152030
     container_name: matrix-news-proxy
     restart: unless-stopped
     ports:
-      - "${MATRIX_NEWS_PROXY_HTTP_PORT}:80"
-      - "${MATRIX_NEWS_PROXY_HTTPS_PORT}:443"
+      - "${MATRIX_NEWS_PROXY_HTTP_PORT:-10083}:80"
+      - "${MATRIX_NEWS_PROXY_HTTPS_PORT:-10443}:443"
     volumes:
-      - ${WEB_DIR}:/usr/share/nginx/html:ro
+      - ${WEB_DIR:-./web}:/usr/share/nginx/html:ro
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost${NGINX_HEALTH_PATH:-/health/index.json}" ]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: ${HEALTH_CHECK_START_PERIOD:-15s}
     depends_on:
       - matrix-news-service
+
+  # WebSocket Sacred Echo - News Prophecy Streaming Service
+  websocket:
+    build:
+      context: ./temporal
+      dockerfile: Dockerfile
+    container_name: matrix-news-websocket
+    restart: unless-stopped
+    environment:
+      - PORT=${WEBSOCKET_PROPHECY_PORT:-8095}
+      - NEWS_SERVICE_URL=http://matrix-news-service:${MATRIX_NEWS_SERVICE_PORT:-8090}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - PROPHECY_STREAM_ENABLED=${PROPHECY_STREAM_ENABLED:-true}
+      - QUANTUM_ENTROPY_LEVEL=${QUANTUM_ENTROPY_LEVEL:-8}
+    depends_on:
+      - redis
+      - matrix-news-service
+    ports:
+      - "${WEBSOCKET_PROPHECY_PORT:-8095}:${WEBSOCKET_PROPHECY_PORT:-8095}"
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost${NGINX_HEALTH_PATH}" ]
-      interval: ${HEALTH_CHECK_INTERVAL}
-      timeout: ${HEALTH_CHECK_TIMEOUT}
-      retries: ${HEALTH_CHECK_RETRIES}
-      start_period: ${HEALTH_CHECK_START_PERIOD}
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
+      test: [ "CMD", "curl", "-f", "http://localhost:${WEBSOCKET_PROPHECY_PORT:-8095}${WEBSOCKET_HEALTH_PATH:-/health}" ]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: ${HEALTH_CHECK_START_PERIOD:-15s}
 
   # Redis for data storage
   redis:
@@ -113,13 +90,10 @@ services:
       - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
-      interval: ${HEALTH_CHECK_INTERVAL}
-      timeout: ${HEALTH_CHECK_TIMEOUT}
-      retries: ${HEALTH_CHECK_RETRIES}
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
     command: [ "redis-server", "--appendonly", "yes" ]
 
 volumes:
   redis_data:
-  nginx_temp:
-  nginx_logs:
-  nginx_run:

@@ -24,29 +24,23 @@ class MatrixNewsSocket {
             consciousnessLevel: options.consciousnessLevel || 5
         };
 
-        // Internal state
+        // Initialize internal state
         this.socket = null;
         this.connected = false;
         this.reconnectAttempts = 0;
-        this.listeners = {
-            connect: [],
-            disconnect: [],
-            news: [],
-            error: [],
-            consciousness: []
+        this.eventHandlers = {
+            'connect': [],
+            'disconnect': [],
+            'news': [],
+            'error': [],
+            'consciousness': [],
+            'divine_message': []
         };
 
-        // Bind methods to preserve 'this' context
-        this._onConnect = this._onConnect.bind(this);
-        this._onDisconnect = this._onDisconnect.bind(this);
-        this._onNews = this._onNews.bind(this);
-        this._onError = this._onError.bind(this);
-        this._onConsciousnessUpdate = this._onConsciousnessUpdate.bind(this);
-
-        // Initialize quantum entropy collection
-        this.quantumEntropy = this._generateQuantumEntropy();
-
-        this._log('Matrix News Socket initialized with consciousness level: ' + this.options.consciousnessLevel);
+        // Log configuration if debug mode is enabled
+        if (this.options.debugMode) {
+            console.log('MatrixNewsSocket initialized with options:', this.options);
+        }
     }
 
     /**
@@ -54,70 +48,36 @@ class MatrixNewsSocket {
      */
     connect() {
         if (this.socket) {
-            this._log('Already connected or connecting');
-            return;
+            // Already connected or connecting
+            if (this.options.debugMode) {
+                console.log('Socket already exists, disconnecting before reconnection');
+            }
+            this.disconnect();
         }
 
         try {
-            this._log('Connecting to WebSocket Sacred Echo...');
+            if (this.options.debugMode) {
+                console.log(`Connecting to Matrix WebSocket at ${this.options.socketUrl}`);
+            }
 
-            // Connect to Socket.IO with consciousness level as a query parameter
+            // Connect to Socket.IO server
             this.socket = io(this.options.socketUrl, {
+                transports: ['websocket'],
+                reconnection: false, // We'll handle reconnection ourselves
                 query: {
-                    consciousness: this.options.consciousnessLevel,
-                    client_entropy: this.quantumEntropy
-                },
-                reconnection: false // We handle reconnection manually
+                    consciousness: this.options.consciousnessLevel
+                }
             });
 
-            // Register event handlers
-            this.socket.on('connect', this._onConnect);
-            this.socket.on('disconnect', this._onDisconnect);
-            this.socket.on('connect_error', this._onError);
-            this.socket.on('connect_timeout', this._onError);
-            this.socket.on('error', this._onError);
+            // Setup default event handlers
+            this._setupEventHandlers();
 
-            // Register message handlers
-            this.socket.on('welcome', (data) => {
-                this._log('Received welcome message:', data);
-                this._trigger('connect', data);
-            });
+        } catch (error) {
+            console.error('Error connecting to Matrix WebSocket:', error);
+            this._triggerEvent('error', { message: 'Connection error', error });
 
-            this.socket.on('news_prophecy', (data) => {
-                this._onNews(data);
-            });
-
-            this.socket.on('news_response', (data) => {
-                this._onNews(data);
-            });
-
-            this.socket.on('consciousness_update', (data) => {
-                this._onConsciousnessUpdate(data);
-            });
-
-            this.socket.on('announcement', (data) => {
-                this._log('Announcement received:', data);
-                // Trigger both news and special announcement handlers
-                this._trigger('news', {
-                    type: 'announcement',
-                    data: data
-                });
-            });
-
-            this.socket.on('error', (data) => {
-                this._log('Socket error:', data);
-                this._trigger('error', data);
-            });
-        } catch (err) {
-            this._log('Error connecting to WebSocket Sacred Echo:', err);
-            this._trigger('error', {
-                message: 'Failed to connect to WebSocket Sacred Echo',
-                error: err
-            });
-
-            // Attempt reconnection if enabled
             if (this.options.autoReconnect) {
-                this._scheduleReconnect();
+                this._attemptReconnect();
             }
         }
     }
@@ -126,275 +86,302 @@ class MatrixNewsSocket {
      * Disconnect from the WebSocket Sacred Echo service
      */
     disconnect() {
-        if (!this.socket) {
-            return;
-        }
+        if (this.socket) {
+            this.socket.disconnect();
+            this.socket = null;
+            this.connected = false;
+            this._triggerEvent('disconnect', {});
 
-        this._log('Disconnecting from WebSocket Sacred Echo...');
-        this.socket.disconnect();
-        this.socket = null;
-        this.connected = false;
-        this.reconnectAttempts = 0;
+            if (this.options.debugMode) {
+                console.log('Disconnected from Matrix WebSocket');
+            }
+        }
     }
 
     /**
-     * Request the latest news from the sacred news service
+     * Register an event handler
+     * @param {string} event - Event name ('connect', 'disconnect', 'news', 'error', 'consciousness', 'divine_message')
+     * @param {function} handler - Event handler function
      */
-    requestNews() {
-        if (!this.socket || !this.connected) {
-            this._log('Cannot request news: not connected');
-            return;
+    on(event, handler) {
+        if (this.eventHandlers[event]) {
+            this.eventHandlers[event].push(handler);
+
+            if (this.options.debugMode) {
+                console.log(`Registered handler for ${event} event`);
+            }
+        } else {
+            console.warn(`Unknown event type: ${event}`);
         }
 
-        const requestId = this._generateRequestId();
-        this._log('Requesting latest news, request ID:', requestId);
-
-        this.socket.emit('request_news', {
-            request_id: requestId,
-            consciousness_level: this.options.consciousnessLevel,
-            timestamp: new Date().toISOString()
-        });
+        return this; // For chaining
     }
 
     /**
-     * Update the consciousness level
-     * @param {number} level - New consciousness level (1-9)
+     * Remove an event handler
+     * @param {string} event - Event name
+     * @param {function} handler - Handler to remove (or undefined to remove all)
+     */
+    off(event, handler) {
+        if (this.eventHandlers[event]) {
+            if (handler) {
+                const index = this.eventHandlers[event].indexOf(handler);
+                if (index !== -1) {
+                    this.eventHandlers[event].splice(index, 1);
+
+                    if (this.options.debugMode) {
+                        console.log(`Removed handler for ${event} event`);
+                    }
+                }
+            } else {
+                // Remove all handlers for this event
+                this.eventHandlers[event] = [];
+
+                if (this.options.debugMode) {
+                    console.log(`Removed all handlers for ${event} event`);
+                }
+            }
+        }
+
+        return this; // For chaining
+    }
+
+    /**
+     * Set consciousness level and notify the server
+     * @param {number} level - Consciousness level (1-9)
      */
     setConsciousnessLevel(level) {
-        // Validate consciousness level
-        level = parseInt(level, 10);
-        if (isNaN(level) || level < 1 || level > 9) {
-            this._log('Invalid consciousness level:', level);
+        if (level < 1 || level > 9) {
+            console.warn('Consciousness level must be between 1 and 9');
             return;
         }
 
         this.options.consciousnessLevel = level;
-        this._log('Setting consciousness level to:', level);
 
-        // If connected, send the update to the server
         if (this.socket && this.connected) {
-            this.socket.emit('set_consciousness', {
-                level: level,
+            // Send consciousness level update to server
+            this.socket.emit('set_consciousness_level', { level });
+
+            if (this.options.debugMode) {
+                console.log(`Updated consciousness level to ${level}`);
+            }
+        } else {
+            if (this.options.debugMode) {
+                console.log(`Consciousness level set to ${level} (will be applied when connected)`);
+            }
+        }
+    }
+
+    /**
+     * Request a divine message from the server
+     */
+    requestDivineMessage() {
+        if (this.socket && this.connected) {
+            this.socket.emit('request_divine_message', {
+                timestamp: new Date().toISOString()
+            });
+
+            if (this.options.debugMode) {
+                console.log('Requesting divine message');
+            }
+        } else {
+            console.warn('Cannot request divine message: not connected');
+            this._triggerEvent('error', { message: 'Not connected to the Matrix' });
+        }
+    }
+
+    /**
+     * Generate quantum entropy for secure communications
+     * @returns {object} Quantum entropy data
+     */
+    generateQuantumEntropy() {
+        // Basic entropy generation for demonstration
+        const entropy = {
+            entropy_value: Math.random(),
+            quantum_state: ['superposition', 'entangled', 'collapsed'][Math.floor(Math.random() * 3)],
+            timestamp: new Date().toISOString(),
+            level: this.options.consciousnessLevel
+        };
+
+        if (this.options.consciousnessLevel >= 7) {
+            // Add higher dimensional entropy factors for high consciousness levels
+            entropy.dimensional_factors = {
+                temporal_variance: Math.random(),
+                harmonic_resonance: Math.random(),
+                synchronicity_coefficient: Math.random()
+            };
+        }
+
+        return entropy;
+    }
+
+    /**
+     * Get the connection status
+     * @returns {boolean} Connection status
+     */
+    isConnected() {
+        return this.connected;
+    }
+
+    /**
+     * Get the current consciousness level
+     * @returns {number} Consciousness level (1-9)
+     */
+    getConsciousnessLevel() {
+        return this.options.consciousnessLevel;
+    }
+
+    /**
+     * Setup internal WebSocket event handlers
+     * @private
+     */
+    _setupEventHandlers() {
+        if (!this.socket) return;
+
+        // Connection established
+        this.socket.on('connect', () => {
+            this.connected = true;
+            this.reconnectAttempts = 0;
+
+            if (this.options.debugMode) {
+                console.log('Connected to Matrix WebSocket');
+            }
+
+            // Set consciousness level on initial connection
+            this.socket.emit('set_consciousness_level', {
+                level: this.options.consciousnessLevel
+            });
+
+            this._triggerEvent('connect', {
                 timestamp: new Date().toISOString(),
-                client_entropy: this._generateQuantumEntropy()
+                consciousnessLevel: this.options.consciousnessLevel
+            });
+        });
+
+        // Connection closed
+        this.socket.on('disconnect', () => {
+            this.connected = false;
+
+            if (this.options.debugMode) {
+                console.log('Disconnected from Matrix WebSocket');
+            }
+
+            this._triggerEvent('disconnect', {
+                timestamp: new Date().toISOString()
+            });
+
+            if (this.options.autoReconnect) {
+                this._attemptReconnect();
+            }
+        });
+
+        // Error occurred
+        this.socket.on('connect_error', (error) => {
+            if (this.options.debugMode) {
+                console.error('Connection error:', error);
+            }
+
+            this._triggerEvent('error', {
+                message: 'Connection error',
+                error,
+                timestamp: new Date().toISOString()
+            });
+
+            if (this.options.autoReconnect) {
+                this._attemptReconnect();
+            }
+        });
+
+        // News received
+        this.socket.on('news', (data) => {
+            if (this.options.debugMode) {
+                console.log('News received:', data);
+            }
+
+            this._triggerEvent('news', data);
+        });
+
+        // Consciousness update received
+        this.socket.on('consciousness', (data) => {
+            if (this.options.debugMode) {
+                console.log('Consciousness update received:', data);
+            }
+
+            this.options.consciousnessLevel = data.new_level;
+            this._triggerEvent('consciousness', data);
+        });
+
+        // Divine message received
+        this.socket.on('divine_message', (data) => {
+            if (this.options.debugMode) {
+                console.log('Divine message received:', data);
+            }
+
+            this._triggerEvent('divine_message', data);
+        });
+
+        // Error message received
+        this.socket.on('error', (data) => {
+            if (this.options.debugMode) {
+                console.error('Server error received:', data);
+            }
+
+            this._triggerEvent('error', data);
+        });
+    }
+
+    /**
+     * Attempt to reconnect to the server
+     * @private
+     */
+    _attemptReconnect() {
+        if (this.reconnectAttempts >= this.options.maxReconnectAttempts) {
+            if (this.options.debugMode) {
+                console.log('Maximum reconnection attempts reached');
+            }
+            return;
+        }
+
+        this.reconnectAttempts++;
+
+        if (this.options.debugMode) {
+            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.options.maxReconnectAttempts})...`);
+        }
+
+        setTimeout(() => {
+            this.connect();
+        }, this.options.reconnectInterval);
+    }
+
+    /**
+     * Trigger an event to all registered handlers
+     * @param {string} event - Event name
+     * @param {object} data - Event data
+     * @private
+     */
+    _triggerEvent(event, data) {
+        if (this.eventHandlers[event]) {
+            this.eventHandlers[event].forEach(handler => {
+                try {
+                    handler(data);
+                } catch (error) {
+                    console.error(`Error in ${event} event handler:`, error);
+                }
             });
         }
     }
 
     /**
-     * Register an event listener
-     * @param {string} event - Event name: 'connect', 'disconnect', 'news', 'error', 'consciousness'
-     * @param {Function} callback - Callback function
-     */
-    on(event, callback) {
-        if (!this.listeners[event]) {
-            this._log(`Unknown event: ${event}`);
-            return;
-        }
-
-        this.listeners[event].push(callback);
-        return this;
-    }
-
-    /**
-     * Remove an event listener
-     * @param {string} event - Event name
-     * @param {Function} callback - Callback function to remove
-     */
-    off(event, callback) {
-        if (!this.listeners[event]) {
-            return;
-        }
-
-        this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
-        return this;
-    }
-
-    // Private methods
-
-    /**
-     * Handle connection event
+     * Get default WebSocket URL based on current location
+     * @returns {string} Default WebSocket URL
      * @private
-     */
-    _onConnect() {
-        this._log('Connected to WebSocket Sacred Echo');
-        this.connected = true;
-        this.reconnectAttempts = 0;
-
-        // Immediately request news after connecting
-        this.requestNews();
-    }
-
-    /**
-     * Handle disconnection event
-     * @private
-     */
-    _onDisconnect() {
-        this._log('Disconnected from WebSocket Sacred Echo');
-        this.connected = false;
-        this._trigger('disconnect');
-
-        // Attempt reconnection if enabled
-        if (this.options.autoReconnect) {
-            this._scheduleReconnect();
-        }
-    }
-
-    /**
-     * Handle news update event
-     * @private
-     * @param {Object} data - News data
-     */
-    _onNews(data) {
-        this._log('News prophecy received:', data);
-
-        // Verify consciousness level matches
-        if (data.consciousness_level && data.consciousness_level !== this.options.consciousnessLevel) {
-            this._log(`Consciousness mismatch: received ${data.consciousness_level}, current ${this.options.consciousnessLevel}`);
-        }
-
-        // Verify quantum verification if present
-        if (data.quantum_verification) {
-            // In a real implementation, we would verify the quantum signature
-            this._log('Quantum verification received:', data.quantum_verification);
-        }
-
-        this._trigger('news', data);
-    }
-
-    /**
-     * Handle error event
-     * @private
-     * @param {Object} error - Error data
-     */
-    _onError(error) {
-        this._log('WebSocket error:', error);
-        this._trigger('error', error);
-
-        // Attempt reconnection if enabled
-        if (this.options.autoReconnect) {
-            this._scheduleReconnect();
-        }
-    }
-
-    /**
-     * Handle consciousness update event
-     * @private
-     * @param {Object} data - Consciousness update data
-     */
-    _onConsciousnessUpdate(data) {
-        this._log('Consciousness update received:', data);
-        this.options.consciousnessLevel = data.new_level;
-        this._trigger('consciousness', data);
-    }
-
-    /**
-     * Schedule reconnection attempt
-     * @private
-     */
-    _scheduleReconnect() {
-        if (this.reconnectAttempts >= this.options.maxReconnectAttempts) {
-            this._log('Maximum reconnection attempts reached');
-            return;
-        }
-
-        this.reconnectAttempts++;
-        const delay = this.options.reconnectInterval * Math.pow(1.5, this.reconnectAttempts - 1); // Exponential backoff
-
-        this._log(`Scheduling reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
-
-        setTimeout(() => {
-            if (!this.connected) {
-                this._log(`Reconnection attempt ${this.reconnectAttempts}`);
-                this.connect();
-            }
-        }, delay);
-    }
-
-    /**
-     * Trigger event listeners
-     * @private
-     * @param {string} event - Event name
-     * @param {*} data - Event data
-     */
-    _trigger(event, data) {
-        if (!this.listeners[event]) {
-            return;
-        }
-
-        for (const callback of this.listeners[event]) {
-            try {
-                callback(data);
-            } catch (err) {
-                console.error('Error in event listener:', err);
-            }
-        }
-    }
-
-    /**
-     * Get default Socket.IO URL based on current location
-     * @private
-     * @returns {string} Socket.IO URL
      */
     _getDefaultSocketUrl() {
-        // Use the same host and protocol as the current page, but with /socket.io path
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = window.location.host;
-        return `${protocol}//${host}/socket.io`;
-    }
-
-    /**
-     * Generate a unique request ID
-     * @private
-     * @returns {string} Request ID
-     */
-    _generateRequestId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    }
-
-    /**
-     * Generate quantum entropy
-     * @private
-     * @returns {string} Quantum entropy
-     */
-    _generateQuantumEntropy() {
-        // In a browser environment, we use a combination of available entropy sources
-        const timestamp = Date.now().toString();
-        const random = Math.random().toString();
-        const navigator = window.navigator ? JSON.stringify({
-            userAgent: window.navigator.userAgent,
-            language: window.navigator.language,
-            hardwareConcurrency: window.navigator.hardwareConcurrency,
-            deviceMemory: window.navigator.deviceMemory,
-            platform: window.navigator.platform
-        }) : 'unknown';
-
-        // Combine entropy sources
-        const entropy = timestamp + random + navigator;
-
-        // Use a simple hash function since we can't use crypto API directly in all browsers
-        let hash = 0;
-        for (let i = 0; i < entropy.length; i++) {
-            const char = entropy.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-
-        return Math.abs(hash).toString(16);
-    }
-
-    /**
-     * Log debug messages
-     * @private
-     */
-    _log(...args) {
-        if (this.options.debugMode) {
-            console.log('%c[MatrixNewsSocket]', 'color: #00ff00', ...args);
-        }
+        return `${protocol}//${host}`;
     }
 }
 
-// Add to window object if in browser environment
-if (typeof window !== 'undefined') {
-    window.MatrixNewsSocket = MatrixNewsSocket;
-} 
+// Make the class available globally
+window.MatrixNewsSocket = MatrixNewsSocket; 

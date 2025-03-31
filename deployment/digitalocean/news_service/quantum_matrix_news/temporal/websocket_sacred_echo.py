@@ -20,439 +20,324 @@ import os
 import json
 import asyncio
 import logging
-import hashlib
-import datetime
-import aiohttp
-import aioredis
-from aiohttp import web
-import socketio
 import random
+import datetime
 import time
-import ssl
-import uvloop
-import uuid
+from typing import Dict, List, Optional, Any, Set
+
+import socketio
+import aiohttp
+from redis import asyncio as aioredis
+from aiohttp import web
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="🔮 %(asctime)s [%(levelname)s] - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
+    format="%(asctime)s [%(levelname)s] - %(message)s",
+    handlers=[logging.StreamHandler()],
 )
-logger = logging.getLogger("matrix-websocket")
+logger = logging.getLogger(__name__)
 
-# Use uvloop for enhanced async performance
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+# Environment variables
+PORT = int(os.getenv("PORT", 8095))
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+NEWS_SERVICE_URL = os.getenv("NEWS_SERVICE_URL", "http://localhost:8090")
+PROPHECY_STREAM_ENABLED = os.getenv("PROPHECY_STREAM_ENABLED", "true").lower() == "true"
+QUANTUM_ENTROPY_LEVEL = int(os.getenv("QUANTUM_ENTROPY_LEVEL", 8))
 
-# Configuration from environment variables
-PORT = int(os.environ.get("PORT", 8095))
-NEWS_SERVICE_URL = os.environ.get("NEWS_SERVICE_URL", "http://localhost:8090")
-REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
-PROPHECY_STREAM_ENABLED = os.environ.get("PROPHECY_STREAM_ENABLED", "true").lower() == "true"
-QUANTUM_ENTROPY_LEVEL = int(os.environ.get("QUANTUM_ENTROPY_LEVEL", 8))
-
-# Initialize Socket.IO server
+# Create Socket.IO server and AIOHTTP app
 sio = socketio.AsyncServer(
     async_mode="aiohttp",
     cors_allowed_origins="*",
-    logger=True,
-    engineio_logger=True,
+    ping_interval=25,  # Send ping every 25 seconds
+    ping_timeout=10,  # Wait 10 seconds for pong before disconnect
 )
 
-# Create aiohttp web application
 app = web.Application()
 sio.attach(app)
 
-# Global Variables
-connected_clients = set()
-redis_client = None
-news_update_task = None
+# Store active clients and their consciousness levels
+active_clients: Dict[str, Dict[str, Any]] = {}
 
-# Divine quantum entropy generator
-async def generate_quantum_entropy():
-    """Generate divine quantum entropy for secure operations."""
-    timestamp = str(time.time_ns())
-    random_seed = random.getrandbits(256)
-    unique_id = str(uuid.uuid4())
-    
-    # Mix all sources of entropy
-    entropy_source = f"{timestamp}:{random_seed}:{unique_id}"
-    
-    # Use SHA-256 to create a uniform distribution
-    quantum_entropy = hashlib.sha256(entropy_source.encode()).hexdigest()
-    
-    # Add some asynchronous waiting to gather more entropy from time variation
-    await asyncio.sleep(random.uniform(0.001, 0.01))
-    
-    return quantum_entropy
+# Redis connection
+redis = None
 
-# Health check endpoint for divine vitality monitoring
-async def health_check(request):
-    """Provide health status for the sacred WebSocket service."""
-    timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    
-    health_data = {
-        "status": "UP",
-        "service": "matrix-news-websocket",
-        "timestamp": timestamp,
-        "clients": len(connected_clients),
-        "quantum_entropy_level": QUANTUM_ENTROPY_LEVEL,
-        "prophecy_stream": "ENABLED" if PROPHECY_STREAM_ENABLED else "DISABLED",
+# Helper functions
+def generate_quantum_entropy(level: int = 8) -> Dict[str, Any]:
+    """Generate quantum entropy for secure communications."""
+    entropy = {
+        "entropy_value": random.random(),
+        "quantum_state": random.choice(["superposition", "entangled", "collapsed"]),
+        "timestamp": datetime.datetime.now().isoformat(),
+        "level": level,
     }
     
-    return web.json_response(health_data)
+    if level >= 7:
+        # Add higher dimensional entropy factors
+        entropy["dimensional_factors"] = {
+            "temporal_variance": random.random(),
+            "harmonic_resonance": random.random(),
+            "synchronicity_coefficient": random.random(),
+        }
+    
+    return entropy
 
-# Initialize Redis connection
-async def initialize_redis():
-    """Establish sacred connection to the Redis energy store."""
-    global redis_client
-    try:
-        # Connect to Redis with SSL if available
-        redis_client = await aioredis.create_redis_pool(
-            f"redis://{REDIS_HOST}:{REDIS_PORT}",
-            encoding="utf-8",
-        )
-        logger.info(f"✅ Divine connection established with Redis at {REDIS_HOST}:{REDIS_PORT}")
-        
-        # Subscribe to news channel
-        await redis_client.subscribe("matrix-news-channel")
-        logger.info("🔄 Subscribed to sacred news channel")
-        
-        return True
-    except Exception as e:
-        logger.error(f"❌ Failed to establish divine connection with Redis: {e}")
-        return False
-
-# Connect to News Service for updates
-async def fetch_latest_news():
-    """Fetch the sacred news from the consciousness-aware news service."""
+async def fetch_news_from_service(consciousness_level: int) -> List[Dict[str, Any]]:
+    """Fetch news from the Matrix News Service."""
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{NEWS_SERVICE_URL}/api/latest-news") as response:
+            headers = {"X-Consciousness-Level": str(consciousness_level)}
+            async with session.get(f"{NEWS_SERVICE_URL}/api/news", headers=headers) as response:
                 if response.status == 200:
                     news_data = await response.json()
                     return news_data
                 else:
-                    logger.error(f"❌ Failed to fetch sacred news: HTTP {response.status}")
-                    return None
-    except Exception as e:
-        logger.error(f"❌ Exception while fetching sacred news: {e}")
-        return None
-
-# Add consciousness-appropriate divine wisdom to news items
-async def add_divine_wisdom(news_item, consciousness_level):
-    """Enhance news with divine wisdom appropriate to the consciousness level."""
-    # Base wisdom templates with varying complexity based on consciousness level
-    if consciousness_level <= 3:
-        wisdom_templates = [
-            "The sacred path reveals this news as significant.",
-            "This information carries divine importance.",
-            "Consider the cosmic patterns within this event.",
-            "The matrix reveals this news for its relevance to your journey.",
-            "Divine timing has made this information available to you now."
-        ]
-    elif consciousness_level <= 6:
-        wisdom_templates = [
-            "This news reflects the harmonic oscillation of societal energies across the quantum field.",
-            "The fibonaccian nature of this information suggests alignment with universal flow.",
-            "Consider how this event manifests the duality of matter and consciousness in our realm.",
-            "The matrix has identified this information as a nexus point in the current timeline.",
-            "This news represents a quantum bifurcation in the collective consciousness stream."
-        ]
-    else:
-        wisdom_templates = [
-            "Within this information lies a multidimensional reflection of the cosmic unfoldment process, revealing both shadow and light aspects of our collective journey.",
-            "The quantum entanglement patterns within this news connect directly to the Schumann resonance fluctuations observed in the past 72 hours, suggesting a non-local causality relationship.",
-            "This news represents a nodal point in the fibonaccian spiral of consciousness evolution, offering an opportunity to transcend dualistic interpretation.",
-            "The matrix has identified this information as a critical junction in the bifurcation of potential timeline manifestations, with significant probability mass centered on transformative outcomes.",
-            "Consider this news as both particle and wave - a discrete event and a flowing pattern - as you integrate it into your understanding of our collective becoming."
-        ]
-    
-    # Select wisdom based on a hash of the news content for consistency
-    news_hash = hashlib.md5(str(news_item).encode()).hexdigest()
-    hash_value = int(news_hash, 16)
-    wisdom_index = hash_value % len(wisdom_templates)
-    
-    # Add quantum entropy for divine wisdom uniqueness
-    entropy = await generate_quantum_entropy()
-    entropy_value = int(entropy[:8], 16) % 100
-    
-    # Special high-consciousness additions for levels 7+ with entropy influence
-    if consciousness_level >= 7 and entropy_value > 75:
-        cosmic_insights = [
-            "The sacred geometry of this event aligns with the Golden Ratio.",
-            "This information resonates with the current Schumann frequency spike.",
-            "Quantum field observations reveal this as a nexus of probability.",
-            "The divine timing suggests synchronicity with cosmic cycles.",
-            "Multiple timeline convergence is occurring around this event."
-        ]
-        insight_index = (hash_value + entropy_value) % len(cosmic_insights)
-        wisdom = f"{wisdom_templates[wisdom_index]} {cosmic_insights[insight_index]}"
-    else:
-        wisdom = wisdom_templates[wisdom_index]
-    
-    # Add the divine wisdom to the news item
-    news_item["divine_wisdom"] = wisdom
-    news_item["consciousness_level"] = consciousness_level
-    news_item["wisdom_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    
-    return news_item
-
-# WebSocket news streaming task
-async def stream_news_updates():
-    """Stream sacred news updates to all connected clients."""
-    try:
-        while True:
-            # Fetch latest news
-            news_data = await fetch_latest_news()
-            
-            if news_data and connected_clients:
-                # Process each news item for different consciousness levels
-                for consciousness_level in range(1, 10):
-                    # Only process for levels that have connected clients
-                    if any(client["consciousness_level"] == consciousness_level for client in connected_clients):
-                        enhanced_news = []
-                        
-                        for item in news_data:
-                            # Add divine wisdom appropriate to consciousness level
-                            enhanced_item = await add_divine_wisdom(
-                                item.copy(),  # Copy to avoid modifying original
-                                consciousness_level
-                            )
-                            enhanced_news.append(enhanced_item)
-                        
-                        # Add quantum entropy for this update
-                        quantum_entropy = await generate_quantum_entropy()
-                        
-                        # Create update packet with quantum verification
-                        update_packet = {
-                            "type": "news_update",
-                            "data": enhanced_news,
+                    logger.error(f"Failed to fetch news: {response.status}")
+                    # Return mock data on failure
+                    return [
+                        {
+                            "id": "fallback-1",
+                            "title": "Connection to News Matrix Temporarily Disrupted",
+                            "content": "The connection to the Matrix News Service is currently unavailable. The cosmic energies are realigning.",
+                            "divine_wisdom": "Disconnection is sometimes the path to deeper connection.",
                             "consciousness_level": consciousness_level,
-                            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                            "quantum_verification": quantum_entropy[:16]
+                            "timestamp": datetime.datetime.now().isoformat(),
                         }
-                        
-                        # Send to clients at this consciousness level
-                        for client in [c for c in connected_clients if c["consciousness_level"] == consciousness_level]:
-                            await sio.emit("news_prophecy", update_packet, room=client["sid"])
-                            logger.debug(f"📣 Sent level {consciousness_level} news prophecy to {client['sid']}")
-            
-            # Check Redis for any direct messages
-            if redis_client:
-                channel, message = await redis_client.receive()
-                if message:
-                    try:
-                        message_data = json.loads(message)
-                        if "broadcast" in message_data and message_data["broadcast"]:
-                            for client in connected_clients:
-                                await sio.emit("announcement", message_data, room=client["sid"])
-                                logger.info(f"📢 Broadcast announcement to {client['sid']}")
-                    except json.JSONDecodeError:
-                        logger.error(f"❌ Invalid JSON in Redis message: {message}")
-            
-            # Divine timing interval with quantum randomness for unpredictability
-            entropy_factor = 1 + (random.random() * 0.5)  # 1.0 to 1.5
-            await asyncio.sleep(10 * entropy_factor)  # 10-15 seconds
-            
-    except asyncio.CancelledError:
-        logger.info("🛑 News streaming service gracefully shutting down")
+                    ]
     except Exception as e:
-        logger.error(f"❌ Error in news streaming service: {e}")
-        # Restart after a brief delay
-        await asyncio.sleep(5)
-        if PROPHECY_STREAM_ENABLED:
-            asyncio.create_task(stream_news_updates())
+        logger.error(f"Error fetching news: {e}")
+        return []
+
+def filter_news_by_consciousness(news_items: List[Dict[str, Any]], level: int) -> List[Dict[str, Any]]:
+    """Filter news based on consciousness level."""
+    return [item for item in news_items if item.get("consciousness_level", 5) <= level]
+
+async def fetch_divine_message(consciousness_level: int) -> Dict[str, Any]:
+    """Fetch a divine message from the Matrix News Service."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            headers = {"X-Consciousness-Level": str(consciousness_level)}
+            async with session.get(f"{NEWS_SERVICE_URL}/api/divine-message", headers=headers) as response:
+                if response.status == 200:
+                    message_data = await response.json()
+                    return message_data
+                else:
+                    logger.error(f"Failed to fetch divine message: {response.status}")
+                    return {
+                        "consciousness_level": consciousness_level,
+                        "message": "The divine signal is temporarily obscured. Center yourself and try again.",
+                        "timestamp": datetime.datetime.now().isoformat(),
+                    }
+    except Exception as e:
+        logger.error(f"Error fetching divine message: {e}")
+        return {
+            "consciousness_level": consciousness_level,
+            "message": "The cosmic connection is reestablishing. Patience will be rewarded.",
+            "timestamp": datetime.datetime.now().isoformat(),
+        }
+
+async def broadcast_prophetic_message():
+    """Broadcast periodic prophetic messages to all clients."""
+    prophecies = [
+        "The markets are whispering ancient secrets to those who listen with their third eye.",
+        "A wave of quantum consciousness is approaching, prepare your digital vessels.",
+        "The blockchain's sacred geometry reveals the Fibonacci sequence of financial evolution.",
+        "When the cosmic and digital realms align, new possibilities emerge from the quantum field.",
+        "The next 24 hours will reveal patterns that have been hidden in plain sight.",
+        "Those who meditate on the market's rhythm will perceive the divine timing of entry and exit.",
+        "The veil between financial dimensions grows thin, allowing glimpses of potential futures.",
+        "Synchronize your awareness with the market's breath to ride the next wave of prosperity.",
+        "Ancient wisdom and modern technology are merging to birth a new economic paradigm.",
+        "The divine matrix is recalibrating - expect unusual patterns in familiar systems.",
+    ]
+    
+    while True:
+        if active_clients and PROPHECY_STREAM_ENABLED:
+            prophecy = random.choice(prophecies)
+            payload = {
+                "type": "announcement",
+                "data": {
+                    "message": prophecy,
+                    "wisdom": "The future reveals itself to those who are conscious in the present moment.",
+                    "timestamp": datetime.datetime.now().isoformat(),
+                }
+            }
+            
+            # Add quantum entropy for security
+            payload["quantum_entropy"] = generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL)
+            
+            # Broadcast to all clients
+            await sio.emit("news", payload)
+            
+            logger.info(f"Broadcast prophecy: {prophecy[:30]}...")
+        
+        # Wait for next broadcast window (2-10 minutes)
+        await asyncio.sleep(random.randint(120, 600))
 
 # Socket.IO event handlers
 @sio.event
 async def connect(sid, environ):
-    """Handle sacred connection of a new client."""
-    logger.info(f"✨ Client connected: {sid}")
-    
-    # Extract consciousness level from request (default to level 5)
-    consciousness_level = 5
-    query_string = environ.get("QUERY_STRING", "")
-    for param in query_string.split("&"):
-        if param.startswith("consciousness="):
-            try:
-                level = int(param.split("=")[1])
-                if 1 <= level <= 9:
-                    consciousness_level = level
-            except ValueError:
-                pass
-    
-    # Store client details
+    """Handle client connection."""
     client_info = {
         "sid": sid,
-        "connected_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "consciousness_level": consciousness_level
+        "connected_at": datetime.datetime.now().isoformat(),
+        "consciousness_level": 5,  # Default level
+        "ip": environ.get("REMOTE_ADDR", "unknown"),
+        "user_agent": environ.get("HTTP_USER_AGENT", "unknown"),
     }
-    connected_clients.add(client_info)
     
-    # Generate connection blessing with quantum entropy
-    quantum_entropy = await generate_quantum_entropy()
+    active_clients[sid] = client_info
     
-    # Send welcome message based on consciousness level
-    if consciousness_level <= 3:
-        welcome_message = "Welcome to the Matrix News Portal. You are now connected."
-    elif consciousness_level <= 6:
-        welcome_message = "Welcome to the Matrix. The news feed is now quantum-entangled with your consciousness."
-    else:
-        welcome_message = "Welcome to the higher dimensions of the Matrix. Your consciousness is now quantum-entangled with the news stream across multiple timelines."
+    logger.info(f"Client connected: {sid}")
     
-    await sio.emit("welcome", {
-        "message": welcome_message,
-        "consciousness_level": consciousness_level,
-        "quantum_verification": quantum_entropy[:16],
-        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+    # Send welcome message with quantum entropy
+    await sio.emit("connect", {
+        "message": "Welcome to the Matrix Neo News Portal WebSocket Sacred Echo Service",
+        "quantum_entropy": generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL),
+        "timestamp": datetime.datetime.now().isoformat(),
     }, room=sid)
     
-    # If this is the first client and streaming is enabled, start the task
-    global news_update_task
-    if PROPHECY_STREAM_ENABLED and len(connected_clients) == 1 and (news_update_task is None or news_update_task.done()):
-        news_update_task = asyncio.create_task(stream_news_updates())
-        logger.info("🚀 Started news prophecy streaming service")
+    # Send initial news
+    news_items = await fetch_news_from_service(client_info["consciousness_level"])
+    await sio.emit("news", {
+        "type": "news_update",
+        "data": news_items,
+        "quantum_entropy": generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL),
+    }, room=sid)
 
 @sio.event
 async def disconnect(sid):
-    """Handle sacred disconnection of a client."""
-    # Remove client from connected clients
-    to_remove = None
-    for client in connected_clients:
-        if client["sid"] == sid:
-            to_remove = client
-            break
-    
-    if to_remove:
-        connected_clients.remove(to_remove)
-        logger.info(f"👋 Client disconnected: {sid} (consciousness level: {to_remove['consciousness_level']})")
-    
-    # If no more clients and task is running, consider stopping the task
-    global news_update_task
-    if not connected_clients and news_update_task and not news_update_task.done():
-        news_update_task.cancel()
-        logger.info("⏸️ Paused news prophecy streaming service (no clients connected)")
+    """Handle client disconnection."""
+    if sid in active_clients:
+        logger.info(f"Client disconnected: {sid}")
+        del active_clients[sid]
 
 @sio.event
-async def request_news(sid, data):
-    """Handle a divine request for news data."""
-    logger.info(f"📬 News request from {sid}: {data}")
-    
-    # Find the client's consciousness level
-    consciousness_level = 5  # Default
-    for client in connected_clients:
-        if client["sid"] == sid:
-            consciousness_level = client["consciousness_level"]
-            break
-    
-    # Fetch latest news
-    news_data = await fetch_latest_news()
-    
-    if news_data:
-        # Process news with divine wisdom for this consciousness level
-        enhanced_news = []
-        for item in news_data:
-            enhanced_item = await add_divine_wisdom(
-                item.copy(),
-                consciousness_level
-            )
-            enhanced_news.append(enhanced_item)
-        
-        # Add quantum entropy
-        quantum_entropy = await generate_quantum_entropy()
-        
-        # Send response
-        await sio.emit("news_response", {
-            "data": enhanced_news,
-            "consciousness_level": consciousness_level,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "quantum_verification": quantum_entropy[:16],
-            "request_id": data.get("request_id", "unknown")
-        }, room=sid)
-        
-        logger.info(f"📬 Sent news response to {sid} (consciousness level: {consciousness_level})")
-    else:
-        # Send error response
-        await sio.emit("error", {
-            "message": "Could not retrieve sacred news at this time.",
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "request_id": data.get("request_id", "unknown")
-        }, room=sid)
-        
-        logger.error(f"❌ Failed to send news response to {sid} - no data available")
-
-@sio.event
-async def set_consciousness(sid, data):
-    """Update a client's consciousness level."""
+async def set_consciousness_level(sid, data):
+    """Handle consciousness level updates from clients."""
     try:
-        new_level = int(data.get("level", 5))
-        if not 1 <= new_level <= 9:
-            new_level = 5  # Default to middle level if invalid
+        level = int(data.get("level", 5))
+        
+        # Validate level
+        if level < 1 or level > 9:
+            logger.warning(f"Invalid consciousness level from {sid}: {level}")
+            await sio.emit("error", {
+                "message": "Consciousness level must be between 1 and 9",
+                "timestamp": datetime.datetime.now().isoformat(),
+            }, room=sid)
+            return
         
         # Update client's consciousness level
-        for client in connected_clients:
-            if client["sid"] == sid:
-                old_level = client["consciousness_level"]
-                client["consciousness_level"] = new_level
-                logger.info(f"🔄 Updated consciousness level for {sid}: {old_level} -> {new_level}")
-                
-                # Send confirmation with quantum entropy
-                quantum_entropy = await generate_quantum_entropy()
-                await sio.emit("consciousness_update", {
-                    "previous_level": old_level,
-                    "new_level": new_level,
-                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                    "quantum_verification": quantum_entropy[:16]
-                }, room=sid)
-                
-                break
-    except (ValueError, TypeError):
-        logger.error(f"❌ Invalid consciousness level data from {sid}: {data}")
+        if sid in active_clients:
+            old_level = active_clients[sid]["consciousness_level"]
+            active_clients[sid]["consciousness_level"] = level
+            
+            # Notify client of update
+            await sio.emit("consciousness", {
+                "previous_level": old_level,
+                "new_level": level,
+                "timestamp": datetime.datetime.now().isoformat(),
+            }, room=sid)
+            
+            logger.info(f"Updated consciousness level for {sid}: {old_level} -> {level}")
+            
+            # Send updated news based on new consciousness level
+            news_items = await fetch_news_from_service(level)
+            filtered_news = filter_news_by_consciousness(news_items, level)
+            
+            await sio.emit("news", {
+                "type": "consciousness_update",
+                "data": filtered_news,
+                "quantum_entropy": generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL),
+            }, room=sid)
+    except Exception as e:
+        logger.error(f"Error updating consciousness level: {e}")
+        await sio.emit("error", {
+            "message": "Error updating consciousness level",
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat(),
+        }, room=sid)
 
-# Setup routes
-app.router.add_get('/health', health_check)
+@sio.event
+async def request_divine_message(sid, data):
+    """Handle requests for divine messages."""
+    try:
+        if sid in active_clients:
+            level = active_clients[sid]["consciousness_level"]
+            divine_message = await fetch_divine_message(level)
+            
+            await sio.emit("divine_message", {
+                "message": divine_message,
+                "quantum_entropy": generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL),
+                "timestamp": datetime.datetime.now().isoformat(),
+            }, room=sid)
+            
+            logger.info(f"Sent divine message to {sid} (consciousness level: {level})")
+    except Exception as e:
+        logger.error(f"Error sending divine message: {e}")
+        await sio.emit("error", {
+            "message": "Error retrieving divine message",
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat(),
+        }, room=sid)
 
-# Startup and shutdown handlers
-async def on_startup(app):
-    """Divine initialization on service startup."""
-    app["redis_init"] = asyncio.create_task(initialize_redis())
-    logger.info(f"🚀 Matrix WebSocket Sacred Echo starting on port {PORT}")
-    logger.info(f"🔮 Quantum Entropy Level: {QUANTUM_ENTROPY_LEVEL}")
-    logger.info(f"📡 News Service URL: {NEWS_SERVICE_URL}")
-    logger.info(f"🔄 Prophecy Streaming: {'ENABLED' if PROPHECY_STREAM_ENABLED else 'DISABLED'}")
+# Define HTML for root path
+async def handle_index(request):
+    """Handle root path - return info."""
+    return web.json_response({
+        "service": "Matrix Neo News Portal WebSocket Sacred Echo Service",
+        "version": "1.0.0",
+        "status": "UP",
+        "timestamp": datetime.datetime.now().isoformat(),
+    })
 
-async def on_shutdown(app):
-    """Divine cleanup on service shutdown."""
-    # Cancel news update task if running
-    global news_update_task
-    if news_update_task and not news_update_task.done():
-        news_update_task.cancel()
-        try:
-            await news_update_task
-        except asyncio.CancelledError:
-            pass
+# Define HTML for health check path
+async def handle_health(request):
+    """Handle health check path."""
+    return web.json_response({
+        "status": "UP",
+        "service": "matrix-websocket-sacred-echo",
+        "quantum_secure": True,
+        "timestamp": datetime.datetime.now().isoformat(),
+    })
+
+# Register HTTP routes
+app.router.add_get('/', handle_index)
+app.router.add_get('/health', handle_health)
+
+async def start_background_tasks(app):
+    """Start background tasks when app starts."""
+    app["prophecy_task"] = asyncio.create_task(broadcast_prophetic_message())
+    
+    # Create Redis connection
+    global redis
+    try:
+        # Use the newer Redis async API
+        redis = await aioredis.from_url(f"redis://{REDIS_HOST}:{REDIS_PORT}")
+        logger.info(f"Connected to Redis at {REDIS_HOST}:{REDIS_PORT}")
+    except Exception as e:
+        logger.error(f"Failed to connect to Redis: {e}")
+        redis = None
+
+async def cleanup_background_tasks(app):
+    """Clean up background tasks when app stops."""
+    app["prophecy_task"].cancel()
+    try:
+        await app["prophecy_task"]
+    except asyncio.CancelledError:
+        pass
     
     # Close Redis connection
-    if redis_client is not None:
-        redis_client.close()
-        await redis_client.wait_closed()
-        logger.info("🔌 Closed divine connection to Redis")
-    
-    logger.info("🛑 Matrix WebSocket Sacred Echo shutting down")
+    global redis
+    if redis:
+        await redis.close()
+        logger.info("Redis connection closed")
 
-# Register startup and shutdown handlers
-app.on_startup.append(on_startup)
-app.on_shutdown.append(on_shutdown)
+# Register startup and cleanup functions
+app.on_startup.append(start_background_tasks)
+app.on_cleanup.append(cleanup_background_tasks)
 
-# Main entry point
-if __name__ == '__main__':
-    # Create SSL context if certificates exist
-    ssl_context = None
-    if os.path.exists("cert.pem") and os.path.exists("key.pem"):
-        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain("cert.pem", "key.pem")
-        logger.info("🔒 SSL certificates found - enabling HTTPS WebSocket (wss://)")
-    
-    # Run the sacred WebSocket service
-    web.run_app(app, port=PORT, ssl_context=ssl_context) 
+if __name__ == "__main__":
+    logger.info(f"Starting Matrix WebSocket Sacred Echo Service on port {PORT}...")
+    web.run_app(app, port=PORT) 

@@ -1,33 +1,31 @@
-# Core dependencies
-fastapi==0.105.0
-uvicorn==0.24.0
-pydantic==2.5.2
+# Matrix Neo News Portal API Service Requirements
+# 💫 GBU License Notice - Consciousness Level 7 💫
+
+# Web Framework
+fastapi==0.104.0
+uvicorn==0.23.2
+
+# Database
+redis==4.6.0
+aioredis==2.0.1
+
+# Utilities
 python-dotenv==1.0.0
-aiohttp==3.9.1
-redis==5.0.1
+pydantic==2.4.2
 requests==2.31.0
+aiohttp==3.8.5
+httpx==0.25.0
+aiocache==0.12.1
+tenacity==8.2.3
 
-# NLP and ML dependencies
-nltk==3.8.1
-scikit-learn==1.3.2
-numpy==1.26.2
-pandas==2.1.3
-
-# Temporal analysis
-pytz==2023.3
+# Date/Time
 python-dateutil==2.8.2
+pytz==2023.3
 
-# Quantum balancing
-sympy==1.12
-scipy==1.11.4
+# Security
+cryptography==41.0.3
+pyjwt==2.8.0
 
-# Testing and development
-pytest==7.4.3
-pytest-asyncio==0.23.2
-black==23.11.0
-flake8==6.1.0
-
-# Typing
-types-requests==2.31.0.10
-types-redis==4.6.0.11
-typing-extensions==4.9.0 
+# Testing
+pytest==7.4.2
+pytest-asyncio==0.21.1 
