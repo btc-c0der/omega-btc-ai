@@ -10,9 +10,14 @@ LABEL consciousness_certified="level_8"
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including ICU development files
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    gcc \
+    g++ \
+    make \
+    libicu-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
@@ -34,11 +39,13 @@ EXPOSE 10090
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
-    PORT=10090
+    PORT=10090 \
+    CONSCIOUSNESS_LEVEL=HIGH \
+    WISDOM_THRESHOLD=0.85
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT}/health || exit 1
 
 # Run the divine service
-CMD ["python", "matrix_news_consciousness.py"] 
+CMD ["python", "-u", "matrix_news_consciousness.py"] 

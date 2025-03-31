@@ -44,18 +44,17 @@ import logging
 import datetime
 import random
 import time
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union, Any, Tuple
 
 import aiohttp
+import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException, Header, Request, Response, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from langdetect import detect, LangDetectException
-from googletrans import Translator
-import pycld2 as cld2
-import language_data
+from langdetect import detect, DetectorFactory
+DetectorFactory.seed = 0  # For consistent results
 
 # Configure logging
 logging.basicConfig(
@@ -64,9 +63,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
-
-# Initialize translator for consciousness language detection
-translator = Translator()
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -94,6 +90,8 @@ TEMPORAL_CONTEXTUALIZATION_ENABLED = os.getenv("TEMPORAL_CONTEXTUALIZATION_ENABL
 LANGUAGE_DETECTION_ENABLED = os.getenv("LANGUAGE_DETECTION_ENABLED", "true").lower() == "true"
 LANGUAGE_DETECTION_THRESHOLD = int(os.getenv("LANGUAGE_DETECTION_THRESHOLD", 7))
 DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", "en")
+TRANSLATION_API_URL = os.getenv("TRANSLATION_API_URL", "https://translation.googleapis.com/language/translate/v2")
+TRANSLATION_API_KEY = os.getenv("TRANSLATION_API_KEY", "")
 
 # Sacred language map for consciousness-aware translation
 SACRED_LANGUAGE_MAP = {
@@ -199,77 +197,33 @@ def add_divine_wisdom(item: Dict, user_language: str = DEFAULT_LANGUAGE) -> Dict
     consciousness_level = item.get("consciousness_level", 5)
     sentiment = item.get("sentiment_score", 0.5)
     
-    # Higher consciousness levels get more profound wisdom
-    high_consciousness = consciousness_level >= 7
+    # Simple wisdom generation based on content keywords and sentiment
+    wisdom = "The divine matrix reveals: "
     
-    # Keywords to base wisdom on
-    wisdom_map = {
-        "bitcoin": [
-            "Bitcoin transcends mere currency; it is the digital reflection of humanity's quest for incorruptible truth.",
-            "As Bitcoin grows, so grows our collective consciousness about the nature of value itself.",
-            "In the cosmic dance of bits and blocks, Bitcoin represents both liberation and responsibility."
-        ],
-        "blockchain": [
-            "The blockchain is not merely a ledger; it is the divine tapestry upon which we weave our collective financial consciousness.",
-            "Within each block lies not just transactions but moments of humanity's evolution toward decentralized awareness.",
-            "As chains of blocks connect, so too does the collective consciousness evolve toward new understanding of trust."
-        ],
-        "crypto": [
-            "Cryptocurrency represents the sacred union of mathematics and human will.",
-            "In the cryptographic keys lies the code to both financial sovereignty and collective responsibility.",
-            "Beyond the price charts lies a deeper chart of humanity's evolving relationship with trust."
-        ],
-        "market": [
-            "Markets are not separate from consciousness; they are manifestations of our collective energetic state.",
-            "Behind every market movement lies a quantum field of human intention and attention.",
-            "True wealth flows not from market timing but from alignment with universal abundance."
-        ]
-    }
-    
-    # Find matching keywords
-    wisdom_options = []
-    for keyword, wisdoms in wisdom_map.items():
-        if keyword in content or keyword in title:
-            wisdom_options.extend(wisdoms)
-    
-    # Sentiment-based wisdom if no keyword matches
-    if not wisdom_options:
+    if "bitcoin" in content or "btc" in content:
         if sentiment > 0.7:
-            wisdom_options = [
-                "Even in positive news, seek the balance of perspective that reveals hidden truths.",
-                "Enthusiasm is the divine spark of creation, but wisdom is the steady flame of discernment.",
-                "As markets rise, so too should our awareness of the impermanence of all states."
-            ]
+            wisdom += "The cosmic energy flows positively through the blockchain."
         elif sentiment < 0.3:
-            wisdom_options = [
-                "In the darkness of market fear, the light of transformation is often kindled.",
-                "Challenging times reveal not just market weakness but the strength of those who maintain perspective.",
-                "The universe operates in cycles of contraction and expansion; wisdom lies in recognizing both as necessary."
-            ]
+            wisdom += "A temporary shadow passes over the digital realm."
         else:
-            wisdom_options = [
-                "Between extremes of market sentiment lies the balanced path of the conscious trader.",
-                "True awareness arises when we observe market movements without being swept away by them.",
-                "The middle path between fear and greed reveals the nature of all market phenomena."
-            ]
+            wisdom += "Balance maintains in the crypto sphere."
     
-    # Select wisdom based on consciousness level
-    index = min(2, int(consciousness_level / 3))  # 1-3: index 0, 4-6: index 1, 7-9: index 2
-    
-    if wisdom_options:
-        if high_consciousness and random.random() > 0.7:
-            # Occasionally provide especially profound wisdom for high consciousness levels
-            divine_wisdom = "Beyond all market phenomena, beyond all gains and losses, you are the unchanging awareness in which it all unfolds."
+    if "market" in content:
+        if consciousness_level >= 7:
+            wisdom += " Transcend beyond mere price movements."
         else:
-            divine_wisdom = wisdom_options[min(index, len(wisdom_options) - 1)]
-    else:
-        divine_wisdom = "The sacred observer remains unchanged while witnessing the ever-changing market phenomena."
+            wisdom += " Seek wisdom in market patterns."
     
-    # Apply language detection and translation if consciousness level is high enough
-    if LANGUAGE_DETECTION_ENABLED and consciousness_level >= LANGUAGE_DETECTION_THRESHOLD and user_language != DEFAULT_LANGUAGE:
-        divine_wisdom = translate_divine_wisdom(divine_wisdom, user_language, consciousness_level)
+    if "technology" in content or "innovation" in content:
+        wisdom += " Evolution manifests through digital transformation."
     
-    item["divine_wisdom"] = divine_wisdom
+    # Translate wisdom if needed
+    if user_language != DEFAULT_LANGUAGE:
+        translation = translate_text(wisdom, user_language)
+        if translation["success"]:
+            wisdom = translation["translated_text"]
+    
+    item["divine_wisdom"] = wisdom
     return item
 
 def add_temporal_context(item: Dict) -> Dict:
@@ -336,8 +290,8 @@ def process_news_item(item: Dict, consciousness_level: int, user_language: str =
         content_text = item.get("content", "")
         if content_text:
             lang_detection = detect_language(content_text)
-            item["original_language"] = lang_detection["language_code"]
-            item["language"] = lang_detection["language_code"]
+            item["original_language"] = lang_detection["language"]
+            item["language"] = lang_detection["language"]
             
             # If user language is different and consciousness is high, translate content
             if user_language != item["language"] and consciousness_level >= LANGUAGE_DETECTION_THRESHOLD:
@@ -345,7 +299,7 @@ def process_news_item(item: Dict, consciousness_level: int, user_language: str =
                     # Translate title
                     title_translation = translate_text(item["title"], user_language, item["language"])
                     if title_translation["success"]:
-                        item["title"] = title_translation["text"]
+                        item["title"] = title_translation["translated_text"]
                     
                     # Translate content
                     content_translation = translate_text(content_text, user_language, item["language"])
@@ -575,98 +529,40 @@ async def get_divine_message(
     
     return response
 
-def detect_language(text: str) -> Dict[str, Any]:
-    """Detect the language of a text with multiple detection methods for accuracy."""
-    result = {
-        "language_code": DEFAULT_LANGUAGE,  # Default fallback
-        "confidence": 0.0,
-        "detection_method": "default",
-        "possible_languages": []
-    }
-    
-    if not text or len(text.strip()) < 10:
-        return result
-    
-    # Try multiple detection methods for better accuracy
+async def detect_language(text: str) -> Tuple[str, float]:
+    """
+    Detect the language of the text using langdetect.
+    Returns a tuple of (language_code, confidence).
+    """
     try:
-        # Method 1: langdetect
-        lang_code = detect(text)
-        confidence1 = 0.6  # Base confidence level
-        
-        # Method 2: pycld2
-        try:
-            is_reliable, _, details = cld2.detect(text)
-            cld2_lang = details[0][1]
-            cld2_confidence = details[0][2] / 100.0
-            
-            # If both methods agree, we have higher confidence
-            if cld2_lang == lang_code:
-                confidence = max(confidence1, cld2_confidence) + 0.2
-                result["detection_method"] = "multiple_agree"
-            else:
-                # Add both as possibilities
-                confidence = max(confidence1, cld2_confidence)
-                result["possible_languages"].append({"code": cld2_lang, "confidence": cld2_confidence})
-                result["detection_method"] = "multiple_mixed"
-        except:
-            # Fallback to just langdetect if cld2 fails
-            confidence = confidence1
-            result["detection_method"] = "langdetect"
-        
-        result["language_code"] = lang_code
-        result["confidence"] = min(confidence, 1.0)  # Cap at 1.0
-        result["possible_languages"].append({"code": lang_code, "confidence": confidence1})
-        
-    except LangDetectException:
-        # Handle detection failure gracefully
-        logger.warning(f"Language detection failed for text: {text[:50]}...")
-    
-    return result
+        lang = detect(text)
+        return lang, 0.8  # langdetect doesn't provide confidence, using a default value
+    except Exception as e:
+        logger.warning(f"Language detection failed: {e}")
+        return "en", 0.5  # Default to English with low confidence
 
-def translate_text(text: str, target_language: str = DEFAULT_LANGUAGE, source_language: Optional[str] = None) -> Dict[str, Any]:
-    """Translate text to the target language with consciousness-level translation awareness."""
-    if not text:
-        return {"text": text, "success": False, "source_language": source_language, "target_language": target_language}
-    
-    result = {
-        "text": text,
-        "success": False,
-        "source_language": source_language,
-        "target_language": target_language,
-        "consciousness_code": None
-    }
-    
-    if source_language == target_language:
-        result["success"] = True
-        return result
-    
+async def translate_text(text: str, target_lang: str = "en") -> str:
+    """
+    Translate text using a translation API.
+    """
     try:
-        # If source language is not provided, detect it
-        if not source_language:
-            detection = detect_language(text)
-            source_language = detection["language_code"]
-            result["source_language"] = source_language
-            
-            # No need to translate if source is already target
-            if source_language == target_language:
-                result["success"] = True
-                return result
-        
-        # Perform translation
-        translation = translator.translate(text, dest=target_language, src=source_language)
-        
-        if translation and translation.text:
-            result["text"] = translation.text
-            result["success"] = True
-            
-            # Add consciousness code for high consciousness levels
-            if target_language in SACRED_LANGUAGE_MAP:
-                result["consciousness_code"] = SACRED_LANGUAGE_MAP[target_language]["consciousness_code"]
-    
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://translation.googleapis.com/language/translate/v2",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "q": text,
+                    "target": target_lang,
+                }
+            )
+            if response.status_code == 200:
+                return response.json()["data"]["translations"][0]["translatedText"]
+            else:
+                logger.error(f"Translation failed: {response.text}")
+                return text
     except Exception as e:
         logger.error(f"Translation error: {e}")
-    
-    return result
+        return text
 
 def translate_divine_wisdom(wisdom: str, target_language: str, consciousness_level: int) -> str:
     """Translate divine wisdom based on consciousness level and target language."""
@@ -694,6 +590,39 @@ def translate_divine_wisdom(wisdom: str, target_language: str, consciousness_lev
         logger.error(f"Divine wisdom translation error: {e}")
     
     return wisdom
+
+async def generate_wisdom(content: str, sentiment: float) -> str:
+    """
+    Generate wisdom based on content and sentiment.
+    """
+    # Detect language and confidence
+    lang, confidence = await detect_language(content)
+    
+    # Translate if not in English and confidence is high enough
+    if lang != "en" and confidence > 0.8:
+        content = await translate_text(content)
+    
+    # Generate wisdom based on sentiment and content
+    if sentiment > 0.7:
+        wisdom = "The markets shine with optimistic energy."
+    elif sentiment < -0.7:
+        wisdom = "Caution prevails in uncertain times."
+    else:
+        wisdom = "Balance guides the path forward."
+    
+    return f"{wisdom} | Sentiment: {sentiment:.2f} | Confidence: {confidence:.2f}"
+
+@app.post("/process")
+async def process_news(news: NewsItem) -> Dict[str, str]:
+    """
+    Process a news item and return wisdom.
+    """
+    try:
+        wisdom = await generate_wisdom(news.content, news.sentiment_score)
+        return {"wisdom": wisdom}
+    except Exception as e:
+        logger.error(f"Processing error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     logger.info(f"Starting Matrix Neo News Consciousness Service on port {PORT}...")

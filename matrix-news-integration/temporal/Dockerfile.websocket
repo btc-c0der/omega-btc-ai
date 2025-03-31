@@ -49,6 +49,9 @@ ENV PYTHONUNBUFFERED=1 \
 RUN groupadd -r matrixuser && useradd -r -g matrixuser matrixuser && \
     chown -R matrixuser:matrixuser /app
 
+# Install tini for proper signal handling
+RUN apt-get update && apt-get install -y tini && rm -rf /var/lib/apt/lists/*
+
 # Switch to non-root user
 USER matrixuser
 
@@ -57,7 +60,6 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:${PORT}/health || exit 1
 
 # Use tini for proper signal handling
-RUN apt-get update && apt-get install -y tini && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
 # Run the divine service with proper signal handling
