@@ -70,6 +70,58 @@ services:
       timeout: 10s
       retries: 3
 
+  # Divine Redis
+  redis:
+    image: redis:7-alpine
+    container_name: divine-redis
+    restart: always
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/sentinel.conf:/usr/local/etc/redis/sentinel.conf
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    ports:
+      - "6379:6379"
+      - "26379:26379" # Sentinel port
+    networks:
+      - omega-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-divine_omega_redis_password}
+      - SENTINEL_PASSWORD=${SENTINEL_PASSWORD:-divine_omega_sentinel_password}
+    labels:
+      org.omega.service: redis
+      org.omega.role: memory-node
+      org.omega.version: "7.0"
+      org.omega.mode: standalone
+
+  # Divine Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: divine-redis-exporter
+    restart: always
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://:${REDIS_PASSWORD:-divine_omega_redis_password}@redis:6379
+    depends_on:
+      - redis
+    networks:
+      - omega-net
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:9121/metrics" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      org.omega.service: redis-exporter
+      org.omega.role: metrics-collector
+      org.omega.version: "latest"
+
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:latest
     container_name: divine-nginx-exporter
