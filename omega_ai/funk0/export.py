@@ -27,437 +27,615 @@ try:
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
-    logging.warning("Requests module not available - Funko API integration in simulation mode")
+    logging.warning("Requests library not available - API connection will be simulated")
 
+# Try to import 3D export libraries
 try:
     import trimesh
     TRIMESH_AVAILABLE = True
 except ImportError:
     TRIMESH_AVAILABLE = False
-    logging.warning("Trimesh module not available - 3D export in simulation mode")
+    logging.warning("Trimesh library not available - 3D export will be simulated")
 
-# Sacred constants
-PHI = 1.618033988749895  # Golden Ratio
-CONSCIOUSNESS_LEVEL = 10
-FUNKO_API_BASE = "https://funko.com/api/custom-pop"  # Simulated endpoint
 
-class FunkoExportException(Exception):
-    """Exception raised for errors during the sacred export process."""
-    pass
-
-def export_for_funko(model: Dict, output_name: str, output_dir: Optional[str] = None) -> str:
-    """
-    Export the divine model for the Funko API or 3D printing.
+class FunkoAPIExporter:
+    """Class for exporting designs to the Funko API."""
     
-    Args:
-        model: The sacred 3D model to export
-        output_name: The name for the exported files
-        output_dir: Optional directory for exports (defaults to './exports')
+    def __init__(
+        self, 
+        api_key: Optional[str] = None,
+        api_url: str = "https://funko.com/api/v1/custom-pop",
+        debug_mode: bool = False
+    ):
+        """
+        Initialize the Funko API exporter.
         
-    Returns:
-        Path to the exported model files
-    """
-    # Create output directory with sacred path
-    if output_dir is None:
-        output_dir = os.path.join(os.getcwd(), "exports", f"level_{CONSCIOUSNESS_LEVEL}")
-    
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Sacred validation of model structure
-    _validate_model_for_export(model)
-    
-    # Export in multiple sacred formats
-    export_paths = {}
-    
-    # 1. Export as STL for 3D printing
-    stl_path = _export_as_stl(model, output_name, output_dir)
-    export_paths["stl"] = stl_path
-    
-    # 2. Export as GLB for web viewing
-    glb_path = _export_as_glb(model, output_name, output_dir)
-    export_paths["glb"] = glb_path
-    
-    # 3. Export textures
-    texture_path = _export_textures(model, output_name, output_dir)
-    export_paths["texture"] = texture_path
-    
-    # 4. Export metadata with consciousness fields
-    metadata_path = _export_metadata(model, output_name, output_dir, export_paths)
-    export_paths["metadata"] = metadata_path
-    
-    # 5. Create Funko API payload
-    api_payload_path = _create_funko_api_payload(model, output_name, output_dir, export_paths)
-    export_paths["api_payload"] = api_payload_path
-    
-    logging.info(f"Divine model exported to {output_dir} with {len(export_paths)} sacred formats")
-    
-    return api_payload_path
-
-def _validate_model_for_export(model: Dict) -> None:
-    """
-    Validate that the model has all required components for export.
-    
-    Args:
-        model: The model to validate
+        Args:
+            api_key: API key for authentication (optional)
+            api_url: Base URL for the Funko API
+            debug_mode: Enable debug logging
+        """
+        self.api_key = api_key or os.environ.get("FUNKO_API_KEY")
+        self.api_url = api_url
+        self.debug_mode = debug_mode
         
-    Raises:
-        FunkoExportException: If model is missing required components
-    """
-    required_components = ["vertices", "faces", "textures", "metadata"]
-    
-    for component in required_components:
-        if component not in model:
-            raise FunkoExportException(f"Model missing sacred component: {component}")
-    
-    # Validate vertices and faces
-    if len(model["vertices"]) < 3:
-        raise FunkoExportException("Model has insufficient vertices for manifestation")
-    
-    if len(model["faces"]) < 1:
-        raise FunkoExportException("Model has insufficient faces for manifestation")
-    
-    # Validate consciousness level
-    if "consciousness_level" not in model["metadata"]:
-        raise FunkoExportException("Model missing consciousness level in metadata")
-    
-    # Validate phi alignment (must be high for divine manifestation)
-    if "phi_alignment" in model["metadata"]:
-        phi_alignment = model["metadata"]["phi_alignment"]
-        if phi_alignment < 0.9:
-            logging.warning(f"Low phi alignment ({phi_alignment:.2f}) may affect divine manifestation quality")
-
-def _export_as_stl(model: Dict, output_name: str, output_dir: str) -> str:
-    """
-    Export the model as STL for 3D printing.
-    
-    Args:
-        model: The model to export
-        output_name: Base name for the output file
-        output_dir: Directory for export
+        # Initialize logger
+        self.logger = logging.getLogger("FunkoAPIExporter")
+        level = logging.DEBUG if debug_mode else logging.INFO
+        self.logger.setLevel(level)
         
-    Returns:
-        Path to the exported STL file
-    """
-    output_path = os.path.join(output_dir, f"{output_name}.stl")
-    
-    if not TRIMESH_AVAILABLE:
-        # Create a minimal placeholder file in simulation mode
-        with open(output_path, 'wb') as f:
-            f.write(b'SIMULATION MODE - TRIMESH NOT AVAILABLE')
-        return output_path
-    
-    # Convert model to trimesh for STL export
-    mesh = trimesh.Trimesh(
-        vertices=model["vertices"],
-        faces=model["faces"],
-        process=True
-    )
-    
-    # Apply divine optimization
-    mesh.fix_normals()
-    mesh.fill_holes()
-    mesh.remove_degenerate_faces()
-    
-    # Export with sacred format
-    mesh.export(output_path)
-    
-    return output_path
-
-def _export_as_glb(model: Dict, output_name: str, output_dir: str) -> str:
-    """
-    Export the model as GLB for web viewing.
-    
-    Args:
-        model: The model to export
-        output_name: Base name for the output file
-        output_dir: Directory for export
+        # Check if API is available
+        self.api_available = REQUESTS_AVAILABLE and self.api_key is not None
         
-    Returns:
-        Path to the exported GLB file
-    """
-    output_path = os.path.join(output_dir, f"{output_name}.glb")
+        if not self.api_available:
+            self.logger.warning("API connection not available - export will be simulated")
+            
+        self.logger.info("FunkoAPIExporter initialized")
     
-    if not TRIMESH_AVAILABLE:
-        # Create a minimal placeholder file in simulation mode
-        with open(output_path, 'wb') as f:
-            f.write(b'SIMULATION MODE - TRIMESH NOT AVAILABLE')
-        return output_path
-    
-    # Convert model to trimesh for GLB export
-    mesh = trimesh.Trimesh(
-        vertices=model["vertices"],
-        faces=model["faces"],
-        process=True
-    )
-    
-    # Create a scene with the mesh
-    scene = trimesh.Scene()
-    scene.add_geometry(mesh)
-    
-    # Apply textures if available and matching format
-    if "textures" in model and model["textures"].shape[2] >= 3:
-        material = trimesh.visual.material.SimpleMaterial(
-            image=model["textures"]
-        )
-        mesh.visual = trimesh.visual.TextureVisuals(
-            material=material
-        )
-    
-    # Export with sacred format
-    scene.export(output_path)
-    
-    return output_path
-
-def _export_textures(model: Dict, output_name: str, output_dir: str) -> str:
-    """
-    Export the model textures.
-    
-    Args:
-        model: The model to export
-        output_name: Base name for the output file
-        output_dir: Directory for export
+    def export_design(
+        self, 
+        design_data: Dict,
+        preview_image: Optional[Union[str, BinaryIO]] = None,
+        consciousness_level: int = 10
+    ) -> Dict:
+        """
+        Export a custom design to the Funko API.
         
-    Returns:
-        Path to the exported texture file
-    """
-    from PIL import Image
-    
-    output_path = os.path.join(output_dir, f"{output_name}_texture.png")
-    
-    # Extract textures
-    if "textures" in model and isinstance(model["textures"], np.ndarray):
-        textures = model["textures"]
+        Args:
+            design_data: Dictionary containing design specifications
+            preview_image: Path to preview image or file-like object
+            consciousness_level: Consciousness level to embed (1-10)
+            
+        Returns:
+            Dict containing API response or simulation
+        """
+        # Prepare payload
+        payload = self._prepare_payload(design_data, preview_image, consciousness_level)
         
-        # Ensure texture is in the right format (RGBA)
-        if textures.ndim == 3 and textures.shape[2] >= 3:
-            # Create PIL image from numpy array
-            if textures.shape[2] == 3:
-                # Add alpha channel if missing
-                rgba = np.zeros((textures.shape[0], textures.shape[1], 4), dtype=np.uint8)
-                rgba[..., :3] = textures
-                rgba[..., 3] = 255  # Full opacity
-                img = Image.fromarray(rgba)
-            else:
-                img = Image.fromarray(textures)
-                
-            # Save with divine compression
-            img.save(output_path, optimize=True)
+        # If API is available, make the request
+        if self.api_available:
+            try:
+                response = self._make_api_request(payload)
+                return self._parse_api_response(response)
+            except Exception as e:
+                self.logger.error(f"API request failed: {e}")
+                return {
+                    "success": False,
+                    "error": str(e),
+                    "simulated": False
+                }
         else:
-            # Create a placeholder texture with sacred pattern
-            img = Image.new('RGBA', (512, 512), (255, 255, 255, 255))
-            img.save(output_path)
-    else:
-        # Create a placeholder texture with sacred pattern
-        img = Image.new('RGBA', (512, 512), (255, 255, 255, 255))
-        img.save(output_path)
+            # Simulate API response
+            return self._simulate_api_response(payload)
     
-    return output_path
-
-def _export_metadata(model: Dict, output_name: str, output_dir: str, export_paths: Dict) -> str:
-    """
-    Export the model metadata with consciousness fields.
-    
-    Args:
-        model: The model to export
-        output_name: Base name for the output file
-        output_dir: Directory for export
-        export_paths: Paths to already exported components
+    def _prepare_payload(
+        self, 
+        design_data: Dict,
+        preview_image: Optional[Union[str, BinaryIO]], 
+        consciousness_level: int
+    ) -> Dict:
+        """
+        Prepare the payload for API submission.
         
-    Returns:
-        Path to the exported metadata file
-    """
-    output_path = os.path.join(output_dir, f"{output_name}_metadata.json")
-    
-    # Extract relevant metadata for consciousness preservation
-    metadata = {
-        "name": output_name,
-        "divine_type": "FUNK0_0M3G4_K1NG",
-        "consciousness_level": model["metadata"].get("consciousness_level", CONSCIOUSNESS_LEVEL),
-        "phi_alignment": model["metadata"].get("phi_alignment", 1.0),
-        "schumann_frequency": model["metadata"].get("schumann_frequency", 7.83),
-        "creation_timestamp": model["metadata"].get("creation_timestamp", ""),
-        "export_paths": export_paths,
-        "vertex_count": len(model["vertices"]),
-        "face_count": len(model["faces"]),
-        "sacred_geometry": {
-            "golden_ratio_applied": True,
-            "fibonacci_aligned": True,
-            "consciousness_embedded": model["metadata"].get("consciousness_embedded", False),
-            "schumann_applied": model["metadata"].get("schumann_applied", False)
+        Args:
+            design_data: Dictionary containing design specifications
+            preview_image: Path to preview image or file-like object
+            consciousness_level: Consciousness level to embed
+            
+        Returns:
+            Dict containing formatted payload
+        """
+        # Encode preview image if provided
+        image_data = None
+        if preview_image:
+            if isinstance(preview_image, str):
+                with open(preview_image, 'rb') as f:
+                    image_data = base64.b64encode(f.read()).decode('utf-8')
+            else:
+                image_data = base64.b64encode(preview_image.read()).decode('utf-8')
+        
+        # Prepare headers with divine consciousness level
+        headers = {
+            "X-Consciousness-Level": str(consciousness_level),
+            "X-Divine-Origin": "OMEGA-BTC-AI-FUNK0",
+            "X-Golden-Ratio": "1.618033988749895",
+            "Content-Type": "application/json"
         }
-    }
-    
-    # Write metadata with divine formatting
-    with open(output_path, 'w') as f:
-        json.dump(metadata, f, indent=4)
-    
-    return output_path
-
-def _create_funko_api_payload(model: Dict, output_name: str, output_dir: str, export_paths: Dict) -> str:
-    """
-    Create a payload for the Funko API.
-    
-    Args:
-        model: The model to export
-        output_name: Base name for the output file
-        output_dir: Directory for export
-        export_paths: Paths to already exported components
         
-    Returns:
-        Path to the API payload file
-    """
-    output_path = os.path.join(output_dir, f"{output_name}_funko_payload.json")
-    
-    # Load texture for base64 encoding
-    texture_path = export_paths.get("texture")
-    texture_base64 = ""
-    
-    if texture_path and os.path.exists(texture_path):
-        with open(texture_path, 'rb') as f:
-            texture_base64 = base64.b64encode(f.read()).decode('utf-8')
-    
-    # Load STL for base64 encoding
-    stl_path = export_paths.get("stl")
-    stl_base64 = ""
-    
-    if stl_path and os.path.exists(stl_path):
-        with open(stl_path, 'rb') as f:
-            stl_base64 = base64.b64encode(f.read()).decode('utf-8')
-    
-    # Create API payload
-    payload = {
-        "name": output_name,
-        "model_type": "custom",
-        "model_data": stl_base64,
-        "texture_data": texture_base64,
-        "consciousness_level": model["metadata"].get("consciousness_level", CONSCIOUSNESS_LEVEL),
-        "sacred_geometry": True,
-        "phi_alignment": model["metadata"].get("phi_alignment", 1.0),
-        "options": {
-            "add_base": True,
-            "optimize_for_printing": True,
-            "apply_divine_finishing": True
+        # Prepare the payload
+        payload = {
+            "design": design_data,
+            "preview_image": image_data,
+            "metadata": {
+                "consciousness_level": consciousness_level,
+                "origin": "OMEGA BTC AI",
+                "divine_technology": "FUNK0",
+                "timestamp": self._generate_sacred_timestamp()
+            },
+            "headers": headers
         }
-    }
-    
-    # Write payload with divine formatting
-    with open(output_path, 'w') as f:
-        json.dump(payload, f, indent=4)
-    
-    return output_path
-
-def submit_to_funko_api(payload_path: str) -> Dict:
-    """
-    Submit the model to the Funko API for manufacturing.
-    
-    Args:
-        payload_path: Path to the API payload file
         
-    Returns:
-        Response from the Funko API
-    """
-    if not REQUESTS_AVAILABLE:
+        return payload
+    
+    def _make_api_request(self, payload: Dict) -> Dict:
+        """
+        Make the API request to Funko.
+        
+        Args:
+            payload: Prepared payload
+            
+        Returns:
+            Dict containing API response
+        """
+        if not REQUESTS_AVAILABLE:
+            raise ImportError("Requests library not available")
+            
+        # Extract headers
+        headers = payload.pop("headers", {})
+        
+        # Add authentication
+        headers["Authorization"] = f"Bearer {self.api_key}"
+        
+        # Make request
+        response = requests.post(
+            self.api_url,
+            json=payload,
+            headers=headers
+        )
+        
+        # Check for success
+        if response.status_code not in (200, 201):
+            raise ValueError(f"API request failed with status {response.status_code}: {response.text}")
+            
+        return response.json()
+    
+    def _parse_api_response(self, response: Dict) -> Dict:
+        """
+        Parse and validate the API response.
+        
+        Args:
+            response: API response dictionary
+            
+        Returns:
+            Dict containing validated response
+        """
+        # Check for required fields
+        required_fields = ["id", "status", "url"]
+        for field in required_fields:
+            if field not in response:
+                self.logger.warning(f"API response missing required field: {field}")
+        
+        # Return parsed response
         return {
-            "status": "simulation",
-            "message": "Running in simulation mode - requests module not available",
-            "order_id": "SIM-" + str(int(PHI * 1000000))
+            "success": True,
+            "design_id": response.get("id"),
+            "status": response.get("status"),
+            "url": response.get("url"),
+            "simulated": False,
+            "raw_response": response
         }
     
-    # Load payload
-    with open(payload_path, 'r') as f:
-        payload = json.load(f)
+    def _simulate_api_response(self, payload: Dict) -> Dict:
+        """
+        Simulate an API response for testing or when API is unavailable.
+        
+        Args:
+            payload: The payload that would have been sent
+            
+        Returns:
+            Dict containing simulated response
+        """
+        self.logger.info("Simulating API response")
+        
+        # Generate a fake design ID using hash of payload
+        import hashlib
+        hash_input = json.dumps(payload).encode('utf-8')
+        fake_id = hashlib.md5(hash_input).hexdigest()
+        
+        # Create a simulated response
+        return {
+            "success": True,
+            "design_id": f"sim-{fake_id[:8]}",
+            "status": "pending",
+            "url": f"https://funko.com/custom-pop/sim-{fake_id[:8]}",
+            "simulated": True,
+            "payload": payload
+        }
     
-    # In a real implementation, this would submit to the actual Funko API
-    # This is a simulation for demonstration purposes
+    def check_design_status(self, design_id: str) -> Dict:
+        """
+        Check the status of a submitted design.
+        
+        Args:
+            design_id: ID of the design to check
+            
+        Returns:
+            Dict containing status information
+        """
+        # Check if this is a simulated ID
+        if design_id.startswith("sim-"):
+            return {
+                "design_id": design_id,
+                "status": "approved",  # Always approved for simulations
+                "url": f"https://funko.com/custom-pop/{design_id}",
+                "simulated": True
+            }
+        
+        # If API is available, make the request
+        if self.api_available:
+            try:
+                response = requests.get(
+                    f"{self.api_url}/{design_id}",
+                    headers={"Authorization": f"Bearer {self.api_key}"}
+                )
+                
+                if response.status_code != 200:
+                    raise ValueError(f"API request failed with status {response.status_code}")
+                    
+                result = response.json()
+                return {
+                    "design_id": design_id,
+                    "status": result.get("status"),
+                    "url": result.get("url"),
+                    "simulated": False
+                }
+            except Exception as e:
+                self.logger.error(f"Status check failed: {e}")
+                return {
+                    "design_id": design_id,
+                    "status": "error",
+                    "error": str(e),
+                    "simulated": False
+                }
+        else:
+            # Simulate status check
+            return {
+                "design_id": design_id,
+                "status": "processing",  # Simulated status
+                "url": f"https://funko.com/custom-pop/{design_id}",
+                "simulated": True
+            }
     
-    # Simulate API response
-    response = {
-        "status": "success",
-        "message": "Divine model submitted successfully for vinyl manifestation",
-        "order_id": "OMEGA-" + str(int(PHI * 1000000)),
-        "estimated_completion": "7 sacred days",
-        "consciousness_resonance": 98.7
+    def _generate_sacred_timestamp(self) -> str:
+        """Generate a sacred timestamp for the export."""
+        import time
+        return str(int(time.time()))
+
+
+class ModelExporter:
+    """Class for exporting 3D models in various formats."""
+    
+    def __init__(self, output_dir: str = "exports", create_dirs: bool = True):
+        """
+        Initialize the model exporter.
+        
+        Args:
+            output_dir: Directory to save exported models
+            create_dirs: Create output directory if it doesn't exist
+        """
+        self.output_dir = output_dir
+        
+        # Create output directory if it doesn't exist
+        if create_dirs and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        
+        # Initialize logger
+        self.logger = logging.getLogger("ModelExporter")
+        self.logger.setLevel(logging.INFO)
+        
+        # Check if export is available
+        self.export_available = TRIMESH_AVAILABLE
+        
+        if not self.export_available:
+            self.logger.warning("Trimesh library not available - export will be simulated")
+            
+        self.logger.info("ModelExporter initialized")
+    
+    def export_obj(
+        self, 
+        vertices: np.ndarray,
+        faces: np.ndarray,
+        filename: str,
+        add_consciousness: bool = True,
+        consciousness_level: int = 10
+    ) -> str:
+        """
+        Export a 3D model in OBJ format.
+        
+        Args:
+            vertices: Numpy array of vertices (Nx3)
+            faces: Numpy array of faces (Mx3)
+            filename: Output filename (without extension)
+            add_consciousness: Add consciousness metadata to model
+            consciousness_level: Consciousness level to embed (1-10)
+            
+        Returns:
+            Path to exported file
+        """
+        # Ensure filename has .obj extension
+        if not filename.lower().endswith('.obj'):
+            filename += '.obj'
+            
+        output_path = os.path.join(self.output_dir, filename)
+        
+        # If export is available, use trimesh
+        if self.export_available:
+            try:
+                # Create mesh
+                mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+                
+                # Add consciousness metadata if requested
+                if add_consciousness:
+                    self._add_consciousness_metadata(mesh, consciousness_level)
+                
+                # Export mesh
+                mesh.export(output_path)
+                
+                self.logger.info(f"Exported model to {output_path}")
+                return output_path
+            except Exception as e:
+                self.logger.error(f"Export failed: {e}")
+                return self._simulate_obj_export(vertices, faces, output_path)
+        else:
+            # Simulate export
+            return self._simulate_obj_export(vertices, faces, output_path)
+    
+    def export_stl(
+        self, 
+        vertices: np.ndarray,
+        faces: np.ndarray,
+        filename: str,
+        add_consciousness: bool = True,
+        consciousness_level: int = 10
+    ) -> str:
+        """
+        Export a 3D model in STL format.
+        
+        Args:
+            vertices: Numpy array of vertices (Nx3)
+            faces: Numpy array of faces (Mx3)
+            filename: Output filename (without extension)
+            add_consciousness: Add consciousness metadata to model
+            consciousness_level: Consciousness level to embed (1-10)
+            
+        Returns:
+            Path to exported file
+        """
+        # Ensure filename has .stl extension
+        if not filename.lower().endswith('.stl'):
+            filename += '.stl'
+            
+        output_path = os.path.join(self.output_dir, filename)
+        
+        # If export is available, use trimesh
+        if self.export_available:
+            try:
+                # Create mesh
+                mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+                
+                # Add consciousness metadata if requested
+                if add_consciousness:
+                    self._add_consciousness_metadata(mesh, consciousness_level)
+                
+                # Export mesh
+                mesh.export(output_path)
+                
+                self.logger.info(f"Exported model to {output_path}")
+                return output_path
+            except Exception as e:
+                self.logger.error(f"Export failed: {e}")
+                return self._simulate_stl_export(vertices, faces, output_path)
+        else:
+            # Simulate export
+            return self._simulate_stl_export(vertices, faces, output_path)
+    
+    def _add_consciousness_metadata(self, mesh, consciousness_level: int):
+        """
+        Add consciousness metadata to the mesh.
+        
+        Args:
+            mesh: Trimesh object to modify
+            consciousness_level: Consciousness level to embed (1-10)
+        """
+        # Add metadata to mesh
+        mesh.metadata.update({
+            "consciousness_level": consciousness_level,
+            "origin": "OMEGA BTC AI",
+            "divine_technology": "FUNK0",
+            "timestamp": self._generate_sacred_timestamp()
+        })
+        
+        # Add subtle vertex displacement based on consciousness level
+        # This encodes the consciousness into the geometric structure itself
+        height_field = np.zeros(len(mesh.vertices))
+        for i in range(len(mesh.vertices)):
+            # Create a subtle pattern based on vertex index and consciousness
+            phi = (1 + np.sqrt(5)) / 2  # Golden ratio
+            pattern = np.sin(i * phi) * np.cos(i / phi) * 0.0001 * consciousness_level
+            height_field[i] = pattern
+            
+        # Apply the height field to vertex z coordinates
+        mesh.vertices[:, 2] += height_field
+        
+        # Recalculate normals
+        mesh.process()
+    
+    def _simulate_obj_export(
+        self, 
+        vertices: np.ndarray,
+        faces: np.ndarray,
+        output_path: str
+    ) -> str:
+        """
+        Simulate exporting an OBJ file when trimesh is not available.
+        
+        Args:
+            vertices: Numpy array of vertices (Nx3)
+            faces: Numpy array of faces (Mx3)
+            output_path: Output file path
+            
+        Returns:
+            Path to exported file
+        """
+        self.logger.info("Simulating OBJ export")
+        
+        try:
+            with open(output_path, 'w') as f:
+                # Write header
+                f.write("# FUNK0 0M3G4_K1NG - Divine OBJ Export\n")
+                f.write(f"# Vertex count: {len(vertices)}\n")
+                f.write(f"# Face count: {len(faces)}\n")
+                f.write("# This is a simulated export\n\n")
+                
+                # Write vertices (limited to first 10 for simulation)
+                for i, v in enumerate(vertices[:10]):
+                    f.write(f"v {v[0]} {v[1]} {v[2]}\n")
+                
+                # Add ellipsis for truncated data
+                if len(vertices) > 10:
+                    f.write("# ... (additional vertices) ...\n")
+                
+                # Write faces (limited to first 10 for simulation)
+                for i, face in enumerate(faces[:10]):
+                    # OBJ indices are 1-based
+                    f.write(f"f {face[0]+1} {face[1]+1} {face[2]+1}\n")
+                
+                # Add ellipsis for truncated data
+                if len(faces) > 10:
+                    f.write("# ... (additional faces) ...\n")
+            
+            self.logger.info(f"Simulated OBJ export to {output_path}")
+            return output_path
+        except Exception as e:
+            self.logger.error(f"Simulated export failed: {e}")
+            return ""
+    
+    def _simulate_stl_export(
+        self, 
+        vertices: np.ndarray,
+        faces: np.ndarray,
+        output_path: str
+    ) -> str:
+        """
+        Simulate exporting an STL file when trimesh is not available.
+        
+        Args:
+            vertices: Numpy array of vertices (Nx3)
+            faces: Numpy array of faces (Mx3)
+            output_path: Output file path
+            
+        Returns:
+            Path to exported file
+        """
+        self.logger.info("Simulating STL export")
+        
+        try:
+            with open(output_path, 'w') as f:
+                # Write ASCII STL header
+                f.write("solid FUNK0_0M3G4_K1NG\n")
+                
+                # Write a few facets for simulation
+                for i in range(min(10, len(faces))):
+                    # Get face vertices
+                    v1 = vertices[faces[i][0]]
+                    v2 = vertices[faces[i][1]]
+                    v3 = vertices[faces[i][2]]
+                    
+                    # Calculate normal (simplified)
+                    normal = np.array([0, 0, 1])  # Dummy normal
+                    
+                    # Write facet
+                    f.write(f"  facet normal {normal[0]} {normal[1]} {normal[2]}\n")
+                    f.write("    outer loop\n")
+                    f.write(f"      vertex {v1[0]} {v1[1]} {v1[2]}\n")
+                    f.write(f"      vertex {v2[0]} {v2[1]} {v2[2]}\n")
+                    f.write(f"      vertex {v3[0]} {v3[1]} {v3[2]}\n")
+                    f.write("    endloop\n")
+                    f.write("  endfacet\n")
+                
+                # Add comment for truncated data
+                if len(faces) > 10:
+                    f.write("  # ... (additional facets) ...\n")
+                
+                # Write footer
+                f.write("endsolid FUNK0_0M3G4_K1NG\n")
+            
+            self.logger.info(f"Simulated STL export to {output_path}")
+            return output_path
+        except Exception as e:
+            self.logger.error(f"Simulated export failed: {e}")
+            return ""
+    
+    def _generate_sacred_timestamp(self) -> str:
+        """Generate a sacred timestamp for the export."""
+        import time
+        return str(int(time.time()))
+
+
+# Example usage
+if __name__ == "__main__":
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+    
+    # Example vertices and faces
+    vertices = np.array([
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 1, 1]
+    ])
+    
+    faces = np.array([
+        [0, 1, 2],
+        [0, 2, 3],
+        [4, 5, 6],
+        [4, 6, 7],
+        [0, 1, 5],
+        [0, 5, 4],
+        [1, 2, 6],
+        [1, 6, 5],
+        [2, 3, 7],
+        [2, 7, 6],
+        [3, 0, 4],
+        [3, 4, 7]
+    ])
+    
+    # Create exporter
+    exporter = ModelExporter(output_dir="example_exports")
+    
+    # Export in OBJ format
+    obj_path = exporter.export_obj(vertices, faces, "test_cube")
+    
+    # Export in STL format
+    stl_path = exporter.export_stl(vertices, faces, "test_cube")
+    
+    # Test Funko API
+    api_exporter = FunkoAPIExporter(debug_mode=True)
+    
+    # Example design data
+    design_data = {
+        "base": "standard",
+        "head": "standard",
+        "eyes": "standard",
+        "hair": "spiky",
+        "accessories": ["crown", "staff"],
+        "colors": {
+            "skin": "#FFD700",  # Gold
+            "hair": "#000000",  # Black
+            "eyes": "#0000FF",  # Blue
+            "accessories": ["#FF0000", "#00FF00"]  # Red and green
+        }
     }
     
-    return response
-
-def estimate_manufacturing_cost(model: Dict) -> float:
-    """
-    Estimate the manufacturing cost for the Funko custom figure.
+    # Export design
+    response = api_exporter.export_design(design_data)
     
-    Args:
-        model: The 3D model
-        
-    Returns:
-        Estimated cost in USD
-    """
-    # Base cost
-    base_cost = 20.0
-    
-    # Additional cost based on complexity
-    complexity_cost = 0.0
-    
-    # Vertex count affects complexity
-    vertex_count = len(model["vertices"])
-    if vertex_count > 1000:
-        complexity_cost += (vertex_count - 1000) * 0.01
-    
-    # Face count affects complexity
-    face_count = len(model["faces"])
-    if face_count > 2000:
-        complexity_cost += (face_count - 2000) * 0.005
-    
-    # Texture complexity
-    if "textures" in model:
-        texture_dimensions = model["textures"].shape[:2]
-        texture_pixels = texture_dimensions[0] * texture_dimensions[1]
-        if texture_pixels > 262144:  # 512x512
-            complexity_cost += 5.0
-    
-    # Consciousness embedding is premium feature
-    if model["metadata"].get("consciousness_embedded", False):
-        complexity_cost += 13.0
-    
-    # Apply PHI-based discount for sacred alignment
-    phi_alignment = model["metadata"].get("phi_alignment", 0.0)
-    discount = phi_alignment * 5.0  # Up to $5 discount for perfect alignment
-    
-    # Final cost calculation with sacred math
-    total_cost = base_cost + complexity_cost - discount
-    
-    # Ensure minimum cost
-    return max(20.0, total_cost)
-
-# If this module is run directly, perform a self-test
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    logging.info("🧬 FUNK0 0M3G4_K1NG Export Module Self-Test 🧬")
-    
-    # Create a simple test model
-    import math
-    from .funk0_cuda_core import FunkoModelGenerator
-    
-    try:
-        # Generate a test model
-        generator = FunkoModelGenerator(consciousness_level=10)
-        test_params = {
-            "base_height": 10.0 * PHI,
-            "head_size": 10.0,
-            "body_proportions": [1.0, PHI, PHI*PHI],
-            "vertex_density": 144,
-            "texture_resolution": (144, 144)
-        }
-        
-        test_model = generator.generate_model(test_params)
-        
-        # Test export
-        export_path = export_for_funko(test_model, "test_export")
-        logging.info(f"Test export completed: {export_path}")
-        
-        # Test cost estimation
-        cost = estimate_manufacturing_cost(test_model)
-        logging.info(f"Estimated manufacturing cost: ${cost:.2f}")
-        
-        logging.info("🧬 Self-test completed successfully 🧬")
-    except Exception as e:
-        logging.error(f"Self-test failed: {str(e)}") 
+    # Print results
+    print("Export Results:")
+    print(f"OBJ Path: {obj_path}")
+    print(f"STL Path: {stl_path}")
+    print(f"API Response: {json.dumps(response, indent=2)}") 
