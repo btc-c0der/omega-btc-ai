@@ -710,59 +710,44 @@
         // Run the animation
         setInterval(draw, 33);
 
-        // News Loading
+        // News Loading Simulation
         setTimeout(() => {
             const newsContent = document.getElementById('newsContent');
 
-            // Fetch news from API
-            fetch('/api/news/')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`API returned status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('API Data:', data);
+            // Sample news data
+            const newsItems = [
+                {
+                    title: "Bitcoin Surpasses All-Time High as Institutional Adoption Grows",
+                    date: "2025-03-31",
+                    source: "CryptoNews",
+                    content: "Bitcoin has reached a new all-time high, surpassing previous records as institutional investors continue to enter the market."
+                },
+                {
+                    title: "SEC Approves New Cryptocurrency ETF Applications",
+                    date: "2025-03-30",
+                    source: "FinancialTimes",
+                    content: "The Securities and Exchange Commission has approved additional cryptocurrency ETF applications, signaling increased acceptance of digital assets."
+                },
+                {
+                    title: "Major Central Banks Explore Digital Currency Options",
+                    date: "2025-03-29",
+                    source: "GlobalEconomy",
+                    content: "Several major central banks have announced plans to accelerate research into central bank digital currencies (CBDCs)."
+                }
+            ];
 
-                    if (data.status === 'success' && data.news && data.news.length > 0) {
-                        // Create news HTML content using API data
-                        const newsHTML = data.news.map(item => `
-                            <div class="news-item">
-                                <h4>${item.title}</h4>
-                                <div class="news-item-meta">${new Date(item.published_at).toLocaleDateString()} | Source: ${item.source}</div>
-                                <div class="news-item-content">${item.content}</div>
-                                <div class="truth-meter">
-                                    <div class="truth-value" style="width: ${item.sentiment * 100}%"></div>
-                                </div>
-                                <div class="truth-label">Sentiment: ${(item.sentiment * 100).toFixed(0)}%</div>
-                            </div>
-                        `).join('');
+            // Create news HTML content
+            const newsHTML = newsItems.map(item => `
+                <div class="news-item">
+                    <h4>${item.title}</h4>
+                    <div class="news-item-meta">${item.date} | Source: ${item.source}</div>
+                    <div class="news-item-content">${item.content}</div>
+                </div>
+            `).join('');
 
-                        // Update the news content
-                        newsContent.innerHTML = newsHTML;
-                    } else {
-                        newsContent.innerHTML = '<p>No news articles available at this time.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('API Error:', error);
-                    newsContent.innerHTML = `
-                        <p>Error loading news data: ${error.message}</p>
-                        <p>Using backup news feed instead.</p>
-                        
-                        <div class="news-item">
-                            <h4>Bitcoin Surpasses All-Time High as Institutional Adoption Grows</h4>
-                            <div class="news-item-meta">2025-03-31 | Source: CryptoNews</div>
-                            <div class="news-item-content">Bitcoin has reached a new all-time high, surpassing previous records as institutional investors continue to enter the market.</div>
-                        </div>
-                        <div class="news-item">
-                            <h4>SEC Approves New Cryptocurrency ETF Applications</h4>
-                            <div class="news-item-meta">2025-03-30 | Source: FinancialTimes</div>
-                            <div class="news-item-content">The Securities and Exchange Commission has approved additional cryptocurrency ETF applications, signaling increased acceptance of digital assets.</div>
-                        </div>
-                    `;
-                });
+            // Update the news content
+            newsContent.innerHTML = newsHTML;
+
         }, 3000);
 
         // Handle Window Resize

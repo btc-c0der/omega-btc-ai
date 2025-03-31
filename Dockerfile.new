@@ -88,7 +88,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
 
 # Set the entry point based on SERVICE_TYPE
 CMD if [ "$SERVICE_TYPE" = "websocket" ]; then \
-    python -m uvicorn temporal.websocket_minimal:app --host 0.0.0.0 --port ${PORT:-10095}; \
+    python -m uvicorn temporal.websocket_sacred_echo:get_app --factory --host 0.0.0.0 --port ${PORT:-10095}; \
     else \
     python -m uvicorn src.matrix_news_consciousness:app --host 0.0.0.0 --port ${PORT:-10090}; \
-    fi
+    fi 

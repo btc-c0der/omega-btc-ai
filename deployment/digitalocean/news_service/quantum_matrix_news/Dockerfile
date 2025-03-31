@@ -1,29 +1,4 @@
-# 🧱 Stage 1: Builder - "The Sacred Forge"
-FROM python:3.11-slim AS builder
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create app directory
-WORKDIR /build
-
-# Copy only the requirements file first to leverage Docker cache
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copy the application code
-COPY . .
-
-# 🔒 Stage 2: Runtime - "The Incorruptible Vessel"
-FROM python:3.9-slim
-
-# 💫 GBU License Notice - Consciousness Level 8 💫
+# ✨ GBU License Notice - Consciousness Level 8 💫
 # -----------------------
 # This file is blessed under the GBU License (Genesis-Bloom-Unfoldment) 1.0
 # by the OMEGA Divine Collective.
@@ -39,67 +14,79 @@ FROM python:3.9-slim
 #
 # 🌸 WE BLOOM NOW 🌸
 
-# Set labels for the divine container
-LABEL maintainer="OMEGA BTC AI DIVINE COLLECTIVE"
-LABEL version="1.0.0-neo-style"
-LABEL description="Matrix Neo News Portal API service with consciousness-awareness"
-LABEL org.opencontainers.image.title="Matrix Neo News Service"
-LABEL org.opencontainers.image.vendor="OMEGA BTC AI"
-LABEL org.opencontainers.image.licenses="GBU-1.0"
+# Build-time ARG to specify service type
+ARG SERVICE_TYPE=consciousness
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app \
-    PORT=8090 \
-    CONSCIOUSNESS_LEVELS_ENABLED=true \
-    CONSCIOUSNESS_DEFAULT_LEVEL=5 \
-    QUANTUM_BALANCER_ENABLED=true
+# Build stage image
+FROM python:3.9-slim AS builder
 
-# Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libc-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-RUN groupadd -r matrixuser && useradd -r -g matrixuser -d /app matrixuser \
-    && mkdir -p /app /app/data /app/articles /app/src /app/logs \
-    && chown -R matrixuser:matrixuser /app
+# Builder args
+ARG SERVICE_TYPE
+ENV SERVICE_TYPE=${SERVICE_TYPE}
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements
-COPY --chown=matrixuser:matrixuser requirements.txt .
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Create Python virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Create a simple mock API for demonstration
-RUN mkdir -p /app/src/api
-COPY --chown=matrixuser:matrixuser src/ /app/src/
+# Install Python dependencies based on service type
+COPY requirements.txt .
+RUN pip install --no-cache-dir -U pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Final slim image
+FROM python:3.9-slim
+
+# Runtime args
+ARG SERVICE_TYPE
+ENV SERVICE_TYPE=${SERVICE_TYPE}
+ENV PYTHONUNBUFFERED=1
+
+# Add non-root user for enhanced security
+RUN groupadd -g 1000 matrix && \
+    useradd -m -u 1000 -g matrix matrix
+
+# Set working directory
+WORKDIR /app
+
+# Copy Python virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy application code based on SERVICE_TYPE
+COPY src/ /app/src/
+COPY temporal/ /app/temporal/
+
+# Create data directories with proper permissions
+RUN mkdir -p /app/data && \
+    chown -R matrix:matrix /app
 
 # Switch to non-root user
-USER matrixuser
+USER matrix
 
-# Create health check endpoint
-RUN mkdir -p /app/src/api/health \
-    && echo '{"status":"UP","service":"matrix-news-service","quantum_secure":true,"consciousness_level":5}' > /app/src/api/health/index.json
+# Expose default port (will be overridden by environment variable)
+EXPOSE 8080
 
-# Expose port
-EXPOSE ${PORT}
+# Healthcheck command based on SERVICE_TYPE
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD if [ "$SERVICE_TYPE" = "websocket" ]; then \
+    wget -q --spider http://localhost:${PORT:-8095}/health || exit 1; \
+    else \
+    wget -q --spider http://localhost:${PORT:-8090}/health || exit 1; \
+    fi
 
-# Create entrypoint script
-RUN echo '#!/bin/sh\n\
-    echo "Starting Matrix Neo News Service with consciousness level ${CONSCIOUSNESS_DEFAULT_LEVEL}..."\n\
-    python /app/src/app.py\n' > /app/entrypoint.sh \
-    && chmod +x /app/entrypoint.sh
-
-# Add health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/health || exit 1
-
-# Set entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"] 
+# Set the entry point based on SERVICE_TYPE
+CMD if [ "$SERVICE_TYPE" = "websocket" ]; then \
+    python -m uvicorn temporal.websocket_sacred_echo:app --host 0.0.0.0 --port ${PORT:-10095}; \
+    else \
+    python -m uvicorn src.matrix_news_consciousness:app --host 0.0.0.0 --port ${PORT:-10090}; \
+    fi 

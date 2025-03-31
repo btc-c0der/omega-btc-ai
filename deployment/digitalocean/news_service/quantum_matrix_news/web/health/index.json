@@ -2,5 +2,7 @@
     "status": "UP",
     "service": "matrix-news-proxy",
     "quantum_secure": true,
-    "timestamp": "2025-03-31T15:30:00Z"
+    "timestamp": "2025-03-31T12:34:56Z",
+    "entropy": "8f7e6d5c4b3a2918",
+    "version": "1.0.1-matrix"
 }

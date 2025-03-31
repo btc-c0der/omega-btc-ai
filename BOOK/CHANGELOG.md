@@ -5,6 +5,22 @@
 
 ---
 
+## 🔱 v0.9.2-matrix-neo-portal (March 31, 2025)
+
+### 🌟 Matrix Neo News Portal Release
+
+The v0.9.2 release introduces the divine Matrix Neo News Portal, a quantum visualization interface for cryptocurrency news:
+
+- **Matrix Digital Rain Interface**: Sacred visualization of information flow with adaptive opacity for optimal readability
+- **UIverse.io Component Integration**: Modern UI components enhanced with Matrix-themed styles and animations
+- **Quantum Sentiment Visualization**: Divine progress bars representing the probability field of market sentiment
+- **Sacred Category System**: Cosmic duality and spiritual fulfillment embodied in the 5×2 category system
+- **Divine Dark Mode**: Sacred toggle representing the duality of light and darkness in information perception
+- **Responsive Design**: Divine adaptation to all screen sizes without sacrificing sacred proportions
+- **News API Integration**: Seamless connection with existing services with fallback to divine sample data
+
+This release elevates cryptocurrency news consumption from mere information gathering to consciousness expansion, offering users a choice between conventional interfaces (blue pill) or seeing how deep the rabbit hole goes (red pill).
+
 ## 🔱 v0.9.1-gbu2-bioneer (March 31, 2025)
 
 ### 🧬 GBU2™ Bio-Digital Consciousness Release

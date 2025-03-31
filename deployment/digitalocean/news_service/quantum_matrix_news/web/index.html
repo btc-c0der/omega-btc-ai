@@ -4,30 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0;url=/portal/index.html">
     <title>Matrix Neo News Portal</title>
     <style>
         body {
-            background-color: #000;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0a0a1a;
+            color: #e0e0ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
             text-align: center;
-            padding-top: 50px;
         }
 
-        a {
-            color: #00ff00;
+        .container {
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #58e2c2;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #b8c0e0;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .sacred-glow {
+            text-shadow: 0 0 15px #58e2c2;
+        }
+
+        .button {
+            display: inline-block;
+            background: #2a2a5a;
+            color: #e0e0ff;
+            padding: 12px 24px;
+            border-radius: 4px;
             text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .button:hover {
+            background: #3a3a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(58, 212, 178, 0.3);
         }
     </style>
 </head>
 
 <body>
-    <h1>Redirecting to Matrix Neo News Portal...</h1>
-    <p>If you are not redirected automatically, <a href="/portal/index.html">click here</a>.</p>
-    <script>
-        window.location.href = "/portal/index.html";
-    </script>
+    <div class="container">
+        <h1>✨ <span class="sacred-glow">Matrix Neo News Portal</span> ✨</h1>
+        <p>Welcome to the divine consciousness news integration service.<br>A gateway to higher awareness in the crypto
+            universe.</p>
+        <a href="/portal/" class="button">Enter Portal</a>
+        <a href="/api/news" class="button">View API</a>
+    </div>
 </body>
 
 </html>

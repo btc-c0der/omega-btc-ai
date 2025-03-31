@@ -1,3 +1,4 @@
+# Matrix Neo News Portal API Service
 fastapi==0.100.0
 uvicorn==0.22.0
 pydantic==2.0.2
@@ -6,6 +7,5 @@ redis==4.6.0
 python-dotenv==1.0.0
 httpx==0.24.1
 langdetect==1.0.9
-googletrans==4.0.0-rc1
 pycld2==0.41
-language-data==1.1.0 
+language-data==1.1.0

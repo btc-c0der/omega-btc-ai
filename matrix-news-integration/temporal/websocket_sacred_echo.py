@@ -110,7 +110,7 @@ def generate_quantum_entropy(level: int = 8) -> Dict[str, Any]:
     
     return entropy
 
-async def fetch_news_from_consciousness_service(consciousness_level: int) -> List[Dict[str, Any]]:
+async def fetch_news_from_consciousness_service(consciousness_level: int, language: str = "en") -> List[Dict[str, Any]]:
     """Fetch news from the Matrix News Consciousness Service."""
     global last_news_items, last_fetch_time
     
@@ -121,7 +121,10 @@ async def fetch_news_from_consciousness_service(consciousness_level: int) -> Lis
     
     try:
         async with aiohttp.ClientSession() as session:
-            headers = {"X-Consciousness-Level": str(consciousness_level)}
+            headers = {
+                "X-Consciousness-Level": str(consciousness_level),
+                "X-Preferred-Language": language
+            }
             async with session.get(f"{NEWS_SERVICE_URL}/api/news", headers=headers) as response:
                 if response.status == 200:
                     news_data = await response.json()
@@ -247,13 +250,36 @@ async def connect(sid, environ):
         "sid": sid,
         "connected_at": datetime.datetime.now().isoformat(),
         "consciousness_level": 5,  # Default level
+        "preferred_language": "en",  # Default language
         "ip": environ.get("REMOTE_ADDR", "unknown"),
         "user_agent": environ.get("HTTP_USER_AGENT", "unknown"),
     }
     
+    # Check for language preference in headers or cookies
+    accept_language = environ.get("HTTP_ACCEPT_LANGUAGE", "")
+    if accept_language:
+        # Simple parsing - just get the first language code
+        lang_code = accept_language.split(",")[0].strip().split(";")[0].strip().lower()
+        if lang_code and len(lang_code) >= 2:
+            client_info["preferred_language"] = lang_code[:2]  # Just use the primary language code
+    
+    # Check cookies for preferred_language
+    cookie_header = environ.get("HTTP_COOKIE", "")
+    if cookie_header and "preferred_language=" in cookie_header:
+        try:
+            # Simple cookie parsing
+            cookie_parts = cookie_header.split(";")
+            for part in cookie_parts:
+                if "preferred_language=" in part:
+                    lang_value = part.split("=")[1].strip()
+                    if lang_value and len(lang_value) >= 2:
+                        client_info["preferred_language"] = lang_value
+        except:
+            pass
+    
     active_clients[sid] = client_info
     
-    logger.info(f"Client connected: {sid}")
+    logger.info(f"Client connected: {sid}, language: {client_info['preferred_language']}")
     
     # Send welcome message with quantum entropy
     await sio.emit("connect", {
@@ -263,7 +289,10 @@ async def connect(sid, environ):
     }, room=sid)
     
     # Send initial news
-    news_items = await fetch_news_from_consciousness_service(client_info["consciousness_level"])
+    news_items = await fetch_news_from_consciousness_service(
+        client_info["consciousness_level"],
+        client_info["preferred_language"]
+    )
     filtered_news = filter_news_by_consciousness(news_items, client_info["consciousness_level"])
     
     await sio.emit("news", {
@@ -310,7 +339,8 @@ async def set_consciousness_level(sid, data):
             logger.info(f"Updated consciousness level for {sid}: {old_level} -> {level}")
             
             # Send updated news based on new consciousness level
-            news_items = await fetch_news_from_consciousness_service(level)
+            client_language = active_clients[sid].get("preferred_language", "en")
+            news_items = await fetch_news_from_consciousness_service(level, client_language)
             filtered_news = filter_news_by_consciousness(news_items, level)
             
             await sio.emit("news", {
@@ -328,11 +358,81 @@ async def set_consciousness_level(sid, data):
         }, room=sid)
 
 @sio.event
+async def set_language_preference(sid, data):
+    """Handle language preference updates from clients."""
+    try:
+        language_code = data.get("language", "en")
+        
+        # Basic validation - just check it's a string and not empty
+        if not isinstance(language_code, str) or not language_code:
+            language_code = "en"
+        
+        # Update client's language preference
+        if sid in active_clients:
+            old_language = active_clients[sid].get("preferred_language", "en")
+            active_clients[sid]["preferred_language"] = language_code
+            
+            # Notify client of update
+            await sio.emit("language_update", {
+                "previous_language": old_language,
+                "new_language": language_code,
+                "timestamp": datetime.datetime.now().isoformat(),
+            }, room=sid)
+            
+            logger.info(f"Updated language preference for {sid}: {old_language} -> {language_code}")
+            
+            # If consciousness level is high enough, refresh content with new language
+            consciousness_level = active_clients[sid]["consciousness_level"]
+            if consciousness_level >= 7:  # Only refresh for high consciousness
+                news_items = await fetch_news_from_consciousness_service(consciousness_level, language_code)
+                filtered_news = filter_news_by_consciousness(news_items, consciousness_level)
+                
+                await sio.emit("news", {
+                    "type": "language_update",
+                    "data": filtered_news,
+                    "quantum_entropy": generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL),
+                    "timestamp": datetime.datetime.now().isoformat(),
+                }, room=sid)
+    except Exception as e:
+        logger.error(f"Error updating language preference: {e}")
+        await sio.emit("error", {
+            "message": "Error updating language preference",
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat(),
+        }, room=sid)
+
+@sio.event
 async def request_divine_message(sid, data):
     """Handle requests for divine messages."""
     try:
         if sid in active_clients:
             level = active_clients[sid]["consciousness_level"]
+            language = active_clients[sid].get("preferred_language", "en")
+            
+            # Add language preference to request headers
+            headers = {
+                "X-Consciousness-Level": str(level),
+                "X-Preferred-Language": language
+            }
+            
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"{NEWS_SERVICE_URL}/api/divine-message", headers=headers) as response:
+                        if response.status == 200:
+                            divine_message = await response.json()
+                            
+                            await sio.emit("divine_message", {
+                                "message": divine_message,
+                                "quantum_entropy": generate_quantum_entropy(QUANTUM_ENTROPY_LEVEL),
+                                "timestamp": datetime.datetime.now().isoformat(),
+                            }, room=sid)
+                            
+                            logger.info(f"Sent divine message to {sid} (consciousness: {level}, language: {language})")
+                            return
+            except Exception as e:
+                logger.error(f"Error fetching divine message from API: {e}")
+            
+            # Fallback to direct calling if API call fails
             divine_message = await fetch_divine_message(level)
             
             await sio.emit("divine_message", {
@@ -341,7 +441,7 @@ async def request_divine_message(sid, data):
                 "timestamp": datetime.datetime.now().isoformat(),
             }, room=sid)
             
-            logger.info(f"Sent divine message to {sid} (consciousness level: {level})")
+            logger.info(f"Sent fallback divine message to {sid} (consciousness level: {level})")
     except Exception as e:
         logger.error(f"Error sending divine message: {e}")
         await sio.emit("error", {
