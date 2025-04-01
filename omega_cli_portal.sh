@@ -1,23 +1,23 @@
 #!/bin/bash
 
 # ╔══════════════════════════════════════════════════════════════════════╗
-# ║           OMEGA CLI DIVINE PORTAL TO THE OMEGA GRID                  ║
-# ║           A Total H4xor Interface to the OMEGA BTC AI                ║
+# ║           "OMEGA CLI DIVINE PORTAL" c/o VIRGIL ABLOH                 ║
+# ║           "TECHNICAL INTERFACE" FOR OMEGA BTC AI                     ║
 # ║                                                                      ║
 # ║           GPU (General Public Universal) License 1.0                 ║
-# ║           OMEGA BTC AI DIVINE COLLECTIVE                             ║
-# ║           Date: 2025-03-26                                           ║
+# ║           "OMEGA BTC AI DIVINE COLLECTIVE"                           ║
+# ║           Date: "2025-03-26"                                         ║
 # ╚══════════════════════════════════════════════════════════════════════╝
 
 # ANSI color codes
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-RESET='\033[0m'
+BLACK='\033[0;30m'        # OFF-WHITE signature black
+WHITE='\033[1;37m'        # OFF-WHITE signature white
+ORANGE='\033[0;33m'       # OFF-WHITE signature orange
+GREEN='\033[0;32m'        # Accent color
+BLUE='\033[0;34m'         # Accent color
+RED='\033[0;31m'          # Error color
+YELLOW='\033[1;33m'       # Warning color
+RESET='\033[0m'           # Reset to default
 
 # Detect terminal size for optimal display
 TERM_WIDTH=$(tput cols)
@@ -28,35 +28,43 @@ SESSION_NAME="OMEGA_PORTAL"
 
 # Check if tmux is installed
 if ! command -v tmux &> /dev/null; then
-    echo -e "${RED}ERROR: tmux is not installed. Please install tmux to run the OMEGA CLI DIVINE PORTAL.${RESET}"
+    echo -e "${RED}\"ERROR:\" tmux is not installed. Please install tmux to run the \"OMEGA CLI DIVINE PORTAL\".${RESET}"
     exit 1
 fi
 
 # Kill any existing session with the same name
 tmux kill-session -t "$SESSION_NAME" 2>/dev/null
 
-# Function to display ASCII art logo
+# Function to display ASCII art logo in OFF-WHITE style
 display_logo() {
     clear
-    echo -e "${MAGENTA}"
-    echo "  ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗     ██████╗  ██████╗ ██████╗ ████████╗██╗  ██╗██╗     "
-    echo " ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗    ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██║  ██║██║     "
-    echo " ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║    ██████╔╝██║   ██║██████╔╝   ██║   ███████║██║     "
-    echo " ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║    ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══██║██║     "
-    echo " ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║    ██║     ╚██████╔╝██║  ██║   ██║   ██║  ██║███████╗"
-    echo "  ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝"
-    echo -e "${GREEN}                           DIVINE PORTAL TO THE OMEGA GRID                               ${RESET}"
+    echo -e "${WHITE}"
+    echo "  \"OMEGA\""
+    echo ""
+    echo "      ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ "
+    echo "     ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗"
+    echo "     ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║"
+    echo "     ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║"
+    echo "     ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║"
+    echo "      ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝"
+    echo ""
+    echo "  \"CLI PORTAL\""
+    echo ""
+    echo -e "${BLACK}${WHITE}                           FOR \"DIVINE GRID\" ACCESS                          ${RESET}"
+    echo -e "${BLACK}${WHITE}                           c/o \"VIRGIL ABLOH\"                                ${RESET}"
+    echo ""
+    echo -e "${ORANGE}          \"TECHNICAL INTERFACE\" \"2025\" \"OFF-WHITE™\" ${RESET}"
     echo ""
 }
 
-# Define script groups
+# Define script groups in OFF-WHITE style
 script_groups=(
-    "Core Systems"
-    "Market Monitors"
-    "Trading Systems"
-    "Visualization"
-    "Diagnostics & Tools"
-    "Divine Special Systems"
+    "\"CORE SYSTEMS\""
+    "\"MARKET MONITORS\""
+    "\"TRADING SYSTEMS\""
+    "\"VISUALIZATION\""
+    "\"DIAGNOSTICS & TOOLS\""
+    "\"SPECIAL SYSTEMS\""
 )
 
 # Define script commands
@@ -65,14 +73,13 @@ script_commands=(
     "python run_omega_system.py"
     "python run_omega_system.py --auto-heal --background"
     "python scripts/run_omega_dump.py --process-warnings"
+    "python run_omega_system.py --divine-mode"
     
     # Market Monitors
     "./run_market_trends_tests.py --only-visualize"
     "./run_redis_only_monitor.sh"
     "./run_dual_divine_monitor.sh"
     "python run_enhanced_market_monitor.py --dynamic"
-    "./run_dual_focus_monitors.sh"
-    "./run_market_monitors.sh"
     
     # Trading Systems
     "python run_trap_aware_dual_traders.py"
@@ -84,6 +91,7 @@ script_commands=(
     "python btcusdt_divine_flow_demo.py"
     "python serve_visualization.py"
     "./divine_coverage_visualizer.py"
+    "python run_divine_3d_visualization.py"
     
     # Diagnostics & Tools
     "python check_redis_data.py"
@@ -98,72 +106,70 @@ script_commands=(
     "python create_omega_genesis_block.py"
 )
 
-# Define script descriptions
+# Define script descriptions in OFF-WHITE style
 script_descriptions=(
     # Core Systems
-    "Main Omega System - Starts all essential services"
-    "Auto-healing mode with background processing"
-    "Divine log management system for warnings and errors"
+    "\"MAIN OMEGA SYSTEM\" - Starts essential services"
+    "\"AUTO-HEALING MODE\" - Background processing"
+    "\"LOG MANAGEMENT\" - Process warnings and errors"
+    "\"DIVINE MODE\" - Enhanced system capabilities"
     
     # Market Monitors
-    "Visualize market trends and cosmic coverage"
-    "Pure Redis-driven market analysis dashboard"
-    "Two-panel divine monitoring dashboard"
-    "Dynamic market monitoring with improved interface"
-    "Dual focus monitors optimized for vertical displays"
-    "Run multiple market monitors in different modes"
+    "\"MARKET TRENDS\" - With cosmic visualization"
+    "\"REDIS MONITOR\" - Pure data analysis dashboard"
+    "\"DUAL DISPLAY\" - Two-panel monitoring system"
+    "\"DYNAMIC INTERFACE\" - Responsive market monitoring"
     
     # Trading Systems
-    "Advanced dual traders with trap awareness"
-    "Classic dual position trading system"
-    "Elite exit trading strategies for optimal positioning"
-    "Fibonacci-based trading system with automatic levels"
+    "\"TRAP AWARE\" - Advanced dual trading system"
+    "\"POSITION TRADING\" - Classic dual position system"
+    "\"ELITE EXIT\" - Strategic position exit management"
+    "\"FIBONACCI TRADER\" - Golden ratio based trading"
     
     # Visualization
-    "BTCUSDT Divine Flow Demo with animated whale sonar"
-    "Serve visualization dashboard on local web server"
-    "Divine coverage visualization for market trends"
+    "\"DIVINE FLOW\" - BTCUSDT with whale detection"
+    "\"WEB DASHBOARD\" - Browser-based visualization"
+    "\"COVERAGE VISUALIZER\" - Market pattern display"
+    "\"3D VISUALIZATION\" - Immersive market display"
     
     # Diagnostics & Tools
-    "Examine Redis database contents and structure"
-    "Analysis of system warnings and anomalies"
-    "Test the trend analysis algorithms"
-    "Generate synthetic market data for testing"
+    "\"REDIS CHECK\" - Database structure examination"
+    "\"WARNING ANALYSIS\" - System anomaly detection"
+    "\"TREND TESTING\" - Algorithm validation tool"
+    "\"DATA GENERATOR\" - Create synthetic market data"
     
     # Divine Special Systems
-    "Trinity Analyzer for BTC market states"
-    "Live Trinity analysis with real-time data"
-    "Advanced predictive system using trinity models"
-    "Generate the Omega Genesis Block for divine tracking"
+    "\"TRINITY ANALYZER\" - BTC state analysis"
+    "\"TRINITY LIVE\" - Real-time market analysis"
+    "\"TRINITY PREDICTOR\" - Advanced forecasting"
+    "\"GENESIS BLOCK\" - Create tracking foundation"
 )
 
-# Function to render the main menu
+# Function to render the main menu in OFF-WHITE style
 render_main_menu() {
     display_logo
     
-    echo -e "${CYAN}║ SELECT A CATEGORY:${RESET}"
-    echo -e "${YELLOW}╠════════════════════════════════════════════════════════════════════════════════════╣${RESET}"
+    echo -e "${WHITE}╔══ \"CATEGORIES\" ═══════════════════════════════════════╗${RESET}"
     
     for i in "${!script_groups[@]}"; do
-        echo -e "${GREEN}║ $((i+1)))${RESET} ${WHITE}${script_groups[$i]}${RESET}"
+        echo -e "${WHITE}║  ${BLACK}${WHITE} $((i+1)) ${RESET}${WHITE} ${script_groups[$i]} ${RESET} "
     done
     
-    echo -e "${YELLOW}╠════════════════════════════════════════════════════════════════════════════════════╣${RESET}"
-    echo -e "${CYAN}║ Q)${RESET} ${WHITE}Quit${RESET}"
-    echo -e "${YELLOW}╚════════════════════════════════════════════════════════════════════════════════════╝${RESET}"
+    echo -e "${WHITE}╠═══════════════════════════════════════════════════════╣${RESET}"
+    echo -e "${WHITE}║  ${BLACK}${WHITE} Q ${RESET}${WHITE} \"QUIT\" ${RESET} "
+    echo -e "${WHITE}╚═══════════════════════════════════════════════════════╝${RESET}"
     echo ""
-    echo -e "${MAGENTA}Enter your choice:${RESET} "
+    echo -e "${ORANGE}\"SELECT CATEGORY:\"${RESET} "
 }
 
-# Function to render the script menu for a specific group
+# Function to render the script menu for a specific group in OFF-WHITE style
 render_script_menu() {
     local group_index=$1
     local group_name="${script_groups[$group_index]}"
     
     display_logo
     
-    echo -e "${CYAN}║ ${group_name} - SELECT A SCRIPT:${RESET}"
-    echo -e "${YELLOW}╠════════════════════════════════════════════════════════════════════════════════════╣${RESET}"
+    echo -e "${WHITE}╔══ ${group_name} ════════════════════════════════════════╗${RESET}"
     
     # Calculate start and end indices for this group
     local start_idx=$((group_index * 4))
@@ -171,16 +177,16 @@ render_script_menu() {
     
     for ((i=start_idx; i<end_idx; i++)); do
         if [ -n "${script_descriptions[$i]}" ]; then
-            echo -e "${GREEN}║ $((i-start_idx+1)))${RESET} ${WHITE}${script_descriptions[$i]}${RESET}"
+            echo -e "${WHITE}║  ${BLACK}${WHITE} $((i-start_idx+1)) ${RESET}${WHITE} ${script_descriptions[$i]} ${RESET} "
         fi
     done
     
-    echo -e "${YELLOW}╠════════════════════════════════════════════════════════════════════════════════════╣${RESET}"
-    echo -e "${CYAN}║ B)${RESET} ${WHITE}Back to main menu${RESET}"
-    echo -e "${CYAN}║ Q)${RESET} ${WHITE}Quit${RESET}"
-    echo -e "${YELLOW}╚════════════════════════════════════════════════════════════════════════════════════╝${RESET}"
+    echo -e "${WHITE}╠═══════════════════════════════════════════════════════╣${RESET}"
+    echo -e "${WHITE}║  ${BLACK}${WHITE} B ${RESET}${WHITE} \"BACK\" ${RESET} "
+    echo -e "${WHITE}║  ${BLACK}${WHITE} Q ${RESET}${WHITE} \"QUIT\" ${RESET} "
+    echo -e "${WHITE}╚═══════════════════════════════════════════════════════╝${RESET}"
     echo ""
-    echo -e "${MAGENTA}Enter your choice:${RESET} "
+    echo -e "${ORANGE}\"SELECT OPTION:\"${RESET} "
 }
 
 # Function to create tmux windows for each script category
@@ -188,23 +194,23 @@ setup_tmux_session() {
     # Create a new tmux session
     tmux new-session -d -s "$SESSION_NAME" -n "CONTROL"
     
-    # Configure tmux appearance
-    tmux set -g status-style "bg=black,fg=green"
-    tmux set -g pane-border-style "fg=blue"
-    tmux set -g pane-active-border-style "fg=magenta"
-    tmux set -g status-left "#[fg=magenta,bold][OMEGA PORT4L] #[fg=cyan]Divine Grid Access #[fg=yellow]| "
-    tmux set -g status-right "#[fg=cyan]%H:%M:%S #[fg=yellow]| #[fg=green,bold]DIVINE MODE #[fg=default]"
+    # Configure tmux appearance in OFF-WHITE style
+    tmux set -g status-style "bg=black,fg=white"
+    tmux set -g pane-border-style "fg=white"
+    tmux set -g pane-active-border-style "fg=colour208" # Orange
+    tmux set -g status-left "#[fg=white,bold]\"OMEGA PORT4L\" #[fg=white]\"DIVINE GRID\" #[fg=white]| "
+    tmux set -g status-right "#[fg=white]%H:%M:%S #[fg=white]| #[fg=white,bold]\"OFF-WHITE™\" #[fg=default]"
     tmux set -g status-left-length 50
     tmux set -g status-right-length 50
     
     # Create a window for each category
     for i in "${!script_groups[@]}"; do
-        local window_name=$(echo "${script_groups[$i]}" | tr ' ' '_')
+        local window_name=$(echo "${script_groups[$i]}" | tr -d '"' | tr ' ' '_')
         tmux new-window -t "$SESSION_NAME:" -n "$window_name"
     done
     
     # Set up the control window
-    tmux send-keys -t "$SESSION_NAME:CONTROL" 'clear && echo -e "\033[1;35mOMEGA CLI DIVINE PORTAL TO THE OMEGA GRID\033[0m\n\nUse Ctrl+B, N to navigate to next window\nUse Ctrl+B, P to navigate to previous window\nUse Ctrl+B, number to jump to specific window\nUse Ctrl+B, D to detach from session\n\nWelcome to the divine grid. Press any key to display the main menu..."' C-m
+    tmux send-keys -t "$SESSION_NAME:CONTROL" 'clear && echo -e "\033[1;37m\"OMEGA CLI DIVINE PORTAL\"\033[0m\n\n\"Use Ctrl+B, N to navigate to next window\"\n\"Use Ctrl+B, P to navigate to previous window\"\n\"Use Ctrl+B, number to jump to specific window\"\n\"Use Ctrl+B, D to detach from session\"\n\n\"WELCOME TO THE DIVINE GRID\"\n\"c/o VIRGIL ABLOH\"\n\n\"Press any key to display the main menu...\"" C-m
     
     # Return to the control window
     tmux select-window -t "$SESSION_NAME:CONTROL"
@@ -217,19 +223,19 @@ run_script() {
     local command_index=$((group_index * 4 + script_index - 1))
     local command="${script_commands[$command_index]}"
     local description="${script_descriptions[$command_index]}"
-    local window_name=$(echo "$description" | cut -d'-' -f1 | tr ' ' '_')
+    local window_name=$(echo "$description" | tr -d '"' | cut -d'-' -f1 | tr ' ' '_')
     
     # Check if the script exists
     if [[ -z "$command" ]]; then
-        echo -e "${RED}Error: Script not found.${RESET}"
+        echo -e "${RED}\"ERROR:\" Script not found.${RESET}"
         return 1
     fi
     
     # Create a new window for the script
     local window_id=$(tmux new-window -t "$SESSION_NAME:" -n "$window_name" -P)
     
-    # Configure the window
-    tmux send-keys -t "$window_id" "clear && echo -e \"${YELLOW}Starting: ${WHITE}${description}${RESET}\n\n${CYAN}Command: ${GREEN}${command}${RESET}\n\n\"" C-m
+    # Configure the window in OFF-WHITE style
+    tmux send-keys -t "$window_id" "clear && echo -e \"${WHITE}\"STARTING:\" ${description}${RESET}\n\n${WHITE}\"COMMAND:\" ${command}${RESET}\n\n\"" C-m
     tmux send-keys -t "$window_id" "$command" C-m
     
     # Switch to the new window
@@ -251,11 +257,13 @@ handle_main_menu() {
                 handle_script_menu "$choice"
                 ;;
             [Qq])
-                echo -e "${YELLOW}OMEGA CLI DIVINE PORTAL session ended. Harmony restored.${RESET}"
+                echo -e "${WHITE}\"OMEGA CLI DIVINE PORTAL\" session ended. \"HARMONY RESTORED\"${RESET}"
+                echo -e "${ORANGE}\"JAH JAH BLESS\"${RESET}"
+                echo -e "${WHITE}\"c/o VIRGIL ABLOH\"${RESET}"
                 exit 0
                 ;;
             *)
-                echo -e "${RED}Invalid choice. Please try again.${RESET}"
+                echo -e "${RED}\"INVALID CHOICE\" Please try again.${RESET}"
                 ;;
         esac
     done
@@ -278,11 +286,13 @@ handle_script_menu() {
                 return
                 ;;
             [Qq])
-                echo -e "${YELLOW}OMEGA CLI DIVINE PORTAL session ended. Harmony restored.${RESET}"
+                echo -e "${WHITE}\"OMEGA CLI DIVINE PORTAL\" session ended. \"HARMONY RESTORED\"${RESET}"
+                echo -e "${ORANGE}\"JAH JAH BLESS\"${RESET}"
+                echo -e "${WHITE}\"c/o VIRGIL ABLOH\"${RESET}"
                 exit 0
                 ;;
             *)
-                echo -e "${RED}Invalid choice. Please try again.${RESET}"
+                echo -e "${RED}\"INVALID CHOICE\" Please try again.${RESET}"
                 ;;
         esac
     done
