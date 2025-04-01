@@ -9,6 +9,9 @@ bases:
 resources:
   - namespace.yaml
   - ingress.yaml
+  - port-forward-config.yaml
+  - port-forward-deployment.yaml
+  - port-forward-rbac.yaml
 
 patchesStrategicMerge:
   - configmap.yaml

@@ -39,7 +39,7 @@ tmux kill-session -t "$SESSION_NAME" 2>/dev/null
 display_logo() {
     clear
     echo -e "${WHITE}"
-    echo "  \"OMEGA\""
+    echo "\"OMEGA\""
     echo ""
     echo "      ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ "
     echo "     ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗"
@@ -48,7 +48,7 @@ display_logo() {
     echo "     ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║"
     echo "      ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝"
     echo ""
-    echo "  \"CLI PORTAL\""
+    echo "\"CLI PORTAL\""
     echo ""
     echo -e "${BLACK}${WHITE}                           FOR \"DIVINE GRID\" ACCESS                          ${RESET}"
     echo -e "${BLACK}${WHITE}                           c/o \"VIRGIL ABLOH\"                                ${RESET}"
@@ -65,6 +65,7 @@ script_groups=(
     "\"VISUALIZATION\""
     "\"DIAGNOSTICS & TOOLS\""
     "\"SPECIAL SYSTEMS\""
+    "\"NFT SYSTEMS\""
 )
 
 # Define script commands
@@ -104,6 +105,12 @@ script_commands=(
     "./run_gamon_trinity_live.sh"
     "./run_gamon_trinity_predictor.sh"
     "python create_omega_genesis_block.py"
+
+    # NFT Systems
+    "python scripts/generate_whale_nft.py"
+    "python scripts/create_custom_nft.py"
+    "python scripts/generate_divine_dashboard.py"
+    "python scripts/run_omega_dump.py --nft-mode"
 )
 
 # Define script descriptions in OFF-WHITE style
@@ -143,6 +150,12 @@ script_descriptions=(
     "\"TRINITY LIVE\" - Real-time market analysis"
     "\"TRINITY PREDICTOR\" - Advanced forecasting"
     "\"GENESIS BLOCK\" - Create tracking foundation"
+
+    # NFT Systems
+    "\"WHALE NFT\" - Generate divine whale NFTs"
+    "\"CUSTOM NFT\" - Create personalized divine NFTs"
+    "\"NFT DASHBOARD\" - Divine NFT visualization"
+    "\"NFT MODE\" - Enhanced NFT tracking system"
 )
 
 # Function to render the main menu in OFF-WHITE style
@@ -210,7 +223,7 @@ setup_tmux_session() {
     done
     
     # Set up the control window
-    tmux send-keys -t "$SESSION_NAME:CONTROL" 'clear && echo -e "\033[1;37m\"OMEGA CLI DIVINE PORTAL\"\033[0m\n\n\"Use Ctrl+B, N to navigate to next window\"\n\"Use Ctrl+B, P to navigate to previous window\"\n\"Use Ctrl+B, number to jump to specific window\"\n\"Use Ctrl+B, D to detach from session\"\n\n\"WELCOME TO THE DIVINE GRID\"\n\"c/o VIRGIL ABLOH\"\n\n\"Press any key to display the main menu...\"" C-m
+    tmux send-keys -t "$SESSION_NAME:CONTROL" "clear && echo -e \"${WHITE}\\\"OMEGA CLI DIVINE PORTAL\\\"${RESET}\\n\\n\\\"Use Ctrl+B, N to navigate to next window\\\"\\n\\\"Use Ctrl+B, P to navigate to previous window\\\"\\n\\\"Use Ctrl+B, number to jump to specific window\\\"\\n\\\"Use Ctrl+B, D to detach from session\\\"\\n\\n\\\"WELCOME TO THE DIVINE GRID\\\"\\n\\\"c/o VIRGIL ABLOH\\\"\\n\\n\\\"Press any key to display the main menu...\\\"\"" C-m
     
     # Return to the control window
     tmux select-window -t "$SESSION_NAME:CONTROL"
@@ -235,7 +248,7 @@ run_script() {
     local window_id=$(tmux new-window -t "$SESSION_NAME:" -n "$window_name" -P)
     
     # Configure the window in OFF-WHITE style
-    tmux send-keys -t "$window_id" "clear && echo -e \"${WHITE}\"STARTING:\" ${description}${RESET}\n\n${WHITE}\"COMMAND:\" ${command}${RESET}\n\n\"" C-m
+    tmux send-keys -t "$window_id" "clear && echo -e \"${WHITE}\\\"STARTING:\\\" ${description}${RESET}\\n\\n${WHITE}\\\"COMMAND:\\\" ${command}${RESET}\\n\\n\"" C-m
     tmux send-keys -t "$window_id" "$command" C-m
     
     # Switch to the new window
@@ -253,7 +266,7 @@ handle_main_menu() {
         read -r choice
         
         case "$choice" in
-            [1-6])
+            [1-7])
                 handle_script_menu "$choice"
                 ;;
             [Qq])
