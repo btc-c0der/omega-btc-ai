@@ -450,3 +450,52 @@ Usage:
 ```bash
 ./scripts/start_kubernetes_dashboard.sh
 ```
+
+## 🔱 Social Media & External Communication Scripts
+
+### omega_ig_automation.py
+
+**Divine Instagram Automation**
+
+Automated Instagram content generation and posting system for OMEGA BTC AI. This powerful Python script:
+
+- Generates beautiful Bitcoin price graphics with OMEGA branding
+- Creates market analysis captions with current BTC market data
+- Optimizes hashtags for maximum reach
+- Schedules posts at optimal times
+- Supports both one-time posts and continuous daemon mode
+
+> *"JAH JAH BLESS THE DIVINE SOCIAL FLOW! Instagram disciples shall witness the OMEGA revelations."*
+
+Usage:
+
+```bash
+# Post immediately
+python scripts/omega_ig_automation.py --post
+
+# Schedule posts for the next 7 days
+python scripts/omega_ig_automation.py --schedule 7
+
+# Run in daemon mode (continuous posting)
+python scripts/omega_ig_automation.py --daemon
+```
+
+### omega_ig_post.sh
+
+**Divine Instagram Post Helper**
+
+A user-friendly shell script interface for the Instagram automation system. This script:
+
+- Provides an interactive menu for all Instagram posting functions
+- Automatically sets up a Python virtual environment with dependencies
+- Handles configuration file management
+- Guides users through setting up Instagram credentials
+- Ensures consistent posting schedule
+
+> *"The blessed path to social enlightenment, spreading the OMEGA wisdom through the divine flow."*
+
+Usage:
+
+```bash
+./scripts/omega_ig_post.sh
+```
