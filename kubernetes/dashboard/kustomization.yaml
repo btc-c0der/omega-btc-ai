@@ -4,8 +4,17 @@ kind: Kustomization
 namespace: kubernetes-dashboard
 
 resources:
-- deployment.yaml
-- ingress.yaml
+  - namespace.yaml
+  - dashboard.yaml
+  - dashboard-service.yaml
+  - dashboard-configmap.yaml
+  - dashboard-rbac.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: omega-kubernetes-dashboard
+      environment: shared
 
 commonLabels:
   app: omega-kubernetes-dashboard

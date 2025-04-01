@@ -1,12 +1,45 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - ../../base
-  - namespace.yaml
-
 namespace: omega-grid-dev
 
-labels:
-  - pairs:
-      environment: dev 
+bases:
+  - ../../base
+
+resources:
+  - namespace.yaml
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - configmap.yaml
+  - deployment-patch.yaml
+
+images:
+  - name: prophecy-core
+    newName: prophecy-core
+    newTag: latest
+  - name: btc-live-feed
+    newName: btc-live-feed
+    newTag: latest
+  - name: matrix-news
+    newName: matrix-news
+    newTag: latest
+
+replicas:
+  - name: prophecy-core
+    count: 1
+  - name: btc-live-feed
+    count: 1
+  - name: matrix-news
+    count: 1
+
+# Labels to add to all resources
+commonLabels:
+  environment: dev
+
+configMapGenerator:
+  - name: omega-config
+    behavior: merge
+    literals:
+      - OMEGA_ENV=development
+      - LOG_LEVEL=debug 

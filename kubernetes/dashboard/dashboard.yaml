@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omega-kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  labels:
+    app: omega-kubernetes-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omega-kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        app: omega-kubernetes-dashboard
+    spec:
+      containers:
+      - name: kubernetes-dashboard
+        image: kubernetesui/dashboard:v2.7.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        volumeMounts:
+        - name: kubernetes-dashboard-config
+          mountPath: /etc/kubernetes-dashboard
+      volumes:
+      - name: kubernetes-dashboard-config
+        configMap:
+          name: kubernetes-dashboard-config 

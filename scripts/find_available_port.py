@@ -1,43 +1,58 @@
 #!/usr/bin/env python3
 
+"""
+OMEGA BTC AI - Divine Port Finder
+This script finds an available port on the system.
+"""
+
 import socket
 import argparse
-from typing import Optional, Tuple
+import sys
+from contextlib import closing
 
-def is_port_in_use(port: int, host: str = 'localhost') -> bool:
-    """Check if a port is in use."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind((host, port))
-            return False
-        except socket.error:
-            return True
 
-def find_next_available_port(start_port: int, max_attempts: int = 100) -> Tuple[Optional[int], str]:
-    """
-    Find the next available port starting from start_port.
-    Returns a tuple of (port number, status message).
-    If no port is found, returns (None, error message).
-    """
-    for port in range(start_port, start_port + max_attempts):
-        if not is_port_in_use(port):
-            return port, f"Found available port: {port}"
-    return None, f"No available ports found in range {start_port}-{start_port + max_attempts - 1}"
+def is_port_available(port):
+    """Check if a port is available for use."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        return sock.connect_ex(('127.0.0.1', port)) != 0
+
+
+def find_available_port(start_port, max_port=10000):
+    """Find an available port starting from the given start_port."""
+    for port in range(start_port, max_port + 1):
+        if is_port_available(port):
+            return port
+    return None
+
 
 def main():
-    parser = argparse.ArgumentParser(description='Find next available port')
-    parser.add_argument('--start-port', type=int, default=8000,
-                      help='Starting port number (default: 8000)')
-    parser.add_argument('--max-attempts', type=int, default=100,
-                      help='Maximum number of ports to check (default: 100)')
+    """Main entry point for the script."""
+    parser = argparse.ArgumentParser(description='Find an available port on the system.')
+    parser.add_argument('-s', '--start', type=int, default=8000,
+                        help='Start port number to check (default: 8000)')
+    parser.add_argument('-m', '--max', type=int, default=10000,
+                        help='Maximum port number to check (default: 10000)')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help='Only output the port number')
+
     args = parser.parse_args()
 
-    port, message = find_next_available_port(args.start_port, args.max_attempts)
-    if port is not None:
-        print(port)  # Print just the port number for easy scripting
-    else:
-        print(message)
-        exit(1)
+    if not args.quiet:
+        print(f"🔍 Searching for available port starting from {args.start}...")
 
-if __name__ == '__main__':
-    main() 
+    port = find_available_port(args.start, args.max)
+
+    if port:
+        if not args.quiet:
+            print(f"✅ Found available port: {port}")
+        # Just output the port for easy capture in shell scripts
+        print(port)
+        return 0
+    else:
+        if not args.quiet:
+            print(f"❌ No available ports found between {args.start} and {args.max}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main()) 

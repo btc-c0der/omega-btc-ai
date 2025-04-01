@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prophecy-core
+spec:
+  selector:
+    matchLabels:
+      app: omega-grid
+      component: prophecy-core
+  template:
+    metadata:
+      labels:
+        app: omega-grid
+        component: prophecy-core
+    spec:
+      containers:
+      - name: prophecy-core
+        image: prophecy-core:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 10080
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        envFrom:
+        - configMapRef:
+            name: omega-config
+        - secretRef:
+            name: omega-secrets
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 10080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: btc-live-feed
+spec:
+  selector:
+    matchLabels:
+      app: omega-grid
+      component: btc-live-feed
+  template:
+    metadata:
+      labels:
+        app: omega-grid
+        component: btc-live-feed
+    spec:
+      containers:
+      - name: btc-live-feed
+        image: btc-live-feed:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        envFrom:
+        - configMapRef:
+            name: omega-config
+        - secretRef:
+            name: omega-secrets
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-news
+spec:
+  selector:
+    matchLabels:
+      app: omega-grid
+      component: matrix-news
+  template:
+    metadata:
+      labels:
+        app: omega-grid
+        component: matrix-news
+    spec:
+      containers:
+      - name: matrix-news
+        image: matrix-news:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+          name: http
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        envFrom:
+        - configMapRef:
+            name: omega-config
+        - secretRef:
+            name: omega-secrets
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8001
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 5 

@@ -1,5 +1,5 @@
 # "OFF-WHITE™" c/o "VIRGIL ABLOH"
-# "DIVINE CONTAINER" FOR "OMEGA CLI PORTAL"
+# "DIVINE CLI PORTAL" FOR "OMEGA"
 # "TECHNICAL INTERFACE" "2025"
 
 FROM ubuntu:22.04
@@ -29,7 +29,7 @@ COPY scripts/ /app/scripts/
 COPY omega_ai/ /app/omega_ai/
 COPY BOOK/ /app/BOOK/
 
-# "MAKE" THE "PORTAL" "EXECUTABLE"
+# "MAKE" THE "CLI PORTAL" "EXECUTABLE"
 RUN chmod +x /app/omega_cli_portal.sh
 
 # "SETUP" OF "VIRGIL'S" "ENVIRONMENT"
@@ -42,7 +42,7 @@ RUN mkdir -p /root/.tmux && \
     echo 'set -g status-style "bg=black,fg=white"' > /root/.tmux.conf && \
     echo 'set -g pane-border-style "fg=white"' >> /root/.tmux.conf && \
     echo 'set -g pane-active-border-style "fg=colour208"' >> /root/.tmux.conf && \
-    echo 'set -g status-left "#[fg=white,bold]\"OMEGA PORT4L\" #[fg=white]\"DIVINE GRID\" #[fg=white]| "' >> /root/.tmux.conf && \
+    echo 'set -g status-left "#[fg=white,bold]\"OMEGA CLI PORT4L\" #[fg=white]\"DIVINE GRID\" #[fg=white]| "' >> /root/.tmux.conf && \
     echo 'set -g status-right "#[fg=white]%H:%M:%S #[fg=white]| #[fg=white,bold]\"OFF-WHITE™\" #[fg=default]"' >> /root/.tmux.conf
 
 # "EXPOSE" "DIVINE" "PORT"

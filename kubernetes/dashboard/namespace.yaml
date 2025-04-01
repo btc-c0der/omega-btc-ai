@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: omega-grid
+  name: kubernetes-dashboard
   labels:
-    app: omega-grid
+    app: omega-kubernetes-dashboard
     environment: shared 

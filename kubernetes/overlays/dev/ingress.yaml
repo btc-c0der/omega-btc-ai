@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: omega-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - host: omega.dev.local
+    http:
+      paths:
+      - path: /api/prophecy(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: prophecy-core
+            port:
+              number: 10080
+      - path: /api/btc(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: btc-live-feed
+            port:
+              number: 8000
+      - path: /api/news(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: matrix-news
+            port:
+              number: 8001 
