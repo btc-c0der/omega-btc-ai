@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: matrix-news
+  namespace: omega-btc-ai-dev
 spec:
   replicas: 1
 ---
@@ -9,6 +10,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: btc-live-feed
+  namespace: omega-btc-ai-dev
 spec:
   replicas: 1
 ---
@@ -16,6 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prophecy-core
+  namespace: omega-btc-ai-dev
 spec:
   replicas: 1
 ---
@@ -23,6 +26,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
+  namespace: omega-btc-ai-dev
 spec:
   replicas: 1
 ---
@@ -30,6 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
+  namespace: omega-btc-ai-dev
 spec:
   replicas: 1
 ---
@@ -37,5 +42,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alertmanager
+  namespace: omega-btc-ai-dev
 spec:
   replicas: 1 

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: omega-btc-ai
+  name: omega-grid
   labels:
-    name: omega-btc-ai
+    name: omega-grid
     app: omega-btc-ai 

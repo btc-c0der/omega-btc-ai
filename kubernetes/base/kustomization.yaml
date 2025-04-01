@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - namespace.yaml
   - redis.yaml
   - matrix-news.yaml
   - btc-live-feed.yaml
@@ -12,5 +11,6 @@ resources:
   - secrets.yaml
   - configmaps.yaml
 
-commonLabels:
-  app: omega-btc-ai 
+labels:
+  - pairs:
+      app: omega-btc-ai 
