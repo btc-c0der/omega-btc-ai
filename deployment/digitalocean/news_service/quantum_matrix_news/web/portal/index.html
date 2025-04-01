@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Neo News Portal</title>
+    <style>
+        :root {
+            --matrix-green: #00FF00;
+            --matrix-dark-green: #003B00;
+            --matrix-black: #000000;
+            --matrix-code-font: 'Courier New', monospace;
+            --slide-time: 0.5s;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: var(--matrix-code-font);
+            background-color: var(--matrix-black);
+            color: var(--matrix-green);
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px var(--matrix-green);
+            margin: 0;
+            padding: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 15px;
+            flex-grow: 1;
+        }
+
+        .grid-item {
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-item:hover {
+            background-color: rgba(0, 40, 0, 0.8);
+            box-shadow: 0 0 15px var(--matrix-green);
+            transform: scale(1.02);
+        }
+
+        .grid-item h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .grid-item-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .news-feed {
+            grid-column: span 3;
+            grid-row: span 2;
+            overflow-y: auto;
+        }
+
+        .news-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(51, 255, 51, 0.3);
+        }
+
+        .news-item h4 {
+            margin: 0 0 5px 0;
+        }
+
+        .news-item-meta {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .news-item-content {
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .loading div {
+            position: absolute;
+            top: 33px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--matrix-green);
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+
+        .loading div:nth-child(1) {
+            left: 8px;
+            animation: loading1 0.6s infinite;
+        }
+
+        .loading div:nth-child(2) {
+            left: 8px;
+            animation: loading2 0.6s infinite;
+        }
+
+        .loading div:nth-child(3) {
+            left: 32px;
+            animation: loading2 0.6s infinite;
+        }
+
+        .loading div:nth-child(4) {
+            left: 56px;
+            animation: loading3 0.6s infinite;
+        }
+
+        @keyframes loading1 {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes loading2 {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(24px, 0);
+            }
+        }
+
+        @keyframes loading3 {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Add version glyph */
+        .version-glyph {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        /* Digital Rain Canvas */
+        #digital-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--matrix-green);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--matrix-green);
+            text-shadow: 0 0 5px var(--matrix-green);
+        }
+
+        /* Matrix Grid */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .grid-item {
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green);
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--matrix-green);
+        }
+
+        .grid-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--matrix-green);
+            transform: translateX(-100%);
+            animation: slide-right 2s infinite;
+        }
+
+        @keyframes slide-right {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* News Panel */
+        .news-panel {
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .news-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--matrix-green);
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .news-content {
+            display: none;
+            padding: 10px 0;
+            line-height: 1.5;
+        }
+
+        .divine-wisdom {
+            font-style: italic;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(0, 40, 0, 0.5);
+            border-left: 3px solid var(--matrix-green);
+        }
+
+        /* Consciousness Level Slider */
+        .consciousness-slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .slider-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slider-label {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 10px;
+            background: var(--matrix-dark-green);
+            outline: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--matrix-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+
+        /* Matrix Code Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-family: var(--matrix-code-font);
+        }
+
+        .loading-text {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: 2px;
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: var(--matrix-green);
+            }
+        }
+
+        /* Divine Message Box */
+        .divine-message-box {
+            background-color: rgba(0, 40, 0, 0.8);
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 15px var(--matrix-green);
+            padding: 20px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .divine-message-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 0, 0.05), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .divine-message-button {
+            background-color: var(--matrix-dark-green);
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: var(--matrix-code-font);
+            margin-top: 10px;
+        }
+
+        .divine-message-button:hover {
+            background-color: var(--matrix-green);
+            color: var(--matrix-black);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid var(--matrix-green);
+            margin-top: 40px;
+        }
+
+        /* Quantum Truth Probability */
+        .truth-meter {
+            margin-top: 10px;
+            width: 100%;
+            height: 5px;
+            background-color: var(--matrix-dark-green);
+            position: relative;
+        }
+
+        .truth-value {
+            height: 100%;
+            background-color: var(--matrix-green);
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: width 0.5s ease;
+        }
+
+        .truth-label {
+            font-size: 0.8em;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        select#language-select {
+            background-color: var(--matrix-dark-green);
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 10px;
+            font-family: var(--matrix-code-font);
+            min-width: 200px;
+        }
+
+        select#language-select:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+
+        .sacred-language-marker {
+            color: #00FFAA;
+            font-style: italic;
+            margin-left: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .language-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <div class="header">
+            <h1>MATRIX NEO NEWS PORTAL</h1>
+            <div class="subtitle">QUANTUM-CONSCIOUSNESS NEWS SERVICE</div>
+        </div>
+
+        <div class="grid-container">
+            <!-- News Feed -->
+            <div class="grid-item news-feed" id="newsFeed">
+                <h3>GLOBAL NEWS FEED</h3>
+                <div class="grid-item-content" id="newsContent">
+                    <div class="loading">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <p>Connecting to the News Consciousness Service...</p>
+                </div>
+            </div>
+
+            <!-- Market Analysis -->
+            <div class="grid-item">
+                <h3>MARKET ANALYSIS</h3>
+                <div class="grid-item-content">
+                    <div class="icon">📊</div>
+                    <p>In-depth market analysis</p>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="grid-item">
+                <h3>AI INSIGHTS</h3>
+                <div class="grid-item-content">
+                    <div class="icon">🧠</div>
+                    <p>AI-powered predictions</p>
+                </div>
+            </div>
+
+            <!-- Additional Grid Items -->
+            <div class="grid-item">
+                <h3>SYSTEM ARCHITECTURE</h3>
+                <div class="grid-item-content">
+                    <div class="icon">🏗️</div>
+                    <p>System overview</p>
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <h3>DATA VORTEX</h3>
+                <div class="grid-item-content">
+                    <div class="icon">🌀</div>
+                    <p>Data visualization</p>
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <h3>TERMINAL</h3>
+                <div class="grid-item-content">
+                    <div class="icon">💻</div>
+                    <p>Command interface</p>
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <h3>RESEARCH LAB</h3>
+                <div class="grid-item-content">
+                    <div class="icon">🔬</div>
+                    <p>Experimental features</p>
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <h3>FIBONACCI ORACLE</h3>
+                <div class="grid-item-content">
+                    <div class="icon">🌊</div>
+                    <p>Pattern recognition</p>
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <h3>TRAP RADAR</h3>
+                <div class="grid-item-content">
+                    <div class="icon">🕸️</div>
+                    <p>Manipulation detection</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            OMEGA BTC AI MATRIX PORTAL - JAH JAH BLESS THE FLOW OF INFORMATION
+        </div>
+    </div>
+
+    <div class="version-glyph">v1.0.1-matrix</div>
+
+    <script>
+        // Matrix Digital Rain
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Characters for the digital rain
+        const chars = '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ φ θ Ω ∑ π ω λ γ δ ζ η θ ι κ μ ν ξ ο π ρ ς τ υ φ χ ψ あ い う え お か き く け こ さ し す せ そ た ち つ て と な に ぬ ね の は ひ ふ へ ほ ま み む め も や ゆ よ ら り る れ ろ わ を ん';
+
+        // Size of each character
+        const fontSize = 14;
+
+        // Calculate columns based on canvas width
+        const columns = Math.floor(canvas.width / fontSize);
+
+        // Array to track the y position of each column
+        const drops = [];
+
+        // Initialize all columns
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+        }
+
+        // Drawing function
+        function draw() {
+            // Semi-transparent black background creates the fade effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // The sacred green color of digital truth
+            ctx.fillStyle = '#33ff33';
+            ctx.font = `${fontSize}px monospace`;
+
+            // Each column represents a stream of consciousness
+            for (let i = 0; i < drops.length; i++) {
+                // Characters flow like thoughts in the digital mind
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                drops[i]++;
+
+                // The cycle of reset and renewal
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+            }
+        }
+
+        // Run the animation
+        setInterval(draw, 33);
+
+        // News Loading
+        setTimeout(() => {
+            const newsContent = document.getElementById('newsContent');
+
+            // Fetch news from API
+            fetch('/api/news/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`API returned status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API Data:', data);
+
+                    if (data.status === 'success' && data.news && data.news.length > 0) {
+                        // Create news HTML content using API data
+                        const newsHTML = data.news.map(item => `
+                            <div class="news-item">
+                                <h4>${item.title}</h4>
+                                <div class="news-item-meta">${new Date(item.published_at).toLocaleDateString()} | Source: ${item.source}</div>
+                                <div class="news-item-content">${item.content}</div>
+                                <div class="truth-meter">
+                                    <div class="truth-value" style="width: ${item.sentiment * 100}%"></div>
+                                </div>
+                                <div class="truth-label">Sentiment: ${(item.sentiment * 100).toFixed(0)}%</div>
+                            </div>
+                        `).join('');
+
+                        // Update the news content
+                        newsContent.innerHTML = newsHTML;
+                    } else {
+                        newsContent.innerHTML = '<p>No news articles available at this time.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    newsContent.innerHTML = `
+                        <p>Error loading news data: ${error.message}</p>
+                        <p>Using backup news feed instead.</p>
+                        
+                        <div class="news-item">
+                            <h4>Bitcoin Surpasses All-Time High as Institutional Adoption Grows</h4>
+                            <div class="news-item-meta">2025-03-31 | Source: CryptoNews</div>
+                            <div class="news-item-content">Bitcoin has reached a new all-time high, surpassing previous records as institutional investors continue to enter the market.</div>
+                        </div>
+                        <div class="news-item">
+                            <h4>SEC Approves New Cryptocurrency ETF Applications</h4>
+                            <div class="news-item-meta">2025-03-30 | Source: FinancialTimes</div>
+                            <div class="news-item-content">The Securities and Exchange Commission has approved additional cryptocurrency ETF applications, signaling increased acceptance of digital assets.</div>
+                        </div>
+                    `;
+                });
+        }, 3000);
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Recalculate columns
+            const newColumns = Math.floor(canvas.width / fontSize);
+
+            // Adjust drops array if needed
+            if (newColumns > drops.length) {
+                // Add more columns
+                for (let i = drops.length; i < newColumns; i++) {
+                    drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+                }
+            } else if (newColumns < drops.length) {
+                // Remove extra columns
+                drops.length = newColumns;
+            }
+        });
+
+        // Test API connection
+        fetch('/api/news/')
+            .then(response => {
+                console.log('API Response Status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('API Data:', data);
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
+    </script>
+</body>
+
+</html>

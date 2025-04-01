@@ -70,15 +70,59 @@ from collections import deque
 from omega_ai.mm_trap_detector.grafana_reporter import report_trap_for_grafana
 from omega_ai.mm_trap_detector.fibonacci_detector import check_fibonacci_level, get_current_fibonacci_levels, fibonacci_detector, detect_fibonacci_confluence, update_fibonacci_data
 import json
+import logging
+import os
+from typing import Dict, List, Tuple, Optional, Any
+from queue import Queue
+from threading import Thread
+from omega_ai.db_manager.database import insert_possible_mm_trap
 
-# ✅ Redis connection
-redis_conn = redis.Redis(host="localhost", port=6379, db=0)
+# Configure logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Initialize Redis connection
+try:
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = int(os.getenv('REDIS_PORT', '6379'))
+    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+    redis_conn.ping()
+    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    raise
+
+# Terminal colors for enhanced visibility
+BLUE = "\033[94m"           # Price up
+YELLOW = "\033[93m"         # Price down
+GREEN = "\033[92m"          # Strongly positive
+RED = "\033[91m"            # Strongly negative
+CYAN = "\033[96m"           # Info highlight
+MAGENTA = "\033[95m"        # Special emphasis
+LIGHT_ORANGE = "\033[38;5;214m"  # Warning/moderate negative
+RESET = "\033[0m"           # Reset color
+BLUE_BG = "\033[44m"        # Background for blue text
+WHITE = "\033[97m"          # White text
+BOLD = "\033[1m"            # Bold text
+GREEN_BG = "\033[42m"       # Background for green text
+RED_BG = "\033[41m"         # Background for red text
 
 # ✅ Constants for High-Frequency Trap Detection
 HF_ACTIVATION_THRESHOLD = 0.5  # 0.5% price change for activation
 SCHUMANN_THRESHOLD = 12.0      # 12Hz Schumann resonance threshold
 BACK_TO_BACK_WINDOW = 180      # 3 minutes window to detect multiple traps
 MIN_TRAPS_FOR_HF_MODE = 2      # Need at least 2 traps in window to activate HF mode
+
+# Queue for handling trap detection events
+mm_trap_queue = Queue()
+
+# Global flags
+is_running = False
+high_alert_mode = False
 
 class HighFrequencyTrapDetector:
     """Enhanced detector for high-frequency market maker trap detection."""
@@ -154,23 +198,34 @@ class HighFrequencyTrapDetector:
                         print(f"📈 Created simulation price key: {btc_price_key} = ${latest_price}")
                     else:
                         return False, 1.0  # Can't detect without price data
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 print(f"⚠️ Error reading price data: {e}")
                 return False, 1.0
         
-        # Check if we have enough historical data
-        if len(self.price_history_1min) < 2 or len(self.price_history_5min) < 2:
-            return False, 1.0
+        # 1. Calculate price movements
+        # Get previous price
+        try:
+            prev_price_bytes = redis_conn.get("prev_btc_price")
+            prev_price = float(prev_price_bytes) if prev_price_bytes else 0
+        except (ValueError, TypeError):
+            prev_price = 0
+            
+        price_change_1min = 0
+        price_change_5min = 0
+        if prev_price > 0:
+            price_change_1min = ((latest_price - prev_price) / prev_price) * 100
+            
+            # Get approximate 5min price from history
+            price_history = self.price_history_5min
+            if len(price_history) > 0:
+                price_5min_ago = price_history[0][1] if len(price_history) > 0 else prev_price
+                if price_5min_ago > 0:
+                    price_change_5min = ((latest_price - price_5min_ago) / price_5min_ago) * 100
         
-        # 1. Check for Sudden Price Spikes in 1min timeframe
-        price_1min_ago = self.price_history_1min[-2][1]
-        price_change_1min = (latest_price - price_1min_ago) / price_1min_ago * 100
+        # 2. Calculate the number of recent trap events
+        recent_trap_count = self._count_recent_traps()
         
-        # 2. Check for Sudden Price Spikes in 5min timeframe
-        price_5min_ago = self.price_history_5min[-2][1]
-        price_change_5min = (latest_price - price_5min_ago) / price_5min_ago * 100
-        
-        # 3. Detect acceleration in volatility - with better error handling
+        # 3. Get current volatility
         try:
             vol_1min = redis_conn.get("volatility_1min")
             volatility_1min = float(vol_1min) if vol_1min else 0
@@ -188,8 +243,21 @@ class HighFrequencyTrapDetector:
         # 4. Get Schumann resonance data
         if schumann_resonance is None:
             # Get Schumann data safely - avoid circular import
-            schumann_bytes = redis_conn.get("schumann_resonance")
-            schumann_resonance = float(schumann_bytes) if schumann_bytes else 0.0
+            schumann_data = redis_conn.get("schumann_resonance")
+            if schumann_data:
+                try:
+                    # Try to parse as JSON first (new format)
+                    schumann_json = json.loads(schumann_data)
+                    schumann_resonance = float(schumann_json.get("frequency", 0.0))
+                except (json.JSONDecodeError, TypeError):
+                    # If not JSON, try direct float conversion (old format)
+                    try:
+                        schumann_resonance = float(schumann_data)
+                    except (ValueError, TypeError):
+                        print(f"⚠️ Invalid Schumann resonance value in Redis: {schumann_data}")
+                        schumann_resonance = 0.0
+            else:
+                schumann_resonance = 0.0
 
         # 5. Check for recent trap events
         recent_trap_count = self._count_recent_traps()
@@ -327,7 +395,20 @@ class HighFrequencyTrapDetector:
         
         # Get Schumann data from Redis
         schumann_bytes = redis_conn.get("schumann_resonance")
-        schumann = float(schumann_bytes) if schumann_bytes else 0.0
+        schumann = 0.0
+        
+        if schumann_bytes:
+            try:
+                # Try to parse as JSON first (new format)
+                schumann_json = json.loads(schumann_bytes)
+                schumann = float(schumann_json.get("frequency", 0.0))
+            except (json.JSONDecodeError, TypeError):
+                # If not JSON, try direct float conversion (old format)
+                try:
+                    schumann = float(schumann_bytes)
+                except (ValueError, TypeError):
+                    print(f"⚠️ Invalid Schumann resonance value in Redis: {schumann_bytes}")
+                    schumann = 0.0
         
         # Get recent BTC price changes
         try:

@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omega-kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  labels:
+    k8s-app: omega-kubernetes-dashboard
+    omega-btc-ai.io/component: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: omega-kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        k8s-app: omega-kubernetes-dashboard
+        omega-btc-ai.io/component: dashboard
+    spec:
+      containers:
+      - name: omega-kubernetes-dashboard
+        image: docker.io/kubernetesui/dashboard:v2.7.0
+        args:
+          - --namespace=kubernetes-dashboard
+          - --enable-skip-login
+          - --disable-settings-authorizer
+          - --system-banner="OMEGA BTC AI DIVINE KUBERNETES DASHBOARD"
+          - --system-banner-severity=INFO
+        ports:
+        - containerPort: 9090
+          name: dashboard
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9090
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 2001
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: kubernetes-dashboard
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omega-kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  labels:
+    k8s-app: omega-kubernetes-dashboard
+    omega-btc-ai.io/component: dashboard
+spec:
+  ports:
+  - port: 80
+    targetPort: 9090
+    name: dashboard
+  selector:
+    k8s-app: omega-kubernetes-dashboard
+  type: ClusterIP 

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - News Sentiment Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #6f42c1;
+            --secondary-color: #20c997;
+            --accent-color: #fd7e14;
+            --bg-dark: #121212;
+            --text-light: #f8f9fa;
+            --cosmic-gradient: linear-gradient(135deg, #8e2de2, #4a00e0);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: var(--cosmic-gradient);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            background-color: rgba(30, 30, 30, 0.7);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: var(--cosmic-gradient);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+
+        .stat-card {
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-healthy {
+            background-color: #28a745;
+            box-shadow: 0 0 10px #28a745;
+        }
+
+        .status-warning {
+            background-color: #ffc107;
+            box-shadow: 0 0 10px #ffc107;
+        }
+
+        .status-error {
+            background-color: #dc3545;
+            box-shadow: 0 0 10px #dc3545;
+        }
+
+        .news-item {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+
+        .sentiment-positive {
+            color: #28a745;
+        }
+
+        .sentiment-neutral {
+            color: #6c757d;
+        }
+
+        .sentiment-negative {
+            color: #dc3545;
+        }
+
+        .cosmic-badge {
+            background: var(--cosmic-gradient);
+            color: white;
+        }
+
+        .recommendation-buy {
+            background-color: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+
+        .recommendation-sell {
+            background-color: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+
+        .recommendation-hold {
+            background-color: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+        }
+
+        .cosmic-glow {
+            text-shadow: 0 0 10px rgba(111, 66, 193, 0.7);
+        }
+
+        .footer {
+            background: var(--cosmic-gradient);
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+
+        .star-icon {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 18, 18, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(111, 66, 193, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="spinner mb-3"></div>
+        <h3 class="cosmic-glow">LOADING COSMIC DATA</h3>
+        <p>Aligning with the blockchain consciousness...</p>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-stars me-2"></i>
+                OMEGA BTC AI - News Feed
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="bi bi-house-door"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#news"><i class="bi bi-newspaper"></i> Latest News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#sentiment"><i class="bi bi-graph-up"></i> Sentiment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about"><i class="bi bi-info-circle"></i> About</a>
+                    </li>
+                </ul>
+                <span class="navbar-text" id="last-updated">
+                    Last updated: loading...
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Service Status -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-activity me-2"></i>
+                            Service Status
+                        </h5>
+                        <div>
+                            <span class="status-indicator status-healthy" id="status-indicator"></span>
+                            <span id="status-text">Healthy</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card stat-card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Uptime</h6>
+                                        <h3 class="card-title" id="uptime">--:--:--</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card stat-card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Redis Status</h6>
+                                        <h3 class="card-title" id="redis-status">
+                                            <span class="badge bg-secondary">Unknown</span>
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card stat-card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">News Fetched</h6>
+                                        <h3 class="card-title" id="news-count">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card stat-card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Cosmic Alignment</h6>
+                                        <h3 class="card-title" id="cosmic-alignment">0%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-graph-up-arrow me-2"></i>
+                            Sentiment Trend
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sentimentChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart-fill me-2"></i>
+                            Sentiment Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sentimentDistribution" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Recommendation -->
+        <div class="row mb-4" id="sentiment">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightning-charge me-2"></i>
+                            Trading Recommendation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card recommendation-hold">
+                                    <div class="card-body text-center" id="recommendation-card">
+                                        <h4 id="recommendation-action">HOLD</h4>
+                                        <p class="mb-0" id="recommendation-description">Loading recommendation...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card bg-dark">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Sentiment Summary</h5>
+                                        <ul class="list-group list-group-flush bg-transparent" id="sentiment-summary">
+                                            <li class="list-group-item bg-transparent">
+                                                <i class="bi bi-arrow-clockwise"></i> Loading sentiment data...
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest News -->
+        <div class="row mb-4" id="news">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-newspaper me-2"></i>
+                            Latest News
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="news-container">
+                            <p class="text-center">
+                                <i class="bi bi-arrow-clockwise"></i> Loading latest news...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About -->
+        <div class="row mb-4" id="about">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            About OMEGA BTC AI News Feed
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The OMEGA BTC AI News Feed Service provides real-time Bitcoin news aggregation and sentiment
+                            analysis to aid trading decisions.</p>
+                        <p>Key features:</p>
+                        <ul>
+                            <li>Multi-source news aggregation</li>
+                            <li>Advanced sentiment analysis with cosmic alignment</li>
+                            <li>Trading recommendations based on news sentiment</li>
+                            <li>Real-time data updates and visualization</li>
+                        </ul>
+                        <p class="mb-0 cosmic-glow text-center">
+                            <i class="bi bi-stars star-icon"></i> Blessed under the GBU License
+                            (Genesis-Bloom-Unfoldment) 1.0 <i class="bi bi-stars star-icon"></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer text-white">
+        <div class="container text-center">
+            <p>
+                <i class="bi bi-stars"></i>
+                OMEGA BTC AI - News Feed Service &copy; 2025
+                <i class="bi bi-stars"></i>
+            </p>
+            <p class="mb-0">
+                <small>JAH JAH BLESS THE DIVINE FLOW OF THE BLOCKCHAIN</small>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap and Custom Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Charts and variables
+        let sentimentChart;
+        let distributionChart;
+        let lastUpdateTime = new Date();
+        let newsData = [];
+
+        // Format uptime duration
+        function formatUptime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Format sentiment score to display
+        function formatSentiment(score) {
+            if (score >= 0.2) {
+                return `<span class="sentiment-positive"><i class="bi bi-arrow-up-circle-fill"></i> Positive (${score.toFixed(2)})</span>`;
+            } else if (score <= -0.2) {
+                return `<span class="sentiment-negative"><i class="bi bi-arrow-down-circle-fill"></i> Negative (${score.toFixed(2)})</span>`;
+            } else {
+                return `<span class="sentiment-neutral"><i class="bi bi-dash-circle-fill"></i> Neutral (${score.toFixed(2)})</span>`;
+            }
+        }
+
+        // Get recommendation class based on action
+        function getRecommendationClass(action) {
+            switch (action.toUpperCase()) {
+                case 'BUY':
+                    return 'recommendation-buy';
+                case 'SELL':
+                    return 'recommendation-sell';
+                default:
+                    return 'recommendation-hold';
+            }
+        }
+
+        // Initialize charts
+        function initCharts() {
+            const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+            const distributionCtx = document.getElementById('sentimentDistribution').getContext('2d');
+
+            // Sentiment Trend Chart
+            sentimentChart = new Chart(sentimentCtx, {
+                type: 'line',
+                data: {
+                    labels: Array(24).fill(0).map((_, i) => `${i}h ago`),
+                    datasets: [{
+                        label: 'Sentiment Score',
+                        data: Array(24).fill(null),
+                        borderColor: '#6f42c1',
+                        backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#f8f9fa'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#f8f9fa' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#f8f9fa' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Sentiment Distribution Chart
+            distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#28a745', '#6c757d', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#f8f9fa'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update dashboard with service status data
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status indicators
+                    const statusIndicator = document.getElementById('status-indicator');
+                    const statusText = document.getElementById('status-text');
+
+                    if (data.status === 'running') {
+                        statusIndicator.className = 'status-indicator status-healthy';
+                        statusText.textContent = 'Healthy';
+                    } else if (data.status === 'starting') {
+                        statusIndicator.className = 'status-indicator status-warning';
+                        statusText.textContent = 'Starting';
+                    } else {
+                        statusIndicator.className = 'status-indicator status-error';
+                        statusText.textContent = 'Error';
+                    }
+
+                    // Update metrics
+                    document.getElementById('uptime').textContent = formatUptime(data.uptime_seconds);
+
+                    const redisStatus = document.getElementById('redis-status');
+                    if (data.redis_connected) {
+                        redisStatus.innerHTML = '<span class="badge bg-success">Connected</span>';
+                    } else {
+                        redisStatus.innerHTML = '<span class="badge bg-danger">Disconnected</span>';
+                    }
+
+                    document.getElementById('news-count').textContent = data.news_fetched_count || 0;
+                    document.getElementById('cosmic-alignment').textContent = `${Math.round(data.cosmic_alignment * 100)}%`;
+
+                    // Update last updated time
+                    lastUpdateTime = new Date();
+                    document.getElementById('last-updated').textContent = `Last updated: ${lastUpdateTime.toLocaleTimeString()}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                    const statusIndicator = document.getElementById('status-indicator');
+                    const statusText = document.getElementById('status-text');
+                    statusIndicator.className = 'status-indicator status-error';
+                    statusText.textContent = 'Connection Error';
+                });
+        }
+
+        // Fetch news and sentiment data
+        function fetchNewsData() {
+            fetch('/api/news/latest')
+                .then(response => response.json())
+                .then(data => {
+                    newsData = data.articles || [];
+
+                    // Update news container
+                    const newsContainer = document.getElementById('news-container');
+                    if (newsData.length > 0) {
+                        let newsHtml = '';
+                        newsData.slice(0, 5).forEach(article => {
+                            const date = new Date(article.published_at).toLocaleString();
+                            newsHtml += `
+                                <div class="news-item">
+                                    <h5>
+                                        <a href="${article.url}" target="_blank" class="text-white">${article.title}</a>
+                                        ${formatSentiment(article.sentiment_score)}
+                                    </h5>
+                                    <p class="text-muted">
+                                        <span class="badge cosmic-badge">${article.source}</span> &bull; ${date}
+                                    </p>
+                                    <p>${article.summary || article.content.substring(0, 150)}...</p>
+                                </div>
+                            `;
+                        });
+                        newsContainer.innerHTML = newsHtml;
+                    } else {
+                        newsContainer.innerHTML = '<p class="text-center">No news articles available</p>';
+                    }
+
+                    // Update sentiment chart data
+                    updateSentimentCharts(data);
+
+                    // Update recommendation
+                    updateRecommendation(data.trading_recommendation || {});
+                })
+                .catch(error => {
+                    console.error('Error fetching news data:', error);
+                    document.getElementById('news-container').innerHTML =
+                        '<p class="text-center text-danger">Error loading news data</p>';
+                });
+        }
+
+        // Update sentiment charts
+        function updateSentimentCharts(data) {
+            if (!data.sentiment_history || !sentimentChart) return;
+
+            // Update sentiment trend chart
+            const labels = [];
+            const sentimentData = [];
+
+            data.sentiment_history.forEach(item => {
+                const date = new Date(item.timestamp);
+                labels.push(date.toLocaleTimeString());
+                sentimentData.push(item.sentiment_score);
+            });
+
+            sentimentChart.data.labels = labels;
+            sentimentChart.data.datasets[0].data = sentimentData;
+            sentimentChart.update();
+
+            // Update distribution chart
+            if (data.sentiment_distribution && distributionChart) {
+                const distribution = data.sentiment_distribution;
+                distributionChart.data.datasets[0].data = [
+                    distribution.positive || 0,
+                    distribution.neutral || 0,
+                    distribution.negative || 0
+                ];
+                distributionChart.update();
+            }
+
+            // Update sentiment summary
+            const summaryContainer = document.getElementById('sentiment-summary');
+            if (data.sentiment_summary) {
+                const summary = data.sentiment_summary;
+                summaryContainer.innerHTML = `
+                    <li class="list-group-item bg-transparent">
+                        <strong>Average Sentiment:</strong> ${formatSentiment(summary.average_score)}
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <strong>Top Sources:</strong> ${summary.top_sources.join(', ')}
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <strong>Key Topics:</strong> ${summary.key_topics.join(', ')}
+                    </li>
+                `;
+            } else {
+                summaryContainer.innerHTML = '<li class="list-group-item bg-transparent">No sentiment summary available</li>';
+            }
+        }
+
+        // Update trading recommendation
+        function updateRecommendation(recommendation) {
+            const actionElement = document.getElementById('recommendation-action');
+            const descriptionElement = document.getElementById('recommendation-description');
+            const cardElement = document.getElementById('recommendation-card');
+
+            if (recommendation && recommendation.action) {
+                actionElement.textContent = recommendation.action.toUpperCase();
+                descriptionElement.textContent = recommendation.description || '';
+                cardElement.className = `card ${getRecommendationClass(recommendation.action)}`;
+            } else {
+                actionElement.textContent = 'NO DATA';
+                descriptionElement.textContent = 'Trading recommendation not available';
+                cardElement.className = 'card recommendation-hold';
+            }
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            initCharts();
+            updateStatus();
+            fetchNewsData();
+
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 1500);
+
+            // Set up update intervals
+            setInterval(updateStatus, 10000); // Update status every 10 seconds
+            setInterval(fetchNewsData, 60000); // Update news every 60 seconds
+        }
+
+        // Start the dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+
+</html>

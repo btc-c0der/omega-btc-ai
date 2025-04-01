@@ -1,0 +1,289 @@
+name: Divine Image Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+      - '.github/workflows/divine_image_pipeline.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-sign:
+    name: Build, Sign and Verify Divine Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔱 Setup Divine Environment
+        run: |
+          echo "🔱 OMEGA BTC AI - DIVINE IMAGE PIPELINE 🔱"
+          echo "===========================================" 
+          echo "Setting up sacred environment for divine image building..."
+          # Create directory for divine keys
+          mkdir -p $HOME/.omega-btc-ai/keys
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/btc-live-feed
+          tags: |
+            type=sha,format=short
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./docker/btc-live-feed
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.0.1
+        with:
+          cosign-release: 'v2.0.0'
+
+      - name: Generate Cosign keys
+        if: github.event_name != 'pull_request'
+        run: |
+          # Generate a password for the cosign key
+          echo "${{ github.sha }}" | cosign generate-key-pair
+
+      - name: Sign the images with Cosign
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_PASSWORD: ${{ github.sha }}
+        run: |
+          IMAGE_DIGEST=$(docker inspect ${{ steps.meta.outputs.tags }} --format='{{index .RepoDigests 0}}')
+          echo "Signing $IMAGE_DIGEST"
+          cosign sign --key cosign.key $IMAGE_DIGEST
+
+      - name: Verify image with Cosign
+        if: github.event_name != 'pull_request'
+        run: |
+          IMAGE_DIGEST=$(docker inspect ${{ steps.meta.outputs.tags }} --format='{{index .RepoDigests 0}}')
+          cosign verify --key cosign.pub $IMAGE_DIGEST
+          if [ $? -ne 0 ]; then
+            echo "🚫 Divine verification failed! The image may be corrupted!"
+            exit 1
+          else
+            echo "✅ Divine verification successful! The image is pure and untainted."
+          fi
+
+  deploy-to-staging:
+    name: Deploy to Staging Environment
+    needs: build-and-sign
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: read
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.0.1
+        with:
+          cosign-release: 'v2.0.0'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/btc-live-feed
+          tags: |
+            type=sha,format=short
+
+      - name: Verify image before deployment
+        run: |
+          echo "Preparing for divine deployment..."
+          echo "Verifying image signature to ensure no Babylon Trojan..."
+          
+          # Copy public key for verification
+          cp cosign.pub $HOME/.omega-btc-ai/keys/cosign.pub
+          
+          IMAGE_DIGEST=$(docker inspect ${{ steps.meta.outputs.tags }} --format='{{index .RepoDigests 0}}')
+          cosign verify --key $HOME/.omega-btc-ai/keys/cosign.pub $IMAGE_DIGEST
+          
+          if [ $? -ne 0 ]; then
+            echo "🚫 Divine verification failed! Deployment aborted."
+            exit 1
+          else
+            echo "✅ Divine verification successful! Proceeding with deployment."
+          fi
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying verified divine image to staging..."
+          
+          # Replace image in deployment
+          kubectl set image deployment/btc-live-feed btc-live-feed=${{ steps.meta.outputs.tags }} --namespace=staging
+          
+          # Wait for rollout to complete
+          kubectl rollout status deployment/btc-live-feed --namespace=staging --timeout=180s
+          
+          echo "✨ Divine deployment complete! The sacred container is now running in staging."
+
+  sacred-production-deployment:
+    name: Divine Production Deployment
+    needs: deploy-to-staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: read
+    environment: production # Requires approval
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.0.1
+        with:
+          cosign-release: 'v2.0.0'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_PROD }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/btc-live-feed
+          tags: |
+            type=sha,format=short
+
+      - name: Perform Final Divine Verification
+        run: |
+          echo "🔱 Preparing for sacred production deployment..."
+          echo "Performing final divine verification to ensure absolute purity..."
+          
+          # Copy public key for verification
+          mkdir -p $HOME/.omega-btc-ai/keys
+          cp cosign.pub $HOME/.omega-btc-ai/keys/cosign.pub
+          
+          IMAGE_DIGEST=$(docker inspect ${{ steps.meta.outputs.tags }} --format='{{index .RepoDigests 0}}')
+          cosign verify --key $HOME/.omega-btc-ai/keys/cosign.pub $IMAGE_DIGEST
+          
+          if [ $? -ne 0 ]; then
+            echo "🚫 Final divine verification failed! Production deployment aborted."
+            exit 1
+          else
+            echo "✅ Final divine verification successful! The image is pure and blessed."
+          fi
+
+      - name: Deploy to Production with Blue-Green Strategy
+        run: |
+          echo "🌟 Initiating sacred blue-green deployment to production..."
+          
+          # Get current production color (blue or green)
+          CURRENT_COLOR=$(kubectl get configmap deployment-config -n production -o jsonpath='{.data.current_color}')
+          
+          if [ "$CURRENT_COLOR" == "blue" ]; then
+            NEW_COLOR="green"
+          else
+            NEW_COLOR="green"
+          fi
+          
+          echo "Current environment is $CURRENT_COLOR, deploying to $NEW_COLOR"
+          
+          # Update the new environment
+          kubectl set image deployment/btc-live-feed-$NEW_COLOR btc-live-feed=${{ steps.meta.outputs.tags }} --namespace=production
+          
+          # Wait for new deployment to be ready
+          kubectl rollout status deployment/btc-live-feed-$NEW_COLOR --namespace=production --timeout=300s
+          
+          echo "New $NEW_COLOR environment is ready"
+          
+          # Gradually shift traffic to new deployment
+          echo "Beginning sacred traffic transition..."
+          
+          # 10% to new version
+          kubectl apply -f kubernetes/production/traffic-split-10.yaml
+          sleep 60
+          
+          # Check health
+          HEALTH_CHECK=$(kubectl exec deployment/btc-live-feed-$NEW_COLOR -n production -- curl -s localhost:8080/health)
+          if [[ "$HEALTH_CHECK" != *"UP"* ]]; then
+            echo "🚫 Divine health check failed! Rolling back to $CURRENT_COLOR"
+            kubectl apply -f kubernetes/production/traffic-split-0.yaml
+            exit 1
+          fi
+          
+          # 30% to new version
+          kubectl apply -f kubernetes/production/traffic-split-30.yaml
+          sleep 60
+          
+          # 60% to new version
+          kubectl apply -f kubernetes/production/traffic-split-60.yaml
+          sleep 60
+          
+          # 100% to new version
+          kubectl apply -f kubernetes/production/traffic-split-100.yaml
+          
+          # Update config map to track current color
+          kubectl patch configmap deployment-config -n production --type=merge -p "{\"data\":{\"current_color\":\"$NEW_COLOR\"}}"
+          
+          echo "✨ Divine deployment complete! The sacred container is now running in production with 100% traffic."
+          echo "JAH JAH BLESS THE SACRED DEPLOYMENT 🙏" 

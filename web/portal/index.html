@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Matrix Neo News Portal - The latest cryptocurrency news in a Matrix-inspired interface">
+    <title>Matrix Neo News Portal</title>
+    <link rel="stylesheet" href="css/matrix-news.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <canvas id="matrix-rain"></canvas>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="glitch">MATRIX NEO NEWS PORTAL</h1>
+            <p>Seeing through the code of cryptocurrency markets</p>
+        </header>
+
+        <div class="news-controls">
+            <div class="filters-container">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-bar" placeholder="Search the Matrix...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+
+                <div class="category-pills">
+                    <span class="category-pill filter-pill active" data-category="all">All</span>
+                    <span class="category-pill filter-pill" data-category="Bitcoin">Bitcoin</span>
+                    <span class="category-pill filter-pill" data-category="Ethereum">Ethereum</span>
+                    <span class="category-pill filter-pill" data-category="DeFi">DeFi</span>
+                    <span class="category-pill filter-pill" data-category="Regulation">Regulation</span>
+                    <span class="category-pill filter-pill" data-category="Mining">Mining</span>
+                </div>
+            </div>
+
+            <div class="actions-container">
+                <div class="toggle-container tooltip">
+                    <span>Dark Mode</span>
+                    <input type="checkbox" id="dark-mode-toggle" class="toggle-checkbox">
+                    <label for="dark-mode-toggle" class="toggle-switch"></label>
+                    <div class="tooltip-text">Toggle Matrix Dark Mode</div>
+                </div>
+
+                <button class="matrix-button tooltip" id="refresh-button">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                    <span class="tooltip-text">Reload news data</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="matrix-loader" id="matrix-loader"></div>
+
+        <div class="news-grid" id="news-container">
+            <!-- News cards will be inserted here by JavaScript -->
+        </div>
+
+        <footer class="footer">
+            <p>OMEGA BTC AI - The Matrix Neo News Portal</p>
+            <p class="small">Data is updated in real-time. Take the red pill to see how deep the rabbit hole goes.</p>
+        </footer>
+    </div>
+
+    <script src="js/matrix-news.js"></script>
+</body>
+
+</html>

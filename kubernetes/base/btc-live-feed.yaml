@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: btc-live-feed
+spec:
+  selector:
+    matchLabels:
+      app: btc-live-feed
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: btc-live-feed
+    spec:
+      containers:
+      - name: btc-live-feed
+        image: ${BTC_LIVE_FEED_IMAGE:-btc-live-feed:latest}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 10081
+        env:
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: LOG_LEVEL
+          value: INFO
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /logs
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 10081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 10081
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: btc-live-feed
+spec:
+  selector:
+    app: btc-live-feed
+  ports:
+  - port: 10081
+    targetPort: 10081
+  type: ClusterIP 

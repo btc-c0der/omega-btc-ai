@@ -1,0 +1,94 @@
+# 🔱 OMEGA BTC AI - SACRED PROMETHEUS CONFIGURATION 🔱
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+# 🎭 Alert Manager Configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# 📊 Rule Files
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+# 🔍 Scrape Configurations
+scrape_configs:
+  # Divine Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Divine Matrix News Service
+  - job_name: 'matrix-news'
+    static_configs:
+      - targets: ['matrix-news:10082']
+    metrics_path: '/metrics'
+
+  # Divine BTC Live Feed Service
+  - job_name: 'btc-live-feed'
+    static_configs:
+      - targets: ['btc-live-feed:10081']
+    metrics_path: '/metrics'
+
+  # Divine Prophecy Core Service
+  - job_name: 'prophecy-core'
+    static_configs:
+      - targets: ['prophecy-core:10080']
+    metrics_path: '/metrics'
+
+  # Divine Redis Service
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: divine-redis
+
+  # Divine NGINX Service
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+
+  # Divine Node Exporter
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Divine cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # Divine Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    metrics_path: '/metrics'
+
+  # Divine Alert Manager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    metrics_path: '/metrics'
+
+# 🌟 Remote Write Configuration
+remote_write:
+  - url: "http://remote-storage:9201/write"
+    queue_config:
+      max_samples_per_send: 10000
+      max_shards: 30
+      capacity: 500000
+
+# 🌟 Remote Read Configuration
+remote_read:
+  - url: "http://remote-storage:9201/read"
+    read_recent: true 

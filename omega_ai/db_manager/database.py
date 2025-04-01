@@ -1,847 +1,847 @@
 #!/usr/bin/env python3
 
 """
-Database manager for OmegaBTC AI trading simulations.
-Provides PostgreSQL connection and schema for storing trading metrics.
+Database manager for the OMEGA BTC AI system.
+Handles storage and retrieval of price movements, trend analysis, and market maker traps.
 """
 
-import os
-import psycopg2
-from psycopg2 import sql
-from psycopg2.extras import DictCursor, Json
-import datetime
-from typing import Dict, List, Any, Optional, Tuple
-import redis
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+import sqlite3
+import time
+import os
+from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime, timezone
+import redis
 
-# Set up logger with RASTA VIBES
+# Configure logger
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(message)s')  # Simplified format to avoid conflicts with color codes
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
 
-# Initialize Redis connection with JAH BLESSING
-redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+# Database configuration
+DB_PATH = os.getenv('DB_PATH', 'omega_btc_ai.db')
 
-# Terminal colors for blessed output
-GREEN = "\033[92m"        # Life energy, growth
-YELLOW = "\033[93m"       # Sunlight, divine wisdom
-RED = "\033[91m"          # Heart energy, passion
-CYAN = "\033[96m"         # Water energy, flow
-MAGENTA = "\033[95m"      # Cosmic energy
-RESET = "\033[0m"         # Return to baseline frequency
-
-class DatabaseManager:
-    """Manages database connections and operations for OmegaBTC AI."""
-    
-    def __init__(self, 
-                host: str = "localhost", 
-                port: int = 5432,
-                dbname: str = "omega_btc",
-                user: str = "postgres",
-                password: str = None,
-                redis_host='localhost', 
-                redis_port=6379, 
-                redis_db=0):
-        """Initialize the database manager."""
-        self.host = host
-        self.port = port
-        self.dbname = dbname
-        self.user = user
-        self.password = password or os.environ.get("POSTGRES_PASSWORD", "")
-        self.conn = None
-        self.redis = redis.Redis(
-            host=redis_host,
-            port=redis_port,
-            db=redis_db,
-            decode_responses=True
-        )
-        
-    def connect(self) -> None:
-        """Establish connection to PostgreSQL database."""
-        try:
-            self.conn = psycopg2.connect(
-                host=self.host,
-                port=self.port,
-                dbname=self.dbname,
-                user=self.user,
-                password=self.password
-            )
-            print(f"Connected to database {self.dbname} on {self.host}")
-        except Exception as e:
-            print(f"Error connecting to database: {e}")
-            raise
-    
-    def initialize_schema(self) -> None:
-        """Create required tables and indexes if they don't exist."""
-        if not self.conn:
-            self.connect()
-        
-        with self.conn.cursor() as cur:
-            # Create traders table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS traders (
-                    id SERIAL PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    profile_type VARCHAR(50) NOT NULL,
-                    initial_capital DECIMAL(16,8) NOT NULL,
-                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-                );
-            """)
-            
-            # Create trades table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS trades (
-                    id SERIAL PRIMARY KEY,
-                    trader_id INTEGER REFERENCES traders(id),
-                    direction VARCHAR(10) NOT NULL,
-                    entry_price DECIMAL(16,8) NOT NULL,
-                    exit_price DECIMAL(16,8),
-                    position_size DECIMAL(16,8) NOT NULL,
-                    leverage INTEGER NOT NULL,
-                    entry_reason TEXT NOT NULL,
-                    exit_reason TEXT,
-                    entry_time TIMESTAMP NOT NULL DEFAULT NOW(),
-                    exit_time TIMESTAMP,
-                    pnl DECIMAL(16,8),
-                    fee DECIMAL(16,8) DEFAULT 0,
-                    stop_loss DECIMAL(16,8),
-                    emotional_state VARCHAR(50),
-                    risk_reward_ratio DECIMAL(8,4),
-                    market_condition JSON,
-                    trade_duration_hours DECIMAL(10,4),
-                    take_profits JSON,
-                    trailing_stop BOOLEAN DEFAULT FALSE,
-                    status VARCHAR(20) DEFAULT 'OPEN',
-                    signal_type VARCHAR(50),
-                    liquidated BOOLEAN DEFAULT FALSE
-                );
-            """)
-            
-            # Create trade_exits table for partial exits
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS trade_exits (
-                    id SERIAL PRIMARY KEY,
-                    trade_id INTEGER REFERENCES trades(id),
-                    exit_type VARCHAR(50) NOT NULL,
-                    exit_price DECIMAL(16,8) NOT NULL,
-                    exit_time TIMESTAMP NOT NULL DEFAULT NOW(),
-                    percentage DECIMAL(5,4) NOT NULL,
-                    pnl DECIMAL(16,8) NOT NULL,
-                    price_bar INTEGER,
-                    reason TEXT
-                );
-            """)
-            
-            # Create trader_metrics table for time-series metric storage
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS trader_metrics (
-                    id SERIAL PRIMARY KEY,
-                    trader_id INTEGER REFERENCES traders(id),
-                    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-                    current_capital DECIMAL(16,8) NOT NULL,
-                    total_pnl DECIMAL(16,8) NOT NULL,
-                    drawdown_percentage DECIMAL(8,4) NOT NULL,
-                    win_rate DECIMAL(8,4) NOT NULL, 
-                    total_trades INTEGER NOT NULL,
-                    winning_trades INTEGER NOT NULL,
-                    losing_trades INTEGER NOT NULL,
-                    avg_win DECIMAL(16,8),
-                    avg_loss DECIMAL(16,8),
-                    emotional_state VARCHAR(50),
-                    confidence_level DECIMAL(4,2),
-                    risk_appetite DECIMAL(4,2),
-                    avg_trade_duration_hours DECIMAL(10,4),
-                    extra_metrics JSON
-                );
-            """)
-            
-            # Create indexes for better query performance
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_trades_trader_id ON trades(trader_id);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_trades_entry_time ON trades(entry_time);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_trade_exits_trade_id ON trade_exits(trade_id);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_trader_metrics_trader_id_timestamp ON trader_metrics(trader_id, timestamp);")
-            
-            self.conn.commit()
-            print("Database schema initialized successfully")
-    
-    def save_trader(self, name: str, profile_type: str, initial_capital: float) -> int:
-        """Save trader information and return the trader ID."""
-        if not self.conn:
-            self.connect()
-            
-        with self.conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO traders (name, profile_type, initial_capital)
-                VALUES (%s, %s, %s)
-                RETURNING id;
-            """, (name, profile_type, initial_capital))
-            trader_id = cur.fetchone()[0]
-            self.conn.commit()
-            return trader_id
-    
-    def save_trade(self, trade_data: Dict[str, Any]) -> int:
-        """Save trade entry information and return the trade ID."""
-        if not self.conn:
-            self.connect()
-            
-        with self.conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO trades (
-                    trader_id, direction, entry_price, position_size, leverage,
-                    entry_reason, stop_loss, emotional_state, market_condition,
-                    signal_type, take_profits
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id;
-            """, (
-                trade_data["trader_id"],
-                trade_data["direction"],
-                trade_data["entry_price"],
-                trade_data["position_size"],
-                trade_data["leverage"],
-                trade_data["entry_reason"],
-                trade_data["stop_loss"],
-                trade_data["emotional_state"],
-                Json(trade_data["market_condition"]),
-                trade_data["signal_type"],
-                Json(trade_data["take_profits"])
-            ))
-            trade_id = cur.fetchone()[0]
-            self.conn.commit()
-            return trade_id
-    
-    def save_trade_exit(self, exit_data: Dict[str, Any]) -> None:
-        """Save trade exit information."""
-        if not self.conn:
-            self.connect()
-            
-        with self.conn.cursor() as cur:
-            # Insert exit record
-            cur.execute("""
-                INSERT INTO trade_exits (
-                    trade_id, exit_type, exit_price, percentage, 
-                    pnl, price_bar, reason
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
-            """, (
-                exit_data["trade_id"],
-                exit_data["exit_type"],
-                exit_data["exit_price"],
-                exit_data["percentage"],
-                exit_data["pnl"],
-                exit_data["price_bar"],
-                exit_data["reason"]
-            ))
-            
-            # If this is a complete exit, update the trade record
-            if exit_data.get("is_complete", False):
-                cur.execute("""
-                    UPDATE trades
-                    SET exit_price = %s, 
-                        exit_time = NOW(),
-                        pnl = %s,
-                        exit_reason = %s,
-                        trade_duration_hours = %s,
-                        status = 'CLOSED',
-                        liquidated = %s
-                    WHERE id = %s;
-                """, (
-                    exit_data["exit_price"],
-                    exit_data["total_pnl"],
-                    exit_data["reason"],
-                    exit_data["duration_hours"],
-                    exit_data.get("liquidated", False),
-                    exit_data["trade_id"]
-                ))
-            
-            self.conn.commit()
-    
-    def save_trader_metrics(self, metrics_data: Dict[str, Any]) -> None:
-        """Save periodic trader performance metrics."""
-        if not self.conn:
-            self.connect()
-            
-        with self.conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO trader_metrics (
-                    trader_id, current_capital, total_pnl, drawdown_percentage,
-                    win_rate, total_trades, winning_trades, losing_trades,
-                    avg_win, avg_loss, emotional_state, confidence_level,
-                    risk_appetite, avg_trade_duration_hours, extra_metrics
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """, (
-                metrics_data["trader_id"],
-                metrics_data["current_capital"],
-                metrics_data["total_pnl"],
-                metrics_data["drawdown_percentage"],
-                metrics_data["win_rate"],
-                metrics_data["total_trades"],
-                metrics_data["winning_trades"],
-                metrics_data["losing_trades"],
-                metrics_data.get("avg_win", 0),
-                metrics_data.get("avg_loss", 0),
-                metrics_data["emotional_state"],
-                metrics_data["confidence_level"],
-                metrics_data["risk_appetite"],
-                metrics_data.get("avg_trade_duration", 0),
-                Json(metrics_data.get("extra_metrics", {}))
-            ))
-            self.conn.commit()
-    
-    def get_trader_trades(self, trader_id: int) -> List[Dict]:
-        """Get all trades for a specific trader."""
-        if not self.conn:
-            self.connect()
-            
-        with self.conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute("""
-                SELECT * FROM trades
-                WHERE trader_id = %s
-                ORDER BY entry_time DESC;
-            """, (trader_id,))
-            return [dict(row) for row in cur.fetchall()]
-    
-    def get_trade_exits(self, trade_id: int) -> List[Dict]:
-        """Get all exits for a specific trade."""
-        if not self.conn:
-            self.connect()
-            
-        with self.conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute("""
-                SELECT * FROM trade_exits
-                WHERE trade_id = %s
-                ORDER BY exit_time;
-            """, (trade_id,))
-            return [dict(row) for row in cur.fetchall()]
-    
-    def close(self) -> None:
-        """Close the database connection."""
-        if self.conn:
-            self.conn.close()
-            self.conn = None
-            print("Database connection closed")
-    
-    def health_check(self) -> bool:
-        """Check if the database connection is working."""
-        try:
-            return self.redis.ping()
-        except Exception:
-            return False
-
-# Initialize a global instance
-db_manager = DatabaseManager()
+# Redis connection
+try:
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = int(os.getenv('REDIS_PORT', '6379'))
+    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+    redis_conn.ping()
+    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    redis_conn = None
 
 def get_db_connection():
-    """Get a connection to the PostgreSQL database."""
+    """Return the Redis connection object.
+    
+    Returns:
+        Redis connection object or None if connection failed
+    """
+    return redis_conn
+
+def initialize_database() -> None:
+    """Initialize the database with required tables."""
     try:
-        conn = psycopg2.connect(
-            dbname=os.getenv('DB_NAME', 'omega_btc'),
-            user=os.getenv('DB_USER', 'postgres'),
-            password=os.getenv('DB_PASSWORD', ''),
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432')
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Table for storing BTC price movements
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS price_movements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            price REAL NOT NULL,
+            volume REAL,
+            timestamp TEXT NOT NULL,
+            interval INTEGER NOT NULL,
+            change_pct REAL,
+            abs_change REAL
         )
-        return conn
-    except Exception as e:
-        print(f"Error connecting to database: {e}")
-        return None
-
-def fetch_recent_movements(minutes=15):
-    """
-    Fetch recent price movements from Redis or database.
-    Returns a list of dictionaries with keys: timestamp, price, volume
-    """
-    try:
-        # First try Redis for most recent data
-        movements = []
-        recent_data = redis_conn.lrange("btc_movement_history", -100, -1)
+        ''')
         
-        if recent_data:
-            for data in recent_data:
-                try:
-                    # Try to parse as price,volume pair
-                    if ',' in data:
-                        price, volume = map(float, data.split(','))
-                    else:
-                        price = float(data)
-                        volume = 0
-                    
-                    movements.append({
-                        'timestamp': datetime.now(timezone.utc) - timedelta(seconds=len(movements)),
-                        'price': price,
-                        'volume': volume
-                    })
-                except (ValueError, TypeError):
-                    continue
-            
-            return movements
+        # Table for storing market maker trap detections
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mm_traps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            timeframe TEXT,
+            confidence REAL NOT NULL,
+            price_change REAL NOT NULL,
+            price REAL,
+            timestamp TEXT NOT NULL,
+            validated INTEGER DEFAULT 0,
+            validation_score REAL,
+            fibonacci_level TEXT,
+            volume_anomaly TEXT
+        )
+        ''')
         
-        # Fallback to database if Redis is empty
-        conn = get_db_connection()
-        if not conn:
-            return []
+        # Table for storing trend analysis
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS trend_analysis (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timeframe INTEGER NOT NULL,
+            trend TEXT NOT NULL,
+            change_pct REAL NOT NULL,
+            timestamp TEXT NOT NULL
+        )
+        ''')
         
-        with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute("""
-                SELECT timestamp, price, volume 
-                FROM price_movements 
-                WHERE timestamp > NOW() - INTERVAL '%s minutes'
-                ORDER BY timestamp DESC
-            """, (minutes,))
-            
-            rows = cur.fetchall()
-            movements = [dict(row) for row in rows]
+        # Table for Fibonacci level detections
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS fibonacci_detections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            level_name TEXT NOT NULL,
+            price REAL NOT NULL,
+            current_price REAL NOT NULL,
+            distance_pct REAL NOT NULL,
+            confidence REAL NOT NULL,
+            timestamp TEXT NOT NULL
+        )
+        ''')
         
-        conn.close()
-        return movements
-        
-    except Exception as e:
-        print(f"Error fetching recent movements: {e}")
-        return []
-
-def insert_mm_trap(timestamp, price, price_change_pct, trap_type, trap_confidence):
-    """Insert a detected MM trap into the database."""
-    try:
-        conn = get_db_connection()
-        if not conn:
-            return False
-            
-        with conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO mm_traps (timestamp, price, price_change_pct, trap_type, confidence)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (timestamp, price, price_change_pct, trap_type, trap_confidence))
-            
-        conn.commit()
-        conn.close()
-        return True
-        
-    except Exception as e:
-        print(f"Error inserting MM trap: {e}")
-        return False
-
-def insert_subtle_movement(timestamp, price, volume=0, movement_type="price_update"):
-    """Insert a subtle price movement for historical analysis."""
-    try:
-        conn = get_db_connection()
-        if not conn:
-            return False
-            
-        with conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO price_movements (timestamp, price, volume, movement_type)
-                VALUES (%s, %s, %s, %s)
-            """, (timestamp, price, volume, movement_type))
-            
         conn.commit()
         conn.close()
         
-        # Also store in Redis for quick access
-        redis_conn.rpush("btc_movement_history", f"{price},{volume}")
-        redis_conn.ltrim("btc_movement_history", -1000, -1)  # Keep last 1000 movements
+        logger.info("Database initialized successfully")
         
-        return True
-        
-    except Exception as e:
-        print(f"Error inserting subtle movement: {e}")
-        return False
+    except sqlite3.Error as e:
+        logger.error(f"Database initialization error: {e}")
+        raise
 
-def store_price_data(timeframe: str, price_data: Dict[str, Any]) -> bool:
+def insert_price_movement(price: float, volume: Optional[float] = None, 
+                          interval: int = 1, change_pct: Optional[float] = None,
+                          abs_change: Optional[float] = None) -> int:
     """
-    Store price data in Redis.
+    Insert a price movement record into the database.
     
     Args:
-        timeframe: Timeframe of data ('1m', '5m', '15m', '1h', '4h', '1d')
-        price_data: Dictionary with price data
+        price: Current BTC price
+        volume: Optional trading volume
+        interval: Time interval in minutes
+        change_pct: Optional percentage change
+        abs_change: Optional absolute change
         
     Returns:
-        Success status
+        int: ID of the inserted record
     """
     try:
-        key = f"btc_price_data:{timeframe}"
-        db_manager.redis.rpush(key, json.dumps(price_data))
-        # Keep only the last 10000 items
-        db_manager.redis.ltrim(key, -10000, -1)
-        return True
-    except Exception as e:
-        print(f"Error storing price data: {e}")
-        return False
-
-def insert_mm_trap(trap_data: Dict[str, Any]) -> bool:
-    """
-    Insert detected market manipulation trap into the database.
-    
-    Args:
-        trap_data: Dictionary containing trap information
-            - timestamp: When the trap was detected
-            - trap_type: Type of manipulation ('stop_hunt', 'liquidity_grab', etc.)
-            - price_level: Price at which trap occurred
-            - direction: 'up' or 'down'
-            - confidence_score: How confident the detection is (0.0-1.0)
-            - volume_spike: Volume increase percentage
-            - timeframe: Timeframe where trap was detected
-            - price_range: Price range of the trap
-            - description: Human-readable description
-            
-    Returns:
-        Success status
-    """
-    # First initialize schema if needed
-    try:
-        if not db_manager.conn:
-            db_manager.connect()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        # Create mm_traps table if it doesn't exist
-        if not db_manager.conn:
-            db_manager.connect()
-        with db_manager.conn.cursor() as cur:
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS mm_traps (
-                    id SERIAL PRIMARY KEY,
-                    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-                    trap_type VARCHAR(50) NOT NULL,
-                    price_level DECIMAL(16,8) NOT NULL,
-                    direction VARCHAR(10) NOT NULL,
-                    confidence_score DECIMAL(4,3) NOT NULL,
-                    volume_spike DECIMAL(10,2),
-                    timeframe VARCHAR(10),
-                    price_range DECIMAL(16,8),
-                    description TEXT,
-                    metadata JSON
-                );
-            """)
-            db_manager.conn.commit()
+        timestamp = datetime.now(timezone.utc).isoformat()
         
-        # Insert the trap data
-        with db_manager.conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO mm_traps (
-                    timestamp, trap_type, price_level, direction, 
-                    confidence_score, volume_spike, timeframe, 
-                    price_range, description, metadata
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id;
-            """, (
-                trap_data.get("timestamp", datetime.now(timezone.utc)),
-                trap_data["trap_type"],
-                trap_data["price_level"],
-                trap_data["direction"],
-                trap_data["confidence_score"],
-                trap_data.get("volume_spike", 0),
-                trap_data.get("timeframe", "1h"),
-                trap_data.get("price_range", 0),
-                trap_data.get("description", ""),
-                Json(trap_data.get("metadata", {}))
-            ))
-            trap_id = cur.fetchone()[0]
-            db_manager.conn.commit()
-            
-        # Also store in Redis for quick access by real-time systems
-        key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now(timezone.utc).timestamp())}"
-        db_manager.redis.set(key, json.dumps(trap_data))
-        db_manager.redis.expire(key, 60*60*24)  # Expire after 24 hours
-            
-        return True
+        cursor.execute(
+            '''
+            INSERT INTO price_movements 
+            (price, volume, timestamp, interval, change_pct, abs_change)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ''',
+            (price, volume, timestamp, interval, change_pct, abs_change)
+        )
         
-    except Exception as e:
-        print(f"Error inserting MM trap: {e}")
+        record_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
         
-        # Fallback to just Redis if PostgreSQL fails
-        try:
-            key = f"mm_trap:{trap_data['trap_type']}:{int(datetime.now(timezone.utc).timestamp())}"
-            db_manager.redis.set(key, json.dumps(trap_data))
-            db_manager.redis.expire(key, 60*60*24)  # Expire after 24 hours
-            return True
-        except:
-            return False
-
-def get_recent_mm_traps(hours: int = 24, trap_type: Optional[str] = None) -> List[Dict[str, Any]]:
-    """
-    Get recent market manipulation traps.
-    
-    Args:
-        hours: How many hours back to look
-        trap_type: Optional filter by trap type
-        
-    Returns:
-        List of trap data dictionaries
-    """
-    try:
-        if not db_manager.conn:
-            db_manager.connect()
-            
-        with db_manager.conn.cursor(cursor_factory=DictCursor) as cur:
-            if trap_type:
-                cur.execute("""
-                    SELECT * FROM mm_traps
-                    WHERE timestamp > NOW() - INTERVAL %s HOUR
-                    AND trap_type = %s
-                    ORDER BY timestamp DESC;
-                """, (hours, trap_type))
-            else:
-                cur.execute("""
-                    SELECT * FROM mm_traps
-                    WHERE timestamp > NOW() - INTERVAL %s HOUR
-                    ORDER BY timestamp DESC;
-                """, (hours,))
+        # Also update Redis cache if available
+        if redis_conn:
+            try:
+                # Store price in Redis
+                redis_conn.set("last_btc_price", str(price))
                 
-            return [dict(row) for row in cur.fetchall()]
-            
-    except Exception as e:
-        print(f"Error retrieving MM traps: {e}")
-        
-        # Fallback to Redis
-        try:
-            traps = []
-            for key in db_manager.redis.keys("mm_trap:*"):
-                trap_data = json.loads(db_manager.redis.get(key))
+                # Store volume if provided
+                if volume is not None:
+                    redis_conn.set("last_btc_volume", str(volume))
                 
-                # Apply filters if needed
-                if trap_type and trap_data.get("trap_type") != trap_type:
-                    continue
+                # Add to movement history
+                if volume is not None:
+                    movement_str = f"{price},{volume}"
+                else:
+                    movement_str = str(price)
                     
-                # Add to results
-                traps.append(trap_data)
+                redis_conn.lpush("btc_movement_history", movement_str)
+                redis_conn.ltrim("btc_movement_history", 0, 999)  # Keep last 1000 entries
                 
-            return traps
-        except:
-            return []
+                # Store change percentage if provided
+                if change_pct is not None:
+                    redis_conn.lpush("btc_change_history", str(change_pct))
+                    redis_conn.ltrim("btc_change_history", 0, 999)  # Keep last 1000 entries
+                
+                # Store absolute change if provided
+                if abs_change is not None:
+                    redis_conn.lpush("abs_price_change_history", str(abs_change))
+                    redis_conn.ltrim("abs_price_change_history", 0, 999)  # Keep last 1000 entries
+            except Exception as e:
+                logger.warning(f"Failed to update Redis cache: {e}")
+        
+        return record_id
+        
+    except sqlite3.Error as e:
+        logger.error(f"Error inserting price movement: {e}")
+        return -1
 
-def fetch_multi_interval_movements(interval: int = 5, limit: int = 100) -> tuple:
+def insert_trend_analysis(timeframe: int, trend: str, change_pct: float) -> int:
     """
-    Fetch BTC price movements from Redis for the specified timeframe interval.
+    Insert a trend analysis record into the database.
+    
+    Args:
+        timeframe: Time interval in minutes
+        trend: Trend description (e.g., "Bullish", "Bearish")
+        change_pct: Percentage price change
+        
+    Returns:
+        int: ID of the inserted record
+    """
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        timestamp = datetime.now(timezone.utc).isoformat()
+        
+        cursor.execute(
+            '''
+            INSERT INTO trend_analysis 
+            (timeframe, trend, change_pct, timestamp)
+            VALUES (?, ?, ?, ?)
+            ''',
+            (timeframe, trend, change_pct, timestamp)
+        )
+        
+        record_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        # Also update Redis cache if available
+        if redis_conn:
+            try:
+                # Store trend analysis in Redis
+                trend_data = {
+                    "timeframe": timeframe,
+                    "trend": trend,
+                    "change_pct": change_pct,
+                    "timestamp": timestamp
+                }
+                
+                redis_conn.set(f"btc_trend_{timeframe}min", json.dumps(trend_data))
+            except Exception as e:
+                logger.warning(f"Failed to update Redis cache: {e}")
+        
+        return record_id
+        
+    except sqlite3.Error as e:
+        logger.error(f"Error inserting trend analysis: {e}")
+        return -1
+
+def insert_possible_mm_trap(trap_data: Dict[str, Any]) -> int:
+    """
+    Insert a possible market maker trap detection into the database.
+    
+    Args:
+        trap_data: Dictionary with trap detection data
+            Required keys: type
+            Optional keys: timeframe, confidence, price_change, price,
+                          fibonacci_level, volume_anomaly
+        
+    Returns:
+        int: ID of the inserted record
+    """
+    try:
+        # Ensure required fields are present
+        if "type" not in trap_data:
+            logger.error("Missing required field 'type' in trap data")
+            return -1
+        
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Set default values
+        trap_type = trap_data.get("type")
+        timeframe = trap_data.get("timeframe")
+        confidence = trap_data.get("confidence", 0.5)
+        price_change = trap_data.get("price_change", 0.0)
+        price = trap_data.get("price", 0.0)
+        timestamp = trap_data.get("timestamp", datetime.now(timezone.utc).isoformat())
+        validated = trap_data.get("validated", 0)
+        validation_score = trap_data.get("validation_score", 0.0)
+        fibonacci_level = trap_data.get("fibonacci_level")
+        volume_anomaly = trap_data.get("volume_anomaly")
+        
+        # Convert complex objects to JSON strings
+        if fibonacci_level and isinstance(fibonacci_level, dict):
+            fibonacci_level = json.dumps(fibonacci_level)
+            
+        if volume_anomaly and isinstance(volume_anomaly, dict):
+            volume_anomaly = json.dumps(volume_anomaly)
+        
+        cursor.execute(
+            '''
+            INSERT INTO mm_traps 
+            (type, timeframe, confidence, price_change, price, timestamp, 
+             validated, validation_score, fibonacci_level, volume_anomaly)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (trap_type, timeframe, confidence, price_change, price, timestamp,
+             validated, validation_score, fibonacci_level, volume_anomaly)
+        )
+        
+        record_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        # Also update Redis cache if available
+        if redis_conn:
+            try:
+                # Increment trap counter
+                redis_conn.incr(f"mm_trap_count_{trap_type.replace(' ', '_').lower()}")
+                
+                # Store latest trap detection
+                redis_conn.set("latest_mm_trap", json.dumps({
+                    "id": record_id,
+                    "type": trap_type,
+                    "timeframe": timeframe,
+                    "confidence": confidence,
+                    "price_change": price_change,
+                    "timestamp": timestamp
+                }))
+                
+                # Add to recent traps list
+                redis_conn.lpush("recent_mm_traps", json.dumps({
+                    "id": record_id,
+                    "type": trap_type,
+                    "timeframe": timeframe,
+                    "confidence": confidence,
+                    "price_change": price_change,
+                    "timestamp": timestamp
+                }))
+                
+                redis_conn.ltrim("recent_mm_traps", 0, 49)  # Keep last 50 traps
+            except Exception as e:
+                logger.warning(f"Failed to update Redis cache: {e}")
+        
+        return record_id
+        
+    except sqlite3.Error as e:
+        logger.error(f"Error inserting MM trap: {e}")
+        return -1
+
+def insert_fibonacci_detection(level_name: str, price: float, current_price: float,
+                              distance_pct: float, confidence: float) -> int:
+    """
+    Insert a Fibonacci level detection into the database.
+    
+    Args:
+        level_name: Name of the Fibonacci level
+        price: Price at the Fibonacci level
+        current_price: Current BTC price
+        distance_pct: Percentage distance from level
+        confidence: Confidence score
+        
+    Returns:
+        int: ID of the inserted record
+    """
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        timestamp = datetime.now(timezone.utc).isoformat()
+        
+        cursor.execute(
+            '''
+            INSERT INTO fibonacci_detections 
+            (level_name, price, current_price, distance_pct, confidence, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ''',
+            (level_name, price, current_price, distance_pct, confidence, timestamp)
+        )
+        
+        record_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        # Also update Redis cache if available
+        if redis_conn:
+            try:
+                # Store latest Fibonacci detection
+                redis_conn.set("latest_fibonacci_detection", json.dumps({
+                    "id": record_id,
+                    "level_name": level_name,
+                    "price": price,
+                    "current_price": current_price,
+                    "distance_pct": distance_pct,
+                    "confidence": confidence,
+                    "timestamp": timestamp
+                }))
+            except Exception as e:
+                logger.warning(f"Failed to update Redis cache: {e}")
+        
+        return record_id
+        
+    except sqlite3.Error as e:
+        logger.error(f"Error inserting Fibonacci detection: {e}")
+        return -1
+
+def fetch_multi_interval_movements(interval: int = 5, limit: int = 100) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """
+    Fetch price movements for a specific interval with summary statistics.
     
     Args:
         interval: Time interval in minutes
-        limit: Maximum number of movements to return
+        limit: Maximum number of records to fetch
         
     Returns:
-        Tuple of (movements_list, summary_dict)
+        Tuple of (movements list, summary dictionary)
     """
     try:
-        logger.debug(f"Fetching {interval}min movements (limit={limit})")
-        movements_key = f"btc_movements_{interval}min"
-        
-        # Check if key exists
-        if not redis_conn.exists(movements_key):
-            logger.debug(f"No data found for {movements_key}, checking alternate sources")
-            # Try alternate keys
-            if redis_conn.exists("btc_movement_history"):
-                movements_data = redis_conn.lrange("btc_movement_history", 0, limit-1)
-            else:
-                # Create simple dataset with current price if available
-                last_price = redis_conn.get("last_btc_price")
-                if last_price:
-                    price_val = float(last_price)
-                    now = datetime.now(timezone.utc).isoformat()
-                    logger.info(f"{GREEN}JAH BLESS{RESET} - Creating seed data with current BTC price: ${price_val}")
-                    movements = [{"timestamp": now, "price": price_val}]
-                    summary = {
-                        f"{interval}min": {
-                            "count": 1,
-                            "first": movements[0],
-                            "last": movements[0]
-                        }
-                    }
-                    return movements, summary
-                return [], {}
-        else:
-            movements_data = redis_conn.lrange(movements_key, 0, limit-1)
-        
-        # Parse movement data
-        movements = []
-        for item in movements_data:
+        # First try to get from Redis cache if available
+        if redis_conn:
             try:
-                # First try standard JSON parsing
-                movement = json.loads(item)
-                if isinstance(movement, dict) and "price" in movement:
-                    movements.append(movement)
-                continue  # Successfully processed this item
-            except json.JSONDecodeError:
-                # If JSON parsing fails, try the format "price,volume"
-                try:
-                    if "," in item:
-                        price_str, volume_str = item.split(",", 1)
-                        price = float(price_str.strip())
-                        volume = float(volume_str.strip())
-                        now = datetime.now(timezone.utc).isoformat()
-                        movements.append({
-                            "timestamp": now,
-                            "price": price,
-                            "volume": volume
-                        })
-                        continue  # Successfully processed this item
-                except (ValueError, TypeError) as e:
-                    logger.warning(f"Error parsing alternative format: {e}")
-            except (TypeError) as e:
-                logger.warning(f"Error parsing movement data: {e}")
+                cached_movements = redis_conn.get(f"cached_movements_{interval}min")
+                cached_summary = redis_conn.get(f"cached_summary_{interval}min")
+                
+                if cached_movements and cached_summary:
+                    return json.loads(cached_movements), json.loads(cached_summary)
+            except Exception as e:
+                logger.warning(f"Failed to get from Redis cache: {e}")
         
-        # Create summary dictionary with divine Rastafarian energy
-        summary = {
-            f"{interval}min": {
+        # If not in cache or Redis not available, get from database
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            '''
+            SELECT * FROM price_movements
+            WHERE interval = ?
+            ORDER BY timestamp DESC
+            LIMIT ?
+            ''',
+            (interval, limit)
+        )
+        
+        rows = cursor.fetchall()
+        
+        # Convert to list of dictionaries
+        movements = []
+        for row in rows:
+            movements.append(dict(row))
+        
+        # Calculate summary statistics
+        summary = {}
+        
+        if movements:
+            prices = [m["price"] for m in movements]
+            changes = [m["change_pct"] for m in movements if m["change_pct"] is not None]
+            
+            summary = {
                 "count": len(movements),
-                "first": movements[0] if movements else None,
-                "last": movements[-1] if movements else None
+                "latest_price": movements[0]["price"] if movements else 0,
+                "avg_price": sum(prices) / len(prices) if prices else 0,
+                "min_price": min(prices) if prices else 0,
+                "max_price": max(prices) if prices else 0,
+                "avg_change": sum(changes) / len(changes) if changes else 0,
+                "interval": interval
             }
-        }
         
-        logger.debug(f"Retrieved {len(movements)} movements for {interval}min timeframe")
+        conn.close()
+        
+        # Cache in Redis if available
+        if redis_conn:
+            try:
+                redis_conn.set(f"cached_movements_{interval}min", json.dumps(movements))
+                redis_conn.expire(f"cached_movements_{interval}min", 60)  # Expire in 60 seconds
+                
+                redis_conn.set(f"cached_summary_{interval}min", json.dumps(summary))
+                redis_conn.expire(f"cached_summary_{interval}min", 60)  # Expire in 60 seconds
+            except Exception as e:
+                logger.warning(f"Failed to cache in Redis: {e}")
+        
         return movements, summary
         
-    except Exception as e:
-        logger.error(f"Error fetching movements: {e}", exc_info=True)
+    except sqlite3.Error as e:
+        logger.error(f"Error fetching price movements: {e}")
         return [], {}
 
-def analyze_price_trend(minutes: int = 5) -> Tuple[str, float]:
+def fetch_recent_mm_traps(limit: int = 10) -> List[Dict[str, Any]]:
     """
-    Analyze BTC price trend for the given timeframe with JAH BLESSING.
+    Fetch recent market maker trap detections.
     
     Args:
-        minutes: Time interval in minutes to analyze
+        limit: Maximum number of records to fetch
+        
+    Returns:
+        List of trap detections
+    """
+    try:
+        # First try to get from Redis cache if available
+        if redis_conn:
+            try:
+                cached_traps = redis_conn.lrange("recent_mm_traps", 0, limit - 1)
+                if cached_traps:
+                    return [json.loads(trap) for trap in cached_traps]
+            except Exception as e:
+                logger.warning(f"Failed to get from Redis cache: {e}")
+        
+        # If not in cache or Redis not available, get from database
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            '''
+            SELECT * FROM mm_traps
+            ORDER BY timestamp DESC
+            LIMIT ?
+            ''',
+            (limit,)
+        )
+        
+        rows = cursor.fetchall()
+        
+        # Convert to list of dictionaries
+        traps = []
+        for row in rows:
+            trap = dict(row)
+            
+            # Parse JSON strings
+            if trap["fibonacci_level"]:
+                try:
+                    trap["fibonacci_level"] = json.loads(trap["fibonacci_level"])
+                except:
+                    pass
+                
+            if trap["volume_anomaly"]:
+                try:
+                    trap["volume_anomaly"] = json.loads(trap["volume_anomaly"])
+                except:
+                    pass
+            
+            traps.append(trap)
+        
+        conn.close()
+        
+        # Cache in Redis if available
+        if redis_conn and traps:
+            try:
+                redis_conn.delete("recent_mm_traps")
+                for trap in traps:
+                    redis_conn.rpush("recent_mm_traps", json.dumps(trap))
+            except Exception as e:
+                logger.warning(f"Failed to cache in Redis: {e}")
+        
+        return traps
+        
+    except sqlite3.Error as e:
+        logger.error(f"Error fetching MM traps: {e}")
+        return []
+
+def validate_price_change(change_pct: float, timeframe_minutes: int) -> Tuple[bool, str]:
+    """
+    Validate if a price change percentage is realistic for the given timeframe.
+    
+    Args:
+        change_pct: The percentage change to validate
+        timeframe_minutes: The timeframe in minutes
+        
+    Returns:
+        Tuple of (is_valid, reason)
+    """
+    # Define maximum allowed percentage changes based on timeframe
+    # These are reasonable limits that can be adjusted based on market volatility
+    max_changes = {
+        1: 5.0,      # 1min: max 5% change
+        5: 8.0,      # 5min: max 8% change
+        15: 12.0,    # 15min: max 12% change
+        30: 15.0,    # 30min: max 15% change
+        60: 20.0,    # 1hr: max 20% change
+        240: 30.0,   # 4hr: max 30% change
+        720: 40.0,   # 12hr: max 40% change
+        1440: 50.0,  # 24hr: max 50% change
+    }
+    
+    # Get the maximum allowed change for this timeframe
+    max_allowed = max_changes.get(timeframe_minutes, 50.0)
+    
+    # Check if the change exceeds the maximum allowed (in either direction)
+    if abs(change_pct) > max_allowed:
+        return False, f"Price change of {change_pct:.2f}% exceeds maximum of {max_allowed:.2f}% for {timeframe_minutes}min timeframe"
+    
+    return True, "Valid price change"
+
+def format_price(price: float) -> str:
+    """
+    Format a price value consistently.
+    
+    Args:
+        price: The price to format
+        
+    Returns:
+        Formatted price string with commas and 2 decimal places
+    """
+    return f"${price:,.2f}"
+
+def format_percentage(percentage: float) -> str:
+    """
+    Format a percentage value consistently.
+    
+    Args:
+        percentage: The percentage to format
+        
+    Returns:
+        Formatted percentage string with 2 decimal places and % sign
+    """
+    if percentage is None:
+        percentage = 0.0
+    elif isinstance(percentage, str):
+        try:
+            percentage = float(percentage)
+        except ValueError:
+            percentage = 0.0
+    
+    return f"{percentage:.2f}%"
+
+def get_fallback_trend_data(minutes: int) -> Tuple[str, float]:
+    """
+    Get fallback trend data when primary sources are unavailable.
+    Uses multiple fallback mechanisms in a cascading manner.
+    
+    Args:
+        minutes: Timeframe in minutes
+        
+    Returns:
+        Tuple of (trend_description, percent_change)
+    """
+    logger.info(f"Using fallback mechanism for {minutes}min trend data")
+    
+    # Fallback 1: Try to get data from a nearby timeframe
+    nearby_timeframes = [1, 5, 15, 30, 60, 240, 720, 1440]
+    nearby_timeframes.sort(key=lambda x: abs(x - minutes))
+    
+    for tf in nearby_timeframes[1:3]:  # Try the 2 closest timeframes
+        try:
+            if redis_conn:
+                cached_trend = redis_conn.get(f"btc_trend_{tf}min")
+                if cached_trend:
+                    trend_data = json.loads(cached_trend)
+                    logger.info(f"Using {tf}min data as fallback for {minutes}min")
+                    change_pct = trend_data.get("change_pct", 0.0)
+                    # Ensure change_pct is a float
+                    if isinstance(change_pct, str):
+                        try:
+                            change_pct = float(change_pct)
+                        except ValueError:
+                            change_pct = 0.0
+                    return trend_data.get("trend", "Neutral"), change_pct
+        except Exception as e:
+            logger.warning(f"Failed to get fallback data from {tf}min: {e}")
+    
+    # Fallback 2: Try to calculate from price history
+    try:
+        if redis_conn:
+            price_history = redis_conn.lrange("btc_movement_history", 0, 1)
+            if len(price_history) >= 2:
+                # Parse price history entries
+                latest_price = float(price_history[0].split(",")[0])
+                reference_price = float(price_history[-1].split(",")[0])
+                
+                if reference_price > 0:
+                    change_pct = ((latest_price - reference_price) / reference_price) * 100
+                    
+                    # Determine trend
+                    if change_pct > 3.0:
+                        trend = "Strongly Bullish"
+                    elif change_pct > 0.5:
+                        trend = "Bullish"
+                    elif change_pct < -3.0:
+                        trend = "Strongly Bearish"
+                    elif change_pct < -0.5:
+                        trend = "Bearish"
+                    else:
+                        trend = "Neutral"
+                        
+                    logger.info(f"Calculated fallback trend from price history: {trend} ({change_pct:.2f}%)")
+                    return trend, change_pct
+    except Exception as e:
+        logger.warning(f"Failed to calculate trend from price history: {e}")
+    
+    # Fallback 3: Default to neutral with zero change
+    logger.warning(f"All fallback mechanisms failed for {minutes}min, using default neutral")
+    return "Neutral", 0.0
+
+def analyze_price_trend(minutes: int) -> Tuple[str, float]:
+    """
+    Analyze price trend for the given timeframe with enhanced validation and fallbacks.
+    
+    Args:
+        minutes: Time interval in minutes
         
     Returns:
         Tuple of (trend_description, percent_change)
     """
     try:
-        movements_data = fetch_multi_interval_movements(interval=minutes)
+        # First check if we have cached results in Redis
+        if redis_conn:
+            try:
+                cached_trend = redis_conn.get(f"btc_trend_{minutes}min")
+                if cached_trend:
+                    trend_data = json.loads(cached_trend)
+                    now = datetime.now(timezone.utc)
+                    timestamp = datetime.fromisoformat(trend_data.get("timestamp", now.isoformat()))
+                    
+                    # Also validate cached data
+                    age_minutes = (now - timestamp).total_seconds() / 60
+                    if age_minutes < 1.0 and "trend" in trend_data and "change_pct" in trend_data:
+                        # Ensure the change_pct is a float
+                        change_pct = trend_data["change_pct"]
+                        if isinstance(change_pct, str):
+                            try:
+                                change_pct = float(change_pct)
+                            except ValueError:
+                                change_pct = 0.0
+                        # Return cached result
+                        return trend_data["trend"], float(change_pct)
+            except Exception as e:
+                logger.warning(f"Failed to retrieve cached trend for {minutes}min: {e}")
         
-        # DIVINE FIX: Handle the tuple return structure
-        if isinstance(movements_data, tuple) and len(movements_data) >= 1:
-            # Extract just the movements list from the tuple
-            movements = movements_data[0]  
-        else:
-            # If not a tuple, assume it's just the movements list
-            movements = movements_data
+        # If no valid cached data, calculate trend
+        # Get price data from database
+        price_data, _ = fetch_multi_interval_movements(minutes)
         
-        if not movements or len(movements) < 2:
-            logger.debug(f"Insufficient data for {minutes}min trend analysis")
-            return "Insufficient data", 0.0
+        if not price_data or len(price_data) < 2:
+            logger.warning(f"Missing price data for {minutes}min trend analysis")
+            return get_fallback_trend_data(minutes)
             
-        # Extract prices
-        prices = []
-        for m in movements:
-            if isinstance(m, dict) and "price" in m:
-                try:
-                    prices.append(float(m["price"]))
-                except (ValueError, TypeError):
-                    pass
-        
-        if len(prices) < 2:
-            logger.debug(f"Couldn't extract valid prices for {minutes}min trend")
-            return "Insufficient data", 0.0
+        # Extract current and old prices
+        try:
+            current_candle = price_data[0]
+            old_candle = price_data[-1]
             
-        # Calculate percentage change
-        first_price = prices[0]
-        last_price = prices[-1]
-        
-        if first_price == 0:
-            return "Invalid data", 0.0
-            
-        change_pct = ((last_price - first_price) / first_price) * 100
-        
-        # Determine trend based on percentage change with JAH BLESS precision
-        if change_pct > 1.0:
-            trend = "Strongly Bullish"
-        elif change_pct > 0.2:
-            trend = "Moderately Bullish"
-        elif change_pct > 0:
-            trend = "Slightly Bullish"
-        elif change_pct < -1.0:
-            trend = "Strongly Bearish"
-        elif change_pct < -0.2:
-            trend = "Moderately Bearish"
-        elif change_pct < 0:
-            trend = "Slightly Bearish"
-        else:
-            trend = "Neutral"
-            
-        return trend, change_pct
-        
-    except Exception as e:
-        logger.error(f"Error analyzing price trend: {e}", exc_info=True)
-        return "Error", 0.0
-
-# For the insert_mm_trap functions, rename the original one to avoid recursive calls
-def insert_possible_mm_trap(trap_data: Dict[str, Any]) -> bool:
-    """
-    Insert potential market maker trap data into Redis for later analysis.
-    
-    Args:
-        trap_data: Dictionary with trap details
-        
-    Returns:
-        Success boolean
-    """
-    try:
-        # Validate required fields
-        required_fields = ["type", "timeframe", "confidence", "price_change"]
-        for field in required_fields:
-            if field not in trap_data:
-                logger.warning(f"Missing required field '{field}' in trap data")
-                return False
+            # Check for invalid price data
+            if not isinstance(current_candle, dict) or not isinstance(old_candle, dict):
+                logger.warning(f"Invalid candle data format for {minutes}min")
+                return get_fallback_trend_data(minutes)
                 
-        # Add timestamp if not present
-        if "detected_at" not in trap_data:
-            trap_data["detected_at"] = datetime.now(timezone.utc).isoformat()
+            # Safely access candle data
+            current_price = current_candle.get('c', 0)
+            reference_price = old_candle.get('o', 0)
             
-        # Store in Redis
-        trap_json = json.dumps(trap_data)
-        redis_conn.lpush("mm_trap_detections", trap_json)
-        
-        # Also store in timeframe-specific list
-        timeframe = trap_data["timeframe"]
-        redis_conn.lpush(f"mm_trap_detections:{timeframe}", trap_json)
-        
-        # Keep lists to a reasonable size
-        redis_conn.ltrim("mm_trap_detections", 0, 999)
-        redis_conn.ltrim(f"mm_trap_detections:{timeframe}", 0, 99)
-        
-        # Format the log message without using f-strings in the logger
-        message = f"{YELLOW}⚠️ MM TRAP DETECTED{RESET}: {trap_data['type']} on {trap_data['timeframe']} (confidence: {trap_data['confidence']:.2f})"
-        logger.info(message)
-        return True
-        
+            # Ensure values are floats
+            if isinstance(current_price, str):
+                try:
+                    current_price = float(current_price)
+                except ValueError:
+                    current_price = 0.0
+            if isinstance(reference_price, str):
+                try:
+                    reference_price = float(reference_price)
+                except ValueError:
+                    reference_price = 0.0
+                    
+            if current_price <= 0 or reference_price <= 0:
+                logger.warning(f"Invalid price values (0 or negative) for {minutes}min trend analysis")
+                return get_fallback_trend_data(minutes)
+            
+            # Calculate price change
+            price_diff = current_price - reference_price
+            percent_change = (price_diff / reference_price) * 100
+            
+            # Validate the calculated change
+            is_valid, reason = validate_price_change(percent_change, minutes)
+            if not is_valid:
+                logger.warning(reason)
+                # Cap the change to maximum allowed
+                max_changes = {
+                    1: 5.0, 5: 8.0, 15: 12.0, 30: 15.0, 
+                    60: 20.0, 240: 30.0, 720: 40.0, 1440: 50.0
+                }
+                max_allowed = max_changes.get(minutes, 50.0)
+                # Preserve direction but cap magnitude
+                if percent_change > 0:
+                    percent_change = min(percent_change, max_allowed)
+                else:
+                    percent_change = max(percent_change, -max_allowed)
+            
+            # Classify the trend based on percentage change
+            if percent_change > 3.0:
+                trend = "Strongly Bullish"
+            elif percent_change > 0.5:
+                trend = "Bullish"
+            elif percent_change < -3.0:
+                trend = "Strongly Bearish"
+            elif percent_change < -0.5:
+                trend = "Bearish"
+            else:
+                trend = "Neutral"
+                
+            # Log the result
+            logger.info(f"Analyzed {minutes}min trend: {trend} ({percent_change:.2f}%) from {format_price(reference_price)} to {format_price(current_price)}")
+            
+            # Cache the result in Redis
+            try:
+                if redis_conn:
+                    result = {
+                        "trend": trend,
+                        "change_pct": percent_change,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                    redis_conn.set(f"btc_trend_{minutes}min", json.dumps(result))
+            except Exception as e:
+                logger.warning(f"Failed to cache trend result: {e}")
+                
+            return trend, percent_change
+            
+        except (IndexError, KeyError, TypeError) as e:
+            logger.warning(f"Error accessing price data for {minutes}min: {e}")
+            return get_fallback_trend_data(minutes)
+            
     except Exception as e:
-        logger.error(f"Error recording MM trap: {e}", exc_info=True)
-        return False
+        logger.error(f"Error in trend analysis for {minutes}min: {e}")
+        return get_fallback_trend_data(minutes)
 
-# Then keep your existing wrapper function
-def insert_mm_trap(price, price_change_pct, trap_type, trap_confidence):
-    """
-    Insert a market maker trap detection into the database.
+# Ensure database is initialized
+try:
+    initialize_database()
+except Exception as e:
+    logger.error(f"Failed to initialize database: {e}")
+
+# Module testing
+if __name__ == "__main__":
+    # Test database functionality
+    print("Testing database functionality...")
     
-    Args:
-        price: BTC price at trap detection
-        price_change_pct: Percentage change that triggered the trap
-        trap_type: Type of trap detected (Liquidity Grab, Fake Pump, etc.)
-        trap_confidence: Confidence level (0.0-1.0)
-    """
-    # Convert parameters to the dictionary format expected by the implementation
-    trap_data = {
-        "timestamp": datetime.now(timezone.utc),
-        "trap_type": trap_type,
-        "price_level": price,
-        "direction": "up" if price_change_pct > 0 else "down",
-        "confidence_score": trap_confidence,
-        "volume_spike": 0,  # Not available from the parameters
-        "price_range": abs(price_change_pct * price),
-        "description": f"{trap_type} detected with {trap_confidence:.2f} confidence"
-    }
+    # Insert test price movement
+    price_id = insert_price_movement(
+        price=59000.0,
+        volume=1200.5,
+        interval=5,
+        change_pct=0.5,
+        abs_change=300.0
+    )
     
-    # Log trap for debugging during tests
-    print(f"Storing MM trap: {trap_type} | Price: ${price:.2f} | Change: {price_change_pct:.2%} | Confidence: {trap_confidence:.2f}")
+    print(f"Inserted price movement with ID: {price_id}")
     
-    try:
-        # Call the renamed function without risk of recursion
-        return insert_possible_mm_trap(trap_data)
-    except Exception as e:
-        print(f"Error storing MM trap: {e}")
-        return False
+    # Insert test trap
+    trap_id = insert_possible_mm_trap({
+        "type": "Bull Trap",
+        "timeframe": "15min",
+        "confidence": 0.75,
+        "price_change": 1.5,
+        "price": 59000.0
+    })
+    
+    print(f"Inserted MM trap with ID: {trap_id}")
+    
+    # Test fetching movements
+    movements, summary = fetch_multi_interval_movements(interval=5, limit=10)
+    print(f"Fetched {len(movements)} movements for 5-minute interval")
+    print(f"Summary: {summary}")
+    
+    # Test trend analysis
+    trend, change = analyze_price_trend(15)
+    print(f"15-minute trend: {trend} ({change:.2f}%)")
+    
+    print("Database tests completed")

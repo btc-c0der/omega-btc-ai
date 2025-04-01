@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "extracted_at": "2025-03-28T08:44:42.421267",
+    "time_window_minutes": 15,
+    "total_entries": 1
+  },
+  "prices": [
+    {
+      "timestamp": "2025-03-28T08:44:42.421267",
+      "price": 85274.75,
+      "type": "current"
+    }
+  ]
+}

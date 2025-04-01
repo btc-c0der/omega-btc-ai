@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 """
-Test script to verify Redis connection works properly with localhost
+Test script to verify Redis connection works properly with cloud Redis
 """
 
 import redis
 import os
-from omega_ai.utils.redis_manager import RedisManager
+import ssl
+from datetime import datetime
 
 # Rasta color constants
 GREEN_RASTA = "\033[92m"
@@ -15,80 +16,58 @@ RED_RASTA = "\033[91m"
 BLUE_RASTA = "\033[94m"
 RESET = "\033[0m"
 
-def log_message(message, color=GREEN_RASTA, level="info"):
-    """Log with color coding."""
-    if level == "error":
-        print(f"{RED_RASTA}❌ {message}{RESET}")
-    elif level == "warning":
-        print(f"{YELLOW_RASTA}⚠️  {message}{RESET}")
-    elif level == "success":
-        print(f"{GREEN_RASTA}✅ {message}{RESET}")
-    else:
-        print(f"{color}ℹ️  {message}{RESET}")
+# Redis connection parameters from environment
+redis_host = os.getenv('REDIS_HOST', 'redis-19332.fcrce173.eu-west-1-1.ec2.redns.redis-cloud.com')
+redis_port = int(os.getenv('REDIS_PORT', '19332'))
+redis_username = os.getenv('REDIS_USERNAME', 'omega')
+redis_password = os.getenv('REDIS_PASSWORD', 'VuKJU8Z.Z2V8Qn_')
+redis_cert = os.getenv('REDIS_CERT', 'SSL_redis-btc-omega-redis.pem')
 
-def test_redis_manager():
-    """Test direct Redis connection and RedisManager class."""
-    print(f"{BLUE_RASTA}=== Testing Redis Connections ==={RESET}")
-    
-    # Test direct Redis connection first
-    try:
-        direct_redis = redis.Redis(
-            host='localhost',
-            port=int(os.getenv('REDIS_PORT', '6379')),
-            db=0
-        )
-        if direct_redis.ping():
-            log_message("Direct Redis connection successful (localhost)", level="success")
-        else:
-            log_message("Direct Redis ping failed", level="error")
-    except Exception as e:
-        log_message(f"Direct Redis connection failed: {e}", level="error")
-    
-    # Test RedisManager
-    try:
-        # Initialize RedisManager with explicit localhost
-        redis_mgr = RedisManager(host='localhost', port=6379, db=0)
-        if redis_mgr.ping():
-            log_message("RedisManager connection successful", level="success")
-            
-            # Test basic set/get
-            test_key = "test:btc:price"
-            test_value = "50000.0"
-            success = redis_mgr.set_cached(test_key, test_value)
-            if success:
-                log_message("Set test value successful", level="success")
-            else:
-                log_message("Set test value failed", level="error")
-                
-            # Test get
-            value = redis_mgr.get_cached(test_key)
-            if value == test_value:
-                log_message(f"Get test value successful: {value}", level="success")
-            else:
-                log_message(f"Get test value inconsistent: {value}", level="warning")
-                
-            # Test list operations
-            test_list_key = "test:btc:history"
-            redis_mgr.lpush(test_list_key, "49000.0,0.1")
-            redis_mgr.lpush(test_list_key, "49100.0,0.2")
-            
-            list_values = redis_mgr.lrange(test_list_key, 0, -1)
-            if list_values and len(list_values) > 0:
-                log_message(f"List operations successful: {list_values}", level="success")
-            else:
-                log_message("List operations failed", level="error")
-                
-            # Check btc_movement_history
-            btc_history = redis_mgr.lrange("btc_movement_history", 0, 5)
-            if btc_history:
-                log_message(f"btc_movement_history exists with {len(btc_history)} entries", level="success")
-                log_message(f"Sample entries: {btc_history[:3]}", color=BLUE_RASTA)
-            else:
-                log_message("btc_movement_history is empty", level="warning")
-        else:
-            log_message("RedisManager ping failed", level="error")
-    except Exception as e:
-        log_message(f"RedisManager test failed: {e}", level="error")
+print(f"{BLUE_RASTA}=== Testing Redis Cloud Connection ==={RESET}")
+print(f"Connecting to Redis at {redis_host}:{redis_port}")
+print(f"Username: {redis_username}")
+print(f"SSL Certificate: {redis_cert}")
 
-if __name__ == "__main__":
-    test_redis_manager() 
+# Create Redis connection with SSL
+redis_client = redis.Redis(
+    host=redis_host,
+    port=redis_port,
+    username=redis_username,
+    password=redis_password,
+    ssl=True,
+    ssl_cert_reqs=None,  # Skip certificate verification for testing
+    decode_responses=True
+)
+
+try:
+    # Test connection
+    print("\nTesting connection to Redis...")
+    redis_client.ping()
+    print(f"{GREEN_RASTA}✅ Successfully connected to Redis!{RESET}")
+    
+    # Test write
+    test_key = f"test:connection:{datetime.now().timestamp()}"
+    test_value = "Hello Redis Cloud!"
+    redis_client.set(test_key, test_value)
+    print(f"{GREEN_RASTA}✅ Successfully wrote test key: {test_key}{RESET}")
+    
+    # Test read
+    value = redis_client.get(test_key)
+    print(f"{GREEN_RASTA}✅ Successfully read test key: {value}{RESET}")
+    
+    # Test BTC live feed keys
+    btc_keys = ["btc_price", "btc_price_changes", "btc_movement_history"]
+    print("\nChecking BTC live feed keys:")
+    for key in btc_keys:
+        value = redis_client.get(key)
+        if value:
+            print(f"{GREEN_RASTA}✅ {key}: {value}{RESET}")
+        else:
+            print(f"{YELLOW_RASTA}⚠️ {key} not found{RESET}")
+    
+    # Cleanup test key
+    redis_client.delete(test_key)
+    print(f"\n{GREEN_RASTA}✅ Successfully cleaned up test key{RESET}")
+    
+except Exception as e:
+    print(f"{RED_RASTA}❌ Error connecting to Redis: {e}{RESET}") 

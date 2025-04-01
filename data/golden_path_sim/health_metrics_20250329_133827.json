@@ -1,0 +1,3170 @@
+[
+  {
+    "date": "2025-02-27",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 30
+  },
+  {
+    "date": "2025-02-28",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 30
+  },
+  {
+    "date": "2025-03-01",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 30
+  },
+  {
+    "date": "2025-03-02",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 30
+  },
+  {
+    "date": "2025-03-03",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-04",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-05",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-06",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-07",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-08",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-09",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-10",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-11",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-12",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-13",
+    "physical_health": 50,
+    "mental_wellbeing": 45,
+    "community_connection": 40,
+    "financial_literacy": 35,
+    "consciousness_level": 37.0
+  },
+  {
+    "date": "2025-03-14",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-15",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-16",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-17",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-18",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-19",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-20",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-21",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-22",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-23",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-24",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-25",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-26",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-27",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-28",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-29",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 38.0
+  },
+  {
+    "date": "2025-03-30",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-03-31",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-01",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-02",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-03",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-04",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-05",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-06",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-07",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-08",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-09",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-10",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-11",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-12",
+    "physical_health": 52,
+    "mental_wellbeing": 46,
+    "community_connection": 43,
+    "financial_literacy": 35,
+    "consciousness_level": 45.0
+  },
+  {
+    "date": "2025-04-13",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-14",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-15",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-16",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-17",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-18",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-19",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-20",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-21",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-22",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-23",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-24",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-25",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-26",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-27",
+    "physical_health": 57,
+    "mental_wellbeing": 50,
+    "community_connection": 43,
+    "financial_literacy": 38,
+    "consciousness_level": 47.0
+  },
+  {
+    "date": "2025-04-28",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-04-29",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-04-30",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-01",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-02",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-03",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-04",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-05",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-06",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-07",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-08",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-09",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-10",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-11",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-12",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-13",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-14",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 55.0
+  },
+  {
+    "date": "2025-05-15",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-16",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-17",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-18",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-19",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-20",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-21",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-22",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-23",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-24",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-25",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-26",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-27",
+    "physical_health": 60,
+    "mental_wellbeing": 57,
+    "community_connection": 48,
+    "financial_literacy": 40,
+    "consciousness_level": 65.0
+  },
+  {
+    "date": "2025-05-28",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 69.0
+  },
+  {
+    "date": "2025-05-29",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 69.0
+  },
+  {
+    "date": "2025-05-30",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 69.0
+  },
+  {
+    "date": "2025-05-31",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-01",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-02",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-03",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-04",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-05",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-06",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-07",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-08",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-09",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-10",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-11",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-12",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-13",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 77.0
+  },
+  {
+    "date": "2025-06-14",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 87.0
+  },
+  {
+    "date": "2025-06-15",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 87.0
+  },
+  {
+    "date": "2025-06-16",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-17",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-18",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-19",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-20",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-21",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-22",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-23",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-24",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-25",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-26",
+    "physical_health": 63,
+    "mental_wellbeing": 62,
+    "community_connection": 56,
+    "financial_literacy": 42,
+    "consciousness_level": 94.0
+  },
+  {
+    "date": "2025-06-27",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-06-28",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-06-29",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-06-30",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-01",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-02",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-03",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-04",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-05",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-06",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 99.0
+  },
+  {
+    "date": "2025-07-07",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-08",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-09",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-10",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-11",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-12",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-13",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-14",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-15",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-16",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-17",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-18",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-19",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-20",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-21",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-22",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-23",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-24",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-25",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-26",
+    "physical_health": 67,
+    "mental_wellbeing": 68,
+    "community_connection": 59,
+    "financial_literacy": 47,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-27",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-28",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-29",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-30",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-07-31",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-01",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-02",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-03",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-04",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-05",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-06",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-07",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-08",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-09",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-10",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-11",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-12",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-13",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-14",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-15",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-16",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-17",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-18",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-19",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-20",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-21",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-22",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-23",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-24",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-25",
+    "physical_health": 75,
+    "mental_wellbeing": 74,
+    "community_connection": 62,
+    "financial_literacy": 51,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-26",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-27",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-28",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-29",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-30",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-08-31",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-01",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-02",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-03",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-04",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-05",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-06",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-07",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-08",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-09",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-10",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-11",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-12",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-13",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-14",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-15",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-16",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-17",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-18",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-19",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-20",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-21",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-22",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-23",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-24",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-25",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-26",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-27",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-28",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-29",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-09-30",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-01",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-02",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-03",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-04",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-05",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-06",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-07",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-08",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-09",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-10",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-11",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-12",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-13",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-14",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-15",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-16",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-17",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-18",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-19",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-20",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-21",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-22",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-23",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-24",
+    "physical_health": 77,
+    "mental_wellbeing": 77,
+    "community_connection": 63,
+    "financial_literacy": 61,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-25",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-26",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-27",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-28",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-29",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-30",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-10-31",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-01",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-02",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-03",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-04",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-05",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-06",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-07",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-08",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-09",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-10",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-11",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-12",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-13",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-14",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-15",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-16",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-17",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-18",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-19",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-20",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-21",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-22",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-23",
+    "physical_health": 87,
+    "mental_wellbeing": 85,
+    "community_connection": 68,
+    "financial_literacy": 64,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-24",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-25",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-26",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-27",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-28",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-29",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-11-30",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-01",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-02",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-03",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-04",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-05",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-06",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-07",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-08",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-09",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-10",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-11",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-12",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-13",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-14",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-15",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-16",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-17",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-18",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-19",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-20",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-21",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-22",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-23",
+    "physical_health": 89,
+    "mental_wellbeing": 94,
+    "community_connection": 72,
+    "financial_literacy": 76,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-24",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-25",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-26",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-27",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-28",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-29",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-30",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2025-12-31",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-01",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-02",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-03",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-04",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-05",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-06",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-07",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-08",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-09",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-10",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-11",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-12",
+    "physical_health": 92,
+    "mental_wellbeing": 100,
+    "community_connection": 79,
+    "financial_literacy": 84,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-13",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-14",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-15",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-16",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-17",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-18",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-19",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-20",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-21",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-22",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-23",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-24",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-25",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-26",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-27",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-28",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-29",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-30",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-01-31",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-01",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-02",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-03",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-04",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-05",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-06",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-07",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-08",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-09",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-10",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-11",
+    "physical_health": 97,
+    "mental_wellbeing": 100,
+    "community_connection": 87,
+    "financial_literacy": 94,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-12",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-13",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-14",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-15",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-16",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-17",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-18",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-19",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-20",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-21",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-22",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-23",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-24",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-25",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-26",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-27",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-02-28",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-01",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-02",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-03",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-04",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-05",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-06",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-07",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-08",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-09",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-10",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-11",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-12",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-13",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-14",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-15",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-16",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-17",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-18",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-19",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-20",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-21",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-22",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-23",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-24",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-25",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-26",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-27",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-28",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  },
+  {
+    "date": "2026-03-29",
+    "physical_health": 100,
+    "mental_wellbeing": 100,
+    "community_connection": 97,
+    "financial_literacy": 100,
+    "consciousness_level": 100
+  }
+]

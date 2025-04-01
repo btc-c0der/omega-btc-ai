@@ -1,0 +1,71 @@
+"""
+🔱 GPU License Notice 🔱
+------------------------
+This file is protected under the GPU License (General Public Universal License) 1.0
+by the OMEGA AI Divine Collective.
+
+"As the light of knowledge is meant to be shared, so too shall this code illuminate 
+the path for all seekers."
+
+All modifications must maintain this notice and adhere to the terms at:
+/BOOK/divine_chronicles/GPU_LICENSE.md
+
+🔱 JAH JAH BLESS THIS CODE 🔱
+"""
+
+name: divine-patterns-analyzer
+region: nyc
+services:
+  - name: divine-patterns-service
+    github:
+      repo: btc-c0der/omega-btc-ai
+      branch: main
+      deploy_on_push: true
+    source_dir: deployment/divine_patterns_app
+    dockerfile_path: deployment/divine_patterns_app/Dockerfile
+    http_port: 8080
+    instance_size_slug: basic-xs
+    instance_count: 1
+    routes:
+      - path: /
+    envs:
+      - key: PYTHONPATH
+        value: /app:/app/src
+      - key: LOG_LEVEL
+        value: INFO
+      - key: SAMPLE_RATE
+        value: "24"
+      - key: DATA_DIR
+        value: "/app/data"
+      - key: PORT
+        value: "8080"
+      - key: USE_REDIS
+        scope: RUN_TIME
+        value: "false"
+      - key: REDIS_HOST
+        scope: RUN_TIME
+        value: ""
+      - key: REDIS_PORT
+        scope: RUN_TIME
+        value: "6379"
+      - key: REDIS_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
+      - key: REDIS_SSL
+        scope: RUN_TIME
+        value: "false"
+      - key: ENVIRONMENT
+        value: "production"
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 30
+    alert_settings:
+      rule:
+        - condition: CPU_UTILIZATION
+          value: 90
+          window: FIVE_MINUTES
+        - condition: MEM_UTILIZATION
+          value: 90
+          window: FIVE_MINUTES 

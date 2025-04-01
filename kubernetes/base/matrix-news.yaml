@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-news
+spec:
+  selector:
+    matchLabels:
+      app: matrix-news
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: matrix-news
+    spec:
+      containers:
+      - name: matrix-news
+        image: ${MATRIX_NEWS_IMAGE:-matrix-news:latest}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 10082
+        env:
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: LOG_LEVEL
+          value: INFO
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /logs
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 10082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 10082
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matrix-news
+spec:
+  selector:
+    app: matrix-news
+  ports:
+  - port: 10082
+    targetPort: 10082
+  type: ClusterIP 

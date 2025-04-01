@@ -1,10 +1,11 @@
 [run]
-source = omega_ai
+source = omega_ai/monitor
 omit = 
     */tests/*
-    */__init__.py
-    */migrations/*
-    */setup.py
+    */__pycache__/*
+    */site-packages/*
+    */dist-packages/*
+    */venv/*
 
 [report]
 exclude_lines =
@@ -17,4 +18,4 @@ exclude_lines =
 
 [html]
 directory = htmlcov
-title = OMEGA BTC AI Divine Coverage Report
+title = OMEGA BTC AI - Divine Coverage Report

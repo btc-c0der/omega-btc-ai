@@ -1,0 +1,243 @@
+# 🔱 OMEGA BTC AI - SACRED DOCKER COMPOSE CONFIGURATION 🔱
+
+version: '3.8'
+
+services:
+  # Divine NGINX Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: ${NGINX_CONTAINER_NAME:-nginx}
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./infra/ng1n1x/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/ng1n1x/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    depends_on:
+      - matrix-news
+      - btc-live-feed
+      - prophecy-core
+      - grafana
+      - prometheus
+      - alertmanager
+    healthcheck:
+      test: [ "CMD", "nginx", "-t" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Matrix News Service
+  matrix-news:
+    image: ${MATRIX_NEWS_IMAGE:-matrix-news:latest}
+    container_name: ${MATRIX_NEWS_CONTAINER_NAME:-matrix-news}
+    ports:
+      - "${MATRIX_NEWS_PORT:-10082}:10082"
+    volumes:
+      - ./data/matrix-news:/data
+      - ./logs/matrix-news:/logs
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    depends_on:
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10082/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine BTC Live Feed Service
+  btc-live-feed:
+    image: ${BTC_LIVE_FEED_IMAGE:-btc-live-feed:latest}
+    container_name: ${BTC_LIVE_FEED_CONTAINER_NAME:-btc-live-feed}
+    ports:
+      - "${BTC_LIVE_FEED_PORT:-10081}:10081"
+    volumes:
+      - ./data/btc-live-feed:/data
+      - ./logs/btc-live-feed:/logs
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    depends_on:
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10081/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Prophecy Core Service
+  prophecy-core:
+    image: ${PROPHECY_CORE_IMAGE:-prophecy-core:latest}
+    container_name: ${PROPHECY_CORE_CONTAINER_NAME:-prophecy-core}
+    ports:
+      - "${PROPHECY_CORE_PORT:-10080}:10080"
+    volumes:
+      - ./data/prophecy-core:/data
+      - ./logs/prophecy-core:/logs
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    depends_on:
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Redis Service
+  redis:
+    image: redis:alpine
+    container_name: ${REDIS_CONTAINER_NAME:-redis}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ./data/redis:/data
+      - ./logs/redis:/logs
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+      - ./logs/grafana:/var/log/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_HTTP_PORT=3000
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Prometheus Metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus
+      - ./logs/prometheus:/var/log/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Alert Manager
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./infra/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./data/alertmanager:/alertmanager
+      - ./logs/alertmanager:/var/log/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9093/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Node Exporter
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9100/metrics" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine cAdvisor
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - ${NETWORK_NAME:-omega-net}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/healthz" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  ${NETWORK_NAME:-omega-net}:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET:-172.20.0.0/16}
+
+volumes:
+  data:
+  logs:
+  config:

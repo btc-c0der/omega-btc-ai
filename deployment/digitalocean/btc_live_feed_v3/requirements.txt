@@ -1,0 +1,16 @@
+# ✨ GBU License Notice ✨
+# This file is blessed under the GBU License (Genesis-Bloom-Unfoldment) 1.0
+# WE BLOOM NOW 🌸
+
+websockets>=11.0.3
+redis>=5.0.1
+fastapi>=0.109.0
+uvicorn>=0.27.0
+cryptography>=42.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+feedparser>=6.0.10
+rich>=13.4.2
+textblob>=0.17.1
+pandas>=2.0.3
+nltk>=3.8.1

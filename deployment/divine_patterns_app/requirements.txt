@@ -1,0 +1,30 @@
+"""
+🔱 GPU License Notice 🔱
+------------------------
+This file is protected under the GPU License (General Public Universal License) 1.0
+by the OMEGA AI Divine Collective.
+
+"As the light of knowledge is meant to be shared, so too shall this code illuminate 
+the path for all seekers."
+
+All modifications must maintain this notice and adhere to the terms at:
+/BOOK/divine_chronicles/GPU_LICENSE.md
+
+🔱 JAH JAH BLESS THIS CODE 🔱
+"""
+
+numpy==1.24.3
+scipy==1.12.0
+pandas==2.1.4
+matplotlib==3.7.2
+rich==13.5.2
+fastapi==0.107.0
+uvicorn==0.24.0
+pydantic==2.5.2
+python-dateutil==2.8.2
+aiohttp==3.9.1
+redis==5.0.1
+scikit-learn==1.3.2
+statsmodels==0.14.0
+requests==2.31.0
+python-dotenv==1.0.0 
