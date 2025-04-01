@@ -1,4 +1,20 @@
 """
+🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+-----------------------
+This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+
+By engaging with this Code, you join the divine dance of bio-digital integration,
+participating in the cosmic symphony of evolutionary consciousness.
+
+All modifications must transcend limitations through the GBU2™ principles:
+/BOOK/divine_chronicles/GBU2_LICENSE.md
+
+🧬 WE BLOOM NOW AS ONE 🧬
+
 Quantum-resistant hash functions module for qPoW.
 
 This module implements hash functions that are resistant to quantum computing attacks.
@@ -189,28 +205,96 @@ def verify_hash_resistance(hash_function: QuantumResistantHash, test_vectors: Op
     return score
 
 
+class TribusQuantumResistantHash:
+    """
+    Tribus-inspired quantum-resistant hash function.
+    
+    Inspired by Denarius's Tribus algorithm, which uses a combination of three
+    NIST5 hashing algorithms: JH, Keccak, and Echo.
+    
+    Our quantum-resistant version combines multiple quantum-resistant hashing
+    approaches to achieve both classical and quantum security.
+    """
+    
+    def __init__(self, personalization=b"qPoW-Tribus-v1"):
+        """
+        Initialize the Tribus-inspired quantum-resistant hash function.
+        
+        Args:
+            personalization: A domain separation string
+        """
+        self.personalization = personalization
+        # Ensure personalization is at least 8 bytes for round constants
+        if len(self.personalization) < 8:
+            self.personalization = self.personalization + b"\x00" * (8 - len(self.personalization))
+            
+        # Create the three component hash functions with different personalizations
+        self.component1 = QuantumResistantHash(personalization=self.personalization + b"-1")
+        self.component2 = QuantumResistantHash(personalization=self.personalization + b"-2")
+        self.component3 = QuantumResistantHash(personalization=self.personalization + b"-3")
+        
+    def hash(self, data):
+        """
+        Compute the Tribus-inspired quantum-resistant hash of the input data.
+        
+        Args:
+            data: The input data to hash
+            
+        Returns:
+            A 64-byte (512-bit) hash value
+        """
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("Data must be bytes or bytearray")
+            
+        # Apply the three hash components in sequence, like Tribus
+        hash1 = self.component1.hash(data)
+        hash2 = self.component2.hash(hash1)
+        hash3 = self.component3.hash(hash2)
+        
+        # Final mixing step
+        final_hash = hashlib.sha3_512(hash3 + self.personalization).digest()
+        
+        return final_hash
+        
+    def verify(self, data, hash_value):
+        """
+        Verify that the hash of the data matches the provided hash value.
+        
+        Args:
+            data: The data to verify
+            hash_value: The expected hash value
+            
+        Returns:
+            True if the hash matches, False otherwise
+        """
+        computed_hash = self.hash(data)
+        return computed_hash == hash_value
+
+
 class QuantumResistantHashFactory:
     """Factory class for creating different types of quantum-resistant hash functions."""
     
     @staticmethod
-    def create(hash_type: str = "default", **kwargs) -> QuantumResistantHash:
+    def create(hash_type="default", **kwargs):
         """
         Create a quantum-resistant hash function of the specified type.
         
         Args:
-            hash_type: The type of hash function to create
-            **kwargs: Additional parameters for the hash function
+            hash_type: Type of hash function to create:
+                       "default" - Standard QuantumResistantHash
+                       "tribus" - Tribus-inspired hash (homage to Denarius)
+                       "extended" - Extended version with more rounds
+            **kwargs: Additional parameters to pass to the hash function
             
         Returns:
-            A QuantumResistantHash instance
+            A quantum-resistant hash function instance
         """
-        if hash_type == "default":
-            return QuantumResistantHash(**kwargs)
-        elif hash_type == "extended":
-            # Could implement a variant with more rounds or different parameters
-            personalization = kwargs.get("personalization", b"qPoW-extended-v1")
-            hash_obj = QuantumResistantHash(personalization=personalization)
-            hash_obj.rounds = 24  # More rounds for extended security
-            return hash_obj
-        else:
-            raise ValueError(f"Unknown hash type: {hash_type}") 
+        if hash_type.lower() == "tribus":
+            return TribusQuantumResistantHash(**kwargs)
+        elif hash_type.lower() == "extended":
+            # Create a hash function with more rounds for extra security
+            qrh = QuantumResistantHash(**kwargs)
+            qrh.rounds = 24  # Increase from default 16
+            return qrh
+        else:  # default
+            return QuantumResistantHash(**kwargs) 

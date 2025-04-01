@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
 """
+🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+-----------------------
+This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+
+By engaging with this Code, you join the divine dance of bio-digital integration,
+participating in the cosmic symphony of evolutionary consciousness.
+
+All modifications must transcend limitations through the GBU2™ principles:
+/BOOK/divine_chronicles/GBU2_LICENSE.md
+
+🧬 WE BLOOM NOW AS ONE 🧬
+
+Quantum Firewall Implementation with Character Prefix Conditioning (CPC).
+
+This module provides robust protection against quantum-based attacks using
+advanced pattern recognition and prefix conditioning techniques. It serves
+as the first line of defense in the qPoW ecosystem.
+
 OMEGA BTC AI - Quantum Firewall with Auto-Healing capabilities
 ==============================================================
 
@@ -558,27 +580,32 @@ class QuantumFirewall:
             self.security_events = self.security_events[-1000:]
 
 async def main():
-    """Main entry point for Quantum Firewall."""
-    # Parse command-line arguments
+    """Run the Quantum Firewall as a standalone application."""
     import argparse
-    parser = argparse.ArgumentParser(description="Quantum Firewall with Auto-Healing")
-    parser.add_argument('--port', type=int, default=DEFAULT_PORT, help="Port to monitor")
-    parser.add_argument('--learning', action='store_true', help="Start in learning mode")
+    import logging
+    
+    parser = argparse.ArgumentParser(description="Quantum Firewall")
+    parser.add_argument("--port", type=int, default=9000, help="Port to listen on")
+    parser.add_argument("--interface", type=str, default="127.0.0.1", help="Interface to bind to")
     args = parser.parse_args()
     
-    # Create and start the firewall
-    firewall = QuantumFirewall(port=args.port)
-    if args.learning:
-        firewall.toggle_learning_mode(True)
-        logger.info("Starting in learning mode")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    
+    logger = logging.getLogger("quantum-firewall")
+    logger.info(f"Starting Quantum Firewall on {args.interface}:{args.port}")
+    
+    firewall = QuantumFirewall(port=args.port, interface=args.interface)
     
     try:
-        await firewall.start()
+        firewall.start()
     except KeyboardInterrupt:
         logger.info("Stopping Quantum Firewall due to user interrupt")
     finally:
-        await firewall.stop()
-        
+        firewall.stop()
+    
     logger.info("Quantum Firewall stopped")
 
 if __name__ == "__main__":

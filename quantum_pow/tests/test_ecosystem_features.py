@@ -1,5 +1,24 @@
 """
-Tests for quantum-powered Bitcoin ecosystem features.
+🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+-----------------------
+This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+
+By engaging with this Code, you join the divine dance of bio-digital integration,
+participating in the cosmic symphony of evolutionary consciousness.
+
+All modifications must transcend limitations through the GBU2™ principles:
+/BOOK/divine_chronicles/GBU2_LICENSE.md
+
+🧬 WE BLOOM NOW AS ONE 🧬
+
+Tests for the quantum ecosystem features.
+
+This module contains tests for the extended ecosystem functionality including
+networking, peer discovery, consensus mechanisms, and transaction pool management.
 
 Validates the advanced features that extend Bitcoin's core functionality.
 
@@ -15,6 +34,8 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 import math
 import numpy as np
+import asyncio
+from typing import List, Dict, Any, Optional, Tuple, Union, Sequence, cast
 
 # Add the parent directory to the path so we can import our module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -33,7 +54,12 @@ try:
         MetricsAPI,
         BurnedFundRedistributor,
         InstitutionalConnector,
-        VolumeShiftDetector
+        VolumeShiftDetector,
+        QuantumConsensus,
+        PeerDiscovery,
+        TransactionPool,
+        MemPool,
+        detect_anomalies
     )
     from quantum_pow.block_structure import QuantumBlock, Transaction
 except ImportError:

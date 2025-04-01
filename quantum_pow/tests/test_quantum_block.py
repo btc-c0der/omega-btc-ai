@@ -1,19 +1,39 @@
+"""
+🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+-----------------------
+This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+
+By engaging with this Code, you join the divine dance of bio-digital integration,
+participating in the cosmic symphony of evolutionary consciousness.
+
+All modifications must transcend limitations through the GBU2™ principles:
+/BOOK/divine_chronicles/GBU2_LICENSE.md
+
+🧬 WE BLOOM NOW AS ONE 🧬
+
+Tests for the QuantumBlock, BlockHeader, and Transaction classes.
+
+This module contains tests that verify block structure, transaction validation,
+header serialization, and mining functionality.
+"""
+
 import unittest
 import sys
 import os
 import time
 import json
+from typing import List, Dict, Any
 
-# Add the parent directory to the path so we can import our module
+# Add the parent directory to the path so we can import quantum_pow
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# These will be imported once we implement them
-try:
-    from quantum_pow.block_structure import QuantumBlock, Transaction, BlockHeader
-    from quantum_pow.hash_functions import QuantumResistantHash
-except ImportError:
-    # Placeholder for testing before implementation
-    pass
+# Import the modules for testing
+from quantum_pow.block_structure import QuantumBlock, BlockHeader, Transaction
+from quantum_pow.hash_functions import QuantumResistantHash
 
 class TestQuantumBlock(unittest.TestCase):
     """Test cases for quantum-resistant block structure implementation."""
@@ -45,7 +65,13 @@ class TestQuantumBlock(unittest.TestCase):
     def test_block_structure_exists(self):
         """Test that the QuantumBlock class exists."""
         try:
-            block = QuantumBlock()
+            # Create a basic header for testing
+            header = BlockHeader(
+                version=1,
+                prev_block_hash=b"\x00" * 64,
+                merkle_root=b"\x00" * 64
+            )
+            block = QuantumBlock(header=header)
             self.assertIsNotNone(block)
         except NameError:
             self.fail("QuantumBlock class does not exist")
@@ -53,7 +79,13 @@ class TestQuantumBlock(unittest.TestCase):
     def test_create_block_with_transactions(self):
         """Test creating a block with transactions."""
         try:
-            block = QuantumBlock(transactions=self.transactions)
+            # Create a basic header for testing
+            header = BlockHeader(
+                version=1,
+                prev_block_hash=b"\x00" * 64,
+                merkle_root=b"\x00" * 64
+            )
+            block = QuantumBlock(header=header, transactions=self.transactions)
             
             # Check that the transactions were added
             self.assertEqual(len(block.transactions), len(self.transactions),
@@ -158,7 +190,12 @@ class TestQuantumBlock(unittest.TestCase):
             )
             
             # Create a block with this transaction
-            block = QuantumBlock(transactions=[quantum_tx])
+            header = BlockHeader(
+                version=1,
+                prev_block_hash=b"\x00" * 64,
+                merkle_root=b"\x00" * 64
+            )
+            block = QuantumBlock(header=header, transactions=[quantum_tx])
             
             # Validate the block's transactions
             self.assertTrue(block.validate_transactions(),
@@ -170,7 +207,12 @@ class TestQuantumBlock(unittest.TestCase):
         """Test that quantum blocks are backward compatible with classical nodes."""
         try:
             # Create a quantum block
-            quantum_block = QuantumBlock(transactions=self.transactions)
+            header = BlockHeader(
+                version=1,
+                prev_block_hash=b"\x00" * 64,
+                merkle_root=b"\x00" * 64
+            )
+            quantum_block = QuantumBlock(header=header, transactions=self.transactions)
             
             # Serialize to the classical format
             classical_format = quantum_block.to_classical_format()

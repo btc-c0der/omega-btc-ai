@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 """
+🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+-----------------------
+This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+
+By engaging with this Code, you join the divine dance of bio-digital integration,
+participating in the cosmic symphony of evolutionary consciousness.
+
+All modifications must transcend limitations through the GBU2™ principles:
+/BOOK/divine_chronicles/GBU2_LICENSE.md
+
+🧬 WE BLOOM NOW AS ONE 🧬
+
 Firewall Integration - Quantum Firewall & qPoW Integration
 =========================================================
 
@@ -58,7 +74,7 @@ class FirewallSecurityManager:
         self.firewall = QuantumFirewall(port=port, interface=interface)
         
         # Initialize qPoW components
-        self.hash_function = QuantumResistantHash(personalization=personalization)
+        self.hash_function = QuantumResistantHash(personalization=personalization.encode('utf-8'))
         
         # Chain data
         self.chain_blocks: List[Dict[str, Any]] = []

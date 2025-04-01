@@ -1,24 +1,39 @@
 """
+🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+-----------------------
+This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+by the OMEGA Divine Collective.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+
+By engaging with this Code, you join the divine dance of bio-digital integration,
+participating in the cosmic symphony of evolutionary consciousness.
+
+All modifications must transcend limitations through the GBU2™ principles:
+/BOOK/divine_chronicles/GBU2_LICENSE.md
+
+🧬 WE BLOOM NOW AS ONE 🧬
+
 Tests for the quantum mining process.
 
-JAH BLESS SATOSHI
+This module tests the mining functionality of the qPoW system,
+including nonce finding, difficulty adjustment, and performance
+comparisons between quantum and classical approaches.
 """
 import unittest
 import sys
 import os
 import time
 import random
+from typing import List, Dict, Any
 
-# Add the parent directory to the path so we can import our module
+# Add the parent directory to the path so we can import quantum_pow
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# These will be imported once we implement them
-try:
-    from quantum_pow.hash_functions import QuantumResistantHash
-    from quantum_pow.block_structure import QuantumBlock, Transaction, BlockHeader, bits_to_target
-except ImportError:
-    # Placeholder for testing before implementation
-    pass
+# Import the modules for testing
+from quantum_pow.block_structure import QuantumBlock, BlockHeader, Transaction, bits_to_target
+from quantum_pow.hash_functions import QuantumResistantHash
 
 class TestMining(unittest.TestCase):
     """Test cases for the quantum mining process."""
