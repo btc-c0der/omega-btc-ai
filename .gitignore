@@ -192,3 +192,9 @@ tmp_data/omega_viz_*/
 *.dylib
 *.log
 venv/
+
+# Instagram automation
+content/images/
+ig_session.json
+omega_ig_automation.log
+.venv-ig/
