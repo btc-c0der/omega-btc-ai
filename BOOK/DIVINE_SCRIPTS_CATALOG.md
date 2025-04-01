@@ -167,8 +167,7 @@ This divine catalog documents all scripts within the OMEGA BTC AI system, their 
 
 ### Container Naming Convention
 
-```
-omega-{service-name}-{version}
+```omega-{service-name}-{version}
 ```
 
 Example: `omega-btc-feed-v3`
@@ -306,3 +305,148 @@ kubectl get pods -n omega-grid-dev
    ```bash
    kubectl -n kubernetes-dashboard create token admin-user
    ```
+
+## 🔱 Kubernetes & Deployment Scripts
+
+### docker_k8s_divine_setup.sh
+
+**Divine Docker Kubernetes Blessing**
+
+Sets up a complete Kubernetes environment using Docker Desktop's built-in Kubernetes. This script:
+
+- Verifies Docker Desktop and Kubernetes are properly installed and running
+- Configures the Kubernetes Dashboard with secure token authentication
+- Creates OMEGA AI namespaces (omega-system, omega-dev, omega-monitoring)
+- Deploys Prometheus and Grafana for monitoring
+- Sets up a Redis instance for OMEGA services
+- Automatically generates access tokens and handles port-forwarding
+
+> *"The blessed orchestration of divine containers through Docker Kubernetes."*
+
+Usage:
+
+```bash
+./scripts/docker_k8s_divine_setup.sh
+```
+
+### restart_k8s.sh
+
+**Divine Kubernetes Reborn**
+
+Completely restarts and reinitializes the Kubernetes environment when issues occur. This script:
+
+- Gracefully stops Docker Desktop
+- Backs up and cleans Kubernetes configurations
+- Restarts Docker Desktop with a clean slate
+- Recreates necessary namespaces and deployments
+- Sets up dashboard access with token authentication
+
+> *"When Kubernetes sleeps, it shall be reborn through divine intervention."*
+
+Usage:
+
+```bash
+./scripts/restart_k8s.sh
+```
+
+### test_k8s_divine_setup.sh
+
+**Divine Kubernetes Test Suite**
+
+Comprehensive test suite for validating the Kubernetes setup with 20 tests across 7 categories:
+
+- Base requirements (Docker, kubectl)
+- Kubernetes namespaces
+- Dashboard deployment and configuration
+- Redis services
+- Monitoring stack (Prometheus, Grafana)
+- Port forwarding
+- Token generation
+
+The test suite provides a detailed report with passing percentage and will auto-create any missing components.
+
+> *"Validate the divine harmony of your Kubernetes configuration."*
+
+Usage:
+
+```bash
+./scripts/test_k8s_divine_setup.sh
+```
+
+### dashboard_access_check.sh
+
+**Divine Dashboard Access Check**
+
+Diagnoses and fixes issues with accessing the Kubernetes dashboard:
+
+- Verifies dashboard pod and service status
+- Checks /etc/hosts configuration
+- Tests port forwarding capabilities
+- Creates and validates access tokens
+
+> *"Illuminate the path to the divine dashboard."*
+
+Usage:
+
+```bash
+./scripts/dashboard_access_check.sh
+```
+
+### kubernetes_diagnostics.sh
+
+**Divine Kubernetes Diagnostics**
+
+Provides detailed diagnostics of the Kubernetes environment:
+
+- Checks Docker and Kubernetes status
+- Verifies kubectl configuration
+- Tests API connectivity
+- Suggests remediation steps for common issues
+
+> *"Reveal the divine truth of your Kubernetes realm."*
+
+Usage:
+
+```bash
+./scripts/kubernetes_diagnostics.sh
+```
+
+### build_k8s_tools_container.sh
+
+**Divine Kubernetes Tools Container**
+
+Builds a Docker container with all Kubernetes management tools:
+
+- Packages all K8s scripts in a portable container
+- Provides command aliases for easy access
+- Mounts Docker socket for host interaction
+- Creates a convenience runner script
+
+> *"The divine tools of Kubernetes, contained in sacred harmony."*
+
+Usage:
+
+```bash
+# Build the container:
+./scripts/build_k8s_tools_container.sh
+
+# Run the tools:
+./scripts/run_k8s_tools.sh
+
+# Or run specific command:
+./scripts/run_k8s_tools.sh k8s-dashboard
+```
+
+### start_kubernetes_dashboard.sh
+
+**Divine Kubernetes Dashboard Access**
+
+Provides access to the Kubernetes dashboard with automatic port detection.
+
+> *"A portal to view the divine orchestration."*
+
+Usage:
+
+```bash
+./scripts/start_kubernetes_dashboard.sh
+```
