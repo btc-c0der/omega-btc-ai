@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: omega-grid-prod
+  labels:
+    name: omega-grid-prod
+    app: omega-btc-ai
+    environment: prod 

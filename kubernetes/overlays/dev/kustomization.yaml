@@ -3,12 +3,10 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - namespace.yaml
 
-namespace: omega-btc-ai-dev
+namespace: omega-grid-dev
 
-patchesStrategicMerge:
-  - patch-replicas.yaml
-  - patch-ingress.yaml
-
-commonLabels:
-  environment: dev 
+labels:
+  - pairs:
+      environment: dev 
