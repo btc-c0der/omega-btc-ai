@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sermon-service-config
+  namespace: ibr-spain
+data:
+  NODE_ENV: "production"
+  PORT: "3001"
+  LOG_LEVEL: "info"
+  MONGODB_URI: "mongodb://mongodb-sermon:27017/ibr-sermon"
+  STORAGE_TYPE: "s3"
+  S3_BUCKET: "ibr-sermons"
+  S3_REGION: "eu-west-1"
+  THUMBNAIL_SIZES: "small:240,medium:480,large:720"
+  AUDIO_FORMATS: "mp3,ogg"
+  ENABLE_TRANSCRIPTION: "true"
+  SCRIPTURE_API_URL: "https://api.scripture.api.bible/v1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sermon-service-secrets
+  namespace: ibr-spain
+type: Opaque
+data:
+  AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID_BASE64}"
+  AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY_BASE64}"
+  MONGODB_USER: "${MONGODB_USER_BASE64}"
+  MONGODB_PASSWORD: "${MONGODB_PASSWORD_BASE64}"
+  SCRIPTURE_API_KEY: "${SCRIPTURE_API_KEY_BASE64}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sermon-service
+  namespace: ibr-spain
+  labels:
+    app: sermon-service
+    component: microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sermon-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: sermon-service
+        component: microservice
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: sermon-service
+        image: ${DOCKER_REGISTRY}/ibr-spain/sermon-service:${SERMON_SERVICE_VERSION}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3001
+          name: http
+        envFrom:
+        - configMapRef:
+            name: sermon-service-config
+        - secretRef:
+            name: sermon-service-secrets
+        resources:
+          requests:
+            cpu: 150m
+            memory: 256Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 3001
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sermon-service
+  namespace: ibr-spain
+  labels:
+    app: sermon-service
+    component: microservice
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3001
+    targetPort: 3001
+    protocol: TCP
+    name: http
+  selector:
+    app: sermon-service
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sermon-service-hpa
+  namespace: ibr-spain
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sermon-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 60 
