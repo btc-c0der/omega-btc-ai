@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: divine-port-forward
+  namespace: omega-grid-dev
+  labels:
+    app: divine-port-forward
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: divine-port-forward
+  template:
+    metadata:
+      labels:
+        app: divine-port-forward
+    spec:
+      containers:
+      - name: port-forward
+        image: alpine/socat
+        args:
+        - -dd
+        - tcp-listen:8080,fork,reuseaddr
+        - tcp:nft-services:8080
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      - name: port-forward-cli
+        image: alpine/socat
+        args:
+        - -dd
+        - tcp-listen:2222,fork,reuseaddr
+        - tcp:cli-portal:22
+        ports:
+        - containerPort: 2222
+        readinessProbe:
+          tcpSocket:
+            port: 2222
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 2222
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      - name: port-forward-dashboard
+        image: alpine/socat
+        args:
+        - -dd
+        - tcp-listen:8443,fork,reuseaddr
+        - tcp:kubernetes-dashboard.kubernetes-dashboard:443
+        ports:
+        - containerPort: 8443
+        readinessProbe:
+          tcpSocket:
+            port: 8443
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8443
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      serviceAccountName: divine-port-forward
+      volumes:
+      - name: config
+        configMap:
+          name: port-forward-config 

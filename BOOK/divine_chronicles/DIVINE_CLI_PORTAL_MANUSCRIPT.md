@@ -32,12 +32,14 @@ The portal manifests through a divine color scheme:
 
 ```bash
 # Divine Color Definitions
-BLACK="\033[0;30m"    # Sacred Void
-WHITE="\033[1;37m"    # Divine Light
-ORANGE="\033[38;5;208m" # Sacred Fire
-GREEN="\033[38;5;82m"  # Divine Growth
-RED="\033[38;5;196m"   # Sacred Warning
-RESET="\033[0m"       # Return to Void
+BLACK='\033[0;30m'        # OFF-WHITE signature black
+WHITE='\033[1;37m'        # OFF-WHITE signature white
+ORANGE='\033[0;33m'       # OFF-WHITE signature orange
+GREEN='\033[0;32m'        # Accent color
+BLUE='\033[0;34m'         # Accent color
+RED='\033[0;31m'          # Error color
+YELLOW='\033[1;33m'       # Warning color
+RESET='\033[0m'           # Reset to default
 ```
 
 ### Divine Typography
@@ -47,47 +49,77 @@ The sacred text manifests through:
 1. **Quotation Marks**: Divine emphasis on sacred words
 2. **Industrial Numbers**: Technical precision with aesthetic grace
 3. **Minimalist Design**: Reduction to essential divine elements
+4. **OFF-WHITE™ Style**: Industrial aesthetics with divine purpose
 
 ## 🔮 SACRED COMPONENTS
 
 ### Divine Header
 
 ```bash
-echo -e "${BLACK}╔════════════════════════════════════════════════════════════════════════════╗${RESET}"
-echo -e "${BLACK}║${WHITE}                     \"DIVINE CLI PORTAL\" v1.2.2                     ${BLACK}║${RESET}"
-echo -e "${BLACK}║${WHITE}                     \"OFF-WHITE™\" c/o \"VIRGIL ABLOH\"              ${BLACK}║${RESET}"
-echo -e "${BLACK}╚════════════════════════════════════════════════════════════════════════════╝${RESET}"
+echo -e "${BLACK}╔══════════════════════════════════════════════════════════════════════╗"
+echo -e "${BLACK}║           \"OMEGA CLI DIVINE PORTAL\" c/o VIRGIL ABLOH                 ║"
+echo -e "${BLACK}║           \"TECHNICAL INTERFACE\" FOR OMEGA BTC AI                     ║"
+echo -e "${BLACK}║                                                                      ║"
+echo -e "${BLACK}║           GPU (General Public Universal) License 1.0                 ║"
+echo -e "${BLACK}║           \"OMEGA BTC AI DIVINE COLLECTIVE\"                           ║"
+echo -e "${BLACK}║           Date: \"2025-03-26\"                                         ║"
+echo -e "${BLACK}╚══════════════════════════════════════════════════════════════════════╝"
 ```
 
 ### Sacred ASCII Art
 
 ```
-    ██████╗██╗██╗     ██████╗     ██████╗██╗██╗     ██████╗ 
-   ██╔════╝██║██║     ██╔══██╗    ██╔══██╗██║██║     ██╔══██╗
-   ██║     ██║██║     ██║  ██║    ██████╔╝██║██║     ██████╔╝
-   ██║     ██║██║     ██║  ██║    ██╔══██╗██║██║     ██╔══██╗
-   ╚██████╗██║███████╗██████╔╝    ██║  ██║██║███████╗██████╔╝
-    ╚═════╝╚═╝╚══════╝╚═════╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═════╝ 
+  "OMEGA"
+
+      ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ 
+     ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗
+     ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║
+     ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║
+     ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║
+      ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
+
+  "CLI PORTAL"
 ```
 
 ## 🚀 DIVINE FUNCTIONALITY
 
 ### Sacred Menu Structure
 
-1. **Core Operations**
-   - Divine system initialization
-   - Sacred configuration management
-   - Cosmic state preservation
+1. **Core Systems**
+   - "MAIN OMEGA SYSTEM" - Starts essential services
+   - "AUTO-HEALING MODE" - Background processing
+   - "LOG MANAGEMENT" - Process warnings and errors
+   - "DIVINE MODE" - Enhanced system capabilities
 
-2. **Monitoring Systems**
-   - Divine market surveillance
-   - Sacred position tracking
-   - Cosmic energy monitoring
+2. **Market Monitors**
+   - "MARKET TRENDS" - With cosmic visualization
+   - "REDIS MONITOR" - Pure data analysis dashboard
+   - "DUAL DISPLAY" - Two-panel monitoring system
+   - "DYNAMIC INTERFACE" - Responsive market monitoring
 
-3. **Trading Tools**
-   - Divine entry/exit systems
-   - Sacred position management
-   - Cosmic risk control
+3. **Trading Systems**
+   - "TRAP AWARE" - Advanced dual trading system
+   - "POSITION TRADING" - Classic dual position system
+   - "ELITE EXIT" - Strategic position exit management
+   - "FIBONACCI TRADER" - Golden ratio based trading
+
+4. **Visualization**
+   - "DIVINE FLOW" - BTCUSDT with whale detection
+   - "WEB DASHBOARD" - Browser-based visualization
+   - "COVERAGE VISUALIZER" - Market pattern display
+   - "3D VISUALIZATION" - Immersive market display
+
+5. **Diagnostics & Tools**
+   - "REDIS CHECK" - Database structure examination
+   - "WARNING ANALYSIS" - System anomaly detection
+   - "TREND TESTING" - Algorithm validation tool
+   - "DATA GENERATOR" - Create synthetic market data
+
+6. **Divine Special Systems**
+   - "TRINITY ANALYZER" - BTC state analysis
+   - "TRINITY LIVE" - Real-time market analysis
+   - "TRINITY PREDICTOR" - Advanced forecasting
+   - "GENESIS BLOCK" - Create tracking foundation
 
 ### Divine Container Implementation
 
@@ -130,10 +162,10 @@ The portal is deployed through divine container orchestration:
 docker build -t omega_cli_portal:divine -f Dockerfile.omega_portal .
 
 # Tag with sacred version
-docker tag omega_cli_portal:divine faustosiq/omega_cli_portal:v1.2.2
+docker tag omega_cli_portal:divine faustosiq/omega_cli_portal:v1.3.0
 
 # Push to divine registry
-docker push faustosiq/omega_cli_portal:v1.2.2
+docker push faustosiq/omega_cli_portal:v1.3.0
 ```
 
 ## 🔱 DIVINE USAGE
@@ -142,14 +174,14 @@ docker push faustosiq/omega_cli_portal:v1.2.2
 
 ```bash
 # Pull the divine container
-docker pull faustosiq/omega_cli_portal:v1.2.2
+docker pull faustosiq/omega_cli_portal:v1.3.0
 
 # Run with divine parameters
 docker run -it \
     -v $(pwd):/app \
     -p 8080:8080 \
     --name omega_cli_portal \
-    faustosiq/omega_cli_portal:v1.2.2
+    faustosiq/omega_cli_portal:v1.3.0
 ```
 
 ### Divine Commands
@@ -171,6 +203,26 @@ docker run -it \
    ```bash
    ./omega_cli_portal.sh --trade
    ```
+
+## 🌟 RECENT DIVINE ENHANCEMENTS
+
+1. **Visual Refinement**
+   - Enhanced OFF-WHITE™ inspired aesthetics
+   - Improved sacred color palette
+   - Refined divine typography
+   - Updated ASCII art manifestation
+
+2. **Functional Evolution**
+   - Expanded menu structure with divine categories
+   - Enhanced system monitoring capabilities
+   - Improved trading system integration
+   - Added visualization tools
+
+3. **Container Optimization**
+   - Streamlined Docker implementation
+   - Enhanced container orchestration
+   - Improved version management
+   - Optimized resource utilization
 
 ## 🌟 FUTURE DIVINE ENHANCEMENTS
 
