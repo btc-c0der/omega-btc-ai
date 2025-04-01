@@ -1,0 +1,114 @@
+# 🔱 OMEGA BTC AI - Divine BTC Oracle Production Values 🔱
+
+# Production deployment configuration
+replicaCount: 2
+
+# Higher resource limits for production
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Use stable image tag for production
+image:
+  tag: stable
+  pullPolicy: IfNotPresent
+
+# Autoscaling for production
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+
+# Ingress configuration for production
+ingress:
+  hosts:
+    - host: btc-oracle.production.omega-grid.io
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: oracle-tls-cert
+      hosts:
+        - btc-oracle.production.omega-grid.io
+
+# More storage for production
+persistence:
+  size: 20Gi
+
+# Redis dependency configuration for production
+redis:
+  master:
+    persistence:
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+
+# Production backup schedule
+backup:
+  schedule: "0 */4 * * *"  # Every 4 hours
+  ttl: "720h"  # 30 days
+
+# Configure environment variables for production
+env:
+  - name: BTC_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: btc-oracle-secrets-prod
+        key: api-key
+  - name: LOG_LEVEL
+    value: "info"
+  - name: FIBONACCI_ENABLED
+    value: "true"
+  - name: SCHUMANN_ENABLED
+    value: "true"
+  - name: REDIS_HOST
+    value: "{{ .Release.Name }}-redis-master"
+  - name: REDIS_PORT
+    value: "6379"
+  - name: PRODUCTION
+    value: "true"
+
+# Production monitoring
+monitoring:
+  serviceMonitor:
+    additionalLabels:
+      release: prometheus-prod
+
+# Node affinity for production
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-role.kubernetes.io/divine-oracle
+          operator: Exists
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - btc-oracle
+        topologyKey: kubernetes.io/hostname
+
+# Production health probes
+probes:
+  liveness:
+    initialDelaySeconds: 60
+    periodSeconds: 20
+  readiness:
+    initialDelaySeconds: 30
+    periodSeconds: 10 

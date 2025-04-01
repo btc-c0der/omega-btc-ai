@@ -1,0 +1,210 @@
+# 🔱 OMEGA BTC AI - Divine BTC Oracle Values 🔱
+
+# Image configuration
+image:
+  repository: ghcr.io/fsiqueira/omega-btc-ai
+  tag: latest
+  pullPolicy: Always
+
+# Deployment configuration
+replicaCount: 1
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Pod Security Context
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: btc-oracle.omega-grid.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Environment variables
+env:
+  - name: BTC_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: btc-oracle-secrets
+        key: api-key
+  - name: LOG_LEVEL
+    value: "info"
+  - name: FIBONACCI_ENABLED
+    value: "true"
+  - name: SCHUMANN_ENABLED
+    value: "true"
+  - name: REDIS_HOST
+    value: "{{ .Release.Name }}-redis-master"
+  - name: REDIS_PORT
+    value: "6379"
+
+# Redis dependency configuration
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+# ConfigMap for oracle configuration
+configMap:
+  enabled: true
+  data:
+    oracle-config.yaml: |
+      oracle:
+        # Divine Oracle Configuration
+        name: "OMEGA BTC Divine Oracle"
+        version: "1.0.0"
+        updateInterval: 60
+        sources:
+          - name: "binance"
+            enabled: true
+            priority: 1
+          - name: "coinbase"
+            enabled: true
+            priority: 2
+          - name: "bitfinex"
+            enabled: true
+            priority: 3
+        
+        # Divine Fibonacci Configuration
+        fibonacci:
+          enabled: true
+          levels: [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.618, 2.618, 3.618, 4.236]
+          timeframes: ["1h", "4h", "1d", "1w"]
+          
+        # Schumann Resonance Integration
+        schumann:
+          enabled: true
+          endpoint: "https://api.schumannresonance.org/v1/latest"
+          correlationEnabled: true
+          
+        # Cosmic Fibonacci Visualization
+        visualization:
+          enabled: true
+          outputPath: "/data/visualizations"
+          
+        # Divine Memory
+        memory:
+          retentionDays: 30
+          storageType: "redis"
+
+# Persistent volume for oracle data
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 5Gi
+  storageClass: "longhorn"
+  mountPath: /data
+
+# Secrets (to be created separately or through values-secret.yaml)
+secrets:
+  create: false
+  name: btc-oracle-secrets
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: prometheus
+
+# Health probes
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    path: /health
+  readiness:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    path: /ready
+
+# Divine backup integration with Velero
+backup:
+  enabled: true
+  schedule: "0 3 * * *"
+  ttl: "720h"
+  includedNamespaces:
+    - "{{ .Release.Namespace }}"
+  includedResources:
+    - deployments
+    - services
+    - configmaps
+    - secrets
+    - persistentvolumeclaims
+
+# Divine maintenance
+maintenance:
+  enabled: true
+  schedule: "0 2 * * *"  # Run daily at 2 AM
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+
+# Divine annotations for pods
+podAnnotations:
+  omega.ai/divine-protection: "enabled"
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {} 

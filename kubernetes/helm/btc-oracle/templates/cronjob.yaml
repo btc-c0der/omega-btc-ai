@@ -1,0 +1,64 @@
+{{- if .Values.maintenance.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "btc-oracle.fullname" . }}-maintenance
+  labels:
+    {{- include "btc-oracle.labels" . | nindent 4 }}
+  annotations:
+    omega.ai/divine-maintenance: "enabled"
+spec:
+  schedule: {{ .Values.maintenance.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "btc-oracle.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: maintenance
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: maintenance
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command:
+                - sh
+                - -c
+                - |
+                  echo "🔱 Starting divine maintenance for the BTC Oracle 🔱"
+                  # Connect to Redis and run maintenance tasks
+                  redis-cli -h {{ .Release.Name }}-redis-master -p 6379 PING
+                  if [ $? -eq 0 ]; then
+                    echo "✅ Connected to Redis, performing divine cleanup..."
+                    # Cleanup old data
+                    redis-cli -h {{ .Release.Name }}-redis-master -p 6379 KEYS "oracle:data:*:old" | xargs -r redis-cli -h {{ .Release.Name }}-redis-master -p 6379 DEL
+                    # Update Fibonacci calculations if needed
+                    /app/scripts/update_fibonacci.sh
+                    echo "✨ Divine maintenance completed successfully"
+                  else
+                    echo "❌ Failed to connect to Redis. Divine maintenance aborted."
+                    exit 1
+                  fi
+              env:
+                - name: MAINTENANCE_MODE
+                  value: "true"
+                - name: REDIS_HOST
+                  value: "{{ .Release.Name }}-redis-master"
+                - name: REDIS_PORT
+                  value: "6379"
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+          restartPolicy: OnFailure
+{{- end }} 

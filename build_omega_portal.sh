@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # "OFF-WHITE™" c/o "VIRGIL ABLOH"
-# "DIVINE CONTAINER" "BUILD SCRIPT"
+# "DIVINE CLI PORTAL" "BUILD SCRIPT"
 # "TECHNICAL INTERFACE" "2025"
 
 # "COLORS" FOR "DIVINE" "OUTPUT"
@@ -24,9 +24,9 @@ display_logo() {
     echo "     ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║"
     echo "      ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝"
     echo ""
-    echo "  \"DOCKER PORTAL\""
+    echo "  \"CLI PORTAL\""
     echo ""
-    echo -e "${BLACK}${WHITE}                           FOR \"DIVINE CONTAINER\" BUILD                          ${RESET}"
+    echo -e "${BLACK}${WHITE}                           FOR \"DIVINE CLI PORTAL\" BUILD                          ${RESET}"
     echo -e "${BLACK}${WHITE}                           c/o \"VIRGIL ABLOH\"                                ${RESET}"
     echo ""
     echo -e "${ORANGE}          \"TECHNICAL INTERFACE\" \"2025\" \"OFF-WHITE™\" ${RESET}"
@@ -35,7 +35,7 @@ display_logo() {
 
 # "CHECK" FOR "DOCKER" "INSTALLATION"
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}\"ERROR:\" Docker is not installed. Please install Docker to build the \"DIVINE CONTAINER\".${RESET}"
+    echo -e "${RED}\"ERROR:\" Docker is not installed. Please install Docker to build the \"DIVINE CLI PORTAL\".${RESET}"
     exit 1
 fi
 
@@ -43,26 +43,26 @@ fi
 display_logo
 
 # "BUILD" THE "DIVINE" "CONTAINER"
-echo -e "${WHITE}\"BUILDING\" \"DIVINE CONTAINER\"...${RESET}"
-docker build -t omega_portal:divine -f Dockerfile.omega_portal .
+echo -e "${WHITE}\"BUILDING\" \"DIVINE CLI PORTAL\"...${RESET}"
+docker build -t omega_cli_portal:divine -f Dockerfile.omega_portal .
 
 # "CHECK" "BUILD" "STATUS"
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}\"SUCCESS:\" \"DIVINE CONTAINER\" built successfully!${RESET}"
+    echo -e "${GREEN}\"SUCCESS:\" \"DIVINE CLI PORTAL\" built successfully!${RESET}"
     echo -e "${ORANGE}\"JAH JAH BLESS\"${RESET}"
     echo -e "${WHITE}\"c/o VIRGIL ABLOH\"${RESET}"
     
     # "ASK" IF "USER" WANTS TO "RUN" THE "CONTAINER"
-    read -p $'\033[1;37m\"RUN\" \"DIVINE CONTAINER\"? (y/n): \033[0m' run_container
+    read -p $'\033[1;37m\"RUN\" \"DIVINE CLI PORTAL\"? (y/n): \033[0m' run_container
     if [[ $run_container =~ ^[Yy]$ ]]; then
-        echo -e "${WHITE}\"STARTING\" \"DIVINE CONTAINER\"...${RESET}"
+        echo -e "${WHITE}\"STARTING\" \"DIVINE CLI PORTAL\"...${RESET}"
         docker run -it --rm \
             -v $(pwd):/app \
             -p 8080:8080 \
-            --name omega_portal \
-            omega_portal:divine
+            --name omega_cli_portal \
+            omega_cli_portal:divine
     fi
 else
-    echo -e "${RED}\"ERROR:\" Failed to build \"DIVINE CONTAINER\".${RESET}"
+    echo -e "${RED}\"ERROR:\" Failed to build \"DIVINE CLI PORTAL\".${RESET}"
     exit 1
 fi 

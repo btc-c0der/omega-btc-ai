@@ -3,6 +3,5 @@ kind: Namespace
 metadata:
   name: omega-grid-dev
   labels:
-    name: omega-grid-dev
-    app: omega-btc-ai
+    app: omega-grid
     environment: dev 

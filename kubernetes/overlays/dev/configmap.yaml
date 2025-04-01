@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omega-common-config
+data:
+  APP_VERSION: "0.7.2-dev"
+  DEBUG_MODE: "true"
+  BTC_REFRESH_RATE: "60"  # Faster refresh for development
+  NEWS_REFRESH_RATE: "300" # Faster refresh for development 

@@ -1,0 +1,34 @@
+apiVersion: v2
+name: btc-oracle
+description: Divine BTC Oracle Service for OMEGA BTC AI
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://github.com/fsiqueira/omega-btc-ai
+maintainers:
+  - name: OMEGA Divine Collective
+    email: divine@omega-btc-ai.io
+keywords:
+  - btc
+  - oracle
+  - fibonacci
+  - divine
+  - omega
+  - prophecy
+  - schumann
+sources:
+  - https://github.com/fsiqueira/omega-btc-ai
+icon: https://raw.githubusercontent.com/fsiqueira/omega-btc-ai/main/docs/assets/omega-icon.png
+dependencies:
+  - name: redis
+    version: ~17.0.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+annotations:
+  artifacthub.io/license: GPL-3.0
+  artifacthub.io/links: |
+    - name: OMEGA BTC AI
+      url: https://github.com/fsiqueira/omega-btc-ai
+  artifacthub.io/maintainers: |
+    - name: OMEGA Divine Collective
+      email: divine@omega-btc-ai.io 
