@@ -27,6 +27,9 @@ The Quantum Proof-of-Work (qPoW) system implements a novel approach to blockchai
 - **Post-Quantum Cryptographic Primitives**: Using lattice-based cryptographic techniques resistant to quantum attacks
 - **OmegaPRM (Probabilistic Residual Mining)**: Advanced mining algorithm that uses Monte Carlo Tree Search (MCTS) for optimization
 - **Kubernetes Deployment**: Ready-to-use Kubernetes manifests for deploying a mining cluster
+- **CSRF Protection**: Advanced monitoring system to prevent Cross-Site Request Forgery attacks
+- **Validator Privacy**: Metadata protection for validator nodes to prevent deanonymization attacks
+- **Quantum-Resistant Authentication**: One-shot signatures and other post-quantum cryptographic techniques for secure validator authentication
 
 ## Project Structure
 
@@ -38,12 +41,23 @@ quantum_pow/
 ├── omega_prm_runner.py - Main mining implementation using MCTS
 ├── demo.py - Demonstration of core functionality
 ├── run_tests.py - Test runner script
+├── security/ - Security monitoring and protection
+│   ├── csrf_monitor.py - CSRF attack monitoring system
+│   ├── csrf_server.py - FastAPI server for CSRF protection
+│   ├── validator_privacy.py - Validator privacy protection system
+│   ├── validator_privacy_server.py - FastAPI server for validator privacy
+│   ├── quantum_resistant_auth.py - Quantum-resistant authentication
+│   ├── quantum_auth_server.py - FastAPI server for quantum authentication
+│   └── README.md - Documentation for security components
 └── tests/ - Test suite
     ├── __init__.py
     ├── test_hash.py
     ├── test_block.py
     ├── test_mining.py
-    └── test_transactions.py
+    ├── test_transactions.py
+    ├── test_csrf_monitor.py - CSRF monitor tests
+    ├── test_validator_privacy.py - Validator privacy tests
+    └── test_quantum_resistant_auth.py - Quantum authentication tests
 ```
 
 ## OmegaPRM Mining Algorithm
@@ -63,6 +77,7 @@ OmegaPRM (Probabilistic Residual Mining) uses Monte Carlo Tree Search (MCTS) to 
 - Required packages:
   - `cryptography`
   - `numpy`
+  - `fastapi` and `uvicorn` (for security services)
   - For Kubernetes deployment: `kubectl` and a running Kubernetes cluster
 
 ### Installation
@@ -94,11 +109,20 @@ python quantum_pow/run_tests.py
 
 # Run specific test modules
 python quantum_pow/run_tests.py --pattern "test_mining.py"
+
+# Run CSRF protection tests
+python quantum_pow/run_tests.py --pattern "test_csrf_monitor.py"
+
+# Run validator privacy tests
+python quantum_pow/run_tests.py --pattern "test_validator_privacy.py"
+
+# Run quantum authentication tests
+python quantum_pow/run_tests.py --pattern "test_quantum_resistant_auth.py"
 ```
 
 ## Kubernetes Deployment
 
-The system includes a full Kubernetes deployment configuration in `kubernetes/omega_prm_deployment.yaml`.
+The system includes full Kubernetes deployment configurations in the `kubernetes/` directory.
 
 ### Deploying to Kubernetes
 
@@ -106,8 +130,20 @@ The system includes a full Kubernetes deployment configuration in `kubernetes/om
 # Deploy the mining nodes
 kubectl apply -f kubernetes/omega_prm_deployment.yaml
 
+# Deploy the CSRF protection
+kubectl apply -f kubernetes/csrf_monitor_deployment.yaml
+
+# Deploy the validator privacy protection
+kubectl apply -f kubernetes/validator_privacy_deployment.yaml
+
+# Deploy the quantum authentication
+kubectl apply -f kubernetes/quantum_auth_deployment.yaml
+
 # Check the deployment status
 kubectl get pods -l app=omega-prm-miner
+kubectl get pods -l app=csrf-monitor
+kubectl get pods -l app=validator-privacy
+kubectl get pods -l app=quantum-auth
 
 # View mining logs
 kubectl logs -l app=omega-prm-miner
@@ -148,6 +184,39 @@ OmegaPRM optimizes traditional mining:
 - **Heat Mapping**: Internal tracking of nonce pattern performance
 - **Adaptive Difficulty**: Adjustments based on network hash rate and block times
 
+### CSRF Protection
+
+The CSRF monitor protects API endpoints from Cross-Site Request Forgery attacks:
+
+- **Multiple Parsing Strategies**: Uses both RegEx and AST-based parsing for deep analysis
+- **Request Whitelisting**: Maintains a whitelist of known safe request patterns
+- **Kubernetes Integration**: Deployed alongside mining nodes with automatic scaling
+- **REST API**: Exposed endpoints for checking requests and managing whitelist
+- **TDD Approach**: Built with comprehensive test coverage
+
+### Validator Privacy Protection
+
+The validator privacy module protects validator identities from being linked to their IP addresses:
+
+- **Dandelion Routing**: Two-phase routing protocol that makes it difficult to trace messages to their origin
+- **Metadata Protection**: Randomized timing and message padding to prevent metadata analysis attacks
+- **Privacy Risk Analysis**: Advanced analytics to identify and mitigate privacy vulnerabilities
+- **Trusted Proxies**: Routing of sensitive block proposals through trusted proxies
+- **Peer Rotation**: Regular rotation of peer connections to prevent long-term correlation
+- **Kubernetes Deployment**: Fully containerized deployment with automatic peer rotation and analysis
+
+### Quantum-Resistant Authentication
+
+The quantum authentication module provides post-quantum secure authentication for validators:
+
+- **One-Shot Signatures**: Implementation of the "one-shot signatures" technique from "One-shot signatures and applications to hybrid quantum/classical authentication" (R. Amos et al.)
+- **Multiple Signature Schemes**: Support for various post-quantum cryptographic schemes including FALCON, DILITHIUM, SPHINCS+, and ZK-ECDSA
+- **Emergency Key Rotation**: Automatic key rotation in case of potential quantum attacks
+- **One-Time Tokens**: Single-use authentication tokens for enhanced security
+- **Regular Key Rotation**: Scheduled key rotation via Kubernetes cron jobs
+- **Validator Isolation**: Each validator's keys and authentication is isolated from others
+- **Cross-Platform Authentication**: Works with both classical and quantum-enabled clients
+
 ### Performance Considerations
 
 - Hash rate typically improves 30-40% compared to brute force approaches
@@ -159,12 +228,21 @@ OmegaPRM optimizes traditional mining:
 - Post-quantum security assumes proper implementation of the underlying cryptographic primitives
 - The system is designed for demonstration purposes and should undergo formal verification before production use
 - Default difficulty settings are lowered for testing purposes
+- The CSRF monitor protects API endpoints with multiple parsing strategies
+- Validator privacy protection is essential as quantum miners could be targets for attacks if identifiable
+- Quantum authentication provides an additional layer of security even if the underlying blockchain is compromised
+- One-shot signatures ensure forward secrecy even in the event of a quantum attack
+- All external requests are validated against potential attack patterns
+- Whitelist of approved request patterns is maintained and persisted
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0 by the OMEGA Divine Collective.
 
 ## Acknowledgments
 
 - Satoshi Nakamoto for the original Bitcoin concept
 - The quantum computing and post-quantum cryptography research community
+- Apache ModSecurity CSRF project for security monitoring inspiration
+- Ethereum research on validator privacy for the Dandelion routing implementation
+- R. Amos et al. for the one-shot signatures research

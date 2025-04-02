@@ -1,0 +1,89 @@
+{
+    "badge": {
+        "name": "AIXBT Divine Monitor",
+        "description": "Coverage badge for the AIXBT Divine Monitor",
+        "version": "1.0.0",
+        "style": {
+            "theme": "divine",
+            "size": "default",
+            "animation": true,
+            "hover_effect": true,
+            "responsive": true,
+            "print_friendly": true
+        },
+        "colors": {
+            "high": {
+                "threshold": 80,
+                "background": "#4CAF50",
+                "text": "#FFFFFF"
+            },
+            "medium": {
+                "threshold": 60,
+                "background": "#FFC107",
+                "text": "#000000"
+            },
+            "low": {
+                "threshold": 0,
+                "background": "#F44336",
+                "text": "#FFFFFF"
+            }
+        },
+        "template": {
+            "file": "coverage_badge_template.svg",
+            "style_file": "coverage_badge_style.css",
+            "output_file": "coverage.svg",
+            "readme_file": "README.md"
+        },
+        "divine": {
+            "enabled": true,
+            "effects": {
+                "gradient": true,
+                "glow": true,
+                "pulse": true,
+                "shadow": true
+            },
+            "colors": {
+                "primary": "#4CAF50",
+                "secondary": "#2196F3",
+                "accent": "#9C27B0"
+            }
+        },
+        "update": {
+            "auto": true,
+            "interval": "daily",
+            "on_commit": true,
+            "on_push": true,
+            "notify": true
+        },
+        "display": {
+            "show_icon": true,
+            "show_label": true,
+            "show_percentage": true,
+            "show_trend": true,
+            "decimal_places": 2
+        },
+        "thresholds": {
+            "fail": 60,
+            "warn": 80,
+            "pass": 90
+        },
+        "notifications": {
+            "slack": {
+                "enabled": false,
+                "webhook_url": "",
+                "channel": "#coverage"
+            },
+            "email": {
+                "enabled": false,
+                "recipients": [],
+                "subject": "AIXBT Coverage Update"
+            }
+        },
+        "history": {
+            "enabled": true,
+            "file": "coverage_history.json",
+            "max_entries": 100,
+            "trend_window": 7
+        }
+    }
+}

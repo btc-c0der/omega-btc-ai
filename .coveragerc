@@ -1,11 +1,14 @@
+# 🌌 AIXBT Divine Monitor Coverage Configuration
+# ------------------------------------------
+
 [run]
-source = omega_ai/monitor
-omit = 
+source = omega_ai
+omit =
     */tests/*
-    */__pycache__/*
-    */site-packages/*
-    */dist-packages/*
     */venv/*
+    */__pycache__/*
+    */setup.py
+    */__init__.py
 
 [report]
 exclude_lines =
@@ -16,6 +19,43 @@ exclude_lines =
     pass
     raise ImportError
 
+ignore_errors = True
+
 [html]
+directory = coverage_html_report
+title = AIXBT Divine Monitor Coverage Report
+
+[xml]
+output = coverage.xml
+
+[junit]
+output = junit.xml
+
+[paths]
+source =
+    omega_ai
+    */omega_ai
+
+[coverage:run]
+branch = True
+parallel = True
+concurrency = multiprocessing
+
+[coverage:report]
+show_missing = True
+skip_covered = False
+fail_under = 80
+
+[coverage:html]
 directory = htmlcov
-title = OMEGA BTC AI - Divine Coverage Report
+title = AIXBT Divine Monitor Coverage Report
+extra_css =
+    .highlight { background-color: #f8f8f8; }
+    .missing { background-color: #ffdddd; }
+    .covered { background-color: #ddffdd; }
+
+[coverage:xml]
+output = coverage.xml
+
+[coverage:json]
+output = coverage.json

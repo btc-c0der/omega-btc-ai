@@ -81,4 +81,67 @@ matplotlib==3.7.2
 
 # Testing
 pytest==7.4.0
-pytest-asyncio==0.21.1 
+pytest-asyncio==0.21.1
+
+# Core dependencies
+numpy>=1.19.5
+cryptography>=3.4.7
+pytest>=6.2.5
+pytest-cov>=2.12.1
+python-dateutil>=2.8.2
+
+# Networking
+requests>=2.26.0
+websockets>=10.0
+
+# Utilities
+tqdm>=4.62.3
+coloredlogs>=15.0.1
+typing-extensions>=3.10.0.2
+
+# 🌌 AIXBT Divine Monitor Requirements
+# ---------------------------------
+# This file contains the sacred dependencies required for the
+# AIXBT Divine Monitor with GBU2™ integration.
+
+# Core dependencies
+aiohttp==3.9.1
+redis==5.0.1
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.3.0
+
+# Divine metrics and analysis
+ta-lib==0.4.28
+python-binance==1.0.19
+ccxt==4.1.13
+
+# Testing and development
+pytest==7.4.0
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+black==23.7.0
+flake8==6.1.0
+mypy==1.5.1
+
+# Logging and monitoring
+python-json-logger==2.0.7
+prometheus-client==0.17.1
+
+# Divine visualization
+plotly==5.16.1
+dash==2.13.0
+dash-bootstrap-components==1.4.2
+
+# Sacred mathematics
+sympy==1.12
+scipy==1.11.2
+
+# Divine security
+cryptography==41.0.3
+python-jose==3.3.0
+
+# Divine utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+requests==2.31.0 

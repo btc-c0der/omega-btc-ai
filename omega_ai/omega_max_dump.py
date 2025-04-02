@@ -46,8 +46,8 @@ def simulate_omega_max_dump(days=180, volatility=0.03, dump_factor=0.5, recovery
     Returns:
         DataFrame with price data
     """
-    # Start with a price of $84,420 (cosmic number)
-    start_price = 84420
+    # Start with a price of $84,428 (cosmic number)
+    start_price = 84428
     
     # Create date range
     if end_date is None:

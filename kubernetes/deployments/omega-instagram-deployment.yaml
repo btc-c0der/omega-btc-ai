@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: instagram-config
+  namespace: omega-system
+data:
+  instagram_config.json: |
+    {
+      "username": "YOUR_INSTAGRAM_USERNAME",
+      "password": "YOUR_INSTAGRAM_PASSWORD",
+      "session_file": "ig_session.json",
+      "post_frequency": 24,
+      "best_times": ["08:00", "12:00", "17:00", "20:00"],
+      "hashtags": [
+        "#OMEGABTCAI", "#BTC", "#Bitcoin", "#Trading", "#TradingBot", 
+        "#CryptoTrading", "#AITrading", "#QuantTrading", "#AlgoTrading",
+        "#BitcoinTrading", "#CryptoBot", "#TradingAlgorithm", "#HODL"
+      ],
+      "caption_templates": [
+        "🔱 OMEGA BTC AI divine market insights for {date} 🔱\n\n{market_summary}\n\nJAH JAH BLESS THE DIVINE FLOW! 🔱",
+        "⚡️ Bitcoin market update from OMEGA AI - {date} ⚡️\n\n{market_summary}\n\nFollow for daily divine insights! 🔱",
+        "🧠 OMEGA AI analysis for {date}:\n\n{market_summary}\n\nTrust the divine flow! 🔱"
+      ]
+    }
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: instagram-credentials
+  namespace: omega-system
+type: Opaque
+stringData:
+  IG_USERNAME: "YOUR_INSTAGRAM_USERNAME"
+  IG_PASSWORD: "YOUR_INSTAGRAM_PASSWORD"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omega-instagram
+  namespace: omega-system
+  labels:
+    app: omega-instagram
+    component: social-media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omega-instagram
+  template:
+    metadata:
+      labels:
+        app: omega-instagram
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+      - name: instagram-automation
+        image: ${DOCKER_REGISTRY:-localhost}/omega-instagram:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python", "omega_ig_automation.py", "--daemon"]
+        ports:
+        - containerPort: 8000
+          name: metrics
+        env:
+        - name: IG_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: instagram-credentials
+              key: IG_USERNAME
+        - name: IG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: instagram-credentials
+              key: IG_PASSWORD
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: content-volume
+          mountPath: /app/content
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: instagram-config
+      - name: content-volume
+        persistentVolumeClaim:
+          claimName: instagram-content-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: instagram-content-pvc
+  namespace: omega-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omega-instagram
+  namespace: omega-system
+  labels:
+    app: omega-instagram
+spec:
+  ports:
+  - port: 8000
+    targetPort: metrics
+    protocol: TCP
+    name: metrics
+  selector:
+    app: omega-instagram
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: instagram-religious-post
+  namespace: omega-system
+spec:
+  schedule: "0 10 * * 0"  # Every Sunday at 10:00
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: instagram-religious
+            image: ${DOCKER_REGISTRY:-localhost}/omega-instagram:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "omega_ig_automation.py", "--religious"]
+            env:
+            - name: IG_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: instagram-credentials
+                  key: IG_USERNAME
+            - name: IG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: instagram-credentials
+                  key: IG_PASSWORD
+            volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+            - name: content-volume
+              mountPath: /app/content
+          volumes:
+          - name: config-volume
+            configMap:
+              name: instagram-config
+          - name: content-volume
+            persistentVolumeClaim:
+              claimName: instagram-content-pvc
+          restartPolicy: OnFailure 

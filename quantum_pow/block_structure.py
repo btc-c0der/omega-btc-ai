@@ -130,6 +130,24 @@ class Transaction:
         else:
             # Simulate classical signature verification
             return len(self.signature) > 5  # Dummy check
+            
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert transaction to dictionary format for serialization.
+        
+        Returns:
+            Dictionary representation of the transaction
+        """
+        return {
+            "sender": self.sender,
+            "recipient": self.recipient,
+            "amount": self.amount,
+            "timestamp": self.timestamp,
+            "signature": self.signature if isinstance(self.signature, str) else self.signature.hex() if self.signature else "",
+            "is_quantum_signed": self.is_quantum_signed,
+            "nonce": self.nonce,
+            "hash": self.hash().hex()
+        }
 
 
 @dataclass

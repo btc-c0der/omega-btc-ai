@@ -145,6 +145,45 @@ class ContentGenerator:
         # Download font if it doesn't exist
         if not os.path.exists(self.font_path):
             self._download_font()
+
+        # Religious themes for IBR church in Catalonia
+        self.religious_themes = [
+            {
+                "title": "Amor Divino",
+                "message": "El amor de Dios es eterno e incondicional. Bendiciones para todos.",
+                "scripture": "1 Juan 4:16 - Dios es amor, y el que permanece en amor, permanece en Dios.",
+            },
+            {
+                "title": "Fe y Esperanza",
+                "message": "La fe nos sostiene en tiempos difíciles, manteniendo viva nuestra esperanza.",
+                "scripture": "Hebreos 11:1 - La fe es la certeza de lo que se espera, la convicción de lo que no se ve.",
+            },
+            {
+                "title": "Comunidad y Unidad",
+                "message": "Juntos somos más fuertes, unidos en espíritu y propósito.",
+                "scripture": "Salmo 133:1 - ¡Mirad cuán bueno y cuán delicioso es que habiten los hermanos juntos en armonía!",
+            },
+            {
+                "title": "Paz Interior",
+                "message": "Encuentra la paz que sobrepasa todo entendimiento.",
+                "scripture": "Filipenses 4:7 - Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.",
+            },
+            {
+                "title": "Gratitud Diaria",
+                "message": "Dar gracias transforma nuestra perspectiva y abre puertas a la bendición.",
+                "scripture": "1 Tesalonicenses 5:18 - Dad gracias en todo, porque esta es la voluntad de Dios para vosotros.",
+            },
+            {
+                "title": "Compasión y Servicio",
+                "message": "Servir a otros con amor es servir a Dios.",
+                "scripture": "Gálatas 5:13 - Servíos por amor los unos a los otros.",
+            },
+            {
+                "title": "Renovación Espiritual",
+                "message": "Cada día es una oportunidad para renovar nuestra fe y compromiso.",
+                "scripture": "2 Corintios 4:16 - Aunque nuestro hombre exterior se va desgastando, el interior no obstante se renueva de día en día.",
+            }
+        ]
     
     def _download_font(self) -> None:
         """Download Montserrat font for image generation."""
@@ -285,6 +324,142 @@ class ContentGenerator:
         
         return full_caption
 
+    def generate_religious_image(self) -> str:
+        """Generate a religious themed image for Instagram posting for IBR church."""
+        # Select a random religious theme
+        theme = random.choice(self.religious_themes)
+        
+        # Create image
+        width, height = 1080, 1080
+        image = Image.new('RGB', (width, height), color=(30, 50, 80))  # Peaceful blue background
+        draw = ImageDraw.Draw(image)
+        
+        # Try to use downloaded font, fall back to default
+        try:
+            title_font = ImageFont.truetype(self.font_path, 65) if self.font_path else ImageFont.load_default()
+            message_font = ImageFont.truetype(self.font_path, 45) if self.font_path else ImageFont.load_default()
+            scripture_font = ImageFont.truetype(self.font_path, 38) if self.font_path else ImageFont.load_default()
+            footer_font = ImageFont.truetype(self.font_path, 40) if self.font_path else ImageFont.load_default()
+        except Exception:
+            title_font = ImageFont.load_default()
+            message_font = ImageFont.load_default()
+            scripture_font = ImageFont.load_default()
+            footer_font = ImageFont.load_default()
+        
+        # Draw title
+        draw.text((width//2, 160), theme["title"], 
+                  fill=(255, 215, 0), font=title_font, anchor="mm")  # Gold color
+        
+        # Draw divider
+        draw.line([(width//4, 230), (width*3//4, 230)], fill=(255, 215, 0), width=3)
+        
+        # Draw message (wrap text to fit)
+        message_lines = self._wrap_text(theme["message"], message_font, width - 200)
+        y_position = height//2 - 50
+        for line in message_lines:
+            draw.text((width//2, y_position), line, 
+                    fill=(255, 255, 255), font=message_font, anchor="mm")
+            y_position += self._get_text_height(message_font, line) + 10
+        
+        # Draw scripture
+        scripture_lines = self._wrap_text(theme["scripture"], scripture_font, width - 200)
+        y_position = height//2 + 150
+        for line in scripture_lines:
+            draw.text((width//2, y_position), line, 
+                    fill=(173, 216, 230), font=scripture_font, anchor="mm")  # Light blue
+            y_position += self._get_text_height(scripture_font, line) + 10
+        
+        # Draw IBR church name
+        draw.text((width//2, height-150), "Iglesia Bautista Reformada", 
+                  fill=(255, 215, 0), font=footer_font, anchor="mm")  # Gold color
+        
+        # Draw location
+        draw.text((width//2, height-90), "Catalonia", 
+                  fill=(255, 255, 255), font=footer_font, anchor="mm")
+        
+        # Save image
+        current_date = datetime.now().strftime("%Y%m%d")
+        filename = f"{self.image_dir}/ibr_cat_{current_date}_{theme['title'].replace(' ', '_').lower()}.jpg"
+        image.save(filename, quality=95)
+        logger.info(f"Generated religious image: {filename}")
+        
+        return filename
+    
+    def _wrap_text(self, text: str, font, max_width: int) -> List[str]:
+        """Wrap text to fit within a given width."""
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            width = self._get_text_width(font, test_line)
+                
+            if width <= max_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+                
+        lines.append(current_line)
+        return lines
+    
+    def _get_text_width(self, font, text: str) -> int:
+        """Get text width compatible with different PIL/Pillow versions."""
+        # Use getbbox for newer PIL versions (preferred method)
+        if hasattr(font, "getbbox"):
+            bbox = font.getbbox(text)
+            return bbox[2] - bbox[0]
+        # Use getsize for older PIL versions (deprecated)
+        elif hasattr(font, "getsize"):
+            return font.getsize(text)[0]
+        else:
+            # Fallback if neither method is available
+            return len(text) * 15  # Rough estimate
+    
+    def _get_text_height(self, font, text: str) -> int:
+        """Get text height compatible with different PIL/Pillow versions."""
+        # Use getbbox for newer PIL versions (preferred method)
+        if hasattr(font, "getbbox"):
+            bbox = font.getbbox(text)
+            return bbox[3] - bbox[1]
+        # Use getsize for older PIL versions (deprecated)
+        elif hasattr(font, "getsize"):
+            return font.getsize(text)[1]
+        else:
+            # Fallback if neither method is available
+            return 30  # Rough estimate
+        
+    def generate_religious_caption(self) -> str:
+        """Generate a religious caption for the IBR church Instagram post."""
+        # Select a random religious theme
+        theme = random.choice(self.religious_themes)
+        
+        # Create caption
+        caption = (
+            f"✝️ {theme['title']} ✝️\n\n"
+            f"{theme['message']}\n\n"
+            f"📖 {theme['scripture']}\n\n"
+            f"Únete a nosotros este domingo en la Iglesia Bautista Reformada de Catalonia "
+            f"para reflexionar sobre este mensaje de esperanza y fe."
+        )
+        
+        # Add hashtags
+        hashtags = [
+            "#IglesiaBautistaReformada", "#IBRCatalonia", "#Fe", "#Esperanza", 
+            "#Amor", "#Comunidad", "#IglesiaBautista", "#VidaCristiana",
+            "#Biblia", "#PalabraDeDios", "#Catalonia", "#EspiritualidadCristiana"
+        ]
+        
+        random.shuffle(hashtags)
+        selected_hashtags = hashtags[:10]  # Select 10 hashtags
+        hashtags_text = " ".join(selected_hashtags)
+        
+        full_caption = f"{caption}\n\n{hashtags_text}"
+        logger.info(f"Generated religious caption with {len(selected_hashtags)} hashtags")
+        
+        return full_caption
+
 # Instagram Manager
 class InstagramManager:
     """Manages Instagram login and posting."""
@@ -378,13 +553,21 @@ class AutomationController:
         self.content_generator = ContentGenerator(self.config)
         self.instagram = InstagramManager(self.config)
     
-    def post_now(self) -> bool:
-        """Generate content and post immediately."""
-        print(f"{COLORS['GOLD']}🔱 OMEGA BTC AI - Divine Instagram Automation 🔱{COLORS['RESET']}")
-        print(f"{COLORS['CYAN']}Generating divine Instagram content...{COLORS['RESET']}")
+    def post_now(self, content_type: str = "standard") -> bool:
+        """Generate content and post immediately.
         
-        image_path = self.content_generator.generate_image()
-        caption = self.content_generator.generate_caption()
+        Args:
+            content_type: Type of content to post ('standard' or 'religious')
+        """
+        print(f"{COLORS['GOLD']}🔱 OMEGA BTC AI - Divine Instagram Automation 🔱{COLORS['RESET']}")
+        print(f"{COLORS['CYAN']}Generating {content_type} Instagram content...{COLORS['RESET']}")
+        
+        if content_type == "religious":
+            image_path = self.content_generator.generate_religious_image()
+            caption = self.content_generator.generate_religious_caption()
+        else:
+            image_path = self.content_generator.generate_image()
+            caption = self.content_generator.generate_caption()
         
         print(f"{COLORS['GREEN']}✅ Content created successfully{COLORS['RESET']}")
         print(f"{COLORS['CYAN']}Posting to Instagram...{COLORS['RESET']}")
@@ -461,6 +644,8 @@ def main():
                         help="Path to configuration file")
     parser.add_argument("--post", "-p", action="store_true",
                         help="Generate and post content immediately")
+    parser.add_argument("--religious", "-r", action="store_true",
+                        help="Generate and post religious content for IBR church")
     parser.add_argument("--schedule", "-s", type=int, default=0,
                         help="Schedule posts for specified number of days")
     parser.add_argument("--daemon", "-d", action="store_true",
@@ -471,7 +656,9 @@ def main():
     controller = AutomationController(args.config)
     
     if args.post:
-        controller.post_now()
+        controller.post_now("standard")
+    elif args.religious:
+        controller.post_now("religious")
     elif args.schedule > 0:
         controller.schedule_posts(args.schedule)
     elif args.daemon:
