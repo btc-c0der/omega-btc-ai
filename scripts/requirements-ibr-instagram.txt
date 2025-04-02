@@ -1,0 +1,4 @@
+instagrapi>=1.16.30
+pillow>=9.0.0
+requests>=2.27.1
+python-dotenv>=0.19.2 
