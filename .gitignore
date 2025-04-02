@@ -198,3 +198,13 @@ content/images/
 ig_session.json
 omega_ig_automation.log
 .venv-ig/
+# Generated data
+data/omega_max_dump/nft/
+data/omega_mega_pump/
+
+# UI components (separate repo)
+ibr-ui/
+
+# Binary files
+*.zip
+
