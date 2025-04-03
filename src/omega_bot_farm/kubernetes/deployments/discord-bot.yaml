@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-bot
+  namespace: omega-bot-farm
+  labels:
+    app: discord-bot
+    component: control-interface
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-bot
+  template:
+    metadata:
+      labels:
+        app: discord-bot
+        component: control-interface
+    spec:
+      containers:
+      - name: discord-bot
+        image: omega-btc-ai/discord-bot:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-port
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: discord-credentials
+              key: token
+        - name: DISCORD_COMMAND_PREFIX
+          value: "!"
+        - name: DISCORD_STATUS_UPDATE_INTERVAL
+          value: "60"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: discord-bot-config
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discord-bot
+  namespace: omega-bot-farm
+  labels:
+    app: discord-bot
+    component: control-interface
+spec:
+  selector:
+    app: discord-bot
+  ports:
+  - port: 8081
+    targetPort: 8081
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: discord-bot-config
+  namespace: omega-bot-farm
+data:
+  config.yaml: |
+    bot:
+      name: OmegaFarmBot
+      description: Trading bot farm controller
+      version: 1.0.0
+    features:
+      enable_cosmic_influence: true
+      enable_trading_notifications: true
+      enable_market_alerts: true
+      enable_performance_reports: true
+    notifications:
+      trade_entry: true
+      trade_exit: true
+      risk_alerts: true
+      profit_loss_alerts: true
+      liquidation_warnings: true
+    permissions:
+      admin_roles:
+        - "Farm Administrator"
+        - "Trading Manager"
+      user_roles:
+        - "Bot Operator"
+        - "Trader" 
