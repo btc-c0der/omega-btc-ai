@@ -179,17 +179,36 @@ def persona(
     )
 ):
     """
-    Activate a specific QA persona for specialized testing tasks.
+    Activate a specialized QA persona for specific testing tasks.
     """
     console.print(Panel.fit(
         f"[bold blue]Activating {persona_type} Persona[/bold blue]",
         border_style="blue"
     ))
     
-    if task:
-        console.print(f"Task: {task}")
-    
-    console.print(f"[green]{persona_type} persona activated successfully[/green]")
+    try:
+        # Import the persona factory
+        from qa_ai.personas.factory import PersonaFactory
+        
+        # Create the persona instance
+        persona_instance = PersonaFactory.create_persona(persona_type)
+        
+        # Display persona information
+        console.print(f"Persona: [bold]{persona_instance.name}[/bold]")
+        console.print(f"Focus: {persona_instance.description}")
+        
+        if task:
+            console.print(f"Task: {task}")
+            # In a real implementation, you would use the persona to execute the task
+        
+        # Show status
+        status = persona_instance.get_status()
+        console.print(f"Active scenarios: {status['active_scenarios']}")
+        
+        console.print(f"[green]{persona_type} persona activated successfully[/green]")
+    except Exception as e:
+        console.print(f"[red]Error activating persona: {str(e)}[/red]")
+        raise typer.Exit(1)
 
 if __name__ == "__main__":
-    app() 
+    app()

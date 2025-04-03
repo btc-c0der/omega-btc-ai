@@ -14,6 +14,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 import json
 from typing import Dict, List, Optional, Any
+from pathlib import Path
 
 from src.omega_bot_farm.utils.redis_client import RedisClient
 
@@ -318,5 +319,23 @@ def run_bot():
     # Run the bot
     bot.run(token)
     
+def setup_bitget_commands(bot):
+    """
+    Set up the BitGet Position Analyzer commands.
+    
+    Args:
+        bot: The Discord bot instance
+    """
+    try:
+        # Import and setup the commands cog
+        from src.omega_bot_farm.discord.commands.bitget_position_commands import BitgetPositionCommands
+        
+        # Register the cog
+        bot.add_cog(BitgetPositionCommands(bot))
+        logging.info("BitGet Position Commands registered successfully")
+        
+    except Exception as e:
+        logging.error(f"Failed to register BitGet Position Commands: {e}")
+
 if __name__ == "__main__":
     run_bot() 

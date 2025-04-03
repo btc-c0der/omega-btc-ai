@@ -1,0 +1,235 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bitget-position-analyzer
+  labels:
+    app: bitget-position-analyzer
+    component: trading-analysis
+    part-of: omega-bot-farm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bitget-position-analyzer
+  template:
+    metadata:
+      labels:
+        app: bitget-position-analyzer
+        component: trading-analysis
+        part-of: omega-bot-farm
+    spec:
+      containers:
+      - name: bitget-position-analyzer
+        image: ${REGISTRY}/omega-bot-farm/bitget-position-analyzer:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        env:
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: BITGET_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bitget-api-credentials
+              key: api-key
+        - name: BITGET_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bitget-api-credentials
+              key: secret-key
+        - name: BITGET_PASSPHRASE
+          valueFrom:
+            secretKeyRef:
+              name: bitget-api-credentials
+              key: passphrase
+        - name: USE_TESTNET
+          value: "false"
+        - name: REDIS_HOST
+          value: "redis-master.default.svc.cluster.local"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: TRADER_LATITUDE
+          value: "40.7128"  # Default to New York for cosmic calculations
+        - name: TRADER_LONGITUDE
+          value: "-74.0060"
+        ports:
+        - containerPort: 8080
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: bitget-position-analyzer-config
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitget-position-analyzer
+  labels:
+    app: bitget-position-analyzer
+    component: trading-analysis
+    part-of: omega-bot-farm
+spec:
+  selector:
+    app: bitget-position-analyzer
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bitget-position-analyzer-config
+  labels:
+    app: bitget-position-analyzer
+    component: trading-analysis
+    part-of: omega-bot-farm
+data:
+  position-analyzer-config.yaml: |
+    # BitGet Position Analyzer Configuration
+    position_history_length: 10
+    
+    # Fibonacci Analysis Settings
+    fibonacci:
+      use_golden_ratio: true
+      default_stop_loss_level: "38.2%"
+      default_take_profit_level: "61.8%"
+      
+    # Harmony Scoring
+    harmony:
+      balance_weight: 0.3
+      pnl_weight: 0.3
+      size_weight: 0.2
+      fibonacci_weight: 0.2
+      
+    # API Service Settings
+    api:
+      enable: true
+      host: "0.0.0.0"
+      port: 8080
+      
+    # Integration Settings
+    integration:
+      redis:
+        publish_channel: "position_analysis"
+        publish_interval: 60  # seconds
+      discord:
+        enable: true
+        webhook_url: ""  # Set via environment variable
+        
+    # Monitoring Settings
+    monitoring:
+      position_check_interval: 60  # seconds
+      alert_on_position_change: true
+      alert_on_low_harmony: true
+      low_harmony_threshold: 0.4
+      
+    # Recommendations
+    recommendations:
+      generate: true
+      max_recommendations: 5
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bitget-position-analyzer-daily-report
+  labels:
+    app: bitget-position-analyzer
+    component: trading-analysis
+    part-of: omega-bot-farm
+spec:
+  schedule: "0 0 * * *"  # Daily at midnight
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: bitget-position-analyzer-report
+            image: ${REGISTRY}/omega-bot-farm/bitget-position-analyzer:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "-m", "src.omega_bot_farm.trading.b0ts.bitget_analyzer.report_generator"]
+            env:
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: REPORT_TYPE
+              value: "daily"
+            - name: BITGET_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bitget-api-credentials
+                  key: api-key
+            - name: BITGET_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bitget-api-credentials
+                  key: secret-key
+            - name: BITGET_PASSPHRASE
+              valueFrom:
+                secretKeyRef:
+                  name: bitget-api-credentials
+                  key: passphrase
+            - name: REDIS_HOST
+              value: "redis-master.default.svc.cluster.local"
+            - name: REDIS_PORT
+              value: "6379"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 300m
+                memory: 256Mi
+            volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+            - name: reports-volume
+              mountPath: /app/reports
+          volumes:
+          - name: config-volume
+            configMap:
+              name: bitget-position-analyzer-config
+          - name: reports-volume
+            persistentVolumeClaim:
+              claimName: bitget-position-reports-pvc
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitget-position-reports-pvc
+  labels:
+    app: bitget-position-analyzer
+    component: trading-analysis
+    part-of: omega-bot-farm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi 

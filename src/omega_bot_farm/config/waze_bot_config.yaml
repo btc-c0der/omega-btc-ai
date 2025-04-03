@@ -1,0 +1,101 @@
+# Waze Bot Configuration
+
+# Bot settings
+bot:
+  # Discord bot token (can also be set via DISCORD_TOKEN environment variable)
+  token: ""
+  # Command prefix for non-slash commands
+  prefix: "!"
+  # Bot description
+  description: "Waze Bot - Your crypto navigation guide powered by the Omega AI BTC system."
+
+# Redis connection settings (for data sharing between components)
+redis:
+  enabled: false
+  host: "localhost"
+  port: 6379
+  db: 0
+  # password: "" # Uncomment and set if Redis requires authentication
+
+# BitGet API settings
+bitget:
+  enabled: false
+  # API credentials (can also be set via environment variables)
+  # api_key: "" # Can also use BITGET_API_KEY environment variable
+  # api_secret: "" # Can also use BITGET_SECRET_KEY environment variable
+  # passphrase: "" # Can also use BITGET_PASSPHRASE environment variable
+  use_testnet: false
+  
+  # Default position monitor settings
+  monitor:
+    # How often to check for position changes (in minutes)
+    interval: 5
+    # Minimum percentage change to consider significant for notifications
+    min_significant_change: 5.0
+    # Enable monitoring of new positions
+    track_new_positions: true
+    # Enable monitoring of closed positions
+    track_closed_positions: true
+    # Enable monitoring of position size changes
+    track_size_changes: true
+    # Enable monitoring of position PnL changes
+    track_pnl_changes: true
+
+# Fibonacci analysis settings
+fibonacci:
+  # Default Fibonacci levels to display
+  levels:
+    - 0.0
+    - 0.236
+    - 0.382
+    - 0.5
+    - 0.618
+    - 0.786
+    - 1.0
+    - 1.618
+    - 2.618
+  # Highlight key levels (Golden Ratio)
+  highlight_levels:
+    - 0.618
+    - 1.618
+
+# User interaction settings
+interaction:
+  # Enable context-based personalization
+  context_aware: true
+  # How many messages to remember per user
+  memory_size: 10
+  # Enable proactive suggestions based on user context
+  proactive_suggestions: true
+  # Time between proactive suggestions (in hours)
+  suggestion_interval: 12
+  # Maximum suggestions per day
+  max_daily_suggestions: 3
+  
+# Notification settings
+notifications:
+  # Default notification styling
+  emoji_prefix: true
+  use_embeds: true
+  # Default notification visibility (public or ephemeral)
+  default_visibility: "ephemeral"
+  # Position change notification threshold (percentage)
+  position_change_threshold: 5.0
+  # PnL notification threshold (percentage)
+  pnl_threshold: 10.0
+  
+# Channel configuration
+channels:
+  # Default announcement channel ID (set with !waze-set-channel command)
+  # announcements: 123456789012345678
+  
+# Advanced settings
+advanced:
+  # Debug mode
+  debug: false
+  # Additional logging
+  verbose_logging: false
+  # Maximum concurrent API requests
+  max_concurrent_requests: 5
+  # API request timeout (seconds)
+  request_timeout: 30 

@@ -6,15 +6,15 @@
 
 OMEGA BTC AI represents the pinnacle of sacred trading intelligence, harmonizing Fibonacci mathematics, Schumann resonance, and divine market analysis to create a holistic Bitcoin trading system aligned with cosmic rhythms.
 
-## 📣 LATEST RELEASE - v0.8.0
+## �� LATEST RELEASE - v2.2.0
 
-The latest release introduces the QUANTUM METRICS TESTNET INTEGRATION:
+The latest release introduces the TMUX-BASED CLI DEMO and QA AI INTEGRATION:
 
-- **Quantum Security Metrics**: Real-time monitoring of quantum-resistant security features
-- **Testnet Integration**: Combined testnet and metrics system for comprehensive testing
-- **Interactive Dashboard**: Visual representation of quantum security consciousness
-- **Kubernetes Deployment**: Cloud-native deployment for divine scalability
-- **Local Demo Script**: Easy visualization of quantum metrics in action
+- **Tmux-based CLI Demo**: Interactive multi-pane presentation system
+- **QA AI Integration**: Advanced testing and quality assurance automation
+- **Divine Coverage Reports**: Enhanced test coverage visualization
+- **Kubernetes Manifests**: Updated deployment configurations
+- **GBU2™ Integration**: Advanced divine principles and sacred mathematics
 
 See the [CHANGELOG](./CHANGELOG.md) for details.
 
@@ -68,6 +68,7 @@ cd omega-btc-ai
 
 ```bash
 pip install -r requirements.txt
+pip install -r requirements-demo.txt  # For tmux demo
 ```
 
 3. Configure environment variables:
@@ -83,7 +84,13 @@ cp .env.example .env
 ./omega_cli_portal.sh
 ```
 
-5. Run the Quantum Metrics Testnet Demo:
+5. Run the Tmux Demo:
+
+```bash
+python scripts/demo.py
+```
+
+6. Run the Quantum Metrics Testnet Demo:
 
 ```bash
 ./scripts/run_quantum_metrics_testnet_demo.sh
@@ -124,11 +131,19 @@ The framework follows the OMEGA AGILE QUANTUM TESTING FRAMEWORK:
 - TDD-first development approach
 - AI-driven test generation
 - Quantum security metrics validation
+- Automated coverage reporting
+- Tmux-based demo testing
 
 Run the test suite:
 
 ```bash
 ./run_tests.sh
+```
+
+Run the tmux demo:
+
+```bash
+python scripts/demo.py
 ```
 
 Run the quantum metrics testnet:

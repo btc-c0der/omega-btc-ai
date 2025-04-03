@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA AI Dashboard</title>
+    <!-- Add Chart.js for real charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --warning: #e74c3c;
+            --dark: #34495e;
+            --light: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .logo span {
+            margin-left: 10px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .sidebar {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h3 {
+            margin-top: 0;
+            color: var(--dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .sidebar li:hover {
+            color: var(--primary);
+        }
+        
+        .sidebar li.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card h3 {
+            margin-top: 0;
+            color: var(--dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+        }
+        
+        .test-coverage {
+            color: var(--secondary);
+        }
+        
+        .test-failures {
+            color: var(--warning);
+        }
+        
+        .chart {
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .personas {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .persona-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        .persona-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .persona-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .persona-architect {
+            border-top: 4px solid #3498db;
+        }
+        
+        .persona-explorer {
+            border-top: 4px solid #2ecc71;
+        }
+        
+        .persona-guardian {
+            border-top: 4px solid #e74c3c;
+        }
+        
+        .action-bar {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #bdc3c7;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 70%;
+            max-width: 700px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: var(--dark);
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-button.active {
+            border-bottom: 2px solid var(--primary);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .scenario-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .task-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+        
+        /* Progress animation */
+        @keyframes progress {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background-color: var(--primary);
+            width: 0;
+        }
+        
+        .progress-animate {
+            animation: progress 2s ease-in-out forwards;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Additional styles for new components */
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        .component-tree {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .component-header {
+            padding: 8px;
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .component-items {
+            padding-left: 15px;
+        }
+
+        .component-item {
+            padding: 6px;
+            margin: 4px 0;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .component-item:hover {
+            background-color: #e9f5fe;
+        }
+
+        .template-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .flow-step {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .flow-step-header {
+            background-color: #f5f7fa;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flow-step-number {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 0.8rem;
+            line-height: 20px;
+        }
+
+        .flow-step-body {
+            padding: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .flow-step-connector {
+            height: 15px;
+            width: 2px;
+            background-color: #ddd;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                🧪 <span>QA AI Dashboard</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Tests</a></li>
+                    <li><a href="#">Personas</a></li>
+                    <li><a href="#">Configuration</a></li>
+                    <li><a href="#">Help</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="sidebar">
+                <h3>Test Projects</h3>
+                <ul>
+                    <li class="active">Main Project</li>
+                    <li>API Services</li>
+                    <li>UI Components</li>
+                    <li>Mobile App</li>
+                    <li>Kubernetes Integration</li>
+                </ul>
+                
+                <h3>Test Types</h3>
+                <ul>
+                    <li class="active">E2E Tests</li>
+                    <li>Integration Tests</li>
+                    <li>Unit Tests</li>
+                    <li>Security Tests</li>
+                </ul>
+            </div>
+            
+            <div class="main-content">
+                <div class="stats-grid">
+                    <div class="card">
+                        <h3>Test Metrics</h3>
+                        <div class="metric">
+                            <span>Test Coverage</span>
+                            <span class="metric-value test-coverage">85%</span>
+                        </div>
+                        <div class="metric">
+                            <span>Pass Rate</span>
+                            <span class="metric-value test-coverage">92%</span>
+                        </div>
+                        <div class="metric">
+                            <span>Test Failures</span>
+                            <span class="metric-value test-failures">12</span>
+                        </div>
+                        <div class="metric">
+                            <span>Execution Time</span>
+                            <span class="metric-value">2m 15s</span>
+                        </div>
+                        <div class="metric">
+                            <span>Last Run</span>
+                            <span class="metric-value last-run-date">2025-04-02 10:45:12</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Business Impact</h3>
+                        <div class="metric">
+                            <span>Critical Issues</span>
+                            <span class="metric-value test-failures">5</span>
+                        </div>
+                        <div class="metric">
+                            <span>Quality Score</span>
+                            <span class="metric-value test-coverage">88%</span>
+                        </div>
+                        <div class="metric">
+                            <span>Automated Tests</span>
+                            <span class="metric-value">153</span>
+                        </div>
+                        <div class="metric">
+                            <span>Potential Issues Prevented</span>
+                            <span class="metric-value test-coverage">27</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Test Execution Trends</h3>
+                    <div class="chart">
+                        <canvas id="trendsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="personas">
+                    <div class="persona-card persona-architect" data-persona="architect">
+                        <div class="persona-icon">🏛️</div>
+                        <h3>The Architect</h3>
+                        <p>Integration testing, 15 test scenarios active</p>
+                    </div>
+                    <div class="persona-card persona-explorer" data-persona="explorer">
+                        <div class="persona-icon">🔍</div>
+                        <h3>The Explorer</h3>
+                        <p>Edge case testing, 8 test scenarios active</p>
+                    </div>
+                    <div class="persona-card persona-guardian" data-persona="guardian">
+                        <div class="persona-icon">🛡️</div>
+                        <h3>The Guardian</h3>
+                        <p>Security testing, 12 test scenarios active</p>
+                    </div>
+                </div>
+                
+                <div class="action-bar">
+                    <button class="btn-primary" id="generateTests">Generate Tests</button>
+                    <button class="btn-primary" id="runTests">Run Tests</button>
+                    <button class="btn-secondary" id="viewReport">View Report</button>
+                    <button class="btn-secondary" id="exportData">Export Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Persona Modal -->
+    <div id="personaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="personaModalTitle">Persona Details</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div id="personaModalContent">
+                <div id="personaDescription"></div>
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <div class="tab-button active" data-tab="scenarios">Active Scenarios</div>
+                        <div class="tab-button" data-tab="expertise">Expertise</div>
+                        <div class="tab-button" data-tab="tasks">Available Tasks</div>
+                    </div>
+                    <div class="tab-content active" id="scenariosTab">
+                        <div id="scenariosList"></div>
+                    </div>
+                    <div class="tab-content" id="expertiseTab">
+                        <div id="expertiseContent"></div>
+                    </div>
+                    <div class="tab-content" id="tasksTab">
+                        <ul class="task-list" id="tasksList"></ul>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn-primary" id="activatePersona">Activate Persona</button>
+                <button class="btn-secondary close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generate Tests Modal -->
+    <div id="generateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate Test Cases</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="testType" style="display: block; margin-bottom: 5px;">Test Type:</label>
+                    <select id="testType" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="e2e">E2E Tests</option>
+                        <option value="integration">Integration Tests</option>
+                        <option value="unit">Unit Tests</option>
+                        <option value="security">Security Tests</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="targetSystem" style="display: block; margin-bottom: 5px;">Target System:</label>
+                    <input type="text" id="targetSystem" placeholder="https://example.com" 
+                           style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="personaSelect" style="display: block; margin-bottom: 5px;">Persona:</label>
+                    <select id="personaSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="architect">The Architect</option>
+                        <option value="explorer">The Explorer</option>
+                        <option value="guardian">The Guardian</option>
+                        <option value="all">All Personas</option>
+                    </select>
+                </div>
+                <div id="generateProgress" style="margin-top: 20px; display: none;">
+                    <p>Generating tests...</p>
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn-primary" id="startGenerate">Generate</button>
+                <button class="btn-secondary close-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Run Tests Modal -->
+    <div id="runModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Run Test Cases</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="runTestType" style="display: block; margin-bottom: 5px;">Test Type:</label>
+                    <select id="runTestType" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="e2e">E2E Tests</option>
+                        <option value="integration">Integration Tests</option>
+                        <option value="unit">Unit Tests</option>
+                        <option value="security">Security Tests</option>
+                        <option value="all">All Tests</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <input type="checkbox" id="runParallel" style="margin-right: 8px;">
+                    <label for="runParallel">Run in parallel</label>
+                </div>
+                <div id="runProgress" style="margin-top: 20px; display: none;">
+                    <p>Running tests...</p>
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn-primary" id="startRun">Run Tests</button>
+                <button class="btn-secondary close-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GitHub Copilot-style AI Assistant Modal -->
+    <div id="aiAssistantModal" class="modal">
+        <div class="modal-content" style="width: 85%; max-width: 1000px;">
+            <div class="modal-header">
+                <h2><span style="color: #3498db;">✨ GitHub Copilot</span> for QA Testing</h2>
+                <span class="close">&times;</span>
+            </div>
+            
+            <div style="display: flex; gap: 20px; height: 500px;">
+                <!-- Left side: Component Browser -->
+                <div style="width: 30%; border-right: 1px solid #eee; padding-right: 15px; overflow-y: auto;">
+                    <h3>UI Components</h3>
+                    <div class="component-tree">
+                        <div class="component-group">
+                            <div class="component-header">
+                                <span>📱 Login Page</span>
+                                <span class="expand-icon">+</span>
+                            </div>
+                            <div class="component-items" style="display: none;">
+                                <div class="component-item" draggable="true" data-component="login_form">Login Form</div>
+                                <div class="component-item" draggable="true" data-component="username_field">Username Field</div>
+                                <div class="component-item" draggable="true" data-component="password_field">Password Field</div>
+                                <div class="component-item" draggable="true" data-component="submit_button">Submit Button</div>
+                                <div class="component-item" draggable="true" data-component="forgot_password">Forgot Password Link</div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-group">
+                            <div class="component-header">
+                                <span>🏠 Dashboard</span>
+                                <span class="expand-icon">+</span>
+                            </div>
+                            <div class="component-items" style="display: none;">
+                                <div class="component-item" draggable="true" data-component="user_profile">User Profile</div>
+                                <div class="component-item" draggable="true" data-component="stats_widget">Stats Widget</div>
+                                <div class="component-item" draggable="true" data-component="navigation_menu">Navigation Menu</div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-group">
+                            <div class="component-header">
+                                <span>🛒 Shopping Cart</span>
+                                <span class="expand-icon">+</span>
+                            </div>
+                            <div class="component-items" style="display: none;">
+                                <div class="component-item" draggable="true" data-component="cart_item">Cart Item</div>
+                                <div class="component-item" draggable="true" data-component="quantity_selector">Quantity Selector</div>
+                                <div class="component-item" draggable="true" data-component="checkout_button">Checkout Button</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px;">Template Gallery</h3>
+                    <div class="template-list">
+                        <div class="template-item">
+                            <span>🔍 Form Validation Tests</span>
+                            <button class="btn-secondary btn-small">Use</button>
+                        </div>
+                        <div class="template-item">
+                            <span>🖱️ User Interaction Tests</span>
+                            <button class="btn-secondary btn-small">Use</button>
+                        </div>
+                        <div class="template-item">
+                            <span>📱 Responsive Design Tests</span>
+                            <button class="btn-secondary btn-small">Use</button>
+                        </div>
+                        <div class="template-item">
+                            <span>🔒 Authentication Tests</span>
+                            <button class="btn-secondary btn-small">Use</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Middle: Code/Test Editor -->
+                <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                    <div style="background-color: #f5f7fa; padding: 8px; border-radius: 4px 4px 0 0; font-family: monospace; display: flex; justify-content: space-between; align-items: center;">
+                        <span>login_form_test.py</span>
+                        <div>
+                            <button class="btn-secondary btn-small">Run</button>
+                            <button class="btn-secondary btn-small">Save</button>
+                        </div>
+                    </div>
+                    <div class="code-editor" style="flex-grow: 1; background-color: #282c34; color: #abb2bf; padding: 15px; font-family: monospace; overflow-y: auto; border-radius: 0 0 4px 4px;">
+<pre style="margin: 0; line-height: 1.5;">
+<span style="color: #c678dd;">import</span> <span style="color: #e5c07b;">pytest</span>
+<span style="color: #c678dd;">from</span> playwright.sync_api <span style="color: #c678dd;">import</span> expect
+
+<span style="color: #61afef;">@pytest.fixture</span>
+<span style="color: #c678dd;">def</span> <span style="color: #61afef;">setup</span>(page):
+    <span style="color: #5c6370;"># Navigate to login page before each test</span>
+    page.goto(<span style="color: #98c379;">"https://example.com/login"</span>)
+    <span style="color: #c678dd;">yield</span> page
+
+<span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_login_form_visibility</span>(setup):
+    page = setup
+    <span style="color: #5c6370;"># Test that login form elements are visible</span>
+    expect(page.locator(<span style="color: #98c379;">'form[id="login-form"]'</span>)).to_be_visible()
+    expect(page.locator(<span style="color: #98c379;">'input[name="username"]'</span>)).to_be_visible()
+    expect(page.locator(<span style="color: #98c379;">'input[name="password"]'</span>)).to_be_visible()
+    expect(page.locator(<span style="color: #98c379;">'button[type="submit"]'</span>)).to_be_visible()
+
+<span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_login_with_valid_credentials</span>(setup):
+    page = setup
+    <span style="color: #5c6370;"># Fill login form with valid credentials</span>
+    page.fill(<span style="color: #98c379;">'input[name="username"]'</span>, <span style="color: #98c379;">"testuser"</span>)
+    page.fill(<span style="color: #98c379;">'input[name="password"]'</span>, <span style="color: #98c379;">"password123"</span>)
+    
+    <span style="color: #5c6370;"># Click submit button</span>
+    page.click(<span style="color: #98c379;">'button[type="submit"]'</span>)
+    
+    <span style="color: #5c6370;"># Verify successful login</span>
+    expect(page).to_have_url(<span style="color: #98c379;">"https://example.com/dashboard"</span>)
+    expect(page.locator(<span style="color: #98c379;">'.welcome-message'</span>)).to_contain_text(<span style="color: #98c379;">"Welcome"</span>)
+
+<span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_login_with_invalid_credentials</span>(setup):
+    page = setup
+    <span style="color: #5c6370;"># Explore edge cases here...</span><span style="color: #61afef; text-decoration: underline; cursor: pointer;">|</span>
+</pre>
+                    </div>
+                    
+                    <!-- GitHub Copilot Suggestion Panel -->
+                    <div style="margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                            <span style="color: #3498db; font-weight: bold;">✨ GitHub Copilot</span>
+                            <span style="font-size: 0.9em; color: #666;">AI-powered test suggestions</span>
+                        </div>
+                        <div style="background-color: #f0f0f0; border-left: 3px solid #3498db; padding: 10px;">
+                            <p style="margin-top: 0;">I can complete your test_login_with_invalid_credentials function. Here's what I suggest:</p>
+<pre style="background-color: #f0f0f0; margin: 0; font-family: monospace; line-height: 1.4;">
+def test_login_with_invalid_credentials(setup):
+    page = setup
+    # Fill form with invalid credentials
+    page.fill('input[name="username"]', "invalid_user")
+    page.fill('input[name="password"]', "wrong_password")
+    
+    # Click submit button
+    page.click('button[type="submit"]')
+    
+    # Verify error message appears
+    expect(page.locator('.error-message')).to_be_visible()
+    expect(page.locator('.error-message')).to_contain_text("Invalid username or password")
+    
+    # Verify still on login page
+    expect(page).to_have_url("https://example.com/login")
+</pre>
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="btn-primary btn-small">Accept</button>
+                                <button class="btn-secondary btn-small">Generate Alternative</button>
+                                <button class="btn-secondary btn-small">Explain</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <div class="ai-input-container" style="display: flex; border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+                            <input type="text" placeholder="Ask GitHub Copilot to generate tests or explain concepts..." 
+                                   style="flex-grow: 1; padding: 10px; border: none; outline: none;">
+                            <button class="btn-primary" style="border-radius: 0;">Ask</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right side: Test Flow & GitHub Integration -->
+                <div style="width: 25%; border-left: 1px solid #eee; padding-left: 15px; overflow-y: auto;">
+                    <h3>GitHub Integration</h3>
+                    <div class="github-info" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 5px;">
+                            <svg height="16" viewBox="0 0 16 16" width="16" style="fill: #333;">
+                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                            </svg>
+                            <span>Repository: qa-ai-testing</span>
+                        </div>
+                        <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Branch: feature/login-tests</div>
+                        
+                        <div style="background-color: #f0f0f0; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                            <div style="font-weight: bold;">GitHub Action Template</div>
+                            <div style="font-size: 0.9em; margin-top: 3px;">ui-playwright-tests.yml</div>
+                        </div>
+                        
+                        <button class="btn-primary" style="width: 100%; margin-bottom: 5px;">Push Tests to GitHub</button>
+                        <button class="btn-secondary" style="width: 100%;">Create Pull Request</button>
+                    </div>
+                    
+                    <h3>Test Flow</h3>
+                    <div class="test-flow-builder" style="margin-top: 10px;">
+                        <div class="flow-step">
+                            <div class="flow-step-header">
+                                <span class="flow-step-number">1</span>
+                                <span class="flow-step-title">Visit Login Page</span>
+                            </div>
+                            <div class="flow-step-body">goto("https://example.com/login")</div>
+                        </div>
+                        
+                        <div class="flow-step-connector"></div>
+                        
+                        <div class="flow-step">
+                            <div class="flow-step-header">
+                                <span class="flow-step-number">2</span>
+                                <span class="flow-step-title">Fill Form</span>
+                            </div>
+                            <div class="flow-step-body">
+                                fill("username", "testuser")<br>
+                                fill("password", "*****")
+                            </div>
+                        </div>
+                        
+                        <div class="flow-step-connector"></div>
+                        
+                        <div class="flow-step">
+                            <div class="flow-step-header">
+                                <span class="flow-step-number">3</span>
+                                <span class="flow-step-title">Submit Form</span>
+                            </div>
+                            <div class="flow-step-body">click("button[type='submit']")</div>
+                        </div>
+                        
+                        <div class="flow-step-connector"></div>
+                        
+                        <div class="flow-step">
+                            <div class="flow-step-header">
+                                <span class="flow-step-number">4</span>
+                                <span class="flow-step-title">Assert Results</span>
+                            </div>
+                            <div class="flow-step-body">
+                                expect(page).to_have_url("/dashboard")<br>
+                                expect(".welcome").to_be_visible()
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; text-align: center;">
+                            <button class="btn-secondary btn-small">+ Add Step</button>
+                            <button class="btn-secondary btn-small">Generate Test</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        // Persona data
+        const personaData = {
+            architect: {
+                name: "The Architect",
+                description: "Focuses on system design and integration testing, ensuring components work together as expected.",
+                scenarios: [
+                    "API Gateway Integration Testing",
+                    "Service Mesh Communication Tests",
+                    "Event-Driven Architecture Validation",
+                    "Microservices Integration Tests",
+                    "Database Integration Tests",
+                    "Third-Party Services Integration"
+                ],
+                expertise: [
+                    "System architecture validation",
+                    "Component integration",
+                    "System latency analysis",
+                    "Data flow testing",
+                    "Service communication testing"
+                ],
+                tasks: [
+                    "Generate integration test cases",
+                    "Validate system architecture",
+                    "Test component interactions",
+                    "Analyze system bottlenecks",
+                    "Review service dependencies"
+                ]
+            },
+            explorer: {
+                name: "The Explorer",
+                description: "Specializes in discovering unexpected behavior and edge cases through creative testing approaches.",
+                scenarios: [
+                    "Boundary Value Testing",
+                    "Error Conditions Exploration",
+                    "Performance Extremes Testing",
+                    "Unusual User Behavior Simulation",
+                    "Data Anomalies Detection"
+                ],
+                expertise: [
+                    "Edge case identification",
+                    "Boundary analysis",
+                    "Unexpected input handling",
+                    "Random testing strategies",
+                    "UI/UX inconsistency detection"
+                ],
+                tasks: [
+                    "Generate edge case tests",
+                    "Create exploratory testing guide",
+                    "Test unusual user flows",
+                    "Analyze boundary conditions",
+                    "Discover hidden user paths"
+                ]
+            },
+            guardian: {
+                name: "The Guardian",
+                description: "Ensures security and compliance testing, protecting the system from vulnerabilities and ensuring it meets standards.",
+                scenarios: [
+                    "Authentication Security Testing",
+                    "Authorization Control Tests",
+                    "Data Protection Validation",
+                    "Input Validation Tests",
+                    "Session Management Security",
+                    "API Security Testing"
+                ],
+                expertise: [
+                    "Security vulnerability detection",
+                    "Compliance requirements testing",
+                    "Data protection validation",
+                    "Authentication/authorization testing",
+                    "Secure coding practices verification"
+                ],
+                tasks: [
+                    "Generate security test cases",
+                    "Create compliance validation tests",
+                    "Scan for OWASP vulnerabilities",
+                    "Test data protection measures",
+                    "Validate secure session management"
+                ]
+            }
+        };
+        
+        // Initialize chart
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mar 26', 'Mar 27', 'Mar 28', 'Mar 29', 'Mar 30', 'Mar 31', 'Apr 1', 'Apr 2'],
+                datasets: [{
+                    label: 'Test Coverage',
+                    data: [75, 78, 80, 79, 82, 84, 83, 85],
+                    borderColor: '#2ecc71',
+                    tension: 0.1,
+                    fill: false
+                }, {
+                    label: 'Pass Rate',
+                    data: [88, 90, 89, 91, 90, 93, 94, 92],
+                    borderColor: '#3498db',
+                    tension: 0.1,
+                    fill: false
+                }, {
+                    label: 'Test Count',
+                    data: [120, 125, 130, 135, 140, 145, 150, 153],
+                    borderColor: '#9b59b6',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Test Performance Trends'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Update last run date
+        document.querySelector('.last-run-date').textContent = new Date().toLocaleString();
+        
+        // Modal handling
+        const modals = document.querySelectorAll('.modal');
+        const closeButtons = document.querySelectorAll('.close, .close-modal');
+        let activePersona = null;
+        
+        // Open persona modal when clicking on persona card
+        document.querySelectorAll('.persona-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const persona = this.dataset.persona;
+                openPersonaModal(persona);
+            });
+        });
+        
+        function openPersonaModal(persona) {
+            activePersona = persona;
+            const data = personaData[persona];
+            
+            // Update modal content
+            document.getElementById('personaModalTitle').textContent = data.name;
+            document.getElementById('personaDescription').innerHTML = `<p>${data.description}</p>`;
+            
+            // Update scenarios tab
+            const scenariosHtml = data.scenarios.map(s => 
+                `<div class="scenario-item">${s}</div>`
+            ).join('');
+            document.getElementById('scenariosList').innerHTML = scenariosHtml;
+            
+            // Update expertise tab
+            const expertiseHtml = `
+                <ul style="padding-left: 20px;">
+                    ${data.expertise.map(e => `<li>${e}</li>`).join('')}
+                </ul>
+            `;
+            document.getElementById('expertiseContent').innerHTML = expertiseHtml;
+            
+            // Update tasks tab
+            const tasksHtml = data.tasks.map(t => 
+                `<li>
+                    <label>
+                        <input type="checkbox"> ${t}
+                    </label>
+                </li>`
+            ).join('');
+            document.getElementById('tasksList').innerHTML = tasksHtml;
+            
+            // Show the modal
+            document.getElementById('personaModal').style.display = 'block';
+            
+            // Reset to first tab
+            showTab('scenarios');
+        }
+        
+        // Close all modals when clicking close buttons
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                modals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+        
+        // Tab handling
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+                showTab(tab);
+            });
+        });
+        
+        function showTab(tab) {
+            // Hide all tabs and remove active class
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab and add active class
+            document.getElementById(`${tab}Tab`).classList.add('active');
+            document.querySelector(`.tab-button[data-tab="${tab}"]`).classList.add('active');
+        }
+        
+        // Generate Tests button handling
+        document.getElementById('generateTests').addEventListener('click', function() {
+            document.getElementById('generateModal').style.display = 'block';
+        });
+        
+        document.getElementById('startGenerate').addEventListener('click', function() {
+            const testType = document.getElementById('testType').value;
+            const target = document.getElementById('targetSystem').value;
+            const persona = document.getElementById('personaSelect').value;
+            
+            if (!target) {
+                showToast("Please enter a target system URL");
+                return;
+            }
+            
+            // Show progress bar
+            const progressBar = document.querySelector('#generateProgress .progress-bar');
+            document.getElementById('generateProgress').style.display = 'block';
+            progressBar.classList.add('progress-animate');
+            
+            // Simulate generation
+            setTimeout(() => {
+                document.getElementById('generateModal').style.display = 'none';
+                document.getElementById('generateProgress').style.display = 'none';
+                progressBar.classList.remove('progress-animate');
+                showToast(`Generated ${testType} tests for ${target} using ${persona === 'all' ? 'all personas' : personaData[persona].name}`);
+                
+                // Update test count in UI
+                const currentCount = parseInt(document.querySelectorAll('.metric-value')[2].textContent);
+                document.querySelectorAll('.metric-value')[2].textContent = currentCount + 15;
+            }, 2000);
+        });
+        
+        // Run Tests button handling
+        document.getElementById('runTests').addEventListener('click', function() {
+            document.getElementById('runModal').style.display = 'block';
+        });
+        
+        document.getElementById('startRun').addEventListener('click', function() {
+            const testType = document.getElementById('runTestType').value;
+            const parallel = document.getElementById('runParallel').checked;
+            
+            // Show progress bar
+            const progressBar = document.querySelector('#runProgress .progress-bar');
+            document.getElementById('runProgress').style.display = 'block';
+            progressBar.classList.add('progress-animate');
+            
+            // Simulate running tests
+            setTimeout(() => {
+                document.getElementById('runModal').style.display = 'none';
+                document.getElementById('runProgress').style.display = 'none';
+                progressBar.classList.remove('progress-animate');
+                
+                // Update last run date
+                document.querySelector('.last-run-date').textContent = new Date().toLocaleString();
+                
+                showToast(`Completed ${testType} tests ${parallel ? 'in parallel' : 'sequentially'}`);
+                
+                // Update chart with new data point
+                addChartDataPoint();
+            }, 3000);
+        });
+        
+        // Activate Persona button
+        document.getElementById('activatePersona').addEventListener('click', function() {
+            if (!activePersona) return;
+            
+            document.getElementById('personaModal').style.display = 'none';
+            showToast(`Activated ${personaData[activePersona].name} for testing tasks`);
+            
+            // Highlight the active persona card
+            document.querySelectorAll('.persona-card').forEach(card => {
+                card.style.transform = '';
+                card.style.boxShadow = '';
+            });
+            
+            const activeCard = document.querySelector(`.persona-card[data-persona="${activePersona}"]`);
+            activeCard.style.transform = 'translateY(-5px)';
+            activeCard.style.boxShadow = '0 8px 15px rgba(0,0,0,0.2)';
+        });
+        
+        // View Report button
+        document.getElementById('viewReport').addEventListener('click', function() {
+            showToast("Opening test report in new tab...");
+            // In a real app, this would open a report page
+        });
+        
+        // Export Data button
+        document.getElementById('exportData').addEventListener('click', function() {
+            showToast("Exporting test data as CSV...");
+            // In a real app, this would trigger a download
+        });
+        
+        // Toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Add a new data point to the chart
+        function addChartDataPoint() {
+            // Get current date
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            
+            // Add new data points with slight variations
+            chart.data.labels.push(dateStr);
+            chart.data.datasets[0].data.push(Math.floor(Math.random() * 5) + 83); // Coverage
+            chart.data.datasets[1].data.push(Math.floor(Math.random() * 5) + 90); // Pass rate
+            chart.data.datasets[2].data.push(155); // Test count
+            
+            // Remove oldest data point if we have more than 10
+            if (chart.data.labels.length > 10) {
+                chart.data.labels.shift();
+                chart.data.datasets.forEach(dataset => {
+                    dataset.data.shift();
+                });
+            }
+            
+            // Update the chart
+            chart.update();
+        }
+
+        document.getElementById('generateTests').addEventListener('click', function() {
+            // Show the AI Assistant modal instead of the generate tests modal
+            document.getElementById('generateModal').style.display = 'none';
+            document.getElementById('aiAssistantModal').style.display = 'block';
+        });
+
+        // Component tree expand/collapse
+        document.querySelectorAll('.component-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const items = this.nextElementSibling;
+                const icon = this.querySelector('.expand-icon');
+                
+                if (items.style.display === 'none') {
+                    items.style.display = 'block';
+                    icon.textContent = '-';
+                } else {
+                    items.style.display = 'none';
+                    icon.textContent = '+';
+                }
+            });
+        });
+
+        // Make component items draggable
+        document.querySelectorAll('.component-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', this.dataset.component);
+            });
+        });
+    </script>
+</body>
+</html>

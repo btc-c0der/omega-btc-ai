@@ -1,141 +1,163 @@
-from typing import Dict, List
-from pathlib import Path
-from .base import QAPersona, TestCase
+"""
+The Architect: System design and integration testing persona.
+"""
 
-class ArchitectPersona(QAPersona):
-    """The Architect persona focuses on system design and integration testing"""
+import logging
+from typing import Dict, List, Any
+from pathlib import Path
+import json
+import time
+
+from qa_ai.personas.base_persona import BasePersona
+
+logger = logging.getLogger(__name__)
+
+class Architect(BasePersona):
+    """
+    The Architect focuses on system design and integration testing,
+    ensuring components work together as expected.
+    """
     
-    def __init__(self):
+    def __init__(self, config: Dict[str, Any] = None):
+        """Initialize the Architect persona"""
         super().__init__(
             name="The Architect",
-            expertise=[
-                "System Architecture",
-                "Integration Testing",
-                "API Testing",
-                "Performance Testing",
-                "Scalability Analysis"
-            ]
+            description="Focuses on system design and integration testing",
+            config=config
         )
+        self.integration_patterns = [
+            "API Gateway", "Service Mesh", "Event-Driven", 
+            "Microservices", "Database Integration", "Third-Party Services"
+        ]
     
-    def analyze_requirements(self, requirements: Dict) -> List[TestCase]:
-        """Analyze requirements from an architectural perspective"""
-        test_cases = []
+    def generate_test_cases(self, target: str, test_type: str, output_dir: Path) -> List[Path]:
+        """
+        Generate integration-focused test cases.
         
-        # Analyze system components
-        for component in requirements.get("components", []):
-            test_case = TestCase(
-                name=f"Component Integration: {component['name']}",
-                description=f"Verify integration of {component['name']} with other system components",
-                steps=[
-                    f"Initialize {component['name']} component",
-                    "Verify component dependencies",
-                    "Test component interfaces",
-                    "Validate data flow between components"
-                ],
-                expected_results=[
-                    "Component initializes successfully",
-                    "All dependencies are properly resolved",
-                    "Interfaces function as expected",
-                    "Data flows correctly between components"
-                ],
-                priority=1,
-                category="integration"
-            )
-            test_cases.append(test_case)
+        Args:
+            target: The target system or URL to test
+            test_type: The type of test (e.g., e2e, integration)
+            output_dir: Directory to save the generated tests
+            
+        Returns:
+            List of paths to the generated test files
+        """
+        logger.info(f"Architect generating {test_type} tests for {target}")
+        output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Analyze API endpoints
-        for endpoint in requirements.get("apis", []):
-            test_case = TestCase(
-                name=f"API Endpoint: {endpoint['path']}",
-                description=f"Verify {endpoint['method']} {endpoint['path']} endpoint functionality",
-                steps=[
-                    f"Prepare {endpoint['method']} request",
-                    "Set appropriate headers and parameters",
-                    "Send request to endpoint",
-                    "Validate response format and content"
-                ],
-                expected_results=[
-                    "Request is properly formatted",
-                    "Response matches expected schema",
-                    "Status code is appropriate",
-                    "Error handling is correct"
-                ],
-                priority=2,
-                category="api"
-            )
-            test_cases.append(test_case)
+        generated_files = []
         
-        self.test_cases.extend(test_cases)
-        return test_cases
+        # Create integration test scenarios based on patterns
+        for pattern in self.integration_patterns:
+            if pattern.lower() in target.lower() or test_type == "integration":
+                test_file = output_dir / f"test_integration_{pattern.lower().replace('-', '_')}.py"
+                
+                # Create a test file with integration testing best practices
+                with open(test_file, 'w') as f:
+                    f.write(self._generate_integration_test_template(target, pattern))
+                
+                generated_files.append(test_file)
+                self.active_scenarios.append(f"Integration test for {pattern}")
+        
+        # Create system design validation tests
+        if test_type == "e2e":
+            system_test_file = output_dir / "test_system_architecture.py"
+            with open(system_test_file, 'w') as f:
+                f.write(self._generate_system_test_template(target))
+            
+            generated_files.append(system_test_file)
+            self.active_scenarios.append("System architecture validation")
+        
+        logger.info(f"Architect generated {len(generated_files)} test files")
+        return generated_files
     
-    def generate_test_script(self, test_case: TestCase, framework: str = "playwright") -> str:
-        """Generate test script for the Architect's test cases"""
-        if framework == "playwright":
-            return self._generate_playwright_script(test_case)
-        else:
-            raise ValueError(f"Unsupported framework: {framework}")
-    
-    def _generate_playwright_script(self, test_case: TestCase) -> str:
-        """Generate Playwright test script"""
-        script = f'''import pytest
-from playwright.sync_api import Page, expect
-
-def test_{test_case.name.lower().replace(' ', '_')}(page: Page):
-    """
-    {test_case.description}
-    """
-    # Test steps
-    {self._format_steps(test_case.steps)}
-    
-    # Verify expected results
-    {self._format_expected_results(test_case.expected_results)}
-'''
-        return script
-    
-    def _format_steps(self, steps: List[str]) -> str:
-        """Format test steps for the script"""
-        formatted = []
-        for i, step in enumerate(steps, 1):
-            formatted.append(f"    # Step {i}: {step}")
-        return "\n".join(formatted)
-    
-    def _format_expected_results(self, results: List[str]) -> str:
-        """Format expected results for the script"""
-        formatted = []
-        for i, result in enumerate(results, 1):
-            formatted.append(f"    # Expected {i}: {result}")
-        return "\n".join(formatted)
-    
-    def review_test_results(self, results: Dict) -> Dict:
-        """Review test results and provide architectural insights"""
-        insights = {
-            "system_health": "good",
-            "integration_points": [],
-            "performance_metrics": {},
-            "recommendations": []
+    def analyze_results(self, results_path: Path) -> Dict[str, Any]:
+        """
+        Analyze test results with focus on system integration issues.
+        
+        Args:
+            results_path: Path to the test results file/directory
+            
+        Returns:
+            Dictionary containing architectural analysis
+        """
+        logger.info(f"Architect analyzing results from {results_path}")
+        
+        # In a real implementation, this would parse the test results
+        # and provide insights on system design and integration issues
+        
+        # Simulated analysis for demonstration
+        analysis = {
+            "integration_issues": [
+                {"component": "API Gateway", "issue": "Timeout during high load", "severity": "High"},
+                {"component": "Database Integration", "issue": "Connection pooling inefficient", "severity": "Medium"}
+            ],
+            "architectural_recommendations": [
+                "Consider implementing circuit breaker pattern for API calls",
+                "Database connection pooling needs optimization"
+            ],
+            "system_health_score": 85,
+            "bottlenecks": ["Authentication service", "Report generation"]
         }
         
-        # Analyze integration test results
-        for test in results.get("integration_tests", []):
-            if test["status"] == "failed":
-                insights["integration_points"].append({
-                    "component": test["component"],
-                    "issue": test["error"],
-                    "severity": "high"
-                })
-        
-        # Analyze performance metrics
-        if "performance_metrics" in results:
-            insights["performance_metrics"] = {
-                "response_time": results["performance_metrics"].get("avg_response_time"),
-                "throughput": results["performance_metrics"].get("requests_per_second"),
-                "error_rate": results["performance_metrics"].get("error_rate")
-            }
-        
-        # Generate recommendations
-        if insights["integration_points"]:
-            insights["recommendations"].append(
-                "Review and fix integration points with high severity issues"
-            )
-        
-        return insights 
+        return analysis
+    
+    def _generate_integration_test_template(self, target: str, pattern: str) -> str:
+        """Generate code for an integration test based on the pattern"""
+        return f"""
+# Integration test for {pattern} with {target}
+import pytest
+import requests
+
+def test_{pattern.lower().replace('-', '_')}_integration():
+    \"\"\"
+    Test the integration with {pattern} component
+    \"\"\"
+    # Setup test environment
+    base_url = "{target}"
+    
+    # Execute integration test
+    response = requests.get(f"{{base_url}}/api/{pattern.lower().replace(' ', '-')}")
+    
+    # Verify integration is working
+    assert response.status_code == 200
+    assert "status" in response.json()
+    assert response.json()["status"] == "operational"
+
+def test_{pattern.lower().replace('-', '_')}_error_handling():
+    \"\"\"
+    Test error handling in {pattern} integration
+    \"\"\"
+    # Implementation here
+    pass
+"""
+    
+    def _generate_system_test_template(self, target: str) -> str:
+        """Generate code for a system architecture test"""
+        return f"""
+# System architecture validation test for {target}
+import pytest
+import requests
+
+def test_system_components_availability():
+    \"\"\"
+    Verify all system components are available
+    \"\"\"
+    base_url = "{target}"
+    components = ["auth", "api", "database", "cache", "storage"]
+    
+    for component in components:
+        response = requests.get(f"{{base_url}}/health/{{component}}")
+        assert response.status_code == 200, f"{{component}} is not available"
+        assert response.json()["status"] == "up", f"{{component}} is not up"
+
+def test_system_latency():
+    \"\"\"
+    Verify system response times are within acceptable limits
+    \"\"\"
+    base_url = "{target}"
+    response = requests.get(f"{{base_url}}/api/status")
+    
+    # Verify response time is acceptable
+    assert response.elapsed.total_seconds() < 1.0, "System response time exceeds threshold"
+"""

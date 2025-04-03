@@ -25,14 +25,23 @@ from typing import List, Dict, Optional
 import asyncio
 from pathlib import Path
 
-# Platform-specific imports for key input
-if os.name == 'nt':  # Windows
-    import msvcrt
-else:  # Unix-like
-    import tty
-    import termios
+# Platform-specific imports for key input handling
+_msvcrt = None
+_termios = None
+_tty = None
 
-app = typer.Typer()
+if os.name == 'nt':  # Windows
+    try:
+        import msvcrt as _msvcrt
+    except ImportError:
+        pass
+else:  # Unix-like
+    try:
+        import termios as _termios
+        import tty as _tty
+    except ImportError:
+        pass
+
 console = Console()
 
 # Slide content
@@ -116,6 +125,60 @@ SLIDES = [
     }
 ]
 
+def get_key():
+    """Get a single keypress from the user."""
+    if os.name == 'nt':  # Windows
+        if _msvcrt:
+            if _msvcrt.kbhit():
+                key = _msvcrt.getch()
+                try:
+                    if key in [b'\xe0']:  # Arrow key prefix
+                        key = _msvcrt.getch()
+                        if key == b'H':  # Up arrow
+                            return 'up'
+                        elif key == b'P':  # Down arrow
+                            return 'down'
+                        elif key == b'K':  # Left arrow
+                            return 'left'
+                        elif key == b'M':  # Right arrow
+                            return 'right'
+                    return key.decode('utf-8')
+                except:
+                    return None
+        else:
+            console.print("[red]Warning: msvcrt module not available[/red]")
+            return None
+        return None
+    else:  # Unix-like
+        if _termios and _tty:
+            try:
+                fd = sys.stdin.fileno()
+                old_settings = _termios.tcgetattr(fd)
+                try:
+                    _tty.setraw(sys.stdin.fileno())
+                    ch = sys.stdin.read(1)
+                    if ch == '\x1b':
+                        ch = sys.stdin.read(1)
+                        if ch == '[':
+                            ch = sys.stdin.read(1)
+                            if ch == 'A':  # Up arrow
+                                return 'up'
+                            elif ch == 'B':  # Down arrow
+                                return 'down'
+                            elif ch == 'D':  # Left arrow
+                                return 'left'
+                            elif ch == 'C':  # Right arrow
+                                return 'right'
+                    return ch
+                finally:
+                    _termios.tcsetattr(fd, _termios.TCSADRAIN, old_settings)
+            except _termios.error:
+                console.print("[red]Warning: Failed to configure terminal[/red]")
+                return None
+        else:
+            console.print("[red]Warning: termios/tty modules not available[/red]")
+            return None
+
 def setup_tmux_session():
     """Set up a new tmux session for the presentation."""
     session_name = "tkww-demo"
@@ -146,6 +209,17 @@ def setup_tmux_session():
     # Set up pane 2 (controls)
     subprocess.run(["tmux", "select-pane", "-t", "2"])
     subprocess.run(["tmux", "send-keys", "-t", session_name, "clear", "C-m"])
+    
+    # Print instructions for the user
+    console.print("\n[green]Tmux session created![/green]")
+    console.print("\nTo view the presentation:")
+    console.print("1. Open a new terminal window")
+    console.print("2. Run: [blue]tmux attach-session -t tkww-demo[/blue]")
+    console.print("\nControls:")
+    console.print("- Use ←/→ or h/l to navigate slides")
+    console.print("- Space to pause/resume")
+    console.print("- q to quit")
+    console.print("\nPress Ctrl+C in this window to end the presentation\n")
     
     return session_name
 
@@ -250,57 +324,18 @@ async def play_slideshow(show_progress: bool = True):
         # Clean up tmux session
         subprocess.run(["tmux", "kill-session", "-t", session_name])
 
-def get_key():
-    """Get a single keypress from the user."""
-    if os.name == 'nt':  # Windows
-        if msvcrt.kbhit():
-            key = msvcrt.getch()
-            try:
-                if key in [b'\xe0']:  # Arrow key prefix
-                    key = msvcrt.getch()
-                    if key == b'H':  # Up arrow
-                        return 'up'
-                    elif key == b'P':  # Down arrow
-                        return 'down'
-                    elif key == b'K':  # Left arrow
-                        return 'left'
-                    elif key == b'M':  # Right arrow
-                        return 'right'
-                return key.decode('utf-8')
-            except:
-                return None
-        return None
-    else:  # Unix-like
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            ch = sys.stdin.read(1)
-            if ch == '\x1b':
-                ch = sys.stdin.read(1)
-                if ch == '[':
-                    ch = sys.stdin.read(1)
-                    if ch == 'A':  # Up arrow
-                        return 'up'
-                    elif ch == 'B':  # Down arrow
-                        return 'down'
-                    elif ch == 'D':  # Left arrow
-                        return 'left'
-                    elif ch == 'C':  # Right arrow
-                        return 'right'
-            return ch
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-
-@app.command()
-def run():
-    """Run the TKWW QA AI demo slideshow."""
+def main():
+    """Main entry point for the demo script."""
     try:
         asyncio.run(play_slideshow())
     except KeyboardInterrupt:
         console.print("\n[red]Demo interrupted by user[/red]")
+        # Clean up tmux session
+        subprocess.run(["tmux", "kill-session", "-t", "tkww-demo"])
     except Exception as e:
         console.print(f"\n[red]Error running demo: {e}[/red]")
+        # Clean up tmux session
+        subprocess.run(["tmux", "kill-session", "-t", "tkww-demo"])
 
 if __name__ == "__main__":
-    app() 
+    main() 

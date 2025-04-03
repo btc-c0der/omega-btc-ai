@@ -1,170 +1,115 @@
-# Omega Bot Farm
-
-A containerized, Kubernetes-orchestrated trading bot system with Discord integration and cosmic influences.
+# Omega BTC AI - Bot Farm
 
 ## Overview
 
-The Omega Bot Farm is a sophisticated trading system that deploys multiple trading bots with distinct psychological profiles and trading strategies. Each bot operates with its own decision-making process, risk tolerance, and emotional responses to market conditions.
+The Omega Bot Farm is a specialized environment for algorithmic trading bots powered by artificial intelligence. The farm includes various bots for market analysis, trading execution, position monitoring, and user interaction.
 
-The system is deployed in Kubernetes for scalability and resilience, and includes a Discord bot for real-time monitoring and command control.
+## Key Components
 
-## Features
+- **Trading B0ts**: Core algorithmic traders using various strategies
+- **Analytics**: Tools for market analysis and prediction
+- **Services**: Shared functionality across bots
+- **Discord UI**: User interface via Discord for monitoring and control
 
-- **Multiple Trading Personas**: Strategic, Aggressive, Scalper, Newbie, and Cosmic traders
-- **Psychological Modeling**: Bots with emotional states that affect trading decisions
-- **CCXT Integration**: Unified interface to 120+ cryptocurrency exchanges
-- **Cosmic Influences**: Integration of Schumann resonance, moon phases, and other cosmic factors
-- **Discord Integration**: Command and control via Discord with rich data visualization
-- **Kubernetes Deployment**: Containerized, scalable architecture
-- **Advanced Risk Management**: Sophisticated position sizing and exit strategies
+## Waze Bot - Discord UI
 
-## Architecture
+The Waze Bot is the primary user interface for the Omega AI BTC system, providing a rich, context-driven experience for monitoring and analyzing BitGet positions through Discord.
 
-The system consists of several components:
+### Features
 
-- **Trading Bots**: Independent containers running different trader personas
-- **Exchange Connectivity**: CCXT integration for trading on various exchanges
-- **Discord Bot**: User interface for monitoring and control
-- **Redis**: Message queue for inter-service communication
-- **Kubernetes**: Orchestration platform for container management
+- **Position Monitoring**: Track open positions on BitGet with real-time updates
+- **Fibonacci Analysis**: Analyze positions using Fibonacci retracement and extension levels
+- **Position Harmony**: Evaluate how well positions align with the golden ratio principles
+- **Portfolio Recommendations**: Get actionable insights for portfolio management
+- **Context-Aware Interaction**: Personalized responses based on user context
+- **Automated Notifications**: Get alerts for significant position changes
 
-## Getting Started
+### Setup Instructions
 
-### Prerequisites
+#### Prerequisites
 
-- Docker
-- Kubernetes cluster or minikube
-- Redis instance
-- Discord Bot Token
-- Exchange API credentials
-- CCXT library (`pip install ccxt`)
+1. Python 3.8+
+2. BitGet API credentials
+3. Discord Bot Token
+4. Redis (optional, for data sharing)
 
-### Installation
+#### Installation
 
-1. Configure environment variables:
+1. Install required dependencies:
 
 ```bash
-export DISCORD_TOKEN=your_discord_token
-export EXCHANGE_ID=bitget
-export EXCHANGE_API_KEY=your_api_key
-export EXCHANGE_API_SECRET=your_api_secret
-export EXCHANGE_API_PASSPHRASE=your_passphrase
+pip install discord.py redis python-dotenv pyyaml ccxt
 ```
 
-2. Create Kubernetes secrets:
+2. Configure environment variables:
 
 ```bash
-kubectl create secret generic discord-credentials \
-  --from-literal=token=$DISCORD_TOKEN
+# Discord bot token
+export DISCORD_TOKEN="your_discord_bot_token"
 
-kubectl create secret generic exchange-credentials \
-  --from-literal=api-key=$EXCHANGE_API_KEY \
-  --from-literal=api-secret=$EXCHANGE_API_SECRET \
-  --from-literal=passphrase=$EXCHANGE_API_PASSPHRASE
+# BitGet API credentials (for default analyzer)
+export BITGET_API_KEY="your_bitget_api_key"
+export BITGET_SECRET_KEY="your_bitget_secret_key"
+export BITGET_PASSPHRASE="your_bitget_passphrase"
+
+# Redis configuration (optional)
+export REDIS_HOST="localhost"
+export REDIS_PORT="6379"
 ```
 
-3. Deploy Redis:
+3. Configure the bot settings in `config/waze_bot_config.yaml`
+
+4. Run the Waze Bot:
 
 ```bash
-kubectl apply -f kubernetes/infrastructure/redis.yaml
+python -m src.omega_bot_farm.discord.waze_bot
 ```
 
-4. Deploy trading bots:
+### Discord Commands
 
-```bash
-kubectl apply -f kubernetes/deployments/strategic-trader.yaml
-kubectl apply -f kubernetes/deployments/ccxt-strategic-trader.yaml
-kubectl apply -f kubernetes/deployments/aggressive-trader.yaml
-kubectl apply -f kubernetes/deployments/scalper-trader.yaml
-kubectl apply -f kubernetes/deployments/cosmic-trader.yaml
-```
+#### Setup Commands
 
-5. Deploy Discord bot:
+- `/bitget-setup` - Set up BitGet API credentials (securely via DM)
+- `!waze-set-channel` - Set the current channel for Waze bot announcements
 
-```bash
-kubectl apply -f kubernetes/deployments/discord-bot.yaml
-```
+#### Analysis Commands
 
-## Discord Commands
+- `/bitget-positions` - Show your current BitGet positions
+- `/bitget-analyze` - Analyze your BitGet positions with Fibonacci levels
+- `/bitget-changes` - Show recent changes in your BitGet positions
 
-The Discord bot provides several commands for interacting with the trading bots:
+#### Insight Commands
 
-- `/farm_status` - Get status of all trading bots in the farm
-- `/start <bot_name>` - Start a specific trading bot
-- `/stop <bot_name>` - Stop a specific trading bot
-- `/stats <bot_name>` - View detailed statistics for a trading bot
-- `/cosmic_influence` - View current cosmic influences on trading
+- `/golden-wisdom` - Receive trading wisdom based on Fibonacci principles
+- `/market-pulse` - Get the current market sentiment
 
-## CCXT Integration
+#### Help Command
 
-The Omega Bot Farm integrates with CCXT (CryptoCurrency eXchange Trading Library) to provide a unified interface for interacting with various cryptocurrency exchanges.
+- `!waze-help` - Show help information for Waze bot
 
-### Supported Exchanges
+### Integration with BitgetPositionAnalyzerB0t
 
-CCXT supports over 120 cryptocurrency exchanges, including:
+The Waze Bot integrates directly with the `BitgetPositionAnalyzerB0t`, bringing its powerful Fibonacci-based position analysis to Discord. Key integration points:
 
-- BitGet
-- Binance
-- Bybit
-- OKX
-- Kucoin
-- FTX
+1. **Personal Analysis**: Users can set up their own BitGet API credentials for personalized position analysis
+2. **Shared Analysis**: A default analyzer can provide general market insights to all users
+3. **Automated Monitoring**: The bot monitors positions and notifies users of significant changes
+4. **Harmony Insights**: The bot provides insights into position harmony based on golden ratio principles
 
-### Exchange Configuration
+### Security
 
-The trading bots can be configured to work with different exchanges by setting the appropriate environment variables:
+- API credentials are handled securely through direct messages
+- Each user's API credentials are stored separately and not shared
+- Sensitive position data is sent as ephemeral messages visible only to the requesting user
 
-```yaml
-env:
-- name: EXCHANGE_ID
-  value: "bitget"  # Can be any CCXT-supported exchange
-- name: USE_TESTNET
-  value: "true"    # Set to false for live trading
-```
+## Contributing
 
-For more detailed information, see the [CCXT Integration Documentation](docs/ccxt_integration.md).
+To contribute to the Omega Bot Farm:
 
-## Development
-
-### Building from Source
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/omega-btc-ai.git
-cd omega-btc-ai/src/omega_bot_farm
-```
-
-2. Build Docker images:
-
-```bash
-docker build -t omega-btc-ai/ccxt-strategic-trader:latest -f docker/trading-bots/Dockerfile .
-docker build -t omega-btc-ai/discord-bot:latest -f docker/discord-bot/Dockerfile .
-```
-
-### Project Structure
-
-```
-omega_bot_farm/
-├── discord/               # Discord bot implementation
-├── kubernetes/            # Kubernetes deployment configurations
-├── trading/               # Trading components
-│   ├── bots/              # Bot implementations for different personas
-│   ├── core/              # Core trading functionality
-│   ├── exchanges/         # Exchange integrations using CCXT
-│   └── profiles/          # Trading profiles from existing codebase
-├── analytics/             # Analytics and performance tracking
-├── docker/                # Dockerfiles for containerization
-├── docs/                  # Documentation
-├── tests/                 # Test suite
-├── config/                # Configuration files
-└── utils/                 # Utility functions and helpers
-```
+1. Create a new branch for your feature
+2. Implement and test your changes
+3. Submit a pull request with a detailed description of your implementation
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-Built on the foundation of OmegaBTC AI trading components and integrates with CCXT for exchange connectivity.
+This project is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
