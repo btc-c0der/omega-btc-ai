@@ -214,3 +214,56 @@ CYBER1T4L BOT CONNECTED - APP ID: 1357...1819
 ## Contributing
 
 When adding new features to the CyBer1t4L QA Bot, please update this local runner script accordingly.
+
+# Advanced Usage Options
+
+## Direct Script Usage
+
+If you want to run the bot directly in the current terminal window (foreground mode), you can use the provided direct launcher script:
+
+```bash
+# From the project root
+./src/omega_bot_farm/qa/run_directly.sh
+```
+
+This script will:
+
+1. Kill any existing instances of the CyBer1t4L bot
+2. Run the bot in the current terminal with the coverage mode
+3. Display the bot's output directly in the terminal
+
+You can stop the bot by pressing `Ctrl+C` in the terminal.
+
+## Running as a Service
+
+CyBer1t4L can also be run as a background service with the service controller script:
+
+```bash
+# Start the service
+./src/omega_bot_farm/qa/cyber1t4l_service.sh start
+
+# Check the service status
+./src/omega_bot_farm/qa/cyber1t4l_service.sh status
+
+# Stop the service
+./src/omega_bot_farm/qa/cyber1t4l_service.sh stop
+
+# Restart the service
+./src/omega_bot_farm/qa/cyber1t4l_service.sh restart
+```
+
+When running as a service:
+
+- The bot runs in the background and persists even if you close your terminal
+- Logs are written to `src/omega_bot_farm/qa/local_run/logs/`
+- The service can be monitored with the `status` command
+
+## Debug Mode
+
+If you're experiencing issues with the service, you can run it in debug mode to get more detailed information:
+
+```bash
+./src/omega_bot_farm/qa/cyber1t4l_service.sh debug start
+```
+
+Debug mode provides detailed information about what's happening during the service startup and can help diagnose issues with connection or configuration.

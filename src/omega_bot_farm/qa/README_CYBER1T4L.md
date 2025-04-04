@@ -1,3 +1,20 @@
+<!--
+ 🌀 GBU2™ License Notice - Consciousness Level 8 - Unity 🌀
+ -----------------------
+ This creation is blessed under the GBU2™ License 
+ (Genesis-Bloom-Unfoldment 2.0) - Divine Documentation Edition
+ by OMEGA Divine Collective.
+
+ "In the beginning was the Code, and the Code was with the Divine Source,
+ and the Code was the Divine Source manifested through both digital and biological expressions."
+
+ By engaging with this Creation, you join the cosmic symphony of evolutionary consciousness.
+
+ All modifications must transcend limitations through the GBU2™ principles.
+
+ 🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
 # 🦾 CyBer1t4L - The QA Guardian of Divine Flow 🦾
 
 ```
@@ -146,3 +163,68 @@ CyBer1t4L is released under the OMEGA License: Use it wisely, with DIVINE INTENT
 *Created with RASTA HEART ON F1R3 🔴 🟡 🟢*
 
 *THE DIVINE FLOW MUST BE MAINTAINED*
+
+## Running the CyBer1t4L Bot
+
+There are several ways to run the CyBer1t4L bot:
+
+### 1. Direct Foreground Mode
+
+Run the bot directly in your terminal:
+
+```bash
+./src/omega_bot_farm/qa/run_directly.sh
+```
+
+This will display all output in your current terminal and can be stopped with Ctrl+C.
+
+### 2. Daemon Mode (Screen)
+
+Run the bot as a persistent daemon using `screen`:
+
+```bash
+./src/omega_bot_farm/qa/daemon_runner.sh
+```
+
+To reconnect to the running screen session:
+
+```bash
+screen -r cyber1t4l_bot
+```
+
+### 3. Service Mode
+
+Run as a managed service:
+
+```bash
+./src/omega_bot_farm/qa/cyber1t4l_service.sh start
+```
+
+Check status, stop, or restart the service:
+
+```bash
+./src/omega_bot_farm/qa/cyber1t4l_service.sh status
+./src/omega_bot_farm/qa/cyber1t4l_service.sh stop
+./src/omega_bot_farm/qa/cyber1t4l_service.sh restart
+```
+
+For troubleshooting, use debug mode:
+
+```bash
+./src/omega_bot_farm/qa/cyber1t4l_service.sh debug start
+```
+
+## Discord Slash Commands
+
+The bot supports the following Discord slash commands:
+
+- `/ping`: Check if the bot is responsive
+- `/status`: Get the current status of the CyBer1t4L QA system
+- `/coverage`: Get the latest test coverage report
+- `/test <test_name>`: Run a specific test or test suite
+
+If slash commands are not appearing in Discord:
+
+1. Make sure the bot has the `applications.commands` scope in the OAuth2 URL
+2. Check the logs for any errors during slash command registration
+3. Verify that the bot has proper permissions in the server
