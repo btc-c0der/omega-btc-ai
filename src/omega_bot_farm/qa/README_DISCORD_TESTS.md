@@ -13,6 +13,18 @@ The testing suite provides a way to verify that all Discord interaction methods 
 5. `interaction.original_response()` - Retrieving the original response
 6. Error handling during interactions
 
+## Testing Options
+
+There are two ways to test the Discord interaction endpoints:
+
+### 1. Live Testing with Discord API
+
+Using the `test_discord_interactions.py` script, you can test interactions with the actual Discord API. This requires a bot token and proper Discord application setup.
+
+### 2. Offline Mock Testing
+
+Using the `test_discord_interactions_mock.py` script, you can test interactions without a Discord connection. This is useful for development and CI/CD environments where Discord access may not be available.
+
 ## Installation Requirements
 
 Ensure you have the required dependencies:
@@ -21,18 +33,28 @@ Ensure you have the required dependencies:
 pip install discord.py python-dotenv
 ```
 
+For mock testing, only the standard library is required.
+
 ## Configuration
 
-The test suite uses the same environment variables as the main bot:
+### Live Testing Configuration
+
+The live test suite uses the same environment variables as the main bot:
 
 - `DISCORD_BOT_TOKEN` - Your Discord bot token
 - `CYBER1T4L_APP_ID` - Your bot's application ID
 
 These can be set in your `.env` file or passed directly as command-line arguments.
 
+### Mock Testing Configuration
+
+No configuration is required for mock testing, as it simulates the Discord API entirely offline.
+
 ## Running the Tests
 
-To run the interaction tests:
+### Running Live Tests
+
+To run the interaction tests against the live Discord API:
 
 ```bash
 python src/omega_bot_farm/qa/test_discord_interactions.py
@@ -44,9 +66,19 @@ Or with explicit token:
 python src/omega_bot_farm/qa/test_discord_interactions.py --token YOUR_TOKEN --app-id YOUR_APP_ID
 ```
 
-## Test Commands
+### Running Mock Tests
 
-Once the bot is running, the following slash commands will be available in your Discord server:
+To run mocked interaction tests without connecting to Discord:
+
+```bash
+python src/omega_bot_farm/qa/test_discord_interactions_mock.py
+```
+
+The mock tests will generate a `discord_interaction_test_results.md` file with the detailed results.
+
+## Live Test Commands
+
+When running live tests, the following slash commands will be available in your Discord server:
 
 - `/test_interactions response_send_message` - Tests direct message responses
 - `/test_interactions response_defer` - Tests deferred responses
@@ -58,11 +90,17 @@ Once the bot is running, the following slash commands will be available in your 
 
 ## Test Reports
 
-After running the tests, use the `/test_interactions_report` command to get a summary of test results. This will show which tests passed and which failed, including error details for failures.
+### Live Testing Reports
+
+After running the live tests, use the `/test_interactions_report` command to get a summary of test results. This will show which tests passed and which failed, including error details for failures.
+
+### Mock Testing Reports
+
+The mock tests automatically generate a Markdown report file with comprehensive test results, which can be examined to validate interaction behavior.
 
 ## Troubleshooting
 
-If you encounter issues:
+If you encounter issues with live testing:
 
 1. **Command sync issues**: Ensure your bot has the correct permissions, including the `applications.commands` scope.
 2. **Response failures**: Check that your bot has proper permissions in the channel.
@@ -83,6 +121,8 @@ Here's how our tests map to the official Discord.py Interaction API:
 
 ## Example Test Output
 
+### Live Test Output
+
 ```
 # Discord Interactions Test Report
 
@@ -92,6 +132,26 @@ Here's how our tests map to the official Discord.py Interaction API:
 ✅ response_is_done: success
 ✅ error_handling: success
 ✅ original_response: success
+```
+
+### Mock Test Output
+
+Mock tests produce a more detailed report, including each test's execution status and notes about how each interaction endpoint is used in the CyBer1t4L bot.
+
+## CI/CD Integration
+
+For automated testing in CI/CD environments, it's recommended to use the mock tests as they don't require Discord credentials or network connectivity. You can add the following to your CI pipeline:
+
+```yaml
+- name: Test Discord Interactions
+  run: python src/omega_bot_farm/qa/test_discord_interactions_mock.py
+  
+- name: Verify Test Results
+  run: |
+    if ! grep -q "Success Rate: 6/6" discord_interaction_test_results.md; then
+      echo "Not all Discord interaction tests passed!"
+      exit 1
+    fi
 ```
 
 ## Additional Resources
