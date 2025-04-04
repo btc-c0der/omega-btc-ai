@@ -530,6 +530,17 @@ class DiscordConnector:
                 self.connected = True
                 self.logger.info(f"{Colors.format('CyBer1t4L QA Bot', Colors.NEON_GREEN)} connected to Discord as {bot.user}")
                 
+                # Log detailed connection information
+                guild_count = len(bot.guilds)
+                self.logger.info(f"{Colors.format('Connected to', Colors.NEON_GREEN)} {guild_count} guilds")
+                
+                for guild in bot.guilds:
+                    self.logger.info(f"{Colors.format('Guild', Colors.CYBER_CYAN)}: {guild.name} (ID: {guild.id})")
+                    # Log channels where bot has permission to send messages
+                    text_channels = [channel for channel in guild.text_channels if channel.permissions_for(guild.me).send_messages]
+                    if text_channels:
+                        self.logger.info(f"{Colors.format('Available text channels', Colors.NEON_GREEN)}: {len(text_channels)}")
+                
                 # Set bot status
                 await bot.change_presence(
                     activity=discord.Activity(
@@ -576,6 +587,25 @@ class DiscordConnector:
             async def on_app_command_completion(interaction, command):
                 self.logger.info(f"{Colors.format('Slash command executed', Colors.NEON_GREEN)}: /{command.name} by {interaction.user}")
                 
+            @bot.event
+            async def on_error(event, *args, **kwargs):
+                self.logger.error(f"{Colors.format('Discord event error', Colors.NEON_RED)}: {event}")
+                import traceback
+                self.logger.error(f"Exception: {traceback.format_exc()}")
+                
+            @bot.event
+            async def on_command_error(ctx, error):
+                self.logger.error(f"{Colors.format('Command error', Colors.NEON_RED)}: {str(error)}")
+                self.logger.error(f"Error type: {type(error).__name__}")
+                if hasattr(ctx, 'command') and ctx.command:
+                    self.logger.error(f"Command: {ctx.command.name}")
+                
+                # Send error message to the channel if possible
+                try:
+                    await ctx.send(f"⚠️ An error occurred while processing the command: {type(error).__name__}")
+                except Exception:
+                    pass
+            
             # Register slash commands using the app_commands tree
             # Clear any existing commands first
             bot.tree.clear_commands(guild=None)
@@ -584,39 +614,91 @@ class DiscordConnector:
             @bot.tree.command(name="ping", description="Check if the bot is alive")
             async def slash_ping(interaction: discord.Interaction):
                 """Simple ping command to check if the bot is alive."""
-                self.logger.info(f"{Colors.format('Processing ping command', Colors.NEON_GREEN)} from {interaction.user}")
-                await interaction.response.send_message("🧪 PONG! CyBer1t4L QA Bot is alive")
-                self.logger.info(f"{Colors.format('Ping command completed', Colors.NEON_GREEN)} for {interaction.user}")
+                try:
+                    self.logger.info(f"{Colors.format('Processing ping command', Colors.NEON_GREEN)} from {interaction.user}")
+                    
+                    # Respond immediately to prevent timeout
+                    await interaction.response.send_message("🧪 PONG! CyBer1t4L QA Bot is alive")
+                    
+                    # Log success
+                    self.logger.info(f"{Colors.format('Ping command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except Exception as e:
+                    # Log the error
+                    self.logger.error(f"{Colors.format('Error processing ping command', Colors.NEON_RED)}: {str(e)}")
+                    self.logger.error(f"From user: {interaction.user}, Error type: {type(e).__name__}")
+                    
+                    # Try to respond if we haven't already
+                    try:
+                        if not interaction.response.is_done():
+                            await interaction.response.send_message("⚠️ Error processing command. Check bot logs.")
+                    except Exception as inner_e:
+                        self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             
             @bot.tree.command(name="status", description="Get the current status of the QA bot")
             async def slash_status(interaction: discord.Interaction):
                 """Return the current status of the QA bot."""
-                self.logger.info(f"{Colors.format('Processing status command', Colors.NEON_GREEN)} from {interaction.user}")
-                await interaction.response.send_message(
-                    "🧬 **CyBer1t4L QA Bot Status**\n"
-                    f"✅ Bot is running\n"
-                    f"✅ Monitoring active\n"
-                    f"✅ Coverage analysis available\n"
-                )
-                self.logger.info(f"{Colors.format('Status command completed', Colors.NEON_GREEN)} for {interaction.user}")
+                try:
+                    self.logger.info(f"{Colors.format('Processing status command', Colors.NEON_GREEN)} from {interaction.user}")
+                    await interaction.response.send_message(
+                        "🧬 **CyBer1t4L QA Bot Status**\n"
+                        f"✅ Bot is running\n"
+                        f"✅ Monitoring active\n"
+                        f"✅ Coverage analysis available\n"
+                    )
+                    self.logger.info(f"{Colors.format('Status command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except Exception as e:
+                    # Log the error
+                    self.logger.error(f"{Colors.format('Error processing status command', Colors.NEON_RED)}: {str(e)}")
+                    self.logger.error(f"From user: {interaction.user}, Error type: {type(e).__name__}")
+                    
+                    # Try to respond if we haven't already
+                    try:
+                        if not interaction.response.is_done():
+                            await interaction.response.send_message("⚠️ Error processing command. Check bot logs.")
+                    except Exception as inner_e:
+                        self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             
             @bot.tree.command(name="coverage", description="Get the current test coverage report")
             async def slash_coverage(interaction: discord.Interaction):
                 """Return the current test coverage information."""
-                self.logger.info(f"{Colors.format('Processing coverage command', Colors.NEON_GREEN)} from {interaction.user}")
-                await interaction.response.defer()
-                await interaction.followup.send("📊 **Generating coverage report...**\nThis may take a few moments.")
-                self.logger.info(f"{Colors.format('Coverage command completed', Colors.NEON_GREEN)} for {interaction.user}")
+                try:
+                    self.logger.info(f"{Colors.format('Processing coverage command', Colors.NEON_GREEN)} from {interaction.user}")
+                    await interaction.response.defer()
+                    await interaction.followup.send("📊 **Generating coverage report...**\nThis may take a few moments.")
+                    self.logger.info(f"{Colors.format('Coverage command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except Exception as e:
+                    # Log the error
+                    self.logger.error(f"{Colors.format('Error processing coverage command', Colors.NEON_RED)}: {str(e)}")
+                    self.logger.error(f"From user: {interaction.user}, Error type: {type(e).__name__}")
+                    
+                    # Try to respond if we haven't already
+                    try:
+                        if not interaction.response.is_done():
+                            await interaction.response.send_message("⚠️ Error processing command. Check bot logs.")
+                    except Exception as inner_e:
+                        self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             
             @bot.tree.command(name="test", description="Run tests for a specific module")
             @app_commands.describe(module="The module to test (e.g., trading, discord, qa)")
             async def slash_test(interaction: discord.Interaction, module: str):
                 """Run tests for a specific module."""
-                self.logger.info(f"{Colors.format('Processing test command', Colors.NEON_GREEN)} for module {module} from {interaction.user}")
-                await interaction.response.defer()
-                await interaction.followup.send(f"🧪 **Running tests for module: {module}**\nThis may take a few moments.")
-                self.logger.info(f"{Colors.format('Test command completed', Colors.NEON_GREEN)} for {interaction.user}")
-                
+                try:
+                    self.logger.info(f"{Colors.format('Processing test command', Colors.NEON_GREEN)} for module {module} from {interaction.user}")
+                    await interaction.response.defer()
+                    await interaction.followup.send(f"🧪 **Running tests for module: {module}**\nThis may take a few moments.")
+                    self.logger.info(f"{Colors.format('Test command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except Exception as e:
+                    # Log the error
+                    self.logger.error(f"{Colors.format('Error processing test command', Colors.NEON_RED)}: {str(e)}")
+                    self.logger.error(f"From user: {interaction.user}, Error type: {type(e).__name__}, Module: {module}")
+                    
+                    # Try to respond if we haven't already
+                    try:
+                        if not interaction.response.is_done():
+                            await interaction.response.send_message(f"⚠️ Error processing test command for module '{module}'. Check bot logs.")
+                    except Exception as inner_e:
+                        self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
+            
             # Log the registered commands
             all_commands = bot.tree.get_commands()
             self.logger.info(f"{Colors.format('Registered slash commands', Colors.NEON_GREEN)}: {len(all_commands)} commands")
