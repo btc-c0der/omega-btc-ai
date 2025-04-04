@@ -1,0 +1,10 @@
+# Requirements for running CyBer1t4L QA Bot locally
+pytest>=7.0.0
+pytest-cov>=4.0.0
+python-dotenv>=1.0.0
+pyyaml>=6.0
+requests>=2.27.1
+urllib3>=1.26.9
+jsonschema>=4.4.0
+cryptography>=37.0.0
+discord.py>=2.0.0 

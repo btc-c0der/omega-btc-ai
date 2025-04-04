@@ -1,0 +1,58 @@
+bot:
+  name: CyBer1t4L
+  description: Advanced Quality Assurance Bot for OMEGA Trading Ecosystem
+  version: 1.0.0
+
+testing:
+  coverage_threshold: 80.0
+  monitor_components:
+    - trading
+    - discord
+    - matrix
+  critical_modules:
+    - src/omega_bot_farm/trading/b0ts/ccxt/ccxt_strategic_trader.py
+    - src/omega_bot_farm/bitget_positions_info.py
+    - src/omega_bot_farm/matrix_cli_live_positions.py
+  report_directory: /app/reports
+  run_interval_minutes: 60
+
+discord:
+  enabled: true
+  command_prefix: "!"
+  status_message: "Monitoring QA | /qa_status"
+  channels:
+    qa_reports: "qa-reports"
+    critical_alerts: "qa-alerts"
+    coverage_reports: "test-coverage"
+  roles:
+    qa_admin: "QA Administrator"
+    bot_developer: "Bot Developer"
+
+notifications:
+  test_coverage_alerts: true
+  critical_test_failure_alerts: true
+  daily_reports: true
+  notification_levels:
+    info: 0
+    warning: 60
+    critical: 80
+  test_failure_threshold: 3
+
+monitoring:
+  enabled: true
+  interval_minutes: 60
+  realtime_monitoring: true
+  health_check_port: 8082
+  health_check_path: /health
+  readiness_check_path: /readiness
+
+reporting:
+  html_reports: true
+  json_reports: true
+  console_reports: true
+  max_report_age_days: 30
+  report_format: "cyberpunk"  # options: standard, minimal, cyberpunk
+
+cosmic_factors:
+  honor_moon_phase: true
+  respect_golden_ratio: true 
