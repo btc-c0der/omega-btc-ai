@@ -474,19 +474,16 @@ class DiscordConnector:
             return False
     
     def start(self) -> bool:
-        """Start the Discord bot in a background thread."""
-        self.logger.info(f"{Colors.format('Attempting to start Discord bot', Colors.CYBER_CYAN)}")
-        
+        """Start the Discord bot in a separate thread."""
         if not self.is_configured():
-            self.logger.warning(f"{Colors.format('Discord integration not configured or discord.py not installed', Colors.NEON_YELLOW)}")
+            self.logger.warning(f"{Colors.format('Discord bot not configured, skipping start', Colors.NEON_YELLOW)}")
             return False
         
-        if self.token == "DISABLED" or self.app_id == "DISABLED" or self.public_key == "DISABLED":
-            self.logger.info(f"{Colors.format('Discord integration disabled', Colors.NEON_YELLOW)}")
-            return False
-            
         try:
-            self.thread = threading.Thread(target=self._run_discord_bot, daemon=True)
+            self.thread = threading.Thread(
+                target=self._run_discord_bot,
+                daemon=True
+            )
             self.thread.start()
             self.logger.info(f"{Colors.format('Discord bot thread started', Colors.NEON_GREEN)}")
             return True
@@ -502,6 +499,7 @@ class DiscordConnector:
         try:
             import discord
             from discord.ext import commands
+            from discord import app_commands
             self.logger.info(f"{Colors.format('Discord library imported successfully', Colors.NEON_GREEN)}")
         except ImportError:
             self.logger.error(f"{Colors.format('Discord library not available', Colors.NEON_RED)}")
@@ -517,13 +515,14 @@ class DiscordConnector:
             intents = discord.Intents.default()
             # Enabling privileged intents that are now active in the Discord Developer Portal
             intents.message_content = True  # Privileged intent for reading message content
-            intents.members = True         # Privileged intent for accessing member information
-            intents.presences = True       # Privileged intent for accessing presence information
+            # intents.members = True         # Privileged intent for accessing member information
+            # intents.presences = True       # Privileged intent for accessing presence information
             
-            # Create bot with command prefix
+            # Create bot with command prefix and intents
             bot = commands.Bot(command_prefix='!', intents=intents)
             self.client = bot
             self.logger.info(f"{Colors.format('Discord bot created with intents', Colors.NEON_GREEN)}")
+            self.logger.info(f"{Colors.format('Message content intent enabled: ' + str(intents.message_content), Colors.NEON_GREEN)}")
             
             # Define bot events
             @bot.event
@@ -540,19 +539,90 @@ class DiscordConnector:
                     status=discord.Status.online
                 )
                 self.logger.info(f"{Colors.format('Discord bot status set to online', Colors.NEON_GREEN)}")
+                
+                # Sync commands with Discord
+                try:
+                    self.logger.info(f"{Colors.format('Attempting to sync slash commands with Discord', Colors.NEON_YELLOW)}")
+                    # Use copy_global_to=None to sync to all guilds the bot is in
+                    synced = await bot.tree.sync(guild=None)
+                    self.logger.info(f"{Colors.format('Slash commands synced globally', Colors.NEON_GREEN)}: {len(synced)} commands")
+                    
+                    # If global sync doesn't work, try syncing to each guild individually
+                    if not synced and bot.guilds:
+                        self.logger.info(f"{Colors.format('Attempting guild-specific command sync', Colors.NEON_YELLOW)}")
+                        for guild in bot.guilds:
+                            try:
+                                guild_synced = await bot.tree.sync(guild=discord.Object(id=guild.id))
+                                self.logger.info(f"{Colors.format('Slash commands synced to guild', Colors.NEON_GREEN)}: {guild.name} ({len(guild_synced)} commands)")
+                            except Exception as e:
+                                self.logger.error(f"{Colors.format('Failed to sync commands to guild', Colors.NEON_RED)}: {guild.name} - {str(e)}")
+                except Exception as e:
+                    self.logger.error(f"{Colors.format('Failed to sync slash commands', Colors.NEON_RED)}: {str(e)}")
+                    self.logger.error(f"Exception type: {type(e).__name__}")
+                    import traceback
+                    self.logger.error(f"Traceback: {traceback.format_exc()}")
             
-            @bot.command(name="ping")
-            async def ping(ctx):
+            # Add more debug events
+            @bot.event
+            async def on_guild_join(guild):
+                self.logger.info(f"{Colors.format('Bot joined new guild', Colors.NEON_GREEN)}: {guild.name} ({guild.id})")
+                try:
+                    cmds = await bot.tree.sync(guild=discord.Object(id=guild.id))
+                    self.logger.info(f"{Colors.format('Synced commands to new guild', Colors.NEON_GREEN)}: {len(cmds)} commands")
+                except Exception as e:
+                    self.logger.error(f"{Colors.format('Failed to sync commands to new guild', Colors.NEON_RED)}: {str(e)}")
+                    
+            @bot.event 
+            async def on_app_command_completion(interaction, command):
+                self.logger.info(f"{Colors.format('Slash command executed', Colors.NEON_GREEN)}: /{command.name} by {interaction.user}")
+                
+            # Register slash commands using the app_commands tree
+            # Clear any existing commands first
+            bot.tree.clear_commands(guild=None)
+            self.logger.info(f"{Colors.format('Cleared existing slash commands', Colors.CYBER_CYAN)}")
+            
+            @bot.tree.command(name="ping", description="Check if the bot is alive")
+            async def slash_ping(interaction: discord.Interaction):
                 """Simple ping command to check if the bot is alive."""
-                await ctx.send("🧪 PONG! CyBer1t4L QA Bot is alive")
+                self.logger.info(f"{Colors.format('Processing ping command', Colors.NEON_GREEN)} from {interaction.user}")
+                await interaction.response.send_message("🧪 PONG! CyBer1t4L QA Bot is alive")
+                self.logger.info(f"{Colors.format('Ping command completed', Colors.NEON_GREEN)} for {interaction.user}")
             
-            @bot.command(name="status")
-            async def status(ctx):
+            @bot.tree.command(name="status", description="Get the current status of the QA bot")
+            async def slash_status(interaction: discord.Interaction):
                 """Return the current status of the QA bot."""
-                await ctx.send("🧬 **CyBer1t4L QA Bot Status**\n"
-                              f"✅ Bot is running\n"
-                              f"✅ Monitoring active\n"
-                              f"✅ Coverage analysis available\n")
+                self.logger.info(f"{Colors.format('Processing status command', Colors.NEON_GREEN)} from {interaction.user}")
+                await interaction.response.send_message(
+                    "🧬 **CyBer1t4L QA Bot Status**\n"
+                    f"✅ Bot is running\n"
+                    f"✅ Monitoring active\n"
+                    f"✅ Coverage analysis available\n"
+                )
+                self.logger.info(f"{Colors.format('Status command completed', Colors.NEON_GREEN)} for {interaction.user}")
+            
+            @bot.tree.command(name="coverage", description="Get the current test coverage report")
+            async def slash_coverage(interaction: discord.Interaction):
+                """Return the current test coverage information."""
+                self.logger.info(f"{Colors.format('Processing coverage command', Colors.NEON_GREEN)} from {interaction.user}")
+                await interaction.response.defer()
+                await interaction.followup.send("📊 **Generating coverage report...**\nThis may take a few moments.")
+                self.logger.info(f"{Colors.format('Coverage command completed', Colors.NEON_GREEN)} for {interaction.user}")
+            
+            @bot.tree.command(name="test", description="Run tests for a specific module")
+            @app_commands.describe(module="The module to test (e.g., trading, discord, qa)")
+            async def slash_test(interaction: discord.Interaction, module: str):
+                """Run tests for a specific module."""
+                self.logger.info(f"{Colors.format('Processing test command', Colors.NEON_GREEN)} for module {module} from {interaction.user}")
+                await interaction.response.defer()
+                await interaction.followup.send(f"🧪 **Running tests for module: {module}**\nThis may take a few moments.")
+                self.logger.info(f"{Colors.format('Test command completed', Colors.NEON_GREEN)} for {interaction.user}")
+                
+            # Log the registered commands
+            all_commands = bot.tree.get_commands()
+            self.logger.info(f"{Colors.format('Registered slash commands', Colors.NEON_GREEN)}: {len(all_commands)} commands")
+            for cmd in all_commands:
+                cmd_desc = getattr(cmd, 'description', 'No description available')
+                self.logger.info(f"{Colors.format('Command', Colors.CYBER_CYAN)}: /{cmd.name} - {cmd_desc}")
             
             # Start the bot (with non-None token)
             if self.token and self.token != "DISABLED":

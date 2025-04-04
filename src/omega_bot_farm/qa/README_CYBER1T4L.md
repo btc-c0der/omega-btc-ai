@@ -228,3 +228,47 @@ If slash commands are not appearing in Discord:
 1. Make sure the bot has the `applications.commands` scope in the OAuth2 URL
 2. Check the logs for any errors during slash command registration
 3. Verify that the bot has proper permissions in the server
+
+## Discord Configuration
+
+### Privileged Intents
+
+CyBer1t4L relies on Discord's privileged intents to access certain features. If you see the following warning in your logs:
+
+```
+Privileged message content intent is missing, commands may not work as expected.
+```
+
+You need to make two changes:
+
+1. **Enable intents in your code (already done in the CyBer1t4L code)**:
+
+   ```python
+   intents = discord.Intents.default()
+   intents.message_content = True
+   bot = commands.Bot(command_prefix='!', intents=intents)
+   ```
+
+2. **Enable intents in the Discord Developer Portal**:
+   - Go to [Discord Developer Portal](https://discord.com/developers/applications)
+   - Select your application
+   - Navigate to the 'Bot' tab
+   - Scroll down to 'Privileged Gateway Intents' section
+   - Enable 'MESSAGE CONTENT INTENT'
+   - Click 'Save Changes'
+   - Restart your bot
+
+### Testing Privileged Intents
+
+You can use the included test script to diagnose issues with privileged intents:
+
+```bash
+# Run a full test that checks if intents are properly configured
+./src/omega_bot_farm/qa/test_privileged_intents.py
+
+# Show instructions for fixing intent issues
+./src/omega_bot_farm/qa/test_privileged_intents.py --instructions
+
+# Show code example for properly enabling intents
+./src/omega_bot_farm/qa/test_privileged_intents.py --code-example
+```
