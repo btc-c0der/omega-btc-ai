@@ -34,7 +34,20 @@ from .file_monitor import FileChangeHandler
 from .git_manager import GitManager
 from .gbu2_license import GBU2LicenseChecker
 from .k8s_surveillance import K8sMatrixSurveillance
-from .utils import log_with_formatting, print_section_header, print_enhanced_header, create_progress_bar, create_multi_segment_progress_bar, create_animated_spinner, create_gradient_progress_bar, create_fancy_progress_display, format_time_duration, PROGRESS_BAR_STYLES, ANIMATED_PROGRESS_FRAMES
+from .utils import (
+    log_with_formatting, 
+    print_section_header, 
+    print_enhanced_header, 
+    create_progress_bar, 
+    create_multi_segment_progress_bar, 
+    create_animated_spinner, 
+    create_gradient_progress_bar,
+    create_fancy_progress_display, 
+    format_time_duration, 
+    PROGRESS_BAR_STYLES, 
+    ANIMATED_PROGRESS_FRAMES,
+    beautify_log_header
+)
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +65,9 @@ class QuantumTestService:
             project_root: The root directory of the project
             config: Optional configuration dictionary
         """
+        # Apply our beautified log header style
+        beautify_log_header()
+        
         self.project_root = os.path.abspath(project_root)
         self.config = config or {}
         

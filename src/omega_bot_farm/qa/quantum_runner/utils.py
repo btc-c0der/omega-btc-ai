@@ -435,6 +435,114 @@ def matrix_rain_animation(duration=3.0):
         print("\033[?25h", end="", flush=True)  # Make sure cursor is visible
         print(f"\n{Colors.RED}Matrix rain animation error: {e}{Colors.ENDC}")
 
+def beautify_log_header():
+    """
+    Create a custom, stylized logger that replaces the standard boring timestamp with
+    something more cyberpunk and visually appealing.
+    
+    This configures the root logger to use our custom formatter.
+    """
+    import logging
+    import datetime
+    import random
+    
+    class QuantumLogFormatter(logging.Formatter):
+        """Custom log formatter with cyberpunk styling."""
+        
+        def __init__(self):
+            super().__init__()
+            self.quantum_header = "0M3G4_B0TS_QA_AUT0_TEST_SUITES_RuNn3R_5D"
+            self.last_header_time = 0
+            self.header_interval = 60  # Show fancy header once per minute max
+            
+            # Random cool prefixes for log entries
+            self.prefix_options = [
+                "QUANTUM",
+                "MATRIX",
+                "COSMIC",
+                "CYBER",
+                "NEURAL",
+                "DIGITAL",
+                "BITCOIN",
+                "WAVE",
+                "QUBIT",
+                "NEXUS"
+            ]
+            
+            # Colors for different log levels
+            self.level_colors = {
+                logging.DEBUG: Colors.BLUE,
+                logging.INFO: Colors.GREEN,
+                logging.WARNING: Colors.YELLOW,
+                logging.ERROR: Colors.RED,
+                logging.CRITICAL: Colors.PURPLE + Colors.BOLD
+            }
+            
+            # Header colors that cycle
+            self.header_colors = [
+                Colors.CYAN,
+                Colors.GREEN,
+                Colors.BLUE,
+                Colors.PURPLE,
+            ]
+            self.header_color_idx = 0
+        
+        def format(self, record):
+            # Get the current time
+            now = datetime.datetime.now()
+            timestamp = now.strftime("%H:%M:%S")
+            
+            # Get color for the log level
+            level_color = self.level_colors.get(record.levelno, Colors.ENDC)
+            
+            # Choose a random prefix for variety
+            prefix = random.choice(self.prefix_options)
+            
+            # Format log content with colors
+            content = f"{level_color}{record.getMessage()}{Colors.ENDC}"
+            
+            # Decide whether to show fancy header based on time
+            current_time = time.time()
+            if current_time - self.last_header_time >= self.header_interval:
+                # It's time for a fancy header
+                self.last_header_time = current_time
+                
+                # Cycle through header colors
+                header_color = self.header_colors[self.header_color_idx]
+                self.header_color_idx = (self.header_color_idx + 1) % len(self.header_colors)
+                
+                # Create fancy divider
+                divider = f"{header_color}{'═' * 80}{Colors.ENDC}"
+                
+                # Create the fancy header with date and the quantum header
+                date_str = now.strftime("%Y-%m-%d")
+                header = f"{Colors.BOLD}{header_color}┤ {date_str} ⟨ {self.quantum_header} ⟩ {timestamp} ├{Colors.ENDC}"
+                
+                # Return with fancy header
+                return f"\n{divider}\n{header}\n{divider}\n{Colors.CYAN}[{prefix}]{Colors.ENDC} {content}"
+            else:
+                # Return with simple format
+                return f"{Colors.CYAN}[{timestamp} {prefix}]{Colors.ENDC} {content}"
+    
+    # Apply our custom formatter to the root logger
+    root_logger = logging.getLogger()
+    
+    # Remove any existing handlers to avoid duplicates
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    
+    # Create console handler and set formatter
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(QuantumLogFormatter())
+    root_logger.addHandler(console_handler)
+    
+    # Also apply to our specific logger
+    quantum_logger = logging.getLogger("0M3G4_B0TS_QA_AUT0_TEST_SUITES_RuNn3R_5D")
+    quantum_logger.handlers = []  # Clear existing handlers
+    quantum_logger.addHandler(console_handler)
+    
+    return True
+
 def display_matrix_rain_and_logo():
     """Display matrix rain followed by the quantum celebration."""
     # Run matrix rain animation
