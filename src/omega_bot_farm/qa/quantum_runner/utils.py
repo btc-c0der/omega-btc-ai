@@ -563,13 +563,26 @@ def print_section_header(title):
     table_width = 80  # Fixed table width for consistency
     
     print()
-    print(f"┌{'─' * (table_width - 2)}┐")
     
-    # Calculate padding for title to center it
+    # Top border
+    top_border = f"┌{'─' * (table_width - 2)}┐"
+    
+    # Content line with centered title
     title_padding = max(0, (table_width - 2 - len(title)) // 2)
-    print(f"│{' ' * title_padding}{title}{' ' * (table_width - 2 - len(title) - title_padding)}│")
+    content_line = f"│{' ' * title_padding}{title}{' ' * (table_width - 2 - len(title) - title_padding)}│"
     
-    print(f"└{'─' * (table_width - 2)}┘")
+    # Bottom border
+    bottom_border = f"└{'─' * (table_width - 2)}┘"
+    
+    # Validate and fix any table inconsistencies
+    fixed_top, [fixed_content], fixed_bottom = ensure_table_consistency(
+        top_border, [content_line], bottom_border, table_width
+    )
+    
+    # Print the fixed table
+    print(fixed_top)
+    print(fixed_content)
+    print(fixed_bottom)
     print()
 
 def print_quantum_divider():
@@ -582,18 +595,36 @@ def print_enhanced_header(title, subtitle=None):
     table_width = 80  # Fixed table width for consistency
     
     print()
-    print(f"╔{'═' * (table_width - 2)}╗")
     
-    # Calculate padding for title to center it
+    # Top border
+    top_border = f"╔{'═' * (table_width - 2)}╗"
+    
+    # Title line with centered text
     title_padding = max(0, (table_width - 2 - len(title)) // 2)
-    print(f"║{' ' * title_padding}{title}{' ' * (table_width - 2 - len(title) - title_padding)}║")
+    title_line = f"║{' ' * title_padding}{title}{' ' * (table_width - 2 - len(title) - title_padding)}║"
+    
+    # Content lines (just title or title+subtitle)
+    content_lines = [title_line]
     
     if subtitle:
-        # Calculate padding for subtitle to center it
+        # Add subtitle line with centered text
         subtitle_padding = max(0, (table_width - 2 - len(subtitle)) // 2)
-        print(f"║{' ' * subtitle_padding}{subtitle}{' ' * (table_width - 2 - len(subtitle) - subtitle_padding)}║")
+        subtitle_line = f"║{' ' * subtitle_padding}{subtitle}{' ' * (table_width - 2 - len(subtitle) - subtitle_padding)}║"
+        content_lines.append(subtitle_line)
     
-    print(f"╚{'═' * (table_width - 2)}╝")
+    # Bottom border
+    bottom_border = f"╚{'═' * (table_width - 2)}╝"
+    
+    # Validate and fix any table inconsistencies
+    fixed_top, fixed_content, fixed_bottom = ensure_table_consistency(
+        top_border, content_lines, bottom_border, table_width
+    )
+    
+    # Print the fixed table
+    print(fixed_top)
+    for line in fixed_content:
+        print(line)
+    print(fixed_bottom)
     print()
 
 def print_celebration_message():
@@ -665,4 +696,330 @@ def format_status_output(files, prefix="  - ", color=None):
             return f"{formatted}\n{prefix}... and {len(files) - 5} more files"
         else:
             formatted = "\n".join([f"{prefix}{f}" for f in visible_files])
-            return f"{formatted}\n{prefix}... and {len(files) - 5} more files" 
+            return f"{formatted}\n{prefix}... and {len(files) - 5} more files"
+
+def validate_and_fix_table_width(table_str, expected_width):
+    """
+    Validates a table string and fixes it if the width is incorrect.
+    
+    Args:
+        table_str: The table string to validate
+        expected_width: The expected width of the table
+        
+    Returns:
+        Fixed table string
+    """
+    lines = table_str.strip().split('\n')
+    fixed_lines = []
+    
+    for line in lines:
+        # Calculate visible width (excluding ANSI color codes)
+        visible_chars = remove_ansi_codes(line)
+        current_width = len(visible_chars)
+        
+        if current_width == expected_width:
+            # Line is correct width, keep as is
+            fixed_lines.append(line)
+        else:
+            # Line needs fixing
+            if '║' in line or '│' in line:
+                # It's a content line, needs padding in the middle
+                fixed_line = fix_content_line(line, expected_width)
+                fixed_lines.append(fixed_line)
+            elif '╔' in line or '╚' in line or '┌' in line or '└' in line:
+                # It's a top/bottom border, fix it
+                fixed_line = fix_border_line(line, expected_width)
+                fixed_lines.append(fixed_line)
+            else:
+                # Keep other lines as they are
+                fixed_lines.append(line)
+    
+    return '\n'.join(fixed_lines)
+
+def remove_ansi_codes(text):
+    """Remove ANSI color codes from a string to get visible length."""
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+def fix_content_line(line, expected_width):
+    """Fix a content line to match the expected width."""
+    import re
+    
+    # Extract all ANSI color codes to preserve them
+    ansi_codes = []
+    ansi_pattern = re.compile(r'(\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~]))')
+    for match in ansi_pattern.finditer(line):
+        ansi_codes.append((match.start(), match.group(0)))
+    
+    # Remove ANSI codes to work with visible content
+    visible_line = remove_ansi_codes(line)
+    current_width = len(visible_line)
+    
+    # Determine border characters
+    if '║' in visible_line:
+        left_border, right_border = '║', '║'
+    else:
+        left_border, right_border = '│', '│'
+    
+    # Find the position of borders
+    left_pos = visible_line.find(left_border)
+    right_pos = visible_line.rfind(right_border)
+    
+    if left_pos == -1 or right_pos == -1 or left_pos == right_pos:
+        # Can't determine borders properly, fallback to simple padding
+        if current_width < expected_width:
+            # Add padding to match expected width
+            padding = ' ' * (expected_width - current_width)
+            return line + padding
+        else:
+            # Truncate
+            return line[:expected_width]
+    
+    # Extract content between borders
+    content = visible_line[left_pos + 1:right_pos]
+    
+    # Determine if content contains an alignment hint 
+    # (e.g., title is centered, content is left/right aligned)
+    alignment = 'center'  # Default
+    
+    if content.strip() and content.startswith(' ') and content.endswith(' '):
+        # Check if spaces are balanced on both sides
+        left_spaces = len(content) - len(content.lstrip())
+        right_spaces = len(content) - len(content.rstrip())
+        
+        if abs(left_spaces - right_spaces) <= 1:  # Allow 1 space difference
+            alignment = 'center'
+        elif left_spaces > right_spaces:
+            alignment = 'right'
+        else:
+            alignment = 'left'
+    
+    # Calculate required content width
+    required_content_width = expected_width - 2  # -2 for the borders
+    
+    # Adjust content based on alignment
+    content_text = content.strip()
+    if alignment == 'center':
+        padding = (required_content_width - len(content_text)) // 2
+        new_content = ' ' * padding + content_text + ' ' * (required_content_width - len(content_text) - padding)
+    elif alignment == 'left':
+        new_content = content_text + ' ' * (required_content_width - len(content_text))
+    else:  # right
+        new_content = ' ' * (required_content_width - len(content_text)) + content_text
+    
+    # Reconstruct the line
+    new_visible_line = left_border + new_content + right_border
+    
+    # Reinsert ANSI codes
+    offset = 0
+    result = new_visible_line
+    for pos, code in sorted(ansi_codes, key=lambda x: x[0]):
+        # Adjust position for previously inserted codes
+        result = result[:pos + offset] + code + result[pos + offset:]
+        offset += len(code)
+    
+    return result
+
+def fix_border_line(line, expected_width):
+    """Fix a border line to match the expected width."""
+    # Remove ANSI color codes for processing
+    visible_line = remove_ansi_codes(line)
+    
+    # Determine the border characters
+    border_type = None
+    for char_set in [('╔', '═', '╗'), ('╚', '═', '╝'), ('┌', '─', '┐'), ('└', '─', '┘')]:
+        if char_set[0] in visible_line and char_set[2] in visible_line:
+            border_type = char_set
+            break
+    
+    if not border_type:
+        # Can't determine border type, return the line unchanged
+        return line
+    
+    left_char, fill_char, right_char = border_type
+    
+    # Extract ANSI color code if present
+    color_code = ""
+    reset_code = ""
+    
+    import re
+    color_match = re.search(r'(\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~]))', line)
+    reset_match = re.search(r'(\x1B\[0m)', line)
+    
+    if color_match:
+        color_code = color_match.group(0)
+    if reset_match:
+        reset_code = reset_match.group(0)
+    
+    # Create the corrected border line
+    fixed_line = f"{color_code}{left_char}{fill_char * (expected_width - 2)}{right_char}{reset_code}"
+    
+    return fixed_line
+
+def ensure_table_consistency(top_border, content_lines, bottom_border, expected_width=80):
+    """
+    Ensures that a table's borders and content lines are consistent in width.
+    
+    Args:
+        top_border: The top border line of the table
+        content_lines: List of content lines in the table
+        bottom_border: The bottom border line of the table
+        expected_width: The expected width of the table (default: 80)
+        
+    Returns:
+        Tuple of (fixed_top_border, fixed_content_lines, fixed_bottom_border)
+    """
+    # Fix top border
+    fixed_top = fix_border_line(top_border, expected_width)
+    
+    # Fix content lines
+    fixed_content = [fix_content_line(line, expected_width) for line in content_lines]
+    
+    # Fix bottom border
+    fixed_bottom = fix_border_line(bottom_border, expected_width)
+    
+    return fixed_top, fixed_content, fixed_bottom
+
+def create_table_safe(headers, rows, width=80, style='fancy', colors=None):
+    """
+    Creates a consistently formatted table with headers and rows.
+    Ensures the table maintains proper width regardless of content.
+    
+    Args:
+        headers: List of column headers
+        rows: List of rows (each row is a list of column values)
+        width: Total width of the table
+        style: 'fancy' or 'simple'
+        colors: Optional dict mapping column indices to color codes
+        
+    Returns:
+        String representation of the table
+    """
+    if not headers or not rows:
+        return ""
+    
+    num_cols = len(headers)
+    
+    # Calculate column widths
+    total_borders = num_cols + 1  # Number of vertical borders
+    total_spacing = num_cols * 2   # Two spaces per column for padding
+    available_width = width - total_borders - total_spacing
+    
+    # Default equal column widths
+    col_widths = [available_width // num_cols] * num_cols
+    
+    # Distribute remaining width to columns
+    remaining = available_width - sum(col_widths)
+    for i in range(remaining):
+        col_widths[i % num_cols] += 1
+    
+    # Characters for different table styles
+    if style == 'fancy':
+        top_left = '╔'
+        top_right = '╗'
+        bottom_left = '╚'
+        bottom_right = '╝'
+        horizontal = '═'
+        vertical = '║'
+        top_separator = '╦'
+        bottom_separator = '╩'
+        cross = '╬'
+        left_separator = '╠'
+        right_separator = '╣'
+        row_separator = '═'
+    else:  # simple
+        top_left = '┌'
+        top_right = '┐'
+        bottom_left = '└'
+        bottom_right = '┘'
+        horizontal = '─'
+        vertical = '│'
+        top_separator = '┬'
+        bottom_separator = '┴'
+        cross = '┼'
+        left_separator = '├'
+        right_separator = '┤'
+        row_separator = '─'
+    
+    # Build the table
+    result = []
+    
+    # Top border
+    top_border = top_left
+    for i, w in enumerate(col_widths):
+        top_border += horizontal * (w + 2)  # +2 for padding
+        if i < num_cols - 1:
+            top_border += top_separator
+    top_border += top_right
+    result.append(top_border)
+    
+    # Header row
+    header_line = vertical
+    for i, (header, width) in enumerate(zip(headers, col_widths)):
+        # Truncate header if too long
+        if len(header) > width:
+            display_header = header[:width-1] + '…'
+        else:
+            display_header = header
+        
+        # Center the header
+        padding = width - len(display_header)
+        left_pad = padding // 2
+        right_pad = padding - left_pad
+        
+        # Apply color if specified
+        if colors and i in colors:
+            color_code = colors[i]
+            reset_code = Colors.ENDC
+            header_line += f" {color_code}{' ' * left_pad}{display_header}{' ' * right_pad}{reset_code} "
+        else:
+            header_line += f" {' ' * left_pad}{display_header}{' ' * right_pad} "
+        
+        header_line += vertical
+    result.append(header_line)
+    
+    # Separator after header
+    separator = left_separator
+    for i, w in enumerate(col_widths):
+        separator += row_separator * (w + 2)  # +2 for padding
+        if i < num_cols - 1:
+            separator += cross
+    separator += right_separator
+    result.append(separator)
+    
+    # Data rows
+    for row in rows:
+        row_line = vertical
+        for i, (cell, width) in enumerate(zip(row, col_widths)):
+            # Convert cell to string and truncate if needed
+            cell_str = str(cell)
+            if len(cell_str) > width:
+                display_cell = cell_str[:width-1] + '…'
+            else:
+                display_cell = cell_str
+            
+            # Left-align the cell content
+            padding = width - len(display_cell)
+            
+            # Apply color if specified
+            if colors and i in colors:
+                color_code = colors[i]
+                reset_code = Colors.ENDC
+                row_line += f" {color_code}{display_cell}{' ' * padding}{reset_code} "
+            else:
+                row_line += f" {display_cell}{' ' * padding} "
+            
+            row_line += vertical
+        result.append(row_line)
+    
+    # Bottom border
+    bottom_border = bottom_left
+    for i, w in enumerate(col_widths):
+        bottom_border += horizontal * (w + 2)  # +2 for padding
+        if i < num_cols - 1:
+            bottom_border += bottom_separator
+    bottom_border += bottom_right
+    result.append(bottom_border)
+    
+    return '\n'.join(result) 
