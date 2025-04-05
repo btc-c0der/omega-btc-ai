@@ -51,11 +51,18 @@ if [ $? -ne 0 ]; then
 fi
 
 # Install requirements
-echo -e "${BLUE}Installing requirements...${NC}"
+echo -e "${BLUE}Installing dashboard requirements...${NC}"
 pip install -r "${SCRIPT_DIR}/requirements_quantum_dashboard.txt"
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to install requirements.${NC}"
+    echo -e "${RED}Failed to install dashboard requirements.${NC}"
     exit 1
+fi
+
+# Install additional requirements for Git features
+echo -e "${BLUE}Installing git integration requirements...${NC}"
+pip install GitPython watchdog
+if [ $? -ne 0 ]; then
+    echo -e "${YELLOW}Warning: Failed to install git integration requirements. Some features may not work.${NC}"
 fi
 
 # Set PYTHONPATH to include project root for imports

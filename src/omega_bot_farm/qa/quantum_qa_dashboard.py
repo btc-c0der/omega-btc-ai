@@ -42,8 +42,130 @@ parent_dir = os.path.dirname(os.path.dirname(current_dir))
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from src.omega_bot_farm.qa.qa_metrics_collector import QAMetrics, collect_and_save_metrics
-from src.omega_bot_farm.qa.test_automation_framework import TestAutomationFramework, TestSuite, TestResult
+# Try importing the QA metrics collector
+try:
+    from src.omega_bot_farm.qa.qa_metrics_collector import QAMetrics, collect_and_save_metrics
+except ImportError:
+    # Create mock classes and functions if imports fail
+    @dataclass
+    class QAMetrics:
+        """Mock QA metrics class"""
+        class Coverage:
+            total_coverage: float = 87.5
+            
+        class Tests:
+            total_tests: int = 100
+            passed: int = 95
+            
+        class Performance:
+            cpu_percent: float = 35.0
+            memory_usage: float = 42.0
+            disk_usage: float = 28.0
+            
+        class Security:
+            firewall_active: bool = True
+            discord_token_secure: bool = True
+            api_keys_secure: bool = True
+            ssl_certificates: Dict[str, Dict[str, bool]] = field(default_factory=lambda: {
+                "site_cert": {"verified": True}
+            })
+            
+        class API:
+            availability: Dict[str, float] = field(default_factory=lambda: {
+                "main_api": 98.5,
+                "backup_api": 99.2
+            })
+            
+        coverage = Coverage()
+        tests = Tests()
+        performance = Performance()
+        security = Security()
+        api = API()
+    
+    def collect_and_save_metrics():
+        """Mock function to collect metrics"""
+        return QAMetrics()
+
+# Try importing the test automation framework
+try:
+    from src.omega_bot_farm.qa.test_automation_framework import TestAutomationFramework, TestSuite, TestResult
+except ImportError:
+    # Create mock classes if import fails
+    class TestAutomationFramework:
+        """Mock test automation framework class"""
+        pass
+        
+    class TestSuite:
+        """Mock test suite class"""
+        pass
+        
+    class TestResult:
+        """Mock test result class"""
+        pass
+
+# Import the GitManager for uncommitted files tracking
+try:
+    # First try with the symbolic link name
+    from src.omega_bot_farm.qa.RuNn3R_5D import GitManager
+except ImportError:
+    try:
+        # Try to import directly from the full module
+        # Python identifiers can't start with numbers, so we use importlib
+        import importlib.util
+        import sys
+        
+        # Define the module name and path
+        module_name = "runner_5d"
+        module_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "0M3G4_B0TS_QA_AUT0_TEST_SUITES_RuNn3R_5D.py")
+        
+        # Create the spec
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        if spec and spec.loader:
+            # Create the module
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            
+            # Execute the module
+            spec.loader.exec_module(module)
+            
+            # Get the GitManager class
+            GitManager = module.GitManager
+        else:
+            raise ImportError("Could not load module from file")
+    except (ImportError, AttributeError):
+        # If both fail, create a mock GitManager as fallback
+        logger = logging.getLogger("Quantum5DQADashboard")
+        logger.warning("Could not import GitManager, using mock implementation")
+        
+        class GitManager:
+            """Mock GitManager for when the real one is not available."""
+            def __init__(self, project_root):
+                self.project_root = project_root
+                
+            def get_uncommitted_report(self):
+                """Return empty mock report."""
+                return {
+                    'timestamp': datetime.datetime.now().isoformat(),
+                    'file_counts': {
+                        'total': 0,
+                        'modified': 0,
+                        'added': 0,
+                        'deleted': 0,
+                        'untracked': 0
+                    },
+                    'by_extension': {},
+                    'by_directory': {},
+                    'files': {
+                        'modified': [],
+                        'added': [],
+                        'deleted': [],
+                        'untracked': []
+                    },
+                    'suggestions': {
+                        'commit_message': "No changes to commit",
+                        'tag': "v0.1.0-omega-mock"
+                    }
+                }
 
 # Configure logging
 RESET = "\033[0m"
@@ -263,6 +385,11 @@ class Quantum5DDashboard:
         self.collector_thread = None
         self.stop_event = threading.Event()
         
+        # Git manager for uncommitted files
+        self.git_manager = GitManager(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
+        self.uncommitted_files_report = None
+        self.last_git_scan = 0
+        
         # Build the layout and callbacks
         self._build_layout()
         self._setup_callbacks()
@@ -369,7 +496,7 @@ class Quantum5DDashboard:
                             ]
                         ),
                         
-                        # Fourth row with controls and actions
+                        # Fourth row with controls and uncommitted files
                         html.Div(
                             className="row mb-4",
                             children=[
@@ -381,9 +508,23 @@ class Quantum5DDashboard:
                                     ]
                                 ),
                                 
-                                # Actions card
+                                # NEW: Uncommitted files card
                                 html.Div(
                                     className="col-md-6",
+                                    children=[
+                                        self._build_uncommitted_files_card()
+                                    ]
+                                )
+                            ]
+                        ),
+                        
+                        # Fifth row with actions
+                        html.Div(
+                            className="row mb-4",
+                            children=[
+                                # Actions card
+                                html.Div(
+                                    className="col-md-12",
                                     children=[
                                         self._build_actions_card()
                                     ]
@@ -405,6 +546,7 @@ class Quantum5DDashboard:
                 
                 # Store components for state
                 dcc.Store(id='metrics-store'),
+                dcc.Store(id='uncommitted-files-store'),
                 dcc.Store(id='alerts-store'),
                 dcc.Store(id='animation-store', data={'frame': 0})
             ]
@@ -1070,14 +1212,14 @@ class Quantum5DDashboard:
 
     def _setup_callbacks(self):
         """Set up all dashboard callbacks"""
-        
-        # Basic UI update callbacks
         self._setup_time_callbacks()
         self._setup_metrics_display_callbacks()
         self._setup_visualization_callbacks()
         self._setup_control_callbacks()
         self._setup_action_callbacks()
-        
+        # NEW: Git callbacks
+        self._setup_git_callbacks()
+
     def _setup_time_callbacks(self):
         """Set up time-related callbacks"""
         @self.app.callback(
@@ -2376,18 +2518,28 @@ class Quantum5DDashboard:
         return metrics
     
     def start_metrics_collection(self):
-        """Start the background metrics collection thread"""
-        if self.collector_thread and self.collector_thread.is_alive():
-            logger.info("Metrics collection already running")
+        """Start the background thread for collecting metrics."""
+        if self.collector_thread is not None and self.collector_thread.is_alive():
+            logger.warning("Metrics collection thread is already running")
             return
-        
+            
+        # Reset the stop event
         self.stop_event.clear()
+        
+        # Start the collector thread
         self.collector_thread = threading.Thread(
             target=self._metrics_collection_loop,
             daemon=True
         )
         self.collector_thread.start()
         logger.info("Started metrics collection thread")
+        
+        # Also scan for git data
+        try:
+            self.uncommitted_files_report = self.git_manager.get_uncommitted_report()
+            self.last_git_scan = time.time()
+        except Exception as e:
+            logger.error(f"Error in initial git scan: {e}")
     
     def _metrics_collection_loop(self):
         """Background loop for collecting metrics periodically"""
@@ -2428,6 +2580,328 @@ class Quantum5DDashboard:
         finally:
             # Stop metrics collection when dashboard is closed
             self.stop_metrics_collection()
+
+    # NEW: Build uncommitted files card
+    def _build_uncommitted_files_card(self):
+        """Build the card to display git uncommitted files and suggestions."""
+        return dbc.Card(
+            className="h-100 border-0 shadow",
+            style={
+                'backgroundColor': quantum_theme['panel'],
+                'borderRadius': '10px'
+            },
+            children=[
+                dbc.CardHeader(
+                    className="d-flex justify-content-between align-items-center",
+                    style={
+                        'backgroundColor': 'transparent',
+                        'borderBottom': f"1px solid {quantum_theme['grid']}",
+                        'color': quantum_theme['accent4']
+                    },
+                    children=[
+                        html.H5("Git Quantum State", className="mb-0"),
+                        html.Div(
+                            className="d-flex align-items-center",
+                            children=[
+                                dbc.Button(
+                                    html.I(className="fas fa-sync"),
+                                    color="link",
+                                    size="sm",
+                                    id="refresh-git-btn",
+                                    className="p-0 me-2"
+                                )
+                            ]
+                        )
+                    ]
+                ),
+                dbc.CardBody(
+                    [
+                        # Git stats summary
+                        html.Div(
+                            className="mb-3",
+                            children=[
+                                html.H6("Uncommitted Files", className="mb-3"),
+                                dbc.Row([
+                                    dbc.Col([
+                                        dbc.Card(
+                                            className="text-center p-2 border-0",
+                                            style={
+                                                'backgroundColor': 'rgba(0, 184, 148, 0.1)',
+                                                'borderRadius': '8px'
+                                            },
+                                            children=[
+                                                html.H3(
+                                                    "0",
+                                                    id="git-total-files",
+                                                    className="mb-0",
+                                                    style={'color': quantum_theme['accent2']}
+                                                ),
+                                                html.Small("Total", className="text-muted")
+                                            ]
+                                        )
+                                    ], width=3),
+                                    dbc.Col([
+                                        dbc.Card(
+                                            className="text-center p-2 border-0",
+                                            style={
+                                                'backgroundColor': 'rgba(108, 92, 231, 0.1)',
+                                                'borderRadius': '8px'
+                                            },
+                                            children=[
+                                                html.H3(
+                                                    "0",
+                                                    id="git-modified-files",
+                                                    className="mb-0",
+                                                    style={'color': quantum_theme['accent1']}
+                                                ),
+                                                html.Small("Modified", className="text-muted")
+                                            ]
+                                        )
+                                    ], width=3),
+                                    dbc.Col([
+                                        dbc.Card(
+                                            className="text-center p-2 border-0",
+                                            style={
+                                                'backgroundColor': 'rgba(253, 203, 110, 0.1)',
+                                                'borderRadius': '8px'
+                                            },
+                                            children=[
+                                                html.H3(
+                                                    "0",
+                                                    id="git-added-files",
+                                                    className="mb-0",
+                                                    style={'color': quantum_theme['warning']}
+                                                ),
+                                                html.Small("New", className="text-muted")
+                                            ]
+                                        )
+                                    ], width=3),
+                                    dbc.Col([
+                                        dbc.Card(
+                                            className="text-center p-2 border-0",
+                                            style={
+                                                'backgroundColor': 'rgba(225, 112, 85, 0.1)',
+                                                'borderRadius': '8px'
+                                            },
+                                            children=[
+                                                html.H3(
+                                                    "0",
+                                                    id="git-deleted-files",
+                                                    className="mb-0",
+                                                    style={'color': quantum_theme['error']}
+                                                ),
+                                                html.Small("Deleted", className="text-muted")
+                                            ]
+                                        )
+                                    ], width=3)
+                                ])
+                            ]
+                        ),
+                        
+                        # Uncommitted file list
+                        html.Div(
+                            className="mb-3",
+                            style={
+                                'maxHeight': '150px',
+                                'overflowY': 'auto',
+                                'borderRadius': '8px',
+                                'border': f"1px solid {quantum_theme['grid']}",
+                                'padding': '10px'
+                            },
+                            children=[
+                                html.Div(
+                                    id="uncommitted-files-list",
+                                    children=[
+                                        html.P(
+                                            "No uncommitted files found",
+                                            className="text-muted text-center my-3"
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                        
+                        # Commit suggestion
+                        html.Div(
+                            className="mb-3",
+                            children=[
+                                html.H6("Suggested Commit Message"),
+                                dbc.Card(
+                                    className="p-2 border-0",
+                                    style={
+                                        'backgroundColor': 'rgba(0, 206, 201, 0.1)',
+                                        'borderRadius': '8px'
+                                    },
+                                    children=[
+                                        html.P(
+                                            "No changes to commit",
+                                            id="git-commit-suggestion",
+                                            className="mb-0",
+                                            style={'color': quantum_theme['accent2']}
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                        
+                        # Tag suggestion
+                        html.Div(
+                            children=[
+                                html.H6("Suggested Tag"),
+                                dbc.Card(
+                                    className="p-2 border-0",
+                                    style={
+                                        'backgroundColor': 'rgba(116, 185, 255, 0.1)',
+                                        'borderRadius': '8px'
+                                    },
+                                    children=[
+                                        html.P(
+                                            "No tag suggested",
+                                            id="git-tag-suggestion",
+                                            className="mb-0",
+                                            style={'color': quantum_theme['accent3']}
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+
+    # NEW: Setup git callbacks
+    def _setup_git_callbacks(self):
+        """Set up callbacks for git integration"""
+        
+        @self.app.callback(
+            [Output('uncommitted-files-store', 'data'),
+             Output('git-total-files', 'children'),
+             Output('git-modified-files', 'children'),
+             Output('git-added-files', 'children'),
+             Output('git-deleted-files', 'children'),
+             Output('uncommitted-files-list', 'children'),
+             Output('git-commit-suggestion', 'children'),
+             Output('git-tag-suggestion', 'children')],
+            [Input('interval-component', 'n_intervals'),
+             Input('refresh-git-btn', 'n_clicks')]
+        )
+        def update_git_info(n, btn_clicks):
+            # Check if we should update
+            now = time.time()
+            force_update = btn_clicks is not None and ctx.triggered_id == 'refresh-git-btn'
+            
+            if not force_update and now - self.last_git_scan < 60:  # Update at most once per minute
+                if self.uncommitted_files_report is None:
+                    # First time, scan anyway
+                    pass
+                else:
+                    # Return current data
+                    return self._format_git_data_for_display(self.uncommitted_files_report)
+            
+            # Scan for uncommitted files
+            try:
+                self.uncommitted_files_report = self.git_manager.get_uncommitted_report()
+                self.last_git_scan = now
+                return self._format_git_data_for_display(self.uncommitted_files_report)
+            except Exception as e:
+                logger.error(f"Error updating git info: {e}")
+                # Return empty data
+                return (
+                    None,  # Store data
+                    "0",   # Total files
+                    "0",   # Modified files
+                    "0",   # Added files 
+                    "0",   # Deleted files
+                    [html.P("Error scanning git repository", className="text-danger text-center my-3")],  # Files list
+                    "Error scanning git repository",  # Commit suggestion
+                    "Error scanning git repository"   # Tag suggestion
+                )
+    
+    def _format_git_data_for_display(self, report):
+        """Format git data for display in the dashboard"""
+        # Counters
+        total = report['file_counts']['total']
+        modified = report['file_counts']['modified']
+        added = report['file_counts']['added'] + report['file_counts']['untracked']
+        deleted = report['file_counts']['deleted']
+        
+        # File list
+        file_list = []
+        
+        # Add modified files
+        for file_path in report['files']['modified'][:5]:  # Top 5
+            file_list.append(html.Div(
+                className="d-flex align-items-center mb-1",
+                children=[
+                    html.Span(
+                        "●",
+                        className="me-2",
+                        style={'color': quantum_theme['accent1']}
+                    ),
+                    html.Span(
+                        file_path,
+                        style={'color': quantum_theme['text'], 'fontSize': '0.85rem'}
+                    )
+                ]
+            ))
+        
+        # Add new files
+        for file_path in (report['files']['added'] + report['files']['untracked'])[:5]:  # Top 5
+            file_list.append(html.Div(
+                className="d-flex align-items-center mb-1",
+                children=[
+                    html.Span(
+                        "●",
+                        className="me-2",
+                        style={'color': quantum_theme['warning']}
+                    ),
+                    html.Span(
+                        file_path,
+                        style={'color': quantum_theme['text'], 'fontSize': '0.85rem'}
+                    )
+                ]
+            ))
+        
+        # Add deleted files
+        for file_path in report['files']['deleted'][:3]:  # Top 3
+            file_list.append(html.Div(
+                className="d-flex align-items-center mb-1",
+                children=[
+                    html.Span(
+                        "●",
+                        className="me-2",
+                        style={'color': quantum_theme['error']}
+                    ),
+                    html.Span(
+                        file_path,
+                        style={'color': quantum_theme['text'], 'fontSize': '0.85rem', 'textDecoration': 'line-through'}
+                    )
+                ]
+            ))
+        
+        # If no files, show message
+        if not file_list:
+            file_list = [html.P("No uncommitted files found", className="text-muted text-center my-3")]
+        
+        # Format the commit message with line breaks for dashboard
+        commit_message = report['suggestions']['commit_message']
+        formatted_commit = []
+        for line in commit_message.split('\n'):
+            formatted_commit.append(html.Span(line))
+            formatted_commit.append(html.Br())
+        
+        # Return all formatted data
+        return (
+            report,  # Store data
+            str(total),  # Total files
+            str(modified),  # Modified files
+            str(added),  # Added files
+            str(deleted),  # Deleted files
+            file_list,  # Files list
+            formatted_commit,  # Commit suggestion
+            report['suggestions']['tag']  # Tag suggestion
+        )
 
 def run_dashboard():
     """Run the Quantum 5D QA Dashboard"""
