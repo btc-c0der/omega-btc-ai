@@ -308,3 +308,51 @@ This project is licensed under the GBU2™ License - see the [LICENSE](LICENSE) 
 - Fausto Cengarle de Siqueira for divine guidance
 - The OMEGA BTC AI Divine Collective
 - The AIXBT community for their support
+
+## BitGet Position Analyzer
+
+The BitGet Position Analyzer provides a comprehensive set of tools for analyzing positions on the BitGet exchange. The analyzer uses multiple connection methods to ensure robust connectivity, including:
+
+1. **ExchangeService** - A centralized service for managing exchange clients
+2. **ExchangeClientB0t** - A wrapper around CCXT for standardized exchange interactions
+3. **Direct CCXT** - Direct integration with the CCXT library
+
+### Features
+
+- Retrieve detailed position information from BitGet
+- Calculate account statistics (equity, PnL, exposure)
+- Generate Fibonacci-based analysis of open positions
+- Monitor position changes over time
+- Interactive API credential setup
+
+### Usage
+
+You can use the BitGet position analyzer with the following command:
+
+```bash
+python src/omega_bot_farm/bitget_positions_info.py [OPTIONS]
+```
+
+#### Options
+
+- `--setup` - Run interactive setup to configure API credentials
+- `--show-help` - Display help information
+- `--testnet` - Force use of BitGet testnet
+- `--validate` - Only validate API credentials without fetching positions
+- `--print-keys` - Print the loaded API credentials
+- `--multi-connect` - Try multiple connection methods for higher reliability
+
+### CCXT Integration
+
+The Omega Bot Farm integrates with the [CCXT library](https://github.com/ccxt/ccxt) to provide unified trading APIs across multiple exchanges. The integration supports:
+
+- Synchronous and asynchronous API calls
+- Multiple connection fallbacks for redundancy
+- Proper error handling and logging
+- Support for BitGet, Binance, Bybit, and OKX exchanges
+
+To install CCXT:
+
+```bash
+pip install ccxt
+```
