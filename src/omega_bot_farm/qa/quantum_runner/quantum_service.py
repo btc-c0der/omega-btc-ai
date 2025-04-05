@@ -127,6 +127,45 @@ class QuantumTestService:
         print_enhanced_header(f"0M3G4 B0TS QA AUT0 TEST SUITES RuNn3R 5D", mode_text)
         log_with_formatting(f"Initialized on project root: {self.project_root}", logging.INFO, Colors.BLUE)
         log_with_formatting(f"Reports will be saved to: {self.report_dir}", logging.INFO, Colors.BLUE)
+        
+        # Print timing information
+        print_enhanced_header("QUANTUM MATRIX TIMING CONFIGURATION", None)
+        
+        # Get all intervals with default values
+        monitoring_intervals = {
+            "Status updates": self.config.get('status_update_interval', 60),
+            "Git analysis": self.config.get('git_suggestion_interval', 600),
+            "Uncommitted files scan": self.config.get('uncommitted_scan_interval', 300),
+            "File system scan": self.config.get('new_file_scan_interval', 60),
+            "Kubernetes matrix report": self.config.get('k8s_report_interval', 600)
+        }
+        
+        # Format and print time intervals
+        for name, seconds in monitoring_intervals.items():
+            minutes = seconds / 60
+            if minutes < 1:
+                log_with_formatting(f"{name}: Every {seconds} seconds", logging.INFO, Colors.CYAN)
+            elif minutes == 1:
+                log_with_formatting(f"{name}: Every minute", logging.INFO, Colors.CYAN)
+            elif minutes.is_integer():
+                log_with_formatting(f"{name}: Every {int(minutes)} minutes", logging.INFO, Colors.CYAN)
+            else:
+                log_with_formatting(f"{name}: Every {minutes:.1f} minutes", logging.INFO, Colors.CYAN)
+        
+        # Also print test schedule
+        print()
+        log_with_formatting("Test Schedule:", logging.INFO, Colors.BLUE)
+        for test_type, interval in self.schedule.items():
+            minutes = interval / 60
+            hours = minutes / 60
+            days = hours / 24
+            
+            if days >= 1 and days.is_integer():
+                log_with_formatting(f"  {test_type.upper()} tests: Every {int(days)} days", logging.INFO, Colors.YELLOW)
+            elif hours >= 1 and hours.is_integer():
+                log_with_formatting(f"  {test_type.upper()} tests: Every {int(hours)} hours", logging.INFO, Colors.YELLOW)
+            else:
+                log_with_formatting(f"  {test_type.upper()} tests: Every {int(minutes)} minutes", logging.INFO, Colors.YELLOW)
     
     def start(self):
         """Start the service with continuous monitoring."""
@@ -166,6 +205,11 @@ class QuantumTestService:
             last_git_suggestion = 0
             last_k8s_report = 0
             
+            # Make these available to other methods
+            self._last_uncommitted_check = last_uncommitted_check
+            self._last_git_suggestion = last_git_suggestion
+            self._last_k8s_report = last_k8s_report
+            
             print_enhanced_header("QUANTUM SERVICE RUNNING", "PRESS CTRL+C TO EXIT")
             
             while True:
@@ -188,6 +232,7 @@ class QuantumTestService:
                         now - last_uncommitted_check >= uncommitted_interval):
                     self.report_uncommitted_files()
                     last_uncommitted_check = now
+                    self._last_uncommitted_check = now
                 
                 # Generate git suggestions
                 if (self.config.get('suggest_git', False) and 
@@ -195,6 +240,7 @@ class QuantumTestService:
                     self.suggest_git_commit()
                     self.suggest_git_tag()
                     last_git_suggestion = now
+                    self._last_git_suggestion = now
                 
                 # Generate K8s matrix report with timeout
                 if (self.k8s_surveillance and self.k8s_surveillance.available and
@@ -221,6 +267,7 @@ class QuantumTestService:
                         log_with_formatting(f"Error generating K8s Matrix report: {e}", logging.ERROR)
                     
                     last_k8s_report = now
+                    self._last_k8s_report = now
                 
                 # Print monitoring status
                 self._print_monitoring_status()
@@ -440,6 +487,58 @@ class QuantumTestService:
                 monitoring_details.append(f"{Colors.BLUE}🔷 K8s Matrix: {Colors.GREEN}ACTIVE{Colors.ENDC}")
             elif self.k8s_surveillance:
                 monitoring_details.append(f"{Colors.BLUE}🔷 K8s Matrix: {Colors.RED}NOT AVAILABLE{Colors.ENDC}")
+            
+            # Show timing countdown for monitoring activities
+            monitoring_details.append(f"\n{Colors.MAGENTA}⏰ Monitoring Countdown Timers:{Colors.ENDC}")
+            
+            # Track times for various monitoring activities
+            if not hasattr(self, '_last_git_suggestion'):
+                self._last_git_suggestion = 0
+            if not hasattr(self, '_last_uncommitted_check'):
+                self._last_uncommitted_check = 0
+            if not hasattr(self, '_last_k8s_report'):
+                self._last_k8s_report = 0
+                
+            # Calculate and show time left for each activity
+            git_interval = self.config.get('git_suggestion_interval', 600)
+            git_next = self._last_git_suggestion + git_interval
+            git_left = max(0, git_next - now)
+            git_pct = min(100, 100 - (git_left / git_interval * 100))
+            
+            # Create a progress bar for the Git Quantum Analysis
+            bar_length = 20
+            filled_length = int(bar_length * git_pct / 100)
+            bar = '█' * filled_length + '░' * (bar_length - filled_length)
+            
+            # Format time in minutes and seconds
+            minutes, seconds = divmod(int(git_left), 60)
+            time_format = f"{minutes}m {seconds}s" if minutes > 0 else f"{seconds}s"
+            
+            monitoring_details.append(f"\n{Colors.PURPLE}========================= GIT QUANTUM ANALYSIS ========================={Colors.ENDC}")
+            monitoring_details.append(f"{Colors.PURPLE}🧬 OMEGA BTC GIT QUANTUM ANALYSIS:{Colors.ENDC} {Colors.CYAN}next in {time_format}{Colors.ENDC}")
+            monitoring_details.append(f"{Colors.PURPLE}[{bar}] {git_pct:.0f}%{Colors.ENDC}")
+            monitoring_details.append(f"{Colors.PURPLE}====================================================================={Colors.ENDC}\n")
+            
+            # Add other monitoring activities with simpler format
+            uncommitted_interval = self.config.get('uncommitted_scan_interval', 300)
+            uncommitted_next = self._last_uncommitted_check + uncommitted_interval
+            uncommitted_left = max(0, uncommitted_next - now)
+            uncommitted_pct = min(100, 100 - (uncommitted_left / uncommitted_interval * 100))
+            monitoring_details.append(f"   {Colors.CYAN}📂 Uncommitted Files Scan:{Colors.ENDC} {Colors.CYAN}next in {int(uncommitted_left)}s {Colors.YELLOW}[{uncommitted_pct:.0f}%]{Colors.ENDC}")
+            
+            if self.k8s_surveillance and self.k8s_surveillance.available:
+                k8s_interval = self.config.get('k8s_report_interval', 600)
+                k8s_next = self._last_k8s_report + k8s_interval
+                k8s_left = max(0, k8s_next - now)
+                k8s_pct = min(100, 100 - (k8s_left / k8s_interval * 100))
+                monitoring_details.append(f"   {Colors.BLUE}🔷 K8s Matrix Report:{Colors.ENDC} {Colors.CYAN}next in {int(k8s_left)}s {Colors.YELLOW}[{k8s_pct:.0f}%]{Colors.ENDC}")
+            
+            # Show status update timer
+            status_interval = 60  # Status update is fixed at 60 seconds
+            status_next = self._last_status_print + status_interval
+            status_left = max(0, status_next - now)
+            status_pct = min(100, 100 - (status_left / status_interval * 100))
+            monitoring_details.append(f"   {Colors.GREEN}📊 Status Update:{Colors.ENDC} {Colors.CYAN}next in {int(status_left)}s {Colors.YELLOW}[{status_pct:.0f}%]{Colors.ENDC}")
                 
             # Print all details
             for detail in monitoring_details:

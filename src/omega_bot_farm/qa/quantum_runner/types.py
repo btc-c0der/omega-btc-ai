@@ -16,6 +16,7 @@ class Colors:
     YELLOW = '\033[93m'
     RED = '\033[91m'
     PURPLE = '\033[95m'  # Same as HEADER for now
+    MAGENTA = '\033[35m'  # Darker magenta
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
