@@ -24,6 +24,7 @@ import os
 import sys
 import logging
 import asyncio
+import pytest
 from dotenv import load_dotenv
 
 # Configure logging
@@ -62,6 +63,7 @@ def check_discord_credentials():
     
     return issues
 
+@pytest.mark.asyncio
 async def test_discord_connection():
     """Test Discord connection and diagnose issues."""
     logger.info("Starting Discord connection test...")
@@ -162,4 +164,4 @@ if __name__ == "__main__":
         logger.error(f"Unexpected error: {e}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
-        sys.exit(1) 
+        sys.exit(1)

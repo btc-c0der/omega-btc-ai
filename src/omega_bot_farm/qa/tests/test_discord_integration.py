@@ -327,8 +327,8 @@ class TestRunningBotE2E:
     """
     
     @pytest.fixture
-    async def check_bot_process(self):
-        """Check if the bot process is running and yield the PID."""
+    def check_bot_process(self):
+        """Check if the bot process is running and return the PID."""
         # Use subprocess to check if the bot is running
         import subprocess
         import time
@@ -369,12 +369,12 @@ class TestRunningBotE2E:
                 else:
                     print("Warning: Bot may not be connected to Discord based on logs")
         
-        yield pid
+        return pid
     
     @pytest.mark.asyncio
     async def test_bot_process_running(self, check_bot_process):
         """Test that the bot process is running."""
-        pid = await anext(check_bot_process)
+        pid = check_bot_process
         
         # Check that we got a valid PID
         assert pid is not None
@@ -394,8 +394,7 @@ class TestRunningBotE2E:
     @pytest.mark.asyncio
     async def test_bot_connection_status(self, check_bot_process):
         """Test that the bot is connected to Discord."""
-        # We don't actually need the PID for this test, but we still need to await the fixture
-        await anext(check_bot_process)
+        pid = check_bot_process
         
         # Load environment variables for the test
         from dotenv import load_dotenv
@@ -442,8 +441,7 @@ class TestRunningBotE2E:
     @pytest.mark.asyncio
     async def test_bot_command_registration(self, check_bot_process):
         """Test that the bot has registered commands with Discord."""
-        # We don't actually need the PID for this test, but we still need to await the fixture
-        await anext(check_bot_process)
+        pid = check_bot_process
         
         # Load environment variables for the test
         from dotenv import load_dotenv
@@ -494,4 +492,4 @@ class TestRunningBotE2E:
             pytest.fail(f"Request error when checking bot commands: {str(e)}")
 
 if __name__ == "__main__":
-    pytest.main(["-xvs", __file__]) 
+    pytest.main(["-xvs", __file__])

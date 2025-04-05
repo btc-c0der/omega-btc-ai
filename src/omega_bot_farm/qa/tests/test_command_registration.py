@@ -21,6 +21,7 @@ by checking command registration and synchronization.
 
 
 import os
+import pytest
 import sys
 import asyncio
 import logging
@@ -129,6 +130,7 @@ class CommandRegistrationTester:
                     description="Debug command for testing registration",
                     guild=guild
                 )
+@pytest.mark.asyncio
                 async def test_interactions_report(interaction: discord.Interaction):
                     await interaction.response.send_message("Debug command registered successfully")
             
@@ -213,4 +215,4 @@ if __name__ == "__main__":
         sys.exit(asyncio.run(main()))
     except KeyboardInterrupt:
         logger.info(f"{YELLOW}Test cancelled by user.{RESET}")
-        sys.exit(0) 
+        sys.exit(0)

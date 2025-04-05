@@ -31,6 +31,7 @@ The patch addresses the following issues:
 
 
 import os
+import pytest
 import sys
 import json
 import logging
@@ -154,6 +155,7 @@ class DiscordInteractionTester:
             name="test_interactions_report", 
             description="Show the results of interaction tests"
         )
+        @pytest.mark.asyncio
         async def test_interactions_report(interaction: discord.Interaction):
             if not self.interaction_responses:
                 await interaction.response.send_message("No tests have been run yet.")
@@ -484,4 +486,4 @@ if __name__ == "__main__":
         sys.exit(asyncio.run(main()))
     except KeyboardInterrupt:
         logger.info(f"{YELLOW}Test cancelled by user.{RESET}")
-        sys.exit(0) 
+        sys.exit(0)

@@ -21,6 +21,7 @@ It tests all methods from the Discord.py interactions API that are used by the b
 
 
 import os
+import pytest
 import sys
 import json
 import logging
@@ -271,6 +272,7 @@ class DiscordInteractionTester:
                 description="Show the results of interaction tests",
                 guild=guild
             )
+            @pytest.mark.asyncio
             async def test_interactions_report(interaction: discord.Interaction):
                 if not self.interaction_responses:
                     await interaction.response.send_message("No tests have been run yet.")
@@ -347,4 +349,4 @@ if __name__ == "__main__":
         sys.exit(asyncio.run(main()))
     except KeyboardInterrupt:
         logger.info(f"{YELLOW}Test cancelled by user.{RESET}")
-        sys.exit(0) 
+        sys.exit(0)

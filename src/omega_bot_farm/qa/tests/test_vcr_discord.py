@@ -302,4 +302,4 @@ class TestInteractionReplays:
         assert response['data']['components'] == []  # Buttons removed
 
 if __name__ == "__main__":
-    pytest.main(["-xvs", __file__]) 
+    pytest.main(["-xvs", __file__])

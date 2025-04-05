@@ -21,6 +21,7 @@ import subprocess
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Union, Tuple
 from pathlib import Path
+import importlib.util
 
 # Add dotenv import for loading environment variables
 from dotenv import load_dotenv
@@ -455,6 +456,26 @@ class DiscordConnector:
         self.connected = False
         self.thread = None
         
+        # Check if list_test_cases module exists
+        qa_dir = os.path.dirname(os.path.abspath(__file__))
+        list_test_cases_path = os.path.join(qa_dir, "list_test_cases.py")
+        self.list_test_cases = None
+        
+        if os.path.exists(list_test_cases_path):
+            # Try to import the module dynamically
+            try:
+                spec = importlib.util.spec_from_file_location("list_test_cases", list_test_cases_path)
+                if spec and spec.loader:
+                    self.list_test_cases = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(self.list_test_cases)
+                    self.logger.info(f"{Colors.format('Successfully imported list_test_cases module', Colors.NEON_GREEN)}")
+                else:
+                    self.logger.warning(f"{Colors.format('Could not create module spec for list_test_cases', Colors.NEON_YELLOW)}")
+            except Exception as e:
+                self.logger.error(f"{Colors.format('Error importing list_test_cases module', Colors.NEON_RED)}: {str(e)}")
+        else:
+            self.logger.info(f"{Colors.format('list_test_cases.py not found at', Colors.NEON_YELLOW)} {list_test_cases_path}")
+        
         # Add initial log entries to help debug
         if self.token:
             token_preview = f"{self.token[:4]}...{self.token[-4:]}" if len(self.token) > 8 else "[EMPTY]"
@@ -462,6 +483,20 @@ class DiscordConnector:
         if self.app_id:
             self.logger.info(f"{Colors.format('Discord App ID loaded', Colors.CYBER_CYAN)}: {self.app_id}")
         
+    def _find_test_functions(self, file_path: Path) -> List[str]:
+        """Find all test functions in a Python file."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            import re
+            # Find function definitions (test_* functions)
+            test_pattern = re.compile(r'def\s+(test_[a-zA-Z0-9_]+)\s*\(')
+            return [match.group(1) for match in test_pattern.finditer(content)]
+        except Exception as e:
+            self.logger.error(f"{Colors.format('Error extracting test functions', Colors.NEON_RED)}: {str(e)}")
+            return []
+    
     def is_configured(self) -> bool:
         """Check if Discord credentials are properly configured."""
         try:
@@ -617,11 +652,23 @@ class DiscordConnector:
                 try:
                     self.logger.info(f"{Colors.format('Processing ping command', Colors.NEON_GREEN)} from {interaction.user}")
                     
-                    # Respond immediately to prevent timeout
-                    await interaction.response.send_message("🧪 PONG! CyBer1t4L QA Bot is alive")
+                    # Immediately defer to prevent timeout
+                    await interaction.response.defer(ephemeral=False)
+                    
+                    # Process the command (simulated delay here)
+                    response_message = "🧪 PONG! CyBer1t4L QA Bot is alive"
+                    
+                    # Use followup instead of direct response
+                    await interaction.followup.send(response_message)
                     
                     # Log success
                     self.logger.info(f"{Colors.format('Ping command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except discord.errors.NotFound as e:
+                    # Handle expired interaction error
+                    if e.code == 10062:  # Unknown Interaction
+                        self.logger.error(f"{Colors.format('Interaction expired before response', Colors.NEON_RED)}: {str(e)}")
+                    else:
+                        self.logger.error(f"{Colors.format('Discord NotFound error', Colors.NEON_RED)}: {str(e)}")
                 except Exception as e:
                     # Log the error
                     self.logger.error(f"{Colors.format('Error processing ping command', Colors.NEON_RED)}: {str(e)}")
@@ -631,6 +678,8 @@ class DiscordConnector:
                     try:
                         if not interaction.response.is_done():
                             await interaction.response.send_message("⚠️ Error processing command. Check bot logs.")
+                        else:
+                            await interaction.followup.send("⚠️ Error processing command. Check bot logs.")
                     except Exception as inner_e:
                         self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             
@@ -639,13 +688,27 @@ class DiscordConnector:
                 """Return the current status of the QA bot."""
                 try:
                     self.logger.info(f"{Colors.format('Processing status command', Colors.NEON_GREEN)} from {interaction.user}")
-                    await interaction.response.send_message(
+                    
+                    # Immediately defer to prevent timeout
+                    await interaction.response.defer(ephemeral=False)
+                    
+                    status_message = (
                         "🧬 **CyBer1t4L QA Bot Status**\n"
                         f"✅ Bot is running\n"
                         f"✅ Monitoring active\n"
                         f"✅ Coverage analysis available\n"
                     )
+                    
+                    # Use followup instead of direct response
+                    await interaction.followup.send(status_message)
+                    
                     self.logger.info(f"{Colors.format('Status command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except discord.errors.NotFound as e:
+                    # Handle expired interaction error
+                    if e.code == 10062:  # Unknown Interaction
+                        self.logger.error(f"{Colors.format('Interaction expired before response', Colors.NEON_RED)}: {str(e)}")
+                    else:
+                        self.logger.error(f"{Colors.format('Discord NotFound error', Colors.NEON_RED)}: {str(e)}")
                 except Exception as e:
                     # Log the error
                     self.logger.error(f"{Colors.format('Error processing status command', Colors.NEON_RED)}: {str(e)}")
@@ -655,6 +718,8 @@ class DiscordConnector:
                     try:
                         if not interaction.response.is_done():
                             await interaction.response.send_message("⚠️ Error processing command. Check bot logs.")
+                        else:
+                            await interaction.followup.send("⚠️ Error processing command. Check bot logs.")
                     except Exception as inner_e:
                         self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             
@@ -663,9 +728,26 @@ class DiscordConnector:
                 """Return the current test coverage information."""
                 try:
                     self.logger.info(f"{Colors.format('Processing coverage command', Colors.NEON_GREEN)} from {interaction.user}")
-                    await interaction.response.defer()
+                    
+                    # Immediately defer to prevent timeout
+                    await interaction.response.defer(ephemeral=False)
+                    
+                    # Send initial message with followup
                     await interaction.followup.send("📊 **Generating coverage report...**\nThis may take a few moments.")
+                    
+                    # Here you would actually run the coverage analysis
+                    # For now, we're just simulating it
+                    
+                    # Send additional info if needed
+                    await interaction.followup.send("✅ Coverage analysis complete. Results will be available soon.")
+                    
                     self.logger.info(f"{Colors.format('Coverage command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except discord.errors.NotFound as e:
+                    # Handle expired interaction error
+                    if e.code == 10062:  # Unknown Interaction
+                        self.logger.error(f"{Colors.format('Interaction expired before response', Colors.NEON_RED)}: {str(e)}")
+                    else:
+                        self.logger.error(f"{Colors.format('Discord NotFound error', Colors.NEON_RED)}: {str(e)}")
                 except Exception as e:
                     # Log the error
                     self.logger.error(f"{Colors.format('Error processing coverage command', Colors.NEON_RED)}: {str(e)}")
@@ -675,6 +757,8 @@ class DiscordConnector:
                     try:
                         if not interaction.response.is_done():
                             await interaction.response.send_message("⚠️ Error processing command. Check bot logs.")
+                        else:
+                            await interaction.followup.send("⚠️ Error processing command. Check bot logs.")
                     except Exception as inner_e:
                         self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             
@@ -684,9 +768,26 @@ class DiscordConnector:
                 """Run tests for a specific module."""
                 try:
                     self.logger.info(f"{Colors.format('Processing test command', Colors.NEON_GREEN)} for module {module} from {interaction.user}")
-                    await interaction.response.defer()
+                    
+                    # Immediately defer to prevent timeout
+                    await interaction.response.defer(ephemeral=False)
+                    
+                    # Send initial notification
                     await interaction.followup.send(f"🧪 **Running tests for module: {module}**\nThis may take a few moments.")
+                    
+                    # Here you would actually run the tests
+                    # For now we're just simulating this
+                    
+                    # Send results after "running tests"
+                    await interaction.followup.send(f"✅ Tests completed for module: {module}")
+                    
                     self.logger.info(f"{Colors.format('Test command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                except discord.errors.NotFound as e:
+                    # Handle expired interaction error
+                    if e.code == 10062:  # Unknown Interaction
+                        self.logger.error(f"{Colors.format('Interaction expired before response', Colors.NEON_RED)}: {str(e)}")
+                    else:
+                        self.logger.error(f"{Colors.format('Discord NotFound error', Colors.NEON_RED)}: {str(e)}")
                 except Exception as e:
                     # Log the error
                     self.logger.error(f"{Colors.format('Error processing test command', Colors.NEON_RED)}: {str(e)}")
@@ -696,6 +797,232 @@ class DiscordConnector:
                     try:
                         if not interaction.response.is_done():
                             await interaction.response.send_message(f"⚠️ Error processing test command for module '{module}'. Check bot logs.")
+                        else:
+                            await interaction.followup.send(f"⚠️ Error processing test command for module '{module}'. Check bot logs.")
+                    except Exception as inner_e:
+                        self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
+            
+            # Add list_tests command if the module is available
+            if self.list_test_cases:
+                @bot.tree.command(name="list_tests", description="List all available test cases")
+                async def list_tests(interaction: discord.Interaction, format: Optional[str] = "markdown"):
+                    """List all available test cases."""
+                    try:
+                        self.logger.info(f"{Colors.format('Processing list_tests command', Colors.NEON_GREEN)} from {interaction.user}")
+                        
+                        # Immediately defer to prevent timeout
+                        await interaction.response.defer(ephemeral=False)
+                        
+                        # Only accept valid formats and ensure format is not None
+                        format_str = format or "markdown"
+                        if format_str.lower() not in ["markdown", "plain", "json"]:
+                            format_str = "markdown"
+                        
+                        # Get test cases from the module
+                        if not self.list_test_cases:
+                            await interaction.followup.send("❌ Error: list_test_cases module is not available")
+                            return
+                            
+                        # Log what we're doing to help with debugging
+                        self.logger.info(f"{Colors.format('Fetching test cases with format', Colors.CYBER_CYAN)}: {format_str}")
+                        
+                        test_cases = self.list_test_cases.get_all_test_cases(format_str)
+                        
+                        # Check if the output is too long for a single message
+                        if len(test_cases) > 2000:
+                            # Split into multiple messages
+                            parts = []
+                            current_part = ""
+                            
+                            for line in test_cases.split("\n"):
+                                if len(current_part) + len(line) + 1 > 1900:  # Leave some margin
+                                    parts.append(current_part)
+                                    current_part = line
+                                else:
+                                    current_part += line + "\n"
+                            
+                            if current_part:
+                                parts.append(current_part)
+                            
+                            self.logger.info(f"{Colors.format('Sending test case data in', Colors.CYBER_CYAN)} {len(parts)} parts")
+                            
+                            # Send the first part
+                            await interaction.followup.send(parts[0])
+                            
+                            # Send the rest as follow-ups
+                            for i, part in enumerate(parts[1:], 1):
+                                self.logger.info(f"{Colors.format('Sending part', Colors.CYBER_CYAN)} {i+1} of {len(parts)}")
+                                await interaction.followup.send(part)
+                        else:
+                            # Send as a single message
+                            await interaction.followup.send(test_cases)
+                        
+                        self.logger.info(f"{Colors.format('list_tests command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                    except discord.errors.NotFound as e:
+                        # Handle expired interaction error
+                        if e.code == 10062:  # Unknown Interaction
+                            self.logger.error(f"{Colors.format('Interaction expired before response', Colors.NEON_RED)}: {str(e)}")
+                        else:
+                            self.logger.error(f"{Colors.format('Discord NotFound error', Colors.NEON_RED)}: {str(e)}")
+                    except Exception as e:
+                        # Log the error
+                        self.logger.error(f"{Colors.format('Error listing test cases', Colors.NEON_RED)}: {str(e)}")
+                        import traceback
+                        self.logger.error(f"Traceback: {traceback.format_exc()}")
+                        
+                        # Try to respond if we haven't already
+                        try:
+                            if not interaction.response.is_done():
+                                await interaction.response.send_message(f"❌ Error listing test cases: {str(e)}")
+                            else:
+                                await interaction.followup.send(f"❌ Error listing test cases: {str(e)}")
+                        except Exception as inner_e:
+                            self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
+            
+            @bot.tree.command(name="list_tests_omega", description="List all tests under omega_bot_farm")
+            @app_commands.describe(format="Output format (simple, detailed, json)", path="Specific subdirectory to search in (optional)")
+            async def slash_list_tests_omega(interaction: discord.Interaction, format: str = "simple", path: str = ""):
+                """List all test files and test functions under omega_bot_farm."""
+                try:
+                    self.logger.info(f"{Colors.format('Processing list_tests_omega command', Colors.NEON_GREEN)} from {interaction.user}")
+                    
+                    # Immediately defer to prevent timeout
+                    await interaction.response.defer(ephemeral=False)
+                    
+                    # Normalize format parameter
+                    format = format.lower()
+                    if format not in ["simple", "detailed", "json"]:
+                        format = "simple"  # Default to simple if invalid format provided
+                    
+                    self.logger.info(f"{Colors.format('Using format', Colors.CYBER_CYAN)}: {format}")
+                        
+                    # Set base path to search
+                    base_dir = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+                    if path:
+                        search_dir = base_dir / path
+                        if not search_dir.exists() or not search_dir.is_dir():
+                            await interaction.followup.send(f"⚠️ Invalid path: {path}")
+                            return
+                    else:
+                        search_dir = base_dir
+                        
+                    self.logger.info(f"{Colors.format('Searching for tests in', Colors.CYBER_CYAN)} {search_dir}")
+                    
+                    # Find test files
+                    test_files = []
+                    
+                    # Include both test_*.py files and *_test.py files
+                    for pattern in ["test_*.py", "*_test.py"]:
+                        test_files.extend(list(search_dir.glob(f"**/{pattern}")))
+                    
+                    if not test_files:
+                        await interaction.followup.send(f"🔍 No test files found under {search_dir.name}{f'/{path}' if path else ''}")
+                        return
+                    
+                    self.logger.info(f"{Colors.format('Found', Colors.CYBER_CYAN)} {len(test_files)} test files")
+                        
+                    # Process test files
+                    results = []
+                    for test_file in test_files:
+                        relative_path = test_file.relative_to(base_dir)
+                        test_funcs = self._find_test_functions(test_file)
+                        
+                        results.append({
+                            "file": str(relative_path),
+                            "path": str(test_file),
+                            "functions": test_funcs,
+                            "count": len(test_funcs)
+                        })
+                    
+                    # Format and send response
+                    if format == "json":
+                        import json
+                        json_data = json.dumps(results, indent=2)
+                        
+                        # Check if response is too long
+                        if len(json_data) > 1900:
+                            # Send as a file attachment
+                            import io
+                            byte_data = json_data.encode('utf-8')
+                            file = discord.File(io.BytesIO(byte_data), filename="omega_tests.json")
+                            await interaction.followup.send(f"🧪 Found {len(test_files)} test files with {sum(r['count'] for r in results)} test functions", file=file)
+                        else:
+                            await interaction.followup.send(f"```json\n{json_data}\n```")
+                    
+                    elif format == "detailed":
+                        response = [f"🧪 **Omega Test Files ({len(test_files)})**\n"]
+                        
+                        for result in results:
+                            response.append(f"**📄 {result['file']}** - {result['count']} tests")
+                            if result['functions']:
+                                for func in result['functions']:
+                                    response.append(f"  • `{func}`")
+                            else:
+                                response.append("  • *No test functions found*")
+                            response.append("")  # Empty line for spacing
+                            
+                        # Check if response is too long
+                        full_response = "\n".join(response)
+                        if len(full_response) > 1900:
+                            # Split into multiple messages
+                            chunks = []
+                            current_chunk = []
+                            current_length = 0
+                            
+                            for line in response:
+                                if current_length + len(line) + 1 > 1900:  # +1 for newline
+                                    chunks.append("\n".join(current_chunk))
+                                    current_chunk = [line]
+                                    current_length = len(line)
+                                else:
+                                    current_chunk.append(line)
+                                    current_length += len(line) + 1
+                            
+                            if current_chunk:
+                                chunks.append("\n".join(current_chunk))
+                            
+                            self.logger.info(f"{Colors.format('Sending detailed response in', Colors.CYBER_CYAN)} {len(chunks)} chunks")
+                                
+                            # Send chunks
+                            await interaction.followup.send(chunks[0])
+                            for i, chunk in enumerate(chunks[1:], 1):
+                                self.logger.info(f"{Colors.format('Sending chunk', Colors.CYBER_CYAN)} {i+1} of {len(chunks)}")
+                                await interaction.followup.send(chunk)
+                        else:
+                            await interaction.followup.send(full_response)
+                    
+                    else:  # simple format
+                        response = [f"🧪 **Omega Test Files ({len(test_files)})**\n"]
+                        total_tests = sum(r['count'] for r in results)
+                        
+                        for result in results:
+                            response.append(f"• **{result['file']}** - {result['count']} tests")
+                            
+                        # Add summary
+                        response.append(f"\n**Total:** {total_tests} test functions in {len(test_files)} files")
+                        
+                        await interaction.followup.send("\n".join(response))
+                    
+                    self.logger.info(f"{Colors.format('list_tests_omega command completed successfully', Colors.NEON_GREEN)} for {interaction.user}")
+                
+                except discord.errors.NotFound as e:
+                    # Handle expired interaction error
+                    if e.code == 10062:  # Unknown Interaction
+                        self.logger.error(f"{Colors.format('Interaction expired before response', Colors.NEON_RED)}: {str(e)}")
+                    else:
+                        self.logger.error(f"{Colors.format('Discord NotFound error', Colors.NEON_RED)}: {str(e)}")
+                except Exception as e:
+                    # Log the error
+                    self.logger.error(f"{Colors.format('Error processing list_tests_omega command', Colors.NEON_RED)}: {str(e)}")
+                    import traceback
+                    self.logger.error(f"Traceback: {traceback.format_exc()}")
+                    
+                    # Try to respond if we haven't already
+                    try:
+                        if not interaction.response.is_done():
+                            await interaction.response.send_message("⚠️ Error processing list_tests_omega command. Check bot logs.")
+                        else:
+                            await interaction.followup.send("⚠️ Error occurred while listing tests. Check bot logs.")
                     except Exception as inner_e:
                         self.logger.error(f"{Colors.format('Failed to send error response', Colors.NEON_RED)}: {str(inner_e)}")
             

@@ -296,4 +296,4 @@ class TestButtonInteractions:
         # and actually test them with real Discord interactions
 
 if __name__ == "__main__":
-    pytest.main(["-xvs", __file__]) 
+    pytest.main(["-xvs", __file__])

@@ -21,6 +21,7 @@ It mocks the Discord.py API to validate interaction behavior offline.
 
 
 import os
+import pytest
 import sys
 import json
 import logging
@@ -218,6 +219,7 @@ class DiscordMockTester:
         # Also generate the report file since we have results now
         self.write_report_file()
     
+    @pytest.mark.asyncio
     async def test_response_send_message(self) -> bool:
         """Test interaction.response.send_message()."""
         interaction = MockInteraction()
@@ -228,6 +230,7 @@ class DiscordMockTester:
         # Verify the response was sent
         return interaction.response.is_done()
     
+    @pytest.mark.asyncio
     async def test_response_defer(self) -> bool:
         """Test interaction.response.defer() and followup."""
         interaction = MockInteraction()
@@ -244,6 +247,7 @@ class DiscordMockTester:
         
         return True
     
+    @pytest.mark.asyncio
     async def test_response_edit(self) -> bool:
         """Test interaction.edit_original_response()."""
         interaction = MockInteraction()
@@ -258,6 +262,7 @@ class DiscordMockTester:
         original = await interaction.original_response()
         return original.content == "✅ Edited the initial response successfully!"
     
+    @pytest.mark.asyncio
     async def test_response_is_done(self) -> bool:
         """Test interaction.response.is_done()."""
         interaction = MockInteraction()
@@ -273,6 +278,7 @@ class DiscordMockTester:
         
         return not before_send and after_send
     
+    @pytest.mark.asyncio
     async def test_error_handling(self) -> bool:
         """Test error handling during interaction."""
         interaction = MockInteraction()
@@ -288,6 +294,7 @@ class DiscordMockTester:
         
         return False
     
+    @pytest.mark.asyncio
     async def test_original_response(self) -> bool:
         """Test interaction.original_response()."""
         interaction = MockInteraction()
@@ -392,4 +399,4 @@ if __name__ == "__main__":
         sys.exit(asyncio.run(main()))
     except KeyboardInterrupt:
         logger.info(f"{YELLOW}Test cancelled by user.{RESET}")
-        sys.exit(0) 
+        sys.exit(0)

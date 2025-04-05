@@ -1,0 +1,228 @@
+{
+  "models": {
+    "CyberTest-GPT": {
+      "name": "CyberTest-GPT",
+      "description": "Advanced test generation model specializing in Python and TypeScript",
+      "model_type": "hybrid_classical_quantum",
+      "capabilities": [
+        "test_synthesis",
+        "code_generation",
+        "pattern_recognition"
+      ],
+      "version": "1.2.0",
+      "accuracy": 0.89,
+      "training_data_description": "15M test cases across 500K projects, with emphasis on Discord bots",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 2048
+      },
+      "confidence_threshold": 0.7,
+      "last_training": null,
+      "fine_tuned": false,
+      "quantum_enhanced": true
+    },
+    "QuantumEye": {
+      "name": "QuantumEye",
+      "description": "Anomaly detection model for identifying unusual patterns in code and tests",
+      "model_type": "quantum_neural_network",
+      "capabilities": [
+        "anomaly_detection",
+        "pattern_recognition",
+        "uncertainty_quantification"
+      ],
+      "version": "0.9.5",
+      "accuracy": 0.92,
+      "training_data_description": "10M code samples with labeled anomalies and bugs",
+      "parameters": {
+        "detection_threshold": 0.65,
+        "quantum_layers": 3
+      },
+      "confidence_threshold": 0.7,
+      "last_training": null,
+      "fine_tuned": false,
+      "quantum_enhanced": true
+    },
+    "CausalityNet": {
+      "name": "CausalityNet",
+      "description": "Causal reasoning engine for understanding test failures",
+      "model_type": "neuro_symbolic",
+      "capabilities": [
+        "causal_reasoning",
+        "knowledge_extraction",
+        "multi_dimensional_analysis"
+      ],
+      "version": "2.1.0",
+      "accuracy": 0.86,
+      "training_data_description": "5M traced test executions with root cause analysis",
+      "parameters": {
+        "reasoning_depth": 5,
+        "confidence_threshold": 0.8
+      },
+      "confidence_threshold": 0.7,
+      "last_training": null,
+      "fine_tuned": false,
+      "quantum_enhanced": false
+    }
+  },
+  "test_generators": {
+    "PyTestQuantum": {
+      "name": "PyTestQuantum",
+      "description": "Quantum-enhanced pytest test generator",
+      "supported_languages": [
+        "python"
+      ],
+      "model": {
+        "name": "CyberTest-GPT",
+        "description": "Advanced test generation model specializing in Python and TypeScript",
+        "model_type": "hybrid_classical_quantum",
+        "capabilities": [
+          "test_synthesis",
+          "code_generation",
+          "pattern_recognition"
+        ],
+        "version": "1.2.0",
+        "accuracy": 0.89,
+        "training_data_description": "15M test cases across 500K projects, with emphasis on Discord bots",
+        "parameters": {
+          "temperature": 0.7,
+          "max_tokens": 2048
+        },
+        "confidence_threshold": 0.7,
+        "last_training": null,
+        "fine_tuned": false,
+        "quantum_enhanced": true
+      },
+      "dimensions": [
+        {
+          "name": "code_complexity",
+          "description": "Measures cyclomatic complexity of code",
+          "baseline": 5.0,
+          "variance_threshold": 2.0,
+          "historical_values": [],
+          "quantum_state": "SUPERPOSITION"
+        },
+        {
+          "name": "maintainability",
+          "description": "Measures code maintainability index",
+          "baseline": 70.0,
+          "variance_threshold": 15.0,
+          "historical_values": [],
+          "quantum_state": "SUPERPOSITION"
+        },
+        {
+          "name": "test_coverage",
+          "description": "Measures test coverage percentage",
+          "baseline": 80.0,
+          "variance_threshold": 10.0,
+          "historical_values": [],
+          "quantum_state": "SUPERPOSITION"
+        }
+      ]
+    }
+  },
+  "anomaly_detectors": {
+    "CodeAnomalyQuantum": {
+      "name": "CodeAnomalyQuantum",
+      "description": "Detects anomalies in code quality and patterns",
+      "model": {
+        "name": "QuantumEye",
+        "description": "Anomaly detection model for identifying unusual patterns in code and tests",
+        "model_type": "quantum_neural_network",
+        "capabilities": [
+          "anomaly_detection",
+          "pattern_recognition",
+          "uncertainty_quantification"
+        ],
+        "version": "0.9.5",
+        "accuracy": 0.92,
+        "training_data_description": "10M code samples with labeled anomalies and bugs",
+        "parameters": {
+          "detection_threshold": 0.65,
+          "quantum_layers": 3
+        },
+        "confidence_threshold": 0.7,
+        "last_training": null,
+        "fine_tuned": false,
+        "quantum_enhanced": true
+      },
+      "sensitivity": 0.8,
+      "detection_dimensions": [
+        {
+          "name": "code_complexity",
+          "description": "Measures cyclomatic complexity of code",
+          "baseline": 5.0,
+          "variance_threshold": 2.0,
+          "historical_values": [],
+          "quantum_state": "SUPERPOSITION"
+        },
+        {
+          "name": "maintainability",
+          "description": "Measures code maintainability index",
+          "baseline": 70.0,
+          "variance_threshold": 15.0,
+          "historical_values": [],
+          "quantum_state": "SUPERPOSITION"
+        },
+        {
+          "name": "bug_potential",
+          "description": "Measures potential for bugs based on code patterns",
+          "baseline": 20.0,
+          "variance_threshold": 15.0,
+          "historical_values": [],
+          "quantum_state": "SUPERPOSITION"
+        }
+      ],
+      "normal_patterns": {
+        "code_complexity": {
+          "min": 0,
+          "max": 10
+        },
+        "maintainability": {
+          "min": 50,
+          "max": 100
+        },
+        "bug_potential": {
+          "min": 0,
+          "max": 40
+        }
+      },
+      "anomaly_history": []
+    }
+  },
+  "quantum_dimensions": {
+    "code_complexity": {
+      "name": "code_complexity",
+      "description": "Measures cyclomatic complexity of code",
+      "baseline": 5.0,
+      "variance_threshold": 2.0,
+      "historical_values": [],
+      "quantum_state": "SUPERPOSITION"
+    },
+    "maintainability": {
+      "name": "maintainability",
+      "description": "Measures code maintainability index",
+      "baseline": 70.0,
+      "variance_threshold": 15.0,
+      "historical_values": [],
+      "quantum_state": "SUPERPOSITION"
+    },
+    "test_coverage": {
+      "name": "test_coverage",
+      "description": "Measures test coverage percentage",
+      "baseline": 80.0,
+      "variance_threshold": 10.0,
+      "historical_values": [],
+      "quantum_state": "SUPERPOSITION"
+    },
+    "bug_potential": {
+      "name": "bug_potential",
+      "description": "Measures potential for bugs based on code patterns",
+      "baseline": 20.0,
+      "variance_threshold": 15.0,
+      "historical_values": [],
+      "quantum_state": "SUPERPOSITION"
+    }
+  },
+  "system_state": "SUPERPOSITION",
+  "last_entanglement": null
+}

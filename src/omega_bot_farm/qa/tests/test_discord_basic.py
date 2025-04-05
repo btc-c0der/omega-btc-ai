@@ -23,6 +23,7 @@ import os
 import sys
 import logging
 import asyncio
+import pytest
 from dotenv import load_dotenv
 
 # Configure logging
@@ -39,6 +40,7 @@ load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
 CYBER1T4L_APP_ID = os.getenv("CYBER1T4L_APP_ID", "")
 
+@pytest.mark.asyncio
 async def test_basic_discord_connection():
     """Test Discord connection with minimal intents."""
     logger.info("Starting basic Discord connection test...")
@@ -106,4 +108,4 @@ if __name__ == "__main__":
         logger.error(f"Unexpected error: {e}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
-        sys.exit(1) 
+        sys.exit(1)

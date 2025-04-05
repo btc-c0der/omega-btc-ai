@@ -155,6 +155,30 @@ If you encounter issues:
    docker logs cyber1t4l-qa-bot
    ```
 
+## Important Implementation Notes
+
+### Discord Interaction Handling
+
+To ensure proper handling of Discord interactions, we've implemented the following best practices:
+
+1. **Immediate Response Deferral**: All commands immediately call `await interaction.response.defer(ephemeral=False)` at the beginning of each command handler, which extends the interaction validity to 15 minutes.
+
+2. **Followup Messages**: We use `interaction.followup.send()` for responses, allowing messages to be sent after the initial deferral.
+
+3. **Error Handling**: Specific error handling for interaction errors, particularly for the 10062 "Unknown Interaction" error, with improved error logging.
+
+4. **Enhanced Logging**: Better debug information for interaction issues, including format information and structured logging for multi-part responses.
+
+### Test Coverage Reporting
+
+For proper HTML coverage report generation:
+
+1. The coverage configuration in `.coveragerc` has been updated to ensure HTML reports generate correctly.
+
+2. The test runner script `run_live_tests.sh` automatically creates HTML coverage reports in the `reports/html` directory.
+
+3. All async test functions are properly decorated with `@pytest.mark.asyncio` to prevent unhandled coroutine warnings.
+
 ---
 
 🔴 🟡 🟢 **RASTA HEART ON F1R3** 🔴 🟡 🟢

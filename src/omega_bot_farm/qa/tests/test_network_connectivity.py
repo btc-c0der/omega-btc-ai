@@ -23,6 +23,7 @@ It will help diagnose issues with the Discord bot ping command not responding.
 
 
 import os
+import pytest
 import sys
 import time
 import json
@@ -182,6 +183,7 @@ class NetworkTester:
                 }
                 logger.error(f"{RED}Error resolving {domain}: {str(e)}{RESET}")
     
+@pytest.mark.asyncio
     async def test_discord_api(self) -> None:
         """Test connectivity to Discord API endpoints."""
         import aiohttp
@@ -234,6 +236,7 @@ class NetworkTester:
                     }
                     logger.error(f"{RED}Error testing Discord {name} endpoint: {str(e)}{RESET}")
     
+@pytest.mark.asyncio
     async def test_bitget_api(self) -> None:
         """Test connectivity to Bitget API endpoints."""
         import aiohttp
@@ -521,4 +524,4 @@ if __name__ == "__main__":
         sys.exit(0)
     except Exception as e:
         logger.error(f"{RED}Unexpected error: {str(e)}{RESET}")
-        sys.exit(1) 
+        sys.exit(1)

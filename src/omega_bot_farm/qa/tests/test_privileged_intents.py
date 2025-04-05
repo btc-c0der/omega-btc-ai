@@ -21,6 +21,7 @@ Specifically targets the "Privileged message content intent is missing" warning.
 
 
 import os
+import pytest
 import sys
 import logging
 import asyncio
@@ -48,18 +49,21 @@ class IntentTester:
         self.token = token
         self.app_id = app_id
         
+@pytest.mark.asyncio
     async def test_with_message_content_intent(self):
         """Test connection with message_content intent enabled."""
         logger.info("=== TESTING WITH MESSAGE_CONTENT INTENT ENABLED ===")
         result = await self._run_test(enable_message_content=True)
         return result
         
+@pytest.mark.asyncio
     async def test_without_message_content_intent(self):
         """Test connection with message_content intent disabled."""
         logger.info("=== TESTING WITH MESSAGE_CONTENT INTENT DISABLED ===")
         result = await self._run_test(enable_message_content=False)
         return result
         
+@pytest.mark.asyncio
     async def test_all_privileged_intents(self):
         """Test connection with all privileged intents enabled."""
         logger.info("=== TESTING WITH ALL PRIVILEGED INTENTS ENABLED ===")
@@ -321,4 +325,4 @@ if __name__ == "__main__":
         logger.error(f"Unexpected error: {e}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
-        sys.exit(1) 
+        sys.exit(1)

@@ -385,6 +385,7 @@ def define_discord_bot_tests() -> TestSuite:
         # Load environment variables, etc.
     
     # Test: Check if Discord token is valid
+@pytest.mark.asyncio
     async def test_discord_token():
         """Test if the Discord bot token is valid."""
         import os
@@ -429,9 +430,11 @@ def define_discord_bot_tests() -> TestSuite:
             }
     
     # Test: Check if commands are registered
+@pytest.mark.asyncio
     async def test_commands_registered():
         """Test if Discord bot commands are properly registered."""
         import os
+import pytest
         from dotenv import load_dotenv
         import aiohttp
         
@@ -483,6 +486,7 @@ def define_discord_bot_tests() -> TestSuite:
             }
     
     # Test: Ping connectivity
+@pytest.mark.asyncio
     async def test_ping_command_connectivity():
         """Test connectivity related to the Discord ping command."""
         try:
@@ -561,6 +565,7 @@ def define_network_tests() -> TestSuite:
         }
     
     # Test: HTTP connectivity
+@pytest.mark.asyncio
     async def test_http_connectivity():
         """Test HTTP connectivity to critical services."""
         import aiohttp
@@ -739,4 +744,4 @@ if __name__ == "__main__":
         sys.exit(0)
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
-        sys.exit(1) 
+        sys.exit(1)
