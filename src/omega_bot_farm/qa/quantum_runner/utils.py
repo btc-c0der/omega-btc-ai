@@ -992,18 +992,69 @@ def create_table_safe(headers, rows, width=80, style='fancy', colors=None):
     for row in rows:
         row_line = vertical
         for i, (cell, width) in enumerate(zip(row, col_widths)):
-            # Convert cell to string and truncate if needed
+            # Convert cell to string
             cell_str = str(cell)
-            if len(cell_str) > width:
-                display_cell = cell_str[:width-1] + '…'
+            
+            # Check if the cell contains ANSI color codes
+            has_ansi = "\033[" in cell_str or "\x1b[" in cell_str
+            
+            if has_ansi:
+                # For cells with ANSI codes, we need to get the visible length
+                visible_text = remove_ansi_codes(cell_str)
+                visible_len = len(visible_text)
+                
+                # Truncate the visible text if needed
+                if visible_len > width:
+                    # Extract ANSI codes
+                    import re
+                    ansi_pattern = re.compile(r'(\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~]))')
+                    
+                    # Find all ANSI codes and their positions
+                    ansi_codes = [(m.start(), m.group(0)) for m in ansi_pattern.finditer(cell_str)]
+                    
+                    # Find the position in the original string that corresponds to 
+                    # width-1 visible characters
+                    visible_pos = 0
+                    actual_pos = 0
+                    
+                    while visible_pos < width - 1 and actual_pos < len(cell_str):
+                        # Check if current position is part of an ANSI code
+                        is_ansi = False
+                        for code_start, _ in ansi_codes:
+                            if actual_pos == code_start:
+                                # Skip this ANSI code
+                                code_match = ansi_pattern.search(cell_str[actual_pos:])
+                                if code_match:
+                                    actual_pos += len(code_match.group(0))
+                                    is_ansi = True
+                                    break
+                        
+                        if not is_ansi:
+                            # Regular character
+                            visible_pos += 1
+                            actual_pos += 1
+                    
+                    # Add ellipsis and ensure ANSI reset if needed
+                    truncated = cell_str[:actual_pos] + '…'
+                    if '\033[' in truncated and not truncated.endswith(Colors.ENDC):
+                        truncated += Colors.ENDC
+                    
+                    display_cell = truncated
+                else:
+                    display_cell = cell_str
             else:
-                display_cell = cell_str
+                # No ANSI codes, simple truncation
+                if len(cell_str) > width:
+                    display_cell = cell_str[:width-1] + '…'
+                else:
+                    display_cell = cell_str
             
-            # Left-align the cell content
-            padding = width - len(display_cell)
+            # Calculate the visible length for padding
+            visible_length = len(remove_ansi_codes(display_cell))
+            padding = width - visible_length
             
-            # Apply color if specified
-            if colors and i in colors:
+            # Apply color if specified and not already colored
+            if colors and i in colors and not has_ansi:
                 color_code = colors[i]
                 reset_code = Colors.ENDC
                 row_line += f" {color_code}{display_cell}{' ' * padding}{reset_code} "

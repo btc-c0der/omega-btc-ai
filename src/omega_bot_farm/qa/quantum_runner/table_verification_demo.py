@@ -25,6 +25,7 @@ import os
 import sys
 import time
 import random
+import logging
 import argparse
 
 # Add the parent directory to the path so we can import the utils
@@ -261,9 +262,6 @@ if __name__ == "__main__":
     parser.add_argument('--matrix', action='store_true', help='Show matrix rain animation before demo')
     parser.add_argument('--simulate', action='store_true', help='Simulate table corruption and repair')
     args = parser.parse_args()
-    
-    # Import logging here since it's used conditionally
-    import logging
     
     if args.matrix:
         matrix_rain_animation(3.0)
