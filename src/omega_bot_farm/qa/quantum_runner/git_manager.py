@@ -243,26 +243,318 @@ class GitManager:
         # Get the most common extension
         common_ext = max(extensions.items(), key=lambda x: x[1])[0] if extensions else ""
         
-        # Generate a simple message
+        # Generate conventional commit format message
         if len(uncommitted['all']) == 1:
             # Single file change
             file_path = uncommitted['all'][0]
             file_name = os.path.basename(file_path)
             
             if file_path in uncommitted['added']:
-                return f"{change_type}({scope}): Add {file_name}"
+                conventional_message = f"{change_type}({scope}): Add {file_name}"
             elif file_path in uncommitted['modified']:
-                return f"{change_type}({scope}): Update {file_name}"
+                conventional_message = f"{change_type}({scope}): Update {file_name}"
             elif file_path in uncommitted['deleted']:
-                return f"{change_type}({scope}): Remove {file_name}"
+                conventional_message = f"{change_type}({scope}): Remove {file_name}"
             else:
-                return f"{change_type}({scope}): Change {file_name}"
-        
-        # Multiple files
-        if common_ext:
-            return f"{change_type}({scope}): Update {common_ext[1:]} files"
+                conventional_message = f"{change_type}({scope}): Change {file_name}"
         else:
-            return f"{change_type}({scope}): Multiple changes"
+            # Multiple files
+            if common_ext:
+                conventional_message = f"{change_type}({scope}): Update {common_ext[1:]} files"
+            else:
+                conventional_message = f"{change_type}({scope}): Multiple changes"
+                
+        # Generate enhanced quantum analysis for display
+        import datetime
+        now = datetime.datetime.now()
+        
+        # Get the file type distribution for detailed report
+        file_types = {}
+        for file_path in uncommitted['all']:
+            ext = os.path.splitext(file_path)[1]
+            if ext:
+                if ext not in file_types:
+                    file_types[ext] = 0
+                file_types[ext] += 1
+                
+        # Sort file types by count
+        sorted_file_types = sorted(file_types.items(), key=lambda x: x[1], reverse=True)
+        
+        # Get directory distribution for detailed report
+        dir_counts = {}
+        for file_path in uncommitted['all']:
+            directory = os.path.dirname(file_path)
+            if directory == '':
+                directory = '.'
+            if directory not in dir_counts:
+                dir_counts[directory] = 0
+            dir_counts[directory] += 1
+            
+        # Sort directories by count
+        sorted_dir_counts = sorted(dir_counts.items(), key=lambda x: x[1], reverse=True)
+        
+        # Create tag suggestion - include date and project name
+        date_str = now.strftime("%Y%m%d")
+        tag_suggestion = f"v2.2.1-omega-{date_str}"
+        
+        # Create hash tags for the commit
+        hashtags = []
+        if 'test' in scope.lower() or change_type == 'test':
+            hashtags.append("#test")
+        if any(ext.lower() in ['.md', '.txt', '.rst'] for ext in file_types):
+            hashtags.append("#docs")
+        if any(ext.lower() in ['.yml', '.yaml', '.json', '.ini'] for ext in file_types):
+            hashtags.append("#config")
+        
+        # Add project-specific tags
+        hashtags.extend(["#OMEGA", "#BTC", "#AI"])
+        
+        # Format the enhanced report
+        quantum_analysis = f"""
+======== 🧬 OMEGA BTC GIT QUANTUM ANALYSIS 🧬 ========
+Time: {now.isoformat()}
+
+📊 File Change Summary:
+  • {len(uncommitted['all'])} total files
+  • {len(uncommitted['modified'])} modified files
+  • {len(uncommitted['added'])} new files
+  • {len(uncommitted['deleted'])} deleted files
+  • {len(uncommitted['untracked'])} untracked files
+
+📂 Files by Type:
+{chr(10).join(f"  • {ext}: {count} files" for ext, count in sorted_file_types[:10])}
+
+📁 Files by Directory:
+{chr(10).join(f"  • {directory}: {count} files" for directory, count in sorted_dir_counts[:5])}
+
+✏️ Modified Files (top 5):
+{chr(10).join(f"  • {os.path.basename(file)}" for file in uncommitted['modified'][:5] if file)}
+
+➕ New Files (top 5):
+{chr(10).join(f"  • {os.path.basename(file)}" for file in (uncommitted['added'] + uncommitted['untracked'])[:5] if file)}
+
+💡 Quantum Git Suggestions:
+
+Commit Message:
+{conventional_message} ({len(uncommitted['all'])} files changed)
+
+{' '.join(hashtags)}
+
+Suggested Tag:
+{tag_suggestion}
+"""
+        # Return just the conventional message for programmatic use
+        return conventional_message
+        
+    def get_enhanced_commit_analysis(self) -> str:
+        """Generate enhanced quantum git analysis with visual formatting."""
+        uncommitted = self.get_uncommitted_files()
+        
+        if not uncommitted['all']:
+            return "No uncommitted changes found."
+            
+        # Get the most common directories
+        directories = {}
+        for file_path in uncommitted['all']:
+            directory = os.path.dirname(file_path)
+            top_level = directory.split('/')[0] if '/' in directory else directory
+            
+            if top_level not in directories:
+                directories[top_level] = 0
+            directories[top_level] += 1
+        
+        # Sort directories by count
+        sorted_dirs = sorted(directories.items(), key=lambda x: x[1], reverse=True)
+        
+        # Determine the scope
+        scope = sorted_dirs[0][0] if sorted_dirs else "misc"
+        
+        # Determine the type of change
+        change_type = "feat"
+        if len(uncommitted['modified']) > len(uncommitted['added']):
+            change_type = "fix" if len(uncommitted['modified']) < 5 else "refactor"
+        
+        # Special case for test files
+        test_files = [f for f in uncommitted['all'] if 'test' in f.lower()]
+        if len(test_files) > len(uncommitted['all']) / 2:
+            change_type = "test"
+        
+        # Special case for docs
+        doc_files = [f for f in uncommitted['all'] if f.endswith('.md') or 'doc' in f.lower()]
+        if len(doc_files) > len(uncommitted['all']) / 2:
+            change_type = "docs"
+        
+        # Count the number of files by extension
+        extensions = {}
+        for file_path in uncommitted['all']:
+            ext = os.path.splitext(file_path)[1]
+            if ext:
+                if ext not in extensions:
+                    extensions[ext] = 0
+                extensions[ext] += 1
+        
+        # Get the most common extension
+        common_ext = max(extensions.items(), key=lambda x: x[1])[0] if extensions else ""
+        
+        # Generate conventional commit format message
+        if len(uncommitted['all']) == 1:
+            # Single file change
+            file_path = uncommitted['all'][0]
+            file_name = os.path.basename(file_path)
+            
+            if file_path in uncommitted['added']:
+                conventional_message = f"{change_type}({scope}): Add {file_name}"
+            elif file_path in uncommitted['modified']:
+                conventional_message = f"{change_type}({scope}): Update {file_name}"
+            elif file_path in uncommitted['deleted']:
+                conventional_message = f"{change_type}({scope}): Remove {file_name}"
+            else:
+                conventional_message = f"{change_type}({scope}): Change {file_name}"
+        else:
+            # Multiple files
+            if common_ext:
+                conventional_message = f"{change_type}({scope}): Update {common_ext[1:]} files"
+            else:
+                conventional_message = f"{change_type}({scope}): Multiple changes"
+                
+        # Generate enhanced quantum analysis for display
+        import datetime
+        now = datetime.datetime.now()
+        
+        # Get the file type distribution for detailed report
+        file_types = {}
+        for file_path in uncommitted['all']:
+            ext = os.path.splitext(file_path)[1]
+            if ext:
+                if ext not in file_types:
+                    file_types[ext] = 0
+                file_types[ext] += 1
+                
+        # Sort file types by count
+        sorted_file_types = sorted(file_types.items(), key=lambda x: x[1], reverse=True)
+        
+        # Get directory distribution for detailed report
+        dir_counts = {}
+        for file_path in uncommitted['all']:
+            directory = os.path.dirname(file_path)
+            if directory == '':
+                directory = '.'
+            if directory not in dir_counts:
+                dir_counts[directory] = 0
+            dir_counts[directory] += 1
+            
+        # Sort directories by count
+        sorted_dir_counts = sorted(dir_counts.items(), key=lambda x: x[1], reverse=True)
+        
+        # Create tag suggestion - include date and project name
+        date_str = now.strftime("%Y%m%d")
+        tag_suggestion = f"v2.2.1-omega-{date_str}"
+        
+        # Create hash tags for the commit
+        hashtags = []
+        if 'test' in scope.lower() or change_type == 'test':
+            hashtags.append("#test")
+        if any(ext.lower() in ['.md', '.txt', '.rst'] for ext in file_types):
+            hashtags.append("#docs")
+        if any(ext.lower() in ['.yml', '.yaml', '.json', '.ini'] for ext in file_types):
+            hashtags.append("#config")
+        
+        # Add project-specific tags
+        hashtags.extend(["#OMEGA", "#BTC", "#divine"])
+        
+        # Format the enhanced report with better coloring
+        # Create the separator line
+        separator = f"{Colors.PURPLE}==========================================={Colors.ENDC}"
+        
+        # Format the enhanced report with rich coloring
+        # Build the report header
+        report = f"\n{separator}\n"
+        report += f"{Colors.PURPLE}======== 🧬 {Colors.CYAN}OMEGA BTC GIT QUANTUM ANALYSIS{Colors.PURPLE} 🧬 ========{Colors.ENDC}\n"
+        report += f"{Colors.BLUE}Time: {Colors.CYAN}{now.isoformat()}{Colors.ENDC}\n\n"
+        
+        # File Change Summary section
+        report += f"{Colors.BLUE}📊 {Colors.BOLD}File Change Summary:{Colors.ENDC}\n"
+        report += f"{Colors.CYAN}• {len(uncommitted['all'])} total files{Colors.ENDC}\n"
+        report += f"{Colors.BLUE}• {len(uncommitted['modified'])} modified files{Colors.ENDC}\n"
+        report += f"{Colors.GREEN}• {len(uncommitted['added'])} new files{Colors.ENDC}\n"
+        report += f"{Colors.RED}• {len(uncommitted['deleted'])} deleted files{Colors.ENDC}\n"
+        report += f"{Colors.YELLOW}• {len(uncommitted['untracked'])} untracked files{Colors.ENDC}\n\n"
+        
+        # Files by Type section with colored extensions
+        report += f"{Colors.BLUE}📂 {Colors.BOLD}Files by Type:{Colors.ENDC}\n"
+        for ext, count in sorted_file_types[:10]:
+            # Color different extensions differently
+            if ext in ['.py', '.js', '.ts']:
+                ext_color = Colors.CYAN
+            elif ext in ['.md', '.txt', '.rst']:
+                ext_color = Colors.GREEN
+            elif ext in ['.yml', '.yaml', '.json', '.ini']:
+                ext_color = Colors.YELLOW
+            elif ext in ['.html', '.css']:
+                ext_color = Colors.PURPLE
+            else:
+                ext_color = Colors.BLUE
+            report += f"{Colors.CYAN}• {ext_color}{ext}{Colors.ENDC}: {count} files\n"
+        report += "\n"
+        
+        # Files by Directory section with colored paths
+        report += f"{Colors.BLUE}📁 {Colors.BOLD}Files by Directory:{Colors.ENDC}\n"
+        for directory, count in sorted_dir_counts[:5]:
+            parts = directory.split('/')
+            colored_dir = ""
+            for i, part in enumerate(parts):
+                if i == 0:
+                    colored_dir += f"{Colors.YELLOW}{part}{Colors.ENDC}"
+                else:
+                    colored_dir += f"{Colors.ENDC}/{Colors.CYAN}{part}{Colors.ENDC}"
+            report += f"{Colors.CYAN}• {colored_dir}: {count} files\n"
+        report += "\n"
+        
+        # Modified Files section
+        modified_files = [os.path.basename(file) for file in uncommitted['modified'][:5] if file]
+        if modified_files:
+            report += f"{Colors.YELLOW}✏️ {Colors.BOLD}Modified Files (top 5):{Colors.ENDC}\n"
+            for file in modified_files:
+                report += f"{Colors.YELLOW}• {Colors.BLUE}{file}{Colors.ENDC}\n"
+        else:
+            report += f"{Colors.YELLOW}✏️ {Colors.BOLD}Modified Files (top 5):{Colors.ENDC}\n"
+            report += f"{Colors.YELLOW}• {Colors.BLUE}None{Colors.ENDC}\n"
+        report += "\n"
+        
+        # New Files section
+        new_files = [os.path.basename(file) for file in (uncommitted['added'] + uncommitted['untracked'])[:5] if file]
+        if new_files:
+            report += f"{Colors.GREEN}➕ {Colors.BOLD}New Files (top 5):{Colors.ENDC}\n"
+            for file in new_files:
+                report += f"{Colors.GREEN}• {Colors.CYAN}{file}{Colors.ENDC}\n"
+        else:
+            report += f"{Colors.GREEN}➕ {Colors.BOLD}New Files (top 5):{Colors.ENDC}\n"
+            report += f"{Colors.GREEN}• {Colors.CYAN}None{Colors.ENDC}\n"
+        report += "\n"
+        
+        # Quantum Git Suggestions section
+        report += f"{Colors.PURPLE}💡 {Colors.BOLD}Quantum Git Suggestions:{Colors.ENDC}\n\n"
+        report += f"{Colors.CYAN}Commit Message:{Colors.ENDC}\n"
+        report += f"{Colors.GREEN}{conventional_message} ({len(uncommitted['all'])} files changed){Colors.ENDC}\n\n"
+        
+        # Format hashtags with different colors
+        colored_hashtags = []
+        for i, tag in enumerate(hashtags):
+            if i % 3 == 0:
+                colored_hashtags.append(f"{Colors.CYAN}{tag}{Colors.ENDC}")
+            elif i % 3 == 1:
+                colored_hashtags.append(f"{Colors.PURPLE}{tag}{Colors.ENDC}")
+            else:
+                colored_hashtags.append(f"{Colors.BLUE}{tag}{Colors.ENDC}")
+        report += f"{' '.join(colored_hashtags)}\n\n"
+        
+        report += f"{Colors.YELLOW}Suggested Tag:{Colors.ENDC}\n"
+        report += f"{Colors.GREEN}v2.2.1-omega-{date_str}{Colors.ENDC}\n"
+        
+        # Add footer
+        report += f"\n{separator}\n"
+        
+        return report
     
     def suggest_git_tag(self) -> str:
         """Suggest a Git tag based on the current state."""

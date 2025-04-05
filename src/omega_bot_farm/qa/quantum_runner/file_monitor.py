@@ -10,7 +10,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple, Union
 
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
-from .types import TestDimension
+from .types import TestDimension, Colors
 
 logger = logging.getLogger("0M3G4_B0TS_QA_AUT0_TEST_SUITES_RuNn3R_5D")
 
@@ -31,6 +31,19 @@ class FileChangeHandler(FileSystemEventHandler):
         if event.is_directory:
             return
         
+        # Get the name of the file
+        file_name = os.path.basename(event.src_path)
+        event_type = event.event_type.upper()
+        
+        # Determine color based on event type
+        color = Colors.GREEN
+        if event_type == 'MODIFIED':
+            color = Colors.BLUE
+        elif event_type == 'DELETED':
+            color = Colors.RED
+        elif event_type == 'MOVED':
+            color = Colors.YELLOW
+        
         # Ignore temporary files and files in ignored directories
         if any(ignored in event.src_path for ignored in self.ignored_dirs):
             return
@@ -47,13 +60,16 @@ class FileChangeHandler(FileSystemEventHandler):
                 return
             
         self.last_events[event.src_path] = current_time
+        
+        # Log the detected change with color
+        logger.info(f"{color}⚡ FILE {event_type}: {file_name}{Colors.ENDC}")
             
         # Determine which tests to run based on the file path
         dimensions_to_test = self._get_dimensions_to_test(event.src_path)
         
         if dimensions_to_test:
-            logger.info(f"File change detected: {event.src_path}")
-            logger.info(f"Triggering tests: {[d.name for d in dimensions_to_test]}")
+            dimension_names = [dim.name for dim in dimensions_to_test]
+            logger.info(f"{Colors.CYAN}↪ Queueing tests: {Colors.YELLOW}{', '.join(dimension_names)}{Colors.ENDC}")
             self.queue.put((event.src_path, dimensions_to_test))
     
     def _get_dimensions_to_test(self, file_path: str) -> List[TestDimension]:

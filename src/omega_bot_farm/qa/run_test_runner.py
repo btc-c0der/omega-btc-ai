@@ -131,6 +131,13 @@ def main():
         help="Enable all features (full Omega mode)"
     )
     
+    # Add a new OMEGA-K8s option
+    parser.add_argument(
+        "--OMEGA-K8s",
+        action="store_true",
+        help="Enable all features including Kubernetes Matrix surveillance"
+    )
+    
     # Interval configuration
     parser.add_argument(
         "--uncommitted-interval",
@@ -179,23 +186,64 @@ def main():
         help="Generate a one-time Kubernetes Matrix surveillance report and exit"
     )
     
+    # Add a new option to disable K8s matrix even in OMEGA mode
+    parser.add_argument(
+        "--no-k8s",
+        action="store_true",
+        help="Disable Kubernetes Matrix surveillance even in OMEGA mode"
+    )
+    
+    # Add an option for diagnostic mode - skips potential slow operations
+    parser.add_argument(
+        "--diagnostic",
+        action="store_true",
+        help="Run in diagnostic mode - skips potentially slow operations"
+    )
+    
+    # Add a new celebration flag
+    parser.add_argument(
+        "--celebration",
+        action="store_true",
+        help="Display quantum celebration sequence"
+    )
+    
     args = parser.parse_args()
     
     # Build configuration from arguments
     config = {
         'report_dir': args.report_dir,
         'run_initial_tests': args.run_tests is not None,
-        'report_uncommitted': args.report_uncommitted or args.OMEGA,
-        'suggest_git': args.suggest_git or args.OMEGA,
-        'auto_listen': args.auto_listen or args.OMEGA,
-        'full_omega_mode': args.OMEGA,
+        'report_uncommitted': args.report_uncommitted or args.OMEGA or args.OMEGA_K8s,
+        'suggest_git': args.suggest_git or args.OMEGA or args.OMEGA_K8s,
+        'auto_listen': args.auto_listen or args.OMEGA or args.OMEGA_K8s,
+        'full_omega_mode': args.OMEGA or args.OMEGA_K8s,
         'uncommitted_scan_interval': args.uncommitted_interval,
         'git_suggestion_interval': args.git_suggestion_interval,
         'new_file_scan_interval': args.new_file_scan_interval,
-        'k8s_matrix_mode': args.k8s_matrix or args.OMEGA,
+        'k8s_matrix_mode': args.k8s_matrix or args.OMEGA_K8s,
         'k8s_namespace': args.k8s_namespace,
         'k8s_report_interval': args.k8s_report_interval
     }
+    
+    # If celebration is requested or in OMEGA mode, show the celebration
+    if args.celebration or args.OMEGA or args.OMEGA_K8s:
+        try:
+            # Try to run the Matrix rain animation
+            from quantum_runner.utils import display_matrix_rain_and_logo
+            display_matrix_rain_and_logo()
+        except ImportError:
+            try:
+                # Fall back to just the celebration sequence
+                from quantum_runner.utils import print_celebration_message
+                print_celebration_message()
+            except ImportError:
+                try:
+                    # Fall back to the enhanced celebration
+                    from quantum_runner.enhanced_celebration import EnhancedCelebration
+                    celebration = EnhancedCelebration()
+                    celebration.celebration_sequence()
+                except ImportError:
+                    logger.warning("Celebration module not found. Run may continue without celebrating.")
     
     # Initialize the service
     service = QuantumTestService(args.project_root, config)
@@ -242,14 +290,18 @@ def main():
         return
     
     # Start continuous monitoring if no one-time commands were specified
-    if args.auto_listen or args.OMEGA or args.k8s_matrix:
+    if args.auto_listen or args.OMEGA or args.OMEGA_K8s or args.k8s_matrix:
         try:
             service.start()
             
             # Print appropriate message based on mode
-            if args.OMEGA:
-                print(f"\n{Colors.BOLD}{Colors.CYAN}🌀 OMEGA MODE ACTIVATED 🌀{Colors.ENDC}")
+            if args.OMEGA_K8s:
+                print(f"\n{Colors.BOLD}{Colors.CYAN}🌀 OMEGA MODE WITH K8S MATRIX ACTIVATED 🌀{Colors.ENDC}")
                 print(f"{Colors.YELLOW}Monitoring for file changes, uncommitted files, Matrix K8s, and providing AI-powered Git suggestions{Colors.ENDC}")
+                print(f"{Colors.GREEN}Press Ctrl+C to stop{Colors.ENDC}\n")
+            elif args.OMEGA:
+                print(f"\n{Colors.BOLD}{Colors.CYAN}🌀 OMEGA MODE ACTIVATED 🌀{Colors.ENDC}")
+                print(f"{Colors.YELLOW}Monitoring for file changes, uncommitted files, and providing AI-powered Git suggestions{Colors.ENDC}")
                 print(f"{Colors.GREEN}Press Ctrl+C to stop{Colors.ENDC}\n")
             elif args.k8s_matrix:
                 print(f"\n{Colors.BOLD}{Colors.GREEN}🔵 MATRIX K8S SURVEILLANCE ACTIVATED 🔵{Colors.ENDC}")

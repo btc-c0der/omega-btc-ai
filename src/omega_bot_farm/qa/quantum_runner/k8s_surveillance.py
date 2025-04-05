@@ -46,28 +46,53 @@ class K8sMatrixSurveillance:
         self.available = KUBERNETES_AVAILABLE
         self.running = False
         self.thread = None
-        self.last_scan_time = 0
+        self.last_scan_time = time.time()  # Initialize to current time
         self.k8s_resources = {}
         self.scan_interval = 30  # seconds
+        self.k8s_connection_timeout = 10  # seconds
         
         # Try to load Kubernetes config
         if self.available:
             try:
-                config.load_kube_config()
-                # Fallback to in-cluster config if running inside a pod
-                if not os.path.exists(os.path.expanduser('~/.kube/config')):
-                    config.load_incluster_config()
-                self.v1 = client.CoreV1Api()
-                self.apps_v1 = client.AppsV1Api()
-                logger.info(f"{Colors.CYAN}🔷 Kubernetes surveillance system initialized{Colors.ENDC}")
+                # Add timeout for config loading
+                config_thread = threading.Thread(target=self._load_k8s_config)
+                config_thread.daemon = True
+                config_thread.start()
+                
+                # Wait with timeout
+                config_thread.join(timeout=10)
+                
+                if not hasattr(self, 'v1'):
+                    # If config loading timed out, create placeholders and mark as unavailable
+                    logger.warning(f"{Colors.YELLOW}⚠ Kubernetes config loading timed out{Colors.ENDC}")
+                    self.available = False
+                    self.v1 = client.CoreV1Api()
+                    self.apps_v1 = client.AppsV1Api()
+                else:
+                    logger.info(f"{Colors.CYAN}🔷 Kubernetes surveillance system initialized{Colors.ENDC}")
             except Exception as e:
                 logger.error(f"{Colors.RED}Failed to initialize Kubernetes client: {e}{Colors.ENDC}")
                 self.available = False
+                self.v1 = client.CoreV1Api()
+                self.apps_v1 = client.AppsV1Api()
         else:
             # Initialize placeholders for type checking
             self.v1 = client.CoreV1Api()
             self.apps_v1 = client.AppsV1Api()
             
+    def _load_k8s_config(self):
+        """Load Kubernetes config with error handling."""
+        try:
+            config.load_kube_config()
+            # Fallback to in-cluster config if running inside a pod
+            if not os.path.exists(os.path.expanduser('~/.kube/config')):
+                config.load_incluster_config()
+            self.v1 = client.CoreV1Api()
+            self.apps_v1 = client.AppsV1Api()
+        except Exception as e:
+            logger.error(f"{Colors.RED}Failed to load Kubernetes config: {e}{Colors.ENDC}")
+            self.available = False
+    
     def start(self) -> bool:
         """Start the Kubernetes surveillance thread."""
         if not self.available:
@@ -95,8 +120,21 @@ class K8sMatrixSurveillance:
         """Main surveillance loop for monitoring Kubernetes resources."""
         while self.running:
             try:
-                self._scan_resources()
-                self.last_scan_time = time.time()
+                # Add timeout protection to scan
+                scan_thread = threading.Thread(target=self._scan_resources)
+                scan_thread.daemon = True
+                scan_thread.start()
+                
+                # Wait with timeout
+                scan_thread.join(timeout=15)
+                
+                # Check if scan completed
+                if scan_thread.is_alive():
+                    logger.warning(f"{Colors.YELLOW}⚠️ Matrix scan timeout - will retry later{Colors.ENDC}")
+                    # Force update last_scan_time to prevent continuous report messages
+                    self.last_scan_time = time.time()
+                else:
+                    self.last_scan_time = time.time()
                 
                 # Scan at regular intervals
                 time.sleep(self.scan_interval)
@@ -112,21 +150,21 @@ class K8sMatrixSurveillance:
         try:
             # Get pods
             if self.namespace:
-                pods = self.v1.list_namespaced_pod(self.namespace)
+                pods = self.v1.list_namespaced_pod(self.namespace, _request_timeout=10)
             else:
-                pods = self.v1.list_pod_for_all_namespaces()
+                pods = self.v1.list_pod_for_all_namespaces(_request_timeout=10)
                 
             # Get deployments
             if self.namespace:
-                deployments = self.apps_v1.list_namespaced_deployment(self.namespace)
+                deployments = self.apps_v1.list_namespaced_deployment(self.namespace, _request_timeout=10)
             else:
-                deployments = self.apps_v1.list_deployment_for_all_namespaces()
+                deployments = self.apps_v1.list_deployment_for_all_namespaces(_request_timeout=10)
                 
             # Get services
             if self.namespace:
-                services = self.v1.list_namespaced_service(self.namespace)
+                services = self.v1.list_namespaced_service(self.namespace, _request_timeout=10)
             else:
-                services = self.v1.list_service_for_all_namespaces()
+                services = self.v1.list_service_for_all_namespaces(_request_timeout=10)
                 
             # Store results
             self.k8s_resources = {
@@ -264,10 +302,23 @@ class K8sMatrixSurveillance:
             print(f"{Colors.CYAN}Install with: pip install kubernetes{Colors.ENDC}\n")
             return
             
+        # Add timeout after 3 seconds of waiting for Matrix data
         if not self.k8s_resources:
-            print(f"\n{Colors.YELLOW}⚠️ NO DATA FROM THE MATRIX YET ⚠️{Colors.ENDC}")
-            print(f"{Colors.CYAN}Waiting for first scan to complete...{Colors.ENDC}\n")
-            return
+            if time.time() - self.last_scan_time > 3 and self.last_scan_time > 0:
+                # Force a scan with timeout protection
+                try:
+                    self._scan_resources()
+                except Exception as e:
+                    logger.error(f"{Colors.RED}Error in Matrix scan: {e}{Colors.ENDC}")
+                
+            # If still no data after attempt or waiting
+            if not self.k8s_resources:
+                print(f"\n{Colors.YELLOW}⚠️ NO DATA FROM THE MATRIX YET ⚠️{Colors.ENDC}")
+                print(f"{Colors.CYAN}Matrix scan timeout - continuing operation{Colors.ENDC}")
+                print(f"{Colors.GREEN}K8s surveillance will retry in the background{Colors.ENDC}\n")
+                # Update last_scan_time to avoid continuous retries
+                self.last_scan_time = time.time()
+                return
             
         report = self.get_resource_report()
         
