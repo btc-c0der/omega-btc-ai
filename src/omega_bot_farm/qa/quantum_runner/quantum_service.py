@@ -34,7 +34,7 @@ from .file_monitor import FileChangeHandler
 from .git_manager import GitManager
 from .gbu2_license import GBU2LicenseChecker
 from .k8s_surveillance import K8sMatrixSurveillance
-from .utils import log_with_formatting, print_section_header, print_enhanced_header
+from .utils import log_with_formatting, print_section_header, print_enhanced_header, create_progress_bar, create_multi_segment_progress_bar, create_animated_spinner, create_gradient_progress_bar, create_fancy_progress_display, format_time_duration, PROGRESS_BAR_STYLES, ANIMATED_PROGRESS_FRAMES
 
 logger = logging.getLogger(__name__)
 
@@ -503,6 +503,15 @@ class QuantumTestService:
             
             monitoring_details = []
             
+            # Terminal width detection for better formatting
+            try:
+                terminal_width = os.get_terminal_size().columns
+            except:
+                terminal_width = 80
+                
+            # Adjust bar width based on terminal width
+            bar_width = min(40, terminal_width - 40)
+            
             if hasattr(self, 'observer') and self.observer.is_alive():
                 monitoring_details.append(f"{Colors.CYAN}🔍 File monitoring: {Colors.GREEN}ACTIVE{Colors.ENDC}")
                 monitoring_details.append(f"   {Colors.CYAN}Watching {len(self.watched_extensions)} file types across {self.project_root}{Colors.ENDC}")
@@ -511,11 +520,42 @@ class QuantumTestService:
                 
             if self.test_scheduler.running:
                 monitoring_details.append(f"{Colors.YELLOW}⏱ Test scheduler: {Colors.GREEN}ACTIVE{Colors.ENDC}")
-                # Show next scheduled tests
+                # Show next scheduled tests with progress bars
+                monitoring_details.append(f"\n{Colors.YELLOW}📊 Test Schedule Status:{Colors.ENDC}")
+                
                 for test_type, interval in self.schedule.items():
+                    # Choose a different style for each test type
+                    styles = {
+                        'unit': ('quantum', Colors.GREEN),
+                        'integration': ('hex', Colors.BLUE),
+                        'performance': ('blocks', Colors.YELLOW),
+                        'security': ('cyber', Colors.RED),
+                        'full': ('matrix', Colors.PURPLE),
+                        'compliance': ('bitcoin', Colors.CYAN)
+                    }
+                    
+                    style, color = styles.get(test_type, ('standard', Colors.CYAN))
+                    
                     next_run = self.test_scheduler.last_run.get(test_type, 0) + interval
                     time_left = max(0, next_run - now)
-                    monitoring_details.append(f"   {Colors.YELLOW}{test_type.upper()} tests: {Colors.GREEN}next in {int(time_left)} seconds{Colors.ENDC}")
+                    progress = 1.0 - (time_left / interval)
+                    
+                    # Format remaining time
+                    remaining_time = format_time_duration(time_left)
+                    
+                    # Create fancy progress bar
+                    test_name = f"{test_type.upper()} TESTS"
+                    test_name = test_name.ljust(14)
+                    
+                    progress_bar = create_progress_bar(progress, bar_width, style, color)
+                    
+                    # Create spinner
+                    spinner_style = 'quantum' if test_type == 'unit' else 'spinner' if test_type == 'integration' else 'matrix'
+                    frame_idx = int(now * 10) % len(ANIMATED_PROGRESS_FRAMES[spinner_style])
+                    spinner = create_animated_spinner(frame_idx, spinner_style, color)
+                    
+                    # Add to output
+                    monitoring_details.append(f"   {test_name} {spinner} {progress_bar} {color}{progress*100:.1f}%{Colors.ENDC} (Next: {remaining_time})")
             else:
                 monitoring_details.append(f"{Colors.YELLOW}⏱ Test scheduler: {Colors.RED}INACTIVE{Colors.ENDC}")
                 
@@ -524,8 +564,8 @@ class QuantumTestService:
             elif self.k8s_surveillance:
                 monitoring_details.append(f"{Colors.BLUE}🔷 K8s Matrix: {Colors.RED}NOT AVAILABLE{Colors.ENDC}")
             
-            # Show timing countdown for monitoring activities
-            monitoring_details.append(f"\n{Colors.MAGENTA}⏰ Monitoring Countdown Timers:{Colors.ENDC}")
+            # Show timing countdown for monitoring activities with enhanced visualization
+            monitoring_details.append(f"\n{Colors.MAGENTA}⏰ OMEGA QUANTUM MONITORING COUNTDOWN:{Colors.ENDC}")
             
             # Track times for various monitoring activities
             if not hasattr(self, '_last_git_suggestion'):
@@ -540,41 +580,106 @@ class QuantumTestService:
             git_next = self._last_git_suggestion + git_interval
             git_left = max(0, git_next - now)
             git_pct = min(100, 100 - (git_left / git_interval * 100))
+            git_progress = git_pct / 100.0
             
             # Create a progress bar for the Git Quantum Analysis
-            bar_length = 20
-            filled_length = int(bar_length * git_pct / 100)
-            bar = '█' * filled_length + '░' * (bar_length - filled_length)
+            git_bar_width = min(50, terminal_width - 30)
             
-            # Format time in minutes and seconds
+            # Create multi-segment progress bar for Git analysis
+            git_segments = []
+            git_colors = []
+            
+            # Create segments based on progress
+            if git_progress <= 0.33:
+                git_segments = [git_progress, 0, 0]
+                git_colors = [Colors.GREEN, Colors.YELLOW, Colors.RED]
+            elif git_progress <= 0.66:
+                git_segments = [0.33, git_progress - 0.33, 0]
+                git_colors = [Colors.GREEN, Colors.YELLOW, Colors.RED]
+            else:
+                git_segments = [0.33, 0.33, git_progress - 0.66]
+                git_colors = [Colors.GREEN, Colors.YELLOW, Colors.RED]
+                
+            # Create multi-segment bar
+            git_bar = create_multi_segment_progress_bar(git_segments, git_bar_width, git_colors, 'matrix')
+            
+            # Format time in minutes and seconds for Git analysis
             minutes, seconds = divmod(int(git_left), 60)
             time_format = f"{minutes}m {seconds}s" if minutes > 0 else f"{seconds}s"
             
-            monitoring_details.append(f"\n{Colors.PURPLE}========================= GIT QUANTUM ANALYSIS ========================={Colors.ENDC}")
-            monitoring_details.append(f"{Colors.PURPLE}🧬 OMEGA BTC GIT QUANTUM ANALYSIS:{Colors.ENDC} {Colors.CYAN}next in {time_format}{Colors.ENDC}")
-            monitoring_details.append(f"{Colors.PURPLE}[{bar}] {git_pct:.0f}%{Colors.ENDC}")
-            monitoring_details.append(f"{Colors.PURPLE}====================================================================={Colors.ENDC}\n")
+            # Create a fancy frame for the Git analysis
+            monitoring_details.append(f"{Colors.PURPLE}╔═══════════════════ GIT QUANTUM ANALYSIS ═════════════════════╗{Colors.ENDC}")
             
-            # Add other monitoring activities with simpler format
+            # Create spinner for Git analysis
+            git_spinner_idx = int(now * 10) % len(ANIMATED_PROGRESS_FRAMES['matrix'])
+            git_spinner = create_animated_spinner(git_spinner_idx, 'matrix', Colors.PURPLE)
+            
+            monitoring_details.append(f"{Colors.PURPLE}║ {git_spinner} OMEGA BTC GIT QUANTUM ANALYSIS: {Colors.CYAN}next in {time_format}{Colors.PURPLE} {' ' * (12 - len(time_format))}║{Colors.ENDC}")
+            monitoring_details.append(f"{Colors.PURPLE}║ {git_bar} {git_pct:.0f}% {' ' * (5 - len(str(int(git_pct))))}║{Colors.ENDC}")
+            monitoring_details.append(f"{Colors.PURPLE}╚═════════════════════════════════════════════════════════════╝{Colors.ENDC}")
+            
+            # Add other monitoring activities with enhanced bars
+            # Uncommitted files scan
             uncommitted_interval = self.config.get('uncommitted_scan_interval', 300)
             uncommitted_next = self._last_uncommitted_check + uncommitted_interval
             uncommitted_left = max(0, uncommitted_next - now)
             uncommitted_pct = min(100, 100 - (uncommitted_left / uncommitted_interval * 100))
-            monitoring_details.append(f"   {Colors.CYAN}📂 Uncommitted Files Scan:{Colors.ENDC} {Colors.CYAN}next in {int(uncommitted_left)}s {Colors.YELLOW}[{uncommitted_pct:.0f}%]{Colors.ENDC}")
+            uncommitted_progress = uncommitted_pct / 100.0
             
+            # Create fancy progress display for uncommitted scan
+            uncommitted_display = create_fancy_progress_display(
+                "📂 UNCOMMITTED FILES SCAN", 
+                uncommitted_progress,
+                width=terminal_width,
+                style='cyber',
+                color=Colors.CYAN,
+                show_spinner=True,
+                spinner_style='dots',
+                eta=uncommitted_left
+            )
+            monitoring_details.append("\n" + uncommitted_display)
+            
+            # K8s Matrix Report (if available)
             if self.k8s_surveillance and self.k8s_surveillance.available:
                 k8s_interval = self.config.get('k8s_report_interval', 600)
                 k8s_next = self._last_k8s_report + k8s_interval
                 k8s_left = max(0, k8s_next - now)
                 k8s_pct = min(100, 100 - (k8s_left / k8s_interval * 100))
-                monitoring_details.append(f"   {Colors.BLUE}🔷 K8s Matrix Report:{Colors.ENDC} {Colors.CYAN}next in {int(k8s_left)}s {Colors.YELLOW}[{k8s_pct:.0f}%]{Colors.ENDC}")
+                k8s_progress = k8s_pct / 100.0
+                
+                # Create a gradient progress bar for K8s
+                k8s_bar = create_gradient_progress_bar(
+                    k8s_progress, 
+                    min(40, terminal_width - 40),
+                    Colors.BLUE,
+                    Colors.CYAN
+                )
+                
+                k8s_spinner_idx = int(now * 10) % len(ANIMATED_PROGRESS_FRAMES['spinner'])
+                k8s_spinner = create_animated_spinner(k8s_spinner_idx, 'spinner', Colors.BLUE)
+                
+                k8s_time = format_time_duration(k8s_left)
+                monitoring_details.append(f"\n{Colors.BLUE}🔷 K8s MATRIX REPORT:{Colors.ENDC} {k8s_spinner} {k8s_bar} {Colors.CYAN}{k8s_pct:.0f}%{Colors.ENDC} (Next: {k8s_time})")
             
-            # Show status update timer
+            # Status update timer with bitcoin style
             status_interval = 60  # Status update is fixed at 60 seconds
             status_next = self._last_status_print + status_interval
             status_left = max(0, status_next - now)
             status_pct = min(100, 100 - (status_left / status_interval * 100))
-            monitoring_details.append(f"   {Colors.GREEN}📊 Status Update:{Colors.ENDC} {Colors.CYAN}next in {int(status_left)}s {Colors.YELLOW}[{status_pct:.0f}%]{Colors.ENDC}")
+            status_progress = status_pct / 100.0
+            
+            status_bar = create_progress_bar(
+                status_progress,
+                min(30, terminal_width - 40),
+                'bitcoin', 
+                Colors.GREEN
+            )
+            
+            status_spinner_idx = int(now * 10) % len(ANIMATED_PROGRESS_FRAMES['crypto'])
+            status_spinner = create_animated_spinner(status_spinner_idx, 'crypto', Colors.GREEN)
+            
+            status_time = format_time_duration(status_left)
+            monitoring_details.append(f"\n{Colors.GREEN}📊 STATUS UPDATE:{Colors.ENDC} {status_spinner} {status_bar} {Colors.CYAN}{status_pct:.0f}%{Colors.ENDC} (Next: {status_time})")
                 
             # Print all details
             for detail in monitoring_details:

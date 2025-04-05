@@ -8,9 +8,341 @@ import time
 import os
 import sys
 import threading
+import shutil
 from .types import Colors, TestState
 
 logger = logging.getLogger("0M3G4_B0TS_QA_AUT0_TEST_SUITES_RuNn3R_5D")
+
+# Progress bar styles
+PROGRESS_BAR_STYLES = {
+    'standard': ('█', '░'),           # Standard blocks
+    'dots': ('•', '·'),               # Dots style
+    'line': ('━', '─'),               # Line style 
+    'blocks': ('▓', '▒'),             # Gradient blocks
+    'arrows': ('►', '─'),             # Arrows
+    'equals': ('=', '-'),             # Classic equals
+    'stars': ('★', '☆'),             # Stars
+    'waves': ('∿', '⌒'),             # Waves
+    'braille': ('⣿', '⣀'),           # Braille patterns
+    'cyber': ('◉', '◎'),             # Cyberpunk style
+    'matrix': ('⟪', '⟫'),            # Matrix style
+    'quantum': ('⚬', '○'),           # Quantum style
+    'bitcoin': ('₿', '○'),           # Bitcoin style
+    'hex': ('⬢', '⬡'),               # Hexagon
+    'circuit': ('◼', '◻'),           # Circuit style
+    'classic': ('#', '.'),            # Classic ASCII
+}
+
+# Animated progress bar frames
+ANIMATED_PROGRESS_FRAMES = {
+    'spinner': ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+    'dots': ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'],
+    'pulse': ['[    ]', '[=   ]', '[==  ]', '[=== ]', '[====]', '[ ===]', '[  ==]', '[   =]'],
+    'matrix': ['⠉', '⠘', '⠰', '⠤', '⠆', '⠃', '⠉', '⠘', '⠰', '⠤', '⠆', '⠃'],
+    'quantum': ['∙', '●', '∘', '○', '◌', '◎', '◉', '⦿'],
+    'bar': ['[⣿⣿⣿⣀⣀⣀]', '[⣿⣿⣀⣀⣀⣀]', '[⣿⣀⣀⣀⣀⣀]', '[⣀⣀⣀⣀⣀⣀]', '[⣿⣀⣀⣀⣀⣀]', '[⣿⣿⣀⣀⣀⣀]', '[⣿⣿⣿⣀⣀⣀]'],
+    'crypto': ['₿', 'Ξ', '◎', '₿', 'Ξ', '◎'],
+    'node': ['⠧', '⠏', '⠛', '⠹'],
+}
+
+def create_progress_bar(progress, width=20, style='standard', color=Colors.GREEN, empty_color=Colors.ENDC):
+    """Create a stylized progress bar.
+    
+    Args:
+        progress: Float between 0 and 1 representing progress
+        width: Width of the progress bar in characters
+        style: Style from PROGRESS_BAR_STYLES
+        color: ANSI color code for the filled part
+        empty_color: ANSI color code for the empty part
+        
+    Returns:
+        Formatted progress bar string
+    """
+    if style not in PROGRESS_BAR_STYLES:
+        style = 'standard'
+        
+    # Ensure progress is between 0 and 1
+    progress = max(0, min(1, progress))
+    
+    filled_char, empty_char = PROGRESS_BAR_STYLES[style]
+    
+    # Calculate how many characters should be filled
+    filled_length = int(width * progress)
+    
+    # Create the bar
+    filled_part = color + filled_char * filled_length
+    empty_part = empty_color + empty_char * (width - filled_length)
+    
+    return f"{filled_part}{empty_part}{Colors.ENDC}"
+
+def create_multi_segment_progress_bar(percentages, width=20, colors=None, style='standard'):
+    """Create a progress bar with multiple colored segments.
+    
+    Args:
+        percentages: List of values between 0 and 1 for each segment
+        width: Width of the progress bar in characters
+        colors: List of colors for each segment
+        style: Style from PROGRESS_BAR_STYLES
+        
+    Returns:
+        Formatted progress bar string
+    """
+    if style not in PROGRESS_BAR_STYLES:
+        style = 'standard'
+        
+    filled_char, empty_char = PROGRESS_BAR_STYLES[style]
+    
+    # Default colors if not provided
+    if not colors or len(colors) < len(percentages):
+        colors = [Colors.GREEN, Colors.BLUE, Colors.YELLOW, Colors.RED, Colors.PURPLE] * (len(percentages) // 5 + 1)
+        colors = colors[:len(percentages)]
+    
+    # Total progress (should not exceed 1.0)
+    total_progress = min(1.0, sum(percentages))
+    
+    # Calculate character counts for each segment
+    segment_lengths = [int(width * p) for p in percentages]
+    
+    # Adjust to ensure total length is correct (due to rounding)
+    total_length = sum(segment_lengths)
+    if total_length < int(width * total_progress):
+        # Add remaining characters to the first non-zero segment
+        for i, p in enumerate(percentages):
+            if p > 0:
+                segment_lengths[i] += int(width * total_progress) - total_length
+                break
+    
+    # Create segments
+    segments = []
+    for i, length in enumerate(segment_lengths):
+        if length > 0:
+            segments.append(f"{colors[i]}{filled_char * length}")
+    
+    # Calculate empty part
+    filled_length = int(width * total_progress)
+    empty_part = f"{Colors.ENDC}{empty_char * (width - filled_length)}"
+    
+    return f"{''.join(segments)}{empty_part}{Colors.ENDC}"
+
+def create_animated_spinner(frame_idx, style='spinner', color=Colors.CYAN):
+    """Create an animated spinner for progress indication.
+    
+    Args:
+        frame_idx: Current frame index
+        style: Style name from ANIMATED_PROGRESS_FRAMES
+        color: ANSI color code
+        
+    Returns:
+        Current frame character of the spinner
+    """
+    if style not in ANIMATED_PROGRESS_FRAMES:
+        style = 'spinner'
+        
+    frames = ANIMATED_PROGRESS_FRAMES[style]
+    return f"{color}{frames[frame_idx % len(frames)]}{Colors.ENDC}"
+
+def create_gradient_progress_bar(progress, width=20, start_color=Colors.GREEN, end_color=Colors.YELLOW):
+    """Create a progress bar with gradient color.
+    
+    Args:
+        progress: Float between 0 and 1 representing progress
+        width: Width of the progress bar in characters
+        start_color: Starting ANSI color
+        end_color: Ending ANSI color
+        
+    Returns:
+        Formatted progress bar with gradient
+    """
+    # This is a simplified version - a true gradient would require 256 color support
+    filled_length = int(width * progress)
+    half_point = filled_length // 2
+    
+    # First half with start color, second half with end color
+    if filled_length <= 0:
+        bar = f"{Colors.ENDC}{'░' * width}"
+    elif filled_length >= width:
+        bar = f"{end_color}{'█' * width}"
+    else:
+        first_segment = f"{start_color}{'█' * half_point}"
+        second_segment = f"{end_color}{'█' * (filled_length - half_point)}"
+        empty_segment = f"{Colors.ENDC}{'░' * (width - filled_length)}"
+        bar = f"{first_segment}{second_segment}{empty_segment}"
+    
+    return f"{bar}{Colors.ENDC}"
+
+def create_completion_bar(value, maximum, width=20, style='quantum', prefix="", suffix="", 
+                          show_percent=True, show_values=False, color=Colors.CYAN):
+    """Create a full-featured completion bar.
+    
+    Args:
+        value: Current value
+        maximum: Maximum value
+        width: Width of the progress bar
+        style: Bar style to use
+        prefix: Text to show before the bar
+        suffix: Text to show after the bar
+        show_percent: Whether to show percentage
+        show_values: Whether to show the actual values
+        color: Color for the filled portion
+        
+    Returns:
+        Complete formatted progress bar with labels
+    """
+    # Calculate progress and create the bar
+    try:
+        progress = value / maximum if maximum > 0 else 1.0
+    except (TypeError, ZeroDivisionError):
+        progress = 0.0
+        
+    bar = create_progress_bar(progress, width, style, color)
+    
+    # Format percent
+    percent = f" {progress*100:.1f}%" if show_percent else ""
+    
+    # Format values
+    values = f" {value}/{maximum}" if show_values else ""
+    
+    # Combine all parts
+    return f"{prefix}{bar}{suffix}{percent}{values}"
+
+def create_fancy_progress_display(title, progress, width=None, style='quantum', color=Colors.CYAN,
+                                 show_spinner=True, spinner_style='quantum', elapsed=None, eta=None):
+    """Create a fancy progress display with title, bar, spinner, and timing info.
+    
+    Args:
+        title: Title for the progress bar
+        progress: Progress value (0-1)
+        width: Width of terminal (auto-detected if None)
+        style: Bar style
+        color: Main color
+        show_spinner: Whether to show a spinner
+        spinner_style: Style of spinner
+        elapsed: Elapsed time in seconds (optional)
+        eta: Estimated time remaining in seconds (optional)
+        
+    Returns:
+        Multi-line fancy progress display
+    """
+    if width is None:
+        try:
+            width = shutil.get_terminal_size().columns
+        except:
+            width = 80
+    
+    # Ensure minimum width
+    width = max(40, width)
+    
+    # Calculate bar width based on terminal width
+    bar_width = min(30, width - 25)
+    
+    # Create progress bar
+    progress_bar = create_progress_bar(progress, bar_width, style, color)
+    
+    # Create spinner if requested
+    spinner = ""
+    if show_spinner:
+        frame_idx = int(time.time() * 10) % len(ANIMATED_PROGRESS_FRAMES[spinner_style])
+        spinner = create_animated_spinner(frame_idx, spinner_style, color)
+    
+    # Format percentage
+    percent = f"{progress*100:.1f}%"
+    
+    # Format time information
+    time_info = ""
+    if elapsed is not None:
+        elapsed_str = format_time_duration(elapsed)
+        time_info += f"Elapsed: {elapsed_str}"
+    
+    if eta is not None:
+        eta_str = format_time_duration(eta)
+        if time_info:
+            time_info += " | "
+        time_info += f"ETA: {eta_str}"
+    
+    # Put it all together
+    result = []
+    result.append(f"{color}{title}{Colors.ENDC}")
+    progress_line = f"{spinner} {progress_bar} {percent}"
+    result.append(progress_line)
+    
+    if time_info:
+        result.append(time_info)
+    
+    return "\n".join(result)
+
+def format_time_duration(seconds):
+    """Format seconds into a human-readable duration."""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        minutes = seconds / 60
+        return f"{int(minutes)}m {int(seconds % 60)}s"
+    else:
+        hours = seconds / 3600
+        minutes = (seconds % 3600) / 60
+        return f"{int(hours)}h {int(minutes)}m"
+
+def print_progress_bar_demo():
+    """Print a demonstration of available progress bar styles."""
+    print(f"\n{Colors.BOLD}{Colors.CYAN}🌟 OMEGA QUANTUM PROGRESS BAR STYLES 🌟{Colors.ENDC}\n")
+    
+    # Show static bar styles
+    print(f"{Colors.BOLD}Static Progress Bar Styles:{Colors.ENDC}")
+    progress_values = [0.25, 0.5, 0.75, 1.0]
+    
+    for style, chars in PROGRESS_BAR_STYLES.items():
+        demos = []
+        for progress in progress_values:
+            bar = create_progress_bar(progress, 10, style)
+            demos.append(f"{bar} {int(progress*100)}%")
+        
+        style_name = f"{style.upper()}:"
+        print(f"{style_name.ljust(12)} {' '.join(demos)}")
+    
+    # Show animated spinners
+    print(f"\n{Colors.BOLD}Animated Spinner Styles:{Colors.ENDC}")
+    for style in ANIMATED_PROGRESS_FRAMES:
+        frames = ANIMATED_PROGRESS_FRAMES[style]
+        frame_display = ' '.join([f"{Colors.CYAN}{frame}{Colors.ENDC}" for frame in frames])
+        style_name = f"{style.upper()}:"
+        print(f"{style_name.ljust(12)} {frame_display}")
+    
+    # Show gradient bar
+    print(f"\n{Colors.BOLD}Gradient Progress Bars:{Colors.ENDC}")
+    for progress in progress_values:
+        bar = create_gradient_progress_bar(progress, 20, Colors.GREEN, Colors.RED)
+        print(f"GRADIENT: {bar} {int(progress*100)}%")
+    
+    # Show multi-segment bar
+    print(f"\n{Colors.BOLD}Multi-Segment Progress Bar:{Colors.ENDC}")
+    segments = [
+        [0.2, 0.3, 0.1],
+        [0.1, 0.1, 0.1, 0.2],
+        [0.05, 0.15, 0.25, 0.15, 0.1]
+    ]
+    colors = [
+        [Colors.GREEN, Colors.YELLOW, Colors.RED],
+        [Colors.GREEN, Colors.YELLOW, Colors.RED, Colors.PURPLE],
+        [Colors.GREEN, Colors.CYAN, Colors.BLUE, Colors.PURPLE, Colors.RED]
+    ]
+    
+    for i, segs in enumerate(segments):
+        bar = create_multi_segment_progress_bar(segs, 20, colors[i])
+        print(f"MULTI-SEG: {bar} {sum(segs)*100:.0f}%")
+    
+    # Show fancy progress display
+    print(f"\n{Colors.BOLD}Fancy Progress Display:{Colors.ENDC}")
+    fancy = create_fancy_progress_display(
+        "MATRIX SYNCHRONIZATION", 0.75, style='matrix', color=Colors.GREEN,
+        show_spinner=True, spinner_style='matrix', elapsed=345, eta=115
+    )
+    print(fancy)
+    
+    fancy = create_fancy_progress_display(
+        "QUANTUM ENTANGLEMENT", 0.42, style='quantum', color=Colors.PURPLE,
+        show_spinner=True, spinner_style='quantum', elapsed=67, eta=93
+    )
+    print(f"\n{fancy}")
 
 def log_with_formatting(message, level=logging.INFO, color=None):
     """Log a message with optional color formatting."""
