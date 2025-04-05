@@ -48,6 +48,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple, Union, cast
 from pathlib import Path
 from dataclasses import dataclass, field
 import shutil
+import uuid
 
 # For file system monitoring
 try:
@@ -75,6 +76,7 @@ class Colors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
+    PURPLE = '\033[95m'  # Adding PURPLE (same as HEADER for now)
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
@@ -326,33 +328,39 @@ class TestRunner:
         
     def run_tests(self, dimensions: List[TestDimension], source_files: Optional[List[str]] = None) -> TestRun:
         """Run tests in the specified dimensions."""
-        actual_source_files: List[str] = [] if source_files is None else source_files
-            
-        # Create unique ID for this test run
         run_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        # Create test run object
+        # Create a new test run
         test_run = TestRun(
             id=run_id,
             timestamp=datetime.datetime.now(),
-            trigger="file_change" if actual_source_files else "manual",
-            source_files=actual_source_files
+            trigger="manual" if source_files else "scheduled",
+            source_files=source_files or []
         )
         
-        # Set environment variable to allow performance tests
+        # Header with quantum design
+        header_width = 80
+        logger.info(f"\n{Colors.CYAN}╔{'═' * (header_width-2)}╗{Colors.ENDC}")
+        title = f" 0M3G4 QUANTUM TEST RUN - {run_id} "
+        padding = (header_width - 4 - len(title)) // 2
+        logger.info(f"{Colors.CYAN}║{' ' * padding}{Colors.BOLD}{Colors.BLUE}{title}{Colors.ENDC}{Colors.CYAN}{' ' * (padding + (header_width - 4 - len(title)) % 2)}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╚{'═' * (header_width-2)}╝{Colors.ENDC}\n")
+        
+        # Set up for performance tests
         if TestDimension.PERFORMANCE in dimensions:
             os.environ["RUN_PERFORMANCE_TESTS"] = "1"
         
-        # Create a base command with common options
+        # Run tests for each dimension
         for dimension in dimensions:
             if dimension not in self.test_scripts:
+                logger.warning(f"{Colors.YELLOW}⚠ No test script configured for {dimension.name}{Colors.ENDC}")
                 continue
-                
+            
             script = self.test_scripts[dimension]
             if not os.path.exists(script):
-                logger.warning(f"Test script not found: {script}")
+                logger.warning(f"{Colors.YELLOW}⚠ Test script not found: {script}{Colors.ENDC}")
                 continue
-                
+            
             # Create directory for test run reports
             run_report_dir = os.path.join(self.report_dir, run_id)
             os.makedirs(run_report_dir, exist_ok=True)
@@ -374,7 +382,21 @@ class TestRunner:
                 "--self-contained-html"
             ]
             
-            logger.info(f"Running {dimension.name} tests: {' '.join(cmd)}")
+            # Dimension-specific section header
+            dim_color = {
+                TestDimension.UNIT: Colors.GREEN,
+                TestDimension.INTEGRATION: Colors.BLUE,
+                TestDimension.PERFORMANCE: Colors.YELLOW,
+                TestDimension.SECURITY: Colors.RED,
+                TestDimension.COMPLIANCE: Colors.PURPLE
+            }.get(dimension, Colors.CYAN)
+            
+            logger.info(f"{dim_color}┌{'─' * 78}┐{Colors.ENDC}")
+            logger.info(f"{dim_color}│ {Colors.BOLD}Running {dimension.name} tests{Colors.ENDC}{dim_color}{' ' * (62 - len(dimension.name))}│{Colors.ENDC}")
+            logger.info(f"{dim_color}└{'─' * 78}┘{Colors.ENDC}")
+            
+            cmd_str = " ".join(cmd)
+            logger.info(f"{Colors.YELLOW}Command:{Colors.ENDC} {cmd_str}")
             
             # Mark this dimension as running
             test_run.results[dimension] = TestResult(
@@ -411,7 +433,7 @@ class TestRunner:
                     "output": output,
                     "error": error,
                     "returncode": result.returncode,
-                    "command": " ".join(cmd),
+                    "command": cmd_str,
                     "reports": {
                         "xml": xml_report,
                         "html": html_report,
@@ -427,18 +449,26 @@ class TestRunner:
                     details=details
                 )
                 
-                # Print results
-                if state == TestState.PASSED:
-                    logger.info(f"{Colors.GREEN}✓ {dimension.name} tests PASSED in {duration:.2f}s{Colors.ENDC}")
-                else:
-                    logger.error(f"{Colors.RED}✗ {dimension.name} tests FAILED in {duration:.2f}s{Colors.ENDC}")
-                    # Print error details for failed tests
+                # Print results with improved formatting
+                status_symbol = "✓" if state == TestState.PASSED else "✗"
+                status_color = Colors.GREEN if state == TestState.PASSED else Colors.RED
+                
+                # Result box
+                logger.info(f"\n{status_color}┌{'─' * 78}┐{Colors.ENDC}")
+                logger.info(f"{status_color}│ {Colors.BOLD}{status_symbol} {dimension.name} tests {state.value}{Colors.ENDC}{status_color}{' ' * (66 - len(dimension.name) - len(state.value))}│{Colors.ENDC}")
+                logger.info(f"{status_color}│ {Colors.BOLD}Duration:{Colors.ENDC} {duration:.2f}s{' ' * (68 - len(str(round(duration, 2))))}│{Colors.ENDC}")
+                logger.info(f"{status_color}└{'─' * 78}┘{Colors.ENDC}\n")
+                
+                # Print error details for failed tests
+                if state == TestState.FAILED:
+                    logger.info(f"{Colors.RED}Failed Test Details:{Colors.ENDC}")
                     for line in output.split("\n"):
                         if "FAILED" in line:
-                            logger.error(f"{Colors.RED}{line}{Colors.ENDC}")
+                            logger.error(f"{Colors.RED}  {line}{Colors.ENDC}")
+                    logger.info("")
             
             except Exception as e:
-                logger.error(f"Error running {dimension.name} tests: {e}")
+                logger.error(f"{Colors.RED}Error running {dimension.name} tests: {e}{Colors.ENDC}")
                 test_run.results[dimension] = TestResult(
                     dimension=dimension,
                     state=TestState.FAILED,
@@ -452,6 +482,24 @@ class TestRunner:
         
         # Update the overall state
         test_run.update_state()
+        
+        # Results summary section
+        logger.info(f"{Colors.CYAN}╔{'═' * 78}╗{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}TEST RESULTS SUMMARY{Colors.ENDC}{Colors.CYAN}{' ' * 60}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╠{'═' * 78}╣{Colors.ENDC}")
+        
+        for dimension, result in test_run.results.items():
+            status_color = Colors.GREEN if result.state == TestState.PASSED else Colors.RED
+            status_symbol = "✓" if result.state == TestState.PASSED else "✗"
+            logger.info(f"{Colors.CYAN}║ {Colors.BOLD}{dimension.name}:{Colors.ENDC} {status_color}{status_symbol} {result.state.value}{Colors.ENDC} ({result.duration:.2f}s){' ' * (57 - len(dimension.name) - len(result.state.value) - len(str(round(result.duration, 2))))}║")
+        
+        overall_status = "PASSED" if test_run.state == TestState.PASSED else "FAILED"
+        overall_color = Colors.GREEN if test_run.state == TestState.PASSED else Colors.RED
+        overall_symbol = "✓" if test_run.state == TestState.PASSED else "✗"
+        
+        logger.info(f"{Colors.CYAN}╠{'═' * 78}╣{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}OVERALL:{Colors.ENDC} {overall_color}{overall_symbol} {overall_status}{Colors.ENDC} (Total: {test_run.total_duration:.2f}s){' ' * (56 - len(overall_status) - len(str(round(test_run.total_duration, 2))))}║")
+        logger.info(f"{Colors.CYAN}╚{'═' * 78}╝{Colors.ENDC}\n")
         
         # Save test run results
         self.save_test_run(test_run)
@@ -467,13 +515,17 @@ class TestRunner:
         filepath = os.path.join(self.report_dir, f"test_run_{test_run.id}.json")
         with open(filepath, "w") as f:
             json.dump(test_run.to_dict(), f, indent=2)
-            
+        
         # Save summary to latest.json
         latest_filepath = os.path.join(self.report_dir, "latest.json")
         with open(latest_filepath, "w") as f:
             json.dump(test_run.to_dict(), f, indent=2)
-            
-        logger.info(f"Test results saved to {filepath}")
+        
+        # Print with better formatting
+        report_path = os.path.relpath(filepath, os.getcwd())
+        logger.info(f"\n{Colors.CYAN}╔{'═' * 78}╗{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║{Colors.BOLD} Report saved to:{Colors.ENDC} {Colors.BLUE}{report_path}{Colors.ENDC}{' ' * (55 - len(report_path))}{Colors.CYAN}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╚{'═' * 78}╝{Colors.ENDC}\n")
 
 # Add GBU2 License check functionality
 class GBU2LicenseChecker:
@@ -1095,24 +1147,62 @@ class QuantumTestService:
     
     def _print_test_summary(self, test_run: TestRun) -> None:
         """Print a summary of test results."""
-        header = f"\n{Colors.BOLD}Test Run: {test_run.id}{Colors.ENDC}"
-        print(header)
-        print("=" * len(header))
+        # Box width
+        width = 80
         
-        print(f"Timestamp: {test_run.timestamp}")
-        print(f"Trigger: {test_run.trigger}")
-        print(f"Source files: {', '.join(test_run.source_files) if test_run.source_files else 'N/A'}")
-        print(f"Total duration: {test_run.total_duration:.2f}s")
-        print(f"State: {Colors.GREEN if test_run.state == TestState.PASSED else Colors.RED}{test_run.state.value}{Colors.ENDC}")
+        # Create fancy header
+        logger.info(f"\n{Colors.CYAN}╔{'═' * (width-2)}╗{Colors.ENDC}")
+        title = f" QUANTUM TEST RESULTS: {test_run.id} "
+        padding = (width - 4 - len(title)) // 2
+        logger.info(f"{Colors.CYAN}║{' ' * padding}{Colors.BOLD}{Colors.BLUE}{title}{Colors.ENDC}{Colors.CYAN}{' ' * (padding + (width - 4 - len(title)) % 2)}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╠{'═' * (width-2)}╣{Colors.ENDC}")
         
-        print("\nResults by dimension:")
+        # Metadata section
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Timestamp:{Colors.ENDC} {test_run.timestamp.strftime('%Y-%m-%d %H:%M:%S')}{' ' * (width - 26 - len(test_run.timestamp.strftime('%Y-%m-%d %H:%M:%S')))}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Trigger:{Colors.ENDC} {test_run.trigger}{' ' * (width - 13 - len(test_run.trigger))}║{Colors.ENDC}")
+        
+        # Format source files nicely
+        if test_run.source_files:
+            source_files_str = ', '.join(test_run.source_files)
+            if len(source_files_str) > width - 20:
+                source_files_str = source_files_str[:width-23] + "..."
+            logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Files:{Colors.ENDC} {source_files_str}{' ' * (width - 11 - len(source_files_str))}║{Colors.ENDC}")
+        else:
+            logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Files:{Colors.ENDC} N/A{' ' * (width - 13)}║{Colors.ENDC}")
+        
+        # Display duration and overall state
+        duration_str = f"{test_run.total_duration:.2f}s"
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Duration:{Colors.ENDC} {duration_str}{' ' * (width - 14 - len(duration_str))}║{Colors.ENDC}")
+        
+        overall_status = "PASSED" if test_run.state == TestState.PASSED else "FAILED"
+        overall_color = Colors.GREEN if test_run.state == TestState.PASSED else Colors.RED
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Status:{Colors.ENDC} {overall_color}{overall_status}{Colors.ENDC}{' ' * (width - 12 - len(overall_status))}║{Colors.ENDC}")
+        
+        # Results by dimension section
+        logger.info(f"{Colors.CYAN}╠{'═' * (width-2)}╣{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}RESULTS BY DIMENSION{Colors.ENDC}{' ' * (width - 22)}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╠{'═' * (width-2)}╣{Colors.ENDC}")
+        
         for dimension, result in test_run.results.items():
-            state_color = Colors.GREEN if result.state == TestState.PASSED else Colors.RED
-            print(f"  {dimension.name}: {state_color}{result.state.value}{Colors.ENDC} ({result.duration:.2f}s)")
+            status_color = Colors.GREEN if result.state == TestState.PASSED else Colors.RED
+            status_symbol = "✓" if result.state == TestState.PASSED else "✗"
+            duration_str = f"({result.duration:.2f}s)"
             
-        print("\nReport saved to:", os.path.join(self.report_dir, f"test_run_{test_run.id}.json"))
-        print()
+            # Calculate padding to align everything nicely
+            dimension_name = f"{dimension.name}:"
+            status_text = f"{status_symbol} {result.state.value}"
+            remaining_space = width - 5 - len(dimension_name) - len(status_text) - len(duration_str)
+            
+            logger.info(f"{Colors.CYAN}║ {Colors.BOLD}{dimension_name}{Colors.ENDC} {status_color}{status_text}{Colors.ENDC} {duration_str}{' ' * remaining_space}║{Colors.ENDC}")
         
+        # Footer with report information
+        report_path = os.path.join(self.report_dir, f"test_run_{test_run.id}.json")
+        report_path = os.path.relpath(report_path, os.getcwd())  # Make path relative for readability
+        
+        logger.info(f"{Colors.CYAN}╠{'═' * (width-2)}╣{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}Report:{Colors.ENDC} {Colors.BLUE}{report_path}{Colors.ENDC}{' ' * (width - 12 - len(report_path))}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╚{'═' * (width-2)}╝{Colors.ENDC}\n")
+    
     def check_gbu2_license_compliance(self) -> Dict[str, Any]:
         """Check repository for GBU2 License compliance."""
         results = self.license_checker.check_uncommitted_files()
@@ -1553,6 +1643,48 @@ class GitManager:
         print(f"{Colors.CYAN}{actual_report['suggestions']['tag']}{Colors.ENDC}")
         
         print(f"\n{Colors.HEADER}{Colors.BOLD}=========================================================={Colors.ENDC}\n")
+
+def log_with_formatting(message, level=logging.INFO, color=None):
+    """Log a message with optional color formatting."""
+    if color:
+        formatted_message = f"{color}{message}{Colors.ENDC}"
+        logger.log(level, formatted_message)
+    else:
+        logger.log(level, message)
+
+def print_section_header(title, width=80):
+    """Print a section header with a border."""
+    border = "═" * width
+    logger.info(f"{Colors.CYAN}{border}{Colors.ENDC}")
+    centered_title = f"  {title}  ".center(width, "═")
+    logger.info(f"{Colors.CYAN}║{Colors.BOLD}{Colors.BLUE}{centered_title}{Colors.ENDC}{Colors.CYAN}║{Colors.ENDC}")
+    logger.info(f"{Colors.CYAN}{border}{Colors.ENDC}")
+
+def print_test_result(test_type, result, duration, report_path=None):
+    """Print a formatted test result."""
+    if result == "PASSED":
+        status_color = Colors.GREEN
+        symbol = "✓"
+    elif result == "FAILED":
+        status_color = Colors.RED
+        symbol = "✗"
+    else:
+        status_color = Colors.YELLOW
+        symbol = "⚠"
+    
+    test_type_formatted = f"{Colors.BOLD}{test_type}{Colors.ENDC}"
+    result_formatted = f"{status_color}{symbol} {result}{Colors.ENDC}"
+    duration_formatted = f"{Colors.YELLOW}{duration:.2f}s{Colors.ENDC}"
+    
+    message = f"\n  {test_type_formatted} tests {result_formatted} in {duration_formatted}"
+    logger.info(message)
+    
+    if report_path:
+        logger.info(f"  {Colors.CYAN}Report saved to: {report_path}{Colors.ENDC}\n")
+
+def print_file_action(action, file_path):
+    """Print a formatted file action message."""
+    logger.info(f"{Colors.BLUE}{action}:{Colors.ENDC} {file_path}")
 
 def main() -> None:
     """Main entry point for the service."""
