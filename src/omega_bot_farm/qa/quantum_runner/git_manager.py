@@ -654,4 +654,264 @@ Suggested Tag:
         print(f"{Colors.CYAN}║ {Colors.GREEN}{suggested_message}{Colors.ENDC}{' ' * (77 - len(suggested_message))}║{Colors.ENDC}")
         
         # Print footer
-        print(f"{Colors.CYAN}╚{'═' * 78}╝{Colors.ENDC}\n") 
+        print(f"{Colors.CYAN}╚{'═' * 78}╝{Colors.ENDC}\n")
+    
+    def batch_commit_files(self, files: List[str], message: Optional[str] = None) -> Tuple[bool, str]:
+        """
+        Add and commit a batch of files in a single operation.
+        
+        Args:
+            files: List of file paths to commit
+            message: Optional commit message (will be auto-generated if None)
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        if not files:
+            return False, "No files specified for commit"
+        
+        # Step 1: Add all the specified files
+        add_cmd = ["add"] + files
+        add_stdout, add_stderr, add_code = self._run_git_command(add_cmd)
+        
+        if add_code != 0:
+            return False, f"Failed to add files: {add_stderr}"
+        
+        # Step 2: Get commit message if not provided
+        if message is None:
+            # Create a quantum enhanced commit message
+            # First check what's actually staged
+            status_stdout, status_stderr, status_code = self._run_git_command(["status", "--porcelain"])
+            if status_code != 0:
+                return False, f"Failed to check git status: {status_stderr}"
+            
+            # Filter to only get staged files
+            staged_files = []
+            for line in status_stdout.strip().split('\n'):
+                if not line:
+                    continue
+                
+                status = line[:2]
+                file_path = line[3:].strip()
+                
+                # Only include staged files
+                if status in ['A ', 'M ', 'D ']:
+                    staged_files.append(file_path)
+            
+            # Generate specialized message for this batch
+            message = self._generate_batch_commit_message(staged_files)
+        
+        # Step 3: Commit the changes
+        commit_cmd = ["commit", "-m", message]
+        commit_stdout, commit_stderr, commit_code = self._run_git_command(commit_cmd)
+        
+        if commit_code != 0:
+            return False, f"Failed to commit files: {commit_stderr}"
+        
+        # Success message with summary
+        summary = f"Successfully committed {len(files)} files"
+        return True, f"{summary}\nCommit message: {message}\n{commit_stdout}"
+    
+    def _generate_batch_commit_message(self, files: List[str]) -> str:
+        """
+        Generate a specialized commit message for a batch of files.
+        More nuanced than the general suggest_commit_message method.
+        
+        Args:
+            files: List of staged file paths
+            
+        Returns:
+            Generated commit message
+        """
+        if not files:
+            return "Empty commit"
+        
+        # Analyze the files
+        file_types = {}
+        directories = {}
+        
+        for file_path in files:
+            # Get extension
+            ext = os.path.splitext(file_path)[1]
+            if ext:
+                if ext not in file_types:
+                    file_types[ext] = 0
+                file_types[ext] += 1
+            
+            # Get directory
+            directory = os.path.dirname(file_path)
+            top_level = directory.split('/')[0] if '/' in directory else directory
+            
+            if top_level not in directories:
+                directories[top_level] = 0
+            directories[top_level] += 1
+        
+        # Sort by count
+        sorted_file_types = sorted(file_types.items(), key=lambda x: x[1], reverse=True)
+        sorted_dirs = sorted(directories.items(), key=lambda x: x[1], reverse=True)
+        
+        # Determine scope from directories
+        scope = sorted_dirs[0][0] if sorted_dirs else "misc"
+        
+        # Determine change type
+        change_type = self._determine_change_type(files)
+        
+        # Generate message based on file analysis
+        if len(files) == 1:
+            # Single file commit
+            file_name = os.path.basename(files[0])
+            message = f"{change_type}({scope}): {self._get_verb(change_type)} {file_name}"
+        elif sorted_file_types:
+            # Multiple files of similar type
+            main_ext = sorted_file_types[0][0][1:] if sorted_file_types[0][0] else "files"
+            message = f"{change_type}({scope}): {self._get_verb(change_type)} {main_ext} files ({len(files)} files)"
+        else:
+            # Mixed file types
+            message = f"{change_type}({scope}): {self._get_verb(change_type)} multiple files ({len(files)} files)"
+        
+        # Add specific details for certain types
+        if change_type == "docs" and len(files) <= 3:
+            doc_names = [os.path.basename(f) for f in files]
+            message = f"{change_type}({scope}): Update documentation: {', '.join(doc_names)}"
+        
+        elif change_type == "test" and len(files) <= 5:
+            test_components = set()
+            for file in files:
+                # Extract component name from test file (e.g., test_component_name.py -> component_name)
+                base = os.path.basename(file)
+                if base.startswith("test_"):
+                    parts = base[5:].split(".")  # Remove "test_" and split by "."
+                    if parts:
+                        test_components.add(parts[0])
+            
+            if test_components:
+                message = f"{change_type}({scope}): Add tests for {', '.join(test_components)}"
+        
+        # Apply quantum enhancements for version tag if needed
+        if "version" in ' '.join(files).lower() or "tag" in ' '.join(files).lower():
+            message = f"{change_type}({scope}): Bump version to {self.suggest_git_tag()[1:]}"
+        
+        # Add project signature for quantum coherence
+        import datetime
+        now = datetime.datetime.now()
+        date_code = now.strftime("%Y%m%d")
+        
+        # Add hashtags in a more subtle way for machine-readable indexing
+        if "5D" in ' '.join(files) or "quantum" in ' '.join(files).lower():
+            message += f" [quantum-{date_code}]"
+        elif "test" in ' '.join(files).lower():
+            message += f" [test-{date_code}]"
+        
+        return message
+    
+    def _determine_change_type(self, files: List[str]) -> str:
+        """Determine the conventional commit type based on file analysis."""
+        # Check for tests
+        test_files = [f for f in files if 'test' in f.lower()]
+        if len(test_files) > len(files) / 2:
+            return "test"
+        
+        # Check for docs
+        doc_files = [f for f in files if f.endswith(('.md', '.rst', '.txt')) or 'doc' in f.lower()]
+        if len(doc_files) > len(files) / 2:
+            return "docs"
+        
+        # Check for config files
+        config_files = [f for f in files if f.endswith(('.json', '.yml', '.yaml', '.ini', '.toml'))]
+        if len(config_files) > len(files) / 2:
+            return "config"
+        
+        # Check for feature files
+        feature_patterns = ['feature', 'feat', 'add', 'new', 'implement']
+        feature_files = [f for f in files if any(p in f.lower() for p in feature_patterns)]
+        if len(feature_files) > len(files) / 3:
+            return "feat"
+        
+        # Check for fix files
+        fix_patterns = ['fix', 'bug', 'issue', 'solve', 'resolve', 'correct']
+        fix_files = [f for f in files if any(p in f.lower() for p in fix_patterns)]
+        if len(fix_files) > len(files) / 3:
+            return "fix"
+        
+        # Default to feat for new files, fix for modified files
+        if len(files) < 5:
+            # For small changes, lean toward feature
+            return "feat"
+        else:
+            # For larger changes, lean toward refactor
+            return "refactor"
+    
+    def _get_verb(self, change_type: str) -> str:
+        """Get appropriate verb for the commit message based on change type."""
+        if change_type == "feat":
+            return "Add"
+        elif change_type == "fix":
+            return "Fix"
+        elif change_type == "docs":
+            return "Update"
+        elif change_type == "test":
+            return "Add tests for"
+        elif change_type == "config":
+            return "Update configuration for"
+        elif change_type == "refactor":
+            return "Refactor"
+        else:
+            return "Update"
+    
+    def quantum_commit_all(self) -> Tuple[bool, str]:
+        """
+        Special method to commit all uncommitted files with quantum-enhanced commit message.
+        Automatically groups files by type and creates appropriate commit messages.
+        
+        Returns:
+            Tuple of (success, message)
+        """
+        # Get all uncommitted files
+        uncommitted = self.get_uncommitted_files()
+        
+        if not uncommitted['all']:
+            return False, "No uncommitted changes found"
+        
+        # Add all changes
+        add_stdout, add_stderr, add_code = self._run_git_command(["add", "--all"])
+        if add_code != 0:
+            return False, f"Failed to add all files: {add_stderr}"
+        
+        # Get the quantum enhanced commit message
+        # Generate commitment quantum signature
+        import datetime
+        import hashlib
+        
+        # Create a unique quantum signature for this commit
+        now = datetime.datetime.now()
+        time_sig = now.strftime("%Y%m%d%H%M%S")
+        file_hash = hashlib.md5(str(uncommitted['all']).encode()).hexdigest()[:8]
+        quantum_sig = f"q{file_hash}{time_sig[-6:]}"
+        
+        # Get a more reliable commit message from our message generator
+        try:
+            # Try to get enhanced analysis first
+            enhanced_analysis = self.get_enhanced_commit_analysis()
+            if "Commit Message:" in enhanced_analysis:
+                message = enhanced_analysis.split("Commit Message:")[1].strip().split("\n")[0]
+                message = message.replace(Colors.GREEN, "").replace(Colors.ENDC, "").strip()
+            else:
+                # Fall back to simple commit message
+                message = self.suggest_commit_message()
+        except Exception as e:
+            # If anything fails, use the suggest_commit_message as fallback
+            logger.warning(f"Error getting enhanced commit message: {e}")
+            message = self.suggest_commit_message()
+        
+        # Apply quantum signature to the message 
+        final_message = f"{message} [{quantum_sig}]"
+        
+        # Commit the changes
+        commit_cmd = ["commit", "-m", final_message]
+        commit_stdout, commit_stderr, commit_code = self._run_git_command(commit_cmd)
+        
+        if commit_code != 0:
+            return False, f"Failed to commit files: {commit_stderr}"
+        
+        # Success message
+        return True, f"Successfully committed {len(uncommitted['all'])} files with quantum signature\nCommit message: {final_message}\n{commit_stdout}" 

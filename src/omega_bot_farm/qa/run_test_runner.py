@@ -138,6 +138,13 @@ def main():
         help="Enable all features including Kubernetes Matrix surveillance"
     )
     
+    # Add a flag for visual enhancements
+    parser.add_argument(
+        "--fancy-visuals",
+        action="store_true",
+        help="Enable fancy progress bars, table verification, and enhanced logging (automatically included in OMEGA mode)"
+    )
+    
     # Interval configuration
     parser.add_argument(
         "--uncommitted-interval",
@@ -207,9 +214,10 @@ def main():
         help="Display quantum celebration sequence"
     )
     
+    # Parse args and setup environment
     args = parser.parse_args()
     
-    # Build configuration from arguments
+    # Configuration based on arguments
     config = {
         'report_dir': args.report_dir,
         'run_initial_tests': args.run_tests is not None,
@@ -222,7 +230,12 @@ def main():
         'new_file_scan_interval': args.new_file_scan_interval,
         'k8s_matrix_mode': args.k8s_matrix or args.OMEGA_K8s,
         'k8s_namespace': args.k8s_namespace,
-        'k8s_report_interval': args.k8s_report_interval
+        'k8s_report_interval': args.k8s_report_interval,
+        'fancy_progress_bars': args.fancy_visuals or args.OMEGA or args.OMEGA_K8s,
+        'quantum_table_verification': args.OMEGA or args.OMEGA_K8s,
+        'enhanced_logging': args.OMEGA or args.OMEGA_K8s,
+        'log_level': logging.INFO,
+        'schedule': {}
     }
     
     # If celebration is requested or in OMEGA mode, show the celebration
@@ -231,6 +244,36 @@ def main():
             # Try to run the Matrix rain animation
             from quantum_runner.utils import display_matrix_rain_and_logo
             display_matrix_rain_and_logo()
+            
+            # In OMEGA mode, activate enhanced visual features
+            if args.OMEGA or args.OMEGA_K8s:
+                try:
+                    from quantum_runner.utils import (
+                        beautify_log_header, 
+                        print_progress_bar_demo,
+                        create_table_safe
+                    )
+                    
+                    # Activate beautified log headers
+                    beautify_log_header()
+                    
+                    # Let the user know about the enhanced features
+                    logger.info(f"{Colors.CYAN}Activating quantum-enhanced progress bars and table verification{Colors.ENDC}")
+                    
+                    # Display brief demo of progress bar styles if asked with --celebration
+                    if args.celebration:
+                        headers = ["Feature", "Status", "Description"]
+                        rows = [
+                            ["Progress Bars", f"{Colors.GREEN}ACTIVE{Colors.ENDC}", "Multiple styles with animations"],
+                            ["Table Verification", f"{Colors.GREEN}ACTIVE{Colors.ENDC}", "Auto-repair for broken tables"],
+                            ["Log Beautification", f"{Colors.GREEN}ACTIVE{Colors.ENDC}", "Enhanced logging format"],
+                            ["Matrix Animation", f"{Colors.GREEN}ACTIVE{Colors.ENDC}", "Digital rain visualization"]
+                        ]
+                        # Show a fancy table with the enabled features
+                        fancy_table = create_table_safe(headers, rows, width=80, style='fancy')
+                        print("\n" + fancy_table + "\n")
+                except ImportError:
+                    logger.warning("Could not activate all quantum visual enhancements")
         except ImportError:
             try:
                 # Fall back to just the celebration sequence

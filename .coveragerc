@@ -49,10 +49,11 @@ fail_under = 80
 [coverage:html]
 directory = htmlcov
 title = AIXBT Divine Monitor Coverage Report
-extra_css =
-    .highlight { background-color: #f8f8f8; }
-    .missing { background-color: #ffdddd; }
-    .covered { background-color: #ddffdd; }
+# Comment out the problematic extra_css lines
+# extra_css =
+#     .highlight { background-color: #f8f8f8; }
+#     .missing { background-color: #ffdddd; }
+#     .covered { background-color: #ddffdd; }
 
 [coverage:xml]
 output = coverage.xml

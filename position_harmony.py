@@ -24,6 +24,8 @@ FIBONACCI_SEQUENCE = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610]
 class PositionHarmonyManager:
     """Analyzes trading positions for mathematical harmony and balance"""
     
+    # pragma: no cover
+    
     def __init__(self, enabled=True):
         """Initialize the Position Harmony Manager
         

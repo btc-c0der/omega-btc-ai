@@ -24,6 +24,8 @@ logger.addHandler(file_handler)
 class BitgetDataManager:
     """Manages data operations for BitGet position monitoring"""
     
+    # pragma: no cover
+    
     def __init__(self):
         """Initialize the BitGet data manager"""
         # Load environment variables

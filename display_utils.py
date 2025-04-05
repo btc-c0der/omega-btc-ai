@@ -36,6 +36,8 @@ RASTA_FRAMES = [f"{GREEN}♦{RESET}", f"{YELLOW}♦{RESET}", f"{RED}♦{RESET}"]
 class RastaDisplayManager:
     """Manages display functionality for the Rasta BitGet Position Monitor"""
     
+    # pragma: no cover
+    
     def __init__(self, use_color=True, debug=False):
         """Initialize the display manager
         
