@@ -118,68 +118,43 @@ def run_matrix_animation_in_thread():
     animation_thread.start()
     return animation_thread
 
-def print_section_header(title, width=80):
-    """Print a section header with a cyberpunk-themed border."""
-    # Create a glowing cyberpunk border with random colors
-    color_choices = [Colors.PURPLE, Colors.CYAN, Colors.BLUE]
-    border_color = random.choice(color_choices)
+def print_section_header(title):
+    """Print a section header."""
+    table_width = 80  # Fixed table width for consistency
     
-    # Create the border string
-    border = "═" * width
+    print()
+    print(f"┌{'─' * (table_width - 2)}┐")
     
-    # Log the border with decorative elements
-    logger.info(f"{border_color}{'═' * width}{Colors.ENDC}")
+    # Calculate padding for title to center it
+    title_padding = max(0, (table_width - 2 - len(title)) // 2)
+    print(f"│{' ' * title_padding}{title}{' ' * (table_width - 2 - len(title) - title_padding)}│")
     
-    # Center the title with some decorative elements
-    title_length = len(title)
-    padding = (width - title_length - 8) // 2  # 8 for the decorative elements
-    left_padding = "═" * padding
-    right_padding = "═" * (width - padding - title_length - 8)
-    
-    # Format the title with decorative elements
-    formatted_title = f"║{left_padding}  {Colors.BOLD}{Colors.CYAN}{title}{Colors.ENDC}{border_color}  {right_padding}║"
-    logger.info(f"{border_color}{formatted_title}{Colors.ENDC}")
-    
-    # Log the bottom border
-    logger.info(f"{border_color}{'═' * width}{Colors.ENDC}")
+    print(f"└{'─' * (table_width - 2)}┘")
+    print()
 
 def print_quantum_divider():
     """Print a quantum-themed divider."""
     divider = f"{Colors.PURPLE}{'═' * 80}{Colors.ENDC}"
     logger.info(divider)
 
-def print_enhanced_header(title, subtitle=None, width=80):
-    """Print an enhanced header with cyberpunk styling."""
-    # Choose a random accent color
-    accent_colors = [Colors.CYAN, Colors.PURPLE, Colors.BLUE]
-    accent = random.choice(accent_colors)
+def print_enhanced_header(title, subtitle=None):
+    """Print an enhanced header with a title and optional subtitle."""
+    table_width = 80  # Fixed table width for consistency
     
-    # Create top border with symbols
-    top_border = f"{accent}╔{'═' * (width-2)}╗{Colors.ENDC}"
-    logger.info(top_border)
+    print()
+    print(f"╔{'═' * (table_width - 2)}╗")
     
-    # Center the title
-    title_length = len(title)
-    padding = (width - title_length - 4) // 2  # 4 for spacing and ║ characters
-    left_padding = " " * padding
-    right_padding = " " * (width - padding - title_length - 4)
+    # Calculate padding for title to center it
+    title_padding = max(0, (table_width - 2 - len(title)) // 2)
+    print(f"║{' ' * title_padding}{title}{' ' * (table_width - 2 - len(title) - title_padding)}║")
     
-    # Format the title line
-    title_line = f"{accent}║{left_padding}{Colors.BOLD}{Colors.CYAN}{title}{Colors.ENDC}{accent}{right_padding}║{Colors.ENDC}"
-    logger.info(title_line)
-    
-    # Add subtitle if provided
     if subtitle:
-        subtitle_length = len(subtitle)
-        sub_padding = (width - subtitle_length - 4) // 2
-        sub_left = " " * sub_padding
-        sub_right = " " * (width - sub_padding - subtitle_length - 4)
-        subtitle_line = f"{accent}║{sub_left}{Colors.YELLOW}{subtitle}{Colors.ENDC}{accent}{sub_right}║{Colors.ENDC}"
-        logger.info(subtitle_line)
+        # Calculate padding for subtitle to center it
+        subtitle_padding = max(0, (table_width - 2 - len(subtitle)) // 2)
+        print(f"║{' ' * subtitle_padding}{subtitle}{' ' * (table_width - 2 - len(subtitle) - subtitle_padding)}║")
     
-    # Create bottom border
-    bottom_border = f"{accent}╚{'═' * (width-2)}╝{Colors.ENDC}"
-    logger.info(bottom_border)
+    print(f"╚{'═' * (table_width - 2)}╝")
+    print()
 
 def print_celebration_message():
     """Print a celebration message with colorful ASCII art."""

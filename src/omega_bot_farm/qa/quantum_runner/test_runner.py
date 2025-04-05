@@ -125,23 +125,45 @@ class TestRunner:
         # Update the overall state
         test_run.update_state()
         
-        # Results summary section
-        logger.info(f"{Colors.CYAN}╔{'═' * 78}╗{Colors.ENDC}")
-        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}TEST RESULTS SUMMARY{Colors.ENDC}{Colors.CYAN}{' ' * 60}║{Colors.ENDC}")
-        logger.info(f"{Colors.CYAN}╠{'═' * 78}╣{Colors.ENDC}")
+        # Results summary section - Use fixed width for consistent table layout
+        table_width = 80
+        
+        logger.info(f"\n{Colors.CYAN}╔{'═' * (table_width - 2)}╗{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}TEST RESULTS SUMMARY{Colors.ENDC}{Colors.CYAN}{' ' * (table_width - 22)}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╠{'═' * (table_width - 2)}╣{Colors.ENDC}")
         
         for dimension, result in test_run.results.items():
             status_color = Colors.GREEN if result.state == TestState.PASSED else Colors.RED
             status_symbol = "✓" if result.state == TestState.PASSED else "✗"
-            logger.info(f"{Colors.CYAN}║ {Colors.BOLD}{dimension.name}:{Colors.ENDC} {status_color}{status_symbol} {result.state.value}{Colors.ENDC} ({result.duration:.2f}s){' ' * (57 - len(dimension.name) - len(result.state.value) - len(str(round(result.duration, 2))))}║")
+            
+            # Create a consistent format string for each test result
+            name_part = f"{Colors.BOLD}{dimension.name}:{Colors.ENDC}"
+            status_part = f"{status_color}{status_symbol} {result.state.value}{Colors.ENDC}"
+            duration_part = f"({result.duration:.2f}s)"
+            
+            # Calculate remaining space for padding
+            content_length = len(dimension.name) + len(result.state.value) + len(str(round(result.duration, 2))) + 5  # 5 for symbols and spaces
+            padding = table_width - content_length - 4  # 4 for the ║ at start and end + spacing
+            
+            logger.info(f"{Colors.CYAN}║ {name_part} {status_part} {duration_part}{' ' * padding}║{Colors.ENDC}")
         
         overall_status = "PASSED" if test_run.state == TestState.PASSED else "FAILED"
         overall_color = Colors.GREEN if test_run.state == TestState.PASSED else Colors.RED
         overall_symbol = "✓" if test_run.state == TestState.PASSED else "✗"
         
-        logger.info(f"{Colors.CYAN}╠{'═' * 78}╣{Colors.ENDC}")
-        logger.info(f"{Colors.CYAN}║ {Colors.BOLD}OVERALL:{Colors.ENDC} {overall_color}{overall_symbol} {overall_status}{Colors.ENDC} (Total: {test_run.total_duration:.2f}s){' ' * (56 - len(overall_status) - len(str(round(test_run.total_duration, 2))))}║")
-        logger.info(f"{Colors.CYAN}╚{'═' * 78}╝{Colors.ENDC}\n")
+        logger.info(f"{Colors.CYAN}╠{'═' * (table_width - 2)}╣{Colors.ENDC}")
+        
+        # Create a consistent format for the overall result
+        overall_part = f"{Colors.BOLD}OVERALL:{Colors.ENDC}"
+        overall_status_part = f"{overall_color}{overall_symbol} {overall_status}{Colors.ENDC}"
+        overall_duration_part = f"(Total: {test_run.total_duration:.2f}s)"
+        
+        # Calculate padding needed
+        overall_content_length = 8 + len(overall_status) + len(str(round(test_run.total_duration, 2))) + 10  # 10 for symbols and spaces and "Total: "
+        overall_padding = table_width - overall_content_length - 4  # 4 for the ║ at start and end + spacing
+        
+        logger.info(f"{Colors.CYAN}║ {overall_part} {overall_status_part} {overall_duration_part}{' ' * overall_padding}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╚{'═' * (table_width - 2)}╝{Colors.ENDC}\n")
         
         # Save test run results
         self.save_test_run(test_run)
@@ -163,8 +185,16 @@ class TestRunner:
         with open(latest_filepath, "w") as f:
             json.dump(test_run.to_dict(), f, indent=2)
             
-        # Print with better formatting
+        # Print with better formatting using the same table width
+        table_width = 80
         report_path = os.path.relpath(filepath, os.getcwd())
-        logger.info(f"\n{Colors.CYAN}╔{'═' * 78}╗{Colors.ENDC}")
-        logger.info(f"{Colors.CYAN}║{Colors.BOLD} Report saved to:{Colors.ENDC} {Colors.BLUE}{report_path}{Colors.ENDC}{' ' * (55 - len(report_path))}{Colors.CYAN}║{Colors.ENDC}")
-        logger.info(f"{Colors.CYAN}╚{'═' * 78}╝{Colors.ENDC}\n") 
+        
+        logger.info(f"\n{Colors.CYAN}╔{'═' * (table_width - 2)}╗{Colors.ENDC}")
+        
+        # Calculate padding needed for the report path
+        report_label = " Report saved to: "
+        content_length = len(report_label) + len(report_path)
+        padding = table_width - content_length - 2  # 2 for the ║ at start and end
+        
+        logger.info(f"{Colors.CYAN}║{Colors.BOLD}{report_label}{Colors.ENDC}{Colors.BLUE}{report_path}{Colors.ENDC}{' ' * padding}║{Colors.ENDC}")
+        logger.info(f"{Colors.CYAN}╚{'═' * (table_width - 2)}╝{Colors.ENDC}\n") 

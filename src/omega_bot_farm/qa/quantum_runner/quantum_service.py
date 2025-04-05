@@ -290,7 +290,30 @@ class QuantumTestService:
             # Run all dimensions
             dimensions = [d.name for d in TestDimension]
         
-        print_enhanced_header(f"RUNNING TESTS IN DIMENSIONS", f"{', '.join(dimensions)}")
+        # Use consistent table width
+        table_width = 80
+        subtitle = f"{', '.join(dimensions)}"
+        
+        # Print header with consistent width
+        print("\n")
+        print(f"╔{'═' * (table_width - 2)}╗")
+        
+        # Center the title
+        title = "RUNNING TESTS IN DIMENSIONS"
+        title_padding = max(0, (table_width - 2 - len(title)) // 2)
+        print(f"║{' ' * title_padding}{Colors.CYAN}{title}{Colors.ENDC}{' ' * (table_width - 2 - len(title) - title_padding)}║")
+        
+        # Center the subtitle if it's not too long, otherwise align left with padding
+        if len(subtitle) <= table_width - 10:  # Leave some space for aesthetics
+            subtitle_padding = max(0, (table_width - 2 - len(subtitle)) // 2)
+            print(f"║{' ' * subtitle_padding}{Colors.GREEN}{subtitle}{Colors.ENDC}{' ' * (table_width - 2 - len(subtitle) - subtitle_padding)}║")
+        else:
+            # If subtitle is too long, truncate with ellipsis
+            truncated = subtitle[:table_width - 15] + "..."
+            print(f"║ {Colors.GREEN}{truncated}{Colors.ENDC}{' ' * (table_width - 3 - len(truncated))}║")
+            
+        print(f"╚{'═' * (table_width - 2)}╝")
+        print()
         
         for dimension in dimensions:
             try:
@@ -431,7 +454,20 @@ class QuantumTestService:
                         # Convert TestDimension enum instances to strings
                         dimension_names = [dim.name for dim in data]
                         
-                        print_enhanced_header("FILE CHANGE DETECTED", os.path.basename(source))
+                        # Use consistent table width
+                        table_width = 80
+                        filename = os.path.basename(source)
+                        
+                        # Print header with consistent width
+                        print("\n")
+                        print(f"┌{'─' * (table_width - 2)}┐")
+                        
+                        # Center the title
+                        title = f"FILE CHANGE DETECTED: {filename}"
+                        title_padding = max(0, (table_width - 2 - len(title)) // 2)
+                        print(f"│{' ' * title_padding}{Colors.CYAN}{title}{Colors.ENDC}{' ' * (table_width - 2 - len(title) - title_padding)}│")
+                        print(f"└{'─' * (table_width - 2)}┘")
+                        
                         log_with_formatting(f"Path: {source}", logging.INFO, Colors.CYAN)
                         log_with_formatting(f"Running tests: {', '.join(dimension_names)}", 
                                         logging.INFO, Colors.GREEN)
