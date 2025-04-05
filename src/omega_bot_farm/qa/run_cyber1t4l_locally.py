@@ -149,13 +149,60 @@ def parse_args():
         help="Coverage threshold percentage (default: 80.0)"
     )
     
+    parser.add_argument(
+        "--stop-if-running",
+        action="store_true",
+        help="Stop any currently running instance before starting"
+    )
+    
     return parser.parse_args()
+
+def stop_running_instance():
+    """Stop any currently running instance of CyBer1t4L."""
+    print(f"\n{Colors.NEON_YELLOW}Checking for running CyBer1t4L instances...{Colors.RESET}")
+    
+    # Look for process running the module
+    try:
+        import psutil
+        current_pid = os.getpid()
+        count = 0
+        
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            if proc.pid == current_pid:
+                continue
+                
+            cmdline = proc.info.get('cmdline', [])
+            if cmdline and 'python' in cmdline[0].lower() and 'cyber1t4l' in ' '.join(cmdline).lower():
+                print(f"{Colors.NEON_RED}Found running instance: PID {proc.pid}{Colors.RESET}")
+                try:
+                    proc.terminate()
+                    print(f"{Colors.NEON_GREEN}Successfully terminated process {proc.pid}{Colors.RESET}")
+                    count += 1
+                except Exception as e:
+                    print(f"{Colors.NEON_RED}Failed to terminate process {proc.pid}: {e}{Colors.RESET}")
+        
+        if count == 0:
+            print(f"{Colors.NEON_GREEN}No running instances found.{Colors.RESET}")
+        else:
+            print(f"{Colors.NEON_GREEN}Terminated {count} running instances.{Colors.RESET}")
+            # Give processes time to shut down
+            time.sleep(2)
+            
+    except ImportError:
+        print(f"{Colors.NEON_YELLOW}psutil not installed. Cannot check for running instances.{Colors.RESET}")
+        print(f"{Colors.NEON_YELLOW}Install with: pip install psutil{Colors.RESET}")
+    except Exception as e:
+        print(f"{Colors.NEON_RED}Error checking for running instances: {e}{Colors.RESET}")
 
 def main():
     """Main function to run the CyBer1t4L QA Bot locally."""
     print(f"\n{Colors.NEON_GREEN}Starting CyBer1t4L QA Bot Local Runner{Colors.RESET}\n")
     
     args = parse_args()
+    
+    if args.stop_if_running:
+        stop_running_instance()
+    
     setup_local_directories()
     setup_environment()
     
