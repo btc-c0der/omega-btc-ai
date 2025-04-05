@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.208" timestamp="2025-04-05T10:02:20.681570" hostname="Faustos-MacBook-Pro.local"><testcase classname="" name="omega_bot_farm.qa.tests.test_quantum_ai_performance" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/test_quantum_ai_performance.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/omega_bot_farm/qa/tests/test_quantum_ai_performance.py:31: in &lt;module&gt;
+    import psutil
+E   ModuleNotFoundError: No module named 'psutil'</error></testcase></testsuite></testsuites>

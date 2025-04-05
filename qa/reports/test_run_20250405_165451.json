@@ -1,0 +1,28 @@
+{
+  "id": "20250405_165451",
+  "timestamp": "2025-04-05T16:54:51.312795",
+  "trigger": "scheduled",
+  "source_files": [],
+  "results": {
+    "SECURITY": {
+      "dimension": "SECURITY",
+      "state": "FAILED",
+      "duration": 0.827172040939331,
+      "timestamp": "2025-04-05T16:54:52.140584",
+      "details": {
+        "output": "",
+        "error": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/.venv/lib/python3.13/site-packages/_pytest/config/__init__.py:328: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.\nPlugin: helpconfig, Hook: pytest_cmdline_parse\nUsageError: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --security-audit\n  inifile: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/pytest.ini\n  rootdir: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests\nFor more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning\n  config = pluginmanager.hook.pytest_cmdline_parse(\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --security-audit\n  inifile: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/pytest.ini\n  rootdir: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests\n\n",
+        "returncode": 4,
+        "command": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/.venv/bin/python3 -m pytest /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/security -v --junit-xml=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/qa/reports/20250405_165451/security_report.xml --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/qa/reports/20250405_165451/security_report.html --self-contained-html --security-audit",
+        "reports": {
+          "xml": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/qa/reports/20250405_165451/security_report.xml",
+          "html": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/qa/reports/20250405_165451/security_report.html",
+          "json": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/qa/reports/20250405_165451/security_report.json"
+        }
+      },
+      "entangled_dimensions": []
+    }
+  },
+  "state": "FAILED",
+  "total_duration": 0.827172040939331
+}
