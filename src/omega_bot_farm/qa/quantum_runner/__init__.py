@@ -29,5 +29,16 @@ from .git_manager import GitManager
 from .k8s_surveillance import K8sMatrixSurveillance
 from .quantum_service import QuantumTestService
 
+# Test implementation classes
+from .test_implementations import (
+    AbstractTestImplementation,
+    UnitTestImplementation,
+    IntegrationTestImplementation,
+    PerformanceTestImplementation,
+    SecurityTestImplementation,
+    ComplianceTestImplementation,
+    get_test_implementation
+)
+
 # Helper functions
 from .utils import log_with_formatting, print_section_header, print_test_result, print_file_action 

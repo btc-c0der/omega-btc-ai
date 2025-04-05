@@ -15,6 +15,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple, Union
 from .types import Colors, TestDimension, TestState
 from .data_models import TestResult, TestRun
 from .utils import log_with_formatting, print_section_header, print_test_result, print_file_action
+from .test_implementations import get_test_implementation, AbstractTestImplementation
 
 logger = logging.getLogger("0M3G4_B0TS_QA_AUT0_TEST_SUITES_RuNn3R_5D")
 
@@ -29,38 +30,18 @@ class TestRunner:
         # Create directory for reports
         os.makedirs(self.report_dir, exist_ok=True)
         
-        # Determine Python executable to use
-        if os.path.exists(os.path.join(self.project_root, ".venv/bin/python")):
-            self.python_path = os.path.join(self.project_root, ".venv/bin/python")
-        elif os.path.exists(os.path.join(self.project_root, "venv/bin/python")):
-            self.python_path = os.path.join(self.project_root, "venv/bin/python")
-        else:
-            self.python_path = sys.executable
-            
-        # Map test dimensions to test scripts
-        self.test_scripts = self._discover_test_scripts()
+        # Cache for test implementations
+        self._test_implementations = {}
         
-    def _discover_test_scripts(self) -> Dict[TestDimension, str]:
-        """Discover test scripts in the project."""
-        # Define paths for test scripts
-        unit_script = os.path.join(self.project_root, "src/omega_bot_farm/qa/tests/test_quantum_ai_integration.py")
-        integration_script = os.path.join(self.project_root, "src/omega_bot_farm/qa/tests/test_quantum_ai_integration.py")
-        performance_script = os.path.join(self.project_root, "src/omega_bot_farm/qa/tests/test_quantum_ai_performance.py")
-        
-        # Return mapping
-        return {
-            TestDimension.UNIT: unit_script,
-            TestDimension.INTEGRATION: integration_script,
-            TestDimension.PERFORMANCE: performance_script
-        }
-    
-    def _get_test_script_for_dimension(self, dimension: TestDimension) -> Optional[str]:
-        """Get the test script for a dimension."""
-        return self.test_scripts.get(dimension)
-        
-    def _create_test_filter_args(self, files_changed: List[str]) -> List[str]:
-        """Create pytest filter arguments based on changed files."""
-        return []  # Placeholder for more sophisticated filtering
+    def _get_test_implementation(self, dimension: TestDimension) -> AbstractTestImplementation:
+        """Get the test implementation for a dimension, with caching."""
+        if dimension not in self._test_implementations:
+            self._test_implementations[dimension] = get_test_implementation(
+                dimension, 
+                self.project_root, 
+                self.report_dir
+            )
+        return self._test_implementations[dimension]
     
     def run_tests(self, dimensions: List[TestDimension], source_files: Optional[List[str]] = None) -> TestRun:
         """Run tests in the specified dimensions."""
@@ -82,123 +63,52 @@ class TestRunner:
         logger.info(f"{Colors.CYAN}║{' ' * padding}{Colors.BOLD}{Colors.BLUE}{title}{Colors.ENDC}{Colors.CYAN}{' ' * (padding + (header_width - 4 - len(title)) % 2)}║{Colors.ENDC}")
         logger.info(f"{Colors.CYAN}╚{'═' * (header_width-2)}╝{Colors.ENDC}\n")
         
-        # Set up for performance tests
-        if TestDimension.PERFORMANCE in dimensions:
-            os.environ["RUN_PERFORMANCE_TESTS"] = "1"
-            
         # Run tests for each dimension
         for dimension in dimensions:
-            if dimension not in self.test_scripts:
-                logger.warning(f"{Colors.YELLOW}⚠ No test script configured for {dimension.name}{Colors.ENDC}")
-                continue
-                
-            script = self.test_scripts[dimension]
-            if not os.path.exists(script):
-                logger.warning(f"{Colors.YELLOW}⚠ Test script not found: {script}{Colors.ENDC}")
-                continue
-                
-            # Create directory for test run reports
-            run_report_dir = os.path.join(self.report_dir, run_id)
-            os.makedirs(run_report_dir, exist_ok=True)
-            
-            # Set up result file paths
-            xml_report = os.path.join(run_report_dir, f"{dimension.name.lower()}_report.xml")
-            html_report = os.path.join(run_report_dir, f"{dimension.name.lower()}_report.html")
-            json_report = os.path.join(run_report_dir, f"{dimension.name.lower()}_report.json")
-            
-            # Create the command
-            cmd = [
-                sys.executable,
-                "-m",
-                "pytest",
-                script,
-                "-v",
-                f"--junit-xml={xml_report}",
-                f"--html={html_report}",
-                "--self-contained-html"
-            ]
-            
-            # Dimension-specific section header
-            dim_color = {
-                TestDimension.UNIT: Colors.GREEN,
-                TestDimension.INTEGRATION: Colors.BLUE,
-                TestDimension.PERFORMANCE: Colors.YELLOW,
-                TestDimension.SECURITY: Colors.RED,
-                TestDimension.COMPLIANCE: Colors.PURPLE
-            }.get(dimension, Colors.CYAN)
-            
-            logger.info(f"{dim_color}┌{'─' * 78}┐{Colors.ENDC}")
-            logger.info(f"{dim_color}│ {Colors.BOLD}Running {dimension.name} tests{Colors.ENDC}{dim_color}{' ' * (62 - len(dimension.name))}│{Colors.ENDC}")
-            logger.info(f"{dim_color}└{'─' * 78}┘{Colors.ENDC}")
-            
-            cmd_str = " ".join(cmd)
-            logger.info(f"{Colors.YELLOW}Command:{Colors.ENDC} {cmd_str}")
-            
-            # Mark this dimension as running
-            test_run.results[dimension] = TestResult(
-                dimension=dimension,
-                state=TestState.RUNNING
-            )
-            test_run.update_state()
-            
-            # Run the tests
-            start_time = time.time()
             try:
-                result = subprocess.run(
-                    cmd, 
-                    capture_output=True, 
-                    text=True, 
-                    cwd=self.project_root
-                )
+                # Get the implementation for this dimension
+                implementation = self._get_test_implementation(dimension)
                 
-                end_time = time.time()
-                duration = end_time - start_time
+                # Dimension-specific section header
+                dim_color = {
+                    TestDimension.UNIT: Colors.GREEN,
+                    TestDimension.INTEGRATION: Colors.BLUE,
+                    TestDimension.PERFORMANCE: Colors.YELLOW,
+                    TestDimension.SECURITY: Colors.RED,
+                    TestDimension.COMPLIANCE: Colors.PURPLE
+                }.get(dimension, Colors.CYAN)
                 
-                # Parse the output
-                output = result.stdout
-                error = result.stderr
+                logger.info(f"{dim_color}┌{'─' * 78}┐{Colors.ENDC}")
+                logger.info(f"{dim_color}│ {Colors.BOLD}Running {dimension.name} tests{Colors.ENDC}{dim_color}{' ' * (62 - len(dimension.name))}│{Colors.ENDC}")
+                logger.info(f"{dim_color}└{'─' * 78}┘{Colors.ENDC}")
                 
-                # Determine test state
-                if result.returncode == 0:
-                    state = TestState.PASSED
-                else:
-                    state = TestState.FAILED
-                
-                # Save detailed results
-                details = {
-                    "output": output,
-                    "error": error,
-                    "returncode": result.returncode,
-                    "command": cmd_str,
-                    "reports": {
-                        "xml": xml_report,
-                        "html": html_report,
-                        "json": json_report
-                    }
-                }
-                
-                # Update test result
+                # Mark this dimension as running
                 test_run.results[dimension] = TestResult(
                     dimension=dimension,
-                    state=state,
-                    duration=duration,
-                    details=details
+                    state=TestState.RUNNING
                 )
+                test_run.update_state()
+                
+                # Run the tests for this dimension
+                result = implementation.run_tests(source_files)
+                
+                # Update the test run with the result
+                test_run.results[dimension] = result
                 
                 # Print results with improved formatting
-                status_symbol = "✓" if state == TestState.PASSED else "✗"
-                status_color = Colors.GREEN if state == TestState.PASSED else Colors.RED
+                status_symbol = "✓" if result.state == TestState.PASSED else "✗"
+                status_color = Colors.GREEN if result.state == TestState.PASSED else Colors.RED
                 
                 # Result box
                 logger.info(f"\n{status_color}┌{'─' * 78}┐{Colors.ENDC}")
-                logger.info(f"{status_color}│ {Colors.BOLD}{status_symbol} {dimension.name} tests {state.value}{Colors.ENDC}{status_color}{' ' * (66 - len(dimension.name) - len(state.value))}│{Colors.ENDC}")
-                logger.info(f"{status_color}│ {Colors.BOLD}Duration:{Colors.ENDC} {duration:.2f}s{' ' * (68 - len(str(round(duration, 2))))}│{Colors.ENDC}")
+                logger.info(f"{status_color}│ {Colors.BOLD}{status_symbol} {dimension.name} tests {result.state.value}{Colors.ENDC}{status_color}{' ' * (66 - len(dimension.name) - len(result.state.value))}│{Colors.ENDC}")
+                logger.info(f"{status_color}│ {Colors.BOLD}Duration:{Colors.ENDC} {result.duration:.2f}s{' ' * (68 - len(str(round(result.duration, 2))))}│{Colors.ENDC}")
                 logger.info(f"{status_color}└{'─' * 78}┘{Colors.ENDC}\n")
                 
                 # Print error details for failed tests
-                if state == TestState.FAILED:
+                if result.state == TestState.FAILED and 'output' in result.details:
                     logger.info(f"{Colors.RED}Failed Test Details:{Colors.ENDC}")
-                    for line in output.split("\n"):
+                    for line in result.details['output'].split("\n"):
                         if "FAILED" in line:
                             logger.error(f"{Colors.RED}  {line}{Colors.ENDC}")
                     logger.info("")
@@ -208,13 +118,9 @@ class TestRunner:
                 test_run.results[dimension] = TestResult(
                     dimension=dimension,
                     state=TestState.FAILED,
-                    duration=time.time() - start_time,
+                    duration=0.0,
                     details={"error": str(e)}
                 )
-        
-        # Clean up environment variable
-        if "RUN_PERFORMANCE_TESTS" in os.environ:
-            del os.environ["RUN_PERFORMANCE_TESTS"]
         
         # Update the overall state
         test_run.update_state()

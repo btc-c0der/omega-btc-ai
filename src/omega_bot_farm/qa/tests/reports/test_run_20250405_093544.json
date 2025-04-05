@@ -1,0 +1,64 @@
+{
+  "id": "20250405_093544",
+  "timestamp": "2025-04-05T09:35:44.166562",
+  "trigger": "manual",
+  "source_files": [],
+  "results": {
+    "UNIT": {
+      "dimension": "UNIT",
+      "state": "FAILED",
+      "duration": 0.7573659420013428,
+      "timestamp": "2025-04-05T09:35:44.924032",
+      "details": {
+        "output": "",
+        "error": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/unit_report.html --self-contained-html\n  inifile: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/pytest.ini\n  rootdir: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src\n\n",
+        "returncode": 4,
+        "command": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/.venv/bin/python -m pytest /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/test_quantum_ai_knowledge_model.py -v --junit-xml=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/unit_report.xml --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/unit_report.html --self-contained-html",
+        "reports": {
+          "xml": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/unit_report.xml",
+          "html": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/unit_report.html",
+          "json": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/unit_report.json"
+        }
+      },
+      "entangled_dimensions": []
+    },
+    "INTEGRATION": {
+      "dimension": "INTEGRATION",
+      "state": "FAILED",
+      "duration": 0.7499620914459229,
+      "timestamp": "2025-04-05T09:35:45.674228",
+      "details": {
+        "output": "",
+        "error": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/integration_report.html --self-contained-html\n  inifile: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/pytest.ini\n  rootdir: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src\n\n",
+        "returncode": 4,
+        "command": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/.venv/bin/python -m pytest /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/test_quantum_ai_integration.py -v --junit-xml=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/integration_report.xml --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/integration_report.html --self-contained-html",
+        "reports": {
+          "xml": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/integration_report.xml",
+          "html": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/integration_report.html",
+          "json": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/integration_report.json"
+        }
+      },
+      "entangled_dimensions": []
+    },
+    "PERFORMANCE": {
+      "dimension": "PERFORMANCE",
+      "state": "FAILED",
+      "duration": 0.7437448501586914,
+      "timestamp": "2025-04-05T09:35:46.418227",
+      "details": {
+        "output": "",
+        "error": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/performance_report.html --self-contained-html\n  inifile: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/pytest.ini\n  rootdir: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src\n\n",
+        "returncode": 4,
+        "command": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/.venv/bin/python -m pytest /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/test_quantum_ai_performance.py -v --junit-xml=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/performance_report.xml --html=/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/performance_report.html --self-contained-html",
+        "reports": {
+          "xml": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/performance_report.xml",
+          "html": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/performance_report.html",
+          "json": "/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/tests/reports/20250405_093544/performance_report.json"
+        }
+      },
+      "entangled_dimensions": []
+    }
+  },
+  "state": "FAILED",
+  "total_duration": 2.251072883605957
+}

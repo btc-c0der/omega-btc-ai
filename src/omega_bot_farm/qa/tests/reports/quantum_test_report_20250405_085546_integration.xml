@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="7" time="0.063" timestamp="2025-04-05T08:55:46.629090+02:00" hostname="Faustos-MacBook-Pro.local"><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_dimension_measurement_affects_anomaly_detection" time="0.001" /><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_quantum_entanglement_and_collapse_workflow" time="0.000" /><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_test_generation_uses_dimensions" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;MagicMock name='measure' id='4417567248'&gt;.called">ai_model = &lt;src.omega_bot_farm.qa.quantum_ai_knowledge_model.QuantumAIKnowledgeModel object at 0x1076691d0&gt;
+
+    def test_test_generation_uses_dimensions(ai_model):
+        """Test that test generation uses quantum dimensions."""
+        # Patch the measure method to track calls
+        with patch("src.omega_bot_farm.qa.quantum_ai_knowledge_model.QuantumDimension.measure") as mock_measure:
+            mock_measure.return_value = 5.0  # Return a fixed value for predictability
+    
+            # Generate a test
+            test_code = ai_model.generate_test(SAMPLE_GOOD_CODE)
+    
+            # The measure method should have been called at least once
+&gt;           assert mock_measure.called
+E           AssertionError: assert False
+E            +  where False = &lt;MagicMock name='measure' id='4417567248'&gt;.called
+
+src/omega_bot_farm/qa/tests/test_quantum_ai_integration.py:96: AssertionError</failure></testcase><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_model_persistence_roundtrip" time="0.000" /><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_cross_component_interaction" time="0.000" /><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_capability_based_model_selection" time="0.000"><failure message="assert 0 &gt; 0&#10; +  where 0 = len([])">ai_model = &lt;src.omega_bot_farm.qa.quantum_ai_knowledge_model.QuantumAIKnowledgeModel object at 0x10766d370&gt;
+
+    def test_capability_based_model_selection(ai_model):
+        """Test selecting models based on capabilities."""
+        # Get models with test synthesis capability
+        test_models = ai_model.get_ai_model_by_capability(AICapability.TEST_SYNTHESIS)
+    
+        # Get models with anomaly detection capability
+        anomaly_models = ai_model.get_ai_model_by_capability(AICapability.ANOMALY_DETECTION)
+    
+        # There should be at least one model for each capability
+&gt;       assert len(test_models) &gt; 0
+E       assert 0 &gt; 0
+E        +  where 0 = len([])
+
+src/omega_bot_farm/qa/tests/test_quantum_ai_integration.py:157: AssertionError</failure></testcase><testcase classname="omega_bot_farm.qa.tests.test_quantum_ai_integration" name="test_multiple_language_support" time="0.000" /></testsuite></testsuites>
