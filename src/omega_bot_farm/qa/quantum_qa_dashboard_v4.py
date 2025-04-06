@@ -30,9 +30,10 @@ import time
 import webbrowser
 from typing import Dict, Any, Optional, Tuple
 
-# Add the parent directory to the path so we can import the dashboard module
+# Set up proper path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
+sys.path.insert(0, current_dir)
+sys.path.insert(0, os.path.dirname(current_dir))  # Parent directory
 
 # Configure logging
 logging.basicConfig(
@@ -43,25 +44,36 @@ logging.basicConfig(
 logger = logging.getLogger("S0NN3T5DQuantumDashboard")
 
 # Import connection manager
+ConnectionManager = None
 try:
     from quantum_dashboard.connection import ConnectionManager
-except ImportError:
-    print("Failed to import connection manager. Using built-in port detection.")
-    ConnectionManager = None
+    logger.info("Successfully imported ConnectionManager")
+except ImportError as e:
+    logger.warning(f"Failed to import connection manager: {e}")
+    logger.info("Using built-in port detection.")
 
 # Check for version management
+HAS_VERSION_CHECK = False
+check_version = None
 try:
     from quantum_dashboard.version_check import check_version
     HAS_VERSION_CHECK = True
-except ImportError:
-    print("Version check module not found. Skipping version checking.")
-    HAS_VERSION_CHECK = False
+    logger.info("Successfully imported version check module")
+except ImportError as e:
+    logger.warning(f"Version check module not found: {e}")
+    logger.info("Skipping version checking.")
+    # Define placeholder function
+    def check_version():
+        """Placeholder function when version check is not available."""
+        return {"version": "unknown", "changes_detected": False}
 
 # Import the dashboard module
 try:
     from quantum_dashboard.app import run_app
-except ImportError:
-    print("Failed to import dashboard module. Make sure you're in the correct directory.")
+    logger.info("Successfully imported dashboard app module")
+except ImportError as e:
+    logger.error(f"Failed to import dashboard module: {e}")
+    print(f"Failed to import dashboard module. Make sure you're in the correct directory.")
     sys.exit(1)
 
 
@@ -170,8 +182,7 @@ def handle_connection(args) -> Tuple[str, int]:
         # Use ConnectionManager for advanced connection handling
         connection = ConnectionManager(
             host=args.host,
-            port=args.port,
-            max_port_tries=10
+            port=args.port
         )
         
         # Get connection info
@@ -239,7 +250,8 @@ def main():
                 
                 print(f"{Colors.GREEN}Successfully created version {release_info['version']}{Colors.ENDC}")
                 print(f"{Colors.BLUE}Changelog:{Colors.ENDC}\n{release_info['changelog']}")
-            except ImportError:
+            except ImportError as e:
+                logger.warning(f"Version manager not available: {e}")
                 print(f"{Colors.YELLOW}Version manager not available. Skipping version update.{Colors.ENDC}")
     
     # Check dependencies
