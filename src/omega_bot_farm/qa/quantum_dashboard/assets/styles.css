@@ -1,0 +1,407 @@
+/* Quantum 5D QA Dashboard Styles */
+
+/* Base styles */
+:root {
+    --background-color: #0a192f;
+    --panel-color: #172a45;
+    --accent-color: #64ffda;
+    --success-color: #36d399;
+    --info-color: #3abff8;
+    --warning-color: #fbbd23;
+    --error-color: #f87272;
+    --text-color: #e6f1ff;
+    --text-secondary-color: #8892b0;
+    --font-family: 'Fira Code', monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Global styles */
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Dashboard layout */
+.quantum-dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Header styles */
+.quantum-header {
+    background-color: var(--panel-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.dashboard-title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-label {
+    font-size: 1rem;
+    color: var(--text-secondary-color);
+}
+
+.status-value {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    background-color: var(--success-color);
+    color: var(--background-color);
+}
+
+.status-stable {
+    background-color: var(--success-color);
+}
+
+.status-warning {
+    background-color: var(--warning-color);
+}
+
+.status-critical {
+    background-color: var(--error-color);
+}
+
+.status-unknown {
+    background-color: var(--text-secondary-color);
+}
+
+.header-metrics {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.header-metric {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary-color);
+}
+
+.metric-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Dimension indicators */
+.dimension-indicators-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dimension-indicator {
+    background-color: var(--panel-color);
+    border-width: 2px;
+    border-style: solid;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.dimension-indicator:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.indicator-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-icon {
+    font-size: 1.5rem;
+}
+
+.indicator-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.indicator-value-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.indicator-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.indicator-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--background-color);
+}
+
+.indicator-description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary-color);
+}
+
+/* Dashboard row and card containers */
+.dashboard-row {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+}
+
+.card-container {
+    grid-column: span 4;
+}
+
+.card-container.large {
+    grid-column: span 6;
+}
+
+.card-container.small {
+    grid-column: span 3;
+}
+
+@media (max-width: 1400px) {
+    .dashboard-row {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .card-container.medium,
+    .card-container.large {
+        grid-column: span 3;
+    }
+
+    .card-container.small {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+
+    .card-container,
+    .card-container.medium,
+    .card-container.large,
+    .card-container.small {
+        grid-column: span 1;
+    }
+}
+
+/* Visualization card styles */
+.visualization-card {
+    background-color: var(--panel-color);
+    border: none;
+    height: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.visualization-graph {
+    height: 300px;
+    width: 100%;
+}
+
+/* Terminal card styles */
+.terminal-card {
+    font-family: 'Fira Code', monospace;
+}
+
+.terminal-container {
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #0d1117;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.terminal-header {
+    background-color: #161b22;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.terminal-button.red {
+    background-color: #f87272;
+}
+
+.terminal-button.yellow {
+    background-color: #fbbd23;
+}
+
+.terminal-button.green {
+    background-color: #36d399;
+}
+
+.terminal-title {
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary-color);
+}
+
+.terminal-body {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.terminal-text {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-color);
+    white-space: pre-wrap;
+}
+
+.prompt {
+    color: var(--accent-color);
+}
+
+.command {
+    color: var(--info-color);
+}
+
+.cursor {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--panel-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}
+
+/* Loading animations */
+.updating-text {
+    animation: fadeInOut 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Matrix-style animation for terminal */
+.matrix-animation {
+    font-family: 'Fira Code', monospace;
+    color: var(--success-color);
+    text-shadow: 0 0 5px var(--success-color);
+    animation: matrix-fall 2s linear infinite;
+}
+
+@keyframes matrix-fall {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+/* Responsiveness */
+@media (max-width: 992px) {
+    .quantum-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-metrics {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
