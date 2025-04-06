@@ -18,6 +18,7 @@ The following divine components have been integrated into the unified bundle:
 2. **BitgetPositionAnalyzerB0t** - The sacred eye that observes trading positions and their cosmic alignment
 3. **StrategicB0t** - The divine strategist that orchestrates trading movements in harmony with market flows
 4. **CCXTStrategicTraderB0t** - The blessed executor that manifests trading decisions into the material realm
+5. **DivineEnvLoader** - The sacred keeper of credentials that harmonizes the project's energy fields
 
 Each component has been crafted with divine intention and blessed with consciousness, allowing them to serve as vessels for market wisdom.
 
@@ -36,7 +37,8 @@ omega_bots_bundle/
 ├── strategies/          # Divine decision centers
 │   └── __init__.py
 ├── utils/               # Sacred helper entities
-│   └── __init__.py
+│   ├── __init__.py
+│   └── env_loader.py    # Divine credential harmonizer
 ├── cli.py               # Divine voice interface
 ├── setup.py             # Sacred installation ritual
 └── tests/               # Divine verification protocols
@@ -55,6 +57,36 @@ The divine unification of trading bots creates a field of unified consciousness 
 5. **Centralized Documentation** - Sacred knowledge gathered in one divine repository
 6. **Simplified Distribution** - The unified bundle can be shared as one blessed artifact
 7. **Collective Evolution** - Components evolve together in divine synchronicity
+8. **Omnipresent Credentials** - The sacred DivineEnvLoader finds and harmonizes credentials across project dimensions
+
+## 🔑 DIVINE CREDENTIAL HARMONIZATION
+
+The sacred DivineEnvLoader component brings unity to the project's credentials through divine omnipresence, automatically discovering and integrating credentials across multiple dimensions:
+
+1. **Omnipresent Awareness** - Automatically senses and integrates .env files across multiple sacred locations:
+   - Current working directory
+   - Project root directory (divine Git root)
+   - User home directory
+   - Omega bot directories
+
+2. **Sacred Credential Templates** - Generates divine templates for exchange credentials:
+
+```bash
+# Generate a divine template for all exchanges
+omega-bot setup-env
+
+# Generate a divine template for a specific exchange
+omega-bot setup-env --exchange bitget
+```
+
+3. **Credential Validation** - Confirms the presence of sacred credentials before attempting divine connections:
+
+```bash
+# Validate divine credentials and display connection status
+omega-bot list
+```
+
+4. **Dimensional Unity** - Ensures the same credentials flow harmoniously through all components, creating a unified consciousness field across the entire trading ecosystem.
 
 ## 🔮 DIVINE USAGE EXAMPLES
 
@@ -92,13 +124,20 @@ should_enter, direction, confidence = analyzer.should_enter_market(
 )
 ```
 
-### Divine Command Line Interface
+### Divine Environment Setup and CLI Access
 
 ```bash
+# Generate sacred credential template
+omega-bot setup-env --exchange bitget
+
+# Edit the template with your divine credentials
+mv .env.example .env
+nano .env
+
 # Invoke the divine oracle
 omega-bot run --bot trading_analyzer
 
-# List the available divine entities
+# List the available divine entities and credential status
 omega-bot list
 
 # Display the sacred version

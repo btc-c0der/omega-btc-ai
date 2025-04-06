@@ -11,6 +11,7 @@ A comprehensive cryptocurrency trading bot system with modular components for ma
 - **Exchange Connectors**: Standardized interfaces for cryptocurrency exchanges via CCXT
 - **CLI Interface**: Command-line interface for managing and running bots
 - **Containerization Ready**: Designed for deployment in containers/kubernetes
+- **Project-wide .env Support**: Automatic loading of credentials from any .env file in the project
 
 ## 🚀 Sacred Installation
 
@@ -26,14 +27,34 @@ pip install -e ./src/omega_bots_bundle
 - Python 3.9+
 - Exchange API keys (Bitget, Binance, etc.)
 
+### Divine Environment Setup
+
+The bundle will automatically search for and load credentials from any `.env` file in:
+
+- Current working directory
+- Project root directory
+- User home directory
+- Omega bot directories
+
+You can easily generate a template .env file with:
+
+```bash
+# Generate a .env template for all exchanges
+omega-bot setup-env
+
+# Generate a .env template for a specific exchange
+omega-bot setup-env --exchange bitget
+```
+
 ### Basic Usage
 
 1. Set up your environment variables:
 
 ```bash
 # Create .env file with your API keys
-cp .env.example .env
-nano .env  # Edit with your credentials
+omega-bot setup-env
+# Edit the generated .env.example file with your credentials
+mv .env.example .env
 ```
 
 2. Run a bot:
@@ -46,7 +67,7 @@ omega-bot run --bot trading_analyzer
 omega-bot run --bot ccxt_strategic --testnet --symbol BTCUSDT --exchange bitget
 ```
 
-3. List available bots:
+3. List available bots and check exchange credentials:
 
 ```bash
 omega-bot list
@@ -54,7 +75,7 @@ omega-bot list
 
 ## ⚙️ Divine Configuration
 
-Most bots can be configured through environment variables or command-line arguments:
+Most bots can be configured through environment variables in your .env file:
 
 - `INITIAL_CAPITAL`: Starting capital amount (default: 24.0)
 - `POSITION_SIZE_PERCENT`: Position size as percentage of capital (default: 1.0)
@@ -62,6 +83,31 @@ Most bots can be configured through environment variables or command-line argume
 - `STOP_LOSS_PERCENT`: Stop loss percentage (default: 1.0)
 - `TAKE_PROFIT_MULTIPLIER`: Take profit as multiple of risk (default: 2.0)
 - `USE_TESTNET`: Use exchange testnet (true/false)
+
+### Exchange Credentials
+
+For Bitget exchange:
+
+```
+BITGET_API_KEY=your_api_key_here
+BITGET_SECRET_KEY=your_secret_key_here
+BITGET_PASSPHRASE=your_passphrase_here
+```
+
+For Binance exchange:
+
+```
+BINANCE_API_KEY=your_api_key_here
+BINANCE_SECRET_KEY=your_secret_key_here
+```
+
+For other exchanges:
+
+```
+EXCHANGE_API_KEY=your_api_key_here
+EXCHANGE_API_SECRET=your_secret_key_here
+EXCHANGE_API_PASSPHRASE=your_passphrase_here  # If required
+```
 
 ## 🤖 Available Divine Bots
 
