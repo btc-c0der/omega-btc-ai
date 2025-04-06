@@ -35,7 +35,24 @@ from .config import DASHBOARD_CONFIG, quantum_theme
 from .metrics import QuantumMetrics, collect_metrics
 from .test_runner import TestDimension, S0NN3TTestRunner
 
-__version__ = "1.0.0"
+# Add connection management and version checking
+try:
+    from .connection import ConnectionManager
+    HAS_CONNECTION_MANAGER = True
+except ImportError:
+    HAS_CONNECTION_MANAGER = False
+    logger.warning("ConnectionManager not available. Using basic connection handling.")
+
+try:
+    from .version_check import check_version, VersionCheck
+    from .version_manager import get_dashboard_version_manager, DashboardVersionManager
+    HAS_VERSION_MANAGEMENT = True
+except ImportError:
+    HAS_VERSION_MANAGEMENT = False
+    logger.warning("Version management not available. Skipping version checking.")
+
+# Update version to reflect addition of version management
+__version__ = "2.0.0"
 __author__ = "S0NN3T"
 
 # Export public API
@@ -48,4 +65,12 @@ __all__ = [
     "collect_metrics",
     "TestDimension",
     "S0NN3TTestRunner"
-] 
+]
+
+# Add connection and version management to public API if available
+if HAS_CONNECTION_MANAGER:
+    __all__.append("ConnectionManager")
+
+if HAS_VERSION_MANAGEMENT:
+    __all__.extend(["check_version", "VersionCheck", 
+                   "get_dashboard_version_manager", "DashboardVersionManager"]) 

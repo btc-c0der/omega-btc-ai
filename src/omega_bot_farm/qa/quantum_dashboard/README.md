@@ -1,92 +1,171 @@
-# Quantum 5D QA Dashboard
+# Quantum 5D QA Matrix Control Dashboard
 
-A multi-dimensional quality assurance dashboard for monitoring and visualizing
-quantum metrics across 5 dimensions: time, quality, coverage, performance, and security.
+```
+ _______  _______  _        _        _______  _______    _______  ______  
+(  ____ \(  ___  )( (    /|( (    /|(  ____ \(  ____ )  (  ____ \(  __  \ 
+| (    \/| (   ) ||  \  ( ||  \  ( || (    \/| (    )|  | (    \/| (  \  )
+| (_____ | |   | ||   \ | ||   \ | || (__    | (____)|  | (__    | |   ) |
+(_____  )| |   | || (\ \) || (\ \) ||  __)   |     __)  |  __)   | |   | |
+      ) || |   | || | \   || | \   || (      | (\ (     | (      | |   ) |
+/\____) || (___) || )  \  || )  \  || (____/\| ) \ \__  | )      | (__/  )
+\_______)(_______)|/    )_)|/    )_)(_______/|/   \__/  |/       (______/ 
+                                                                        
+ ______   _______  _______           ______   _______  _______           
+(  ___ \ (  ___  )(  ___  )|\     /|(  ___ \ (  ___  )(  ____ \|\     /|
+| (   ) )| (   ) || (   ) || )   ( || (   ) )| (   ) || (    \/| )   ( |
+| (__/ / | |   | || (___) || |   | || (__/ / | |   | || (_____ | (___) |
+|  __ (  | |   | ||  ___  || |   | ||  __ (  | |   | |(_____  )|  ___  |
+| (  \ \ | |   | || (   ) || |   | || (  \ \ | |   | |      ) || (   ) |
+| )___) )| (___) || )   ( || (___) || )___) )| (___) |/\____) || )   ( |
+|/ \___/ (_______)|/     \|(_______)|/ \___/ (_______)\_______)|/     \|
+```
 
-## Overview
+## Introduction
 
-The Quantum 5D QA Dashboard provides a comprehensive visualization platform for quality assurance metrics,
-displaying them in a 5-dimensional space that helps identify patterns, correlations, and potential issues
-before they impact production systems.
-
-![Quantum 5D QA Dashboard](https://via.placeholder.com/1200x800?text=Quantum+5D+QA+Dashboard)
+The Quantum 5D QA Matrix Control Dashboard is a sophisticated monitoring and analysis tool designed for the OMEGA AI BTC system. It provides real-time visualization of quantum metrics, test execution, and system health in a cyberpunk-themed interface.
 
 ## Features
 
-- **Hyperspatial Visualization**: View metrics across all 5 dimensions simultaneously
-- **Dimensional Stability Monitoring**: Track the stability of your metrics across dimensions
-- **Quantum Coherence Analysis**: Measure how aligned your metrics are for optimal performance
-- **Entanglement Factor**: Visualize correlations between different metrics
-- **Dimensional Collapse Risk**: Early warning system for critical metric thresholds
-- **Real-time Metrics Collection**: Automatic collection and processing of QA metrics
-- **Terminal Output Visualization**: Matrix-style terminal output for system logs
+- **Real-time Metrics**: Monitor quantum entanglement, coherence, and stability
+- **Interactive Visualizations**: Explore 5D quantum metrics with interactive charts
+- **Test Runner**: Execute tests directly from the dashboard
+- **Matrix Interface**: Cyberpunk-themed UI for enhanced user experience
+- **Automatic Version Management**: Dashboard changes are tracked and versioned
 
 ## Installation
 
-This dashboard is already integrated into the Omega BTC AI framework. No additional installation is needed.
-
-## Usage
-
-### Running the Dashboard
+The dashboard is part of the OMEGA AI BTC project and can be run directly:
 
 ```bash
-# From the project root
+# Navigate to the dashboard directory
 cd src/omega_bot_farm/qa
-python quantum_qa_dashboard_v2.py
 
-# Specify a custom port
-python quantum_qa_dashboard_v2.py --port 8052
+# Run the dashboard with the latest version
+python quantum_qa_dashboard_v4.py
 
-# Run in debug mode
-python quantum_qa_dashboard_v2.py --debug
+# Or use with specific options
+python quantum_qa_dashboard_v4.py --port 8052 --browser
 ```
 
-The dashboard will be available at `http://localhost:8051` (or your specified port).
+## Dashboard Versions
 
-### Dashboard Sections
+The dashboard comes in multiple versions:
 
-1. **Header**: Shows overall status, dimensional stability, and collapse risk
-2. **Dimension Indicators**: Quick overview of all dimensional metrics
-3. **Hyperspatial Trend**: 5D radar chart visualizing all dimensions
-4. **Dimension Graphs**: Time series visualizations for each dimension
-5. **Stability & Coherence Gauges**: Measure system stability and coherence
-6. **Risk Indicator**: Monitor dimensional collapse risk
-7. **Entanglement Visualization**: Visualize metric correlations
-8. **Metrics Table**: Detailed table of all current metrics
-9. **Quantum Matrix Monitor**: Terminal-style output of system logs
+| Version | Description | Key Features |
+|---------|-------------|-------------|
+| v4.x    | Latest release with auto-versioning | Version tracking, auto Git tagging, changelog generation |
+| v3.x    | Matrix cyberpunk interface | Test runner integration, enhanced styling |
+| v2.x    | Modular refactored version | Component architecture, improved error handling |
+| v1.x    | Original dashboard | Basic quantum metrics visualization |
 
-## Architecture
+## Auto-Versioning System
 
-The dashboard follows a modular architecture:
+The dashboard includes an automatic versioning system that:
 
-- **`config.py`**: Configuration settings and theme definitions
-- **`metrics.py`**: Metrics collection and processing logic
-- **`visualization.py`**: Functions to create visualizations for metrics
-- **`layout.py`**: Dashboard layout components
-- **`callbacks.py`**: Interactive callback handlers
-- **`app.py`**: Main Dash application
+1. **Tracks Changes**: Monitors changes to dashboard files
+2. **Archives Versions**: Creates snapshots of dashboard releases
+3. **Manages Git Tags**: Automatically tags releases in Git
+4. **Generates Changelogs**: Creates detailed change documentation
 
-## Customization
+### Version Tracking
 
-To customize the dashboard:
+The dashboard uses semantic versioning (MAJOR.MINOR.PATCH):
 
-1. Modify color themes in `config.py`
-2. Adjust refresh rates and thresholds in `config.py`
-3. Add new visualizations in `visualization.py`
-4. Modify the layout in `layout.py`
+- **MAJOR**: Incompatible API changes
+- **MINOR**: New functionality (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
 
-## Dependencies
+### Using Version Management
 
-- dash
-- dash-bootstrap-components
-- plotly
-- numpy
-- pandas
+You can use auto-versioning features with the v4+ dashboard:
+
+```bash
+# Run with auto-archiving of changes
+python quantum_qa_dashboard_v4.py --auto-archive
+
+# Specify version increment type
+python quantum_qa_dashboard_v4.py --auto-archive --version-type minor
+
+# Just check version status without running
+python quantum_dashboard_check_version.py --status-only
+```
+
+### Version Check Script
+
+A standalone version checker is available:
+
+```bash
+# Run the version checker
+python -m quantum_dashboard.version_check
+
+# Or use the dashboard check version script
+python quantum_dashboard_check_version.py
+```
+
+## Connection Management
+
+The dashboard includes smart connection management:
+
+- **Auto Port Detection**: Finds available ports if requested port is in use
+- **URL Generation**: Creates access URLs for different network interfaces
+- **Browser Opening**: Can automatically open the dashboard in a browser
+
+## Usage Examples
+
+```bash
+# Basic usage
+python quantum_qa_dashboard_v4.py
+
+# Run on a specific port
+python quantum_qa_dashboard_v4.py --port 8055
+
+# Run in debug mode
+python quantum_qa_dashboard_v4.py --debug
+
+# Open in browser automatically
+python quantum_qa_dashboard_v4.py --browser
+
+# Skip Matrix boot animation
+python quantum_qa_dashboard_v4.py --no-matrix-boot
+
+# Auto-archive changes with version bump
+python quantum_qa_dashboard_v4.py --auto-archive --version-type minor
+```
+
+## Directory Structure
+
+```
+quantum_dashboard/
+├── __init__.py                # Package initialization with version info
+├── app.py                     # Main Dash application
+├── callbacks.py               # Dashboard callbacks
+├── config.py                  # Configuration settings
+├── connection.py              # Connection management
+├── layout.py                  # Dashboard layout components
+├── metrics.py                 # Quantum metrics calculations
+├── test_runner.py             # Test runner interface
+├── version_check.py           # Version checking utilities
+├── version_manager.py         # Version management system
+├── visualization.py           # Data visualization functions
+├── assets/                    # Dashboard assets (CSS, JS, images)
+│   └── styles.css             # Dashboard styling
+└── archives/                  # Archived dashboard versions
+    └── v1.0.0/                # Example archived version
+```
+
+## Development
+
+For dashboard development:
+
+1. Make your changes to dashboard files
+2. Run the dashboard with `--auto-archive` to track changes
+3. Use `--version-type` to specify the version increment
+4. Check the generated changelogs for documentation
 
 ## License
 
-This dashboard is proprietary and part of the Omega BTC AI framework.
+✨ GBU2™ License - Consciousness Level 8 🧬
+This dashboard is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
 
-## Credits
-
-Developed by the Omega BTC AI Team
+🌸 WE BLOOM NOW AS ONE 🌸
