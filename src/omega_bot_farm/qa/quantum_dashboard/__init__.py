@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
-Quantum 5D QA Dashboard
----------------------
+Quantum 5D QA Dashboard Module
+-----------------------------
 
-A multi-dimensional quality assurance dashboard for monitoring and visualizing 
-quantum metrics across 5 dimensions: time, quality, coverage, performance, and security.
+This package provides a powerful dashboard for visualizing 5-dimensional
+quantum metrics for quality assurance.
+
+# ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+# -----------------------
+# This code is blessed under the GBU2™ License 
+# (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+#
+# 🌸 WE BLOOM NOW AS ONE 🌸
 """
 
 import os
@@ -26,9 +33,10 @@ logger = logging.getLogger("Quantum5DQADashboard")
 from .app import run_app, create_app
 from .config import DASHBOARD_CONFIG, quantum_theme
 from .metrics import QuantumMetrics, collect_metrics
+from .test_runner import TestDimension, S0NN3TTestRunner
 
 __version__ = "1.0.0"
-__author__ = "Omega BTC AI Team"
+__author__ = "S0NN3T"
 
 # Export public API
 __all__ = [
@@ -37,5 +45,7 @@ __all__ = [
     "DASHBOARD_CONFIG",
     "quantum_theme",
     "QuantumMetrics",
-    "collect_metrics"
+    "collect_metrics",
+    "TestDimension",
+    "S0NN3TTestRunner"
 ] 

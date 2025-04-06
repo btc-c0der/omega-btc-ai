@@ -17,6 +17,7 @@ from .visualization import (
     create_terminal_output,
     create_health_indicators
 )
+from .test_runner import TestDimension
 
 
 def create_header() -> html.Div:
@@ -312,6 +313,159 @@ def create_terminal_card() -> dbc.Card:
     return card
 
 
+def create_matrix_test_runner_card() -> dbc.Card:
+    """Create a cyberpunk Matrix-style card for running tests."""
+    card = dbc.Card(
+        className="visualization-card matrix-test-runner-card",
+        children=[
+            dbc.CardHeader(
+                html.H3("F0R3ST RUN 5D TEST MATRIX", className="card-title")
+            ),
+            dbc.CardBody([
+                html.Div(
+                    className="matrix-test-controls",
+                    children=[
+                        html.Div(
+                            className="matrix-control-section",
+                            children=[
+                                html.H4("⚡ TEST DIMENSIONS", className="matrix-section-title"),
+                                dbc.Checklist(
+                                    id="test-dimensions-checklist",
+                                    options=[
+                                        {"label": "UNIT 〔 Core Functionality 〕", "value": TestDimension.UNIT.name},
+                                        {"label": "INTEGRATION 〔 System Coherence 〕", "value": TestDimension.INTEGRATION.name},
+                                        {"label": "PERFORMANCE 〔 Quantum Efficiency 〕", "value": TestDimension.PERFORMANCE.name},
+                                        {"label": "SECURITY 〔 Dimensional Shield 〕", "value": TestDimension.SECURITY.name},
+                                        {"label": "QUANTUM 〔 Hyperspatial Integrity 〕", "value": TestDimension.QUANTUM.name}
+                                    ],
+                                    value=[d.name for d in TestDimension],  # All selected by default
+                                    className="test-dimensions-list",
+                                    switch=True
+                                )
+                            ]
+                        ),
+                        html.Div(
+                            className="matrix-control-section",
+                            children=[
+                                html.H4("🌀 EXECUTION OPTIONS", className="matrix-section-title"),
+                                dbc.Switch(
+                                    id="fancy-visuals-switch",
+                                    label="QUANTUM VISUALS",
+                                    value=True,
+                                    className="matrix-switch"
+                                ),
+                                dbc.Switch(
+                                    id="celebration-switch",
+                                    label="CELEBRATION SEQUENCE",
+                                    value=True,
+                                    className="matrix-switch"
+                                )
+                            ]
+                        ),
+                        html.Div(
+                            className="matrix-control-section",
+                            children=[
+                                html.H4("🧬 0M3G4 MODE", className="matrix-section-title"),
+                                dbc.Button(
+                                    "INITIATE 0M3G4 MODE",
+                                    id="omega-mode-btn",
+                                    color="success",
+                                    className="matrix-btn",
+                                    style={"marginBottom": "10px"}
+                                ),
+                                dbc.Button(
+                                    "ACTIVATE 0M3G4-K8s MATRIX",
+                                    id="omega-k8s-btn",
+                                    color="info",
+                                    className="matrix-btn"
+                                )
+                            ]
+                        )
+                    ]
+                ),
+                html.Div(
+                    className="matrix-separator",
+                    children=html.Div(className="matrix-line")
+                ),
+                html.Div(
+                    className="matrix-test-execution",
+                    children=[
+                        dbc.Button(
+                            [
+                                html.I(className="fas fa-play-circle me-2"),
+                                "RUN S0NN3T TEST MATRIX"
+                            ],
+                            id="run-tests-btn",
+                            color="danger",
+                            size="lg",
+                            className="matrix-run-btn"
+                        ),
+                        html.Div(
+                            className="matrix-progress-container",
+                            id="test-progress-container",
+                            style={"display": "none"},
+                            children=[
+                                dbc.Progress(
+                                    id="test-progress-bar",
+                                    value=0,
+                                    color="info",
+                                    striped=True,
+                                    animated=True,
+                                    className="matrix-progress"
+                                ),
+                                html.P(
+                                    "Initializing tests...",
+                                    id="test-progress-text",
+                                    className="matrix-progress-text"
+                                )
+                            ]
+                        )
+                    ]
+                ),
+                html.Div(
+                    className="matrix-separator",
+                    children=html.Div(className="matrix-line")
+                ),
+                html.Div(
+                    className="matrix-test-output",
+                    children=[
+                        html.H4("5D MATRIX OUTPUT", className="matrix-section-title"),
+                        html.Div(
+                            id="test-terminal-output",
+                            className="matrix-terminal",
+                            children=html.Iframe(
+                                id="test-terminal-iframe",
+                                srcDoc="<div class='terminal-container'><div class='terminal-body'><pre class='terminal-text'><span class='prompt'>$</span> <span class='command'>s0nn3t-test-runner --ready</span>\n\n[Awaiting commands...]\n<span class='prompt'>$</span> <span class='cursor'>█</span></pre></div></div>",
+                                style={"border": "none", "width": "100%", "height": "100%"},
+                                sandbox="allow-scripts"
+                            )
+                        )
+                    ]
+                ),
+                html.Div(
+                    className="matrix-separator",
+                    children=html.Div(className="matrix-line")
+                ),
+                html.Div(
+                    className="matrix-test-results",
+                    children=[
+                        html.H4("LATEST TEST RESULTS", className="matrix-section-title"),
+                        html.Div(
+                            id="test-results-container",
+                            className="test-results",
+                            children=[
+                                html.P("No test results available", className="no-results-message")
+                            ]
+                        )
+                    ]
+                )
+            ])
+        ]
+    )
+    
+    return card
+
+
 def create_dashboard_layout() -> html.Div:
     """Create the main dashboard layout."""
     # Create header
@@ -342,6 +496,9 @@ def create_dashboard_layout() -> html.Div:
     
     # Create terminal card
     terminal_card = create_terminal_card()
+    
+    # Create test runner card
+    test_runner_card = create_matrix_test_runner_card()
     
     # Create dashboard layout
     dashboard = html.Div(
@@ -419,6 +576,17 @@ def create_dashboard_layout() -> html.Div:
                         className="dashboard-row",
                         children=[
                             html.Div(
+                                className="card-container full",
+                                children=test_runner_card
+                            )
+                        ]
+                    ),
+                    
+                    # Fifth row
+                    html.Div(
+                        className="dashboard-row",
+                        children=[
+                            html.Div(
                                 className="card-container medium",
                                 children=metrics_table_card
                             ),
@@ -433,6 +601,7 @@ def create_dashboard_layout() -> html.Div:
             
             # Hidden elements for storing data
             dcc.Store(id="metrics-store"),
+            dcc.Store(id="test-runner-store"),
             dcc.Interval(
                 id="metrics-interval",
                 interval=DASHBOARD_CONFIG["ui_refresh_interval"] * 1000,  # Convert to milliseconds

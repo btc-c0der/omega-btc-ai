@@ -28,6 +28,7 @@ from .visualization import (
     create_terminal_output,
     create_health_indicators
 )
+from .test_runner import S0NN3TTestRunner
 
 # Set up logging
 logger = logging.getLogger("Quantum5DQADashboard.Callbacks")
@@ -46,6 +47,9 @@ def register_callbacks(app):
     
     # Metrics collection thread
     metrics_thread = None
+    
+    # Test runner instance
+    test_runner = S0NN3TTestRunner()
     
     # Define metrics update function
     def metrics_collector():
@@ -372,6 +376,239 @@ def register_callbacks(app):
             return "Warning", "status-value status-warning"
         else:
             return "Critical", "status-value status-critical"
+    
+    # Setup test runner callbacks
+    @app.callback(
+        [
+            Output("test-terminal-iframe", "srcDoc"),
+            Output("test-progress-container", "style"),
+            Output("test-progress-bar", "value"),
+            Output("test-progress-text", "children"),
+            Output("test-results-container", "children"),
+            Output("test-runner-store", "data")
+        ],
+        [
+            Input("run-tests-btn", "n_clicks"),
+            Input("omega-mode-btn", "n_clicks"),
+            Input("omega-k8s-btn", "n_clicks")
+        ],
+        [
+            State("test-dimensions-checklist", "value"),
+            State("fancy-visuals-switch", "value"),
+            State("celebration-switch", "value"),
+            State("test-runner-store", "data")
+        ]
+    )
+    def handle_test_runner_actions(
+        run_clicks, omega_clicks, omega_k8s_clicks,
+        test_dimensions, fancy_visuals, celebration, store_data
+    ):
+        """Handle test runner button actions."""
+        # Initialize store data if not present
+        if store_data is None:
+            store_data = {
+                "last_run": None,
+                "running": False,
+                "progress": 0,
+                "latest_results": None
+            }
+        
+        # Check which button was clicked
+        triggered = ctx.triggered_id
+        
+        # If no button was clicked, return current state
+        if triggered is None:
+            # Return empty terminal with initial prompt
+            terminal_html = f"""
+            <div class="terminal-container">
+                <div class="terminal-body">
+                    <pre class="terminal-text">
+                    <span class="prompt">$</span> <span class="command">s0nn3t-test-runner --ready</span>
+                    
+                    [Awaiting commands...]
+                    <span class="prompt">$</span> <span class="cursor">█</span>
+                    </pre>
+                </div>
+            </div>
+            """
+            
+            return (
+                terminal_html,
+                {"display": "none"},
+                0,
+                "Initializing tests...",
+                html.P("No test results available", className="no-results-message"),
+                store_data
+            )
+        
+        # Start progress indicators
+        progress_style = {"display": "block"}
+        progress_value = 10
+        progress_text = "Initializing S0NN3T Test Runner..."
+        
+        # Handle run tests button
+        if triggered == "run-tests-btn" and run_clicks:
+            # Update progress
+            progress_value = 20
+            progress_text = f"Running tests in dimensions: {', '.join(test_dimensions)}"
+            store_data["running"] = True
+            store_data["progress"] = progress_value
+            
+            # Create a thread to run tests
+            import threading
+            
+            def run_tests_thread():
+                nonlocal test_runner
+                # Run tests
+                result = test_runner.run_tests(
+                    dimensions=test_dimensions,
+                    fancy_visuals=fancy_visuals,
+                    celebration=celebration
+                )
+                
+                # Update store with results
+                store_data["latest_results"] = {
+                    "success": result.success,
+                    "duration": result.duration,
+                    "timestamp": result.timestamp,
+                    "dimensions": result.test_dimensions
+                }
+                store_data["running"] = False
+                store_data["progress"] = 100
+                store_data["last_run"] = result.timestamp
+            
+            # Start the thread
+            test_thread = threading.Thread(target=run_tests_thread)
+            test_thread.daemon = True
+            test_thread.start()
+        
+        # Handle OMEGA mode button
+        elif triggered == "omega-mode-btn" and omega_clicks:
+            # Update progress
+            progress_value = 15
+            progress_text = "Initializing 0M3G4 Mode..."
+            store_data["running"] = True
+            store_data["progress"] = progress_value
+            
+            # Run OMEGA mode in a thread
+            test_runner.run_omega_mode(k8s_mode=False)
+        
+        # Handle OMEGA-K8s mode button
+        elif triggered == "omega-k8s-btn" and omega_k8s_clicks:
+            # Update progress
+            progress_value = 15
+            progress_text = "Initializing 0M3G4-K8s Matrix Mode..."
+            store_data["running"] = True
+            store_data["progress"] = progress_value
+            
+            # Run OMEGA-K8s mode in a thread
+            test_runner.run_omega_mode(k8s_mode=True)
+        
+        # Get terminal output
+        terminal_lines = test_runner.get_terminal_output(50)
+        if not terminal_lines:
+            terminal_lines = ["[Awaiting command execution...]"]
+        
+        # Create terminal HTML
+        terminal_html = f"""
+        <div class="terminal-container">
+            <div class="terminal-body">
+                <pre class="terminal-text">
+                <span class="prompt">$</span> <span class="command">s0nn3t-test-runner --executing</span>
+                
+                {"<br>".join(terminal_lines)}
+                <span class="prompt">$</span> <span class="cursor">█</span>
+                </pre>
+            </div>
+        </div>
+        """
+        
+        # Create test results display
+        if store_data.get("latest_results"):
+            results = store_data["latest_results"]
+            results_display = html.Div([
+                html.Div(
+                    className="test-result-item",
+                    children=[
+                        html.Span("Status:", className="test-result-label"),
+                        html.Span(
+                            "SUCCESS" if results["success"] else "FAILURE",
+                            className=f"test-result-value {'test-result-success' if results['success'] else 'test-result-failure'}"
+                        )
+                    ]
+                ),
+                html.Div(
+                    className="test-result-item",
+                    children=[
+                        html.Span("Execution Time:", className="test-result-label"),
+                        html.Span(f"{results['duration']:.2f}s", className="test-result-value")
+                    ]
+                ),
+                html.Div(
+                    className="test-result-item",
+                    children=[
+                        html.Span("Dimensions Tested:", className="test-result-label"),
+                        html.Span(", ".join(results["dimensions"]), className="test-result-value")
+                    ]
+                ),
+                html.Div(
+                    className="test-result-item",
+                    children=[
+                        html.Span("Timestamp:", className="test-result-label"),
+                        html.Span(results["timestamp"], className="test-result-value")
+                    ]
+                )
+            ])
+        else:
+            results_display = html.P("No test results available", className="no-results-message")
+        
+        # Return updated components
+        return (
+            terminal_html,
+            progress_style,
+            progress_value,
+            progress_text,
+            results_display,
+            store_data
+        )
+    
+    # Setup progress bar update callback
+    @app.callback(
+        [
+            Output("test-progress-bar", "value"),
+            Output("test-progress-text", "children")
+        ],
+        Input("metrics-interval", "n_intervals"),
+        State("test-runner-store", "data")
+    )
+    def update_test_progress(n_intervals, store_data):
+        """Update the test progress bar."""
+        if store_data is None or not store_data.get("running", False):
+            return no_update, no_update
+        
+        # Simulate progress by incrementing current progress
+        current_progress = store_data.get("progress", 0)
+        if current_progress < 95:
+            new_progress = min(95, current_progress + 5)
+        else:
+            new_progress = current_progress
+        
+        # Update text based on progress
+        if new_progress < 30:
+            text = "Initializing tests..."
+        elif new_progress < 50:
+            text = "Running test cases..."
+        elif new_progress < 70:
+            text = "Analyzing results..."
+        elif new_progress < 90:
+            text = "Generating report..."
+        else:
+            text = "Finalizing..."
+        
+        # Store updated progress
+        store_data["progress"] = new_progress
+        
+        return new_progress, text
 
 
 def add_terminal_line(line: str, level: str = "info") -> None:

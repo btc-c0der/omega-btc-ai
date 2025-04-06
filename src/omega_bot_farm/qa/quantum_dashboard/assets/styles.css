@@ -405,3 +405,240 @@ body {
         justify-content: space-between;
     }
 }
+
+/* Matrix Test Runner Card styles */
+.matrix-test-runner-card {
+    background: rgba(0, 20, 10, 0.9) !important;
+    border: 1px solid #0f0 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3) !important;
+}
+
+.matrix-test-runner-card .card-title {
+    color: #0f0 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.matrix-test-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.matrix-control-section {
+    flex: 1;
+    min-width: 250px;
+    margin: 10px;
+    padding: 15px;
+    background: rgba(0, 30, 15, 0.6);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 5px;
+}
+
+.matrix-section-title {
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    letter-spacing: 1px;
+}
+
+.test-dimensions-list .form-check {
+    margin-bottom: 10px;
+}
+
+.test-dimensions-list .form-check-label {
+    color: #0cf;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.matrix-switch .form-check-label {
+    color: #0cf;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.matrix-btn {
+    width: 100%;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.matrix-run-btn {
+    background: linear-gradient(to right, #ff0066, #ff3300) !important;
+    border: none !important;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 15px 30px !important;
+    font-size: 1.3rem !important;
+    margin: 20px auto;
+    display: block;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5) !important;
+    transition: all 0.3s ease;
+}
+
+.matrix-run-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.7) !important;
+}
+
+.matrix-separator {
+    margin: 20px 0;
+    position: relative;
+}
+
+.matrix-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #0f0, transparent);
+    position: relative;
+}
+
+.matrix-line::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 5px;
+    background: #0f0;
+    box-shadow: 0 0 8px #0f0;
+    border-radius: 50%;
+}
+
+.matrix-progress-container {
+    margin: 20px auto;
+    width: 80%;
+}
+
+.matrix-progress {
+    height: 15px;
+    background-color: rgba(0, 20, 10, 0.5) !important;
+}
+
+.matrix-progress-text {
+    color: #0cf;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    margin-top: 10px;
+}
+
+.matrix-test-output {
+    margin-bottom: 20px;
+}
+
+.matrix-terminal {
+    background-color: #000;
+    border: 1px solid #0f0;
+    border-radius: 5px;
+    height: 250px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.test-results {
+    background-color: rgba(0, 30, 15, 0.4);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 5px;
+    padding: 15px;
+    min-height: 100px;
+}
+
+.test-result-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+}
+
+.test-result-label {
+    color: #0cf;
+    font-family: 'Courier New', monospace;
+}
+
+.test-result-value {
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.test-result-success {
+    color: #0f0;
+}
+
+.test-result-failure {
+    color: #f00;
+}
+
+.no-results-message {
+    color: #0cf;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-style: italic;
+}
+
+/* Animation for digital rain effect */
+@keyframes matrixRain {
+    0% {
+        box-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+    }
+
+    50% {
+        box-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+    }
+
+    100% {
+        box-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+    }
+}
+
+.matrix-test-runner-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: linear-gradient(rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0));
+    z-index: 1;
+    animation: matrixRain 2s infinite;
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.cursor {
+    animation: blink 1s step-end infinite;
+    color: #0f0;
+}
+
+/* Add a card-container full style for full width cards */
+.card-container.full {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+}
