@@ -208,3 +208,20 @@ ibr-ui/
 # Binary files
 *.zip
 
+# Quantum Dashboard logs and reports
+qa/reports/*.json
+qa/reports/*/
+qa/reports/*_20*/*.json
+qa/reports/*_20*/*.html
+qa/reports/*_20*/*.xml
+qa/reports/quantum_test_report_*.json
+qa/reports/test_run_*.json
+qa/reports/*_20*/
+qa/reports/latest.json
+qa/reports/*_report.html
+qa/reports/*_report.xml
+src/omega_bot_farm/qa/data/*.json
+src/omega_bot_farm/qa/data/quantum_*.json
+src/omega_bot_farm/qa/quantum_dashboard/assets/*.json
+src/omega_bot_farm/qa/tmp/quantum_*.json
+
