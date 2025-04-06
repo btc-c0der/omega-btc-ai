@@ -36,6 +36,7 @@ from dash import dcc, html, Input, Output, State, ctx
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import re
+import base64
 
 # Import project modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -524,11 +525,52 @@ class Quantum5DDashboard:
     
     def __init__(self):
         """Initialize the dashboard"""
+        # Custom CSS for animations and styles
+        custom_css = """
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        """
+        
+        # Custom index with CSS included
+        custom_index = """
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Quantum 5D QA Matrix Control Dashboard - 0m3g4_k1ng</title>
+                {%css%}
+                <style>
+                """ + custom_css + """
+                </style>
+            </head>
+            <body>
+                {%app_entry%}
+                <footer>
+                    {%config%}
+                    {%scripts%}
+                    {%renderer%}
+                </footer>
+            </body>
+        </html>
+        """
+        
         self.app = dash.Dash(
             __name__,
             external_stylesheets=[dbc.themes.CYBORG],
             meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
         )
+        
+        # Set custom index with CSS
+        self.app.index_string = custom_index
+            
         self.app.title = "Quantum 5D QA Matrix Control Dashboard - 0m3g4_k1ng"
         self.metrics_history = []
         self.current_metrics = None
@@ -672,7 +714,21 @@ class Quantum5DDashboard:
                             ]
                         ),
                         
-                        # Fifth row with actions
+                        # NEW: Fifth row with MATRIX C1B3R1T4L monitoring
+                        html.Div(
+                            className="row mb-4",
+                            children=[
+                                # MATRIX C1B3R1T4L QA monitoring card 
+                                html.Div(
+                                    className="col-md-12",
+                                    children=[
+                                        self._build_matrix_monitoring_card()
+                                    ]
+                                )
+                            ]
+                        ),
+                        
+                        # Sixth row with actions
                         html.Div(
                             className="row mb-4",
                             children=[
@@ -1369,9 +1425,146 @@ class Quantum5DDashboard:
         self._setup_visualization_callbacks()
         self._setup_control_callbacks()
         self._setup_action_callbacks()
-        # NEW: Git callbacks
+        # Matrix monitoring callbacks
+        self._setup_matrix_callbacks()
+        # Git callbacks
         self._setup_git_callbacks()
-
+        
+    def _setup_matrix_callbacks(self):
+        """Set up callbacks for the Matrix C1B3R1T4L monitoring components"""
+        @self.app.callback(
+            Output('matrix-terminal-events', 'children'),
+            [Input('matrix-qa-scan-btn', 'n_clicks'),
+             Input('matrix-validation-btn', 'n_clicks'),
+             Input('matrix-analysis-btn', 'n_clicks')],
+            [State('matrix-terminal-events', 'children')]
+        )
+        def handle_matrix_buttons(qa_clicks, validation_clicks, analysis_clicks, current_events):
+            """Handle clicks on the Matrix monitoring buttons"""
+            if not ctx.triggered:
+                return current_events
+                
+            # Initialize events if None
+            if current_events is None:
+                current_events = []
+                
+            # Current timestamp for logs
+            timestamp = datetime.datetime.now().strftime('%H:%M:%S')
+            
+            # Create new event based on which button was clicked
+            triggered_id = ctx.triggered_id if ctx.triggered_id else 'no-id'
+            if triggered_id == 'matrix-qa-scan-btn':
+                new_events = [
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            html.Span("Initiating Quantum QA Scan...", style={'color': quantum_theme['accent1']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Scanning unit tests: ",
+                            html.Span("PASSED", style={'color': quantum_theme['success']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Scanning integration tests: ",
+                            html.Span("PASSED", style={'color': quantum_theme['success']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "QA Scan complete. All systems optimal."
+                        ],
+                        className="mb-1"
+                    )
+                ]
+            elif triggered_id == 'matrix-validation-btn':
+                new_events = [
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            html.Span("Chain validation initiated", style={'color': quantum_theme['accent2']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Verifying blockchain integrity..."
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Validating hash consistency: ",
+                            html.Span("VERIFIED", style={'color': quantum_theme['success']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Chain validation complete. ",
+                            html.Span("100% INTEGRITY", style={'color': quantum_theme['success'], 'fontWeight': 'bold'})
+                        ],
+                        className="mb-1"
+                    )
+                ]
+            elif triggered_id == 'matrix-analysis-btn':
+                new_events = [
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            html.Span("5D Analysis engaged", style={'color': quantum_theme['highlight']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Calculating quantum dimensional metrics..."
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Hyperspatial analysis: ",
+                            html.Span("OPTIMAL", style={'color': quantum_theme['success']})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Dimensional entanglement factor: ",
+                            html.Span("0.95", style={'color': quantum_theme['accent1'], 'fontWeight': 'bold'})
+                        ],
+                        className="mb-1"
+                    ),
+                    html.P(
+                        [
+                            html.Span(f"[{timestamp}] ", style={'color': quantum_theme['accent4']}),
+                            "Analysis complete. All dimensions in harmony."
+                        ],
+                        className="mb-1"
+                    )
+                ]
+            else:
+                return current_events
+            
+            # Combine and return the updated terminal content (limited to last 50 events)
+            return new_events + current_events[:50-len(new_events)]
+    
     def _setup_time_callbacks(self):
         """Set up time-related callbacks"""
         @self.app.callback(
@@ -3097,6 +3290,320 @@ class Quantum5DDashboard:
             # Log the error and use a fallback
             logger.error(f"Error parsing color: {e}")
             return f'rgba(108, 92, 231, {alpha})'  # Default color with opacity
+
+    def _build_matrix_monitoring_card(self):
+        """Build the advanced MATRIX C1B3R1T4L real-time monitoring card with ChainGPT-inspired design."""
+        return dbc.Card(
+            className="h-100 border-0 shadow",
+            style={
+                'backgroundColor': quantum_theme['panel'],
+                'borderRadius': '10px',
+                'background': f'linear-gradient(135deg, {quantum_theme["panel"]}, #111823)',
+                'boxShadow': f'0 0 20px rgba(108, 92, 231, 0.2)'
+            },
+            children=[
+                dbc.CardHeader(
+                    className="d-flex justify-content-between align-items-center",
+                    style={
+                        'backgroundColor': 'transparent',
+                        'borderBottom': f"1px solid {quantum_theme['accent4']}",
+                        'color': quantum_theme['highlight'],
+                        'padding': '16px 20px'
+                    },
+                    children=[
+                        html.H5(
+                            className="mb-0 d-flex align-items-center",
+                            children=[
+                                html.I(className="fas fa-cube me-2", style={'color': quantum_theme['accent2']}),
+                                html.Span([
+                                    "MATR1X ", 
+                                    html.Span("C1B3R1T4L", style={'color': quantum_theme['accent2']}),
+                                    " QA Monitor"
+                                ])
+                            ],
+                            style={'fontWeight': 'bold', 'letterSpacing': '2px', 'textShadow': '0 0 5px rgba(108, 92, 231, 0.5)'}
+                        ),
+                        dbc.Badge(
+                            "∞", 
+                            color="dark",
+                            className="rounded-pill",
+                            style={
+                                'backgroundColor': quantum_theme['background'], 
+                                'color': quantum_theme['accent1'],
+                                'border': f'1px solid {quantum_theme["accent1"]}',
+                                'fontSize': '14px',
+                                'boxShadow': '0 0 8px rgba(108, 92, 231, 0.5)'
+                            }
+                        )
+                    ]
+                ),
+                dbc.CardBody(
+                    [
+                        # Advanced monitor container with terminal-like styling
+                        html.Div(
+                            style={
+                                'backgroundColor': 'rgba(10, 14, 23, 0.7)',
+                                'borderRadius': '6px',
+                                'border': f'1px solid {quantum_theme["accent1"]}',
+                                'boxShadow': 'inset 0 0 15px rgba(0, 0, 0, 0.5)',
+                                'padding': '15px',
+                                'fontFamily': 'monospace',
+                                'overflow': 'hidden',
+                                'position': 'relative',
+                                'height': '280px'
+                            },
+                            className="mb-3",
+                            children=[
+                                # Terminal header
+                                html.Div(
+                                    className="d-flex justify-content-between align-items-center mb-2",
+                                    children=[
+                                        html.Span("QUANTUM MATRIX MONITOR v5.7.3", style={'color': quantum_theme['accent2'], 'fontWeight': 'bold'}),
+                                        html.Div([
+                                            html.Span("●", style={'color': quantum_theme['error'], 'fontSize': '10px', 'marginRight': '8px'}),
+                                            html.Span("●", style={'color': quantum_theme['warning'], 'fontSize': '10px', 'marginRight': '8px'}),
+                                            html.Span("●", style={'color': quantum_theme['success'], 'fontSize': '10px'})
+                                        ])
+                                    ]
+                                ),
+                                
+                                # Live terminal output
+                                html.Div(
+                                    id="matrix-terminal-output",
+                                    className="mt-3",
+                                    style={
+                                        'color': quantum_theme['text'],
+                                        'fontSize': '0.85rem',
+                                        'height': '230px',
+                                        'overflowY': 'auto',
+                                        'overflowX': 'hidden',
+                                        'paddingRight': '5px',
+                                        'marginBottom': '10px'
+                                    },
+                                    children=[
+                                        html.P(
+                                            [
+                                                html.Span(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] ", style={'color': quantum_theme['accent4']}),
+                                                "5D Quantum Matrix Initialized"
+                                            ],
+                                            className="mb-1"
+                                        ),
+                                        html.P(
+                                            [
+                                                html.Span(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] ", style={'color': quantum_theme['accent4']}),
+                                                "Dimensional scanning active..."
+                                            ],
+                                            className="mb-1"
+                                        ),
+                                        html.P(
+                                            [
+                                                html.Span(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] ", style={'color': quantum_theme['accent4']}),
+                                                html.Span("Hyperspace channels open", style={'color': quantum_theme['success']})
+                                            ],
+                                            className="mb-1"
+                                        ),
+                                        html.P(
+                                            [
+                                                html.Span(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] ", style={'color': quantum_theme['accent4']}),
+                                                "Monitoring all quantum fluctuations"
+                                            ],
+                                            className="mb-1"
+                                        ),
+                                        html.P(
+                                            [
+                                                html.Span(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] ", style={'color': quantum_theme['accent4']}),
+                                                html.Span("REALTIME QA MONITORING ACTIVE", style={'color': quantum_theme['accent2'], 'fontWeight': 'bold'})
+                                            ],
+                                            className="mb-3"
+                                        ),
+                                        html.Div(
+                                            id="matrix-terminal-events",
+                                            children=[]
+                                        )
+                                    ]
+                                ),
+                                
+                                # Blinking cursor
+                                html.Div(
+                                    className="position-absolute cursor-blink",
+                                    style={
+                                        'bottom': '15px',
+                                        'left': '15px',
+                                        'width': '10px',
+                                        'height': '20px',
+                                        'backgroundColor': quantum_theme['accent1']
+                                    }
+                                )
+                            ]
+                        ),
+                        
+                        # Status grid
+                        html.Div(
+                            className="row g-2",
+                            children=[
+                                # Status indicators - Using a grid layout for metrics
+                                html.Div(
+                                    className="col-6 col-lg-3",
+                                    children=[
+                                        html.Div(
+                                            className="p-2",
+                                            style={
+                                                'backgroundColor': 'rgba(10, 14, 23, 0.7)',
+                                                'borderRadius': '6px',
+                                                'border': f'1px solid {quantum_theme["accent3"]}',
+                                            },
+                                            children=[
+                                                html.Div(
+                                                    className="d-flex align-items-center justify-content-between",
+                                                    children=[
+                                                        html.Small("Blockchain", style={'color': quantum_theme['accent3']}),
+                                                        html.Span("ACTIVE", style={'color': quantum_theme['success'], 'fontSize': '0.75rem'})
+                                                    ]
+                                                ),
+                                                html.Div(
+                                                    "CONNECTED",
+                                                    style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '1rem', 'marginTop': '2px'}
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                ),
+                                
+                                html.Div(
+                                    className="col-6 col-lg-3",
+                                    children=[
+                                        html.Div(
+                                            className="p-2",
+                                            style={
+                                                'backgroundColor': 'rgba(10, 14, 23, 0.7)',
+                                                'borderRadius': '6px',
+                                                'border': f'1px solid {quantum_theme["accent1"]}',
+                                            },
+                                            children=[
+                                                html.Div(
+                                                    className="d-flex align-items-center justify-content-between",
+                                                    children=[
+                                                        html.Small("Node Status", style={'color': quantum_theme['accent1']}),
+                                                        html.Span("SYNCED", style={'color': quantum_theme['success'], 'fontSize': '0.75rem'})
+                                                    ]
+                                                ),
+                                                html.Div(
+                                                    "5 / 5",
+                                                    style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '1rem', 'marginTop': '2px'}
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                ),
+                                
+                                html.Div(
+                                    className="col-6 col-lg-3",
+                                    children=[
+                                        html.Div(
+                                            className="p-2",
+                                            style={
+                                                'backgroundColor': 'rgba(10, 14, 23, 0.7)',
+                                                'borderRadius': '6px',
+                                                'border': f'1px solid {quantum_theme["accent2"]}',
+                                            },
+                                            children=[
+                                                html.Div(
+                                                    className="d-flex align-items-center justify-content-between",
+                                                    children=[
+                                                        html.Small("Hash Power", style={'color': quantum_theme['accent2']}),
+                                                        html.Span("OPTIMAL", style={'color': quantum_theme['success'], 'fontSize': '0.75rem'})
+                                                    ]
+                                                ),
+                                                html.Div(
+                                                    "∞ TH/s",
+                                                    style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '1rem', 'marginTop': '2px'}
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                ),
+                                
+                                html.Div(
+                                    className="col-6 col-lg-3",
+                                    children=[
+                                        html.Div(
+                                            className="p-2",
+                                            style={
+                                                'backgroundColor': 'rgba(10, 14, 23, 0.7)',
+                                                'borderRadius': '6px',
+                                                'border': f'1px solid {quantum_theme["highlight"]}',
+                                            },
+                                            children=[
+                                                html.Div(
+                                                    className="d-flex align-items-center justify-content-between",
+                                                    children=[
+                                                        html.Small("Memory Pool", style={'color': quantum_theme['highlight']}),
+                                                        html.Span("OPTIMIZED", style={'color': quantum_theme['success'], 'fontSize': '0.75rem'})
+                                                    ]
+                                                ),
+                                                html.Div(
+                                                    "13.37 MB",
+                                                    style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '1rem', 'marginTop': '2px'}
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                        
+                        # Action buttons
+                        html.Div(
+                            className="d-flex justify-content-between mt-3",
+                            children=[
+                                dbc.Button(
+                                    className="d-flex align-items-center justify-content-center",
+                                    size="sm",
+                                    style={
+                                        'backgroundColor': 'transparent',
+                                        'border': f'1px solid {quantum_theme["accent1"]}',
+                                        'color': quantum_theme['accent1']
+                                    },
+                                    children=[
+                                        html.I(className="fas fa-sync-alt me-2"),
+                                        "QA Scan"
+                                    ],
+                                    id="matrix-qa-scan-btn"
+                                ),
+                                dbc.Button(
+                                    className="d-flex align-items-center justify-content-center",
+                                    size="sm",
+                                    style={
+                                        'backgroundColor': 'transparent',
+                                        'border': f'1px solid {quantum_theme["accent2"]}',
+                                        'color': quantum_theme['accent2']
+                                    },
+                                    children=[
+                                        html.I(className="fas fa-shield-alt me-2"),
+                                        "Chain Validation"
+                                    ],
+                                    id="matrix-validation-btn"
+                                ),
+                                dbc.Button(
+                                    className="d-flex align-items-center justify-content-center",
+                                    size="sm",
+                                    style={
+                                        'backgroundColor': 'transparent',
+                                        'border': f'1px solid {quantum_theme["highlight"]}',
+                                        'color': quantum_theme['highlight']
+                                    },
+                                    children=[
+                                        html.I(className="fas fa-project-diagram me-2"),
+                                        "5D Analysis"
+                                    ],
+                                    id="matrix-analysis-btn"
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
 
 def run_dashboard():
     """Run the Quantum 5D QA Dashboard"""
