@@ -16,14 +16,9 @@ __author__ = 'GBU2™ Divine Team'
 __license__ = 'GBU2™ LICENSE - Genesis-Bloom-Unfoldment 2.0'
 
 # Import main classes and functions for easier access
-try:
-    from .zorobabel_k1l1 import ZorobabelMapper
-    from .dem_util import DEMDownloader, ensure_dem_available
-except ImportError:
-    # Handle the case when dependencies are not installed
-    # This allows the package to be imported but will raise errors
-    # only when the specific modules are used
-    pass
+# Make these imports explicitly available at the package level
+from .zorobabel_k1l1 import ZorobabelMapper
+from .dem_util import DEMDownloader, ensure_dem_available
 
 
 def run_web_interface(port=8050, auto_open_browser=True):

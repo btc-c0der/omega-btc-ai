@@ -14,19 +14,20 @@ import sys
 import argparse
 from pathlib import Path
 
-# Ensure the parent directory is in the path so we can import the geospatial package
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+# Add the parent directory to the Python path
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parents[3]
+sys.path.insert(0, str(project_root))
 
 try:
-    from src.omega_bot_farm.geospatial import (
-        ZorobabelMapper, 
-        ensure_dem_available,
-        run_web_interface
-    )
+    # Import the required modules directly
+    from src.omega_bot_farm.geospatial.zorobabel_k1l1 import ZorobabelMapper
+    from src.omega_bot_farm.geospatial.dem_util import ensure_dem_available
+    from src.omega_bot_farm.geospatial.zorobabel_ui import main as ui_main
 except ImportError as e:
     print(f"⚠️ Error importing Zorobabel K1L1 system: {e}")
     print("⚠️ Please ensure all dependencies are installed:")
-    print("⚠️ pip install -r requirements.txt")
+    print("⚠️ pip install -r src/omega_bot_farm/geospatial/requirements.txt")
     sys.exit(1)
 
 
@@ -161,8 +162,7 @@ def main():
     if args.web:
         print("🌐 Launching ZOROBABEL K1L1 web interface...")
         # Pass port and browser preferences to the web interface
-        from src.omega_bot_farm.geospatial.zorobabel_ui import main as run_ui
-        run_ui(default_port=args.port, auto_open_browser=not args.no_browser)
+        ui_main(default_port=args.port, auto_open_browser=not args.no_browser)
     else:
         return run_cli_mode(args)
 
