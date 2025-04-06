@@ -11,8 +11,13 @@ import datetime
 import threading
 import logging
 import json
-from dash import Input, Output, State, ctx, no_update, html
+from dash import Input, Output, State, ctx, no_update, html, dcc, callback_context
 from typing import Dict, List, Any, Tuple, Optional
+import dash_bootstrap_components as dbc
+import random
+import plotly.graph_objects as go
+import pandas as pd
+import numpy as np
 
 # Import configuration and modules
 from .config import DASHBOARD_CONFIG, quantum_theme, ANSI_COLORS
@@ -26,7 +31,8 @@ from .visualization import (
     create_entanglement_visualization,
     create_metrics_table,
     create_terminal_output,
-    create_health_indicators
+    create_health_indicators,
+    create_empty_figure
 )
 from .test_runner import S0NN3TTestRunner
 

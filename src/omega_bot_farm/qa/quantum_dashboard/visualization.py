@@ -14,6 +14,8 @@ import numpy as np
 import datetime
 import math
 from typing import Dict, List, Any, Tuple, Optional
+import textwrap
+import re
 
 # Import configuration
 from .config import DASHBOARD_CONFIG, quantum_theme
@@ -529,72 +531,85 @@ def create_entanglement_visualization(metrics_data):
         entanglement = 0.5  # Default value if missing
     
     # Create a polar chart to show entanglement between dimensions
-    theta = np.linspace(0, 2*np.pi, 100)
-    radius = 1 + entanglement * np.sin(theta * 8)
-    
-    # Convert to cartesian coordinates
-    x = radius * np.cos(theta)
-    y = radius * np.sin(theta)
-    
-    # Add the entanglement plot
-    fig.add_trace(go.Scatter(
-        x=x,
-        y=y,
-        mode='lines',
-        fill='toself',
-        fillcolor='rgba(0, 255, 0, 0.3)',
-        line=dict(color='rgba(0, 255, 0, 0.8)', width=2),
-        name='Entanglement Field'
-    ))
-    
-    # Add dimension points
-    dimensions = ['Quality', 'Coverage', 'Performance', 'Security', 'Time']
-    
-    # Position the points in a circle
-    dim_theta = np.linspace(0, 2*np.pi, len(dimensions), endpoint=False)
-    dim_radius = [
-        metrics_data.get('quality_position', 50) / 100,
-        metrics_data.get('coverage_position', 50) / 100,
-        metrics_data.get('performance_position', 50) / 100,
-        metrics_data.get('security_position', 50) / 100,
-        0.5  # Fixed position for time
-    ]
-    
-    # Convert to cartesian coordinates
-    dim_x = [r * np.cos(t) for r, t in zip(dim_radius, dim_theta)]
-    dim_y = [r * np.sin(t) for r, t in zip(dim_radius, dim_theta)]
-    
-    # Add the dimension points
-    fig.add_trace(go.Scatter(
-        x=dim_x,
-        y=dim_y,
-        mode='markers+text',
-        marker=dict(
-            size=12,
-            color='rgba(255, 255, 255, 0.8)',
-            line=dict(
-                color='rgba(0, 255, 0, 1)',
-                width=2
-            )
-        ),
-        text=dimensions,
-        textposition="top center",
-        name='Dimensions'
-    ))
-    
-    # Add lines connecting the points to show entanglement
-    for i in range(len(dimensions)):
-        for j in range(i+1, len(dimensions)):
-            fig.add_trace(go.Scatter(
-                x=[dim_x[i], dim_x[j]],
-                y=[dim_y[i], dim_y[j]],
-                mode='lines',
+    try:
+        theta = np.linspace(0, 2*np.pi, 100)
+        radius = 1 + float(entanglement) * np.sin(theta * 8)
+        
+        # Convert to cartesian coordinates
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
+        
+        # Add the entanglement plot
+        fig.add_trace(go.Scatter(
+            x=x,
+            y=y,
+            mode='lines',
+            fill='toself',
+            fillcolor='rgba(0, 255, 0, 0.3)',
+            line=dict(color='rgba(0, 255, 0, 0.8)', width=2),
+            name='Entanglement Field'
+        ))
+        
+        # Add dimension points
+        dimensions = ['Quality', 'Coverage', 'Performance', 'Security', 'Time']
+        
+        # Position the points in a circle
+        dim_theta = np.linspace(0, 2*np.pi, len(dimensions), endpoint=False)
+        dim_radius = [
+            metrics_data.get('quality_position', 50) / 100,
+            metrics_data.get('coverage_position', 50) / 100,
+            metrics_data.get('performance_position', 50) / 100,
+            metrics_data.get('security_position', 50) / 100,
+            0.5  # Fixed position for time
+        ]
+        
+        # Convert to cartesian coordinates
+        dim_x = [r * np.cos(t) for r, t in zip(dim_radius, dim_theta)]
+        dim_y = [r * np.sin(t) for r, t in zip(dim_radius, dim_theta)]
+        
+        # Add the dimension points
+        fig.add_trace(go.Scatter(
+            x=dim_x,
+            y=dim_y,
+            mode='markers+text',
+            marker=dict(
+                size=12,
+                color='rgba(255, 255, 255, 0.8)',
                 line=dict(
-                    color=f'rgba(0, 255, 0, {entanglement * 0.7})',
-                    width=1
-                ),
-                showlegend=False
-            ))
+                    color='rgba(0, 255, 0, 1)',
+                    width=2
+                )
+            ),
+            text=dimensions,
+            textposition="top center",
+            name='Dimensions'
+        ))
+        
+        # Add lines connecting the points to show entanglement
+        for i in range(len(dimensions)):
+            for j in range(i+1, len(dimensions)):
+                fig.add_trace(go.Scatter(
+                    x=[dim_x[i], dim_x[j]],
+                    y=[dim_y[i], dim_y[j]],
+                    mode='lines',
+                    line=dict(
+                        color=f'rgba(0, 255, 0, {float(entanglement) * 0.7})',
+                        width=1
+                    ),
+                    showlegend=False
+                ))
+    except (ValueError, TypeError) as e:
+        # If any calculation fails, return a basic figure
+        fig = go.Figure()
+        fig.add_annotation(
+            text="Error generating entanglement visualization",
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=0.5,
+            showarrow=False
+        )
+        return fig
     
     # Update layout
     fig.update_layout(
@@ -626,41 +641,56 @@ def create_metrics_table(metrics):
     if metrics is None:
         return fig
     
-    # Safely get metric values with defaults
-    def safe_format(value, default=0):
-        if value is None:
-            return f"{default:.2f}"
-        return f"{value:.2f}"
-    
-    # Add a table with current metrics
-    fig.add_trace(go.Table(
-        header=dict(
-            values=["Metric", "Value"],
-            fill_color="#1e2130",
-            align="left",
-            font=dict(color="white", size=12)
-        ),
-        cells=dict(
-            values=[
-                ["Dimensional Stability", "Entanglement Factor", "Quantum Coherence", 
-                 "Collapse Risk", "Quality Position", "Coverage Position",
-                 "Performance Position", "Security Position"],
-                [
-                    safe_format(metrics.get('dimensional_stability')),
-                    safe_format(metrics.get('entanglement_factor')),
-                    safe_format(metrics.get('quantum_coherence')),
-                    safe_format(metrics.get('dimensional_collapse_risk')),
-                    safe_format(metrics.get('quality_position')),
-                    safe_format(metrics.get('coverage_position')),
-                    safe_format(metrics.get('performance_position')),
-                    safe_format(metrics.get('security_position'))
-                ]
-            ],
-            fill_color="#131722",
-            align="left",
-            font=dict(color="white", size=11)
+    try:
+        # Safely get metric values with defaults
+        def safe_format(value, default=0):
+            if value is None:
+                return f"{default:.2f}"
+            try:
+                return f"{float(value):.2f}"
+            except (ValueError, TypeError):
+                return f"{default:.2f}"
+        
+        # Add a table with current metrics
+        fig.add_trace(go.Table(
+            header=dict(
+                values=["Metric", "Value"],
+                fill_color="#1e2130",
+                align="left",
+                font=dict(color="white", size=12)
+            ),
+            cells=dict(
+                values=[
+                    ["Dimensional Stability", "Entanglement Factor", "Quantum Coherence", 
+                     "Collapse Risk", "Quality Position", "Coverage Position",
+                     "Performance Position", "Security Position"],
+                    [
+                        safe_format(metrics.get('dimensional_stability')),
+                        safe_format(metrics.get('entanglement_factor')),
+                        safe_format(metrics.get('quantum_coherence')),
+                        safe_format(metrics.get('dimensional_collapse_risk')),
+                        safe_format(metrics.get('quality_position')),
+                        safe_format(metrics.get('coverage_position')),
+                        safe_format(metrics.get('performance_position')),
+                        safe_format(metrics.get('security_position'))
+                    ]
+                ],
+                fill_color="#131722",
+                align="left",
+                font=dict(color="white", size=11)
+            )
+        ))
+    except Exception as e:
+        # If table creation fails, return a simple message
+        fig.add_annotation(
+            text="Error generating metrics table",
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=0.5,
+            showarrow=False
         )
-    ))
+        return fig
     
     # Update layout
     fig.update_layout(
@@ -674,7 +704,7 @@ def create_metrics_table(metrics):
     return fig
 
 
-def create_terminal_output(lines: List[str] = None) -> str:
+def create_terminal_output(lines: Optional[List[str]] = None) -> str:
     """Create a styled HTML representation of terminal output.
     
     Args:
@@ -778,4 +808,40 @@ def create_health_indicators(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
             "description": dim["description"]
         })
     
-    return indicators 
+    return indicators
+
+
+def create_empty_figure():
+    """Create an empty figure with the dashboard's styling."""
+    fig = go.Figure()
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=10, r=10, t=10, b=10),
+        showlegend=False,
+        xaxis=dict(
+            showgrid=False,
+            showticklabels=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            showgrid=False,
+            showticklabels=False,
+            zeroline=False
+        ),
+        annotations=[
+            dict(
+                text="No data available",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+                font=dict(
+                    color="#666666",
+                    size=14
+                )
+            )
+        ]
+    )
+    return fig 
