@@ -1,0 +1,271 @@
+/* AIXBT Dashboard Cyberpunk Styles */
+
+/* Custom fonts */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* Base styling */
+body {
+    font-family: 'Rajdhani', sans-serif;
+    background-color: #0A0E17;
+    color: #DCDDE1;
+    min-height: 100vh;
+}
+
+/* Monospace elements */
+code,
+pre,
+.monospace {
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Cyberpunk glowing effects */
+.glow-text-purple {
+    text-shadow: 0 0 5px #6C5CE7, 0 0 10px #6C5CE7;
+}
+
+.glow-text-blue {
+    text-shadow: 0 0 5px #74B9FF, 0 0 10px #74B9FF;
+}
+
+.glow-text-teal {
+    text-shadow: 0 0 5px #00CEC9, 0 0 10px #00CEC9;
+}
+
+.glow-text-pink {
+    text-shadow: 0 0 5px #FD79A8, 0 0 10px #FD79A8;
+}
+
+.glow-box {
+    box-shadow: 0 0 15px rgba(108, 92, 231, 0.3);
+    transition: box-shadow 0.3s ease;
+}
+
+.glow-box:hover {
+    box-shadow: 0 0 25px rgba(108, 92, 231, 0.5);
+}
+
+/* Custom card styling */
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #121A29;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #2D3436;
+    padding: 1rem 1.25rem;
+}
+
+/* Custom button styling */
+.btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Strategy button animations */
+#strategy-stealth-ladder-btn:hover,
+#strategy-fake-wall-btn:hover,
+#strategy-flow-spiral-btn:hover {
+    transform: translateY(-3px);
+    transition: all 0.3s ease;
+}
+
+#strategy-stealth-ladder-btn:hover i,
+#strategy-fake-wall-btn:hover i,
+#strategy-flow-spiral-btn:hover i {
+    animation: pulse 1.5s infinite;
+}
+
+/* Trap zone visualization */
+.trap-zone {
+    background: linear-gradient(45deg, rgba(225, 112, 85, 0.1), rgba(225, 112, 85, 0.2));
+    border: 1px solid rgba(225, 112, 85, 0.5);
+    border-radius: 5px;
+    padding: 0.5rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #121A29;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6C5CE7;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #A29BFE;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+    }
+
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Add glitch effect to title on hover */
+h1:hover {
+    animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+}
+
+/* Terminal-like container for strategy steps */
+.terminal-container {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    border: 1px solid #6C5CE7;
+    padding: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #E0E0E0;
+    position: relative;
+    overflow: hidden;
+}
+
+.terminal-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6C5CE7, #00CEC9, #74B9FF, #A29BFE);
+    z-index: 1;
+}
+
+/* Custom progress bars */
+.progress {
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-image: linear-gradient(to right, #6C5CE7, #00CEC9);
+    border-radius: 4px;
+}
+
+/* Matrix-inspired text effect for special elements */
+.matrix-text {
+    color: #00CEC9;
+    text-shadow: 0 0 5px #00CEC9;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Dashboard specific overrides for Dash components */
+.dash-graph {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Override dark theme tooltip */
+.dash-tooltip {
+    background-color: #121A29 !important;
+    border: 1px solid #6C5CE7 !important;
+    color: #DCDDE1 !important;
+    box-shadow: 0 0 10px rgba(108, 92, 231, 0.5) !important;
+}
+
+/* Digital number display for prices */
+.digital-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(108, 92, 231, 0.3);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 20px;
+    }
+
+    .container-fluid {
+        padding: 10px;
+    }
+}
+
+/* OMEGA TRAP ZONE™ warning styles */
+.trap-warning {
+    background-color: rgba(225, 112, 85, 0.1);
+    border: 1px solid rgba(225, 112, 85, 0.5);
+    border-radius: 5px;
+    padding: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.trap-warning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(45deg,
+            rgba(225, 112, 85, 0.1),
+            rgba(225, 112, 85, 0.1) 10px,
+            rgba(225, 112, 85, 0.2) 10px,
+            rgba(225, 112, 85, 0.2) 20px);
+    z-index: 0;
+    animation: move-bg 10s linear infinite;
+}
