@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-AIXBT Dashboard App Module
------------------------
+AIXBT Dashboard - Main Application
+----------------------------------
 
-Main application module for the AIXBT Trading Dashboard, integrating all components
-and providing the entry point to run the dashboard.
+Main application module for the AIXBT Trading Dashboard.
+Creates and configures the Dash application with all components.
 """
 
 import os
@@ -14,13 +14,15 @@ import socket
 import logging
 from pathlib import Path
 import dash
+from dash import html
 import dash_bootstrap_components as dbc
 from typing import Optional, Tuple
+from threading import Timer
 
 from . import logger
-from .layout import create_dashboard_layout
+from .config import DASHBOARD_CONFIG as AIXBT_CONFIG
+from .layout import create_dashboard_layout as create_layout
 from .callbacks import register_callbacks
-from .config import DASHBOARD_CONFIG
 
 def is_port_available(host: str, port: int) -> bool:
     """
@@ -78,71 +80,81 @@ def open_browser(host: str, port: int) -> None:
     webbrowser.open_new_tab(url)
     logger.info(f"Dashboard opened in browser at {url}")
 
-def create_app() -> dash.Dash:
+def create_app():
     """
-    Create and configure the Dash application.
+    Create and configure the Dash application without running it.
+    Useful for testing or WSGI deployments.
     
     Returns:
-        Configured Dash app instance
+        dash.Dash: Configured Dash application
     """
-    # Create assets folder if it doesn't exist
-    assets_dir = Path(__file__).parent / "assets"
-    assets_dir.mkdir(exist_ok=True)
-    
-    # Create Dash app
+    # Create Dash app with Bootstrap Cyborg theme
     app = dash.Dash(
         __name__,
-        external_stylesheets=[
-            dbc.themes.CYBORG,
-            "https://use.fontawesome.com/releases/v5.15.4/css/all.css"
-        ],
+        external_stylesheets=[dbc.themes.CYBORG],
+        title="AIXBT Trading Dashboard - OMEGA TRAP ZONE™",
         suppress_callback_exceptions=True,
-        title="AIXBT Trading Dashboard",
-        meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
+        meta_tags=[
+            {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+        ]
     )
     
-    # Set app layout
-    app.layout = create_dashboard_layout()
+    # Set custom CSS directory
+    app.css.config.serve_locally = True
+    
+    # Set up layout
+    app.layout = create_layout()
     
     # Register callbacks
     register_callbacks(app)
     
     return app
 
-def run_app(
-    host: str = "0.0.0.0",
-    port: int = 8051,
-    debug: bool = False,
-    open_browser: bool = True
-) -> None:
+def run_app(host="0.0.0.0", port=8055, debug=False, open_browser=True):
     """
     Run the AIXBT Dashboard application.
     
     Args:
-        host: Host address to bind to
-        port: Port number to bind to
-        debug: Whether to run in debug mode
-        open_browser: Whether to open a browser tab to the dashboard
+        host (str): Host to run the dashboard on
+        port (int): Port to run the dashboard on
+        debug (bool): Whether to run in debug mode
+        open_browser (bool): Whether to open browser automatically
     """
-    # Create the app
-    app = create_app()
+    # Create Dash app with Bootstrap Cyborg theme
+    app = dash.Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.CYBORG],
+        title="AIXBT Trading Dashboard - OMEGA TRAP ZONE™",
+        suppress_callback_exceptions=True,
+        meta_tags=[
+            {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+        ]
+    )
     
-    # Find an available port if the specified port is not available
-    if not is_port_available(host, port):
-        logger.warning(f"Port {port} is not available. Finding an available port...")
-        port = find_available_port(port)
-        logger.info(f"Using port {port} instead")
+    # Set custom CSS directory
+    app.css.config.serve_locally = True
     
-    # Print starting message
-    logger.info(f"Starting AIXBT Trading Dashboard on http://{host}:{port}")
+    # Set up layout
+    app.layout = create_layout()
+    
+    # Register callbacks
+    register_callbacks(app)
+    
+    # Function to open browser
+    def open_browser_tab():
+        webbrowser.open_new_tab(f"http://localhost:{port}")
     
     # Open browser if requested
     if open_browser:
-        webbrowser.open_new_tab(f"http://localhost:{port}")
+        Timer(1.5, open_browser_tab).start()
     
-    # Run the app
-    app.run(debug=debug, host=host, port=port)
+    # Run app
+    app.run_server(
+        host=host,
+        port=port,
+        debug=debug
+    )
 
 if __name__ == "__main__":
-    # Run the app with default settings
+    # When run directly, use default parameters
     run_app(debug=True)
