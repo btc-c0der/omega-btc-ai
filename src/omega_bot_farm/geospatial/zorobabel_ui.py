@@ -490,7 +490,7 @@ def main(default_port=8050, auto_open_browser=True):
             webbrowser.open(url)
         
         # Start the server
-        app.run_server(debug=True, port=port)
+        app.run(debug=True, port=port)
     
     except Exception as e:
         print(f"❌ Error starting ZOROBABEL K1L1 server: {e}")
