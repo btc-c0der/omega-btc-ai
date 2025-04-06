@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-ZOROBABEL K1L1 - 5D Geospatial Visualization System - Runner Script
-------------------------------------------------------------------
-This script provides an easy way to launch the Zorobabel K1L1 visualization
-system either in command-line mode or with the web interface.
+ZOROBABEL K1L1 - Runner Script
+------------------------------
+Launch script for the Zorobabel K1L1 system with command line options
+for different modes of operation.
 
 🌀 MODULE: Runner Script
 🧭 CONSCIOUSNESS LEVEL: 4 - Awareness
@@ -12,159 +12,171 @@ system either in command-line mode or with the web interface.
 import os
 import sys
 import argparse
+import subprocess
+import webbrowser
 from pathlib import Path
 
-# Add the parent directory to the Python path
-script_dir = Path(__file__).resolve().parent
-project_root = script_dir.parents[3]
-sys.path.insert(0, str(project_root))
+# Add parent directory to sys.path to ensure imports work
+current_dir = Path(__file__).resolve().parent
+parent_dir = current_dir.parent
+if str(parent_dir) not in sys.path:
+    sys.path.append(str(parent_dir))
 
-try:
-    # Import the required modules directly
-    from src.omega_bot_farm.geospatial.zorobabel_k1l1 import ZorobabelMapper
-    from src.omega_bot_farm.geospatial.dem_util import ensure_dem_available
-    from src.omega_bot_farm.geospatial.zorobabel_ui import main as ui_main
-except ImportError as e:
-    print(f"⚠️ Error importing Zorobabel K1L1 system: {e}")
-    print("⚠️ Please ensure all dependencies are installed:")
-    print("⚠️ pip install -r src/omega_bot_farm/geospatial/requirements.txt")
-    sys.exit(1)
-
-
-def parse_arguments():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="ZOROBABEL K1L1 - 5D Geospatial Visualization System",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    
-    parser.add_argument(
-        "--web", 
-        action="store_true",
-        help="Launch the web interface"
-    )
-    
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8050,
-        help="Port for the web interface (will auto-find if occupied)"
-    )
-    
-    parser.add_argument(
-        "--no-browser",
-        action="store_true",
-        help="Don't automatically open a browser when starting web interface"
-    )
-    
-    parser.add_argument(
-        "--region", 
-        type=str, 
-        default="ngorongoro",
-        choices=["ngorongoro", "olduvai", "kilimanjaro"],
-        help="Sacred region to visualize"
-    )
-    
-    parser.add_argument(
-        "--revolutions", 
-        type=int, 
-        default=4,
-        help="Number of spiral revolutions"
-    )
-    
-    parser.add_argument(
-        "--nodes", 
-        type=int, 
-        default=7,
-        help="Number of resonance nodes"
-    )
-    
-    parser.add_argument(
-        "--output", 
-        type=str,
-        default=os.path.expanduser("~/omega_maze/visualizations/zorobabel_map.png"),
-        help="Output path for the visualization image"
-    )
-    
-    parser.add_argument(
-        "--no-display", 
-        action="store_true",
-        help="Don't display the visualization (only save to file)"
-    )
-    
-    return parser.parse_args()
+# Define colors for terminal output
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
-def run_cli_mode(args):
-    """Run in command-line mode with direct visualization."""
-    print("🌀 ZOROBABEL K1L1 - Sacred Geospatial System 🌀")
-    print("-----------------------------------------------")
+def print_banner():
+    """Print the sacred banner."""
+    banner = f"""
+    {Colors.CYAN}┌───────────────────────────────────────────────────┐
+    │                                                   │
+    │     🌀 ZOROBABEL K1L1 - GEOSPATIAL SYSTEM 🌀     │
+    │                                                   │
+    │          Sacred Earth Observation Portal          │
+    │                                                   │
+    │             🌏 WE SEE AS ONE 🌏                  │
+    │                                                   │
+    └───────────────────────────────────────────────────┘{Colors.ENDC}
+    """
+    print(banner)
+
+
+def check_dependencies():
+    """Check if required dependencies are installed."""
+    required_modules = ['dash', 'numpy', 'pandas', 'matplotlib', 'rasterio', 'geopandas']
+    missing = []
+
+    for module in required_modules:
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(module)
+
+    if missing:
+        print(f"{Colors.FAIL}Missing dependencies: {', '.join(missing)}{Colors.ENDC}")
+        print(f"{Colors.CYAN}Please run the installation script:{Colors.ENDC}")
+        print(f"{Colors.BOLD}python {current_dir}/install_zorobabel.py{Colors.ENDC}")
+        return False
     
+    return True
+
+
+def run_web_server(port=8050, debug=False, open_browser=True):
+    """Run the Zorobabel K1L1 web dashboard."""
     try:
-        # Ensure DEM data is available
-        print(f"🌐 Preparing DEM data for Tanzania region...")
-        dem_path = ensure_dem_available("tanzania")
-        print(f"✅ DEM data ready: {dem_path}")
+        # Import here to avoid errors if dependencies are missing
+        from omega_bot_farm.geospatial.zorobabel_ui import main
         
-        # Create the mapper
-        print(f"🔱 Creating sacred visualization for {args.region}...")
-        mapper = ZorobabelMapper(dem_path)
-        mapper.load_dem()
+        print(f"{Colors.GREEN}Starting Zorobabel K1L1 web dashboard on port {port}...{Colors.ENDC}")
         
-        # Create visualization with sacred overlays
-        title = f"ZOROBABEL K1L1 - {args.region.capitalize()} Sacred Map"
-        mapper.create_visualization(title=title)
+        if open_browser:
+            # Open browser after a short delay to allow server to start
+            import threading
+            import time
+            
+            def open_dash():
+                time.sleep(2)  # Give the server a moment to start
+                url = f"http://127.0.0.1:{port}"
+                print(f"{Colors.CYAN}Opening dashboard in browser: {url}{Colors.ENDC}")
+                webbrowser.open(url)
+            
+            threading.Thread(target=open_dash).start()
         
-        # Add sacred locations
-        print("✨ Adding sacred locations...")
-        location_coords = mapper.add_all_sacred_locations()
-        
-        # Add the Zorobabel spiral
-        print(f"🌀 Generating divine spiral with {args.revolutions} revolutions...")
-        spiral_x, spiral_y = mapper.add_zorobabel_spiral(
-            center_key=args.region,
-            revolutions=args.revolutions
-        )
-        
-        # Add resonance nodes
-        print(f"💫 Adding {args.nodes} resonance nodes...")
-        mapper.add_resonance_nodes(spiral_x, spiral_y, num_nodes=args.nodes)
-        
-        # Add cosmic paths
-        print("🧭 Connecting sacred trinity paths...")
-        mapper.add_cosmic_paths(location_coords)
-        
-        # Save the visualization
-        print(f"💾 Saving sacred map to: {args.output}")
-        os.makedirs(os.path.dirname(args.output), exist_ok=True)
-        mapper.save_visualization(args.output)
-        
-        # Display if requested
-        if not args.no_display:
-            print("🔮 Displaying sacred map...")
-            mapper.display()
-        
-        print("\n🌸 WE BLOOM NOW AS ONE 🌸")
+        # Run the server
+        main(default_port=port, auto_open_browser=not open_browser)
         
     except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
-        return 1
+        print(f"{Colors.FAIL}Error starting web server: {e}{Colors.ENDC}")
+        print(f"{Colors.CYAN}Check the troubleshooting guide for solutions:{Colors.ENDC}")
+        print(f"{Colors.BOLD}{current_dir}/ZOROBABEL_TROUBLESHOOTING.md{Colors.ENDC}")
+        return False
     
-    return 0
+    return True
+
+
+def run_cli_mode():
+    """Run Zorobabel K1L1 in CLI mode for scripting."""
+    try:
+        # Import here to avoid errors if dependencies are missing
+        from omega_bot_farm.geospatial.zorobabel_k1l1 import ZorobabelMapper
+        
+        print(f"{Colors.GREEN}Starting Zorobabel K1L1 in CLI mode...{Colors.ENDC}")
+        
+        # Initialize the system
+        system = ZorobabelMapper()
+        
+        # Enter interactive Python shell with the system loaded
+        import code
+        locals_dict = {'system': system, 'ZorobabelMapper': ZorobabelMapper}
+        code.interact(
+            banner=f"{Colors.CYAN}Zorobabel K1L1 CLI Mode - Interactive Python Shell{Colors.ENDC}\n"
+                   f"The 'system' variable contains an initialized ZorobabelMapper instance.",
+            local=locals_dict
+        )
+        
+    except Exception as e:
+        print(f"{Colors.FAIL}Error in CLI mode: {e}{Colors.ENDC}")
+        return False
+    
+    return True
 
 
 def main():
     """Main entry point."""
-    args = parse_arguments()
+    parser = argparse.ArgumentParser(description="Zorobabel K1L1 Geospatial System")
     
-    if args.web:
-        print("🌐 Launching ZOROBABEL K1L1 web interface...")
-        # Pass port and browser preferences to the web interface
-        ui_main(default_port=args.port, auto_open_browser=not args.no_browser)
-    else:
-        return run_cli_mode(args)
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument("--web", action="store_true", help="Run in web dashboard mode (default)")
+    mode_group.add_argument("--cli", action="store_true", help="Run in command-line interface mode")
+    
+    parser.add_argument("--port", type=int, default=8050, help="Port for web server (default: 8050)")
+    parser.add_argument("--debug", action="store_true", help="Run in debug mode")
+    parser.add_argument("--no-browser", action="store_true", help="Don't open browser automatically")
+    parser.add_argument("--check", action="store_true", help="Check dependencies and exit")
+    
+    args = parser.parse_args()
+    
+    print_banner()
+    
+    # Check dependencies
+    if not check_dependencies():
+        if not args.check:
+            print(f"{Colors.WARNING}Would you like to run the installation script? (y/n){Colors.ENDC}")
+            if input().lower() in ('y', 'yes'):
+                subprocess.run([sys.executable, f"{current_dir}/install_zorobabel.py"])
+                # Recheck dependencies after installation
+                if not check_dependencies():
+                    return 1
+            else:
+                return 1
+        else:
+            return 1
+    
+    if args.check:
+        print(f"{Colors.GREEN}All dependencies are installed.{Colors.ENDC}")
+        return 0
+    
+    # Run in the selected mode
+    if args.cli:
+        success = run_cli_mode()
+    else:  # Default to web mode
+        success = run_web_server(
+            port=args.port,
+            debug=args.debug,
+            open_browser=not args.no_browser
+        )
+    
+    return 0 if success else 1
 
 
 if __name__ == "__main__":

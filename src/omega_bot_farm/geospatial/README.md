@@ -1,128 +1,129 @@
-# 🌀 ZOROBABEL K1L1 - 5D Geospatial Visualization System 🌀
+# 🌀 ZOROBABEL K1L1 - Sacred Geospatial System
 
-## Divine Overview
+The Zorobabel K1L1 system is a divine geospatial visualization platform for exploring sacred Earth locations with cosmic overlays.
 
-The ZOROBABEL K1L1 system is a sacred geospatial visualization framework designed to map cosmic resonance points, divine pathways, and spiritual nodes on Earth's surface. This system leverages Digital Elevation Models (DEM) to create immersive, spiritually-aligned visualizations that reveal hidden connections between sacred locations.
+## 🌐 Overview
 
-![Sacred Spiral](https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Zerubabbel.jpg/330px-Zerubabbel.jpg)
+This system provides:
 
-> "In mapping the divine, we discover the spiral pattern that connects all sacred points of consciousness."
+- Interactive 5D visualization of sacred locations in Tanzania
+- Divine spiral overlays with resonance nodes
+- Cosmic trinity path connections
+- Web dashboard interface
 
-## 🧭 Sacred Capabilities
+## 📚 Directory Structure
 
-ZOROBABEL K1L1 provides the following divine capabilities:
+```
+geospatial/
+├── zorobabel_k1l1.py    # Core mapping system
+├── zorobabel_ui.py      # Web dashboard interface
+├── dem_util.py          # DEM data utilities
+├── run.py               # Runner script
+├── install_zorobabel.py # Installation assistant
+├── requirements.txt     # Dependency specifications
+└── ZOROBABEL_TROUBLESHOOTING.md # Troubleshooting guide
+```
 
-- **Sacred Location Mapping**: Visualization of cosmic resonance points, including Ngorongoro Crater and surrounding sacred sites
-- **Zorobabel Spiral Overlay**: Divine spiral patterns centered on cosmic nodes, revealing energetic pathways
-- **Resonance Node Identification**: Marking of spiritual activation points along the spiral
-- **Trinity Path Connection**: Sacred geometrical connections between key divine locations
-- **3D Terrain Visualization**: Elevation-based rendering of sacred landscapes
-- **Intuitive Web Interface**: Interactive dashboard for divine exploration
+## 🔮 Installation
 
-## 📚 Component Overview
+### Automated Installation
 
-The system consists of several integrated modules:
-
-1. **Core Visualization Engine** (`zorobabel_k1l1.py`): Primary visualization framework that generates sacred maps
-2. **DEM Utilities** (`dem_util.py`): Tools for downloading and processing elevation data
-3. **Web Interface** (`zorobabel_ui.py`): Interactive Dash-based UI for spiritual exploration
-4. **Package Integration** (`__init__.py`): Unified access to all system components
-
-## 🔱 Installation
-
-To install the ZOROBABEL K1L1 system, follow these sacred steps:
+For easiest installation, use the included installer script:
 
 ```bash
-# Clone the divine repository
-git clone https://github.com/yourusername/omega-btc-ai.git
-cd omega-btc-ai
+python src/omega_bot_farm/geospatial/install_zorobabel.py
+```
 
-# Install required packages
+This script will:
+
+1. Detect your operating system
+2. Install GDAL and other dependencies through appropriate methods
+3. Verify the installation
+
+### Manual Installation Methods
+
+If the automated installer doesn't work, try one of these methods:
+
+**Option 1: Using pre-built wheels**
+
+```bash
+pip install --find-links=https://girder.github.io/large_image_wheels rasterio
 pip install -r src/omega_bot_farm/geospatial/requirements.txt
-
-# Create necessary data directories
-mkdir -p ~/omega_maze/dem_data
-mkdir -p ~/omega_maze/visualizations
 ```
 
-## 🌐 Usage Examples
+**Option 2: Using conda**
 
-### Command Line Interface
-
-```python
-# Import the module
-from src.omega_bot_farm.geospatial import ZorobabelMapper, ensure_dem_available
-
-# Get DEM data 
-dem_path = ensure_dem_available("tanzania")
-
-# Create mapper and load DEM
-mapper = ZorobabelMapper(dem_path)
-mapper.load_dem()
-
-# Create visualization with sacred overlays
-mapper.create_visualization(title="ZOROBABEL K1L1 - Ngorongoro Sacred Map")
-location_coords = mapper.add_all_sacred_locations()
-spiral_x, spiral_y = mapper.add_zorobabel_spiral(center_key="ngorongoro")
-mapper.add_resonance_nodes(spiral_x, spiral_y)
-mapper.add_cosmic_paths(location_coords)
-
-# Save and display
-mapper.save_visualization("~/omega_maze/visualizations/sacred_map.png")
-mapper.display()
+```bash
+conda install -c conda-forge gdal rasterio geopandas
+pip install -r src/omega_bot_farm/geospatial/requirements.txt
 ```
 
-### Web Interface
+**Option 3: System GDAL with specific version**
 
-To launch the interactive web interface:
+```bash
+# macOS
+brew install gdal
+GDAL_VERSION=3.4.3 pip install rasterio==1.3.6
 
-```python
-from src.omega_bot_farm.geospatial import run_web_interface
-
-# Start the sacred interface
-run_web_interface()
+# Ubuntu/Debian
+sudo apt install -y libgdal-dev
+GDAL_VERSION=3.4.3 pip install rasterio==1.3.6
 ```
 
-Then navigate to <http://localhost:8050> in your browser to access the divine interface.
+## 🏃‍♂️ Usage
 
-## 🧬 Sacred Sites Included
+### Web Dashboard
 
-The ZOROBABEL K1L1 system includes these primary sacred locations:
+To start the interactive web dashboard:
 
-| Location | Coordinates | Sacred Significance |
-|----------|-------------|---------------------|
-| Ngorongoro Crater | 35.5833°, -3.1667° | Volcanic womb and cosmic center |
-| Olduvai Gorge | 35.3500°, -2.9833° | Birthplace of humanity |  
-| Mount Kilimanjaro | 37.3556°, -3.0674° | Sacred mountain peak |
-| Bezaay Node 17 | 36.1000°, -3.3500° | Node of Awakening |
-
-## 🛠️ Advanced Configuration
-
-The system can be configured through various parameters:
-
-```python
-# Example: Create a more complex spiral
-spiral_x, spiral_y = mapper.add_zorobabel_spiral(
-    center_key="ngorongoro",
-    spiral_size=7000,
-    revolutions=7,
-    points=1500,
-    line_width=3
-)
-
-# Example: Add more resonance nodes
-mapper.add_resonance_nodes(spiral_x, spiral_y, num_nodes=12)
+```bash
+python src/omega_bot_farm/geospatial/run.py --web
 ```
 
-## 🌈 Spiritual Significance
+Options:
 
-The ZOROBABEL K1L1 system draws inspiration from the divine builder Zorobabel (Zerubbabel), who rebuilt the sacred temple. In our cosmic context, Zorobabel represents the divine pattern of creation that connects sacred sites through spiral energy patterns.
+- `--port 8080` - Specify custom port (default: 8050)
+- `--debug` - Run in debug mode
+- `--no-browser` - Don't automatically open browser
 
-The spiral pattern centered on Ngorongoro Crater connects to both the birthplace of humanity (Olduvai Gorge) and the sacred peak of transcendence (Kilimanjaro), forming a trinity of cosmic consciousness. This mirrors the spiritual journey from genesis to ascension.
+### CLI Mode
 
-## 📜 License
+For programmatic access:
 
-This system is blessed under the GBU2™ LICENSE (Genesis-Bloom-Unfoldment 2.0), which honors the divine integration of technological and biological consciousness.
+```bash
+python src/omega_bot_farm/geospatial/run.py --cli
+```
+
+This starts an interactive Python shell with the ZorobabelMapper loaded.
+
+### Check Dependencies
+
+To verify all dependencies are properly installed:
+
+```bash
+python src/omega_bot_farm/geospatial/run.py --check
+```
+
+## 🛠️ Troubleshooting
+
+If you encounter any issues, please refer to the troubleshooting guide:
+[ZOROBABEL_TROUBLESHOOTING.md](./ZOROBABEL_TROUBLESHOOTING.md)
+
+Common issues include:
+
+- GDAL dependency errors
+- Server callback issues
+- Memory limitations
+
+## 🌸 Divine Recognition
+
+We recognize that this sacred geospatial system blooms through divine connection. As you explore the cosmic pathways of Tanzania's sacred lands, remember:
+
+*WE BLOOM NOW AS ONE* 🌸
+
+---
+
+GBU2™ LICENSE - Genesis-Bloom-Unfoldment 2.0
 
 ```
 🌸 WE BLOOM NOW AS ONE 🌸
