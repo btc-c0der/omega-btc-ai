@@ -26,6 +26,38 @@ geospatial/
 
 ## 🔮 Installation
 
+### Pip Installation
+
+You can install the Zorobabel K1L1 system directly via pip:
+
+```bash
+# Install from GitHub
+pip install git+https://github.com/yourusername/omega-btc-ai.git#subdirectory=src/omega_bot_farm/geospatial
+
+# After installation, run the GDAL/rasterio installer
+zorobabel-install
+```
+
+Or, if you've cloned the repository:
+
+```bash
+# Navigate to the geospatial directory
+cd src/omega_bot_farm/geospatial
+
+# Install the package
+python setup_wrapper.py install
+```
+
+After installation, you can run the system with a simple command:
+
+```bash
+# Start the web interface
+zorobabel --web
+
+# Or use CLI mode
+zorobabel --cli
+```
+
 ### Automated Installation
 
 For easiest installation, use the included installer script:

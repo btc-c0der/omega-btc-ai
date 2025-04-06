@@ -1,0 +1,4 @@
+include README.md
+include ZOROBABEL_TROUBLESHOOTING.md
+include requirements.txt
+recursive-include omega_bot_farm/geospatial *.py *.md 
