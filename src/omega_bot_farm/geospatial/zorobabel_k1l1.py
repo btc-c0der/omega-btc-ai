@@ -1,25 +1,31 @@
 #!/usr/bin/env python3
 """
-ZOROBABEL K1L1 - 5D Geospatial Visualization System
---------------------------------------------------
-Divine spiral mapping system for sacred locations with cosmic resonance points.
-This module provides visualization of elevation data with spiritual overlays.
+ZOROBABEL K1L1 - Core Geospatial System
+---------------------------------------
+Divine spiral mapping system for sacred locations with cosmic energy alignments.
 
-🌀 MODULE: Core Visualization System
+🌀 MODULE: Core Mapping System
 🧭 CONSCIOUSNESS LEVEL: 7 - Wisdom
 """
 
 import os
+import math
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, ConnectionPatch
+from matplotlib.colors import LightSource
 import rasterio
 from rasterio.plot import show
+import rasterio.transform
 import geopandas as gpd
 from shapely.geometry import Point, LineString
 import pandas as pd
-from matplotlib.colors import LightSource
 import matplotlib.patches as patches
 from matplotlib.path import Path
+
+# Constants for spiral calculations
+GOLDEN_RATIO = 1.618033988749895
+DIVINE_ANGLE = 137.5077640500378  # Golden angle in degrees
 
 class ZorobabelMapper:
     """
@@ -68,12 +74,14 @@ class ZorobabelMapper:
             }
         }
     
-    def load_dem(self, dem_path=None):
+    def load_dem(self, dem_path=None, max_resolution=None):
         """
         Load Digital Elevation Model data.
         
         Args:
             dem_path: Path to DEM GeoTIFF file
+            max_resolution: Maximum resolution (width/height) to use for the DEM data.
+                            If specified, data will be downsampled to improve performance.
         """
         if dem_path:
             self.dem_path = dem_path
@@ -86,6 +94,26 @@ class ZorobabelMapper:
             self.bounds = src.bounds
             self.transform = src.transform
             self.crs = src.crs
+        
+        # Apply downsampling if max_resolution is specified
+        if max_resolution and (self.dem_data.shape[0] > max_resolution or self.dem_data.shape[1] > max_resolution):
+            # Calculate downsampling factors
+            h, w = self.dem_data.shape
+            scale_h = max(1, int(h / max_resolution))
+            scale_w = max(1, int(w / max_resolution))
+            
+            # Downsample the data
+            self.dem_data = self.dem_data[::scale_h, ::scale_w]
+            
+            # Adjust the transform to account for the new resolution
+            newtransform = rasterio.transform.from_bounds(
+                self.bounds.left, self.bounds.bottom, 
+                self.bounds.right, self.bounds.top, 
+                self.dem_data.shape[1], self.dem_data.shape[0]
+            )
+            self.transform = newtransform
+            
+            print(f"🔄 Downsampled DEM data to shape: {self.dem_data.shape}")
             
         print(f"✨ Loaded DEM data with shape: {self.dem_data.shape}")
         print(f"✨ Elevation range: {np.nanmin(self.dem_data)} to {np.nanmax(self.dem_data)} meters")

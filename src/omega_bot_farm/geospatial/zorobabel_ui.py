@@ -14,6 +14,14 @@ import base64
 import io
 import socket
 import webbrowser
+import gc
+import logging
+import traceback
+
+# Force non-interactive Matplotlib backend to prevent crashes
+import matplotlib
+matplotlib.use('Agg')  # Set this before importing pyplot
+
 import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
@@ -21,6 +29,17 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(os.path.join(os.path.dirname(__file__), "zorobabel_ui.log"))
+    ]
+)
+logger = logging.getLogger("zorobabel_ui")
 
 # Local imports (assuming they are in the same directory)
 from . import dem_util
@@ -34,6 +53,7 @@ app = dash.Dash(
     meta_tags=[
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"}
     ],
+    suppress_callback_exceptions=True  # Allow for more grace in callbacks
 )
 
 # Set app title
@@ -332,12 +352,19 @@ def generate_visualization(n_clicks, region, overlays, revolutions, node_count):
         return dash.no_update, dash.no_update
     
     try:
+        # Clear previous plot data to prevent memory leaks
+        plt.close('all')
+        
+        logger.info(f"Generating visualization for region: {region}, revs: {revolutions}, nodes: {node_count}")
+        
         # Ensure DEM data is available
         dem_path = dem_util.ensure_dem_available("tanzania")
         
         # Create the Zorobabel mapper
         mapper = zorobabel_k1l1.ZorobabelMapper(dem_path)
-        mapper.load_dem()
+        
+        # Limit DEM resolution to prevent memory issues
+        mapper.load_dem(max_resolution=1200)
         
         # Create visualization
         mapper.create_visualization(title=f"ZOROBABEL K1L1 - {region.capitalize()} Visualization")
@@ -358,10 +385,10 @@ def generate_visualization(n_clicks, region, overlays, revolutions, node_count):
         if "paths" in overlays:
             mapper.add_cosmic_paths(location_coords)
         
-        # Save the visualization to a BytesIO object
+        # Save the visualization to a BytesIO object with reduced DPI
         img_io = io.BytesIO()
         plt.tight_layout()
-        plt.savefig(img_io, format='png', dpi=150, bbox_inches='tight')
+        plt.savefig(img_io, format='png', dpi=100, bbox_inches='tight')
         img_io.seek(0)
         
         # Convert the image to base64 for display
@@ -389,10 +416,15 @@ def generate_visualization(n_clicks, region, overlays, revolutions, node_count):
         else:
             location_info = "No location information available."
         
+        # Force garbage collection to free memory
+        gc.collect()
+        
+        logger.info(f"Successfully generated visualization for {region}")
         return img_src, location_info
         
     except Exception as e:
         error_msg = f"Error generating visualization: {str(e)}"
+        logger.error(f"{error_msg}\n{traceback.format_exc()}")
         return dash.no_update, error_msg
 
 
