@@ -24,6 +24,15 @@ from .config import DASHBOARD_CONFIG as AIXBT_CONFIG
 from .layout import create_dashboard_layout as create_layout
 from .callbacks import register_callbacks
 
+# Conditionally import price feed
+try:
+    from .price_feed import init_price_feed, get_price_feed
+    from .config import update_current_price, get_current_price
+    HAVE_PRICE_FEED = True
+except ImportError:
+    logger.warning("Price feed module not available or CCXT not installed")
+    HAVE_PRICE_FEED = False
+
 def is_port_available(host: str, port: int) -> bool:
     """
     Check if the specified port is available on the host.
@@ -133,6 +142,37 @@ def run_app(host="0.0.0.0", port=8055, debug=False, open_browser=True):
     
     # Set custom CSS directory
     app.css.config.serve_locally = True
+    
+    # Initialize real-time price feed if available
+    if HAVE_PRICE_FEED:
+        logger.info("Initializing real-time price feed...")
+        try:
+            # Get exchange config
+            exchange_config = AIXBT_CONFIG.get("exchange", {})
+            token_config = AIXBT_CONFIG.get("token", {})
+            ui_config = AIXBT_CONFIG.get("ui", {})
+            
+            # Define price update callback
+            def on_price_update(price: float):
+                update_current_price(price)
+                logger.debug(f"Price updated: {price:.5f}")
+            
+            # Initialize price feed
+            init_price_feed(
+                exchange_id=exchange_config.get("exchange_id", "bitget"),
+                symbol=token_config.get("symbol", "AIXBTUSDT"),
+                api_key=exchange_config.get("api_key"),
+                api_secret=exchange_config.get("api_secret"),
+                api_passphrase=exchange_config.get("api_passphrase"),
+                use_testnet=exchange_config.get("use_testnet", False),
+                update_callback=on_price_update,
+                polling_interval=ui_config.get("price_feed_interval", 2.0),
+                use_websocket=ui_config.get("use_websocket", True)
+            )
+            
+            logger.info("Real-time price feed started successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize price feed: {e}")
     
     # Set up layout
     app.layout = create_layout()

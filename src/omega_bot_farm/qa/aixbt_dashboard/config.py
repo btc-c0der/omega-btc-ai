@@ -7,6 +7,13 @@ Configuration settings for the AIXBT Dashboard, including token metrics,
 UI theme settings, and visualization parameters.
 """
 
+import os
+import logging
+from typing import Dict, Any, Optional, Callable
+
+# Configure logging
+logger = logging.getLogger("AIXBTDashboard.Config")
+
 # AIXBT Token Configuration
 TOKEN_CONFIG = {
     "entry_price": 0.08198,
@@ -15,6 +22,7 @@ TOKEN_CONFIG = {
     "token_quantity": 51552,
     "price_target": 1.00,
     "fees_rate": 0.001,  # 0.1%
+    "symbol": "AIXBTUSDT"  # Trading symbol for price feed
 }
 
 # Calculate important levels
@@ -27,10 +35,12 @@ BREAKEVEN_PRICE = TOKEN_CONFIG["entry_price"] + (
 
 # Dashboard UI Configuration
 UI_CONFIG = {
-    "refresh_interval": 15,  # seconds
+    "refresh_interval": 5,  # seconds
     "animation_speed": 0.75,
     "dark_mode": True,
     "fullscreen_default": False,
+    "price_feed_interval": 2.0,  # seconds for price feed updates
+    "use_websocket": True,  # whether to use WebSocket for price feed
 }
 
 # OMEGA Trap Zone™ Configuration
@@ -79,6 +89,15 @@ THEME = {
     "gold": "#FFD700",         # Gold for PnL
 }
 
+# BitGet exchange configuration
+EXCHANGE_CONFIG = {
+    "exchange_id": "bitget",
+    "use_testnet": os.environ.get("USE_TESTNET", "false").lower() == "true",
+    "api_key": os.environ.get("BITGET_API_KEY", ""),
+    "api_secret": os.environ.get("BITGET_SECRET_KEY", ""),
+    "api_passphrase": os.environ.get("BITGET_PASSPHRASE", ""),
+}
+
 # Consolidate all configs
 DASHBOARD_CONFIG = {
     "token": TOKEN_CONFIG,
@@ -89,4 +108,95 @@ DASHBOARD_CONFIG = {
     "theme": THEME,
     "liquidation_price": LIQUIDATION_PRICE,
     "breakeven_price": BREAKEVEN_PRICE,
-} 
+    "exchange": EXCHANGE_CONFIG
+}
+
+# Runtime calculated values (updated dynamically)
+RUNTIME_VALUES = {
+    "current_price": TOKEN_CONFIG["current_price"],
+    "pnl": 0.0,
+    "pnl_percentage": 0.0,
+}
+
+# Callback functions for status updates
+_price_update_callbacks: list[Callable[[float], None]] = []
+
+def update_current_price(price: float) -> None:
+    """
+    Update the current price and recalculate PnL.
+    
+    Args:
+        price: Current price of the token
+    """
+    # Update runtime values
+    RUNTIME_VALUES["current_price"] = price
+    TOKEN_CONFIG["current_price"] = price
+    
+    # Recalculate PnL
+    entry_price = TOKEN_CONFIG["entry_price"]
+    token_quantity = TOKEN_CONFIG["token_quantity"]
+    leverage = TOKEN_CONFIG["leverage"]
+    
+    # Calculate PnL
+    pnl = (price - entry_price) * token_quantity * leverage
+    pnl_percentage = ((price / entry_price) - 1) * 100 * leverage
+    
+    RUNTIME_VALUES["pnl"] = pnl
+    RUNTIME_VALUES["pnl_percentage"] = pnl_percentage
+    
+    # Notify all registered callbacks
+    for callback in _price_update_callbacks:
+        try:
+            callback(price)
+        except Exception as e:
+            logger.error(f"Error in price update callback: {e}")
+
+def register_price_update_callback(callback: Callable[[float], None]) -> None:
+    """
+    Register a callback function that will be called when price is updated.
+    
+    Args:
+        callback: Function that takes a price (float) as argument
+    """
+    if callback not in _price_update_callbacks:
+        _price_update_callbacks.append(callback)
+
+def unregister_price_update_callback(callback: Callable[[float], None]) -> None:
+    """
+    Unregister a price update callback.
+    
+    Args:
+        callback: Function to unregister
+    """
+    if callback in _price_update_callbacks:
+        _price_update_callbacks.remove(callback)
+
+def get_current_price() -> float:
+    """
+    Get the current price.
+    
+    Returns:
+        Current price as float
+    """
+    return RUNTIME_VALUES["current_price"]
+
+def get_current_pnl() -> float:
+    """
+    Get the current PnL.
+    
+    Returns:
+        Current PnL as float
+    """
+    return RUNTIME_VALUES["pnl"]
+
+def get_current_pnl_percentage() -> float:
+    """
+    Get the current PnL percentage.
+    
+    Returns:
+        Current PnL percentage as float
+    """
+    return RUNTIME_VALUES["pnl_percentage"]
+
+# Initialize runtime values
+update_current_price(TOKEN_CONFIG["current_price"]) 

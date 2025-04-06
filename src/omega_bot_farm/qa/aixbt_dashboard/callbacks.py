@@ -13,7 +13,12 @@ import plotly.graph_objects as go
 from typing import Dict, List, Any, Tuple, Optional
 import logging
 
-from .config import DASHBOARD_CONFIG
+from .config import (
+    DASHBOARD_CONFIG, 
+    get_current_price, 
+    get_current_pnl, 
+    get_current_pnl_percentage
+)
 from .visualizations import (
     create_basic_pnl_projection,
     create_multi_leverage_pnl,
@@ -93,10 +98,11 @@ def register_callbacks(app: dash.Dash) -> None:
         Output("pnl-projection-graph", "figure"),
         [
             Input("selected-chart-type-store", "data"),
-            Input("run-escape-vis-btn", "n_clicks")
+            Input("run-escape-vis-btn", "n_clicks"),
+            Input("interval-component", "n_intervals")
         ]
     )
-    def update_pnl_graph(chart_type, escape_clicks):
+    def update_pnl_graph(chart_type, escape_clicks, n_intervals):
         """Update the PnL projection graph based on selected chart type."""
         # If escape button was clicked, show escape visualization
         if ctx.triggered_id == "run-escape-vis-btn":
@@ -244,13 +250,99 @@ def register_callbacks(app: dash.Dash) -> None:
             steps
         )
     
-    # Interval update callback
+    # Realtime price and PnL updates
     @app.callback(
-        Output("current-price-display", "children"),
+        [
+            Output("current-price-display", "children"),
+            Output("current-pnl-display", "children"),
+            Output("current-pnl-percent-display", "children")
+        ],
         [Input("interval-component", "n_intervals")]
     )
-    def update_current_price(n_intervals):
-        """Update the current price display (mock implementation)."""
-        # This would normally fetch the current price from an API
-        # For the demo, we'll just return the static value
-        return f"${DASHBOARD_CONFIG['token']['current_price']:.5f}" 
+    def update_price_and_pnl(n_intervals):
+        """Update the price, PnL, and PnL percentage displays with real-time data."""
+        # Get current values
+        current_price = get_current_price()
+        current_pnl = get_current_pnl()
+        current_pnl_percentage = get_current_pnl_percentage()
+        
+        # Theme for styling
+        theme = DASHBOARD_CONFIG["theme"]
+        
+        # Format price display
+        price_display = f"${current_price:.5f}"
+        
+        # Format PnL display with color
+        pnl_color = theme['success'] if current_pnl >= 0 else theme['error']
+        pnl_display = html.Span(
+            f"${current_pnl:,.2f}",
+            style={'color': pnl_color, 'fontWeight': 'bold'}
+        )
+        
+        # Format PnL percentage display with color
+        pnl_percent_color = theme['success'] if current_pnl_percentage >= 0 else theme['error']
+        pnl_percent_display = html.Span(
+            f"{current_pnl_percentage:+.2f}%",
+            style={'color': pnl_percent_color, 'fontWeight': 'bold'}
+        )
+        
+        return price_display, pnl_display, pnl_percent_display
+    
+    # Risk status indicator
+    @app.callback(
+        [
+            Output("risk-status-indicator", "color"),
+            Output("risk-status-text", "children"),
+            Output("risk-status-text", "style")
+        ],
+        [Input("interval-component", "n_intervals")]
+    )
+    def update_risk_status(n_intervals):
+        """Update the risk status indicator based on current price."""
+        # Get current values
+        current_price = get_current_price()
+        
+        # Get configuration
+        token_config = DASHBOARD_CONFIG["token"]
+        trap_config = DASHBOARD_CONFIG["trap"]
+        theme = DASHBOARD_CONFIG["theme"]
+        
+        # Determine risk level
+        entry_price = token_config["entry_price"]
+        trap_start = trap_config["trap_start"]
+        trap_end = trap_config["trap_end"]
+        emergency_alert = trap_config["emergency_alert"]
+        liquidation_price = DASHBOARD_CONFIG["liquidation_price"]
+        
+        if current_price < liquidation_price * 1.05:
+            # Near liquidation - critical
+            status_color = theme["error"]
+            status_text = "CRITICAL - NEAR LIQUIDATION"
+            status_style = {'color': theme["error"], 'fontWeight': 'bold'}
+        elif current_price < trap_start:
+            # Below trap zone - high danger
+            status_color = theme["error"]
+            status_text = "HIGH RISK - BELOW TRAP"
+            status_style = {'color': theme["error"], 'fontWeight': 'bold'}
+        elif current_price < emergency_alert:
+            # In trap zone, below emergency alert level
+            status_color = theme["error"]
+            status_text = "DANGER - DEEP IN TRAP"
+            status_style = {'color': theme["error"], 'fontWeight': 'bold'}
+        elif current_price < trap_end:
+            # In trap zone but above emergency level
+            status_color = theme["warning"]
+            status_text = "WARNING - IN TRAP ZONE"
+            status_style = {'color': theme["warning"], 'fontWeight': 'bold'}
+        elif current_price < entry_price:
+            # Between trap zone and entry price
+            status_color = theme["warning"]
+            status_text = "CAUTION - BELOW ENTRY"
+            status_style = {'color': theme["warning"], 'fontWeight': 'bold'}
+        else:
+            # Above entry price - safe
+            status_color = theme["success"]
+            status_text = "SAFE - ABOVE ENTRY"
+            status_style = {'color': theme["success"], 'fontWeight': 'bold'}
+        
+        return status_color, status_text, status_style 

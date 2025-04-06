@@ -33,74 +33,111 @@ def create_header() -> html.Div:
             html.Div(
                 className="d-flex justify-content-between align-items-center",
                 children=[
-                    # Left side - Title and subtitle
+                    # Left side - Title
                     html.Div(
+                        className="d-flex align-items-center",
                         children=[
-                            html.H1(
-                                children=[
-                                    html.Span("AIXBT ", style={'color': theme['accent1']}),
-                                    html.Span("Trading Dashboard", style={'color': theme['accent2']}),
-                                    html.Span(" v1.0", style={'color': theme['highlight'], 'fontSize': '1.2rem'})
-                                ],
-                                className="mb-0",
-                                style={'fontWeight': 'bold', 'letterSpacing': '1px'}
+                            html.H3(
+                                "AIXBT Trading Dashboard",
+                                className="m-0 me-2",
+                                style={'color': theme['text']}
                             ),
-                            html.P(
-                                "Escape the OMEGA TRAP ZONE™ with Quantum Strategy",
-                                className="mb-0 text-muted",
-                                style={'fontSize': '1rem'}
+                            html.Span(
+                                "OMEGA TRAP ZONE™",
+                                className="badge bg-primary ms-2",
+                                style={
+                                    'backgroundColor': theme['accent1'],
+                                    'fontSize': '0.8rem',
+                                    'fontWeight': 'bold'
+                                }
                             )
                         ]
                     ),
                     
-                    # Right side - Token stats
+                    # Right side - Price Info
                     html.Div(
                         className="d-flex align-items-center",
                         children=[
-                            # Current price
+                            # Risk Status Indicator
                             html.Div(
-                                className="me-4 text-end",
+                                className="me-4",
                                 children=[
-                                    html.Small("Current Price", className="d-block text-muted"),
-                                    html.Span(
-                                        f"${DASHBOARD_CONFIG['token']['current_price']:.5f}",
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.Span("Status: ", className="me-1"),
+                                            html.Span(
+                                                "IN TRAP ZONE",
+                                                id="risk-status-text",
+                                                style={'color': theme['warning'], 'fontWeight': 'bold'}
+                                            )
+                                        ]),
+                                    ]),
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.Div(
+                                                className="mt-1",
+                                                style={'width': '100%', 'height': '6px'},
+                                                children=[
+                                                    html.Div(
+                                                        id="risk-status-indicator",
+                                                        style={
+                                                            'width': '100%',
+                                                            'height': '100%',
+                                                            'backgroundColor': theme['warning'],
+                                                            'borderRadius': '3px'
+                                                        }
+                                                    )
+                                                ]
+                                            )
+                                        ])
+                                    ])
+                                ]
+                            ),
+                            
+                            # Token Price
+                            html.Div(
+                                className="text-end me-4",
+                                children=[
+                                    html.Div(
+                                        "Current Price",
+                                        style={'fontSize': '0.8rem', 'opacity': '0.7'}
+                                    ),
+                                    html.Div(
                                         id="current-price-display",
-                                        style={
-                                            'color': theme['error'] if DASHBOARD_CONFIG['token']['current_price'] < DASHBOARD_CONFIG['token']['entry_price'] else theme['success'],
-                                            'fontWeight': 'bold',
-                                            'fontSize': '1.2rem'
-                                        }
+                                        children=f"${DASHBOARD_CONFIG['token']['current_price']:.5f}",
+                                        style={'fontSize': '1.2rem', 'fontWeight': 'bold'}
                                     )
                                 ]
                             ),
                             
-                            # Entry price
+                            # PnL
                             html.Div(
-                                className="me-4 text-end",
+                                className="text-end me-4",
                                 children=[
-                                    html.Small("Entry Price", className="d-block text-muted"),
-                                    html.Span(
-                                        f"${DASHBOARD_CONFIG['token']['entry_price']:.5f}",
-                                        style={
-                                            'fontWeight': 'bold',
-                                            'fontSize': '1.2rem'
-                                        }
+                                    html.Div(
+                                        "Current PnL",
+                                        style={'fontSize': '0.8rem', 'opacity': '0.7'}
+                                    ),
+                                    html.Div(
+                                        id="current-pnl-display",
+                                        children=f"$0.00",
+                                        style={'fontSize': '1.2rem', 'fontWeight': 'bold'}
                                     )
                                 ]
                             ),
                             
-                            # Leverage
+                            # PnL Percentage
                             html.Div(
                                 className="text-end",
                                 children=[
-                                    html.Small("Leverage", className="d-block text-muted"),
-                                    html.Span(
-                                        f"{DASHBOARD_CONFIG['token']['leverage']}x",
-                                        style={
-                                            'color': theme['highlight'],
-                                            'fontWeight': 'bold',
-                                            'fontSize': '1.2rem'
-                                        }
+                                    html.Div(
+                                        "Return %",
+                                        style={'fontSize': '0.8rem', 'opacity': '0.7'}
+                                    ),
+                                    html.Div(
+                                        id="current-pnl-percent-display",
+                                        children=f"0.00%",
+                                        style={'fontSize': '1.2rem', 'fontWeight': 'bold'}
                                     )
                                 ]
                             )
@@ -111,7 +148,7 @@ def create_header() -> html.Div:
         ]
     )
 
-def create_footer() -> html.Footer:
+def create_footer() -> html.Div:
     """
     Create the dashboard footer.
     
@@ -120,27 +157,29 @@ def create_footer() -> html.Footer:
     """
     theme = DASHBOARD_CONFIG["theme"]
     
-    return html.Footer(
-        className="container-fluid py-3 mt-5",
+    return html.Div(
+        className="container-fluid py-3 mt-4",
         style={
             'backgroundColor': theme['panel'],
             'borderTop': f"1px solid {theme['grid']}",
+            'color': theme['text'],
+            'opacity': '0.7',
+            'fontSize': '0.8rem',
             'textAlign': 'center'
         },
         children=[
-            html.P(
-                [
-                    "Powered by ",
-                    html.Span("OMEGA ", style={'color': theme['accent1']}),
-                    html.Span("BTC ", style={'color': theme['accent2']}),
-                    html.Span("AI", style={'color': theme['accent3']}),
-                    html.Span(" © 2025")
-                ],
-                className="mb-0"
-            ),
-            html.Small(
-                "The blessing is always after the trick.",
-                className="text-muted"
+            html.Div(
+                className="row",
+                children=[
+                    html.Div(
+                        className="col-md-6 offset-md-3",
+                        children=[
+                            html.P("AIXBT Trading Dashboard - OMEGA TRAP ZONE™ Escape Strategy Visualization", className="mb-0"),
+                            html.P("Powered by OMEGA BTC AI", className="mb-0"),
+                            html.P("© 2024 OMEGA BTC AI - All rights reserved", className="mb-0")
+                        ]
+                    )
+                ]
             )
         ]
     )
@@ -499,52 +538,67 @@ def create_escape_plan_card() -> dbc.Card:
 
 def create_pnl_projection_card() -> dbc.Card:
     """
-    Create the PnL projection card.
+    Create the PnL projection visualization card.
     
     Returns:
-        Card component with PnL projection graph
+        Card component containing the PnL visualization
     """
     theme = DASHBOARD_CONFIG["theme"]
     
     return dbc.Card(
-        className="h-100 border-0 shadow",
-        style={
-            'backgroundColor': theme['panel'],
-            'borderRadius': '10px'
-        },
+        className="h-100 shadow",
+        style={'backgroundColor': theme['panel'], 'border': f"1px solid {theme['grid']}"},
         children=[
             dbc.CardHeader(
                 className="d-flex justify-content-between align-items-center",
-                style={
-                    'backgroundColor': 'transparent',
-                    'borderBottom': f"1px solid {theme['grid']}",
-                    'color': theme['accent1']
-                },
+                style={'backgroundColor': theme['background'], 'borderBottom': f"1px solid {theme['grid']}"},
                 children=[
-                    html.H5("PnL Projection", className="mb-0"),
-                    dbc.ButtonGroup(
-                        [
+                    html.H5(
+                        "PnL Projection & Escape Routes",
+                        className="mb-0",
+                        style={'color': theme['text']}
+                    ),
+                    html.Div(
+                        className="btn-group",
+                        children=[
                             dbc.Button(
                                 "Basic",
                                 id="basic-pnl-btn",
-                                color="dark",
-                                size="sm",
+                                color="primary",
                                 outline=True,
-                                active=True
+                                size="sm",
+                                active=True,
+                                className="me-1"
                             ),
                             dbc.Button(
-                                "Multi-Leverage",
+                                "Multi Leverage",
                                 id="multi-leverage-pnl-btn",
-                                color="dark",
+                                color="primary",
+                                outline=True,
                                 size="sm",
-                                outline=True
+                                className="me-1"
                             ),
                             dbc.Button(
                                 "Trap Zone",
                                 id="trap-zone-pnl-btn",
-                                color="dark",
+                                color="primary",
+                                outline=True,
                                 size="sm",
-                                outline=True
+                                className="me-1"
+                            ),
+                            dbc.Button(
+                                "Fibonacci Vortex",
+                                id="show-fibonacci-vortex-btn",
+                                color="primary",
+                                outline=True,
+                                size="sm",
+                                className="me-1"
+                            ),
+                            dbc.Button(
+                                "Run Escape Visualization",
+                                id="run-escape-vis-btn",
+                                color="success",
+                                size="sm"
                             )
                         ]
                     )
@@ -565,94 +619,147 @@ def create_pnl_projection_card() -> dbc.Card:
         ]
     )
 
-def create_strategy_visualization_card() -> dbc.Card:
+def create_strategy_card() -> dbc.Card:
     """
     Create the strategy visualization card.
     
     Returns:
-        Card component with strategy visualization
+        Card component for strategy visualization
     """
     theme = DASHBOARD_CONFIG["theme"]
     
     return dbc.Card(
-        className="h-100 border-0 shadow",
-        style={
-            'backgroundColor': theme['panel'],
-            'borderRadius': '10px'
-        },
+        className="h-100 shadow",
+        style={'backgroundColor': theme['panel'], 'border': f"1px solid {theme['grid']}"},
         children=[
             dbc.CardHeader(
-                style={
-                    'backgroundColor': 'transparent',
-                    'borderBottom': f"1px solid {theme['grid']}",
-                    'color': theme['accent3']
-                },
+                className="d-flex justify-content-between align-items-center",
+                style={'backgroundColor': theme['background'], 'borderBottom': f"1px solid {theme['grid']}"},
                 children=[
                     html.H5(
                         id="strategy-vis-title",
                         children="Strategy Visualization",
-                        className="mb-0"
+                        className="mb-0",
+                        style={'color': theme['text']}
+                    ),
+                    html.Div(
+                        className="btn-group",
+                        children=[
+                            dbc.Button(
+                                "Stealth Ladder",
+                                id="strategy-stealth-ladder-btn",
+                                color="primary",
+                                outline=True,
+                                size="sm",
+                                className="me-1"
+                            ),
+                            dbc.Button(
+                                "Fake Sell Wall",
+                                id="strategy-fake-wall-btn",
+                                color="primary",
+                                outline=True,
+                                size="sm",
+                                className="me-1"
+                            ),
+                            dbc.Button(
+                                "Positive Flow Spiral",
+                                id="strategy-flow-spiral-btn",
+                                color="primary",
+                                outline=True,
+                                size="sm"
+                            )
+                        ]
                     )
                 ]
             ),
             dbc.CardBody(
                 [
-                    # Default content
+                    # Default content (shown before selecting a strategy)
                     html.Div(
                         id="strategy-default-content",
                         className="text-center py-5",
                         children=[
                             html.I(
-                                className="fas fa-chart-line mb-3",
-                                style={
-                                    'fontSize': '3rem',
-                                    'color': theme['accent2'],
-                                    'opacity': '0.5'
-                                }
+                                className="fas fa-chart-line fa-3x mb-3",
+                                style={'color': theme['accent1']}
                             ),
-                            html.H5("Select a strategy to visualize"),
+                            html.H5(
+                                "Select a strategy to visualize",
+                                style={'color': theme['text']}
+                            ),
                             html.P(
-                                "Click on any strategy above to see detailed visualization and analysis",
+                                "Choose one of the escape strategies above to visualize and analyze its potential effectiveness.",
                                 className="text-muted"
                             )
                         ]
                     ),
                     
-                    # Strategy visualization
+                    # Strategy visualization (hidden by default)
                     dcc.Graph(
                         id='strategy-visualization-graph',
                         config={
                             'displayModeBar': False,
                             'responsive': True
                         },
-                        style={
-                            'height': '400px',
-                            'display': 'none'
-                        }
+                        style={'height': '400px', 'display': 'none'}
                     ),
                     
-                    # Strategy details
+                    # Strategy details (hidden by default)
                     html.Div(
                         id="strategy-details-container",
                         style={'display': 'none'},
                         children=[
-                            dbc.Row([
-                                dbc.Col([
-                                    html.Small("Risk Level"),
-                                    html.Div(id="strategy-risk-level", className="mb-2")
-                                ], width=4),
-                                dbc.Col([
-                                    html.Small("Success Probability"),
-                                    html.Div(id="strategy-success-probability", className="mb-2")
-                                ], width=4),
-                                dbc.Col([
-                                    html.Small("Expected PnL"),
-                                    html.Div(id="strategy-expected-pnl", className="mb-2")
-                                ], width=4)
-                            ]),
-                            html.Hr(style={'margin': '0.5rem 0'}),
-                            html.Small("Strategy Implementation Steps", className="d-block mt-2"),
-                            html.Ol(id="strategy-steps", className="small", style={'paddingLeft': '1rem'})
+                            dbc.Row(
+                                className="mt-3",
+                                children=[
+                                    dbc.Col(
+                                        [
+                                            html.Div(
+                                                className="d-flex justify-content-between",
+                                                children=[
+                                                    html.Div(
+                                                        className="text-center p-2",
+                                                        style={'backgroundColor': theme['background'], 'borderRadius': '5px'},
+                                                        children=[
+                                                            html.Div("Risk Level", style={'fontSize': '0.8rem', 'opacity': '0.7'}),
+                                                            html.Div(id="strategy-risk-level")
+                                                        ]
+                                                    ),
+                                                    html.Div(
+                                                        className="text-center p-2",
+                                                        style={'backgroundColor': theme['background'], 'borderRadius': '5px'},
+                                                        children=[
+                                                            html.Div("Success Probability", style={'fontSize': '0.8rem', 'opacity': '0.7'}),
+                                                            html.Div(id="strategy-success-probability")
+                                                        ]
+                                                    ),
+                                                    html.Div(
+                                                        className="text-center p-2",
+                                                        style={'backgroundColor': theme['background'], 'borderRadius': '5px'},
+                                                        children=[
+                                                            html.Div("Expected PnL", style={'fontSize': '0.8rem', 'opacity': '0.7'}),
+                                                            html.Div(id="strategy-expected-pnl")
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ],
+                                        width=12
+                                    )
+                                ]
+                            ),
+                            dbc.Row(
+                                className="mt-3",
+                                children=[
+                                    dbc.Col(
+                                        [
+                                            html.H6("Strategy Steps:", style={'color': theme['accent2']}),
+                                            html.Ul(id="strategy-steps", className="ps-3")
+                                        ],
+                                        width=12
+                                    )
+                                ]
+                            )
                         ]
                     )
                 ]
@@ -662,19 +769,18 @@ def create_strategy_visualization_card() -> dbc.Card:
 
 def create_dashboard_layout() -> html.Div:
     """
-    Create the complete dashboard layout.
+    Create the main dashboard layout.
     
     Returns:
-        Main layout container
+        Main application layout
     """
     theme = DASHBOARD_CONFIG["theme"]
     
     return html.Div(
         style={
             'backgroundColor': theme['background'],
-            'color': theme['text'],
             'minHeight': '100vh',
-            'fontFamily': "'Roboto', sans-serif"
+            'color': theme['text']
         },
         children=[
             # Header
@@ -682,41 +788,25 @@ def create_dashboard_layout() -> html.Div:
             
             # Main content
             html.Div(
-                className="container-fluid",
-                style={'padding': '20px'},
+                className="container-fluid py-4",
                 children=[
-                    # First row: Token stats and escape plan
+                    # First row - PnL Projection and Strategy Visualization
                     dbc.Row(
                         className="mb-4",
                         children=[
-                            # Token stats
+                            # PnL Projection
                             dbc.Col(
-                                width=4,
-                                children=[create_token_stats_card()]
+                                create_pnl_projection_card(),
+                                lg=6,
+                                md=12,
+                                className="mb-4 mb-lg-0"
                             ),
                             
-                            # Escape plan
+                            # Strategy Visualization
                             dbc.Col(
-                                width=8,
-                                children=[create_escape_plan_card()]
-                            )
-                        ]
-                    ),
-                    
-                    # Second row: PnL projection and strategy visualization
-                    dbc.Row(
-                        className="mb-4",
-                        children=[
-                            # PnL projection
-                            dbc.Col(
-                                width=8,
-                                children=[create_pnl_projection_card()]
-                            ),
-                            
-                            # Strategy visualization
-                            dbc.Col(
-                                width=4,
-                                children=[create_strategy_visualization_card()]
+                                create_strategy_card(),
+                                lg=6,
+                                md=12
                             )
                         ]
                     )

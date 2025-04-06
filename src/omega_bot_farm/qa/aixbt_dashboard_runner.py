@@ -106,6 +106,29 @@ def main():
     parser.add_argument('--auto-port', action='store_true',
                         help='Enable auto port detection (default: True)')
     
+    # Real-time price feed options
+    parser.add_argument('--symbol', type=str, default='AIXBTUSDT',
+                        help='Trading symbol for price feed (default: AIXBTUSDT)')
+    parser.add_argument('--exchange', type=str, default='bitget',
+                        help='Exchange for price feed (default: bitget)')
+    parser.add_argument('--use-testnet', action='store_true',
+                        help='Use testnet for exchange connection')
+    parser.add_argument('--no-use-testnet', action='store_false', dest='use_testnet',
+                        help='Do not use testnet for exchange connection')
+    parser.add_argument('--api-key', type=str, 
+                        help='API key for exchange (default: from environment)')
+    parser.add_argument('--api-secret', type=str,
+                        help='API secret for exchange (default: from environment)')
+    parser.add_argument('--api-passphrase', type=str,
+                        help='API passphrase for exchange (default: from environment)')
+    parser.add_argument('--update-interval', type=float, default=2.0,
+                        help='Price update interval in seconds (default: 2.0)')
+    parser.add_argument('--no-websocket', action='store_false', dest='use_websocket',
+                        help='Disable WebSocket for price updates (use REST API only)')
+    
+    # Set defaults for use_testnet and use_websocket
+    parser.set_defaults(use_testnet=True, use_websocket=True)
+    
     args = parser.parse_args()
     
     # Print header
@@ -134,8 +157,28 @@ def main():
         # Import the dashboard module
         from src.omega_bot_farm.qa.aixbt_dashboard import run_app
         
+        # Set environment variables for price feed if provided
+        if args.api_key:
+            os.environ["BITGET_API_KEY"] = args.api_key
+        if args.api_secret:
+            os.environ["BITGET_SECRET_KEY"] = args.api_secret
+        if args.api_passphrase:
+            os.environ["BITGET_PASSPHRASE"] = args.api_passphrase
+        os.environ["USE_TESTNET"] = "true" if args.use_testnet else "false"
+        
+        # Print configuration summary
+        logger.info("Dashboard Configuration:")
+        logger.info(f"  Host:           {args.host}")
+        logger.info(f"  Port:           {port}")
+        logger.info(f"  Symbol:         {args.symbol}")
+        logger.info(f"  Exchange:       {args.exchange}")
+        logger.info(f"  Testnet:        {'Enabled' if args.use_testnet else 'Disabled'}")
+        logger.info(f"  WebSocket:      {'Enabled' if args.use_websocket else 'Disabled'}")
+        logger.info(f"  Update Interval: {args.update_interval} seconds")
+        logger.info(f"  API Key:        {'Provided' if args.api_key else 'From Environment'}")
+        
         # Run the dashboard app
-        logger.info(f"Starting AIXBT Dashboard on http://localhost:{port}")
+        logger.info(f"Starting AIXBT Dashboard on http://{args.host}:{port}")
         run_app(
             host=args.host,
             port=port,
