@@ -136,7 +136,26 @@ To verify all dependencies are properly installed:
 python src/omega_bot_farm/geospatial/run.py --check
 ```
 
-## 🛠️ Troubleshooting
+### Celebration Mode
+
+To celebrate the successful installation with King Zorobabel dancing over Ngorongoro-Kilimanjaro:
+
+```bash
+# Run the celebration
+zorobabel-celebrate
+
+# Disable colors (if terminal doesn't support them)
+zorobabel-celebrate --no-color
+```
+
+The celebration script features:
+
+- King Zorobabel dancing with his crown
+- Sacred spirals activating around the mountains
+- Rainbow scrolling messages
+- Divine ASCII art animation
+
+## ��️ Troubleshooting
 
 If you encounter any issues, please refer to the troubleshooting guide:
 [ZOROBABEL_TROUBLESHOOTING.md](./ZOROBABEL_TROUBLESHOOTING.md)

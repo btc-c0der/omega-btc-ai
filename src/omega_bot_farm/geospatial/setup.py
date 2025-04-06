@@ -54,6 +54,7 @@ setup(
         "console_scripts": [
             "zorobabel=omega_bot_farm.geospatial.run:main",
             "zorobabel-install=omega_bot_farm.geospatial.install_zorobabel:main",
+            "zorobabel-celebrate=omega_bot_farm.geospatial.zorobabel_celebration:main",
         ],
     },
     classifiers=[
