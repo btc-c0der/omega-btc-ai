@@ -299,12 +299,41 @@ def create_terminal_card() -> dbc.Card:
             dbc.CardBody(
                 html.Div(
                     id="terminal-output",
-                    className="terminal-output",
-                    children=html.Iframe(
-                        srcDoc=create_terminal_output(),
-                        style={"border": "none", "width": "100%", "height": "100%"},
-                        sandbox="allow-scripts"
-                    )
+                    className="terminal-output terminal-container",
+                    children=[
+                        html.Div(
+                            className="terminal-header",
+                            children=[
+                                html.Div(className="terminal-button red"),
+                                html.Div(className="terminal-button yellow"),
+                                html.Div(className="terminal-button green"),
+                                html.Span("Quantum QA Terminal", className="terminal-title")
+                            ]
+                        ),
+                        html.Div(
+                            className="terminal-body",
+                            children=html.Pre(
+                                id="terminal-text",
+                                className="terminal-text",
+                                children=[
+                                    html.Span("$", className="prompt"), " ",
+                                    html.Span("quantum-dashboard --start", className="command"),
+                                    html.Br(),
+                                    html.Br(),
+                                    "Initializing Quantum 5D QA Dashboard...",
+                                    html.Br(),
+                                    "Accessing 5 dimensional metrics...",
+                                    html.Br(),
+                                    "Calculating quantum entanglement...",
+                                    html.Br(),
+                                    "Ready.",
+                                    html.Br(),
+                                    html.Span("$", className="prompt"), " ",
+                                    html.Span("█", className="cursor")
+                                ]
+                            )
+                        )
+                    ]
                 )
             )
         ]
@@ -433,11 +462,24 @@ def create_matrix_test_runner_card() -> dbc.Card:
                         html.Div(
                             id="test-terminal-output",
                             className="matrix-terminal",
-                            children=html.Iframe(
-                                id="test-terminal-iframe",
-                                srcDoc="<div class='terminal-container'><div class='terminal-body'><pre class='terminal-text'><span class='prompt'>$</span> <span class='command'>s0nn3t-test-runner --ready</span>\n\n[Awaiting commands...]\n<span class='prompt'>$</span> <span class='cursor'>█</span></pre></div></div>",
-                                style={"border": "none", "width": "100%", "height": "100%"},
-                                sandbox="allow-scripts"
+                            children=html.Div(
+                                className="terminal-container",
+                                children=html.Div(
+                                    className="terminal-body",
+                                    children=html.Pre(
+                                        id="test-terminal-text",
+                                        className="terminal-text",
+                                        children=[
+                                            html.Span("$", className="prompt"), " ",
+                                            html.Span("s0nn3t-test-runner --ready", className="command"),
+                                            html.Br(), html.Br(),
+                                            "[Awaiting commands...]",
+                                            html.Br(),
+                                            html.Span("$", className="prompt"), " ",
+                                            html.Span("█", className="cursor")
+                                        ]
+                                    )
+                                )
                             )
                         )
                     ]

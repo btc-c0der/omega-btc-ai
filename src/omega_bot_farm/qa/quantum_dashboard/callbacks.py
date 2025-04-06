@@ -132,8 +132,9 @@ def register_callbacks(app):
     )
     def update_hyperspatial_trend_graph(data):
         """Update the hyperspatial trend graph with the latest metrics."""
-        if data is None or "history" not in data or not data["history"]:
-            return no_update
+        if not ctx.triggered or data is None or "history" not in data or not data["history"]:
+            # Return an empty figure on first load
+            return {}
         
         # Create hyperspatial trend graph
         figure = create_hyperspatial_trend_graph(data["history"])
@@ -149,8 +150,9 @@ def register_callbacks(app):
         )
         def update_dimension_graph(data, dimension=dimension):
             """Update the dimension graph with the latest metrics."""
-            if data is None or "history" not in data or not data["history"]:
-                return no_update
+            if not ctx.triggered or data is None or "history" not in data or not data["history"]:
+                # Return an empty figure on first load
+                return {}
             
             # Create dimension graph
             figure = create_dimension_graph(dimension, data["history"])
@@ -164,8 +166,9 @@ def register_callbacks(app):
     )
     def update_stability_gauge(data):
         """Update the stability gauge with the latest metrics."""
-        if data is None or "current" not in data or not data["current"]:
-            return no_update
+        if not ctx.triggered or data is None or "current" not in data or not data["current"]:
+            # Return an empty figure on first load
+            return {}
         
         # Create stability gauge
         figure = create_stability_gauge(data["current"])
@@ -179,8 +182,9 @@ def register_callbacks(app):
     )
     def update_coherence_gauge(data):
         """Update the coherence gauge with the latest metrics."""
-        if data is None or "current" not in data or not data["current"]:
-            return no_update
+        if not ctx.triggered or data is None or "current" not in data or not data["current"]:
+            # Return an empty figure on first load
+            return {}
         
         # Create coherence gauge
         figure = create_coherence_gauge(data["current"])
@@ -194,8 +198,9 @@ def register_callbacks(app):
     )
     def update_risk_indicator(data):
         """Update the risk indicator with the latest metrics."""
-        if data is None or "current" not in data or not data["current"]:
-            return no_update
+        if not ctx.triggered or data is None or "current" not in data or not data["current"]:
+            # Return an empty figure on first load
+            return {}
         
         # Create risk indicator
         figure = create_risk_indicator(data["current"])
@@ -209,8 +214,9 @@ def register_callbacks(app):
     )
     def update_entanglement_visualization(data):
         """Update the entanglement visualization with the latest metrics."""
-        if data is None or "current" not in data or not data["current"]:
-            return no_update
+        if not ctx.triggered or data is None or "current" not in data or not data["current"]:
+            # Return an empty figure on first load
+            return {}
         
         # Create entanglement visualization
         figure = create_entanglement_visualization(data["current"])
@@ -224,8 +230,9 @@ def register_callbacks(app):
     )
     def update_metrics_table(data):
         """Update the metrics table with the latest metrics."""
-        if data is None or "current" not in data or not data["current"]:
-            return no_update
+        if not ctx.triggered or data is None or "current" not in data or not data["current"]:
+            # Return an empty figure on first load
+            return {}
         
         # Create metrics table
         figure = create_metrics_table(data["current"])
@@ -234,7 +241,7 @@ def register_callbacks(app):
     
     # Update terminal output
     @app.callback(
-        Output("terminal-output", "children"),
+        Output("terminal-text", "children"),
         Input("metrics-interval", "n_intervals")
     )
     def update_terminal_output(n_intervals):
@@ -244,15 +251,26 @@ def register_callbacks(app):
         # Get latest terminal lines (limited to last 20)
         latest_lines = terminal_lines[-20:]
         
-        # Create terminal output HTML
-        terminal_html = create_terminal_output(latest_lines)
+        # Create terminal output children elements
+        terminal_children = [
+            html.Span("$", className="prompt"), " ",
+            html.Span("quantum-dashboard --start", className="command"),
+            html.Br(),
+            html.Br()
+        ]
         
-        # Use iframe to safely render HTML content
-        return html.Iframe(
-            srcDoc=terminal_html,
-            style={"border": "none", "width": "100%", "height": "100%"},
-            sandbox="allow-scripts"
-        )
+        # Add each line
+        for line in latest_lines:
+            terminal_children.append(line)
+            terminal_children.append(html.Br())
+        
+        # Add prompt and cursor at the end
+        terminal_children.extend([
+            html.Span("$", className="prompt"), " ",
+            html.Span("█", className="cursor")
+        ])
+        
+        return terminal_children
     
     # Update header metrics
     @app.callback(
@@ -380,10 +398,10 @@ def register_callbacks(app):
     # Setup test runner callbacks
     @app.callback(
         [
-            Output("test-terminal-iframe", "srcDoc"),
+            Output("test-terminal-text", "children"),
             Output("test-progress-container", "style"),
-            Output("test-progress-bar", "value"),
-            Output("test-progress-text", "children"),
+            Output("test-progress-bar", "value", allow_duplicate=True),
+            Output("test-progress-text", "children", allow_duplicate=True),
             Output("test-results-container", "children"),
             Output("test-runner-store", "data")
         ],
@@ -397,7 +415,8 @@ def register_callbacks(app):
             State("fancy-visuals-switch", "value"),
             State("celebration-switch", "value"),
             State("test-runner-store", "data")
-        ]
+        ],
+        prevent_initial_call=True
     )
     def handle_test_runner_actions(
         run_clicks, omega_clicks, omega_k8s_clicks,
@@ -419,21 +438,18 @@ def register_callbacks(app):
         # If no button was clicked, return current state
         if triggered is None:
             # Return empty terminal with initial prompt
-            terminal_html = f"""
-            <div class="terminal-container">
-                <div class="terminal-body">
-                    <pre class="terminal-text">
-                    <span class="prompt">$</span> <span class="command">s0nn3t-test-runner --ready</span>
-                    
-                    [Awaiting commands...]
-                    <span class="prompt">$</span> <span class="cursor">█</span>
-                    </pre>
-                </div>
-            </div>
-            """
+            terminal_children = [
+                html.Span("$", className="prompt"), " ",
+                html.Span("s0nn3t-test-runner --ready", className="command"),
+                html.Br(), html.Br(),
+                "[Awaiting commands...]",
+                html.Br(),
+                html.Span("$", className="prompt"), " ",
+                html.Span("█", className="cursor")
+            ]
             
             return (
-                terminal_html,
+                terminal_children,
                 {"display": "none"},
                 0,
                 "Initializing tests...",
@@ -509,19 +525,23 @@ def register_callbacks(app):
         if not terminal_lines:
             terminal_lines = ["[Awaiting command execution...]"]
         
-        # Create terminal HTML
-        terminal_html = f"""
-        <div class="terminal-container">
-            <div class="terminal-body">
-                <pre class="terminal-text">
-                <span class="prompt">$</span> <span class="command">s0nn3t-test-runner --executing</span>
-                
-                {"<br>".join(terminal_lines)}
-                <span class="prompt">$</span> <span class="cursor">█</span>
-                </pre>
-            </div>
-        </div>
-        """
+        # Create terminal children elements
+        terminal_children = [
+            html.Span("$", className="prompt"), " ",
+            html.Span("s0nn3t-test-runner --executing", className="command"),
+            html.Br(), html.Br()
+        ]
+        
+        # Add each line from the test runner output
+        for line in terminal_lines:
+            terminal_children.append(line)
+            terminal_children.append(html.Br())
+        
+        # Add prompt and cursor at the end
+        terminal_children.extend([
+            html.Span("$", className="prompt"), " ",
+            html.Span("█", className="cursor")
+        ])
         
         # Create test results display
         if store_data.get("latest_results"):
@@ -564,7 +584,7 @@ def register_callbacks(app):
         
         # Return updated components
         return (
-            terminal_html,
+            terminal_children,
             progress_style,
             progress_value,
             progress_text,

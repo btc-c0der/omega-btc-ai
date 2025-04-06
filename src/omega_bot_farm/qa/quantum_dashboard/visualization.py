@@ -514,146 +514,161 @@ def create_risk_indicator(metrics: Dict[str, Any]) -> go.Figure:
     return fig
 
 
-def create_entanglement_visualization(metrics: Dict[str, Any]) -> go.Figure:
-    """Create a visualization for the entanglement factor.
+def create_entanglement_visualization(metrics_data):
+    """Create an entanglement visualization."""
+    # Create a basic empty figure
+    fig = go.Figure()
     
-    Args:
-        metrics: Current metrics dictionary
-        
-    Returns:
-        Plotly figure object
-    """
-    # Get entanglement value
-    entanglement = metrics.get("entanglement_factor", 0)
+    # Add default polar chart
+    if metrics_data is None:
+        return fig
     
-    # Create data for the visualization
+    # Get entanglement factor
+    entanglement = metrics_data.get('entanglement_factor')
+    if entanglement is None:
+        entanglement = 0.5  # Default value if missing
+    
+    # Create a polar chart to show entanglement between dimensions
     theta = np.linspace(0, 2*np.pi, 100)
     radius = 1 + entanglement * np.sin(theta * 8)
     
-    # Convert to Cartesian coordinates
+    # Convert to cartesian coordinates
     x = radius * np.cos(theta)
     y = radius * np.sin(theta)
     
-    # Determine color based on entanglement value
-    if entanglement <= 0.3:
-        color = quantum_theme["success"]
-    elif entanglement <= 0.7:
-        color = quantum_theme["warning"]
-    else:
-        color = quantum_theme["error"]
-    
-    # Create figure
-    fig = go.Figure()
-    
-    # Add trace for the entanglement visualization
+    # Add the entanglement plot
     fig.add_trace(go.Scatter(
         x=x,
         y=y,
         mode='lines',
         fill='toself',
-        fillcolor=_safe_rgba_from_hex(color, 0.5),
-        line=dict(color=color, width=2),
-        showlegend=False
+        fillcolor='rgba(0, 255, 0, 0.3)',
+        line=dict(color='rgba(0, 255, 0, 0.8)', width=2),
+        name='Entanglement Field'
     ))
     
-    # Add a center point
+    # Add dimension points
+    dimensions = ['Quality', 'Coverage', 'Performance', 'Security', 'Time']
+    
+    # Position the points in a circle
+    dim_theta = np.linspace(0, 2*np.pi, len(dimensions), endpoint=False)
+    dim_radius = [
+        metrics_data.get('quality_position', 50) / 100,
+        metrics_data.get('coverage_position', 50) / 100,
+        metrics_data.get('performance_position', 50) / 100,
+        metrics_data.get('security_position', 50) / 100,
+        0.5  # Fixed position for time
+    ]
+    
+    # Convert to cartesian coordinates
+    dim_x = [r * np.cos(t) for r, t in zip(dim_radius, dim_theta)]
+    dim_y = [r * np.sin(t) for r, t in zip(dim_radius, dim_theta)]
+    
+    # Add the dimension points
     fig.add_trace(go.Scatter(
-        x=[0],
-        y=[0],
-        mode='markers',
-        marker=dict(color=quantum_theme["text"], size=8),
-        showlegend=False
+        x=dim_x,
+        y=dim_y,
+        mode='markers+text',
+        marker=dict(
+            size=12,
+            color='rgba(255, 255, 255, 0.8)',
+            line=dict(
+                color='rgba(0, 255, 0, 1)',
+                width=2
+            )
+        ),
+        text=dimensions,
+        textposition="top center",
+        name='Dimensions'
     ))
     
-    # Add reference circle
-    ref_x = np.cos(theta)
-    ref_y = np.sin(theta)
-    
-    fig.add_trace(go.Scatter(
-        x=ref_x,
-        y=ref_y,
-        mode='lines',
-        line=dict(color=quantum_theme["text"], width=1, dash='dot'),
-        showlegend=False
-    ))
+    # Add lines connecting the points to show entanglement
+    for i in range(len(dimensions)):
+        for j in range(i+1, len(dimensions)):
+            fig.add_trace(go.Scatter(
+                x=[dim_x[i], dim_x[j]],
+                y=[dim_y[i], dim_y[j]],
+                mode='lines',
+                line=dict(
+                    color=f'rgba(0, 255, 0, {entanglement * 0.7})',
+                    width=1
+                ),
+                showlegend=False
+            ))
     
     # Update layout
     fig.update_layout(
-        title={
-            'text': f"Entanglement Factor: {entanglement:.2f}",
-            'y':0.95,
-            'x':0.5,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': dict(color=quantum_theme["text"])
-        },
+        template="plotly_dark",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=20, r=20, t=20, b=20),
+        showlegend=False,
         xaxis=dict(
-            range=[-2, 2],
             showgrid=False,
             zeroline=False,
             showticklabels=False
         ),
         yaxis=dict(
-            range=[-2, 2],
             showgrid=False,
             zeroline=False,
-            showticklabels=False,
-            scaleanchor="x",
-            scaleratio=1
-        ),
-        margin=dict(l=20, r=20, t=50, b=20),
-        paper_bgcolor=quantum_theme["background"],
-        plot_bgcolor=quantum_theme["background"],
-        font=dict(color=quantum_theme["text"])
+            showticklabels=False
+        )
     )
     
     return fig
 
 
-def create_metrics_table(metrics: Dict[str, Any]) -> go.Figure:
-    """Create a table visualization of the current metrics.
+def create_metrics_table(metrics):
+    """Create a table of metrics."""
+    # Create an empty figure
+    fig = go.Figure()
     
-    Args:
-        metrics: Current metrics dictionary
-        
-    Returns:
-        Plotly figure object
-    """
-    # Define the metrics to display
-    display_metrics = [
-        ("Coverage Score", f"{metrics.get('coverage_score', 0):.1f}%"),
-        ("Success Score", f"{metrics.get('success_score', 0):.1f}%"),
-        ("Performance Score", f"{metrics.get('performance_score', 0):.1f}%"),
-        ("Security Score", f"{metrics.get('security_score', 0):.1f}%"),
-        ("API Score", f"{metrics.get('api_score', 0):.1f}%"),
-        ("Dimensional Stability", f"{metrics.get('dimensional_stability', 0):.1f}%"),
-        ("Quantum Coherence", f"{metrics.get('quantum_coherence', 0):.1f}%"),
-        ("Entanglement Factor", f"{metrics.get('entanglement_factor', 0):.2f}"),
-        ("Collapse Risk", f"{metrics.get('dimensional_collapse_risk', 0):.1f}%")
-    ]
+    if metrics is None:
+        return fig
     
-    # Create table
-    fig = go.Figure(data=[go.Table(
+    # Safely get metric values with defaults
+    def safe_format(value, default=0):
+        if value is None:
+            return f"{default:.2f}"
+        return f"{value:.2f}"
+    
+    # Add a table with current metrics
+    fig.add_trace(go.Table(
         header=dict(
             values=["Metric", "Value"],
-            fill_color=quantum_theme["panel"],
+            fill_color="#1e2130",
             align="left",
-            font=dict(color=quantum_theme["text"], size=16)
+            font=dict(color="white", size=12)
         ),
         cells=dict(
-            values=list(zip(*display_metrics)),
-            fill_color=[[_safe_rgba_from_hex(quantum_theme["background"], 0.2)]],
-            align=["left", "right"],
-            font=dict(color=quantum_theme["text"], size=14),
-            height=30
+            values=[
+                ["Dimensional Stability", "Entanglement Factor", "Quantum Coherence", 
+                 "Collapse Risk", "Quality Position", "Coverage Position",
+                 "Performance Position", "Security Position"],
+                [
+                    safe_format(metrics.get('dimensional_stability')),
+                    safe_format(metrics.get('entanglement_factor')),
+                    safe_format(metrics.get('quantum_coherence')),
+                    safe_format(metrics.get('dimensional_collapse_risk')),
+                    safe_format(metrics.get('quality_position')),
+                    safe_format(metrics.get('coverage_position')),
+                    safe_format(metrics.get('performance_position')),
+                    safe_format(metrics.get('security_position'))
+                ]
+            ],
+            fill_color="#131722",
+            align="left",
+            font=dict(color="white", size=11)
         )
-    )])
+    ))
     
     # Update layout
     fig.update_layout(
-        margin=dict(l=10, r=10, t=10, b=10),
-        paper_bgcolor=quantum_theme["background"],
-        height=len(display_metrics) * 35 + 50  # Adjust height based on number of rows
+        template="plotly_dark",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=300
     )
     
     return fig

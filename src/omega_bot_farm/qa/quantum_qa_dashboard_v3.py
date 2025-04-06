@@ -127,13 +127,38 @@ def main():
     print(f"\033[1;32mStarting S0NN3T 5D Quantum QA Cyberpunk Matrix Dashboard on http://{args.host}:{args.port}\033[0m")
     print("\033[1;32mPress Ctrl+C to stop the dashboard\033[0m")
     
+    # Check required packages
+    try:
+        import plotly
+        logger.info(f"Using Plotly version: {plotly.__version__}")
+    except ImportError:
+        logger.error("Plotly package is required. Please install it with 'pip install plotly'")
+        print("\033[1;31mERROR: Plotly package is required. Please install it with 'pip install plotly'\033[0m")
+        sys.exit(1)
+    
+    try:
+        from dash import dcc
+        logger.info("Dash component check passed")
+    except ImportError:
+        logger.error("Dash components are required. Please install with 'pip install dash'")
+        print("\033[1;31mERROR: Dash components are required. Please install with 'pip install dash'\033[0m")
+        sys.exit(1)
+    
     # Run the app with auto port detection
-    run_app(
-        host=args.host,
-        port=args.port,
-        debug=args.debug,
-        open_browser=args.browser
-    )
+    try:
+        run_app(
+            host=args.host,
+            port=args.port,
+            debug=args.debug,
+            open_browser=args.browser
+        )
+    except Exception as e:
+        logger.error(f"Error starting dashboard: {e}")
+        print(f"\033[1;31mERROR: Failed to start dashboard: {e}\033[0m")
+        print("\033[1;33mTry running with --debug flag for more information\033[0m")
+        if "already in use" in str(e).lower():
+            print(f"\033[1;33mTry a different port with: --port 8052\033[0m")
+        sys.exit(1)
 
 
 if __name__ == '__main__':
