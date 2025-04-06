@@ -44,6 +44,19 @@ def parse_arguments():
     )
     
     parser.add_argument(
+        "--port",
+        type=int,
+        default=8050,
+        help="Port for the web interface (will auto-find if occupied)"
+    )
+    
+    parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Don't automatically open a browser when starting web interface"
+    )
+    
+    parser.add_argument(
         "--region", 
         type=str, 
         default="ngorongoro",
@@ -147,7 +160,9 @@ def main():
     
     if args.web:
         print("🌐 Launching ZOROBABEL K1L1 web interface...")
-        run_web_interface()
+        # Pass port and browser preferences to the web interface
+        from src.omega_bot_farm.geospatial.zorobabel_ui import main as run_ui
+        run_ui(default_port=args.port, auto_open_browser=not args.no_browser)
     else:
         return run_cli_mode(args)
 

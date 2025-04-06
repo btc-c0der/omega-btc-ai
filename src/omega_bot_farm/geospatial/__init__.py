@@ -26,11 +26,17 @@ except ImportError:
     pass
 
 
-def run_web_interface():
-    """Run the web interface for the Zorobabel K1L1 visualization system."""
+def run_web_interface(port=8050, auto_open_browser=True):
+    """
+    Run the web interface for the Zorobabel K1L1 visualization system.
+    
+    Args:
+        port: Port to use for the web server (will auto-find if occupied)
+        auto_open_browser: Whether to automatically open a web browser
+    """
     try:
         from .zorobabel_ui import main
-        main()
+        main(default_port=port, auto_open_browser=auto_open_browser)
     except ImportError as e:
         print(f"⚠️ Error: Could not start web interface: {e}")
         print("⚠️ Please ensure all dependencies are installed.")

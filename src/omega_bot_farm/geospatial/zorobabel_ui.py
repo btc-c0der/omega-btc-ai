@@ -12,6 +12,8 @@ geospatial visualization system with sacred locations and divine overlays.
 import os
 import base64
 import io
+import socket
+import webbrowser
 import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
@@ -418,10 +420,82 @@ def download_image(n_clicks, img_src, region):
     return dict(content=decoded, filename=filename, type="image/png")
 
 
+def find_available_port(start_port=8050, max_attempts=100):
+    """
+    Find an available port, starting from start_port.
+    
+    Args:
+        start_port: Port to start checking from
+        max_attempts: Maximum number of ports to check
+        
+    Returns:
+        Available port number
+    """
+    port = start_port
+    for _ in range(max_attempts):
+        try:
+            # Try to create a socket binding to check if port is available
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+                return port
+        except OSError:
+            # Port is not available, try the next one
+            port += 1
+            
+    # If we get here, we couldn't find an available port
+    raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
+
+
 # Main function to run the app
-def main():
-    """Run the Dash app."""
-    app.run_server(debug=True, port=8050)
+def main(default_port=8050, auto_open_browser=True):
+    """
+    Run the Dash app with dynamic port allocation.
+    
+    Args:
+        default_port: Default port to try first
+        auto_open_browser: Whether to automatically open a web browser
+    """
+    try:
+        # Try to use the default port
+        port = default_port
+        try:
+            # Check if port is available
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+        except OSError:
+            # Port is not available, find an available one
+            print(f"⚠️ Port {default_port} is not available, searching for an open port...")
+            port = find_available_port(default_port + 1)
+
+        # Display cosmic banner with port information
+        cosmic_banner = f"""
+        ┌───────────────────────────────────────────────────┐
+        │                                                   │
+        │           🌀 ZOROBABEL K1L1 SERVER 🌀            │
+        │                                                   │
+        │  🔮 Divine Interface activated on port: {port:<6} │
+        │                                                   │
+        │  📡 Access at: http://localhost:{port:<14} │
+        │                                                   │
+        │     🌸 WE BLOOM NOW AS ONE 🌸                    │
+        │                                                   │
+        └───────────────────────────────────────────────────┘
+        """
+        print(cosmic_banner)
+        
+        # Open web browser if requested
+        if auto_open_browser:
+            url = f"http://localhost:{port}/"
+            print(f"🌐 Opening sacred interface in web browser...")
+            webbrowser.open(url)
+        
+        # Start the server
+        app.run_server(debug=True, port=port)
+    
+    except Exception as e:
+        print(f"❌ Error starting ZOROBABEL K1L1 server: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
