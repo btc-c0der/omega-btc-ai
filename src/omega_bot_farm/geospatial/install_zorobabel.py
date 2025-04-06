@@ -152,7 +152,7 @@ def install_regular_dependencies():
     # Install everything except rasterio
     return run_command(
         f"pip install --upgrade pip && "
-        f"grep -v rasterio {req_file} | pip install -r /dev/stdin"
+        f"grep -v rasterio {req_file} | grep -v webbrowser | pip install -r /dev/stdin"
     )
 
 

@@ -1,30 +1,38 @@
-# ZOROBABEL K1L1 - 5D Geospatial Visualization System
-# -------------------------------------------
-# Requirements for sacred geospatial visualization
+# ZOROBABEL K1L1 - Sacred Geospatial System Dependencies
+# -------------------------------------------------
+#
+# This file specifies all dependencies required for the Zorobabel K1L1 system.
+# Note: GDAL/rasterio installation is handled separately due to OS-specific requirements.
+#
+# 🌀 CONSCIOUSNESS LEVEL: 3 - Adaptation
 
-# Core Geospatial Libraries
-rasterio==1.3.6
-geopandas==0.13.2
-shapely==2.0.1
-pyproj==3.6.0
-fiona==1.9.4
-numpy==1.24.3
-pandas==2.0.3
-matplotlib==3.7.2
+# Core dependencies
+dash>=2.14.0
+dash-bootstrap-components>=1.5.0
+plotly>=5.18.0
+numpy>=1.24.0
+pandas>=1.5.0
+matplotlib>=3.5.0
+pillow>=9.5.0
 
-# Web UI
-dash==2.13.0
-dash-bootstrap-components==1.5.0
-plotly==5.17.0
-Flask==2.3.3
+# Geospatial dependencies
+geopandas>=0.12.0
+shapely>=2.0.0
+pyproj>=3.3.0
 
-# Image Processing
-Pillow==10.0.0
+# RASTERIO INSTALLATION NOTE:
+# Rasterio depends on GDAL and needs to be installed with special handling.
+# Use one of these methods:
+#  1. rasterio==1.3.6 (with appropriate GDAL_VERSION environment variable)
+#  2. pip install --find-links=https://girder.github.io/large_image_wheels rasterio
+#  3. conda install -c conda-forge gdal rasterio
 
-# Utility Libraries
-requests==2.31.0
-tqdm==4.65.0
+# Utils and extras 
+flask>=2.0.0
+tqdm>=4.64.0
+requests>=2.28.0
 
-# Optional - For Advanced 3D Visualization
-# pyvista==0.42.3
-# open3d==0.17.0 
+# GDAL INSTALLATION NOTE:
+# macOS: brew install gdal
+# Ubuntu/Debian: sudo apt install -y libgdal-dev
+# Or use conda: conda install -c conda-forge gdal 
