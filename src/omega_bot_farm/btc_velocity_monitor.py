@@ -4,6 +4,8 @@ BTC Velocity Monitor - Real-time BTC monitoring using Redis data
 
 This module provides real-time monitoring and analysis of Bitcoin price movements,
 velocity, and market dynamics using data from the remote Redis database.
+
+"THE GRID" — "FOR BTC VELOCITY" — "c/o OFF—WHITE™"
 """
 
 import os
@@ -48,6 +50,12 @@ MAGENTA = Fore.MAGENTA
 CYAN = Fore.CYAN
 RESET = Style.RESET_ALL
 BOLD = Style.BRIGHT
+WHITE = Fore.WHITE
+
+# VIRGIL ABLOH DESIGN CONSTANTS
+VIRGIL_BORDER = f"{CYAN}{'=' * 60}{RESET}"
+VIRGIL_SEPARATOR = f"{CYAN}{'─' * 60}{RESET}"
+VIRGIL_QUOTE = lambda text, category="": f"{CYAN}\"{text.upper()}\"   \"{category}\"{RESET}"
 
 class RedisClient:
     """Redis client for connecting to the remote database"""
@@ -105,7 +113,7 @@ class RedisClient:
             # Get keys with common BTC prefixes/suffixes
             btc_keys = []
             for pattern in ["*btc*", "*bitcoin*", "*price*", "*swing*", "*fibonacci*", 
-                           "*velocity*", "*volatility*", "*trap*", "*volume*"]:
+                           "*velocity*", "*volatility*", "*trap*", "*volume*", "*aixbt*", "*correlation*"]:
                 keys = self.redis_client.keys(pattern)
                 btc_keys.extend([k.decode() for k in keys])
             
@@ -185,6 +193,9 @@ class BTCDataAnalyzer:
         self.price_history = []
         self.velocity_history = []
         self.fibonacci_levels = {}
+        self.aixbt_data = {}
+        self.aixbt_correlation = None
+        self.aixbt_price = 0.0
         
     def load_data(self) -> bool:
         """Load BTC data from Redis"""
@@ -206,6 +217,9 @@ class BTCDataAnalyzer:
             
             # Extract price history data
             self._extract_price_history()
+            
+            # Extract AIXBT correlation data
+            self._extract_aixbt_data()
             
             return True
         except Exception as e:
@@ -252,6 +266,36 @@ class BTCDataAnalyzer:
                     self.fibonacci_levels = json.loads(data["value"])
                 except:
                     pass
+    
+    def _extract_aixbt_data(self):
+        """Extract AIXBT data and correlation metrics from Redis"""
+        try:
+            # Get AIXBT price
+            if "last_aixbt_price" in self.btc_data:
+                data = self.btc_data["last_aixbt_price"]
+                if data["type"] == "string" and data["value"]:
+                    try:
+                        self.aixbt_price = float(data["value"])
+                        logger.info(f"Current AIXBT price: {self.aixbt_price}")
+                    except:
+                        self.aixbt_price = None
+            
+            # Get correlation data
+            if "aixbt_btc_correlation" in self.btc_data:
+                data = self.btc_data["aixbt_btc_correlation"]
+                if data["type"] == "string" and data["value"]:
+                    try:
+                        if isinstance(data["value"], dict):
+                            self.aixbt_correlation = data["value"]
+                        else:
+                            self.aixbt_correlation = json.loads(data["value"])
+                        logger.info(f"Loaded AIXBT-BTC correlation: {self.aixbt_correlation.get('correlation', 'N/A')}")
+                    except Exception as e:
+                        logger.error(f"Error parsing AIXBT correlation: {e}")
+                        self.aixbt_correlation = None
+        
+        except Exception as e:
+            logger.error(f"Error extracting AIXBT data: {e}")
     
     def calculate_velocity(self, timeframe_minutes: int = 5) -> Dict[str, Any]:
         """Calculate BTC velocity metrics"""
@@ -374,6 +418,55 @@ class BTCDataAnalyzer:
         except Exception as e:
             logger.error(f"Error detecting price anomalies: {e}")
             return {}
+    
+    def calculate_aixbt_coefficient(self) -> Dict[str, Any]:
+        """Calculate the coefficient between AIXBT and BTC price movements"""
+        if not self.aixbt_correlation:
+            return {
+                "correlation": None,
+                "correlation_strength": "UNKNOWN",
+                "aixbt_price": self.aixbt_price,
+                "btc_price": self.current_price
+            }
+        
+        try:
+            correlation = self.aixbt_correlation.get('correlation', 0)
+            
+            # Determine correlation strength
+            if abs(correlation) > 0.7:
+                strength = "STRONG"
+            elif abs(correlation) > 0.3:
+                strength = "MODERATE"
+            else:
+                strength = "WEAK"
+            
+            # Determine correlation type
+            if correlation > 0:
+                correlation_type = "POSITIVE"
+            elif correlation < 0:
+                correlation_type = "NEGATIVE"
+            else:
+                correlation_type = "NEUTRAL"
+            
+            # Get timestamp of correlation measurement
+            timestamp = self.aixbt_correlation.get('timestamp', 'N/A')
+            
+            return {
+                "correlation": correlation,
+                "correlation_strength": strength,
+                "correlation_type": correlation_type,
+                "aixbt_price": self.aixbt_price,
+                "btc_price": self.current_price,
+                "timestamp": timestamp
+            }
+        except Exception as e:
+            logger.error(f"Error calculating AIXBT coefficient: {e}")
+            return {
+                "correlation": None,
+                "correlation_strength": "ERROR",
+                "aixbt_price": self.aixbt_price,
+                "btc_price": self.current_price
+            }
 
 class BTCVelocityMonitor:
     """Main module for monitoring BTC velocity"""
@@ -406,10 +499,11 @@ class BTCVelocityMonitor:
         keys = self.redis_client.get_btc_keys()
         
         if not keys:
-            print(f"{YELLOW}No BTC-related keys found in Redis.{RESET}")
+            print(f"\n{VIRGIL_QUOTE('NO BTC-RELATED KEYS FOUND IN REDIS', 'DATABASE EMPTY')}")
             return
         
-        print(f"\n{CYAN}{BOLD}BTC-Related Redis Keys:{RESET}")
+        print(f"\n{VIRGIL_QUOTE('BTC-RELATED REDIS KEYS', 'DATABASE LAYER')}")
+        print(VIRGIL_SEPARATOR)
         for i, key in enumerate(sorted(keys), 1):
             # Get key type
             key_info = self.redis_client.get_key_info(key)
@@ -425,10 +519,11 @@ class BTCVelocityMonitor:
             else:
                 type_color = YELLOW
                 
-            print(f"  {i:2d}. {CYAN}{key}{RESET} ({type_color}{key_type}{RESET})")
+            print(f"  {i:2d}. {CYAN}\"{key}\"{RESET} {type_color}(\"{key_type}\"){RESET}")
+        print(VIRGIL_SEPARATOR)
     
     def monitor_velocity(self, refresh_interval: int = 5) -> None:
-        """Monitor BTC velocity in real-time"""
+        """Monitor BTC velocity in real-time with Virgil Abloh Matrix theme"""
         try:
             while True:
                 # Clear the screen
@@ -442,14 +537,29 @@ class BTCVelocityMonitor:
                 velocity_5min = self.analyzer.calculate_velocity(timeframe_minutes=5)
                 velocity_15min = self.analyzer.calculate_velocity(timeframe_minutes=15)
                 
+                # Calculate AIXBT coefficient
+                aixbt_coefficient = self.analyzer.calculate_aixbt_coefficient()
+                
                 # Detect anomalies
                 anomalies = self.analyzer.detect_price_anomalies(velocity_5min)
                 
-                # Display header
-                print(f"\n{CYAN}{BOLD}======== BTC VELOCITY MONITOR ========{RESET}")
-                print(f"{YELLOW}Current Price: ${self.analyzer.current_price:.2f}{RESET}")
-                print(f"{CYAN}Last Update: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{RESET}")
-                print(f"{CYAN}{'=' * 38}{RESET}\n")
+                # Calculate uptime
+                now = datetime.datetime.now()
+                uptime_str = now.strftime("%d-%m-%Y %H:%M:%S")
+                
+                # Display Virgil Abloh Matrix-themed header
+                print(VIRGIL_BORDER)
+                print(f"{MAGENTA}{BOLD}\"BTC VELOCITY MONITOR\"   \"MATRIX EDITION\"{RESET}")
+                print(VIRGIL_BORDER)
+                print(f"{YELLOW}\"TIMESTAMP: {uptime_str}\"   \"QUANTUM LAYER\"{RESET}")
+                
+                # Display current prices section
+                print(VIRGIL_SEPARATOR)
+                print(f"{YELLOW}\"MARKET PRICES\"   \"REAL-TIME DATA\"{RESET}")
+                print(f"  {CYAN}\"BTC:\" ${self.analyzer.current_price:.2f}{RESET}")
+                if self.analyzer.aixbt_price:
+                    print(f"  {CYAN}\"AIXBT:\" ${self.analyzer.aixbt_price:.8f}{RESET}")
+                print(VIRGIL_SEPARATOR)
                 
                 # Display velocity metrics
                 self._display_velocity_metrics("1-MINUTE VELOCITY", velocity_1min)
@@ -459,17 +569,26 @@ class BTCVelocityMonitor:
                 # Display anomalies
                 self._display_anomalies(anomalies)
                 
+                # Display AIXBT correlation if available
+                if aixbt_coefficient["correlation"] is not None:
+                    self._display_aixbt_correlation(aixbt_coefficient)
+                
+                # Display Virgil Abloh-inspired footer
+                print(VIRGIL_BORDER)
+                print(f"{MAGENTA}\"THE GRID\"   \"FOR BTC VELOCITY\"   \"c/o OFF—WHITE™\"{RESET}")
+                print(f"{YELLOW}\"TIME: {now.strftime('%H:%M:%S')}\"   \"MADE IN DIGITAL SPACE\"   \"PROTOTYPE-003\"{RESET}")
+                
                 # Wait for next update
-                print(f"\n{CYAN}Refreshing in {refresh_interval} seconds... (Press Ctrl+C to exit){RESET}")
+                print(f"\n{CYAN}\"REFRESHING IN {refresh_interval} SECONDS...\"   \"PRESS CTRL+C TO EXIT\"{RESET}")
                 time.sleep(refresh_interval)
         
         except KeyboardInterrupt:
-            print(f"\n{GREEN}BTC Velocity Monitor stopped.{RESET}")
+            print(f"\n{GREEN}\"BTC VELOCITY MONITOR STOPPED\"   \"USER COMMAND\"{RESET}")
     
     def _display_velocity_metrics(self, title: str, metrics: Dict[str, Any]) -> None:
-        """Display velocity metrics in a formatted way"""
+        """Display velocity metrics in a Virgil Abloh Matrix theme"""
         if not metrics:
-            print(f"{YELLOW}{title}: No data available{RESET}")
+            print(f"{YELLOW}\"{title}: NO DATA AVAILABLE\"   \"WAITING FOR DATA\"{RESET}")
             return
         
         # Determine direction color
@@ -490,18 +609,18 @@ class BTCVelocityMonitor:
         momentum_formatted = f"{momentum:.4f}"
         
         # Display section
-        print(f"{BOLD}{CYAN}{title}{RESET}")
-        print(f"  Direction: {direction_color}{direction} {direction_symbol}{RESET}")
-        print(f"  Velocity: {direction_color}{velocity_formatted}{RESET}")
-        print(f"  Momentum: {direction_color}{momentum_formatted}{RESET}")
-        print(f"  Acceleration: {YELLOW}{metrics.get('avg_acceleration', 0):.8f} $/sec²{RESET}")
-        print(f"  Data Points: {metrics.get('data_points', 0)}")
-        print()
+        print(f"{CYAN}\"{title}\"   \"TIME DIMENSION\"{RESET}")
+        print(f"  {YELLOW}\"DIRECTION:\"{RESET} {direction_color}\"{direction.upper()} {direction_symbol}\"{RESET}")
+        print(f"  {YELLOW}\"VELOCITY:\"{RESET} {direction_color}\"{velocity_formatted}\"{RESET}")
+        print(f"  {YELLOW}\"MOMENTUM:\"{RESET} {direction_color}\"{momentum_formatted}\"{RESET}")
+        print(f"  {YELLOW}\"ACCELERATION:\"{RESET} {MAGENTA}\"{metrics.get('avg_acceleration', 0):.8f} $/sec²\"{RESET}")
+        print(f"  {YELLOW}\"DATA POINTS:\"{RESET} {BLUE}\"{metrics.get('data_points', 0)}\"{RESET}")
+        print(VIRGIL_SEPARATOR)
     
     def _display_anomalies(self, anomalies: Dict[str, Any]) -> None:
-        """Display price anomalies"""
+        """Display price anomalies in Virgil Abloh Matrix theme"""
         if not anomalies:
-            print(f"{YELLOW}Anomaly Detection: No data available{RESET}")
+            print(f"{YELLOW}\"ANOMALY DETECTION: NO DATA AVAILABLE\"   \"WAITING FOR DATA\"{RESET}")
             return
         
         # Get anomaly level
@@ -522,40 +641,81 @@ class BTCVelocityMonitor:
             level_text = "SEVERE"
         
         # Display section
-        print(f"{BOLD}{CYAN}ANOMALY DETECTION{RESET}")
-        print(f"  Status: {level_color}{level_text}{RESET}")
+        print(f"{CYAN}\"ANOMALY DETECTION\"   \"PATTERN RECOGNITION\"{RESET}")
+        print(f"  {YELLOW}\"STATUS:\"{RESET} {level_color}\"{level_text}\"{RESET}")
         
         # Display individual anomalies
         if anomalies.get("extreme_velocity", False):
-            print(f"  {RED}• Extreme Velocity Detected{RESET}")
+            print(f"  {RED}• \"EXTREME VELOCITY DETECTED\"   \"PRICE CHANGE RATE\"{RESET}")
         
         if anomalies.get("rapid_acceleration", False):
-            print(f"  {RED}• Rapid Acceleration Detected{RESET}")
+            print(f"  {RED}• \"RAPID ACCELERATION DETECTED\"   \"VELOCITY CHANGE\"{RESET}")
         
         if anomalies.get("momentum_shift", False):
-            print(f"  {MAGENTA}• Momentum Shift Detected{RESET}")
+            print(f"  {MAGENTA}• \"MOMENTUM SHIFT DETECTED\"   \"DIRECTION CHANGE\"{RESET}")
         
         if anomaly_level == 0:
-            print(f"  {GREEN}• Normal Market Activity{RESET}")
+            print(f"  {GREEN}• \"NORMAL MARKET ACTIVITY\"   \"STABILITY CONFIRMED\"{RESET}")
         
-        print()
+        print(VIRGIL_SEPARATOR)
+    
+    def _display_aixbt_correlation(self, correlation_data: Dict[str, Any]) -> None:
+        """Display AIXBT-BTC correlation data in Virgil Abloh Matrix theme"""
+        correlation = correlation_data.get("correlation", 0)
+        strength = correlation_data.get("correlation_strength", "UNKNOWN")
+        corr_type = correlation_data.get("correlation_type", "UNKNOWN")
+        
+        # Determine color based on correlation strength
+        if strength == "STRONG":
+            strength_color = GREEN if corr_type == "POSITIVE" else RED
+        elif strength == "MODERATE":
+            strength_color = YELLOW
+        else:
+            strength_color = BLUE
+        
+        # Display section
+        print(f"{CYAN}\"AIXBT-BTC CORRELATION\"   \"TOKEN RELATIONSHIP\"{RESET}")
+        print(f"  {YELLOW}\"COEFFICIENT:\"{RESET} {strength_color}\"{correlation:.4f}\"{RESET}")
+        print(f"  {YELLOW}\"STRENGTH:\"{RESET} {strength_color}\"{strength}\"{RESET}")
+        print(f"  {YELLOW}\"TYPE:\"{RESET} {strength_color}\"{corr_type}\"{RESET}")
+        
+        # Display price comparison
+        aixbt_price = correlation_data.get("aixbt_price", 0)
+        btc_price = correlation_data.get("btc_price", 0)
+        
+        if aixbt_price and btc_price:
+            # Calculate relative price (AIXBT/BTC)
+            relative_price = (aixbt_price / btc_price) * 100000000  # Convert to satoshis
+            print(f"  {YELLOW}\"AIXBT/BTC RATIO:\"{RESET} {CYAN}\"{relative_price:.8f} SATS\"{RESET}")
+        
+        print(VIRGIL_SEPARATOR)
 
 
 def run_btc_velocity_monitor():
-    """Run the BTC velocity monitor"""
-    print(f"{CYAN}{BOLD}Starting BTC Velocity Monitor...{RESET}")
+    """Run the BTC velocity monitor with Virgil Abloh Matrix theme"""
+    # Clear the screen for dramatic effect
+    os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # Display Virgil Abloh-style intro
+    print(VIRGIL_BORDER)
+    print(f"{MAGENTA}{BOLD}\"BTC VELOCITY MONITOR\"   \"MATRIX EDITION\"{RESET}")
+    print(f"{CYAN}\"POWERED BY OFF—WHITE™ FOR BLOCKCHAIN\"   \"VIRGIL ABLOH 2025\"{RESET}")
+    print(VIRGIL_BORDER)
     
     # Initialize monitor
     monitor = BTCVelocityMonitor()
     if not monitor.initialize():
-        print(f"{RED}Failed to initialize BTC Velocity Monitor.{RESET}")
+        print(f"{RED}\"FAILED TO INITIALIZE BTC VELOCITY MONITOR\"   \"CONNECTION ERROR\"{RESET}")
         return
     
     # Display Redis keys
     monitor.display_redis_keys()
     
+    # Display launch message
+    print(f"\n{CYAN}\"STARTING REAL-TIME MONITORING...\"   \"MATRIX INTERFACE ACTIVE\"{RESET}")
+    print(f"{YELLOW}\"VIRGIL ABLOH MATRIX THEME ENABLED\"   \"DESIGN MODE\"{RESET}")
+    
     # Monitor velocity
-    print(f"\n{CYAN}Starting real-time monitoring...{RESET}")
     monitor.monitor_velocity()
 
 
