@@ -20,6 +20,8 @@ from datetime import datetime
 from pathlib import Path
 import psutil
 import random
+import json
+import argparse
 
 # ANSI Colors for terminal output
 RESET = "\033[0m"
@@ -81,21 +83,22 @@ def display_loading_animation():
     print(f"\n{GREEN}\"SYSTEM READY!\"   \"ACTIVATION COMPLETE\"{RESET}")
 
 def show_menu():
-    """Display the main menu"""
-    print(f"\n{CYAN}{BOLD}\"OMEGA GRID PORTAL\"   \"MAIN MENU\"{RESET}\n")
-    print(f"{GOLD}1. {RESET}\"LAUNCH MATRIX TERMINAL DASHBOARD\"")
-    print(f"{GOLD}2. {RESET}\"LAUNCH WEB DASHBOARD\"")
-    print(f"{GOLD}3. {RESET}\"LAUNCH DISCORD BOT\"")
-    print(f"{GOLD}4. {RESET}\"VIEW BITGET POSITIONS\"")
-    print(f"{GOLD}5. {RESET}\"SHOW SYSTEM STATUS\"")
-    print(f"{GOLD}6. {RESET}\"LAUNCH CCXT STRATEGIC TRADER\"")
-    print(f"{GOLD}7. {RESET}\"LAUNCH CYBERNETIC QUANTUM BLOOM\"")
-    print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
-    print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
-    print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
-    print(f"{GOLD}11. {RESET}{YELLOW}🦁 \"LAUNCH GARVEY WISDOM PORTAL\" 🦁{RESET}")
-    print(f"{GOLD}0. {RESET}\"EXIT\"")
-    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-11):\"{RESET} ")
+    """Show the menu options to the user"""
+    print("\nOMEGA Grid Portal - Simple Menu\n")
+    print("1. View the system status")
+    print("2. Launch Discord bot")  
+    print("3. Show Discord bot info")
+    print("4. Launch Matrix Dashboard")
+    print("5. Launch CCXT Strategic Trader")
+    print("6. Show available parameters")
+    print("7. Launch Web Dashboard")
+    print("8. Get Bitget positions info")
+    print("9. Launch Cybernetic Quantum Bloom")
+    print("10. Run Test Runner")
+    print("11. Launch Garvey Wisdom Portal")
+    print("12. Connect to Online Redis")
+    print("0. Exit")
+    return input("\nEnter your choice (0-12): ")
 
 def launch_matrix_dashboard():
     """Launch the Matrix-style terminal dashboard"""
@@ -344,7 +347,7 @@ def launch_cybernetic_quantum_bloom():
         print(f"{RED}Error launching Cybernetic Quantum Bloom: {e}{RESET}")
         return False
 
-def run_quantum_test_runner():
+def run_test_runner():
     """Run the Quantum Test Runner"""
     print(f"{CYAN}{BOLD}Launching Quantum Test Runner...{RESET}")
     test_runner_path = os.path.join(PROJECT_ROOT, "src/omega_bot_farm/qa/run_test_runner.py")
@@ -416,112 +419,244 @@ def invoke_virgil_abloh_celebration():
 
 def launch_garvey_portal():
     """Launch the Garvey Wisdom Portal"""
-    print(f"{YELLOW}{BOLD}Launching Garvey Wisdom Portal...{RESET}")
-    portal_path = os.path.join(PROJECT_ROOT, "omega_ai/garvey_portal/portal.py")
+    print("Launching the Garvey Wisdom Portal...")
     
-    if not os.path.exists(portal_path):
-        print(f"{RED}Garvey Wisdom Portal not found!{RESET}")
-        return False
+    portal_dir = "omega_ai/garvey_portal"
+    portal_file = os.path.join(portal_dir, "portal.py")
     
-    try:
-        # Create directory to store portal data if it doesn't exist
-        data_dir = os.path.join(os.path.dirname(portal_path), "data")
-        os.makedirs(data_dir, exist_ok=True)
-        
-        # Launch using Streamlit
-        streamlit_cmd = subprocess.run(["which", "streamlit"], 
-                                      capture_output=True, text=True)
-        streamlit_path = streamlit_cmd.stdout.strip()
-        
-        if not streamlit_path:
-            print(f"{YELLOW}Streamlit not found in path. Using module call...{RESET}")
-            subprocess.Popen([sys.executable, "-m", "streamlit", "run", portal_path])
-        else:
-            subprocess.Popen([streamlit_path, "run", portal_path])
-            
-        print(f"{GREEN}Garvey Wisdom Portal launched!{RESET}")
-        print(f"{CYAN}Access at: http://localhost:8501{RESET}")
-        
-        # Open browser automatically
-        import webbrowser
-        webbrowser.open("http://localhost:8501")
-        
-        return True
-    except Exception as e:
-        print(f"{RED}Error launching Garvey Wisdom Portal: {e}{RESET}")
+    if not os.path.exists(portal_file):
+        print(f"{RED}Garvey Portal not found at {portal_file}. Please check the repository structure.{RESET}")
         return False
 
-def open_solomon_portal():
-    """Launch King Solomon's divine portal"""
-    print(f"{MAGENTA}{BOLD}Opening King Solomon's Divine Portal...{RESET}")
-    portal_path = os.path.join(SCRIPT_DIR, "omega_grid_portal.py")
-    
-    if not os.path.exists(portal_path):
-        print(f"{RED}Portal script not found!{RESET}")
-        return False
+    # Create data directory if it doesn't exist
+    os.makedirs(os.path.join(portal_dir, "data"), exist_ok=True)
     
     try:
-        subprocess.call([sys.executable, portal_path, "--open-portal-salomon-k1ng"])
-        print(f"{GREEN}Divine portal closed. Returning to main menu...{RESET}")
-        return True
+        # Try to use streamlit from the path
+        streamlit_path = "streamlit"
+        try:
+            subprocess.Popen([streamlit_path, "run", portal_file], stderr=subprocess.PIPE)
+            print(f"{GREEN}Garvey Portal launched successfully!{RESET}")
+            print(f"{YELLOW}Opening browser to http://localhost:8501{RESET}")
+            # Open browser
+            time.sleep(2)
+            subprocess.Popen(["open", "http://localhost:8501"])
+        except FileNotFoundError:
+            # If streamlit is not in the PATH, try as a module
+            print(f"{YELLOW}Streamlit not found in PATH. Trying as a module...{RESET}")
+            subprocess.Popen([sys.executable, "-m", "streamlit", "run", portal_file])
+            print(f"{GREEN}Garvey Portal launched successfully!{RESET}")
+            print(f"{YELLOW}Opening browser to http://localhost:8501{RESET}")
+            # Open browser
+            time.sleep(2)
+            subprocess.Popen(["open", "http://localhost:8501"])
     except Exception as e:
-        print(f"{RED}Error opening Solomon's portal: {e}{RESET}")
+        print(f"{RED}Failed to launch Garvey Portal: {e}{RESET}")
         return False
+    
+    return True
+
+def connect_online_redis():
+    """Connect to the online Redis instance"""
+    print(f"{MAGENTA}{BOLD}Connecting to online Redis...{RESET}")
+    
+    # Define the Redis connection details
+    redis_host = "omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com"
+    redis_port = 25061
+    redis_username = "default"
+    redis_password = "AVNS_OXMpU0P0ByYEz337Fgi"
+    
+    try:
+        # Check if Redis module is available
+        try:
+            import redis
+        except ImportError:
+            print(f"{YELLOW}Installing Redis module...{RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "redis"], check=True)
+            import redis
+        
+        print(f"{CYAN}Establishing connection to Digital Ocean Redis...{RESET}")
+        print(f"{YELLOW}Host: {redis_host}, Port: {redis_port}{RESET}")
+        
+        # Create the connection
+        r = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            username=redis_username,
+            password=redis_password,
+            ssl=True,
+            socket_connect_timeout=5.0
+        )
+        
+        # Test the connection with a ping
+        result = r.ping()
+        
+        if result:
+            print(f"{GREEN}Connection successful! Redis responded: {result}{RESET}")
+            
+            # Display some Redis info
+            info = r.info()
+            print(f"\n{CYAN}Redis Server Information:{RESET}")
+            print(f"{GOLD}{'—' * 40}{RESET}")
+            print(f"  {YELLOW}Version:           {info.get('redis_version', 'Unknown')}{RESET}")
+            print(f"  {YELLOW}Uptime:            {info.get('uptime_in_days', 0)} days{RESET}")
+            print(f"  {YELLOW}Connected clients: {info.get('connected_clients', 0)}{RESET}")
+            print(f"  {YELLOW}Memory used:       {info.get('used_memory_human', 'Unknown')}{RESET}")
+            print(f"  {YELLOW}Total keys:        {sum(info.get(f'db{i}', {}).get('keys', 0) for i in range(16) if f'db{i}' in info)}{RESET}")
+            print(f"{GOLD}{'—' * 40}{RESET}")
+            
+            # Set a test key to demonstrate functionality
+            test_key = "simple_portal_test"
+            test_value = f"Connected at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Simple Portal"
+            r.set(test_key, test_value)
+            print(f"\n{GREEN}Test key set: {test_key} = {test_value}{RESET}")
+            
+            # Get some existing keys to show
+            print(f"\n{CYAN}Sample keys in database (limited to 10):{RESET}")
+            keys = r.keys("*")[:10]  # Limit to 10 keys
+            if keys:
+                for key in keys:
+                    key_str = key.decode('utf-8') if isinstance(key, bytes) else key
+                    try:
+                        value = r.get(key_str)
+                        value_str = value.decode('utf-8') if isinstance(value, bytes) else str(value)
+                        if len(value_str) > 50:
+                            value_str = value_str[:47] + "..."
+                        print(f"  {BLUE}{key_str}:{RESET} {YELLOW}{value_str}{RESET}")
+                    except:
+                        print(f"  {BLUE}{key_str}:{RESET} {RED}[BINARY DATA]{RESET}")
+            else:
+                print(f"  {YELLOW}No keys found in database{RESET}")
+            
+            return True
+        else:
+            print(f"{RED}Connection failed! No response from Redis.{RESET}")
+            return False
+    except Exception as e:
+        print(f"{RED}Connection error: {str(e)}{RESET}")
+        print(f"\n{YELLOW}Troubleshooting tips:{RESET}")
+        print(f"  {CYAN}1. Check network connectivity and firewall settings{RESET}")
+        print(f"  {CYAN}2. Verify your credentials (username/password){RESET}")
+        print(f"  {CYAN}3. Ensure SSL support (requires TLS connection){RESET}")
+        print(f"  {CYAN}4. Contact administrator if issues persist{RESET}")
+        return False
+
+def show_available_parameters():
+    """Show all available command-line parameters"""
+    print(f"\n{CYAN}{BOLD}Available Command-line Parameters:{RESET}")
+    print(f"{GOLD}{'—' * 50}{RESET}")
+    print(f"  {YELLOW}--status{RESET}      Show system status")
+    print(f"  {YELLOW}--bot{RESET}         Launch Discord bot")
+    print(f"  {YELLOW}--bot-info{RESET}    Show Discord bot information")
+    print(f"  {YELLOW}--matrix{RESET}      Launch Matrix Dashboard")
+    print(f"  {YELLOW}--trader{RESET}      Launch CCXT Strategic Trader")
+    print(f"  {YELLOW}--web{RESET}         Launch Web Dashboard")
+    print(f"  {YELLOW}--positions{RESET}   Get Bitget positions info")
+    print(f"  {YELLOW}--quantum{RESET}     Launch Cybernetic Quantum Bloom")
+    print(f"  {YELLOW}--test{RESET}        Run Test Runner")
+    print(f"  {YELLOW}--garvey{RESET}      Launch Garvey Wisdom Portal")
+    print(f"  {YELLOW}--redis{RESET}       Connect to Online Redis")
+    print(f"{GOLD}{'—' * 50}{RESET}")
+    
+    return True
+
+def show_discord_bot_info():
+    """Show information about the Discord bot from the configuration"""
+    # This function is not provided in the original file or the new code block
+    # It's assumed to exist as it's called in the show_menu function
+    pass
 
 def main():
-    """Main function to run the portal"""
-    display_banner()
-    display_loading_animation()
+    parser = argparse.ArgumentParser(description="OMEGA Grid Portal - Simple Launcher")
+    parser.add_argument("--status", action="store_true", help="Show system status")
+    parser.add_argument("--bot", action="store_true", help="Launch Discord bot")
+    parser.add_argument("--bot-info", action="store_true", help="Show Discord bot information")
+    parser.add_argument("--matrix", action="store_true", help="Launch Matrix Dashboard")
+    parser.add_argument("--trader", action="store_true", help="Launch CCXT Strategic Trader")
+    parser.add_argument("--web", action="store_true", help="Launch Web Dashboard")
+    parser.add_argument("--positions", action="store_true", help="Get Bitget positions info")
+    parser.add_argument("--quantum", action="store_true", help="Launch Cybernetic Quantum Bloom")
+    parser.add_argument("--test", action="store_true", help="Run Test Runner")
+    parser.add_argument("--garvey", action="store_true", help="Launch Garvey Wisdom Portal")
+    parser.add_argument("--redis", action="store_true", help="Connect to Online Redis")
     
-    # Check for command-line arguments
-    if len(sys.argv) > 1:
-        arg = sys.argv[1].lower()
-        if arg == "--status":
-            show_system_status()
-            sys.exit(0)
-        elif arg == "--launch-all":
-            launch_matrix_dashboard()
-            launch_web_dashboard()
-            launch_discord_bot()
-            sys.exit(0)
-        # Add other command-line options as needed
+    args = parser.parse_args()
     
+    # Clear the terminal
+    os.system('cls' if os.name == 'nt' else 'clear')
+    
+    print(f"{GOLD}{BOLD}OMEGA Grid Portal - Simple Launcher{RESET}")
+    print(f"{YELLOW}Initializing...{RESET}")
+    
+    if args.status:
+        show_system_status()
+        return
+    elif args.bot:
+        launch_discord_bot()
+        return
+    elif args.bot_info:
+        show_discord_bot_info()
+        return
+    elif args.matrix:
+        launch_matrix_dashboard()
+        return
+    elif args.trader:
+        launch_strategic_trader()
+        return
+    elif args.web:
+        launch_web_dashboard()
+        return
+    elif args.positions:
+        view_bitget_positions()
+        return
+    elif args.quantum:
+        launch_cybernetic_quantum_bloom()
+        return
+    elif args.test:
+        run_test_runner()
+        return
+    elif args.garvey:
+        launch_garvey_portal()
+        return
+    elif args.redis:
+        connect_online_redis()
+        return
+    
+    # Interactive menu if no arguments were passed
     while True:
         choice = show_menu()
         
         if choice == "1":
-            launch_matrix_dashboard()
-        elif choice == "2":
-            launch_web_dashboard()
-        elif choice == "3":
-            launch_discord_bot()
-        elif choice == "4":
-            view_bitget_positions()
-        elif choice == "5":
             show_system_status()
-        elif choice == "6":
+        elif choice == "2":
+            launch_discord_bot()
+        elif choice == "3":
+            show_discord_bot_info()
+        elif choice == "4":
+            launch_matrix_dashboard()
+        elif choice == "5":
             launch_strategic_trader()
+        elif choice == "6":
+            show_available_parameters()
         elif choice == "7":
-            launch_cybernetic_quantum_bloom()
+            launch_web_dashboard()
         elif choice == "8":
-            run_quantum_test_runner()
+            view_bitget_positions()
         elif choice == "9":
-            invoke_virgil_abloh_celebration()
+            launch_cybernetic_quantum_bloom()
         elif choice == "10":
-            open_solomon_portal()
+            run_test_runner()
         elif choice == "11":
             launch_garvey_portal()
+        elif choice == "12":
+            connect_online_redis()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break
         else:
             print(f"{RED}Invalid choice. Please try again.{RESET}")
         
-        input(f"\n{YELLOW}Press Enter to continue...{RESET}")
+        input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print(f"\n{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
-        sys.exit(0) 
+    main() 

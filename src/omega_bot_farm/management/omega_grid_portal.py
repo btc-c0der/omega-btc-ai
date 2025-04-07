@@ -813,99 +813,125 @@ def display_king_solomon_portal():
     
 
 def invoke_virgil_abloh_celebration():
-    """Invokes a special Virgil Abloh inspired celebration animation"""
-    # Clear the terminal
-    os.system('cls' if os.name == 'nt' else 'clear')
+    """Invoke a Virgil Abloh-inspired design celebration"""
+    print(f"{MAGENTA}{BOLD}\"INVOKING VIRGIL ABLOH CELEBRATION\"   \"DESIGN MOMENT\"{RESET}")
     
-    # Define the celebration frames
-    celebration_frames = [
-        f"""
-{MAGENTA}{BOLD}
-      "VIRGIL"       "ABLOH"       "INVOCATION"      
-      "2022—2025"    "SYSTEM"      "CELEBRATION"
-      
-      "OFF—GRID™"    "FOR"         "OMEGA"
-{RESET}
-        """,
-        f"""
-{CYAN}{BOLD}
-      "VIRGIL"       "ABLOH"       "INVOCATION"      
-      "2022—2025"    "SYSTEM"      "CELEBRATION"
-      
-      "OFF—GRID™"    "FOR"         "OMEGA"
-{RESET}
-        """,
-        f"""
-{GOLD}{BOLD}
-      "VIRGIL"       "ABLOH"       "INVOCATION"      
-      "2022—2025"    "SYSTEM"      "CELEBRATION"
-      
-      "OFF—GRID™"    "FOR"         "OMEGA"
-{RESET}
-        """,
+    # List of Virgil Abloh inspired design quotes
+    quotes = [
+        "\"ART IS MADE IN THE PRESENT TO RESPOND TO THE FUTURE\"",
+        "\"YOU DON'T HAVE TO BE A DESIGNER TO BE CREATIVE\"",
+        "\"EVERYTHING I DO IS FOR THE 17-YEAR-OLD VERSION OF MYSELF\"",
+        "\"QUOTATION MARKS\"   \"ADD ANOTHER LAYER OF MEANING\"",
+        "\"I'M SPEAKING TO THE KIDS THAT ARE COMING AFTER ME\"",
+        "\"STREETWEAR IS A WAY OF MAKING CREATIVE COMMUNITIES\"",
+        "\"THE IDEA IS TO ADD LAYERS OF INFORMATION\""
     ]
     
-    # Play the celebration animation
-    for _ in range(5):  # Loop 5 times
-        for frame in celebration_frames:
-            print(frame)
-            time.sleep(0.3)
-            # Clear the screen between frames
-            os.system('cls' if os.name == 'nt' else 'clear')
+    # Choose a random quote
+    quote = random.choice(quotes)
     
-    # Display main celebration screen
-    print(f"""
-{GOLD}{'=' * 70}{RESET}
-{MAGENTA}{BOLD}
-                "VIRGIL ABLOH INVOCATION"
-                "QUANTUM DESIGN PORTAL"
-{RESET}
-{GOLD}{'=' * 70}{RESET}
-
-{CYAN}"X: 23.7516"        "Y: 42.1893"        "Z: 19.3721"{RESET}
-{YELLOW}"DENSITY: 87.3%"    "MODE: ABLOH"    "LOT: 10 PY.SCRIPT"{RESET}
-
-{GOLD}{'—' * 70}{RESET}
-
-{MAGENTA}{BOLD}"THE TEN"{RESET}
-{CYAN}01. "QUOTATION MARKS"       — "META-LANGUAGE ACTIVATED"{RESET}
-{CYAN}02. "INDUSTRIAL DESIGN"     — "GRID COORDINATES PLOTTED"{RESET}
-{CYAN}03. "HELVETICA BOLD"        — "TYPOGRAPHY ENFORCED"{RESET}
-{CYAN}04. "PRODUCT LABEL"         — "SHIPPING INFORMATION ENCODED"{RESET}
-{CYAN}05. "TECHNICAL SPECS"       — "ENGINEERING DETAILS APPLIED"{RESET}
-{CYAN}06. "META REFERENCES"       — "SELF-AWARENESS ESTABLISHED"{RESET}
-{CYAN}07. "WHITE SPACE"           — "NEGATIVE SPACE OPTIMIZED"{RESET}
-{CYAN}08. "IRONY"                 — "CONTRADICTION EMBRACED"{RESET}
-{CYAN}09. "DECONSTRUCTION"        — "SYSTEM EXPOSED"{RESET}
-{CYAN}10. "PARADOX"               — "SIMULTANEOUS TRUTHS ACCEPTED"{RESET}
-
-{GOLD}{'—' * 70}{RESET}
-
-{MAGENTA}{BOLD}"CELEBRATION STATUS: COMPLETE"{RESET}
-{GREEN}"SUCCESS RATE: 100%"{RESET}
-{YELLOW}"ABLOH DESIGN PRINCIPLES: FULLY IMPLEMENTED"{RESET}
-
-{GOLD}{'=' * 70}{RESET}
-{CYAN}"c/o OMEGA GRID"   "EST. 2025"   "OFF—GRID™ FOR TRAINING"{RESET}
-{YELLOW}"LOT: 23.7516"   "MADE IN DIGITAL SPACE"   "NOT FOR PUBLIC USE"{RESET}
-{GOLD}{'=' * 70}{RESET}
-
-{GREEN}{BOLD}"YOU ARE NOW 3% MORE "VIRGIL" THAN BEFORE"{RESET}
-{MAGENTA}"DESIGN WILL SAVE THE WORLD"{RESET}
-    """)
+    # Print the design celebration
+    print(f"\n{CYAN}{'=' * 78}{RESET}")
+    print(f"{CYAN}╔{'═' * 76}╗{RESET}")
+    print(f"{CYAN}║{' ' * 30}{BOLD}\"CELEBRATION\"{RESET}{CYAN}{' ' * 34}║{RESET}")
+    print(f"{CYAN}║{' ' * 76}║{RESET}")
+    print(f"{CYAN}║{' ' * 18}{YELLOW}{quote}{RESET}{CYAN}{' ' * (58 - len(quote))}║{RESET}")
+    print(f"{CYAN}║{' ' * 76}║{RESET}")
+    print(f"{CYAN}║{' ' * 30}— \"VIRGIL ABLOH\"{' ' * 30}║{RESET}")
+    print(f"{CYAN}╚{'═' * 76}╝{RESET}")
     
-    # Show spinning industrial design element
-    spin_chars = ["-", "\\", "|", "/"]
-    print(f"\n{CYAN}\"SYSTEM RECALIBRATING\"   \"PLEASE WAIT\"{RESET}")
-    for _ in range(20):
-        for char in spin_chars:
-            sys.stdout.write(f"\r{GOLD}[{char}] \"PROCESSING CELEBRATION\"   \"STATUS: ACTIVE\"{RESET}")
-            sys.stdout.flush()
-            time.sleep(0.1)
+    # Add some animated elements
+    for i in range(10):
+        print(f"\r{MAGENTA}{' ' * i}\"DESIGNING\"{' ' * (20 - i)}\"SPACES\"{' ' * i}\"OFF—WHITE™\"", end="")
+        time.sleep(0.2)
     
-    print(f"\n\n{GREEN}{BOLD}\"VIRGIL ABLOH INVOCATION COMPLETE\"{RESET}")
-    print(f"{CYAN}\"THE SYSTEM IS YOURS\"   c/o \"OMEGA GRID\"   \"FOR TRAINING PURPOSES\"{RESET}")
-    input(f"\n{YELLOW}\"PRESS ENTER TO CONTINUE\"   \"USER INPUT REQUIRED\"{RESET}")
+    print(f"\n\n{GREEN}\"CELEBRATION COMPLETE\"   \"RETURNING TO PORTAL\"{RESET}")
+    return True
+
+def connect_online_redis():
+    """Connect to the online Redis instance"""
+    print(f"{MAGENTA}{BOLD}\"CONNECTING TO ONLINE REDIS\"   \"CLOUD INFRASTRUCTURE\"{RESET}")
+    
+    # Define the Redis connection details
+    redis_host = "omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com"
+    redis_port = 25061
+    redis_username = "default"
+    redis_password = "AVNS_OXMpU0P0ByYEz337Fgi"
+    
+    try:
+        # Check if Redis module is available
+        try:
+            import redis
+        except ImportError:
+            print(f"{YELLOW}\"INSTALLING REDIS MODULE\"   \"DEPENDENCY ACQUISITION\"{RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "redis"], check=True)
+            import redis
+        
+        print(f"{CYAN}\"ESTABLISHING CONNECTION\"   \"DIGITAL OCEAN REDIS\"{RESET}")
+        print(f"{YELLOW}\"HOST: {redis_host}\"   \"PORT: {redis_port}\"{RESET}")
+        
+        # Create the connection
+        r = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            username=redis_username,
+            password=redis_password,
+            ssl=True,
+            socket_connect_timeout=5.0
+        )
+        
+        # Test the connection with a ping
+        result = r.ping()
+        
+        if result:
+            print(f"{GREEN}\"CONNECTION SUCCESSFUL\"   \"REDIS RESPONDED: {result}\"{RESET}")
+            
+            # Display some Redis info
+            info = r.info()
+            print(f"\n{CYAN}\"REDIS SERVER INFORMATION\"   \"CLOUD INSTANCE\"{RESET}")
+            print(f"{GOLD}{'—' * 58}{RESET}")
+            print(f"  {YELLOW}\"VERSION:\"           \"{info.get('redis_version', 'Unknown')}\"{RESET}")
+            print(f"  {YELLOW}\"UPTIME:\"            \"{info.get('uptime_in_days', 0)} DAYS\"{RESET}")
+            print(f"  {YELLOW}\"CONNECTED CLIENTS:\" \"{info.get('connected_clients', 0)}\"{RESET}")
+            print(f"  {YELLOW}\"MEMORY USED:\"       \"{info.get('used_memory_human', 'Unknown')}\"{RESET}")
+            print(f"  {YELLOW}\"TOTAL KEYS:\"        \"{sum(info.get(f'db{i}', {}).get('keys', 0) for i in range(16) if f'db{i}' in info)}\"{RESET}")
+            print(f"{GOLD}{'—' * 58}{RESET}")
+            
+            # Set a test key to demonstrate functionality
+            test_key = "omega_grid_portal_test"
+            test_value = f"\"CONNECTED AT {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\"   \"GRID PORTAL\""
+            r.set(test_key, test_value)
+            print(f"\n{GREEN}\"TEST KEY SET:\"   \"{test_key} = {test_value}\"{RESET}")
+            
+            # Get some existing keys to show
+            print(f"\n{CYAN}\"SAMPLE KEYS IN DATABASE\"   \"LIMITED TO 10\"{RESET}")
+            keys = r.keys("*")[:10]  # Limit to 10 keys
+            if keys:
+                for key in keys:
+                    key_str = key.decode('utf-8') if isinstance(key, bytes) else key
+                    try:
+                        value = r.get(key_str)
+                        value_str = value.decode('utf-8') if isinstance(value, bytes) else str(value)
+                        if len(value_str) > 50:
+                            value_str = value_str[:47] + "..."
+                        print(f"  {BLUE}\"{key_str}\":{RESET} {YELLOW}\"{value_str}\"{RESET}")
+                    except:
+                        print(f"  {BLUE}\"{key_str}\":{RESET} {RED}\"[BINARY DATA]\"{RESET}")
+            else:
+                print(f"  {YELLOW}\"NO KEYS FOUND\"   \"EMPTY DATABASE\"{RESET}")
+            
+            return True
+        else:
+            print(f"{RED}\"CONNECTION FAILED\"   \"NO RESPONSE FROM REDIS\"{RESET}")
+            return False
+    except Exception as e:
+        print(f"{RED}\"CONNECTION ERROR\"   \"{str(e)}\"{RESET}")
+        print(f"\n{YELLOW}\"TROUBLESHOOTING TIPS\"   \"CONNECTIVITY\"{RESET}")
+        print(f"  {CYAN}1. \"CHECK NETWORK CONNECTIVITY\"   \"FIREWALL SETTINGS\"{RESET}")
+        print(f"  {CYAN}2. \"VERIFY CREDENTIALS\"   \"USERNAME/PASSWORD\"{RESET}")
+        print(f"  {CYAN}3. \"ENSURE SSL SUPPORT\"   \"REQUIRES TLS CONNECTION\"{RESET}")
+        print(f"  {CYAN}4. \"CONTACT ADMINISTRATOR\"   \"IF ISSUES PERSIST\"{RESET}")
+        return False
 
 def main():
     """Main entry point for the OMEGA Grid Portal"""
@@ -1009,9 +1035,10 @@ def show_interactive_menu():
         print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
         print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
         print(f"{GOLD}11. {RESET}{YELLOW}🦁 \"LAUNCH GARVEY WISDOM PORTAL\" 🦁{RESET}")
+        print(f"{GOLD}12. {RESET}{RED}🔌 \"CONNECT TO ONLINE REDIS\" 🔌{RESET}")
         print(f"{GOLD}0. {RESET}\"EXIT\"")
         
-        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-11):\"{RESET} ")
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-12):\"{RESET} ")
         
         if choice == "1":
             launch_matrix_dashboard()
@@ -1035,6 +1062,8 @@ def show_interactive_menu():
             display_king_solomon_portal()
         elif choice == "11":
             launch_garvey_portal()
+        elif choice == "12":
+            connect_online_redis()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break
