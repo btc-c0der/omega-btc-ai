@@ -1006,10 +1006,11 @@ def show_interactive_menu():
         print(f"{GOLD}6. {RESET}\"LAUNCH CCXT STRATEGIC TRADER\"")
         print(f"{GOLD}7. {RESET}\"LAUNCH CYBERNETIC QUANTUM BLOOM\"")
         print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
-        print(f"{GOLD}9. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
+        print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
+        print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
         print(f"{GOLD}0. {RESET}\"EXIT\"")
         
-        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-9):\"{RESET} ")
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-10):\"{RESET} ")
         
         if choice == "1":
             launch_matrix_dashboard()
@@ -1028,6 +1029,8 @@ def show_interactive_menu():
         elif choice == "8":
             run_test_runner()
         elif choice == "9":
+            invoke_virgil_abloh_celebration()
+        elif choice == "10":
             display_king_solomon_portal()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")

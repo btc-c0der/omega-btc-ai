@@ -91,9 +91,10 @@ def show_menu():
     print(f"{GOLD}6. {RESET}\"LAUNCH CCXT STRATEGIC TRADER\"")
     print(f"{GOLD}7. {RESET}\"LAUNCH CYBERNETIC QUANTUM BLOOM\"")
     print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
-    print(f"{GOLD}9. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
+    print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
+    print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
     print(f"{GOLD}0. {RESET}\"EXIT\"")
-    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-9):\"{RESET} ")
+    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-10):\"{RESET} ")
 
 def launch_matrix_dashboard():
     """Launch the Matrix-style terminal dashboard"""
@@ -395,6 +396,23 @@ def run_quantum_test_runner():
         print(f"{RED}Error running Quantum Test Runner: {e}{RESET}")
         return False
 
+def invoke_virgil_abloh_celebration():
+    """Invoke Virgil Abloh's design celebration"""
+    print(f"{CYAN}{BOLD}Invoking Virgil Abloh Celebration...{RESET}")
+    portal_path = os.path.join(SCRIPT_DIR, "omega_grid_portal.py")
+    
+    if not os.path.exists(portal_path):
+        print(f"{RED}Portal script not found!{RESET}")
+        return False
+    
+    try:
+        subprocess.call([sys.executable, portal_path, "--virgil"])
+        print(f"{GREEN}Celebration complete. Returning to main menu...{RESET}")
+        return True
+    except Exception as e:
+        print(f"{RED}Error during celebration: {e}{RESET}")
+        return False
+
 def open_solomon_portal():
     """Launch King Solomon's divine portal"""
     print(f"{MAGENTA}{BOLD}Opening King Solomon's Divine Portal...{RESET}")
@@ -450,6 +468,8 @@ def main():
         elif choice == "8":
             run_quantum_test_runner()
         elif choice == "9":
+            invoke_virgil_abloh_celebration()
+        elif choice == "10":
             open_solomon_portal()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
