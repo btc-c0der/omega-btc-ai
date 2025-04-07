@@ -1008,9 +1008,10 @@ def show_interactive_menu():
         print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
         print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
         print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
+        print(f"{GOLD}11. {RESET}{YELLOW}🦁 \"LAUNCH GARVEY WISDOM PORTAL\" 🦁{RESET}")
         print(f"{GOLD}0. {RESET}\"EXIT\"")
         
-        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-10):\"{RESET} ")
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-11):\"{RESET} ")
         
         if choice == "1":
             launch_matrix_dashboard()
@@ -1032,6 +1033,8 @@ def show_interactive_menu():
             invoke_virgil_abloh_celebration()
         elif choice == "10":
             display_king_solomon_portal()
+        elif choice == "11":
+            launch_garvey_portal()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break
@@ -1159,19 +1162,56 @@ def run_test_runner():
 
 def launch_discord_bot():
     """Launch the Discord bot"""
-    print(f"{CYAN}{BOLD}\"LAUNCHING DISCORD BOT\"   \"INITIALIZATION\"{RESET}")
+    print(f"{CYAN}{BOLD}Launching Discord Bot...{RESET}")
     bot_path = os.path.join(project_root, "src/omega_bot_farm/discord/bot.py")
     
     if not os.path.exists(bot_path):
-        print(f"{RED}\"DISCORD BOT NOT FOUND\"   \"FILE ERROR\"{RESET}")
+        print(f"{RED}Discord bot not found!{RESET}")
         return False
     
     try:
         subprocess.Popen([sys.executable, bot_path])
-        print(f"{GREEN}\"DISCORD BOT LAUNCHED\"   \"ACTIVATION COMPLETE\"{RESET}")
+        print(f"{GREEN}Discord bot launched!{RESET}")
         return True
     except Exception as e:
-        print(f"{RED}\"ERROR LAUNCHING DISCORD BOT\"   \"{str(e)}\"{RESET}")
+        print(f"{RED}Error launching Discord bot: {e}{RESET}")
+        return False
+
+def launch_garvey_portal():
+    """Launch the Garvey Wisdom Portal"""
+    print(f"{MAGENTA}{BOLD}\"LAUNCHING GARVEY WISDOM PORTAL\"   \"DIVINE CONSCIOUSNESS\"{RESET}")
+    portal_path = os.path.join(project_root, "omega_ai/garvey_portal/portal.py")
+    
+    if not os.path.exists(portal_path):
+        print(f"{RED}\"GARVEY WISDOM PORTAL NOT FOUND\"   \"FILE ERROR\"{RESET}")
+        return False
+    
+    try:
+        # Create directory to store portal data if it doesn't exist
+        data_dir = os.path.join(os.path.dirname(portal_path), "data")
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Launch using Streamlit
+        streamlit_cmd = subprocess.run(["which", "streamlit"], 
+                                      capture_output=True, text=True)
+        streamlit_path = streamlit_cmd.stdout.strip()
+        
+        if not streamlit_path:
+            print(f"{YELLOW}\"STREAMLIT NOT FOUND IN PATH\"   \"USING MODULE CALL\"{RESET}")
+            subprocess.Popen([sys.executable, "-m", "streamlit", "run", portal_path])
+        else:
+            subprocess.Popen([streamlit_path, "run", portal_path])
+            
+        print(f"{GREEN}\"GARVEY WISDOM PORTAL LAUNCHED\"   \"ACTIVATION COMPLETE\"{RESET}")
+        print(f"{CYAN}\"ACCESS AT: http://localhost:8501\"   \"WEB INTERFACE\"{RESET}")
+        
+        # Open browser automatically
+        import webbrowser
+        webbrowser.open("http://localhost:8501")
+        
+        return True
+    except Exception as e:
+        print(f"{RED}\"ERROR LAUNCHING GARVEY WISDOM PORTAL\"   \"{str(e)}\"{RESET}")
         return False
 
 if __name__ == "__main__":

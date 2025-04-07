@@ -93,8 +93,9 @@ def show_menu():
     print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
     print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
     print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
+    print(f"{GOLD}11. {RESET}{YELLOW}🦁 \"LAUNCH GARVEY WISDOM PORTAL\" 🦁{RESET}")
     print(f"{GOLD}0. {RESET}\"EXIT\"")
-    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-10):\"{RESET} ")
+    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-11):\"{RESET} ")
 
 def launch_matrix_dashboard():
     """Launch the Matrix-style terminal dashboard"""
@@ -413,6 +414,43 @@ def invoke_virgil_abloh_celebration():
         print(f"{RED}Error during celebration: {e}{RESET}")
         return False
 
+def launch_garvey_portal():
+    """Launch the Garvey Wisdom Portal"""
+    print(f"{YELLOW}{BOLD}Launching Garvey Wisdom Portal...{RESET}")
+    portal_path = os.path.join(PROJECT_ROOT, "omega_ai/garvey_portal/portal.py")
+    
+    if not os.path.exists(portal_path):
+        print(f"{RED}Garvey Wisdom Portal not found!{RESET}")
+        return False
+    
+    try:
+        # Create directory to store portal data if it doesn't exist
+        data_dir = os.path.join(os.path.dirname(portal_path), "data")
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Launch using Streamlit
+        streamlit_cmd = subprocess.run(["which", "streamlit"], 
+                                      capture_output=True, text=True)
+        streamlit_path = streamlit_cmd.stdout.strip()
+        
+        if not streamlit_path:
+            print(f"{YELLOW}Streamlit not found in path. Using module call...{RESET}")
+            subprocess.Popen([sys.executable, "-m", "streamlit", "run", portal_path])
+        else:
+            subprocess.Popen([streamlit_path, "run", portal_path])
+            
+        print(f"{GREEN}Garvey Wisdom Portal launched!{RESET}")
+        print(f"{CYAN}Access at: http://localhost:8501{RESET}")
+        
+        # Open browser automatically
+        import webbrowser
+        webbrowser.open("http://localhost:8501")
+        
+        return True
+    except Exception as e:
+        print(f"{RED}Error launching Garvey Wisdom Portal: {e}{RESET}")
+        return False
+
 def open_solomon_portal():
     """Launch King Solomon's divine portal"""
     print(f"{MAGENTA}{BOLD}Opening King Solomon's Divine Portal...{RESET}")
@@ -471,6 +509,8 @@ def main():
             invoke_virgil_abloh_celebration()
         elif choice == "10":
             open_solomon_portal()
+        elif choice == "11":
+            launch_garvey_portal()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break
