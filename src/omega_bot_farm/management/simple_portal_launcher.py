@@ -90,9 +90,10 @@ def show_menu():
     print(f"{GOLD}5. {RESET}\"SHOW SYSTEM STATUS\"")
     print(f"{GOLD}6. {RESET}\"LAUNCH CCXT STRATEGIC TRADER\"")
     print(f"{GOLD}7. {RESET}\"LAUNCH CYBERNETIC QUANTUM BLOOM\"")
-    print(f"{GOLD}8. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
+    print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
+    print(f"{GOLD}9. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
     print(f"{GOLD}0. {RESET}\"EXIT\"")
-    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-8):\"{RESET} ")
+    return input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-9):\"{RESET} ")
 
 def launch_matrix_dashboard():
     """Launch the Matrix-style terminal dashboard"""
@@ -326,11 +327,11 @@ def launch_strategic_trader():
 
 def launch_cybernetic_quantum_bloom():
     """Launch the Cybernetic Quantum Bloom"""
-    print(f"{MAGENTA}{BOLD}Launching Cybernetic Quantum Bloom...{RESET}")
+    print(f"{CYAN}{BOLD}Launching Cybernetic Quantum Bloom...{RESET}")
     bloom_path = os.path.join(PROJECT_ROOT, "src/omega_bot_farm/cybernetic_quantum_bloom.py")
     
     if not os.path.exists(bloom_path):
-        print(f"{RED}Cybernetic Quantum Bloom not found!{RESET}")
+        print(f"{RED}Cybernetic Quantum Bloom script not found!{RESET}")
         return False
     
     try:
@@ -339,6 +340,59 @@ def launch_cybernetic_quantum_bloom():
         return True
     except Exception as e:
         print(f"{RED}Error launching Cybernetic Quantum Bloom: {e}{RESET}")
+        return False
+
+def run_quantum_test_runner():
+    """Run the Quantum Test Runner"""
+    print(f"{CYAN}{BOLD}Launching Quantum Test Runner...{RESET}")
+    test_runner_path = os.path.join(PROJECT_ROOT, "src/omega_bot_farm/qa/run_test_runner.py")
+    
+    if not os.path.exists(test_runner_path):
+        print(f"{RED}Quantum Test Runner script not found!{RESET}")
+        return False
+    
+    try:
+        print(f"{YELLOW}Initializing Quantum Test Runner...{RESET}")
+        
+        # Ask user for which test dimensions to run
+        print(f"{CYAN}Available test dimensions:{RESET}")
+        print(f"{GOLD}1. {RESET}UNIT - Unit tests")
+        print(f"{GOLD}2. {RESET}INTEGRATION - Integration tests")
+        print(f"{GOLD}3. {RESET}PERFORMANCE - Performance tests")
+        print(f"{GOLD}4. {RESET}SECURITY - Security tests")
+        print(f"{GOLD}5. {RESET}COMPLIANCE - Compliance tests")
+        print(f"{GOLD}0. {RESET}ALL - Run all test dimensions")
+        
+        choice = input(f"\n{BOLD}Enter your choice (0-5) or press Enter for ALL: {RESET}")
+        
+        cmd = [sys.executable, test_runner_path, "--run-tests"]
+        
+        if choice == "1":
+            cmd.append("UNIT")
+        elif choice == "2":
+            cmd.append("INTEGRATION")
+        elif choice == "3":
+            cmd.append("PERFORMANCE")
+        elif choice == "4":
+            cmd.append("SECURITY")
+        elif choice == "5":
+            cmd.append("COMPLIANCE")
+        # If choice is 0 or empty, run all dimensions (default)
+        
+        # Add fancy visuals and celebration options
+        cmd.append("--fancy-visuals")
+        cmd.append("--celebration")
+        
+        result = subprocess.run(cmd, text=True)
+        
+        if result.returncode == 0:
+            print(f"{GREEN}Test runner completed successfully!{RESET}")
+            return True
+        else:
+            print(f"{RED}Test runner encountered issues.{RESET}")
+            return False
+    except Exception as e:
+        print(f"{RED}Error running Quantum Test Runner: {e}{RESET}")
         return False
 
 def open_solomon_portal():
@@ -359,95 +413,51 @@ def open_solomon_portal():
         return False
 
 def main():
-    """Main entry point for the program"""
-    # Parse command-line arguments
-    import argparse
-    parser = argparse.ArgumentParser(description="OMEGA Grid Portal - Simple Launcher")
-    parser.add_argument("--status", action="store_true", help="Show system status")
-    parser.add_argument("--matrix", action="store_true", help="Launch Matrix dashboard")
-    parser.add_argument("--web", action="store_true", help="Launch Web dashboard")
-    parser.add_argument("--discord", action="store_true", help="Launch Discord bot")
-    parser.add_argument("--positions", action="store_true", help="View BitGet positions")
-    parser.add_argument("--strategic", action="store_true", help="Launch Strategic Trader")
-    parser.add_argument("--quantum", action="store_true", help="Launch Quantum Bloom")
-    parser.add_argument("--solomon", action="store_true", help="Open King Solomon's portal")
-    args = parser.parse_args()
-    
-    # Display banner
+    """Main function to run the portal"""
     display_banner()
-    
-    # Process direct commands if provided
-    if args.status:
-        show_system_status()
-        return
-    
-    if args.matrix:
-        launch_matrix_dashboard()
-        return
-        
-    if args.web:
-        launch_web_dashboard()
-        return
-        
-    if args.discord:
-        launch_discord_bot()
-        return
-        
-    if args.positions:
-        view_bitget_positions()
-        return
-        
-    if args.strategic:
-        launch_strategic_trader()
-        return
-        
-    if args.quantum:
-        launch_cybernetic_quantum_bloom()
-        return
-        
-    if args.solomon:
-        open_solomon_portal()
-        return
-    
-    # If no direct commands, show loading animation and menu
     display_loading_animation()
+    
+    # Check for command-line arguments
+    if len(sys.argv) > 1:
+        arg = sys.argv[1].lower()
+        if arg == "--status":
+            show_system_status()
+            sys.exit(0)
+        elif arg == "--launch-all":
+            launch_matrix_dashboard()
+            launch_web_dashboard()
+            launch_discord_bot()
+            sys.exit(0)
+        # Add other command-line options as needed
     
     while True:
         choice = show_menu()
         
-        if choice == '0':
-            print(f"\n{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
-            break
-            
-        elif choice == '1':
+        if choice == "1":
             launch_matrix_dashboard()
-            
-        elif choice == '2':
+        elif choice == "2":
             launch_web_dashboard()
-            
-        elif choice == '3':
+        elif choice == "3":
             launch_discord_bot()
-            
-        elif choice == '4':
+        elif choice == "4":
             view_bitget_positions()
-            
-        elif choice == '5':
+        elif choice == "5":
             show_system_status()
-            
-        elif choice == '6':
+        elif choice == "6":
             launch_strategic_trader()
-            
-        elif choice == '7':
+        elif choice == "7":
             launch_cybernetic_quantum_bloom()
-            
-        elif choice == '8':
+        elif choice == "8":
+            run_quantum_test_runner()
+        elif choice == "9":
             open_solomon_portal()
-            
+        elif choice == "0":
+            print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
+            break
         else:
             print(f"{RED}Invalid choice. Please try again.{RESET}")
         
-        print(f"\n{CYAN}Press Enter to continue...{RESET}")
-        input()
+        input(f"\n{YELLOW}Press Enter to continue...{RESET}")
 
 if __name__ == "__main__":
     try:

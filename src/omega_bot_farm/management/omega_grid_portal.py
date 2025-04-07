@@ -995,7 +995,7 @@ def main():
         print(f"{GREEN}All systems safely shutdown. JAH BLESS!{RESET}")
 
 def show_interactive_menu():
-    """Display the interactive GRID menu with Virgil Abloh styling"""
+    """Show an interactive menu for the user to choose options"""
     while True:
         print(f"\n{CYAN}{BOLD}\"OMEGA GRID PORTAL\"   \"MAIN MENU\"{RESET}\n")
         print(f"{GOLD}1. {RESET}\"LAUNCH MATRIX TERMINAL DASHBOARD\"")
@@ -1005,48 +1005,37 @@ def show_interactive_menu():
         print(f"{GOLD}5. {RESET}\"SHOW SYSTEM STATUS\"")
         print(f"{GOLD}6. {RESET}\"LAUNCH CCXT STRATEGIC TRADER\"")
         print(f"{GOLD}7. {RESET}\"LAUNCH CYBERNETIC QUANTUM BLOOM\"")
-        print(f"{GOLD}8. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
-        print(f"{GOLD}9. {RESET}{CYAN}🎨 \"INVOKE VIRGIL ABLOH CELEBRATION\" 🎨{RESET}")
+        print(f"{GOLD}8. {RESET}\"RUN QUANTUM TEST RUNNER\"")
+        print(f"{GOLD}9. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
         print(f"{GOLD}0. {RESET}\"EXIT\"")
         
-        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-9):\"   \"USER INPUT REQUIRED\"{RESET} ")
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-9):\"{RESET} ")
         
-        if choice == '0':
-            print(f"\n{GREEN}\"EXITING OMEGA GRID PORTAL\"   \"JAH BLESS\"{RESET}")
-            break
-            
-        elif choice == '1':
+        if choice == "1":
             launch_matrix_dashboard()
-            
-        elif choice == '2':
+        elif choice == "2":
             launch_web_dashboard()
-            
-        elif choice == '3':
+        elif choice == "3":
             launch_discord_bot()
-            
-        elif choice == '4':
+        elif choice == "4":
             view_bitget_positions()
-            
-        elif choice == '5':
+        elif choice == "5":
             show_bot_status()
-            
-        elif choice == '6':
+        elif choice == "6":
             launch_strategic_trader()
-            
-        elif choice == '7':
+        elif choice == "7":
             launch_cybernetic_quantum_bloom()
-            
-        elif choice == '8':
+        elif choice == "8":
+            run_test_runner()
+        elif choice == "9":
             display_king_solomon_portal()
-            
-        elif choice == '9':
-            invoke_virgil_abloh_celebration()
-            
+        elif choice == "0":
+            print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
+            break
         else:
-            print(f"{RED}\"INVALID CHOICE\"   \"SELECTION ERROR\"{RESET}")
+            print(f"{RED}Invalid choice. Please try again.{RESET}")
         
-        print(f"\n{CYAN}\"PRESS ENTER TO CONTINUE\"   \"USER INPUT REQUIRED\"{RESET}")
-        input()
+        input(f"\n{YELLOW}Press Enter to continue...{RESET}")
 
 def launch_strategic_trader():
     """Launch the CCXT Strategic Trader"""
@@ -1085,20 +1074,84 @@ def view_bitget_positions():
         return False
 
 def launch_cybernetic_quantum_bloom():
-    """Launch the Cybernetic Quantum Bloom"""
-    print(f"{MAGENTA}{BOLD}\"LAUNCHING CYBERNETIC QUANTUM BLOOM\"   \"INITIALIZATION\"{RESET}")
+    """Launch the Cybernetic Quantum Bloom script"""
+    print(f"{CYAN}{BOLD}Launching Cybernetic Quantum Bloom...{RESET}")
     bloom_path = os.path.join(project_root, "src/omega_bot_farm/cybernetic_quantum_bloom.py")
     
     if not os.path.exists(bloom_path):
-        print(f"{RED}\"CYBERNETIC QUANTUM BLOOM NOT FOUND\"   \"FILE ERROR\"{RESET}")
+        print(f"{RED}Cybernetic Quantum Bloom script not found!{RESET}")
         return False
     
     try:
         subprocess.Popen([sys.executable, bloom_path])
-        print(f"{GREEN}\"CYBERNETIC QUANTUM BLOOM LAUNCHED\"   \"ACTIVATION COMPLETE\"{RESET}")
+        print(f"{GREEN}Cybernetic Quantum Bloom launched!{RESET}")
         return True
     except Exception as e:
-        print(f"{RED}\"ERROR LAUNCHING CYBERNETIC QUANTUM BLOOM\"   \"{str(e)}\"{RESET}")
+        print(f"{RED}Error launching Cybernetic Quantum Bloom: {e}{RESET}")
+        return False
+
+def run_test_runner():
+    """Run the Quantum Test Runner script"""
+    print(f"{MAGENTA}{BOLD}\"LAUNCHING QUANTUM TEST RUNNER\"   \"INITIALIZATION\"{RESET}")
+    test_runner_path = os.path.join(project_root, "src/omega_bot_farm/qa/run_test_runner.py")
+    
+    if not os.path.exists(test_runner_path):
+        print(f"{RED}\"QUANTUM TEST RUNNER NOT FOUND\"   \"FILE ERROR\"{RESET}")
+        return False
+    
+    try:
+        print(f"{YELLOW}\"INITIALIZING QUANTUM TEST DIMENSIONS\"   \"CONFIGURATION\"{RESET}")
+        
+        # Ask user for which test dimensions to run
+        print(f"\n{CYAN}\"AVAILABLE TEST DIMENSIONS\"   \"SELECTION REQUIRED\"{RESET}")
+        print(f"{GOLD}1. {RESET}\"UNIT\" — \"Basic unit tests\"")
+        print(f"{GOLD}2. {RESET}\"INTEGRATION\" — \"Component integration tests\"")
+        print(f"{GOLD}3. {RESET}\"PERFORMANCE\" — \"System performance tests\"")
+        print(f"{GOLD}4. {RESET}\"SECURITY\" — \"Security vulnerability tests\"")
+        print(f"{GOLD}5. {RESET}\"COMPLIANCE\" — \"Regulatory compliance tests\"")
+        print(f"{GOLD}0. {RESET}\"ALL\" — \"Run all dimensions\"")
+        
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-5)\"   \"OR PRESS ENTER FOR ALL:\"{RESET} ")
+        
+        cmd = [sys.executable, test_runner_path, "--run-tests"]
+        
+        if choice == "1":
+            cmd.append("UNIT")
+            print(f"{BLUE}\"SELECTED: UNIT TESTS\"   \"DIMENSION: SINGULAR\"{RESET}")
+        elif choice == "2":
+            cmd.append("INTEGRATION")
+            print(f"{BLUE}\"SELECTED: INTEGRATION TESTS\"   \"DIMENSION: RELATIONAL\"{RESET}")
+        elif choice == "3":
+            cmd.append("PERFORMANCE")
+            print(f"{BLUE}\"SELECTED: PERFORMANCE TESTS\"   \"DIMENSION: TEMPORAL\"{RESET}")
+        elif choice == "4":
+            cmd.append("SECURITY")
+            print(f"{BLUE}\"SELECTED: SECURITY TESTS\"   \"DIMENSION: PROTECTIVE\"{RESET}")
+        elif choice == "5":
+            cmd.append("COMPLIANCE")
+            print(f"{BLUE}\"SELECTED: COMPLIANCE TESTS\"   \"DIMENSION: REGULATORY\"{RESET}")
+        else:
+            print(f"{BLUE}\"SELECTED: ALL DIMENSIONS\"   \"DIMENSION: HOLISTIC\"{RESET}")
+        
+        # Add fancy visuals and celebration options
+        cmd.append("--fancy-visuals")
+        cmd.append("--celebration")
+        
+        # Industrial design aesthetic with command display
+        print(f"\n{CYAN}\"EXECUTING COMMAND\"   \"TERMINAL INVOCATION\"{RESET}")
+        print(f"{YELLOW}{' '.join(cmd)}{RESET}")
+        
+        print(f"\n{MAGENTA}\"QUANTUM ALIGNMENT IN PROGRESS\"   \"PLEASE WAIT\"{RESET}")
+        result = subprocess.run(cmd, text=True)
+        
+        if result.returncode == 0:
+            print(f"\n{GREEN}\"TEST RUNNER COMPLETED SUCCESSFULLY\"   \"QUANTUM STATE: VERIFIED\"{RESET}")
+            return True
+        else:
+            print(f"\n{RED}\"TEST RUNNER ENCOUNTERED ISSUES\"   \"QUANTUM STATE: DISRUPTED\"{RESET}")
+            return False
+    except Exception as e:
+        print(f"\n{RED}\"ERROR RUNNING QUANTUM TEST RUNNER\"   \"{str(e)}\"{RESET}")
         return False
 
 def launch_discord_bot():
