@@ -97,8 +97,9 @@ def show_menu():
     print("10. Run Test Runner")
     print("11. Launch Garvey Wisdom Portal")
     print("12. Connect to Online Redis")
+    print("13. Launch BTC Velocity Monitor")
     print("0. Exit")
-    return input("\nEnter your choice (0-12): ")
+    return input("\nEnter your choice (0-13): ")
 
 def launch_matrix_dashboard():
     """Launch the Matrix-style terminal dashboard"""
@@ -288,6 +289,7 @@ def show_system_status():
     print(f"  {GREEN}\"--strategic\"{RESET}             \"LAUNCH STRATEGIC TRADER\"")
     print(f"  {GREEN}\"--quantum\"{RESET}               \"LAUNCH QUANTUM BLOOM\"")
     print(f"  {GREEN}\"--solomon\"{RESET}               \"OPEN KING SOLOMON'S PORTAL\"")
+    print(f"  {GREEN}\"--velocity\"{RESET}              Launch BTC Velocity Monitor")
     
     # Virgil-inspired footer
     print(f"\n{GOLD}{'=' * 58}{RESET}")
@@ -541,6 +543,35 @@ def connect_online_redis():
         print(f"  {CYAN}4. Contact administrator if issues persist{RESET}")
         return False
 
+def launch_btc_velocity_monitor():
+    """Launch the BTC velocity monitor"""
+    print(f"{CYAN}{BOLD}Launching BTC Velocity Monitor...{RESET}")
+    monitor_path = os.path.join(PROJECT_ROOT, "src/omega_bot_farm/btc_velocity_monitor.py")
+    
+    if not os.path.exists(monitor_path):
+        print(f"{RED}BTC Velocity Monitor not found!{RESET}")
+        return False
+    
+    try:
+        # Ensure dependencies are installed
+        try:
+            import pandas
+            import numpy
+            import colorama
+        except ImportError:
+            print(f"{YELLOW}Installing dependencies...{RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "pandas", "numpy", "colorama", "python-dateutil"], check=True)
+        
+        # Launch the monitor
+        print(f"{CYAN}Starting BTC velocity analysis...{RESET}")
+        subprocess.Popen([sys.executable, monitor_path])
+        
+        print(f"{GREEN}BTC Velocity Monitor launched successfully!{RESET}")
+        return True
+    except Exception as e:
+        print(f"{RED}Error launching BTC Velocity Monitor: {e}{RESET}")
+        return False
+
 def show_available_parameters():
     """Show all available command-line parameters"""
     print(f"\n{CYAN}{BOLD}Available Command-line Parameters:{RESET}")
@@ -556,6 +587,7 @@ def show_available_parameters():
     print(f"  {YELLOW}--test{RESET}        Run Test Runner")
     print(f"  {YELLOW}--garvey{RESET}      Launch Garvey Wisdom Portal")
     print(f"  {YELLOW}--redis{RESET}       Connect to Online Redis")
+    print(f"  {YELLOW}--velocity{RESET}    Launch BTC Velocity Monitor")
     print(f"{GOLD}{'—' * 50}{RESET}")
     
     return True
@@ -579,6 +611,7 @@ def main():
     parser.add_argument("--test", action="store_true", help="Run Test Runner")
     parser.add_argument("--garvey", action="store_true", help="Launch Garvey Wisdom Portal")
     parser.add_argument("--redis", action="store_true", help="Connect to Online Redis")
+    parser.add_argument("--velocity", action="store_true", help="Launch BTC Velocity Monitor")
     
     args = parser.parse_args()
     
@@ -621,6 +654,9 @@ def main():
     elif args.redis:
         connect_online_redis()
         return
+    elif args.velocity:
+        launch_btc_velocity_monitor()
+        return
     
     # Interactive menu if no arguments were passed
     while True:
@@ -650,6 +686,8 @@ def main():
             launch_garvey_portal()
         elif choice == "12":
             connect_online_redis()
+        elif choice == "13":
+            launch_btc_velocity_monitor()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break

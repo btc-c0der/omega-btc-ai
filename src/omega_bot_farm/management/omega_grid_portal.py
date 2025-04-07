@@ -1036,9 +1036,10 @@ def show_interactive_menu():
         print(f"{GOLD}10. {RESET}{MAGENTA}👑 \"OPEN KING SOLOMON'S PORTAL\" 👑{RESET}")
         print(f"{GOLD}11. {RESET}{YELLOW}🦁 \"LAUNCH GARVEY WISDOM PORTAL\" 🦁{RESET}")
         print(f"{GOLD}12. {RESET}{RED}🔌 \"CONNECT TO ONLINE REDIS\" 🔌{RESET}")
+        print(f"{GOLD}13. {RESET}{GREEN}📊 \"BTC VELOCITY MONITORING\" 📊{RESET}")
         print(f"{GOLD}0. {RESET}\"EXIT\"")
         
-        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-12):\"{RESET} ")
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-13):\"{RESET} ")
         
         if choice == "1":
             launch_matrix_dashboard()
@@ -1064,6 +1065,8 @@ def show_interactive_menu():
             launch_garvey_portal()
         elif choice == "12":
             connect_online_redis()
+        elif choice == "13":
+            launch_btc_velocity_monitor()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break
@@ -1241,6 +1244,35 @@ def launch_garvey_portal():
         return True
     except Exception as e:
         print(f"{RED}\"ERROR LAUNCHING GARVEY WISDOM PORTAL\"   \"{str(e)}\"{RESET}")
+        return False
+
+def launch_btc_velocity_monitor():
+    """Launch the BTC velocity monitor"""
+    print(f"{MAGENTA}{BOLD}\"LAUNCHING BTC VELOCITY MONITOR\"   \"REAL-TIME ANALYTICS\"{RESET}")
+    monitor_path = os.path.join(project_root, "src/omega_bot_farm/btc_velocity_monitor.py")
+    
+    if not os.path.exists(monitor_path):
+        print(f"{RED}\"BTC VELOCITY MONITOR NOT FOUND\"   \"FILE ERROR\"{RESET}")
+        return False
+    
+    try:
+        # Ensure dependencies are installed
+        try:
+            import pandas
+            import numpy
+            import colorama
+        except ImportError:
+            print(f"{YELLOW}\"INSTALLING DEPENDENCIES\"   \"SYSTEM PREPARATION\"{RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "pandas", "numpy", "colorama", "python-dateutil"], check=True)
+        
+        # Launch the monitor
+        print(f"{CYAN}\"STARTING VELOCITY ANALYSIS\"   \"QUANTUM FIBONACCI PATTERNS\"{RESET}")
+        subprocess.Popen([sys.executable, monitor_path])
+        
+        print(f"{GREEN}\"BTC VELOCITY MONITOR LAUNCHED\"   \"ACTIVATION COMPLETE\"{RESET}")
+        return True
+    except Exception as e:
+        print(f"{RED}\"ERROR LAUNCHING BTC VELOCITY MONITOR\"   \"{str(e)}\"{RESET}")
         return False
 
 if __name__ == "__main__":
