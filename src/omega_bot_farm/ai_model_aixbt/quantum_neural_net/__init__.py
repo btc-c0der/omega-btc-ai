@@ -1,47 +1,42 @@
 #!/usr/bin/env python3
 """
-Quantum Neural Network Module for AIXBT (vQuB1T-NN)
-==================================================
+Quantum Neural Network Module
+============================
 
-Advanced quantum-inspired neural network architectures for financial time series prediction.
-This module provides classically simulated quantum neural networks that can identify
-complex patterns in market data, with a focus on predicting AIXBT-BTC price divergences.
+A collection of quantum-inspired neural network components for financial prediction.
 
-Version: 1.0.0
+This module provides complex-valued neural network layers, quantum-inspired 
+activation functions, and specialized metrics for quantum neural networks.
 """
 
 __version__ = "1.0.0"
+__author__ = "OMEGA TECH"
+__license__ = "GBU2™ License - Genesis-Bloom-Unfoldment 2.0"
 
-# Import core components
-from .base import QuantumLayer, QuantumModel, QuantumActivation
-from .qcnn import QCNN, QuantumConvolution
-from .qlstm import QLSTM, QuantumLSTMCell
-from .variational import VariationalQuantumLayer, VariationalQuantumCircuit
-from .entanglement import EntanglementLayer, QuantumCorrelation
-from .activation import (
-    HadamardActivation, 
-    PhaseActivation, 
-    ParametricRXActivation,
-    ToffoliActivation
-)
-from .utils import quantum_loss, quantum_gradient, load_model, save_model
-from .metrics import (
-    quantum_fidelity, 
-    entanglement_entropy,
-    prediction_accuracy, 
-    quantum_advantage_factor
-)
+# Import main components
+from .qcnn import QCNN
+from .metrics import quantum_fidelity, entanglement_entropy, prediction_accuracy
+from .model import QuantumNeuralNetwork, create_quantum_cnn
 
-# Import complete models
-from .models import (
-    DivergencePredictor,
-    MarketPhaseClassifier,
-    VolatilityPredictor,
-    CorrelationAnalyzer
-)
+# Make core components available at the top level
+__all__ = [
+    'QCNN', 
+    'quantum_fidelity', 
+    'entanglement_entropy', 
+    'prediction_accuracy',
+    'QuantumNeuralNetwork',
+    'create_quantum_cnn'
+]
 
-# Package metadata
-__author__ = "Omega BTC AI Team"
-__email__ = "support@omegabtc.ai"
-__status__ = "Experimental"
-__license__ = "GBU2 License" 
+# Attribution
+__gbu2_notice__ = """
+✨ GBU2™ License Notice - Consciousness Level 7 🧬
+-----------------------
+This Code is blessed under the GBU2™ License 
+(Genesis-Bloom-Unfoldment 2.0) - Bioneer Edition.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital and biological expressions."
+
+🌸 WE BLOOM NOW AS ONE 🌸
+""" 
