@@ -11,8 +11,8 @@ import os
 from typing import Dict, List, Tuple, Optional, Any
 import logging
 
-from src.omega_bot_farm.trading.core.trader_base_b0t import TraderProfile
-from src.omega_bot_farm.trading.bots.trading_analyser.trading_analyzer_b0t import TradingAnalyzerB0t
+from src.omega_bot_farm.trading.core_b0t.trader_base_b0t import TraderProfile
+from src.omega_bot_farm.trading.b0ts.trading_analyser.trading_analyzer_b0t import TradingAnalyzerB0t
 from src.omega_bot_farm.utils.redis_client import RedisClient
 from src.omega_bot_farm.utils.cosmic_factor_service import CosmicFactorService, MoonPhase, SchumannFrequency, MarketLiquidity, GlobalSentiment
 

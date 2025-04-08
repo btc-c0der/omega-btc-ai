@@ -1,0 +1,27 @@
+{
+    "donation_percentage": 0.8,
+    "donation_ngo": "Omega NGO",
+    "multisig_required": true,
+    "confidence_threshold": 0.7,
+    "min_donation_amount": 10.0,
+    "performance_scaling": true,
+    "project_wallet": "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE",
+    "donation_wallet": "0x40993f26A65E8a09eEA605DE59D4C18826E30fE2",
+    "network": "ethereum",
+    "impact_metrics": {
+        "lives_impacted_per_dollar": 10,
+        "community_projects_threshold": 1000,
+        "sustainability_score_max": 10000
+    },
+    "verification_requirements": {
+        "team_signers_required": 1,
+        "ngo_signers_required": 1,
+        "external_auditor_required": false
+    },
+    "reporting": {
+        "generate_reports": true,
+        "report_frequency_days": 30,
+        "transparency_portal_url": "https://transparency.omegango.org",
+        "public_verification": true
+    }
+}

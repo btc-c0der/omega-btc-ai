@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 """
-BitGet Position Analyzer for Omega Bot Farm
+BitGet Position Analyzer Bot
+
+This module implements the BitGet position analyzer bot that provides
+position analysis, Fibonacci levels, and portfolio recommendations.
+
+Copyright (c) 2024 OMEGA BTC AI
+Licensed under the GBU2 License - see LICENSE file for details
 
 This module provides position analysis and monitoring utilities for BitGet exchange.
 It integrates with the trading analyzer architecture to provide a comprehensive
@@ -14,45 +20,50 @@ import time
 import logging
 from typing import Dict, List, Tuple, Optional, Any, Union
 from datetime import datetime
+from decimal import Decimal
 
 # Import quantum-secure logger
 try:
-    from src.omega_bot_farm.trading.b0ts.bitget_analyzer.tests.quantum_secure_logger import get_quantum_logger
+    from src.omega_bot_farm.trading.b0ts.tests.quantum_secure_logger import get_quantum_logger
     logger = get_quantum_logger(app_name="bitget_position_analyzer_b0t")
     QUANTUM_LOGGING = True
 except ImportError:
     logger = logging.getLogger("bitget_position_analyzer_b0t")
     QUANTUM_LOGGING = False
+    logger.warning("Quantum-secure logger not available. Using standard logger.")
 
 # Import the ExchangeService
 try:
-    from src.omega_bot_farm.services.exchange_service import ExchangeService, create_exchange_service
+    from src.omega_bot_farm.trading.b0ts.exchanges.ccxt_b0t import ExchangeClientB0t
     EXCHANGE_SERVICE_AVAILABLE = True
 except ImportError:
+    logger.warning("Exchange service not available. Using mock data.")
     EXCHANGE_SERVICE_AVAILABLE = False
-    create_exchange_service = None  # Define as None to avoid unbound error
-    logging.warning("ExchangeService not available. Using direct CCXT if available.")
-    # Try to import ccxt for exchange API access as fallback
-    try:
-        import ccxt
-        CCXT_AVAILABLE = True
-    except ImportError:
-        CCXT_AVAILABLE = False
-        logging.warning("ccxt module not installed. BitGet position analysis will be limited.")
-
-# Import ExchangeClientB0t as additional option
-try:
-    from src.omega_bot_farm.trading.exchanges.ccxt_b0t import ExchangeClientB0t
-    EXCHANGE_CLIENT_B0T_AVAILABLE = True
-except ImportError:
-    EXCHANGE_CLIENT_B0T_AVAILABLE = False
     ExchangeClientB0t = None  # Define as None to avoid unbound error
-    logging.warning("ExchangeClientB0t not available. Will try other connection methods.")
 
 # Constants for Mathematical Harmony
 PHI = 1.618034  # Golden Ratio - Divine Proportion
 INV_PHI = 0.618034  # Inverse Golden Ratio
 SCHUMANN_BASE = 7.83  # Earth's base frequency (Hz)
+
+class Position:
+    def __init__(self, data: Dict[str, Any]):
+        self.data = data
+
+    def to_dict(self) -> Dict[str, Any]:
+        return self.data
+
+class PositionHistory:
+    def __init__(self, timestamp: datetime, positions: List[Dict[str, Any]]):
+        self.timestamp = timestamp
+        self.positions = positions
+        
+    def __getitem__(self, key: str) -> Any:
+        if key == 'timestamp':
+            return self.timestamp
+        elif key == 'positions':
+            return self.positions
+        raise KeyError(f"Key {key} not found in PositionHistory")
 
 class BitgetPositionAnalyzerB0t:
     """
@@ -63,170 +74,58 @@ class BitgetPositionAnalyzerB0t:
     architecture to provide a comprehensive view of positions and trading opportunities.
     """
     
-    def __init__(self, 
-                 api_key: Optional[str] = None, 
-                 api_secret: Optional[str] = None,
-                 api_passphrase: Optional[str] = None,
-                 use_testnet: bool = False,
-                 position_history_length: int = 10):
-        """
-        Initialize the BitGet Position Analyzer bot.
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.api_key = str(config.get('api_key', ''))
+        self.api_secret = str(config.get('api_secret', ''))
+        self.api_password = str(config.get('api_password', ''))
+        self.use_testnet = bool(config.get('use_testnet', True))
+        self.symbol = str(config.get('symbol', 'BTC/USDT'))
+        self.positions: List[Position] = []
+        self.position_history: List[PositionHistory] = []
+        self.position_history_length = int(config.get('position_history_length', 10))
         
-        Args:
-            api_key: BitGet API key (will use env var BITGET_API_KEY if None)
-            api_secret: BitGet API secret (will use env var BITGET_SECRET_KEY if None)
-            api_passphrase: BitGet API passphrase (will use env var BITGET_PASSPHRASE if None)
-            use_testnet: Whether to use BitGet testnet
-            position_history_length: Number of position snapshots to keep in history
-        """
-        # Check if our environment loader is available
-        try:
-            # Import with absolute path to avoid relative import issues
-            from src.omega_bot_farm.utils.env_loader import get_env_var, get_bool_env_var, get_int_env_var
-            # Load API credentials from environment with loader
-            self.api_key = api_key or get_env_var("BITGET_API_KEY", "")
-            self.api_secret = api_secret or get_env_var("BITGET_SECRET_KEY", "")
-            self.api_passphrase = api_passphrase or get_env_var("BITGET_PASSPHRASE", "")
-            self.use_testnet = use_testnet if use_testnet is not None else get_bool_env_var("USE_TESTNET", False)
-            history_length = position_history_length or get_int_env_var("POSITION_HISTORY_LENGTH", 10)
-        except ImportError:
-            # Fall back to standard os.environ if loader not available
-            self.api_key = api_key or os.environ.get("BITGET_API_KEY", "")
-            self.api_secret = api_secret or os.environ.get("BITGET_SECRET_KEY", "")
-            self.api_passphrase = api_passphrase or os.environ.get("BITGET_PASSPHRASE", "")
-            self.use_testnet = use_testnet
-            history_length = position_history_length
-        
-        # Position tracking
-        self.position_history = []
-        self.position_history_length = history_length
-        
-        # Exchange service or client
-        self.exchange_service = None
-        self.exchange = None
-        
-        # Initialize exchange service or direct ccxt client
-        self._initialize_exchange()
+        # Exchange-related attributes
+        self.exchange: Optional[Any] = None
+        self.connection_method: Optional[str] = None
+        self.exchange_service: Optional[Any] = None
+        self.exchange_client_b0t: Optional[Any] = None
         
         # Account statistics
-        self.account_balance = 0.0
-        self.account_equity = 0.0
-        self.total_position_value = 0.0
-        self.total_pnl = 0.0
-        self.long_exposure = 0.0
-        self.short_exposure = 0.0
+        self.account_balance: float = 0.0
+        self.account_equity: float = 0.0
+        self.total_position_value: float = 0.0
+        self.total_pnl: float = 0.0
+        self.long_exposure: float = 0.0
+        self.short_exposure: float = 0.0
         
-        logger.info(f"BitgetPositionAnalyzerB0t initialized. Exchange service available: {EXCHANGE_SERVICE_AVAILABLE}")
-    
-    def _initialize_exchange(self) -> None:
-        """Initialize the exchange service, CCXT client, or ExchangeClientB0t."""
-        # Keep track of connection attempts
-        connection_methods_tried = []
-        
-        # Initialize attributes to avoid unbound errors
-        self.connection_method = None
-        self.exchange_client_b0t = None
-        
-        # 1. Try using direct CCXT as the primary option
-        if CCXT_AVAILABLE:
-            try:
-                connection_methods_tried.append("CCXT direct")
-                logger.info("Attempting to connect via direct CCXT (primary method)...")
-                
-                if not self.api_key or not self.api_secret or not self.api_passphrase:
-                    logger.error("Cannot initialize exchange: Missing API credentials")
-                    # Continue to other methods rather than returning
-                else:
-                    # Import ccxt here to avoid unbound error
-                    import ccxt
-                    
-                    # Use regular dict instead of typed Dict to avoid type mismatch
-                    exchange_config = {
-                        'apiKey': self.api_key,
-                        'secret': self.api_secret,
-                        'password': self.api_passphrase,
-                        'options': {
-                            'defaultType': 'swap',
-                            'adjustForTimeDifference': True,
-                            'testnet': self.use_testnet,
-                        }
-                    }
-                    
-                    self.exchange = ccxt.bitget(exchange_config)
-                    
-                    if self.use_testnet:
-                        self.exchange.set_sandbox_mode(True)
-                        logger.info("Connected to BitGet TESTNET via direct CCXT")
-                    else:
-                        logger.info("Connected to BitGet MAINNET via direct CCXT")
-                    
-                    self.connection_method = "CCXT direct"
-                    return
-            except Exception as e:
-                logger.error(f"Failed to initialize BitGet exchange via CCXT direct: {e}")
-                self.exchange = None
-        
-        # 2. Try using ExchangeClientB0t if available
-        if EXCHANGE_CLIENT_B0T_AVAILABLE and ExchangeClientB0t is not None:
-            try:
-                connection_methods_tried.append("ExchangeClientB0t")
-                logger.info("Attempting to connect via ExchangeClientB0t (fallback 1)...")
-                
-                exchange_client = ExchangeClientB0t(
-                    exchange_id="bitget",
+    async def analyze_positions(self) -> List[Dict[str, Any]]:
+        try:
+            if EXCHANGE_SERVICE_AVAILABLE and ExchangeClientB0t is not None:
+                client = ExchangeClientB0t(
+                    exchange_id='bitget',
                     api_key=self.api_key,
                     api_secret=self.api_secret,
-                    api_password=self.api_passphrase,
-                    use_testnet=self.use_testnet
+                    api_password=self.api_password,
+                    use_testnet=self.use_testnet,
+                    symbol=self.symbol
                 )
-                
-                # Check if initialization was successful
-                if hasattr(exchange_client, 'exchange') and exchange_client.exchange:
-                    logger.info(f"Connected to BitGet {'TESTNET' if self.use_testnet else 'MAINNET'} via ExchangeClientB0t")
-                    self.exchange = exchange_client.exchange
-                    self.exchange_client_b0t = exchange_client
-                    self.connection_method = "ExchangeClientB0t"
-                    return
-                else:
-                    logger.warning("Failed to initialize exchange via ExchangeClientB0t")
-            except Exception as e:
-                logger.error(f"Error initializing ExchangeClientB0t: {e}")
-                self.exchange_client_b0t = None
-                self.exchange = None
-
-        # 3. Try using the ExchangeService if available as last resort
-        if EXCHANGE_SERVICE_AVAILABLE and create_exchange_service is not None:
-            try:
-                connection_methods_tried.append("ExchangeService")
-                logger.info("Attempting to connect via ExchangeService (fallback 2)...")
-                
-                self.exchange_service = create_exchange_service(
-                    exchange_id="bitget",
-                    api_key=self.api_key,
-                    api_secret=self.api_secret,
-                    api_passphrase=self.api_passphrase,
-                    use_testnet=self.use_testnet
-                )
-                
-                # Get the underlying exchange client
-                self.exchange = self.exchange_service.get_exchange_client()
-                
-                if self.exchange:
-                    logger.info(f"Connected to BitGet {'TESTNET' if self.use_testnet else 'MAINNET'} via ExchangeService")
-                    self.connection_method = "ExchangeService"
-                    return
-                else:
-                    logger.warning("Failed to initialize exchange via ExchangeService")
-            except Exception as e:
-                logger.error(f"Error initializing ExchangeService: {e}")
-                self.exchange_service = None
-                self.exchange = None
-        
-        # Add back the error message for when all connection methods fail
-        # This should be at the end of the _initialize_exchange method
-        # If we get here, all connection methods failed
-        logger.error(f"All connection methods failed: {', '.join(connection_methods_tried)}")
-        logger.error("Cannot initialize exchange: Neither CCXT direct, ExchangeClientB0t, nor ExchangeService worked")
+                await client.initialize()
+                raw_positions = await client.fetch_positions()
+                self.positions = [Position(pos) for pos in raw_positions]
+                await client.close()
+            else:
+                # Mock data for testing
+                self.positions = [
+                    Position({"symbol": "BTC/USDT", "size": "0.1", "side": "long"}),
+                    Position({"symbol": "ETH/USDT", "size": "1.0", "side": "short"})
+                ]
+            
+            return [pos.to_dict() for pos in self.positions]
+            
+        except Exception as e:
+            logger.error(f"Error analyzing positions: {str(e)}")
+            return []
     
     async def get_positions(self) -> Dict[str, Any]:
         """
@@ -327,20 +226,20 @@ class BitgetPositionAnalyzerB0t:
                 "connection_method": getattr(self, 'connection_method', None)
             }
     
-    def _update_position_history(self, positions: List[Dict]) -> None:
+    def _update_position_history(self, positions: List[Dict[str, Any]]) -> None:
         """Update position history with new position data."""
-        if len(positions) > 0:
+        if positions:
             # Add current positions to history
-            self.position_history.append({
-                "timestamp": datetime.now(),
-                "positions": positions
-            })
+            self.position_history.append(PositionHistory(
+                timestamp=datetime.now(),
+                positions=positions
+            ))
             
             # Trim history if too long
             if len(self.position_history) > self.position_history_length:
                 self.position_history = self.position_history[-self.position_history_length:]
     
-    async def _update_account_statistics(self, positions: List[Dict]) -> None:
+    async def _update_account_statistics(self, positions: List[Dict[str, Any]]) -> None:
         """Update account statistics based on positions."""
         # Reset counters
         self.total_position_value = 0.0
@@ -352,7 +251,7 @@ class BitgetPositionAnalyzerB0t:
         for position in positions:
             notional_value = float(position.get('notional', 0.0))
             unrealized_pnl = float(position.get('unrealizedPnl', 0.0))
-            side = position.get('side', '').lower()
+            side = str(position.get('side', '')).lower()
             
             self.total_position_value += notional_value
             self.total_pnl += unrealized_pnl
@@ -366,30 +265,11 @@ class BitgetPositionAnalyzerB0t:
         try:
             balance = None
             
-            # Use the appropriate method based on connection type
-            if hasattr(self, 'connection_method') and self.connection_method:
-                if self.connection_method == "ExchangeService" and self.exchange_service:
-                    # Use exchange service async method
-                    balance = await self.exchange_service.fetch_balance()
-                    
-                elif self.connection_method == "ExchangeClientB0t" and self.exchange_client_b0t:
-                    # Use exchange client b0t async method if available
-                    if hasattr(self.exchange_client_b0t, 'fetch_balance'):
-                        balance = await self.exchange_client_b0t.fetch_balance()
-                    else:
-                        # Fall back to direct exchange call
-                        balance = self.exchange.fetch_positions() if self.exchange else None
-                        
-                elif self.connection_method == "CCXT direct" and self.exchange:
-                    # Direct exchange call
-                    balance = self.exchange.fetch_balance()
-            elif self.exchange:
-                # No connection method was set, try direct call
-                balance = self.exchange.fetch_balance()
+            if EXCHANGE_SERVICE_AVAILABLE and ExchangeClientB0t is not None and self.exchange_client_b0t:
+                balance = await self.exchange_client_b0t.fetch_balance()
             
             # Extract USDT balance if available
             if balance and isinstance(balance, dict):
-                # Safely access balance properties
                 total = balance.get('total', {})
                 if isinstance(total, dict) and 'USDT' in total:
                     self.account_balance = float(total['USDT'])
@@ -798,19 +678,27 @@ class BitgetPositionAnalyzerB0t:
         
         return recommendations
 
-# Example usage
+def main(config: Dict[str, Any]) -> None:
+    """
+    Initialize and run the BitGet position analyzer bot.
+    
+    Args:
+        config: Configuration dictionary with API credentials and settings
+    """
+    try:
+        bot = BitgetPositionAnalyzerB0t(config=config)
+        logger.info("BitGet position analyzer bot initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize BitGet position analyzer bot: {e}")
+
 if __name__ == "__main__":
-    import asyncio
-    
-    async def main():
-        # Create analyzer
-        analyzer = BitgetPositionAnalyzerB0t()
-        
-        # Get and analyze positions
-        analysis = analyzer.analyze_all_positions()
-        
-        # Print analysis results
-        print(json.dumps(analysis, indent=2))
-    
-    # Run the main function
-    asyncio.run(main()) 
+    # Example configuration
+    example_config = {
+        "api_key": "",  # Will use environment variable if not provided
+        "api_secret": "",  # Will use environment variable if not provided
+        "api_password": "",  # Will use environment variable if not provided
+        "use_testnet": True,
+        "symbol": "BTC/USDT",
+        "position_history_length": 10
+    }
+    main(config=example_config) 

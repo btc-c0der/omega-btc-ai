@@ -1,0 +1,506 @@
+{
+  "last_backup": "20250407_130021",
+  "total_backups": 4942,
+  "backup_history": [
+    {
+      "timestamp": "20250407_124350",
+      "filename": "backup_20250407_124350.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124400",
+      "filename": "backup_20250407_124400.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124410",
+      "filename": "backup_20250407_124410.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124420",
+      "filename": "backup_20250407_124420.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124430",
+      "filename": "backup_20250407_124430.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124440",
+      "filename": "backup_20250407_124440.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124450",
+      "filename": "backup_20250407_124450.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124500",
+      "filename": "backup_20250407_124500.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124510",
+      "filename": "backup_20250407_124510.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124520",
+      "filename": "backup_20250407_124520.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124530",
+      "filename": "backup_20250407_124530.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124540",
+      "filename": "backup_20250407_124540.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124550",
+      "filename": "backup_20250407_124550.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124600",
+      "filename": "backup_20250407_124600.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124610",
+      "filename": "backup_20250407_124610.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124620",
+      "filename": "backup_20250407_124620.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124630",
+      "filename": "backup_20250407_124630.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124640",
+      "filename": "backup_20250407_124640.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124650",
+      "filename": "backup_20250407_124650.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124700",
+      "filename": "backup_20250407_124700.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124710",
+      "filename": "backup_20250407_124710.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124720",
+      "filename": "backup_20250407_124720.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124730",
+      "filename": "backup_20250407_124730.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124740",
+      "filename": "backup_20250407_124740.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124750",
+      "filename": "backup_20250407_124750.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124800",
+      "filename": "backup_20250407_124800.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124810",
+      "filename": "backup_20250407_124810.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124820",
+      "filename": "backup_20250407_124820.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124830",
+      "filename": "backup_20250407_124830.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124840",
+      "filename": "backup_20250407_124840.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124851",
+      "filename": "backup_20250407_124851.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124901",
+      "filename": "backup_20250407_124901.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124911",
+      "filename": "backup_20250407_124911.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124921",
+      "filename": "backup_20250407_124921.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124931",
+      "filename": "backup_20250407_124931.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124941",
+      "filename": "backup_20250407_124941.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_124951",
+      "filename": "backup_20250407_124951.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125001",
+      "filename": "backup_20250407_125001.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125011",
+      "filename": "backup_20250407_125011.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125021",
+      "filename": "backup_20250407_125021.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125031",
+      "filename": "backup_20250407_125031.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125041",
+      "filename": "backup_20250407_125041.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125051",
+      "filename": "backup_20250407_125051.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125101",
+      "filename": "backup_20250407_125101.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125111",
+      "filename": "backup_20250407_125111.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125121",
+      "filename": "backup_20250407_125121.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125131",
+      "filename": "backup_20250407_125131.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125141",
+      "filename": "backup_20250407_125141.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125151",
+      "filename": "backup_20250407_125151.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125201",
+      "filename": "backup_20250407_125201.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125211",
+      "filename": "backup_20250407_125211.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125221",
+      "filename": "backup_20250407_125221.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125231",
+      "filename": "backup_20250407_125231.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125241",
+      "filename": "backup_20250407_125241.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125251",
+      "filename": "backup_20250407_125251.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125301",
+      "filename": "backup_20250407_125301.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125311",
+      "filename": "backup_20250407_125311.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125321",
+      "filename": "backup_20250407_125321.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125331",
+      "filename": "backup_20250407_125331.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125341",
+      "filename": "backup_20250407_125341.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125351",
+      "filename": "backup_20250407_125351.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125401",
+      "filename": "backup_20250407_125401.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125411",
+      "filename": "backup_20250407_125411.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125421",
+      "filename": "backup_20250407_125421.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125431",
+      "filename": "backup_20250407_125431.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125441",
+      "filename": "backup_20250407_125441.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125451",
+      "filename": "backup_20250407_125451.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125501",
+      "filename": "backup_20250407_125501.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125511",
+      "filename": "backup_20250407_125511.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125521",
+      "filename": "backup_20250407_125521.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125531",
+      "filename": "backup_20250407_125531.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125541",
+      "filename": "backup_20250407_125541.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125551",
+      "filename": "backup_20250407_125551.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125601",
+      "filename": "backup_20250407_125601.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125611",
+      "filename": "backup_20250407_125611.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125621",
+      "filename": "backup_20250407_125621.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125631",
+      "filename": "backup_20250407_125631.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125641",
+      "filename": "backup_20250407_125641.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125651",
+      "filename": "backup_20250407_125651.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125701",
+      "filename": "backup_20250407_125701.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125711",
+      "filename": "backup_20250407_125711.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125721",
+      "filename": "backup_20250407_125721.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125731",
+      "filename": "backup_20250407_125731.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125741",
+      "filename": "backup_20250407_125741.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125751",
+      "filename": "backup_20250407_125751.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125801",
+      "filename": "backup_20250407_125801.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125811",
+      "filename": "backup_20250407_125811.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125821",
+      "filename": "backup_20250407_125821.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125831",
+      "filename": "backup_20250407_125831.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125841",
+      "filename": "backup_20250407_125841.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125851",
+      "filename": "backup_20250407_125851.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125901",
+      "filename": "backup_20250407_125901.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125911",
+      "filename": "backup_20250407_125911.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125921",
+      "filename": "backup_20250407_125921.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125931",
+      "filename": "backup_20250407_125931.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125941",
+      "filename": "backup_20250407_125941.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_125951",
+      "filename": "backup_20250407_125951.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_130001",
+      "filename": "backup_20250407_130001.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_130011",
+      "filename": "backup_20250407_130011.zip",
+      "file_count": 0
+    },
+    {
+      "timestamp": "20250407_130021",
+      "filename": "backup_20250407_130021.zip",
+      "file_count": 0
+    }
+  ]
+}

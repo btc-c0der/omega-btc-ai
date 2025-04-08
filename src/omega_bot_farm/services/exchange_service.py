@@ -74,6 +74,7 @@ class ExchangeService:
         
         # Exchange client
         self.exchange = None
+        self.ccxt_client = None  # For async client compatibility
         
         # Initialize if ccxt is available
         if CCXT_AVAILABLE:
@@ -197,21 +198,71 @@ class ExchangeService:
             logging.error(f"Error creating order on {self.exchange_id}: {e}")
             return {"error": str(e)}
     
+    async def fetch_ticker(self, symbol: str) -> Dict[str, Any]:
+        """
+        Fetch ticker information for a symbol.
+        
+        Args:
+            symbol: Trading pair symbol
+            
+        Returns:
+            Dictionary with ticker information
+        """
+        if not self.exchange:
+            logging.error("Cannot fetch ticker: Exchange client not initialized")
+            return {}
+            
+        try:
+            ticker = self.exchange.fetch_ticker(symbol)
+            return ticker
+        except Exception as e:
+            logging.error(f"Error fetching ticker for {symbol} from {self.exchange_id}: {e}")
+            return {}
+            
+    async def close(self) -> None:
+        """Close the exchange connection and clean up resources."""
+        if hasattr(self.exchange, 'close') and callable(self.exchange.close):
+            try:
+                await self.exchange.close()
+                logging.info(f"Closed connection to {self.exchange_id.upper()}")
+            except Exception as e:
+                logging.error(f"Error closing {self.exchange_id} connection: {e}")
+        
+        self.exchange = None
+        self.ccxt_client = None
+            
     def get_exchange_client(self):
         """Get the underlying CCXT exchange client."""
         return self.exchange
 
 
-# Factory function to create exchange service instances
-def create_exchange_service(exchange_id: str = "bitget", **kwargs) -> ExchangeService:
+def create_exchange_service(exchange: str = "bitget", 
+                           api_key: Optional[str] = None,
+                           api_secret: Optional[str] = None,
+                           api_passphrase: Optional[str] = None,
+                           use_testnet: bool = False,
+                           **kwargs) -> ExchangeService:
     """
-    Create an ExchangeService instance for the specified exchange.
+    Create and initialize an ExchangeService instance.
     
     Args:
-        exchange_id: The exchange ID (default: "bitget")
-        **kwargs: Additional parameters for ExchangeService initialization
+        exchange: Exchange ID (e.g., 'bitget', 'binance')
+        api_key: API key
+        api_secret: API secret
+        api_passphrase: API passphrase
+        use_testnet: Whether to use testnet
+        **kwargs: Additional options
         
     Returns:
-        ExchangeService instance
+        Initialized ExchangeService instance
     """
-    return ExchangeService(exchange_id=exchange_id, **kwargs) 
+    service = ExchangeService(
+        exchange_id=exchange,
+        api_key=api_key,
+        api_secret=api_secret,
+        api_passphrase=api_passphrase,
+        use_testnet=use_testnet,
+        options=kwargs.get('options')
+    )
+    
+    return service 

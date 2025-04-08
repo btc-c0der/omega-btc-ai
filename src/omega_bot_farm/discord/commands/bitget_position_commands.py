@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 """
-Discord Commands for BitGet Position Analysis
+Discord commands for BitGet position analysis.
 
-This module provides Discord command integrations for the BitgetPositionAnalyzerB0t,
-allowing users to analyze positions, get Fibonacci levels, and receive portfolio
-recommendations through Discord commands.
+This module provides commands to interact with the BitgetPositionAnalyzerB0t,
+allowing users to analyze their BitGet positions, get Fibonacci levels,
+and receive portfolio recommendations directly in Discord.
+
+Copyright (c) 2024 OMEGA BTC AI
+Licensed under the GBU2 License - see LICENSE file for details
 """
 
 import os
@@ -15,12 +18,24 @@ import logging
 import discord
 from discord import app_commands
 from discord.ext import commands
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional, Tuple, TYPE_CHECKING
 
+try:
+    import ccxt
+    CCXT_AVAILABLE = True
+except ImportError:
+    CCXT_AVAILABLE = False
+    logging.warning("CCXT not available. Features will be limited.")
+
+# Import BitgetPositionAnalyzerB0t for type checking
+if TYPE_CHECKING:
+    from src.omega_bot_farm.trading.b0ts.bitget_analyzer.bitget_position_analyzer_b0t import BitgetPositionAnalyzerB0t
+
+# Try to import BitgetPositionAnalyzerB0t for runtime
 try:
     from src.omega_bot_farm.trading.b0ts.bitget_analyzer.bitget_position_analyzer_b0t import BitgetPositionAnalyzerB0t
     from src.omega_bot_farm.services.exchange_service import create_exchange_service
-    ANALYZER_AVAILABLE = True
+    ANALYZER_AVAILABLE = True and CCXT_AVAILABLE
 except ImportError:
     ANALYZER_AVAILABLE = False
     logging.warning("BitgetPositionAnalyzerB0t not available. Features will be limited.")
@@ -58,7 +73,7 @@ class BitgetPositionCommands(commands.Cog):
     and receive portfolio recommendations directly in Discord.
     """
     
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         """
         Initialize the BitGet Position Commands cog.
         
@@ -67,26 +82,38 @@ class BitgetPositionCommands(commands.Cog):
         """
         self.bot = bot
         self.analyzer = None
-        self.analyzers = {}  # Dictionary to store user-specific analyzers
+        self.analyzers: Dict[int, 'BitgetPositionAnalyzerB0t'] = {}
         
         # Initialize if available
         self._initialize_default_analyzer()
         
-    def _initialize_default_analyzer(self):
-        """Initialize the default analyzer with environment variables."""
+    def _initialize_default_analyzer(self) -> Optional['BitgetPositionAnalyzerB0t']:
+        """Initialize the default BitgetPositionAnalyzerB0t instance."""
         if not ANALYZER_AVAILABLE:
-            logger.warning("BitgetPositionAnalyzerB0t not available. Commands will be limited.")
-            return
+            logger.warning("BitgetPositionAnalyzerB0t not available")
+            return None
             
         try:
-            # Try to initialize the analyzer with default environment variables
-            self.analyzer = BitgetPositionAnalyzerB0t()
-            logger.info("Initialized default BitgetPositionAnalyzerB0t")
+            # Create config dictionary with required parameters
+            config = {
+                'api_key': os.getenv('BITGET_API_KEY', ''),
+                'api_secret': os.getenv('BITGET_SECRET_KEY', ''),
+                'api_password': os.getenv('BITGET_PASSPHRASE', ''),
+                'use_testnet': os.getenv('BITGET_USE_TESTNET', 'true').lower() == 'true',
+                'symbol': os.getenv('BITGET_SYMBOL', 'BTC/USDT'),
+                'position_history_length': int(os.getenv('BITGET_POSITION_HISTORY_LENGTH', '10'))
+            }
+            
+            # Initialize the analyzer with the config
+            analyzer = BitgetPositionAnalyzerB0t(config=config)
+            logger.info("Successfully initialized BitgetPositionAnalyzerB0t")
+            return analyzer
+            
         except Exception as e:
-            logger.error(f"Failed to initialize default BitgetPositionAnalyzerB0t: {e}")
-            self.analyzer = None
+            logger.error(f"Failed to initialize default BitgetPositionAnalyzerB0t: {str(e)}")
+            return None
     
-    async def _get_user_analyzer(self, user_id: int) -> Optional[BitgetPositionAnalyzerB0t]:
+    async def _get_user_analyzer(self, user_id: int) -> Optional['BitgetPositionAnalyzerB0t']:
         """
         Get or create a user-specific analyzer.
         

@@ -8,126 +8,83 @@ extension levels for both long and short positions.
 """
 
 import unittest
-import os
-import sys
-import json
+import pytest
 from unittest.mock import patch, MagicMock
 
-# Try to import BitgetPositionAnalyzerB0t
-try:
-    from src.omega_bot_farm.trading.b0ts.bitget_analyzer.bitget_position_analyzer_b0t import BitgetPositionAnalyzerB0t
-    BOT_AVAILABLE = True
-except ImportError:
-    BOT_AVAILABLE = False
-    print("BitgetPositionAnalyzerB0t not available. Using mock for tests.")
+# Import the class being tested
+from src.omega_bot_farm.trading.b0ts.bitget_analyzer.bitget_position_analyzer_b0t import BitgetPositionAnalyzerB0t
 
-# Constants for tests
-PHI = 1.618034  # Golden Ratio
-INV_PHI = 0.618034  # Inverse Golden Ratio
 
-# Mock implementation if import fails
-if not BOT_AVAILABLE:
-    class BitgetPositionAnalyzerB0t:
-        """Mock implementation for testing"""
+# Mock BitgetPositionAnalyzerB0t class for testing without actual API calls
+class MockBitgetPositionAnalyzerB0t:
+    """Mock for BitgetPositionAnalyzerB0t to allow tests to run."""
+    
+    def __init__(self, api_key=None, api_secret=None, api_passphrase=None, use_testnet=False):
+        """Initialize mock analyzer."""
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.api_passphrase = api_passphrase
+        self.use_testnet = use_testnet
+        self.exchange = MagicMock()
         
-        def __init__(self, api_key=None, api_secret=None, api_passphrase=None, use_testnet=False):
-            self.api_key = api_key or "test_key"
-            self.api_secret = api_secret or "test_secret"
-            self.api_passphrase = api_passphrase or "test_pass"
-            self.use_testnet = use_testnet
+    def _calculate_fibonacci_levels_long(self, entry_price, current_price=None):
+        """Calculate Fibonacci levels for long positions."""
+        fib_levels = {
+            "0.0%": {"price": entry_price, "description": "Entry Price"},
+            "23.6%": {"price": entry_price * 1.236, "description": "Minor Resistance"},
+            "38.2%": {"price": entry_price * 1.382, "description": "Weak Resistance"},
+            "50.0%": {"price": entry_price * 1.5, "description": "Medium Resistance"},
+            "61.8%": {"price": entry_price * 1.618, "description": "Golden Ratio Resistance"},
+            "78.6%": {"price": entry_price * 1.786, "description": "Strong Resistance"},
+            "100.0%": {"price": entry_price * 2, "description": "Full Extension"},
+            "161.8%": {"price": entry_price * 2.618, "description": "Golden Extension"}
+        }
+        return fib_levels
+    
+    def _calculate_fibonacci_levels_short(self, entry_price, current_price=None):
+        """Calculate Fibonacci levels for short positions."""
+        fib_levels = {
+            "0.0%": {"price": entry_price, "description": "Entry Price"},
+            "23.6%": {"price": entry_price * 0.764, "description": "Minor Support"},
+            "38.2%": {"price": entry_price * 0.618, "description": "Weak Support"},
+            "50.0%": {"price": entry_price * 0.5, "description": "Medium Support"},
+            "61.8%": {"price": entry_price * 0.382, "description": "Golden Ratio Support"},
+            "78.6%": {"price": entry_price * 0.214, "description": "Strong Support"},
+            "100.0%": {"price": 0, "description": "Full Extension"}
+        }
+        return fib_levels
+    
+    def analyze_position(self, position):
+        """Analyze a position with Fibonacci levels."""
+        # Extract position details
+        side = position.get("side", "unknown")
+        entry_price = float(position.get("entryPrice", 0))
+        mark_price = float(position.get("markPrice", 0))
         
-        def _calculate_fibonacci_levels_long(self, entry_price, current_price=None):
-            """Calculate Fibonacci levels for long positions."""
-            levels = {}
-            
-            # Basic retracement levels
-            levels["0.0%"] = {"price": entry_price, "percentage": 0.0}
-            levels["23.6%"] = {"price": entry_price * (1 + 0.236), "percentage": 23.6}
-            levels["38.2%"] = {"price": entry_price * (1 + 0.382), "percentage": 38.2}
-            levels["50.0%"] = {"price": entry_price * (1 + 0.5), "percentage": 50.0}
-            levels["61.8%"] = {"price": entry_price * (1 + 0.618), "percentage": 61.8}  # Golden Ratio
-            levels["78.6%"] = {"price": entry_price * (1 + 0.786), "percentage": 78.6}
-            levels["100.0%"] = {"price": entry_price * 2, "percentage": 100.0}
-            
-            # Extension levels
-            levels["161.8%"] = {"price": entry_price * (1 + 1.618), "percentage": 161.8}  # Golden Ratio
-            levels["261.8%"] = {"price": entry_price * (1 + 2.618), "percentage": 261.8}  # PHI³
-            
-            return levels
+        # Calculate PnL percentage
+        if side.lower() == "long":
+            pnl_percentage = ((mark_price - entry_price) / entry_price) * 100
+            fib_levels = self._calculate_fibonacci_levels_long(entry_price, mark_price)
+            recommended_take_profit = ("Golden Ratio", fib_levels["61.8%"]["price"])
+            recommended_stop_loss = ("Risk Management", entry_price * 0.95)
+        else:  # short
+            pnl_percentage = ((entry_price - mark_price) / entry_price) * 100
+            fib_levels = self._calculate_fibonacci_levels_short(entry_price, mark_price)
+            recommended_take_profit = ("Golden Ratio", fib_levels["61.8%"]["price"])
+            recommended_stop_loss = ("Risk Management", entry_price * 1.05)
         
-        def _calculate_fibonacci_levels_short(self, entry_price, current_price=None):
-            """Calculate Fibonacci levels for short positions."""
-            levels = {}
-            
-            # Basic retracement levels (downward)
-            levels["0.0%"] = {"price": entry_price, "percentage": 0.0}
-            levels["23.6%"] = {"price": entry_price * (1 - 0.236), "percentage": -23.6}
-            levels["38.2%"] = {"price": entry_price * (1 - 0.382), "percentage": -38.2}
-            levels["50.0%"] = {"price": entry_price * (1 - 0.5), "percentage": -50.0}
-            levels["61.8%"] = {"price": entry_price * (1 - 0.618), "percentage": -61.8}  # Golden Ratio
-            levels["78.6%"] = {"price": entry_price * (1 - 0.786), "percentage": -78.6}
-            levels["100.0%"] = {"price": 0, "percentage": -100.0}
-            
-            return levels
-
-        def analyze_position(self, position):
-            """Analyze a position with Fibonacci levels."""
-            symbol = position.get("symbol", "Unknown")
-            side = position.get("side", "").lower()
-            entry_price = float(position.get("entryPrice", 0))
-            mark_price = float(position.get("markPrice", 0))
-            
-            # Calculate price change percentage
-            price_change_pct = 0
-            if entry_price > 0:
-                if side == "long":
-                    price_change_pct = ((mark_price - entry_price) / entry_price) * 100
-                else:
-                    price_change_pct = ((entry_price - mark_price) / entry_price) * 100
-            
-            # Calculate Fibonacci levels
-            if side == "long":
-                fib_levels = self._calculate_fibonacci_levels_long(entry_price, mark_price)
-            else:
-                fib_levels = self._calculate_fibonacci_levels_short(entry_price, mark_price)
-            
-            # Determine recommended take profit and stop loss levels
-            take_profit = None
-            stop_loss = None
-            
-            if side == "long":
-                # Take profit: Next Fibonacci level above current price
-                for level_name, level_data in sorted(fib_levels.items(), key=lambda x: level_data["percentage"]):
-                    if level_data["price"] > mark_price and level_name != "0.0%":
-                        take_profit = (level_name, level_data["price"])
-                        break
-                
-                # Stop loss: Golden ratio retracement
-                stop_price = entry_price * (1 - INV_PHI)
-                stop_loss = ("Inverse Golden Ratio", stop_price)
-            else:
-                # Take profit: Next Fibonacci level below current price
-                for level_name, level_data in sorted(fib_levels.items(), key=lambda x: level_data["percentage"], reverse=True):
-                    if level_data["price"] < mark_price and level_name != "0.0%":
-                        take_profit = (level_name, level_data["price"])
-                        break
-                
-                # Stop loss: Golden ratio extension
-                stop_price = entry_price * (1 + INV_PHI)
-                stop_loss = ("Inverse Golden Ratio", stop_price)
-            
-            return {
-                "position": position,
-                "analysis": {
-                    "fibonacci_levels": fib_levels,
-                    "pnl_percentage": price_change_pct,
-                    "recommended_take_profit": take_profit,
-                    "recommended_stop_loss": stop_loss,
-                    "harmony_score": 0.75  # Mock value
-                }
+        return {
+            "position": position,
+            "analysis": {
+                "fibonacci_levels": fib_levels,
+                "pnl_percentage": pnl_percentage,
+                "recommended_take_profit": recommended_take_profit,
+                "recommended_stop_loss": recommended_stop_loss
             }
+        }
 
 
+@pytest.mark.usefixtures("mock_initialize_exchange")
 class TestFibonacciLevels(unittest.TestCase):
     """Test suite for Fibonacci level calculations."""
 
@@ -163,7 +120,7 @@ class TestFibonacciLevels(unittest.TestCase):
             "leverage": 5,
             "unrealizedPnl": 300
         }
-
+    
     def test_long_fibonacci_levels(self):
         """Test Fibonacci level calculations for long positions."""
         # Calculate Fibonacci levels
@@ -171,9 +128,9 @@ class TestFibonacciLevels(unittest.TestCase):
         
         # Check key levels
         self.assertEqual(fib_levels["0.0%"]["price"], 50000, "Entry level (0.0%) should equal entry price")
-        self.assertEqual(fib_levels["61.8%"]["price"], 50000 * (1 + 0.618), "Golden ratio level incorrect")
+        self.assertEqual(fib_levels["61.8%"]["price"], 50000 * 1.618, "Golden ratio level incorrect")
         self.assertEqual(fib_levels["100.0%"]["price"], 50000 * 2, "100% level should be double the entry price")
-        self.assertEqual(fib_levels["161.8%"]["price"], 50000 * (1 + 1.618), "Golden ratio extension incorrect")
+        self.assertEqual(fib_levels["161.8%"]["price"], 50000 * 2.618, "Golden ratio extension incorrect")
         
         # Check value ranges
         for level_name, level_data in fib_levels.items():
@@ -187,7 +144,7 @@ class TestFibonacciLevels(unittest.TestCase):
         
         # Check key levels
         self.assertEqual(fib_levels["0.0%"]["price"], 3000, "Entry level (0.0%) should equal entry price")
-        self.assertEqual(fib_levels["61.8%"]["price"], 3000 * (1 - 0.618), "Golden ratio level incorrect")
+        self.assertEqual(fib_levels["61.8%"]["price"], 3000 * 0.382, "Golden ratio level incorrect")
         
         # Check value ranges
         for level_name, level_data in fib_levels.items():

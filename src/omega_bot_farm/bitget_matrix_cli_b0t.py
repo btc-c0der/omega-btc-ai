@@ -249,7 +249,7 @@ class MatrixRain:
 class BitGetMatrixCliB0t:
     """CLI-based BitGet position display with cyberpunk styling."""
     
-    def __init__(self, positions=None, account=None, refresh_interval=1.0, matrix_interval=30):
+    def __init__(self, positions=None, account=None, refresh_interval=1.0, matrix_interval=30, headless=False):
         """Initialize the display.
         
         Args:
@@ -257,6 +257,7 @@ class BitGetMatrixCliB0t:
             account: Account data dictionary
             refresh_interval: Seconds between display refreshes
             matrix_interval: Show matrix rain effect every N refreshes
+            headless: Whether to run in headless mode (no terminal clearing)
         """
         self.positions = positions or MOCK_POSITIONS
         self.account = account or MOCK_ACCOUNT
@@ -265,6 +266,7 @@ class BitGetMatrixCliB0t:
         self.current_msg_idx = 0
         self.frame_count = 0
         self.running = True
+        self.headless = headless
         
         # Terminal size for matrix effect
         self.terminal_size = shutil.get_terminal_size()
@@ -461,10 +463,15 @@ class BitGetMatrixCliB0t:
         print(f"{Fore.YELLOW}│{Style.RESET_ALL} {Fore.CYAN}{message}{' ' * (52 - len(message))}{Style.RESET_ALL} {Fore.YELLOW}│{Style.RESET_ALL}")
         print(f"{Fore.YELLOW}╘══════════════════════════════════════════════════════════════╛{Style.RESET_ALL}")
     
-    def display(self):
-        """Display a single frame of the visualization."""
-        # Clear screen
-        os.system('cls' if os.name=='nt' else 'clear')
+    def display(self, clear_screen=True):
+        """Display a single frame of the visualization.
+        
+        Args:
+            clear_screen: Whether to clear the screen before display
+        """
+        # Clear screen if not in headless mode and clear_screen is True
+        if not self.headless and clear_screen:
+            os.system('cls' if os.name=='nt' else 'clear')
         
         # Print B0t ASCII Art on first frame or periodically
         if self.frame_count == 0 or self.frame_count % 50 == 0:
@@ -491,7 +498,7 @@ class BitGetMatrixCliB0t:
         try:
             while self.running:
                 # Show matrix rain effect periodically
-                if self.frame_count % self.matrix_interval == 0 and self.frame_count > 0:
+                if self.frame_count % self.matrix_interval == 0 and self.frame_count > 0 and not self.headless:
                     matrix_duration = min(2.0, self.refresh_interval * 0.8) # Don't let matrix animation take too long
                     self.matrix_rain.animate(duration=matrix_duration)
                 
@@ -507,6 +514,58 @@ class BitGetMatrixCliB0t:
         except KeyboardInterrupt:
             print(f"\n{Fore.YELLOW}Exiting Matrix. Ch33rs to the B0ts!{Style.RESET_ALL}")
 
+    def get_positions_display(self) -> str:
+        """Get positions display as string for headless operation.
+        
+        Returns:
+            String representation of positions display
+        """
+        # Capture output instead of printing
+        import io
+        from contextlib import redirect_stdout
+        
+        output = io.StringIO()
+        with redirect_stdout(output):
+            for position in self.positions:
+                self.print_position(position)
+        
+        return output.getvalue()
+    
+    def get_account_display(self) -> str:
+        """Get account display as string for headless operation.
+        
+        Returns:
+            String representation of account display
+        """
+        # Capture output instead of printing
+        import io
+        from contextlib import redirect_stdout
+        
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.print_cyberpunk_header()
+            self.print_account_summary()
+            self.print_cyberpunk_footer()
+        
+        return output.getvalue()
+    
+    def get_full_display(self) -> str:
+        """Get full display as string for headless operation.
+        
+        Returns:
+            String representation of full display
+        """
+        # Capture output instead of printing
+        import io
+        from contextlib import redirect_stdout
+        
+        output = io.StringIO()
+        with redirect_stdout(output):
+            # Use display without clearing screen
+            self.display(clear_screen=False)
+        
+        return output.getvalue()
+
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="BitGet Matrix CLI B0t Position Display")
@@ -516,6 +575,8 @@ def parse_args():
                         help="Show matrix rain every N frames (default: 30)")
     parser.add_argument("--demo", action="store_true",
                         help="Run in demo mode with mock data")
+    parser.add_argument("--headless", action="store_true",
+                        help="Run in headless mode (for integration with other systems)")
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -525,6 +586,7 @@ if __name__ == "__main__":
     # Create and run display
     display = BitGetMatrixCliB0t(
         refresh_interval=args.refresh_interval,
-        matrix_interval=args.matrix_interval
+        matrix_interval=args.matrix_interval,
+        headless=args.headless
     )
     display.run() 

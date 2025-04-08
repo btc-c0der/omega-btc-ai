@@ -1037,9 +1037,10 @@ def show_interactive_menu():
         print(f"{GOLD}11. {RESET}{YELLOW}🦁 \"LAUNCH GARVEY WISDOM PORTAL\" 🦁{RESET}")
         print(f"{GOLD}12. {RESET}{RED}🔌 \"CONNECT TO ONLINE REDIS\" 🔌{RESET}")
         print(f"{GOLD}13. {RESET}{GREEN}📊 \"BTC VELOCITY MONITORING\" 📊{RESET}")
+        print(f"{GOLD}14. {RESET}{BLUE}📈 \"AIXBT LIVE FEED\" 📈{RESET}")
         print(f"{GOLD}0. {RESET}\"EXIT\"")
         
-        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-13):\"{RESET} ")
+        choice = input(f"\n{BOLD}\"ENTER YOUR CHOICE (0-14):\"{RESET} ")
         
         if choice == "1":
             launch_matrix_dashboard()
@@ -1067,6 +1068,8 @@ def show_interactive_menu():
             connect_online_redis()
         elif choice == "13":
             launch_btc_velocity_monitor()
+        elif choice == "14":
+            launch_aixbt_live_feed()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break
@@ -1273,6 +1276,36 @@ def launch_btc_velocity_monitor():
         return True
     except Exception as e:
         print(f"{RED}\"ERROR LAUNCHING BTC VELOCITY MONITOR\"   \"{str(e)}\"{RESET}")
+        return False
+
+def launch_aixbt_live_feed():
+    """Launch the AIXBT live feed"""
+    print(f"{MAGENTA}{BOLD}\"LAUNCHING AIXBT LIVE FEED\"   \"REAL-TIME CORRELATION\"{RESET}")
+    monitor_path = os.path.join(project_root, "src/omega_bot_farm/aixbt_live_feed_v1.py")
+    
+    if not os.path.exists(monitor_path):
+        print(f"{RED}\"AIXBT LIVE FEED NOT FOUND\"   \"FILE ERROR\"{RESET}")
+        return False
+    
+    try:
+        # Ensure dependencies are installed
+        try:
+            import pandas
+            import numpy
+            import colorama
+            import websockets
+        except ImportError:
+            print(f"{YELLOW}\"INSTALLING DEPENDENCIES\"   \"SYSTEM PREPARATION\"{RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "pandas", "numpy", "colorama", "python-dateutil", "websockets"], check=True)
+        
+        # Launch the feed
+        print(f"{CYAN}\"STARTING AIXBT CORRELATION ANALYSIS\"   \"MATRIX CONNECTION\"{RESET}")
+        subprocess.Popen([sys.executable, monitor_path])
+        
+        print(f"{GREEN}\"AIXBT LIVE FEED LAUNCHED\"   \"ACTIVATION COMPLETE\"{RESET}")
+        return True
+    except Exception as e:
+        print(f"{RED}\"ERROR LAUNCHING AIXBT LIVE FEED\"   \"{str(e)}\"{RESET}")
         return False
 
 if __name__ == "__main__":

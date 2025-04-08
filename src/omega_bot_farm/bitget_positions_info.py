@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 """
-BitGet Positions Information Retriever
+BitGet Positions Information Module
+
+This module provides utilities for retrieving and analyzing BitGet positions,
+including position details, changes tracking, and portfolio analysis.
+
+Copyright (c) 2024 OMEGA BTC AI
+Licensed under the GBU2 License - see LICENSE file for details
 
 This script connects to BitGet exchange and retrieves detailed information about current positions
 using the BitgetPositionAnalyzerB0t. It uses the environment loader to access API credentials
@@ -18,6 +24,11 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 import requests
 import os
+import ccxt
+from colorama import Fore, Style, init
+
+# Initialize colorama
+init()
 
 # Configure logging
 logging.basicConfig(
@@ -39,13 +50,12 @@ from src.omega_bot_farm.trading.b0ts.bitget_analyzer.bitget_position_analyzer_b0
 
 # Try to import CCXT directly to check for availability and version
 try:
-    import ccxt
+    CCXT_VERSION = ccxt.__version__
     CCXT_AVAILABLE = True
-    CCXT_VERSION = getattr(ccxt, "__version__", "unknown")
     logger.info(f"CCXT version {CCXT_VERSION} detected.")
-except ImportError:
+except (ImportError, AttributeError):
+    CCXT_VERSION = "N/A"
     CCXT_AVAILABLE = False
-    CCXT_VERSION = "not installed"
     logger.warning("CCXT library not installed. Some features will be limited.")
 
 
@@ -82,123 +92,24 @@ def print_section_header(title: str, width: int = 80) -> None:
 
 def validate_api_credentials(api_key: str, api_secret: str, api_passphrase: str, use_testnet: bool) -> Dict[str, Any]:
     """
-    Validate API credentials with a basic request to BitGet's API.
+    Validate API credentials by trying to connect to BitGet via CCXT.
     
     Args:
         api_key: BitGet API key
-        api_secret: BitGet API secret
+        api_secret: BitGet secret key
         api_passphrase: BitGet API passphrase
         use_testnet: Whether to use testnet
-        
+    
     Returns:
         Dictionary with validation result
     """
-    # Choose the appropriate endpoint
-    base_url = "https://api.bitget.com" if not use_testnet else "https://api-testnet.bitget.com"
-    endpoint = "/api/mix/v1/account/account"
-    url = f"{base_url}{endpoint}"
-    
-    # Log the connection preference
-    logger.info("BitGet connection preference order: 1. CCXT direct, 2. ExchangeClientB0t, 3. ExchangeService")
-    
     try:
-        import time
-        import hmac
-        import base64
-        import hashlib
-        
-        # Current timestamp (milliseconds)
-        timestamp = str(int(time.time() * 1000))
-        
-        # Create the pre-hash string
-        pre_hash = timestamp + "GET" + endpoint
-        
-        # Create signature
-        signature = base64.b64encode(
-            hmac.new(
-                api_secret.encode('utf-8'),
-                pre_hash.encode('utf-8'),
-                hashlib.sha256
-            ).digest()
-        ).decode('utf-8')
-        
-        # Request headers
-        headers = {
-            "Content-Type": "application/json",
-            "ACCESS-KEY": api_key,
-            "ACCESS-SIGN": signature,
-            "ACCESS-TIMESTAMP": timestamp,
-            "ACCESS-PASSPHRASE": api_passphrase,
-            "locale": "en-US"
-        }
-        
-        # Add testnet flag if needed
-        if use_testnet:
-            headers["ACCESS-PASSPHRASE"] = api_passphrase
-            
-        # Make request
-        logger.info(f"Validating API credentials against {base_url}")
-        response = requests.get(url, headers=headers)
-        
-        # Parse response
-        response_data = response.json()
-        
-        # Check for API key errors
-        if response.status_code != 200 or response_data.get("code") != "00000":
-            return {
-                "valid": False,
-                "message": "API key validation failed. Please check your credentials.",
-                "details": response_data.get("msg", "Unknown error"),
-                "status_code": response.status_code,
-                "response": response_data
-            }
-        
-        # Return validation result
-        return {
-            "valid": True,
-            "message": "API key validated successfully",
-            "status_code": response.status_code,
-            "response": response_data
-        }
-        
-    except Exception as e:
-        return {
-            "valid": False,
-            "message": f"Error validating API credentials: {str(e)}",
-            "details": str(e)
-        }
-
-
-async def try_ccxt_direct_connection(api_key: str, api_secret: str, api_passphrase: str, use_testnet: bool) -> Tuple[bool, str]:
-    """
-    Try to connect directly to BitGet using CCXT.
-
-    Args:
-        api_key: BitGet API key
-        api_secret: BitGet API secret
-        api_passphrase: BitGet API passphrase
-        use_testnet: Whether to use testnet
-        
-    Returns:
-        Tuple of (success, message)
-    """
-    if not CCXT_AVAILABLE:
-        return False, "CCXT library not installed"
-        
-    try:
-        # Import ccxt here to avoid unbound issues
-        import ccxt
-        
         # Configure exchange
         exchange_config = {
             'apiKey': api_key,
             'secret': api_secret,
             'password': api_passphrase,
-            'options': {
-                'defaultType': 'swap',
-                'adjustForTimeDifference': True,
-                'testnet': use_testnet,
-            }
+            'enableRateLimit': True
         }
         
         # Create BitGet exchange client
@@ -207,19 +118,31 @@ async def try_ccxt_direct_connection(api_key: str, api_secret: str, api_passphra
         # Set testnet mode if required
         if use_testnet:
             exchange.set_sandbox_mode(True)
-        
-        # Test connection with loadMarkets
-        exchange.load_markets()
-        
-        # Try to fetch account balance as a test
+            
+        # Make a simple request to check connectivity
         balance = exchange.fetch_balance()
-        if balance:
-            return True, f"Successfully connected to BitGet {'TESTNET' if use_testnet else 'MAINNET'} via CCXT"
         
-        return False, "Connected to BitGet but could not fetch balance"
+        # Check if we got a valid response
+        if balance and 'total' in balance:
+            logger.info("API key validation successful")
+            return {
+                "valid": True,
+                "message": "Successfully connected to BitGet via CCXT"
+            }
         
+        logger.warning("API key validation failed. Incomplete response from BitGet")
+        return {
+            "valid": False,
+            "message": "API key validation failed. Incomplete response from BitGet"
+        }
+    
     except Exception as e:
-        return False, f"Failed to connect via CCXT: {str(e)}"
+        error_message = f"API key validation failed. Error: {str(e)}"
+        logger.error(error_message)
+        return {
+            "valid": False,
+            "message": error_message
+        }
 
 
 async def get_positions_info(use_multiple_methods: bool = False) -> Dict[str, Any]:
@@ -236,7 +159,7 @@ async def get_positions_info(use_multiple_methods: bool = False) -> Dict[str, An
     api_key = get_env_var("BITGET_API_KEY", "")
     api_secret = get_env_var("BITGET_SECRET_KEY", "")
     api_passphrase = get_env_var("BITGET_PASSPHRASE", "")
-    use_testnet = get_bool_env_var("USE_TESTNET", False)
+    use_testnet = get_bool_env_var("BITGET_USE_TESTNET", False)
     
     # Validate API credentials
     if not api_key or not api_secret or not api_passphrase:
@@ -257,65 +180,84 @@ async def get_positions_info(use_multiple_methods: bool = False) -> Dict[str, An
     
     # Validate API credentials
     validation_result = validate_api_credentials(api_key, api_secret, api_passphrase, use_testnet)
-    if not validation_result.get("valid", False):
-        error_message = f"{validation_result.get('message')} - {validation_result.get('details')}"
-        logger.error(error_message)
+    if not validation_result["valid"]:
+        logger.error(f"API key validation failed. Please check your credentials. - {validation_result['message']}")
         return {
-            "error": error_message,
-            "connection": "VALIDATION FAILED",
+            "error": f"API key validation failed. Please check your credentials.",
+            "connection": "NOT CONNECTED",
             "positions": [],
             "account": {},
             "changes": {}
         }
     
-    # If using multiple methods, try direct CCXT connection
-    if use_multiple_methods and CCXT_AVAILABLE:
-        logger.info("Connection preference: CCXT direct (primary) -> ExchangeClientB0t -> ExchangeService")
-        logger.info("Attempting direct CCXT connection...")
-        ccxt_success, ccxt_message = await try_ccxt_direct_connection(
-            api_key, api_secret, api_passphrase, use_testnet
-        )
-        logger.info(f"CCXT direct connection result: {ccxt_message}")
-    else:
-        logger.info("Using default connection method (CCXT direct is primary)")
-    
     try:
-        # Initialize analyzer
-        analyzer = BitgetPositionAnalyzerB0t(
-            api_key=api_key,
-            api_secret=api_secret,
-            api_passphrase=api_passphrase,
-            use_testnet=use_testnet
-        )
+        # Connect to BitGet via CCXT
+        exchange_config = {
+            'apiKey': api_key,
+            'secret': api_secret,
+            'password': api_passphrase,
+            'enableRateLimit': True
+        }
+        
+        # Create BitGet exchange client
+        exchange = ccxt.bitget(exchange_config)
+        
+        # Set testnet mode if required
+        if use_testnet:
+            exchange.set_sandbox_mode(True)
+            logger.info("Using TESTNET environment")
+        else:
+            logger.info("Using MAINNET environment")
         
         # Get positions
-        logger.info("Fetching positions from BitGet...")
-        positions_data = await analyzer.get_positions()
+        try:
+            positions = exchange.fetch_positions()
+            logger.info(f"Successfully fetched {len(positions)} positions from BitGet")
+        except Exception as e:
+            logger.error(f"Error fetching positions: {str(e)}")
+            positions = []
         
-        # Add CCXT version info
-        positions_data["ccxt_version"] = CCXT_VERSION
-        positions_data["ccxt_available"] = CCXT_AVAILABLE
+        # Filter out positions with zero size
+        active_positions = []
+        for position in positions:
+            contracts = float(position.get('contracts', 0) or 0)
+            if contracts > 0:
+                active_positions.append(position)
         
-        # Check for errors
-        if "error" in positions_data:
-            error_msg = positions_data["error"]
-            if "Apikey does not exist" in str(error_msg):
-                logger.error("API key does not exist or is invalid. Please check your credentials.")
-            else:
-                logger.error(f"Error retrieving positions: {error_msg}")
+        # Get account balance
+        try:
+            balance = exchange.fetch_balance()
+            account_data = {
+                "total_balance": float(balance.get('total', {}).get('USDT', 0) or 0),
+                "free_balance": float(balance.get('free', {}).get('USDT', 0) or 0),
+                "used_balance": float(balance.get('used', {}).get('USDT', 0) or 0)
+            }
+            logger.info(f"Successfully fetched account balance from BitGet")
+        except Exception as e:
+            logger.error(f"Error fetching account balance: {str(e)}")
+            account_data = {
+                "total_balance": 0.0,
+                "free_balance": 0.0,
+                "used_balance": 0.0
+            }
         
-        return positions_data
+        # Return data
+        return {
+            "connection": "CCXT",
+            "positions": active_positions,
+            "account": account_data,
+            "changes": {}
+        }
+    
     except Exception as e:
-        error_message = f"Failed to connect to BitGet: {str(e)}"
+        error_message = f"Error connecting to BitGet: {str(e)}"
         logger.error(error_message)
         return {
             "error": error_message,
-            "connection": "CONNECTION FAILED",
+            "connection": "ERROR",
             "positions": [],
             "account": {},
-            "changes": {},
-            "ccxt_version": CCXT_VERSION,
-            "ccxt_available": CCXT_AVAILABLE
+            "changes": {}
         }
 
 
@@ -464,7 +406,7 @@ def print_help() -> None:
     print("  BITGET_API_KEY       Your BitGet API key")
     print("  BITGET_SECRET_KEY    Your BitGet API secret")
     print("  BITGET_PASSPHRASE    Your BitGet API passphrase")
-    print("  USE_TESTNET          Whether to use BitGet testnet (true/false)")
+    print("  BITGET_USE_TESTNET   Whether to use BitGet testnet (true/false)")
     print()
 
 
@@ -473,7 +415,7 @@ def print_api_credentials():
     api_key = get_env_var("BITGET_API_KEY", "")
     api_secret = get_env_var("BITGET_SECRET_KEY", "")
     api_passphrase = get_env_var("BITGET_PASSPHRASE", "")
-    use_testnet = get_bool_env_var("USE_TESTNET", False)
+    use_testnet = get_bool_env_var("BITGET_USE_TESTNET", False)
     
     print_section_header("API CREDENTIALS")
     print(f"Network: {'TESTNET' if use_testnet else 'MAINNET'}")
@@ -579,7 +521,7 @@ def update_env_file(env_file_path: str, api_key: str, api_secret: str, api_passp
             'BITGET_API_KEY': False,
             'BITGET_SECRET_KEY': False,
             'BITGET_PASSPHRASE': False,
-            'USE_TESTNET': False
+            'BITGET_USE_TESTNET': False
         }
         
         # Update existing lines
@@ -596,9 +538,9 @@ def update_env_file(env_file_path: str, api_key: str, api_secret: str, api_passp
             elif line.startswith('BITGET_PASSPHRASE='):
                 new_lines.append(f'BITGET_PASSPHRASE="{api_passphrase}"')
                 updated_fields['BITGET_PASSPHRASE'] = True
-            elif line.startswith('USE_TESTNET='):
-                new_lines.append(f'USE_TESTNET={str(use_testnet).lower()}')
-                updated_fields['USE_TESTNET'] = True
+            elif line.startswith('BITGET_USE_TESTNET='):
+                new_lines.append(f'BITGET_USE_TESTNET={str(use_testnet).lower()}')
+                updated_fields['BITGET_USE_TESTNET'] = True
             else:
                 new_lines.append(line)
         
@@ -609,8 +551,8 @@ def update_env_file(env_file_path: str, api_key: str, api_secret: str, api_passp
             new_lines.append(f'BITGET_SECRET_KEY="{api_secret}"')
         if not updated_fields['BITGET_PASSPHRASE']:
             new_lines.append(f'BITGET_PASSPHRASE="{api_passphrase}"')
-        if not updated_fields['USE_TESTNET']:
-            new_lines.append(f'USE_TESTNET={str(use_testnet).lower()}')
+        if not updated_fields['BITGET_USE_TESTNET']:
+            new_lines.append(f'BITGET_USE_TESTNET={str(use_testnet).lower()}')
         
         # Write the updated file
         with open(env_file_path, 'w') as f:
@@ -754,7 +696,7 @@ async def main_wrapper():
         api_key = get_env_var("BITGET_API_KEY", "")
         api_secret = get_env_var("BITGET_SECRET_KEY", "")
         api_passphrase = get_env_var("BITGET_PASSPHRASE", "")
-        use_testnet = get_bool_env_var("USE_TESTNET", False) or args.testnet
+        use_testnet = get_bool_env_var("BITGET_USE_TESTNET", False) or args.testnet
         
         print("\n🧬 OMEGA BOT FARM - BitGet API Validation 🧬\n")
         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -775,11 +717,8 @@ async def main_wrapper():
             
             # If multi-connect flag is provided, try direct CCXT connection
             if args.multi_connect and CCXT_AVAILABLE:
-                print("\nTesting direct CCXT connection...")
-                ccxt_success, ccxt_message = await try_ccxt_direct_connection(
-                    api_key, api_secret, api_passphrase, use_testnet
-                )
-                print(f"CCXT Result: {ccxt_message}")
+                print("\nDirect CCXT connection is available.")
+                print("Connected to BitGet via CCXT")
         else:
             print_section_header("VALIDATION FAILED")
             print(f"Error: {validation_result.get('message')}")
@@ -790,7 +729,7 @@ async def main_wrapper():
     
     # Otherwise, run the normal main function with testnet flag applied if provided
     if args.testnet:
-        os.environ["USE_TESTNET"] = "true"
+        os.environ["BITGET_USE_TESTNET"] = "true"
     
     await main()
 

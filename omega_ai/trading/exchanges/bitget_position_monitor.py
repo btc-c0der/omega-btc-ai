@@ -1,3 +1,13 @@
+"""
+BitGet Position Monitor
+
+This module implements position monitoring and exit strategy execution
+for BitGet exchange positions.
+
+Copyright (c) 2024 OMEGA BTC AI
+Licensed under the GBU2 License - see LICENSE file for details
+"""
+
 async def monitor_bitget_positions(trader, exit_strategy):
     """Monitor BitGet positions and apply exit strategy"""
     running = True

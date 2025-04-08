@@ -98,8 +98,9 @@ def show_menu():
     print("11. Launch Garvey Wisdom Portal")
     print("12. Connect to Online Redis")
     print("13. Launch BTC Velocity Monitor")
+    print("14. Launch AIXBT Live Feed")
     print("0. Exit")
-    return input("\nEnter your choice (0-13): ")
+    return input("\nEnter your choice (0-14): ")
 
 def launch_matrix_dashboard():
     """Launch the Matrix-style terminal dashboard"""
@@ -572,6 +573,36 @@ def launch_btc_velocity_monitor():
         print(f"{RED}Error launching BTC Velocity Monitor: {e}{RESET}")
         return False
 
+def launch_aixbt_live_feed():
+    """Launch the AIXBT live feed"""
+    print(f"{CYAN}{BOLD}Launching AIXBT Live Feed...{RESET}")
+    monitor_path = os.path.join(PROJECT_ROOT, "src/omega_bot_farm/aixbt_live_feed_v1.py")
+    
+    if not os.path.exists(monitor_path):
+        print(f"{RED}AIXBT Live Feed not found!{RESET}")
+        return False
+    
+    try:
+        # Ensure dependencies are installed
+        try:
+            import pandas
+            import numpy
+            import colorama
+            import websockets
+        except ImportError:
+            print(f"{YELLOW}Installing dependencies...{RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "pandas", "numpy", "colorama", "python-dateutil", "websockets"], check=True)
+        
+        # Launch the monitor
+        print(f"{CYAN}Starting AIXBT correlation analysis...{RESET}")
+        subprocess.Popen([sys.executable, monitor_path])
+        
+        print(f"{GREEN}AIXBT Live Feed launched successfully!{RESET}")
+        return True
+    except Exception as e:
+        print(f"{RED}Error launching AIXBT Live Feed: {e}{RESET}")
+        return False
+
 def show_available_parameters():
     """Show all available command-line parameters"""
     print(f"\n{CYAN}{BOLD}Available Command-line Parameters:{RESET}")
@@ -588,6 +619,7 @@ def show_available_parameters():
     print(f"  {YELLOW}--garvey{RESET}      Launch Garvey Wisdom Portal")
     print(f"  {YELLOW}--redis{RESET}       Connect to Online Redis")
     print(f"  {YELLOW}--velocity{RESET}    Launch BTC Velocity Monitor")
+    print(f"  {YELLOW}--aixbt{RESET}       Launch AIXBT Live Feed")
     print(f"{GOLD}{'—' * 50}{RESET}")
     
     return True
@@ -612,6 +644,7 @@ def main():
     parser.add_argument("--garvey", action="store_true", help="Launch Garvey Wisdom Portal")
     parser.add_argument("--redis", action="store_true", help="Connect to Online Redis")
     parser.add_argument("--velocity", action="store_true", help="Launch BTC Velocity Monitor")
+    parser.add_argument("--aixbt", action="store_true", help="Launch AIXBT Live Feed")
     
     args = parser.parse_args()
     
@@ -657,6 +690,9 @@ def main():
     elif args.velocity:
         launch_btc_velocity_monitor()
         return
+    elif args.aixbt:
+        launch_aixbt_live_feed()
+        return
     
     # Interactive menu if no arguments were passed
     while True:
@@ -688,6 +724,8 @@ def main():
             connect_online_redis()
         elif choice == "13":
             launch_btc_velocity_monitor()
+        elif choice == "14":
+            launch_aixbt_live_feed()
         elif choice == "0":
             print(f"{GREEN}Exiting OMEGA Grid Portal. JAH BLESS!{RESET}")
             break

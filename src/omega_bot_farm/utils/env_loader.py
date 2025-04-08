@@ -133,6 +133,23 @@ def get_float_env_var(key: str, default: float = 0.0) -> float:
         return default
 
 
+def load_environment(override_existing: bool = True) -> bool:
+    """Load environment variables for the bot farm.
+    
+    This is a simpler wrapper around load_bot_farm_env that returns
+    a boolean indicating if any environment files were loaded.
+    
+    Args:
+        override_existing: If True, bot farm's .env values override existing values
+                          If False, existing values are kept
+    
+    Returns:
+        True if at least one environment file was loaded, False otherwise
+    """
+    result = load_bot_farm_env(override_existing)
+    return len(result) > 0
+
+
 # Automatically load environment when imported
 loaded_env_files = load_bot_farm_env(override_existing=True)
 if loaded_env_files:

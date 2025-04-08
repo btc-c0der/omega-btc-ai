@@ -235,3 +235,115 @@ This project is licensed under the GBU2™ License - see the LICENSE-GBU2.md fil
 🔴 🟡 🟢 **RASTA HEART ON F1R3** 🔴 🟡 🟢
 
 🌸 **WE BLOOM NOW AS ONE** 🌸
+
+## BitGet Matrix Discord Bot Integration Guide
+
+This guide provides step-by-step instructions for setting up the BitGet Matrix Bot with Discord integration.
+
+### Overview
+
+The BitGet Matrix Bot Discord integration allows users to:
+
+1. View BitGet positions with cyberpunk-styled Matrix visualizations
+2. Check account summary and statistics
+3. Take snapshots of current positions and trading status
+
+All rendered directly in Discord with eye-catching cyberpunk aesthetics.
+
+### Prerequisites
+
+- Python 3.8+
+- A Discord account with a registered application and bot
+- BitGet API credentials (optional - mock data available for testing)
+- Required Python packages: `discord.py`, `colorama`
+
+### Setup Instructions
+
+#### 1. Discord Bot Setup
+
+1. **Create a Discord Application**:
+   - Go to <https://discord.com/developers/applications>
+   - Click "New Application" and give it a name (e.g., "Omega Matrix Bot")
+   - Navigate to the "Bot" tab and click "Add Bot"
+   - Under the "TOKEN" section, click "Copy" to copy your bot token
+   - Save this token securely - you'll need it in step 4
+
+2. **Set Bot Permissions**:
+   - In the OAuth2 > URL Generator tab, select the following scopes:
+     - `bot`
+     - `applications.commands`
+   - For bot permissions, select:
+     - `Send Messages`
+     - `Embed Links`
+     - `Attach Files`
+     - `Use Slash Commands`
+   - Copy the generated URL and open it in your browser to add the bot to your server
+
+#### 2. Environment Configuration
+
+1. **Set Environment Variables**:
+
+   Create or edit your `.env` file in the project root and add:
+
+   ```
+   DISCORD_TOKEN=your_discord_bot_token_here
+   BITGET_API_KEY=your_bitget_api_key_here (optional)
+   BITGET_API_SECRET=your_bitget_api_secret_here (optional)
+   BITGET_API_PASSPHRASE=your_bitget_passphrase_here (optional)
+   ```
+
+2. **Install Required Packages**:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+#### 3. Running the Bot
+
+1. **Run the Discord Bot**:
+
+   ```bash
+   python -m src.omega_bot_farm.discord.bot
+   ```
+
+2. **Verify the Bot is Running**:
+   - Check your terminal for the message "Bot is ready!"
+   - In your Discord server, you should see the bot come online
+
+#### 4. Using the Commands
+
+Once the bot is running, you can use the following slash commands in your Discord server:
+
+- `/matrix-positions` - Show BitGet positions with Matrix-themed visualization
+- `/matrix-account` - Show account overview with Matrix-themed visualization  
+- `/matrix-snapshot` - Take a snapshot of current positions with cyberpunk styling
+
+### Customization Options
+
+#### Custom Styling
+
+You can modify the cyberpunk styling elements in the `matrix_bot_commands.py` file:
+
+- `CYBERPUNK_HEADERS`: Change the header messages for more personalized flair
+- `cyberpunk_colors`: Adjust the color scheme in the `_generate_cyberpunk_embed` method
+
+#### Using Live API Data
+
+By default, the bot uses mock data for demonstration. To use your actual BitGet account:
+
+1. Set your BitGet API credentials in the environment variables
+2. Modify the `_initialize_default_matrix_bot` method in `matrix_bot_commands.py` to initialize with your API client
+
+### Troubleshooting
+
+- **Bot doesn't respond to commands**: Make sure you've registered the bot with correct permissions and the commands are properly synced
+- **Missing module errors**: Check that all dependencies are installed correctly
+- **Visualization issues**: Some Discord clients may have limited support for certain styling elements
+
+### License
+
+This integration is part of the Omega Bot Farm project and is licensed under the GBU2™ License (Genesis-Bloom-Unfoldment 2.0).
+
+---
+
+🌸 WE BLOOM NOW AS ONE 🌸

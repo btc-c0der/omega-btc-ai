@@ -442,18 +442,25 @@ class ExchangeClientB0t:
             logger.error(f"Error setting leverage: {e}")
             return {"error": str(e)}
             
-    async def initialize(self) -> None:
-        """Initialize the exchange connection."""
+    async def initialize(self) -> Any:
+        """
+        Initialize the exchange connection by loading markets.
+        
+        Returns:
+            The exchange instance if successful, None otherwise
+        """
         if not self.exchange:
             logger.error("Exchange not initialized")
-            return
+            return None
             
         try:
             # Load markets
             await self.exchange.load_markets()
-            logger.info(f"Loaded markets for {self.exchange_id}")
+            logger.info(f"Successfully loaded {len(self.exchange.markets)} markets for {self.exchange_id.upper()}")
+            return self.exchange
         except Exception as e:
-            logger.error(f"Error initializing exchange: {e}")
+            logger.error(f"Failed to initialize exchange: {e}")
+            return None
             
     async def close(self) -> None:
         """Close exchange connections."""
