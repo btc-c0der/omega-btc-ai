@@ -119,6 +119,20 @@ Parameters:
 - `--intensity`: Blessing intensity level (1-10, default: 7)
 - `--silent`: Run in silent mode with minimal output
 
+### Using as a Git Command
+
+You can also set up Git Bless as a native git command:
+
+```bash
+# Run the setup script
+./scripts/setup_git_commands.sh
+
+# Then use as a git command
+git bless
+git bless HEAD~1
+git bless --intensity=10
+```
+
 ## 🌐 System Requirements
 
 - Unix-like operating system (Linux, macOS)
