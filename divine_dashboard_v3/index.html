@@ -636,6 +636,9 @@ npm start</code></pre>
         </main>
     </div>
 
+    <!-- Hidden iframe for metrics dashboard communication -->
+    <iframe id="metrics-dashboard-frame" src="http://localhost:7861" style="display: none;"></iframe>
+
     <style>
         /* Additional styles for Tesla Cybertruck QA Dashboard */
         .full-width-card {
@@ -665,6 +668,25 @@ npm start</code></pre>
                 padding-top: 100%;
                 /* 1:1 aspect ratio on mobile */
             }
+        }
+
+        /* Animation for updated metrics */
+        @keyframes pulse-update {
+            0% {
+                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+            }
+        }
+
+        .stat-card.updated {
+            animation: pulse-update 1s ease-out;
         }
     </style>
 
@@ -726,6 +748,46 @@ npm start</code></pre>
                         // Show notification
                         alert("Cybertruck QA Tests " +
                             (event.data.result === "pass" ? "PASSED ✅" : "FAILED ❌"));
+                    }
+                }
+            });
+
+            // Listen for metrics updates from Gradio
+            window.addEventListener("message", (event) => {
+                if (event.data && event.data.source === "dashboard-metrics") {
+                    // Handle different metrics
+                    if (event.data.metric === "commits_today") {
+                        document.querySelector("#commits-today .stat-value").innerText = event.data.value;
+                        if (event.data.change) {
+                            document.querySelector("#commits-today .stat-change").innerText = event.data.change;
+                        }
+                    }
+                    else if (event.data.metric === "lines_changed") {
+                        document.querySelector("#lines-changed .stat-value").innerText = event.data.value;
+                        if (event.data.change) {
+                            document.querySelector("#lines-changed .stat-change").innerText = event.data.change;
+                        }
+                    }
+                    else if (event.data.metric === "pull_requests") {
+                        document.querySelector("#pull-requests .stat-value").innerText = event.data.value;
+                        if (event.data.change) {
+                            document.querySelector("#pull-requests .stat-change").innerText = event.data.change;
+                        }
+                    }
+                    else if (event.data.metric === "deployments") {
+                        document.querySelector("#deployments .stat-value").innerText = event.data.value;
+                        if (event.data.change) {
+                            document.querySelector("#deployments .stat-change").innerText = event.data.change;
+                        }
+                    }
+
+                    // Add visual indicator of update
+                    const metricElement = document.getElementById(event.data.metric.replace('_', '-'));
+                    if (metricElement) {
+                        metricElement.classList.add('updated');
+                        setTimeout(() => {
+                            metricElement.classList.remove('updated');
+                        }, 1000);
                     }
                 }
             });

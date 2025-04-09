@@ -49,6 +49,7 @@ logger = logging.getLogger('divine_server')
 # Server configuration
 DASHBOARD_PORT = 8889  # Main dashboard port
 GRADIO_PORT = 7860    # Cybertruck QA Dashboard port
+METRICS_PORT = 7861   # Dashboard Metrics port
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -456,6 +457,33 @@ def run_servers():
     """Run the FastAPI and Gradio servers"""
     # Mount the Gradio app
     gradio_interface = create_gradio_interface()
+    
+    # Import metrics dashboard
+    try:
+        metrics_module_path = os.path.join(DIRECTORY, "components", "metrics_dashboard.py")
+        if os.path.exists(metrics_module_path):
+            spec = importlib.util.spec_from_file_location("metrics_dashboard", metrics_module_path)
+            if spec is not None and spec.loader is not None:
+                metrics_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(metrics_module)
+                run_metrics_dashboard = getattr(metrics_module, "run_metrics_dashboard", None)
+                
+                # Start metrics dashboard in a separate thread
+                if run_metrics_dashboard:
+                    metrics_thread = threading.Thread(
+                        target=lambda: run_metrics_dashboard(METRICS_PORT), 
+                        daemon=True
+                    )
+                    metrics_thread.start()
+                    logger.info(f"✨ Started Metrics Dashboard on port {METRICS_PORT} ✨")
+                else:
+                    logger.warning("Metrics dashboard run function not found")
+            else:
+                logger.warning("Failed to get valid module spec for metrics dashboard")
+        else:
+            logger.warning(f"Metrics dashboard not found at {metrics_module_path}")
+    except Exception as e:
+        logger.error(f"Error importing metrics dashboard: {e}")
     
     # Create a thread to run the main dashboard server
     def run_dashboard_server():
