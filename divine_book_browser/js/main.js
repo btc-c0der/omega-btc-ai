@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initMarkdownRenderer();
     initDocumentList();
     initEventListeners();
-    initCodeStats();
 });
 
 // Mobile Navigation
@@ -453,61 +452,92 @@ function displayErrorMessage(message) {
 
 // Initialize event listeners
 function initEventListeners() {
-    // Category navigation links
-    document.querySelectorAll('.category-link').forEach(link => {
+    // Category links
+    const categoryLinks = document.querySelectorAll('.category-link');
+    categoryLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const category = link.dataset.category;
+            const category = link.getAttribute('data-category');
             displayDocumentList(category);
         });
     });
 
     // All documents link
-    document.querySelector('.all-docs-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        displayDocumentList('all');
-    });
+    const allDocsLink = document.querySelector('.all-docs-link');
+    if (allDocsLink) {
+        allDocsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            displayDocumentList('all');
+        });
+    }
 
     // Toggle view button
-    document.getElementById('toggle-view-btn').addEventListener('click', () => {
-        const markdownViewer = document.getElementById('markdown-viewer');
-        const htmlViewer = document.getElementById('html-viewer');
+    const toggleViewBtn = document.getElementById('toggle-view-btn');
+    if (toggleViewBtn) {
+        toggleViewBtn.addEventListener('click', () => {
+            const mdViewer = document.getElementById('markdown-viewer');
+            const htmlViewer = document.getElementById('html-viewer');
+            mdViewer.classList.toggle('active');
+            htmlViewer.classList.toggle('active');
 
-        markdownViewer.classList.toggle('active');
-        htmlViewer.classList.toggle('active');
-    });
-
-    // Code stats link - Show the stats dashboard
-    document.getElementById('code-stats-link').addEventListener('click', (e) => {
-        e.preventDefault();
-
-        // Create a dedicated window for code stats instead of toggling display
-        const statsWindowWidth = 1000;
-        const statsWindowHeight = 800;
-        const left = (window.screen.width - statsWindowWidth) / 2;
-        const top = (window.screen.height - statsWindowHeight) / 2;
-
-        // Open a new window with the code stats dashboard
-        const statsWindow = window.open('code-stats.html', 'OMEGACodeStats',
-            `width=${statsWindowWidth},height=${statsWindowHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`);
-
-        // If window was blocked, inform the user
-        if (!statsWindow) {
-            alert('Pop-up blocked! Please allow pop-ups for the Code Stats dashboard.');
-        }
-    });
+            // Update button text based on active viewer
+            if (mdViewer.classList.contains('active')) {
+                toggleViewBtn.innerHTML = '<i class="fas fa-code"></i> View HTML';
+            } else {
+                toggleViewBtn.innerHTML = '<i class="fas fa-markdown"></i> View Markdown';
+            }
+        });
+    }
 
     // Search functionality
     const searchInput = document.getElementById('search-input');
     const searchButton = document.getElementById('search-button');
 
-    searchButton.addEventListener('click', () => {
-        performSearch(searchInput.value);
-    });
-
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    if (searchInput && searchButton) {
+        searchButton.addEventListener('click', () => {
             performSearch(searchInput.value);
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch(searchInput.value);
+            }
+        });
+    }
+
+    // Code Stats link (now points to external page)
+    const codeStatsLink = document.getElementById('code-stats-link');
+    if (codeStatsLink) {
+        // This is already handled by the href and target="_blank" in HTML
+        // No need for additional JavaScript for a simple link
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // ALT + T to toggle view
+        if (e.altKey && e.key === 't') {
+            const toggleViewBtn = document.getElementById('toggle-view-btn');
+            if (toggleViewBtn) {
+                toggleViewBtn.click();
+            }
+        }
+
+        // ESC to clear search
+        if (e.key === 'Escape') {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput && searchInput.value) {
+                searchInput.value = '';
+                displayDocumentList('all');
+            }
+        }
+
+        // CTRL/CMD + F to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput && document.activeElement !== searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
         }
     });
 }
@@ -579,296 +609,6 @@ function performSearch(query) {
     }
 }
 
-// Initialize the code stats dashboard
 function initCodeStats() {
-    // Elements
-    const refreshBtn = document.getElementById('refresh-stats');
-    const sortSelect = document.getElementById('sort-stats');
-    const statsTable = document.getElementById('stats-table-body');
-    const totalFilesEl = document.getElementById('total-files');
-    const totalLinesEl = document.getElementById('total-lines');
-    const totalSizeEl = document.getElementById('total-size');
-    const lastAnalysisEl = document.getElementById('last-analysis');
-
-    // Chart elements
-    const linesChart = document.getElementById('lines-chart');
-    const filesChart = document.getElementById('files-chart');
-
-    let codeStats = null;
-    let charts = {
-        lines: null,
-        files: null
-    };
-
-    // Function to run the code statistics analysis
-    async function runCodeAnalysis() {
-        if (refreshBtn) {
-            refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt spinning"></i> Analyzing...';
-        }
-
-        try {
-            const response = await fetch('/api/run-analysis', {
-                method: 'POST'
-            });
-
-            if (!response.ok) {
-                throw new Error(`Analysis failed: ${response.status} ${response.statusText}`);
-            }
-
-            await loadCodeStats();
-        } catch (error) {
-            console.error('Error running code analysis:', error);
-            alert(`Failed to run code analysis: ${error.message}`);
-        } finally {
-            if (refreshBtn) {
-                refreshBtn.disabled = false;
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Stats';
-            }
-        }
-    }
-
-    // Function to simulate running the code analysis script
-    async function simulateCodeAnalysis() {
-        if (refreshBtn) {
-            refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt spinning"></i> Analyzing...';
-        }
-
-        try {
-            // Create a simple stats object based on count_files_loc.py structure
-            const simulatedStats = {
-                by_extension: {
-                    ".py": { files: 25, lines: 3500, bytes: 120000 },
-                    ".js": { files: 42, lines: 5200, bytes: 180000 },
-                    ".html": { files: 18, lines: 2800, bytes: 95000 },
-                    ".css": { files: 10, lines: 1500, bytes: 45000 },
-                    ".md": { files: 35, lines: 4200, bytes: 140000 },
-                    ".json": { files: 12, lines: 800, bytes: 25000 },
-                    ".txt": { files: 8, lines: 600, bytes: 18000 },
-                    ".csv": { files: 5, lines: 2000, bytes: 80000 },
-                    ".ipynb": { files: 15, lines: 3800, bytes: 220000 },
-                    ".yml": { files: 7, lines: 350, bytes: 8000 }
-                },
-                total_files: 177,
-                total_lines: 24750,
-                total_bytes: 931000,
-                last_analysis: new Date().toISOString()
-            };
-
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Save to localStorage to persist between sessions
-            localStorage.setItem('omega_code_stats', JSON.stringify(simulatedStats));
-
-            codeStats = simulatedStats;
-            renderCodeStats();
-        } catch (error) {
-            console.error('Error simulating code analysis:', error);
-            alert(`Failed to run code analysis simulation: ${error.message}`);
-        } finally {
-            if (refreshBtn) {
-                refreshBtn.disabled = false;
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Stats';
-            }
-        }
-    }
-
-    // Function to load code stats
-    async function loadCodeStats() {
-        try {
-            // In a real implementation, this would fetch from an API
-            // For now, we'll use localStorage or simulate if not available
-            const savedStats = localStorage.getItem('omega_code_stats');
-
-            if (savedStats) {
-                codeStats = JSON.parse(savedStats);
-                renderCodeStats();
-            } else {
-                // No saved stats, simulate first run
-                await simulateCodeAnalysis();
-            }
-        } catch (error) {
-            console.error('Error loading code stats:', error);
-            if (statsTable) {
-                statsTable.innerHTML = `<tr><td colspan="5" class="error">Error loading code statistics: ${error.message}</td></tr>`;
-            }
-        }
-    }
-
-    // Function to render code stats
-    function renderCodeStats() {
-        if (!codeStats) return;
-
-        // Update summary cards
-        if (totalFilesEl) totalFilesEl.textContent = formatNumber(codeStats.total_files);
-        if (totalLinesEl) totalLinesEl.textContent = formatNumber(codeStats.total_lines);
-        if (totalSizeEl) totalSizeEl.textContent = formatSize(codeStats.total_bytes);
-        if (lastAnalysisEl) lastAnalysisEl.textContent = formatDate(codeStats.last_analysis);
-
-        // Sort extensions
-        const sortBy = sortSelect ? sortSelect.value : 'lines';
-        const sortedExtensions = Object.entries(codeStats.by_extension)
-            .sort((a, b) => {
-                if (sortBy === 'extension') {
-                    return a[0].localeCompare(b[0]);
-                } else {
-                    return b[1][sortBy] - a[1][sortBy];
-                }
-            });
-
-        // Render table
-        if (statsTable) {
-            statsTable.innerHTML = '';
-
-            sortedExtensions.forEach(([ext, stats]) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${ext}</td>
-                    <td>${formatNumber(stats.files)}</td>
-                    <td>${formatNumber(stats.lines)}</td>
-                    <td>${formatSize(stats.bytes)}</td>
-                    <td>${(stats.lines / stats.files).toFixed(1)}</td>
-                `;
-                statsTable.appendChild(row);
-            });
-        }
-
-        // Render charts
-        renderCharts(sortedExtensions);
-    }
-
-    // Function to render charts
-    function renderCharts(sortedExtensions) {
-        // Prepare data for charts
-        const top10 = sortedExtensions.slice(0, 10);
-        const labels = top10.map(item => item[0]);
-        const linesData = top10.map(item => item[1].lines);
-        const filesData = top10.map(item => item[1].files);
-
-        // Lines of Code chart
-        if (linesChart) {
-            if (charts.lines) {
-                charts.lines.destroy();
-            }
-
-            const ctx = linesChart.getContext('2d');
-            charts.lines = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Lines of Code',
-                        data: linesData,
-                        backgroundColor: 'rgba(107, 70, 193, 0.6)',
-                        borderColor: 'rgba(107, 70, 193, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `Lines: ${formatNumber(context.raw)}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Files chart
-        if (filesChart) {
-            if (charts.files) {
-                charts.files.destroy();
-            }
-
-            const ctx = filesChart.getContext('2d');
-            charts.files = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Files',
-                        data: filesData,
-                        backgroundColor: [
-                            'rgba(107, 70, 193, 0.8)',
-                            'rgba(79, 70, 229, 0.8)',
-                            'rgba(139, 92, 246, 0.8)',
-                            'rgba(91, 33, 182, 0.8)',
-                            'rgba(124, 58, 237, 0.8)',
-                            'rgba(167, 139, 250, 0.8)',
-                            'rgba(196, 181, 253, 0.8)',
-                            'rgba(221, 214, 254, 0.8)',
-                            'rgba(233, 213, 255, 0.8)',
-                            'rgba(237, 233, 254, 0.8)'
-                        ],
-                        borderColor: '#fff',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    const value = context.raw;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `Files: ${formatNumber(value)} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // Utility functions
-    function formatNumber(num) {
-        return new Intl.NumberFormat().format(num);
-    }
-
-    function formatSize(bytes) {
-        const units = ['B', 'KB', 'MB', 'GB'];
-        let size = bytes;
-        let unitIndex = 0;
-
-        while (size >= 1024 && unitIndex < units.length - 1) {
-            size /= 1024;
-            unitIndex++;
-        }
-
-        return `${size.toFixed(1)} ${units[unitIndex]}`;
-    }
-
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    }
-
-    // Event listeners
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', simulateCodeAnalysis);
-    }
-
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function () {
-            renderCodeStats();
-        });
-    }
-
-    // Initialize on load
-    loadCodeStats();
+    // ... Remove all the code related to code stats ...
 } 

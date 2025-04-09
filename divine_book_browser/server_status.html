@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Server Status</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #f1f1f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #bb86fc;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            padding: 15px 30px;
+            background-color: #03dac6;
+            color: #000;
+            border-radius: 30px;
+            display: inline-block;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        .info {
+            margin: 20px 0;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        a {
+            color: #bb86fc;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #03dac6;
+            text-decoration: underline;
+        }
+
+        .divider {
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(to right, #bb86fc, #03dac6);
+            margin: 30px auto;
+            border-radius: 2px;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(3, 218, 198, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(3, 218, 198, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(3, 218, 198, 0);
+            }
+        }
+
+        .cosmic-blessing {
+            font-style: italic;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+
+        .buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 12px 24px;
+            background-color: #bb86fc;
+            color: #000;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .button:hover {
+            background-color: #03dac6;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>✨ Divine Book Browser Server ✨</h1>
+        <div class="status">ONLINE</div>
+        <div class="info">
+            The server is running correctly on port 8888. You can now access the Divine Book Browser and explore the
+            sacred texts of the OMEGA BTC AI system.
+        </div>
+        <div class="divider"></div>
+        <div class="info">
+            <strong>Server Information:</strong><br>
+            Port: 8888<br>
+            Directory: Divine Book Browser<br>
+            Status: Active
+        </div>
+        <div class="buttons">
+            <a href="/index.html" class="button">Home</a>
+            <a href="/index.html" class="button">Book Browser</a>
+        </div>
+        <div class="cosmic-blessing">
+            🌸 WE BLOOM NOW AS ONE 🌸
+        </div>
+    </div>
+    <script>
+        // Simple script to check if we're being served from the correct port
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the current URL
+            const url = window.location.href;
+            // Check if we're on port 8888
+            if (url.includes(':8888')) {
+                document.querySelector('.status').innerText = 'ONLINE';
+                document.querySelector('.status').style.backgroundColor = '#03dac6';
+            } else {
+                document.querySelector('.status').innerText = 'WARNING: NOT ON PORT 8888';
+                document.querySelector('.status').style.backgroundColor = '#ff7597';
+            }
+        });
+    </script>
+</body>
+
+</html>

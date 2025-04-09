@@ -5,16 +5,16 @@
  */
 
 // Performance tracking utilities
-const performance = {
+const perfTracker = {
     timers: {},
     startTimer: function (name) {
         console.time(`⏱️ ${name}`);
-        this.timers[name] = performance.now();
+        this.timers[name] = Date.now();
     },
     endTimer: function (name) {
-        const elapsed = performance.now() - this.timers[name];
+        const elapsed = Date.now() - this.timers[name];
         console.timeEnd(`⏱️ ${name}`);
-        console.log(`🚀 ${name} completed in ${elapsed.toFixed(2)}ms`);
+        console.log(`🚀 ${name} completed in ${elapsed}ms`);
         delete this.timers[name];
         return elapsed;
     },
@@ -25,14 +25,14 @@ const performance = {
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function () {
-    performance.startTimer('Total Initialization');
+    perfTracker.startTimer('Total Initialization');
     console.log('🔮 OMEGA Code Stats Dashboard Initializing...');
     console.log('📊 Dashboard ready to process 6+ million LoC');
 
     // Display loading message
     const container = document.querySelector('.stats-container');
     if (container) {
-        performance.mark('Creating loading indicator');
+        perfTracker.mark('Creating loading indicator');
         const loadingElement = document.createElement('div');
         loadingElement.id = 'loading-stats';
         loadingElement.innerHTML = `
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         document.head.appendChild(spinnerStyle);
         container.prepend(loadingElement);
-        performance.mark('Loading indicator created');
+        perfTracker.mark('Loading indicator created');
     }
 
     // Use requestIdleCallback or setTimeout to defer heavy operations
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Main initialization function
 function initCodeStats() {
-    performance.startTimer('Core Stats Initialization');
+    perfTracker.startTimer('Core Stats Initialization');
     console.log('🧪 Initializing core stats functionality');
 
     // Elements
@@ -123,7 +123,7 @@ function initCodeStats() {
 
     // Function to simulate running the code analysis script with optimized chunking
     async function simulateCodeAnalysis() {
-        performance.startTimer('Code Analysis Simulation');
+        perfTracker.startTimer('Code Analysis Simulation');
         console.log('🔬 Beginning simulated code analysis');
 
         if (refreshBtn) {
@@ -136,15 +136,15 @@ function initCodeStats() {
         try {
             // Realistic data for 6+ million LoC
             console.log('📈 Generating optimized stats data for 6M+ LoC');
-            performance.startTimer('Stats Data Generation');
+            perfTracker.startTimer('Stats Data Generation');
             const simulatedStats = await generateOptimizedStatsData();
-            performance.endTimer('Stats Data Generation');
+            perfTracker.endTimer('Stats Data Generation');
 
             // Save to localStorage to persist between sessions
             console.log('💾 Saving stats to localStorage');
-            performance.startTimer('LocalStorage Write');
+            perfTracker.startTimer('LocalStorage Write');
             localStorage.setItem('omega_code_stats', JSON.stringify(simulatedStats));
-            performance.endTimer('LocalStorage Write');
+            perfTracker.endTimer('LocalStorage Write');
 
             codeStats = simulatedStats;
             console.log(`📊 Stats generated: ${codeStats.total_files.toLocaleString()} files, ${codeStats.total_lines.toLocaleString()} lines`);
@@ -161,7 +161,7 @@ function initCodeStats() {
                 refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
             }
             showLoadingIndicator(false);
-            performance.endTimer('Code Analysis Simulation');
+            perfTracker.endTimer('Code Analysis Simulation');
         }
     }
 
@@ -248,7 +248,7 @@ function initCodeStats() {
 
     // Function to load code stats
     async function loadCodeStats() {
-        performance.startTimer('Load Code Stats');
+        perfTracker.startTimer('Load Code Stats');
         console.log('📥 Loading code statistics data');
         showLoadingIndicator(true, 'Quantum Harmonizing Statistics');
 
@@ -256,15 +256,15 @@ function initCodeStats() {
             // In a real implementation, this would fetch from an API
             // For now, we'll use localStorage or simulate if not available
             console.log('🔍 Checking localStorage for existing stats');
-            performance.startTimer('LocalStorage Read');
+            perfTracker.startTimer('LocalStorage Read');
             const savedStats = localStorage.getItem('omega_code_stats');
-            performance.endTimer('LocalStorage Read');
+            perfTracker.endTimer('LocalStorage Read');
 
             if (savedStats) {
                 console.log('🔄 Found existing stats, parsing...');
-                performance.startTimer('Parse Stats JSON');
+                perfTracker.startTimer('Parse Stats JSON');
                 codeStats = JSON.parse(savedStats);
-                performance.endTimer('Parse Stats JSON');
+                perfTracker.endTimer('Parse Stats JSON');
                 console.log(`📈 Loaded stats: ${codeStats.total_files.toLocaleString()} files, ${codeStats.total_lines.toLocaleString()} lines`);
                 await renderCodeStatsProgressive();
             } else {
@@ -279,39 +279,39 @@ function initCodeStats() {
             }
             showLoadingIndicator(false);
         }
-        performance.endTimer('Load Code Stats');
+        perfTracker.endTimer('Load Code Stats');
     }
 
     // Progressive rendering function
     async function renderCodeStatsProgressive() {
-        performance.startTimer('Progressive Rendering');
+        perfTracker.startTimer('Progressive Rendering');
         console.log('🖌️ Beginning progressive rendering of stats');
         if (!codeStats) {
             console.warn('⚠️ No code stats available for rendering');
-            performance.endTimer('Progressive Rendering');
+            perfTracker.endTimer('Progressive Rendering');
             return;
         }
 
         // Update summary cards first (quick operation)
         console.log('📊 Updating summary cards');
-        performance.startTimer('Summary Cards Update');
+        perfTracker.startTimer('Summary Cards Update');
         updateSummaryCards();
-        performance.endTimer('Summary Cards Update');
+        perfTracker.endTimer('Summary Cards Update');
 
         // Process and render table in chunks
         console.log('🧩 Rendering table progressively in chunks');
-        performance.startTimer('Table Rendering');
+        perfTracker.startTimer('Table Rendering');
         await renderTableProgressive();
-        performance.endTimer('Table Rendering');
+        perfTracker.endTimer('Table Rendering');
 
         // Finally render charts (most expensive operation)
         console.log('📊 Scheduling chart rendering');
         setTimeout(() => {
-            performance.startTimer('Chart Rendering');
+            perfTracker.startTimer('Chart Rendering');
             renderCharts();
-            performance.endTimer('Chart Rendering');
+            perfTracker.endTimer('Chart Rendering');
             showLoadingIndicator(false);
-            performance.endTimer('Progressive Rendering');
+            perfTracker.endTimer('Progressive Rendering');
             console.log('✨ All stats rendered successfully!');
         }, 100);
     }
@@ -345,7 +345,7 @@ function initCodeStats() {
 
             // Sort extensions
             console.log('🔄 Sorting extensions for table display');
-            performance.startTimer('Sort Extensions');
+            perfTracker.startTimer('Sort Extensions');
             const sortBy = sortSelect ? sortSelect.value : 'lines';
             const sortedExtensions = Object.entries(codeStats.by_extension)
                 .sort((a, b) => {
@@ -355,7 +355,7 @@ function initCodeStats() {
                         return b[1][sortBy] - a[1][sortBy];
                     }
                 });
-            performance.endTimer('Sort Extensions');
+            perfTracker.endTimer('Sort Extensions');
             console.log(`🔢 Extensions sorted by "${sortBy}"`);
 
             // Create document fragment for better performance
@@ -369,7 +369,7 @@ function initCodeStats() {
 
             console.log(`⏱️ Processing table in chunks of ${chunkSize} rows`);
             function processChunk() {
-                performance.startTimer(`Table Chunk ${chunkCounter++}`);
+                perfTracker.startTimer(`Table Chunk ${chunkCounter++}`);
                 const chunk = sortedExtensions.slice(currentIndex, currentIndex + chunkSize);
                 console.log(`🧩 Processing chunk ${chunkCounter} (${chunk.length} items, index ${currentIndex})`);
 
@@ -386,7 +386,7 @@ function initCodeStats() {
                 });
 
                 currentIndex += chunkSize;
-                performance.endTimer(`Table Chunk ${chunkCounter - 1}`);
+                perfTracker.endTimer(`Table Chunk ${chunkCounter - 1}`);
 
                 if (currentIndex < sortedExtensions.length) {
                     // Process next chunk in next animation frame
@@ -395,9 +395,9 @@ function initCodeStats() {
                 } else {
                     // Done processing all chunks
                     console.log('✅ All table chunks processed, appending to DOM');
-                    performance.startTimer('DOM Table Update');
+                    perfTracker.startTimer('DOM Table Update');
                     statsTable.appendChild(fragment);
-                    performance.endTimer('DOM Table Update');
+                    perfTracker.endTimer('DOM Table Update');
                     console.log(`📋 Table completed with ${sortedExtensions.length} rows`);
                     resolve();
                 }
@@ -411,7 +411,7 @@ function initCodeStats() {
     // Function to render charts with optimized settings
     function renderCharts() {
         console.log('📊 Rendering data visualization charts');
-        performance.startTimer('Chart Preparation');
+        perfTracker.startTimer('Chart Preparation');
 
         // Sort extensions
         const sortBy = sortSelect ? sortSelect.value : 'lines';
@@ -437,12 +437,12 @@ function initCodeStats() {
             maxLines: Math.max(...linesData),
             maxFiles: Math.max(...filesData)
         });
-        performance.endTimer('Chart Preparation');
+        perfTracker.endTimer('Chart Preparation');
 
         // Lines of Code chart - optimized settings
         if (linesChart) {
             console.log('📊 Rendering lines of code bar chart');
-            performance.startTimer('Lines Chart Render');
+            perfTracker.startTimer('Lines Chart Render');
             if (charts.lines) {
                 console.log('🔄 Destroying previous lines chart instance');
                 charts.lines.destroy();
@@ -509,13 +509,13 @@ function initCodeStats() {
                     }
                 }
             });
-            performance.endTimer('Lines Chart Render');
+            perfTracker.endTimer('Lines Chart Render');
         }
 
         // Files chart - optimized settings
         if (filesChart) {
             console.log('📊 Rendering files distribution doughnut chart');
-            performance.startTimer('Files Chart Render');
+            perfTracker.startTimer('Files Chart Render');
             if (charts.files) {
                 console.log('🔄 Destroying previous files chart instance');
                 charts.files.destroy();
@@ -570,7 +570,7 @@ function initCodeStats() {
                     }
                 }
             });
-            performance.endTimer('Files Chart Render');
+            perfTracker.endTimer('Files Chart Render');
         }
         console.log('✅ Chart rendering complete');
     }
@@ -654,7 +654,7 @@ function initCodeStats() {
     console.log('🚀 Starting dashboard data loading');
     loadCodeStats();
 
-    performance.endTimer('Core Stats Initialization');
-    performance.endTimer('Total Initialization');
+    perfTracker.endTimer('Core Stats Initialization');
+    perfTracker.endTimer('Total Initialization');
     console.log('✨ OMEGA Code Stats Dashboard is fully initialized and ready!');
 } 
