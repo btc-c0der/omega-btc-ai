@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Technical</span></p>
+    </div>
+    
+    <h1>
+ OMEGA BTC AI Warning System
+</h1>
+<h2>
+ Overview
+</h2>
+<p>
+ The OMEGA BTC AI Warning System is a robust monitoring and diagnostics tool that stores system warnings and errors in Redis rather than simply logging them to the console. This approach provides several advantages:
+</p>
+<ol>
+ <li>
+  <strong>
+   Reduced Console Noise
+  </strong>
+  : Keeps the console output clean by minimizing warning messages
+ </li>
+ <li>
+  <strong>
+   Historical Analysis
+  </strong>
+  : Maintains a searchable history of warnings for post-mortem analysis
+ </li>
+ <li>
+  <strong>
+   Pattern Detection
+  </strong>
+  : Allows tracking of warning frequency and patterns over time
+ </li>
+ <li>
+  <strong>
+   Categorization
+  </strong>
+  : Organizes warnings by type and source for better troubleshooting
+ </li>
+</ol>
+<h2>
+ Warning Types
+</h2>
+<p>
+ The system categorizes warnings into various types:
+</p>
+<table>
+ <thead>
+  <tr>
+   <th>
+    Warning Type
+   </th>
+   <th>
+    Description
+   </th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr>
+   <td>
+    <code>
+     NO_TREND_DATA
+    </code>
+   </td>
+   <td>
+    No trend data available for a particular timeframe
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     FALLBACK_USED
+    </code>
+   </td>
+   <td>
+    Successfully used a fallback data source
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     FALLBACK_FAILED
+    </code>
+   </td>
+   <td>
+    Attempted to use fallback data but failed
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     NO_FALLBACK_DATA
+    </code>
+   </td>
+   <td>
+    No fallback data sources available
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     FALLBACK_ERROR
+    </code>
+   </td>
+   <td>
+    Error encountered while using fallback mechanisms
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     SYSTEM_STARTUP
+    </code>
+   </td>
+   <td>
+    System initialization events
+   </td>
+  </tr>
+ </tbody>
+</table>
+<h2>
+ Checking Warnings
+</h2>
+<p>
+ The
+ <code>
+  check_warnings.py
+ </code>
+ tool provides a simple command-line interface to view and manage warnings stored in Redis:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Show latest 10 warnings</span>
+python<span class="w"> </span>check_warnings.py
+
+<span class="c1"># Show all warnings</span>
+python<span class="w"> </span>check_warnings.py<span class="w"> </span>--all
+
+<span class="c1"># Show warnings of a specific type</span>
+python<span class="w"> </span>check_warnings.py<span class="w"> </span>--type<span class="w"> </span>NO_TREND_DATA
+
+<span class="c1"># Show warning counts by type</span>
+python<span class="w"> </span>check_warnings.py<span class="w"> </span>--count
+
+<span class="c1"># Clear all warnings (keeps counts)</span>
+python<span class="w"> </span>check_warnings.py<span class="w"> </span>--clear
+
+<span class="c1"># Reset warning counters</span>
+python<span class="w"> </span>check_warnings.py<span class="w"> </span>--reset
+</code></pre>
+</div>
+<h2>
+ Redis Storage Structure
+</h2>
+<p>
+ Warnings are stored in Redis using the following keys:
+</p>
+<ul>
+ <li>
+  <code>
+   system:warnings
+  </code>
+  - A list of all warnings (JSON format), newest first
+ </li>
+ <li>
+  <code>
+   system:warnings:{TYPE}
+  </code>
+  - Lists of warnings by type
+ </li>
+ <li>
+  <code>
+   system:warning_counts
+  </code>
+  - Hash of warning counts by type
+ </li>
+</ul>
+<h2>
+ Implementation
+</h2>
+<p>
+ The warning system is implemented in the
+ <code>
+  monitor_market_trends_fixed.py
+ </code>
+ module, with the following key components:
+</p>
+<ol>
+ <li>
+  <code>
+   store_warning_in_redis()
+  </code>
+  - Stores warnings in Redis
+ </li>
+ <li>
+  <code>
+   check_system_warnings()
+  </code>
+  - Retrieves and summarizes warnings
+ </li>
+ <li>
+  Modified logging - Uses DEBUG level for regular warnings to reduce console output
+ </li>
+</ol>
+<h2>
+ Example Output
+</h2>
+<p>
+ When checking warnings:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="nx">SYSTEM</span><span class="w"> </span><span class="nx">WARNINGS</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">NO_TREND_DATA</span><span class="w"> </span><span class="p">(</span><span class="nx">showing</span><span class="w"> </span><span class="nx">latest</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="nx">total</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">)</span>
+<span class="nx">Timestamp</span><span class="w">           </span><span class="nx">Type</span><span class="w">           </span><span class="nx">Source</span><span class="w">                 </span><span class="nx">Message</span>
+<span class="o">------------------</span><span class="w">  </span><span class="o">-------------</span><span class="w">  </span><span class="o">---------------------</span><span class="w">  </span><span class="o">-------------------------------------------------</span>
+<span class="mi">2023</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">24</span><span class="w"> </span><span class="mi">22</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">43</span><span class="w">  </span><span class="nx">NO_TREND_DATA</span><span class="w">  </span><span class="nx">trap_detector_15min</span><span class="w">    </span><span class="nx">No</span><span class="w"> </span><span class="nx">trend</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="nx">available</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">timeframe</span><span class="w"> </span><span class="mi">15</span><span class="nx">min</span><span class="p">.</span><span class="w"> </span><span class="nx">Attempting</span><span class="w"> </span><span class="nx">fallback</span><span class="p">.</span>
+<span class="mi">2023</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">24</span><span class="w"> </span><span class="mi">22</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">43</span><span class="w">  </span><span class="nx">NO_TREND_DATA</span><span class="w">  </span><span class="nx">trap_detector_30min</span><span class="w">    </span><span class="nx">No</span><span class="w"> </span><span class="nx">trend</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="nx">available</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">timeframe</span><span class="w"> </span><span class="mi">30</span><span class="nx">min</span><span class="p">.</span><span class="w"> </span><span class="nx">Attempting</span><span class="w"> </span><span class="nx">fallback</span><span class="p">.</span>
+<span class="mi">2023</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">24</span><span class="w"> </span><span class="mi">22</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">43</span><span class="w">  </span><span class="nx">NO_TREND_DATA</span><span class="w">  </span><span class="nx">trap_detector_60min</span><span class="w">    </span><span class="nx">No</span><span class="w"> </span><span class="nx">trend</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="nx">available</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">timeframe</span><span class="w"> </span><span class="mi">60</span><span class="nx">min</span><span class="p">.</span><span class="w"> </span><span class="nx">Attempting</span><span class="w"> </span><span class="nx">fallback</span><span class="p">.</span>
+</code></pre>
+</div>
+<h2>
+ Extending the Warning System
+</h2>
+<p>
+ To add a new warning type:
+</p>
+<ol>
+ <li>
+  Call
+  <code>
+   store_warning_in_redis()
+  </code>
+  with appropriate parameters
+ </li>
+ <li>
+  Use a consistent naming convention for warning types (ALL_CAPS_WITH_UNDERSCORES)
+ </li>
+ <li>
+  Include meaningful source identification to trace the warning origin
+ </li>
+</ol>
+<h2>
+ Integration with Monitoring Tools
+</h2>
+<p>
+ The warning system can be integrated with monitoring tools by:
+</p>
+<ol>
+ <li>
+  Creating a monitoring endpoint that calls
+  <code>
+   check_system_warnings()
+  </code>
+ </li>
+ <li>
+  Setting up alerts based on warning counts or specific warning types
+ </li>
+ <li>
+  Visualizing warning patterns through time-series dashboards
+ </li>
+</ol>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

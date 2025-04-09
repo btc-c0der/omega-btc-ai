@@ -1,0 +1,36 @@
+# Lucas Silveira Pro Surfer Welcome Pack
+# XYKØ LINE SURFER - Requirements
+
+# Core dependencies
+numpy>=1.19.5
+pandas>=1.2.4
+requests>=2.25.1
+
+# Data analysis
+matplotlib>=3.4.2
+seaborn>=0.11.1
+
+# API clients
+google-api-python-client>=2.23.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=0.4.6
+tweepy>=4.4.0
+facebook-sdk>=4.0.0
+instagram-private-api>=1.6.0
+
+# Date handling
+python-dateutil>=2.8.1
+
+# Web scraping (for surf analytics)
+beautifulsoup4>=4.9.3
+lxml>=4.6.3
+
+# Utilities
+tqdm>=4.61.1
+colorama>=0.4.4
+
+# Development tools
+pytest>=6.2.5
+black>=21.6b0
+isort>=5.9.2
+flake8>=3.9.2 

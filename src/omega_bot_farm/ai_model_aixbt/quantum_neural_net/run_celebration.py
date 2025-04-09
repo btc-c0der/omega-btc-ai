@@ -5,7 +5,7 @@ Run the Quantum Celebration CLI directly with command line arguments
 
 import sys
 import argparse
-from .quantum_celebration import QuantumCelebration
+from omega_bot_farm.ai_model_aixbt.quantum_neural_net.quantum_celebration import QuantumCelebration
 
 def main():
     # Set up argument parser

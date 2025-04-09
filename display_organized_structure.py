@@ -7,12 +7,20 @@ and its contents to help visualize the new organizational structure.
 """
 
 import os
+import sys
 import datetime
 import glob
 
 def main():
-    # Find the most recent BOOK_ORGANIZED directory
+    # First check main directory
     organized_dirs = glob.glob("BOOK_ORGANIZED_*")
+    
+    # If not found, check inside BOOK directory
+    if not organized_dirs and os.path.isdir("BOOK"):
+        book_dir = "BOOK"
+        organized_dirs = [os.path.join(book_dir, d) for d in os.listdir(book_dir) 
+                         if d.startswith("BOOK_ORGANIZED_") and 
+                         os.path.isdir(os.path.join(book_dir, d))]
     
     if not organized_dirs:
         print("No BOOK_ORGANIZED directory found. Please run md_to_medium.py with --organize flag first.")
@@ -81,6 +89,16 @@ def main():
     print(f"\n{'='*80}")
     print(f"✨ DIVINE HARMONY ACHIEVED ✨")
     print(f"{'='*80}\n")
+    
+    # Provide a command to open the index.html file
+    if os.path.exists(index_path):
+        if os.name == 'nt':  # Windows
+            print(f"To view the organized manuscripts, run: start {index_path}")
+        elif os.name == 'posix':  # macOS or Linux
+            if 'darwin' in sys.platform:  # macOS
+                print(f"To view the organized manuscripts, run: open {index_path}")
+            else:  # Linux
+                print(f"To view the organized manuscripts, run: xdg-open {index_path}")
 
 if __name__ == "__main__":
     main() 

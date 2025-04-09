@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Technical</span></p>
+    </div>
+    
+    <h1>
+ Integration of Warning System with OMEGA Dump
+</h1>
+<p>
+ This document explains how to integrate the Redis-based warning system with the OMEGA Dump service for comprehensive logging and monitoring.
+</p>
+<h2>
+ Overview
+</h2>
+<p>
+ The integration of the Warning System with OMEGA Dump provides several benefits:
+</p>
+<ol>
+ <li>
+  <strong>
+   Unified Logging
+  </strong>
+  : All warnings are automatically converted to standard log entries
+ </li>
+ <li>
+  <strong>
+   Centralized Storage
+  </strong>
+  : Warnings and logs are stored in the same Redis instance
+ </li>
+ <li>
+  <strong>
+   Consistent Format
+  </strong>
+  : Warnings follow the same data structure as other logs
+ </li>
+ <li>
+  <strong>
+   Automatic Processing
+  </strong>
+  : Warnings are automatically processed at configurable intervals
+ </li>
+</ol>
+<h2>
+ How It Works
+</h2>
+<p>
+ The integration works as follows:
+</p>
+<ol>
+ <li>
+  The Warning System stores warnings in Redis under
+  <code>
+   system:warnings
+  </code>
+  keys
+ </li>
+ <li>
+  OMEGA Dump periodically checks for new warnings via the WarningManager
+ </li>
+ <li>
+  Warnings are converted to LogEntry objects with appropriate metadata
+ </li>
+ <li>
+  These LogEntry objects are stored in the standard OMEGA Dump storage format
+ </li>
+ <li>
+  Warning counts are tracked for monitoring purposes
+ </li>
+</ol>
+<h2>
+ Prerequisites
+</h2>
+<p>
+ Ensure you have both systems installed and configured:
+</p>
+<ol>
+ <li>
+  The Redis-based Warning System (configured in
+  <code>
+   monitor_market_trends_fixed.py
+  </code>
+  )
+ </li>
+ <li>
+  The OMEGA Dump Service (in the
+  <code>
+   omega_ai/services/omega_dump
+  </code>
+  package)
+ </li>
+</ol>
+<h2>
+ Setting Up the Integration
+</h2>
+<p>
+ The integration has been added to the OMEGA Dump service. To use it:
+</p>
+<ol>
+ <li>
+  Run OMEGA Dump with the new warning integration parameters:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>python<span class="w"> </span>scripts/run_omega_dump.py<span class="w"> </span>--process-warnings
+</code></pre>
+</div>
+<h2>
+ Command-Line Options
+</h2>
+<p>
+ The following command-line options are available for the warning integration:
+</p>
+<table>
+ <thead>
+  <tr>
+   <th>
+    Option
+   </th>
+   <th>
+    Description
+   </th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr>
+   <td>
+    <code>
+     --process-warnings
+    </code>
+   </td>
+   <td>
+    Enable processing of warnings
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     --warning-interval
+    </code>
+   </td>
+   <td>
+    Interval in seconds between warning processing (default: 300)
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     --warning-type
+    </code>
+   </td>
+   <td>
+    Process only warnings of this type
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     --warning-limit
+    </code>
+   </td>
+   <td>
+    Maximum number of warnings to process (default: 1000)
+   </td>
+  </tr>
+ </tbody>
+</table>
+<h2>
+ Examples
+</h2>
+<p>
+ Process all warnings every 5 minutes (default):
+</p>
+<div class="codehilite">
+ <pre><span></span><code>python<span class="w"> </span>scripts/run_omega_dump.py<span class="w"> </span>--process-warnings
+</code></pre>
+</div>
+<p>
+ Process only NO_TREND_DATA warnings every minute:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>python<span class="w"> </span>scripts/run_omega_dump.py<span class="w"> </span>--process-warnings<span class="w"> </span>--warning-type<span class="w"> </span>NO_TREND_DATA<span class="w"> </span>--warning-interval<span class="w"> </span><span class="m">60</span>
+</code></pre>
+</div>
+<p>
+ Process up to 100 warnings of any type every 10 minutes:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>python<span class="w"> </span>scripts/run_omega_dump.py<span class="w"> </span>--process-warnings<span class="w"> </span>--warning-limit<span class="w"> </span><span class="m">100</span><span class="w"> </span>--warning-interval<span class="w"> </span><span class="m">600</span>
+</code></pre>
+</div>
+<h2>
+ Monitoring Warning Activity
+</h2>
+<p>
+ To monitor warning activity, you can:
+</p>
+<ol>
+ <li>
+  Check the OMEGA Dump logs:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>tail<span class="w"> </span>-f<span class="w"> </span>logs/omega_dump.log
+</code></pre>
+</div>
+<ol>
+ <li>
+  Use the
+  <code>
+   check_warnings.py
+  </code>
+  script to view warning counts:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>python<span class="w"> </span>check_warnings.py<span class="w"> </span>--count
+</code></pre>
+</div>
+<ol>
+ <li>
+  Query the OMEGA Dump service for logs from the warning system:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">omega_ai.services.omega_dump</span><span class="w"> </span><span class="kn">import</span> <span class="n">OMEGALogManager</span>
+
+<span class="n">manager</span> <span class="o">=</span> <span class="n">OMEGALogManager</span><span class="p">()</span>
+<span class="n">warning_logs</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"warning_system:*"</span><span class="p">)</span>
+</code></pre>
+</div>
+<h2>
+ Architecture Diagram
+</h2>
+<div class="codehilite">
+ <pre><span></span><code>┌────────────────┐    store     ┌──────────────┐
+│  Monitor with  │───warnings───▶│              │
+│  Warning System│              │    Redis     │
+└────────────────┘              │              │
+                                │  ┌─────────┐ │
+┌────────────────┐    read      │  │Warnings │ │
+│  OMEGA Dump    │◀──warnings───┤  └─────────┘ │
+│  Service       │              │              │
+└───────┬────────┘              │  ┌─────────┐ │
+        │         store as logs │  │ Logs    │ │
+        └─────────────────────▶ │  └─────────┘ │
+                                └──────────────┘
+</code></pre>
+</div>
+<h2>
+ Implementation Details
+</h2>
+<p>
+ The integration includes the following new components:
+</p>
+<ol>
+ <li>
+  <strong>
+   WarningManager
+  </strong>
+  (
+  <code>
+   omega_ai/services/omega_dump/warning_manager.py
+  </code>
+  )
+ </li>
+ <li>
+  Handles retrieving warnings from Redis
+ </li>
+ <li>
+  Converts warnings to LogEntry objects
+ </li>
+ <li>
+  <p>
+   Stores converted warnings as logs
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Enhanced OMEGALogManager
+   </strong>
+   (
+   <code>
+    omega_ai/services/omega_dump/log_manager.py
+   </code>
+   )
+  </p>
+ </li>
+ <li>
+  Integrates with WarningManager
+ </li>
+ <li>
+  Adds periodic warning processing
+ </li>
+ <li>
+  <p>
+   Provides warning-related statistics
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Updated Command-Line Interface
+   </strong>
+   (
+   <code>
+    scripts/run_omega_dump.py
+   </code>
+   )
+  </p>
+ </li>
+ <li>
+  Adds warning-specific command-line arguments
+ </li>
+ <li>
+  Supports targeted warning processing
+ </li>
+ <li>
+  Provides feedback on warning processing
+ </li>
+</ol>
+<h2>
+ Next Steps
+</h2>
+<p>
+ The integration can be further enhanced in the following ways:
+</p>
+<ol>
+ <li>
+  Create a dashboard to visualize warning patterns
+ </li>
+ <li>
+  Set up alerts for specific warning types
+ </li>
+ <li>
+  Add warning aggregation to detect patterns
+ </li>
+ <li>
+  Create automatic remediation actions for certain warnings
+ </li>
+</ol>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

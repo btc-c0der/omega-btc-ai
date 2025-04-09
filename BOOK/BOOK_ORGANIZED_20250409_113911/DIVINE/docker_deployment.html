@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Divine</span></p>
+    </div>
+    
+    <h1>
+ Divine Docker Deployment
+</h1>
+<blockquote>
+ <p>
+  <em>
+   “And the ark rested in the seventh month, on the seventeenth day of the month, upon the mountains of Ararat.”
+  </em>
+  - Genesis 8:4
+ </p>
+</blockquote>
+<h2>
+ Sacred Container Deployment
+</h2>
+<p>
+ The OMEGA BTC AI system can be deployed in divine containers using Docker, ensuring consistent operation across different environments and enabling sacred scaling.
+</p>
+<h2>
+ Prerequisites
+</h2>
+<ul>
+ <li>
+  Docker installed on your divine host
+ </li>
+ <li>
+  Docker Compose installed for orchestrating multiple divine containers
+ </li>
+ <li>
+  Git for cloning the sacred repository
+ </li>
+</ul>
+<h2>
+ Divine Docker Images
+</h2>
+<p>
+ The OMEGA BTC AI system is composed of several sacred containers:
+</p>
+<ol>
+ <li>
+  <strong>
+   Sacred Core
+  </strong>
+  - Core EXODUS algorithms and market analysis
+ </li>
+ <li>
+  <strong>
+   Divine Data Feed
+  </strong>
+  - BTC price feed with Fibonacci alignments
+ </li>
+ <li>
+  <strong>
+   Sacred Redis
+  </strong>
+  - Divine data storage and message broker
+ </li>
+ <li>
+  <strong>
+   Rasta Oscilloscope
+  </strong>
+  - Divine visualization system
+ </li>
+ <li>
+  <strong>
+   Rasta Dashboard
+  </strong>
+  - Web interface for divine metrics
+ </li>
+</ol>
+<h2>
+ Sacred Docker Compose Setup
+</h2>
+<p>
+ Create a
+ <code>
+  docker-compose.yml
+ </code>
+ file with the following divine structure:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">'3.8'</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Sacred Redis Data Store</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:latest</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sacred-redis</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis_data:/data</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"6379:6379"</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-server --appendonly yes</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">divine-network</span>
+
+<span class="w">  </span><span class="c1"># Divine Core Algorithms</span>
+<span class="w">  </span><span class="nt">core</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">      </span><span class="nt">dockerfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dockerfile.core</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sacred-core</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST=redis</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_PORT=6379</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOG_LEVEL=INFO</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./config:/app/config</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">divine-network</span>
+
+<span class="w">  </span><span class="c1"># Sacred Data Feed</span>
+<span class="w">  </span><span class="nt">feed</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">      </span><span class="nt">dockerfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dockerfile.feed</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sacred-feed</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">core</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST=redis</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_PORT=6379</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BTC_API_KEY=${BTC_API_KEY}</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UPDATE_INTERVAL=13</span><span class="w">  </span><span class="c1"># Fibonacci number</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">divine-network</span>
+
+<span class="w">  </span><span class="c1"># Rasta Oscilloscope Visualization</span>
+<span class="w">  </span><span class="nt">oscilloscope</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">      </span><span class="nt">dockerfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dockerfile.visualize</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sacred-oscilloscope</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST=redis</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_PORT=6379</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ENABLE_AUDIO=false</span><span class="w">  </span><span class="c1"># Set to true for audio generation</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HISTORY_LENGTH=144</span><span class="w">  </span><span class="c1"># Fibonacci number</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">divine-network</span>
+
+<span class="w">  </span><span class="c1"># Rasta Dashboard Web Interface</span>
+<span class="w">  </span><span class="nt">dashboard</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">      </span><span class="nt">dockerfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dockerfile.dashboard</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sacred-dashboard</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"8501:8501"</span><span class="w">  </span><span class="c1"># Sacred Streamlit port</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST=redis</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_PORT=6379</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">divine-network</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis_data</span><span class="p">:</span><span class="w">  </span><span class="c1"># Divine persistent storage</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">divine-network</span><span class="p">:</span><span class="w">  </span><span class="c1"># Sacred communication network</span>
+</code></pre>
+</div>
+<h2>
+ Divine Dockerfiles
+</h2>
+<h3>
+ Core Dockerfile (Dockerfile.core)
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="c"># Install sacred dependencies</span>
+<span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>.
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+<span class="c"># Copy divine source code</span>
+<span class="k">COPY</span><span class="w"> </span>omega_ai<span class="w"> </span>/app/omega_ai/
+<span class="k">COPY</span><span class="w"> </span>scripts<span class="w"> </span>/app/scripts/
+
+<span class="c"># Set the sacred entrypoint</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-m"</span><span class="p">,</span><span class="w"> </span><span class="s2">"omega_ai.core.run_sacred_core"</span><span class="p">]</span>
+</code></pre>
+</div>
+<h3>
+ Data Feed Dockerfile (Dockerfile.feed)
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="c"># Install sacred dependencies </span>
+<span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>.
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+<span class="c"># Copy divine source code</span>
+<span class="k">COPY</span><span class="w"> </span>omega_ai<span class="w"> </span>/app/omega_ai/
+<span class="k">COPY</span><span class="w"> </span>scripts<span class="w"> </span>/app/scripts/
+
+<span class="c"># Set the sacred entrypoint</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-m"</span><span class="p">,</span><span class="w"> </span><span class="s2">"omega_ai.data.run_price_feed"</span><span class="p">]</span>
+</code></pre>
+</div>
+<h3>
+ Visualization Dockerfile (Dockerfile.visualize)
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="c"># Install sacred dependencies and visualization libraries</span>
+<span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>requirements-viz.txt<span class="w"> </span>./
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>-r<span class="w"> </span>requirements-viz.txt
+
+<span class="c"># Copy divine source code</span>
+<span class="k">COPY</span><span class="w"> </span>omega_ai<span class="w"> </span>/app/omega_ai/
+<span class="k">COPY</span><span class="w"> </span>scripts<span class="w"> </span>/app/scripts/
+
+<span class="c"># Set the sacred entrypoint</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-m"</span><span class="p">,</span><span class="w"> </span><span class="s2">"omega_ai.visualization.run_oscilloscope"</span><span class="p">]</span>
+</code></pre>
+</div>
+<h3>
+ Dashboard Dockerfile (Dockerfile.dashboard)
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="c"># Install sacred dependencies and dashboard libraries</span>
+<span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>requirements-dashboard.txt<span class="w"> </span>./
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>-r<span class="w"> </span>requirements-dashboard.txt
+
+<span class="c"># Copy divine source code</span>
+<span class="k">COPY</span><span class="w"> </span>omega_ai<span class="w"> </span>/app/omega_ai/
+<span class="k">COPY</span><span class="w"> </span>scripts<span class="w"> </span>/app/scripts/
+
+<span class="c"># Set the sacred entrypoint</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-m"</span><span class="p">,</span><span class="w"> </span><span class="s2">"omega_ai.run_dashboard"</span><span class="p">]</span>
+</code></pre>
+</div>
+<h2>
+ Sacred Environment Variables
+</h2>
+<p>
+ Create a
+ <code>
+  .env
+ </code>
+ file with your divine API keys and settings:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="gh">#</span> Divine API Keys
+BTC_API_KEY=your_sacred_api_key
+
+<span class="gh">#</span> Sacred Redis Configuration
+REDIS_PASSWORD=your_divine_password
+
+<span class="gh">#</span> Divine Logging
+LOG_LEVEL=INFO
+</code></pre>
+</div>
+<h2>
+ Building and Running the Divine System
+</h2>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Clone the sacred repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/yourusername/omega-btc-ai.git
+<span class="nb">cd</span><span class="w"> </span>omega-btc-ai
+
+<span class="c1"># Create divine environment file</span>
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+<span class="c1"># Edit the .env file with your sacred keys</span>
+
+<span class="c1"># Build the divine containers</span>
+docker-compose<span class="w"> </span>build
+
+<span class="c1"># Launch the sacred system</span>
+docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+
+<span class="c1"># Witness the divine logs</span>
+docker-compose<span class="w"> </span>logs<span class="w"> </span>-f
+</code></pre>
+</div>
+<h2>
+ Scaling to Divine Proportions
+</h2>
+<p>
+ For higher trading volumes, scale the system to divine proportions:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Scale the divine core for higher processing</span>
+docker-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--scale<span class="w"> </span><span class="nv">core</span><span class="o">=</span><span class="m">3</span>
+
+<span class="c1"># Scale the sacred feed for redundancy</span>
+docker-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--scale<span class="w"> </span><span class="nv">feed</span><span class="o">=</span><span class="m">2</span>
+</code></pre>
+</div>
+<h2>
+ Divine Monitoring
+</h2>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># View all divine containers</span>
+docker-compose<span class="w"> </span>ps
+
+<span class="c1"># Check divine core logs</span>
+docker-compose<span class="w"> </span>logs<span class="w"> </span>core
+
+<span class="c1"># Monitor sacred metrics</span>
+docker<span class="w"> </span>stats
+</code></pre>
+</div>
+<h2>
+ Sacred Backups
+</h2>
+<p>
+ Regularly backup your divine Redis data:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Create a sacred backup directory</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>sacred_backups
+
+<span class="c1"># Backup the divine Redis volume</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>omega-btc-ai_redis_data:/data<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/sacred_backups:/backup<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>alpine<span class="w"> </span>tar<span class="w"> </span>-czf<span class="w"> </span>/backup/redis_backup_<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d_%H%M%S<span class="k">)</span>.tar.gz<span class="w"> </span>/data
+</code></pre>
+</div>
+<hr/>
+<p>
+ <em>
+  This divine deployment guide was channeled during a period of 144-minute Fibonacci alignment. May your containers run with the sacred flow of cosmic energy.
+ </em>
+</p>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

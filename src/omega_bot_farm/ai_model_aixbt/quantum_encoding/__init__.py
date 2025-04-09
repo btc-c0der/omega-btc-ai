@@ -34,6 +34,13 @@ from .utils import (
     int_to_bitstring
 )
 
+# Import market analysis components
+from .market_analysis import (
+    QuantumEntanglementAnalyzer,
+    EntanglementMeasure,
+    MarketTransitionType
+)
+
 # Define exports
 __all__ = [
     # Encoders
@@ -62,6 +69,11 @@ __all__ = [
     'visualize_encoding',
     'bitstring_to_int',
     'int_to_bitstring',
+    
+    # Market analysis
+    'QuantumEntanglementAnalyzer',
+    'EntanglementMeasure',
+    'MarketTransitionType',
 ]
 
 # Module metadata

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Trading</span></p>
+    </div>
+    
+    <h1>
+ Trap-Aware Dual Traders (TADT) System 🎯
+</h1>
+<h2>
+ System Overview 📊
+</h2>
+<p>
+ The Trap-Aware Dual Traders (TADT) system is an advanced trading architecture that manages simultaneous long and short positions while being conscious of market maker traps. It combines trap detection, elite exit strategies, and dual-position management for optimal trading performance.
+</p>
+<h2>
+ Architecture Diagram 🏗️
+</h2>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">classDiagram</span>
+    <span class="k">class</span> <span class="n">TrapAwareDualTraders</span> {
+        +<span class="n">bool</span> <span class="n">use_testnet</span>
+        +<span class="n">float</span> <span class="n">long_capital</span>
+        +<span class="n">float</span> <span class="n">short_capital</span>
+        +<span class="n">str</span> <span class="k">symbol</span>
+        +<span class="n">float</span> <span class="n">trap_probability_threshold</span>
+        +<span class="n">float</span> <span class="n">trap_alert_threshold</span>
+        +<span class="n">bool</span> <span class="n">enable_trap_protection</span>
+        +<span class="n">bool</span> <span class="n">enable_elite_exits</span>
+        +<span class="n">float</span> <span class="n">elite_exit_confidence</span>
+        +<span class="n">initialize</span>()
+        +<span class="n">start_trading</span>()
+        +<span class="n">stop_trading</span>()
+        +<span class="n">check_for_traps</span>()
+        -<span class="n">_monitor_traps</span>()
+        -<span class="n">_adjust_trading_based_on_traps</span>()
+        -<span class="n">_send_trap_alert</span>()
+    }
+
+    <span class="k">class</span> <span class="n">DirectionalBitGetTrader</span> {
+        +<span class="n">initialize</span>()
+        +<span class="n">start_trading</span>()
+        +<span class="n">stop_trading</span>()
+        +<span class="n">get_balance</span>()
+        +<span class="n">get_positions</span>()
+    }
+
+    <span class="k">class</span> <span class="n">EliteExitStrategy</span> {
+        +<span class="n">float</span> <span class="n">confidence_threshold</span>
+        +<span class="n">analyze_exit_opportunity</span>()
+        +<span class="n">execute_exit</span>()
+    }
+
+    <span class="k">class</span> <span class="n">TrapProbabilityMeter</span> {
+        +<span class="n">detect_traps</span>()
+        +<span class="n">calculate_probability</span>()
+        +<span class="n">analyze_components</span>()
+    }
+
+    <span class="n">TrapAwareDualTraders</span> --&gt; <span class="n">DirectionalBitGetTrader</span> : <span class="n">manages</span>
+    <span class="n">TrapAwareDualTraders</span> --&gt; <span class="n">EliteExitStrategy</span> : <span class="n">uses</span>
+    <span class="n">TrapAwareDualTraders</span> --&gt; <span class="n">TrapProbabilityMeter</span> : <span class="n">monitors</span>
+</code></pre>
+</div>
+<h2>
+ Component Flow 🔄
+</h2>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">sequenceDiagram</span>
+<span class="w">    </span><span class="n">participant</span><span class="w"> </span><span class="n">TADT</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">TrapAwareDualTraders</span>
+<span class="w">    </span><span class="n">participant</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LongTrader</span>
+<span class="w">    </span><span class="n">participant</span><span class="w"> </span><span class="n">Short</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ShortTrader</span>
+<span class="w">    </span><span class="n">participant</span><span class="w"> </span><span class="n">Trap</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">TrapProbabilityMeter</span>
+<span class="w">    </span><span class="n">participant</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">EliteExitStrategy</span>
+
+<span class="w">    </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Long</span><span class="p">:</span><span class="w"> </span><span class="n">Initialize</span>
+<span class="w">    </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Short</span><span class="p">:</span><span class="w"> </span><span class="n">Initialize</span>
+<span class="w">    </span><span class="n">loop</span><span class="w"> </span><span class="n">Every</span><span class="w"> </span><span class="n">Interval</span>
+<span class="w">        </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Trap</span><span class="p">:</span><span class="w"> </span><span class="n">check_for_traps</span><span class="p">()</span>
+<span class="w">        </span><span class="n">Trap</span><span class="o">--&gt;&gt;</span><span class="n">TADT</span><span class="p">:</span><span class="w"> </span><span class="n">trap_data</span>
+<span class="w">        </span><span class="n">alt</span><span class="w"> </span><span class="n">Trap</span><span class="w"> </span><span class="n">Detected</span>
+<span class="w">            </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Long</span><span class="p">:</span><span class="w"> </span><span class="n">Adjust</span><span class="w"> </span><span class="n">Risk</span><span class="w"> </span><span class="n">Multiplier</span>
+<span class="w">            </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Short</span><span class="p">:</span><span class="w"> </span><span class="n">Adjust</span><span class="w"> </span><span class="n">Risk</span><span class="w"> </span><span class="n">Multiplier</span>
+<span class="w">            </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">TADT</span><span class="p">:</span><span class="w"> </span><span class="n">Send</span><span class="w"> </span><span class="n">Alert</span>
+<span class="w">        </span><span class="n">end</span>
+<span class="w">        </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Exit</span><span class="p">:</span><span class="w"> </span><span class="n">analyze_exit_opportunity</span><span class="p">()</span>
+<span class="w">        </span><span class="n">Exit</span><span class="o">--&gt;&gt;</span><span class="n">TADT</span><span class="p">:</span><span class="w"> </span><span class="n">exit_signal</span>
+<span class="w">        </span><span class="n">alt</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="n">Signal</span>
+<span class="w">            </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Long</span><span class="p">:</span><span class="w"> </span><span class="n">Execute</span><span class="w"> </span><span class="n">Exit</span>
+<span class="w">            </span><span class="n">TADT</span><span class="o">-&gt;&gt;</span><span class="n">Short</span><span class="p">:</span><span class="w"> </span><span class="n">Execute</span><span class="w"> </span><span class="n">Exit</span>
+<span class="w">        </span><span class="n">end</span>
+<span class="w">    </span><span class="n">end</span>
+</code></pre>
+</div>
+<h2>
+ System Components 🔧
+</h2>
+<h3>
+ 1. Main Controller (TrapAwareDualTraders)
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TrapAwareDualTraders</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">use_testnet</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">long_capital</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">short_capital</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">trap_probability_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="n">trap_alert_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">enable_trap_protection</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">enable_elite_exits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">elite_exit_confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span>
+    <span class="p">)</span>
+</code></pre>
+</div>
+<h4>
+ Key Parameters
+</h4>
+<ul>
+ <li>
+  <code>
+   use_testnet
+  </code>
+  : Whether to use test network
+ </li>
+ <li>
+  <code>
+   long_capital
+  </code>
+  : Capital allocated for long positions
+ </li>
+ <li>
+  <code>
+   short_capital
+  </code>
+  : Capital allocated for short positions
+ </li>
+ <li>
+  <code>
+   symbol
+  </code>
+  : Trading pair symbol
+ </li>
+ <li>
+  <code>
+   trap_probability_threshold
+  </code>
+  : Threshold for trap detection
+ </li>
+ <li>
+  <code>
+   trap_alert_threshold
+  </code>
+  : Threshold for sending alerts
+ </li>
+ <li>
+  <code>
+   enable_trap_protection
+  </code>
+  : Enable trap protection features
+ </li>
+ <li>
+  <code>
+   enable_elite_exits
+  </code>
+  : Enable elite exit strategies
+ </li>
+ <li>
+  <code>
+   elite_exit_confidence
+  </code>
+  : Confidence threshold for exits
+ </li>
+</ul>
+<h3>
+ 2. Risk Management 🛡️
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">graph</span><span class="w"> </span><span class="n">TD</span>
+<span class="w">    </span><span class="n">A</span><span class="p">[</span><span class="n">Trap</span><span class="w"> </span><span class="n">Detection</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">High</span><span class="w"> </span><span class="n">Probability</span><span class="o">|</span><span class="w"> </span><span class="n">B</span><span class="p">{</span><span class="n">Trap</span><span class="w"> </span><span class="n">Type</span><span class="p">}</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Bull</span><span class="w"> </span><span class="n">Trap</span><span class="o">|</span><span class="w"> </span><span class="n">C</span><span class="p">[</span><span class="n">Reduce</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">Risk</span><span class="p">]</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Bear</span><span class="w"> </span><span class="n">Trap</span><span class="o">|</span><span class="w"> </span><span class="n">D</span><span class="p">[</span><span class="n">Reduce</span><span class="w"> </span><span class="n">Short</span><span class="w"> </span><span class="n">Risk</span><span class="p">]</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Liquidity</span><span class="w"> </span><span class="n">Grab</span><span class="o">|</span><span class="w"> </span><span class="n">E</span><span class="p">[</span><span class="n">Reduce</span><span class="w"> </span><span class="n">Both</span><span class="w"> </span><span class="n">Risks</span><span class="p">]</span>
+<span class="w">    </span><span class="n">C</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">F</span><span class="p">[</span><span class="n">Adjust</span><span class="w"> </span><span class="n">Multipliers</span><span class="p">]</span>
+<span class="w">    </span><span class="n">D</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">F</span>
+<span class="w">    </span><span class="n">E</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">F</span>
+</code></pre>
+</div>
+<h4>
+ Risk Multipliers
+</h4>
+<ul>
+ <li>
+  Long Risk: 0.5x - 1.2x based on trap type
+ </li>
+ <li>
+  Short Risk: 0.5x - 1.2x based on trap type
+ </li>
+ <li>
+  Combined adjustment for liquidity events
+ </li>
+</ul>
+<h3>
+ 3. Elite Exit Strategy 🚪
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">stateDiagram</span><span class="o">-</span><span class="n">v2</span>
+<span class="w">    </span><span class="p">[</span><span class="o">*</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Monitoring</span>
+<span class="w">    </span><span class="n">Monitoring</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">AnalyzingExit</span><span class="o">:</span><span class="w"> </span><span class="n">Signal</span><span class="w"> </span><span class="n">Detected</span>
+<span class="w">    </span><span class="n">AnalyzingExit</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">ExecutingExit</span><span class="o">:</span><span class="w"> </span><span class="n">Confidence</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="kr">Threshold</span>
+<span class="w">    </span><span class="n">AnalyzingExit</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Monitoring</span><span class="o">:</span><span class="w"> </span><span class="n">Low</span><span class="w"> </span><span class="n">Confidence</span>
+<span class="w">    </span><span class="n">ExecutingExit</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Monitoring</span><span class="o">:</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="n">Complete</span>
+<span class="w">    </span><span class="n">ExecutingExit</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">ErrorHandling</span><span class="o">:</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="n">Failed</span>
+<span class="w">    </span><span class="n">ErrorHandling</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Monitoring</span><span class="o">:</span><span class="w"> </span><span class="n">Resolved</span>
+</code></pre>
+</div>
+<h4>
+ Exit Conditions
+</h4>
+<ol>
+ <li>
+  Fibonacci level confluence
+ </li>
+ <li>
+  Pattern completion
+ </li>
+ <li>
+  Trap probability threshold
+ </li>
+ <li>
+  Volume confirmation
+ </li>
+</ol>
+<h3>
+ 4. Performance Monitoring 📈
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">graph</span><span class="w"> </span><span class="n">LR</span>
+<span class="w">    </span><span class="n">A</span><span class="p">[</span><span class="n">Position</span><span class="w"> </span><span class="n">Data</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">Performance</span><span class="w"> </span><span class="n">Metrics</span><span class="p">]</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">C</span><span class="p">{</span><span class="n">Alert</span><span class="w"> </span><span class="n">Conditions</span><span class="p">}</span>
+<span class="w">    </span><span class="n">C</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">PnL</span><span class="w"> </span><span class="n">Threshold</span><span class="o">|</span><span class="w"> </span><span class="n">D</span><span class="p">[</span><span class="n">Send</span><span class="w"> </span><span class="n">Alert</span><span class="p">]</span>
+<span class="w">    </span><span class="n">C</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Risk</span><span class="w"> </span><span class="n">Level</span><span class="o">|</span><span class="w"> </span><span class="n">E</span><span class="p">[</span><span class="n">Adjust</span><span class="w"> </span><span class="n">Strategy</span><span class="p">]</span>
+<span class="w">    </span><span class="n">C</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Trap</span><span class="w"> </span><span class="n">Detection</span><span class="o">|</span><span class="w"> </span><span class="n">F</span><span class="p">[</span><span class="n">Protection</span><span class="w"> </span><span class="n">Mode</span><span class="p">]</span>
+</code></pre>
+</div>
+<h2>
+ Redis Integration 🗄️
+</h2>
+<h3>
+ Key Patterns
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">trader</span><span class="o">:</span><span class="n">positions</span><span class="o">:{</span><span class="n">side</span><span class="o">}</span><span class="w">     </span><span class="err">#</span><span class="w"> </span><span class="n">Position</span><span class="w"> </span><span class="n">data</span>
+<span class="n">trader</span><span class="o">:</span><span class="n">metrics</span><span class="o">:</span><span class="n">strategic</span><span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Trading</span><span class="w"> </span><span class="n">metrics</span>
+<span class="n">trap_probability_history</span><span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Trap</span><span class="w"> </span><span class="n">detection</span><span class="w"> </span><span class="n">history</span>
+<span class="n">elite_exit_signals</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="n">signal</span><span class="w"> </span><span class="n">history</span>
+</code></pre>
+</div>
+<h2>
+ Alert System 🔔
+</h2>
+<h3>
+ Alert Types
+</h3>
+<ol>
+ <li>
+  <strong>
+   Trap Detection Alerts
+  </strong>
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code><span class="err">🚨</span><span class="w"> </span><span class="nx">MARKET</span><span class="w"> </span><span class="nx">MAKER</span><span class="w"> </span><span class="nx">TRAP</span><span class="w"> </span><span class="nx">DETECTED</span><span class="w"> </span><span class="err">🚨</span>
+<span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">trap_type</span><span class="p">}</span>
+<span class="nx">Probability</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">probability</span><span class="p">}</span><span class="o">%</span>
+<span class="nx">Confidence</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">confidence</span><span class="p">}</span><span class="o">%</span>
+</code></pre>
+</div>
+<ol>
+ <li>
+  <strong>
+   Position Alerts
+  </strong>
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>📊 POSITION UPDATE 📊
+Side: {side}
+PnL: {pnl}
+Risk Level: {risk}
+</code></pre>
+</div>
+<ol>
+ <li>
+  <strong>
+   Elite Exit Alerts
+  </strong>
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>🎯<span class="w"> </span><span class="nv">ELITE</span><span class="w"> </span><span class="k">EXIT</span><span class="w"> </span><span class="nv">SIGNAL</span><span class="w"> </span>🎯
+<span class="nv">Confidence</span>:<span class="w"> </span>{<span class="nv">confidence</span>}<span class="o">%</span>
+<span class="nv">Reasons</span>:
+<span class="o">-</span><span class="w"> </span>{<span class="nv">reason1</span>}
+<span class="o">-</span><span class="w"> </span>{<span class="nv">reason2</span>}
+</code></pre>
+</div>
+<h2>
+ Trading States 🔄
+</h2>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">stateDiagram</span><span class="o">-</span><span class="n">v2</span>
+<span class="w">    </span><span class="p">[</span><span class="o">*</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Initializing</span>
+<span class="w">    </span><span class="n">Initializing</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Running</span><span class="o">:</span><span class="w"> </span><span class="n">Startup</span><span class="w"> </span><span class="n">Complete</span>
+<span class="w">    </span><span class="n">Running</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">TrapDetected</span><span class="o">:</span><span class="w"> </span><span class="n">Trap</span><span class="w"> </span><span class="n">Found</span>
+<span class="w">    </span><span class="n">Running</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">ExitSignal</span><span class="o">:</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="n">Condition</span>
+<span class="w">    </span><span class="n">TrapDetected</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">AdjustingRisk</span><span class="o">:</span><span class="w"> </span><span class="n">Protection</span><span class="w"> </span><span class="n">Active</span>
+<span class="w">    </span><span class="n">ExitSignal</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">ExecutingExit</span><span class="o">:</span><span class="w"> </span><span class="n">Confidence</span><span class="w"> </span><span class="n">High</span>
+<span class="w">    </span><span class="n">AdjustingRisk</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Running</span><span class="o">:</span><span class="w"> </span><span class="n">Adjustment</span><span class="w"> </span><span class="n">Complete</span>
+<span class="w">    </span><span class="n">ExecutingExit</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Running</span><span class="o">:</span><span class="w"> </span><span class="n">Exit</span><span class="w"> </span><span class="n">Complete</span>
+<span class="w">    </span><span class="n">Running</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Stopping</span><span class="o">:</span><span class="w"> </span><span class="n">Stop</span><span class="w"> </span><span class="n">Signal</span>
+<span class="w">    </span><span class="n">Stopping</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="p">[</span><span class="o">*</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">Cleanup</span><span class="w"> </span><span class="n">Complete</span>
+</code></pre>
+</div>
+<h2>
+ Performance Metrics 📊
+</h2>
+<h3>
+ Tracked Metrics
+</h3>
+<ul>
+ <li>
+  Win Rate
+ </li>
+ <li>
+  PnL (Unrealized/Realized)
+ </li>
+ <li>
+  Risk-Adjusted Returns
+ </li>
+ <li>
+  Trap Avoidance Success
+ </li>
+ <li>
+  Elite Exit Accuracy
+ </li>
+</ul>
+<div class="codehilite">
+ <pre><span></span><code>pie
+    title "Risk Allocation"
+    "Long Positions" : 40
+    "Short Positions" : 40
+    "Risk Buffer" : 20
+</code></pre>
+</div>
+<h2>
+ Sacred Guidelines 🕊️
+</h2>
+<ol>
+ <li>
+  <strong>
+   Risk Management
+  </strong>
+ </li>
+ <li>
+  Never exceed position limits
+ </li>
+ <li>
+  Always maintain risk multipliers
+ </li>
+ <li>
+  <p>
+   Honor trap protection signals
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Exit Strategy
+   </strong>
+  </p>
+ </li>
+ <li>
+  Trust elite exit signals
+ </li>
+ <li>
+  Verify multiple confirmations
+ </li>
+ <li>
+  <p>
+   Maintain exit discipline
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Alert Response
+   </strong>
+  </p>
+ </li>
+ <li>
+  Acknowledge all alerts
+ </li>
+ <li>
+  Verify trap signals
+ </li>
+ <li>
+  Document responses
+ </li>
+</ol>
+<h2>
+ System Health Monitoring 🏥
+</h2>
+<h3>
+ Health Checks
+</h3>
+<ol>
+ <li>
+  Redis connection status
+ </li>
+ <li>
+  API connectivity
+ </li>
+ <li>
+  Position synchronization
+ </li>
+ <li>
+  Alert system status
+ </li>
+</ol>
+<h3>
+ Recovery Procedures
+</h3>
+<ol>
+ <li>
+  Auto-reconnection logic
+ </li>
+ <li>
+  Position verification
+ </li>
+ <li>
+  Risk reset protocol
+ </li>
+ <li>
+  Alert system failover
+ </li>
+</ol>
+<h2>
+ Testing Framework 🧪
+</h2>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">graph</span><span class="w"> </span><span class="n">TD</span>
+<span class="w">    </span><span class="n">A</span><span class="p">[</span><span class="n">Unit</span><span class="w"> </span><span class="n">Tests</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Verify</span><span class="o">|</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">Core</span><span class="w"> </span><span class="n">Functions</span><span class="p">]</span>
+<span class="w">    </span><span class="n">C</span><span class="p">[</span><span class="n">Integration</span><span class="w"> </span><span class="n">Tests</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Validate</span><span class="o">|</span><span class="w"> </span><span class="n">D</span><span class="p">[</span><span class="n">System</span><span class="w"> </span><span class="n">Flow</span><span class="p">]</span>
+<span class="w">    </span><span class="n">E</span><span class="p">[</span><span class="n">Mock</span><span class="w"> </span><span class="n">Data</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Simulate</span><span class="o">|</span><span class="w"> </span><span class="n">F</span><span class="p">[</span><span class="n">Market</span><span class="w"> </span><span class="n">Conditions</span><span class="p">]</span>
+<span class="w">    </span><span class="n">G</span><span class="p">[</span><span class="n">Performance</span><span class="w"> </span><span class="n">Tests</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;|</span><span class="n">Measure</span><span class="o">|</span><span class="w"> </span><span class="n">H</span><span class="p">[</span><span class="n">System</span><span class="w"> </span><span class="n">Metrics</span><span class="p">]</span>
+</code></pre>
+</div>
+<hr/>
+<p>
+ <em>
+  May the sacred algorithms guide our trades
+ </em>
+ 🙏✨
+</p>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>
