@@ -1,80 +1,106 @@
 /**
- * Matrix Digital Rain Background
- * A cyberpunk-inspired digital rain effect for the background
+ * Matrix Rain Animation
+ * Creates a Matrix-style falling code animation in canvas background
  */
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('matrixCanvas');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
 
-    // Resize handler
-    window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        initMatrix();
-    });
+    // Set canvas size to window size
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
 
-    // Characters to use
-    const chars = '01010101神聖な量子01010101ΩΔΠφγλθ';
-    const fontSize = 14;
-    const columns = Math.floor(width / fontSize);
+    // Resize initially and on window resize
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-    // Array to track the current y position of each column
-    let drops = [];
+    // Characters to display (quantum-themed)
+    const quantum = '01߸ψΨΦφΩ∞≈≠≡±√∫∂∑∏πετθλμ⟨⟩ħℏ'.split('');
 
-    // Initialize the matrix
-    function initMatrix() {
-        drops = [];
+    // Column positions and speeds
+    const drops = [];
+
+    // Initialize drops
+    function initDrops() {
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+
+        // Clear existing drops
+        drops.length = 0;
+
+        // Create new drops
         for (let i = 0; i < columns; i++) {
-            drops[i] = Math.floor(Math.random() * -height);
+            drops.push({
+                x: i * fontSize,
+                y: Math.random() * canvas.height,
+                length: Math.floor(Math.random() * 20) + 5,
+                speed: Math.random() * 1.5 + 0.5,
+                chars: []
+            });
         }
     }
 
-    // Matrix digital rain animation
-    function drawMatrix() {
-        // Semi-transparent black background to create fade effect
+    // Initialize animation
+    initDrops();
+    window.addEventListener('resize', initDrops);
+
+    // Draw the matrix effect
+    function draw() {
+        // Create semi-transparent overlay to gradually fade previous frames
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Set text style
-        ctx.fillStyle = '#6b46c1'; // Purple color for matrix
-        ctx.font = `${fontSize}px monospace`;
+        // Font settings
+        ctx.font = '14px monospace';
 
-        // Draw characters
-        for (let i = 0; i < drops.length; i++) {
-            // Random character from the chars string
-            const char = chars[Math.floor(Math.random() * chars.length)];
+        // Draw each drop
+        drops.forEach(drop => {
+            // Generate a random character for the head of the drop
+            const randomChar = quantum[Math.floor(Math.random() * quantum.length)];
 
-            // Draw the character
-            ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+            // Add new character to the drop's chars array
+            drop.chars.unshift(randomChar);
+
+            // Limit the length of the drop
+            if (drop.chars.length > drop.length) {
+                drop.chars.pop();
+            }
+
+            // Draw each character in the drop
+            drop.chars.forEach((char, i) => {
+                // Calculate opacity based on position in drop
+                const opacity = 1 - (i / drop.length);
+
+                // Calculate green intensity based on position
+                const green = Math.floor(200 * opacity) + 50;
+
+                // Set color with a purple/blue tint for quantum effect
+                ctx.fillStyle = `rgba(100, ${green}, 255, ${opacity})`;
+
+                // Draw the character
+                ctx.fillText(char, drop.x, drop.y - i * 14);
+            });
 
             // Move the drop down
-            drops[i]++;
+            drop.y += drop.speed;
 
-            // Reset drop to top with random delay when it reaches bottom
-            if (drops[i] * fontSize > height && Math.random() > 0.975) {
-                drops[i] = 0;
+            // Reset the drop if it goes off screen
+            if (drop.y - (drop.chars.length * 14) > canvas.height) {
+                drop.y = 0;
+                drop.length = Math.floor(Math.random() * 20) + 5;
+                drop.speed = Math.random() * 1.5 + 0.5;
+                drop.chars = [];
             }
+        });
 
-            // Randomly change colors for some characters
-            if (Math.random() > 0.95) {
-                ctx.fillStyle = '#8b5cf6'; // Lighter purple
-            } else if (Math.random() > 0.95) {
-                ctx.fillStyle = '#4f46e5'; // Blue-purple
-            } else {
-                ctx.fillStyle = '#6b46c1'; // Default purple
-            }
-        }
-
-        // Call animation frame
-        requestAnimationFrame(drawMatrix);
+        // Request next animation frame
+        requestAnimationFrame(draw);
     }
 
-    // Start the matrix
-    initMatrix();
-    drawMatrix();
+    // Start the animation
+    draw();
 }); 

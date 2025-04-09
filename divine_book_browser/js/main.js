@@ -480,16 +480,20 @@ function initEventListeners() {
     // Code stats link - Show the stats dashboard
     document.getElementById('code-stats-link').addEventListener('click', (e) => {
         e.preventDefault();
-        const documentBrowser = document.getElementById('document-browser');
-        const codeStatsDashboard = document.getElementById('code-stats-dashboard');
 
-        // Hide document browser, show stats dashboard
-        if (documentBrowser) documentBrowser.style.display = 'none';
-        if (codeStatsDashboard) codeStatsDashboard.style.display = 'block';
+        // Create a dedicated window for code stats instead of toggling display
+        const statsWindowWidth = 1000;
+        const statsWindowHeight = 800;
+        const left = (window.screen.width - statsWindowWidth) / 2;
+        const top = (window.screen.height - statsWindowHeight) / 2;
 
-        // Call the code stats initialization if it hasn't been called yet
-        if (typeof initCodeStats === 'function') {
-            initCodeStats();
+        // Open a new window with the code stats dashboard
+        const statsWindow = window.open('code-stats.html', 'OMEGACodeStats',
+            `width=${statsWindowWidth},height=${statsWindowHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`);
+
+        // If window was blocked, inform the user
+        if (!statsWindow) {
+            alert('Pop-up blocked! Please allow pop-ups for the Code Stats dashboard.');
         }
     });
 
