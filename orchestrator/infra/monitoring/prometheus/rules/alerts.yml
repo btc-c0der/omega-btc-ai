@@ -1,0 +1,144 @@
+# 🔱 OMEGA BTC AI - Divine Alert Rules 🔱
+
+groups:
+  - name: divine_alerts
+    rules:
+      # 🌟 High CPU Usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage detected
+          description: "Instance {{ $labels.instance }} has high CPU usage: {{ $value }}%"
+
+      # 🌟 High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
+          description: "Instance {{ $labels.instance }} has high memory usage: {{ $value }}%"
+
+      # 🌟 High Disk Usage
+      - alert: HighDiskUsage
+        expr: 100 - ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High disk usage detected
+          description: "Instance {{ $labels.instance }} has high disk usage: {{ $value }}%"
+
+      # 🌟 Service Down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Service is down
+          description: "Service {{ $labels.job }} on instance {{ $labels.instance }} is down"
+
+      # 🌟 High Error Rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High error rate detected
+          description: "Service {{ $labels.job }} has high error rate: {{ $value }}%"
+
+      # 🌟 High Latency
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High latency detected
+          description: "Service {{ $labels.job }} has high latency: {{ $value }}s"
+
+      # 🌟 Container Restart
+      - alert: ContainerRestart
+        expr: changes(container_start_time_seconds[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Container restarted
+          description: "Container {{ $labels.name }} has restarted"
+
+      # 🌟 High Network Traffic
+      - alert: HighNetworkTraffic
+        expr: rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024 > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High network traffic detected
+          description: "Instance {{ $labels.instance }} has high network traffic: {{ $value }} MB/s"
+
+      # 🌟 High Redis Memory Usage
+      - alert: HighRedisMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High Redis memory usage
+          description: "Redis instance has high memory usage: {{ $value }}%"
+
+      # 🌟 High NGINX Error Rate
+      - alert: HighNGINXErrorRate
+        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) / rate(nginx_http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High NGINX error rate
+          description: "NGINX has high error rate: {{ $value }}%"
+
+      # 🌟 Certificate Expiration
+      - alert: CertificateExpiration
+        expr: cert_expiry_timestamp - time() < 86400 * 30
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Certificate expiring soon
+          description: "Certificate will expire in {{ $value | humanizeDuration }}"
+
+      # 🌟 Security Alerts
+      - alert: SecurityVulnerability
+        expr: trivy_vulnerabilities_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Security vulnerability detected
+          description: "{{ $value }} vulnerabilities found in container images"
+
+      # 🌟 WAF Alerts
+      - alert: WAFBlockedRequests
+        expr: rate(modsecurity_blocked_requests_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High WAF blocked requests
+          description: "WAF is blocking {{ $value }} requests per second"
+
+      # 🌟 Falco Alerts
+      - alert: FalcoSecurityAlert
+        expr: falco_events_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Security event detected
+          description: "Falco detected suspicious activity: {{ $value }} events" 

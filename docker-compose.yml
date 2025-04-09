@@ -1,50 +1,74 @@
-version: '3.8'
+version: '3'
 
 services:
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - ./redis_data:/data
-      - ./tools/redis.conf.optimized:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+  matrix-news-redis:
+    image: redis:alpine
+    container_name: matrix-news-redis
     ports:
-      - "6379:6379"
+      - "10079:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - matrix_news_network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
       retries: 3
 
-  postgres:
-    image: postgres:15-alpine
+  matrix-news-websocket:
+    image: python:3.9-slim
+    container_name: matrix-news-websocket
+    working_dir: /app
+    volumes:
+      - ./temporal:/app/temporal
+      - ./web:/app/web
+      - ./src:/app/src
+      - ./omega_ai:/app/omega_ai
+    ports:
+      - "10095:10095"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-omega_db}
-      POSTGRES_USER: ${POSTGRES_USER:-omega_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-omega_pass}
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U omega_user -d omega_db"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-
-  omega_btc_ai:
-    build: .
+      - PORT=10095
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - REDIS_HOST=matrix-news-redis
+      - REDIS_PORT=6379
+    command: >
+      bash -c "pip install fastapi uvicorn python-socketio aiohttp websockets redis && python -m uvicorn temporal.websocket_minimal:app --host 0.0.0.0 --port 10095"
+    networks:
+      - matrix_news_network
     depends_on:
-      redis:
+      matrix-news-redis:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10095/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  matrix-news-proxy:
+    image: nginx:alpine
+    container_name: matrix-news-proxy
     volumes:
-      - ./logs:/app/logs
-      - ./data:/app/data
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:rw
+      - ./web:/usr/share/nginx/html:ro
     ports:
-      - "8765:8765"  # WebSocket Server
-      - "8050:8050"  # Dashboard UI
-    environment:
-      - REDIS_HOST=redis
-      - POSTGRES_HOST=postgres
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - "10083:80"
+    depends_on:
+      matrix-news-websocket:
+        condition: service_healthy
+    networks:
+      - matrix_news_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:80/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+
+
+networks:
+  matrix_news_network:
+    driver: bridge

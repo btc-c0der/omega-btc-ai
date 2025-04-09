@@ -1,0 +1,33 @@
+# Copyright (c) 2024 OMEGA BTC AI Team
+# Licensed under the GNU Affero General Public License v3.0
+# See https://www.gnu.org/licenses/ for more details
+
+[Unit]
+Description=BTC Market Maker Trap Simulator Service
+After=network.target redis.service
+Wants=redis.service
+
+[Service]
+Type=simple
+User=omega_user
+WorkingDirectory=/path/to/omega-btc-ai
+ExecStart=/usr/bin/python3 -m omega_ai.mm_trap_detector.trap_simulation_service --volatility 1.2 --frequency 0.25 --sleep 0.1
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+
+# Restart settings
+Restart=on-failure
+RestartSec=5s
+
+# Log settings
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+ProtectSystem=full
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target 

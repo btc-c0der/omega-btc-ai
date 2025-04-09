@@ -1,0 +1,223 @@
+# 🔱 OMEGA BTC AI - Divine Matrix News Values 🔱
+
+# Image configuration
+image:
+  repository: ghcr.io/fsiqueira/omega-btc-ai
+  tag: latest
+  pullPolicy: Always
+
+# Deployment configuration
+replicaCount: 1
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Pod Security Context
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: matrix-news.omega-grid.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Environment variables
+env:
+  - name: NEWS_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: matrix-news-secrets
+        key: api-key
+  - name: LOG_LEVEL
+    value: "info"
+  - name: MATRIX_ENABLED
+    value: "true"
+  - name: SENTIMENT_ENABLED
+    value: "true"
+  - name: MONGODB_URI
+    value: "mongodb://{{ .Release.Name }}-mongodb:27017/matrix-news"
+
+# MongoDB dependency configuration
+mongodb:
+  enabled: true
+  auth:
+    enabled: false
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# ConfigMap for matrix news configuration
+configMap:
+  enabled: true
+  data:
+    matrix-config.yaml: |
+      matrix:
+        # Divine Matrix Configuration
+        name: "OMEGA BTC Matrix News"
+        version: "1.0.0"
+        updateInterval: 600
+        sources:
+          - name: "coindesk"
+            enabled: true
+            url: "https://www.coindesk.com/arc/outboundfeeds/rss/"
+            category: "cryptocurrency"
+          - name: "cointelegraph"
+            enabled: true
+            url: "https://cointelegraph.com/rss"
+            category: "cryptocurrency"
+          - name: "financialtimes"
+            enabled: true
+            url: "https://www.ft.com/rss/markets"
+            category: "markets"
+        
+        # Sentiment Analysis Configuration
+        sentiment:
+          enabled: true
+          method: "lexicon"
+          threshold: 0.6
+          includeComments: true
+          
+        # Neo Correlation Engine
+        neo:
+          enabled: true
+          btcCorrelation: true
+          schumann: true
+          
+        # Cosmic Significance Assessment
+        cosmic:
+          enabled: true
+          insightLevel: "deep"
+          
+        # Prophecy Generation
+        prophecy:
+          enabled: true
+          frequency: "daily"
+          style: "divine"
+
+# Persistent volume for matrix data
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 5Gi
+  storageClass: "longhorn"
+  mountPath: /data
+
+# Secrets (to be created separately or through values-secret.yaml)
+secrets:
+  create: false
+  name: matrix-news-secrets
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: prometheus
+
+# Health probes
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    path: /health
+  readiness:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    path: /ready
+
+# Divine backup integration with Velero
+backup:
+  enabled: true
+  schedule: "0 3 * * *"
+  ttl: "720h"
+  includedNamespaces:
+    - "{{ .Release.Namespace }}"
+  includedResources:
+    - deployments
+    - services
+    - configmaps
+    - secrets
+    - persistentvolumeclaims
+
+# Divine annotations for pods
+podAnnotations:
+  omega.ai/divine-protection: "enabled"
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 80
+  image:
+    repository: ghcr.io/fsiqueira/omega-btc-ai
+    tag: frontend-latest
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: "matrix-dashboard.omega-grid.local"
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {} 

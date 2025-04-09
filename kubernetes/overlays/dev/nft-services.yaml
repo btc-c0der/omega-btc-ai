@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nft-services
+  namespace: omega-grid-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nft-services
+  template:
+    metadata:
+      labels:
+        app: nft-services
+    spec:
+      containers:
+      - name: nft-services
+        image: nft-services:latest
+        imagePullPolicy: Never
+        stdin: true
+        tty: true
+        env:
+        - name: TERM
+          value: "xterm-256color"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: DIVINE_MODE
+          value: "true"
+        - name: FIBONACCI_ALIGNMENT
+          value: "true"
+        - name: SACRED_PROVENANCE
+          value: "true"
+        - name: COSMIC_PATTERNS
+          value: "true"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: nft-data
+          mountPath: /app/data/nft
+        - name: sacred-scripts
+          mountPath: /app/scripts
+      volumes:
+      - name: nft-data
+        persistentVolumeClaim:
+          claimName: nft-data-pvc
+      - name: sacred-scripts
+        configMap:
+          name: nft-scripts-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nft-services
+  namespace: omega-grid-dev
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: nft-services
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nft-data-pvc
+  namespace: omega-grid-dev
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nft-scripts-config
+  namespace: omega-grid-dev
+data:
+  generate_whale_nft.py: |
+    #!/usr/bin/env python3
+    # Divine whale NFT generation script
+    # ... existing code ...
+  create_custom_nft.py: |
+    #!/usr/bin/env python3
+    # Divine custom NFT creation script
+    # ... existing code ...
+  generate_divine_dashboard.py: |
+    #!/usr/bin/env python3
+    # Divine NFT dashboard generation script
+    # ... existing code ...
+  run_omega_dump.py: |
+    #!/usr/bin/env python3
+    # Divine NFT mode script
+    # ... existing code ... 

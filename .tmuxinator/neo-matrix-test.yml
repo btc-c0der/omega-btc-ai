@@ -1,0 +1,22 @@
+# 🔱 OMEGA BTC AI - SACRED TMUXINATOR CONFIG 🔱
+
+name: neo-matrix-test
+root: ~/Desktop/GitHub/omega-btc-ai
+
+windows:
+  - listener:
+      layout: tiled
+      panes:
+        - omega-test-listener.py start
+        - omega-test-listener.py stats
+        - omega-test-listener.py tree
+  - monitoring:
+      layout: tiled
+      panes:
+        - docker-compose -f orchestrator/docker-compose.monitoring.yml up grafana prometheus
+        - docker-compose -f orchestrator/docker-compose.monitoring.yml up alertmanager
+  - logs:
+      layout: tiled
+      panes:
+        - tail -f divine_test_listener.log
+        - docker-compose -f orchestrator/docker-compose.monitoring.yml logs -f 

@@ -1,0 +1,17 @@
+[Unit]
+Description=OMEGA Dump Service with Warning System Integration
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=omega
+WorkingDirectory=/opt/omega-btc-ai
+ExecStart=/usr/bin/python3 scripts/run_omega_dump.py --process-warnings --warning-interval 300 --backup-interval 3600
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/opt/omega-btc-ai/logs/omega_dump_service.log
+StandardError=append:/opt/omega-btc-ai/logs/omega_dump_service_error.log
+Environment="PYTHONPATH=/opt/omega-btc-ai"
+
+[Install]
+WantedBy=multi-user.target 

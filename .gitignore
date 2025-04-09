@@ -172,3 +172,29 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+/postgres_data
+*.png
+node_modules
+
+# Backup folder
+backup/
+
+# Large deployment packages
+temp_deployment_package.zip
+
+# Visualization directories
+omega_viz_*/
+tmp_data/omega_viz_*/
+.DS_Store
+
+# Large files
+*.pack
+*.dylib
+*.log
+venv/
+
+# Instagram automation
+content/images/
+ig_session.json
+omega_ig_automation.log
+.venv-ig/

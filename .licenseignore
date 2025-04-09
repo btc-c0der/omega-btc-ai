@@ -1,0 +1,91 @@
+# 🌸 GBU License Ignore File 🌸
+# Files and directories listed here will be excluded from divine license application
+# Format: one pattern per line, uses glob syntax
+# - Adding '/' at the end of a pattern will match a directory
+# - Use * for wildcards
+# - Lines beginning with # are comments
+
+# System and temporary files
+.DS_Store
+*.log
+*.tmp
+*.temp
+*.swp
+.env
+.env.*
+.idea/
+.vscode/
+.licenseignore
+
+# Package and dependency files
+node_modules/
+package-lock.json
+yarn.lock
+.npmrc
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Build artifacts
+dist/
+build/
+*.min.js
+*.min.css
+coverage/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# Lock and certificate files
+yarn.lock
+package-lock.json
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+SSL_*
+**/SSL_*
+config/SSL_*
+deployment/digitalocean/SSL_*
+deployment/digitalocean/btc_live_feed_v3/SSL_*
+
+# Binary files (these should already be skipped by the script)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.pdf
+*.zip
+*.tar.gz
+*.tgz
+
+# External vendor files
+vendor/
+third_party/
+externals/
+
+# Large data files
+data/golden_path_sim/*.png
+data/market_maker_sim/*.png
+*.csv
+*.xlsx
+*.parquet
+
+# Special exceptions
+LICENSE
+README.md
+CHANGELOG.md
+BOOK/divine_chronicles/GPU_LICENSE.md
+BOOK/divine_chronicles/GBU_LICENSE.md
+BOOK/divine_chronicles/GBU_LICENSE_PROPHECY.md
+BOOK/divine_chronicles/DIVINE_SIMULATION_MANUSCRIPT.md 

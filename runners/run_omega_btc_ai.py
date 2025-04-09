@@ -74,15 +74,10 @@ MODULES = [
      "description": "High-Frequency Trap Detector", 
      "dependencies": ["fibonacci_detector", "grafana_reporter"]},
      
-    {"module": "omega_ai.mm_trap_detector.mm_trap_analyzer", 
-     "name": "mm_trap_analyzer", 
-     "description": "Market Maker Trap Analyzer", 
+    {"module": "omega_ai.mm_trap_detector.mm_trap_detector",
+     "name": "mm_trap_detector",
+     "description": "Market Maker Trap Detector",
      "dependencies": ["hf_detector"]},
-     
-    {"module": "omega_ai.mm_trap_detector.mm_trap_processor", 
-     "name": "mm_trap_processor", 
-     "description": "Market Maker Trap Processor", 
-     "dependencies": ["mm_trap_analyzer", "fibonacci_detector"]},
      
     # User-facing Components
     {"module": "omega_ai.monitor.monitor_market_trends", 

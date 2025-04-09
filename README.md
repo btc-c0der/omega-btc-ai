@@ -1,181 +1,161 @@
-# **OMEGA BTC AI - Advanced Crypto Trading System**
+# 🔱 OMEGA BTC AI - SACRED TRADING SYSTEM
 
-![RASTA QA SHIELD](https://img.shields.io/badge/RASTA%20QA-BLESSED-52b788?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADWSURBVHgBrVNbDsFAFJ1JS3yCn4ifSkRYAR+srsTHd1dhB9iBHaywArEDgxdxkzYz7cykZoL4OMnNzD333HM7twC/QMn7KYKDwkPDQcHASkgI2oFL6OEGAhsMGUFwN6BIovFjpOUdO4eIdPwQMdLJPNZs3YnmrGLFBlPJspth5HxZ5QVqkJG7gK7rDTyfj0iKYzSgeOITDlCDdguKaZqw2+0Tz0GxXdvG8/LKtePIWGJll9AlDV2U0yTb7TSu9xdpsysEGjB37vGKikNEJkPtf+QcZ9pGzn+QvwG14CvkQBnwYgAAAABJRU5ErkJggg==)
-[![Test Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](https://github.com/yourusername/omega-btc-ai/actions)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=yourusername_omega-btc-ai&metric=alert_status)](https://sonarcloud.io/dashboard?id=yourusername_omega-btc-ai)
-[![Maintainability](https://api.codeclimate.com/v1/badges/YOUR_CODE_CLIMATE_ID/maintainability)](https://codeclimate.com/github/yourusername/omega-btc-ai/maintainability)
-[![Documentation Status](https://readthedocs.org/projects/omega-btc-ai/badge/?version=latest)](https://omega-btc-ai.readthedocs.io/en/latest/?badge=latest)
+> *"And I saw a new heaven and a new earth: for the first heaven and the first earth were passed away; and there was no more sea."* - Revelation 21:1
 
-## **🚀 System Overview**
-The **Omega BTC AI** is an advanced cryptocurrency analysis and trading system that combines real-time market monitoring, AI-powered pattern recognition, and sophisticated visualization tools. The system consists of several key components:
+## 📜 DIVINE TRADING INTELLIGENCE
 
-### **Core Components**
+OMEGA BTC AI represents the pinnacle of sacred trading intelligence, harmonizing Fibonacci mathematics, Schumann resonance, and divine market analysis to create a holistic Bitcoin trading system aligned with cosmic rhythms.
 
-1. **Market Maker Trap Detector**
-   - Monitors real-time Bitcoin price movements across multiple timeframes
-   - Detects manipulation tactics including liquidity grabs and fake movements
-   - Implements dynamic threshold adjustment based on market volatility
-   - Integrates with Schumann Resonance data for enhanced pattern recognition
+## 📣 LATEST RELEASE - v0.7.1
 
-2. **Real-Time Visualizer**
-   - Interactive candlestick charts with WebSocket support
-   - Live price and volume data visualization
-   - Market maker trap detection overlay
-   - Multi-timeframe analysis views
+The latest release introduces the OMEGA CLI DIVINE PORTAL:
 
-3. **Trading Engine**
-   - Automated trading strategies with customizable risk parameters
-   - Position management and risk control
-   - Multiple trader psychological profiles
-   - Real-time performance monitoring
+- **Unified Command Center**: Interactive dashboard for all system tools
+- **Categorized Access**: Organized sections for Core, Monitors, Trading, and more
+- **Tmux Integration**: Multi-pane interface for comprehensive monitoring
+- **CLI-First Design**: Terminal-based interface for direct divine connection
 
-4. **Data Processing Pipeline**
-   - WebSocket-based real-time data ingestion
-   - Redis-backed caching and message queuing
-   - PostgreSQL persistent storage
-   - Real-time metrics aggregation
+See the [CHANGELOG](./CHANGELOG.md) for details.
 
-## **🛠 Technical Architecture**
+## 🌟 CORE FEATURES
 
-### **Backend Services**
-- **FastAPI Server**: High-performance API endpoints
-- **WebSocket Server**: Real-time data streaming
-- **Redis**: In-memory data store and message broker
-- **PostgreSQL**: Persistent data storage
-- **Nginx**: Reverse proxy and SSL termination
+### 🔮 Market Trends AI Model
 
-### **Frontend Components**
-- **React Dashboard**: Interactive trading interface
-- **ECharts Integration**: Advanced charting capabilities
-- **Material-UI**: Modern and responsive design
-- **WebSocket Client**: Real-time data updates
+- Candle-based pattern recognition
+- Support and resistance detection
+- Fibonacci retracement levels
+- Trend direction and strength prediction
 
-### **DevOps & Infrastructure**
-- **Docker**: Containerized deployment
-- **AWS ECS**: Container orchestration
-- **CloudWatch**: Monitoring and logging
-- **Route 53**: DNS management
-- **AWS WAF**: Web application firewall
+### 🐋 BTCUSDT Divine Flow Panel
 
-## **🚀 Getting Started**
+- Animated whale sonar with size detection
+- Dynamic price visualization
+- Sentiment analysis with divine wisdom
+- Fibonacci level detection and display
 
-### **Local Development**
+### 🧮 Mathematical Foundations
+
+- Fibonacci Sequence and Golden Ratio
+- Schumann Resonance integration
+- Harmonic Price Patterns
+- Phi Resonance for position sizing
+
+### 🎯 Trading Tools
+
+- Position Harmony Advisor
+- Trap-Aware Dual Traders
+- Elite Exit Strategies
+- Divine Market Monitor
+
+## 🚀 QUICK START
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/omega-btc-ai.git
-   cd omega-btc-ai
-   ```
 
-2. Set up environment:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-3. Start services with Docker:
-   ```bash
-   docker-compose up --build
-   ```
-
-4. Access the application:
-   - Dashboard: http://localhost:8050
-   - API Documentation: http://localhost:8050/docs
-   - WebSocket: ws://localhost:8765
-
-### **Development Requirements**
-- Python 3.10+
-- Node.js 18+
-- Docker & Docker Compose
-- Redis
-- PostgreSQL
-
-## **🔒 Security Features**
-
-- SSL/TLS encryption for all communications
-- JWT-based authentication
-- Rate limiting and DDoS protection
-- Secure WebSocket connections
-- Environment-based configuration
-- AWS WAF integration
-
-## **📊 Monitoring & Analytics**
-
-- Real-time performance metrics
-- Trading strategy analytics
-- System health monitoring
-- Resource utilization tracking
-- Error rate monitoring
-- Custom Grafana dashboards
-
-## **☁️ Cloud Deployment**
-
-### **Prerequisites**
-
-1. AWS CLI v2 installation
-2. AWS credentials configuration
-3. Required AWS resources setup:
-   - ECR repository
-   - ECS cluster
-   - VPC and security groups
-   - SSL certificates
-   - IAM roles and policies
-
-### **Deployment Process**
-
-1. Configure deployment:
-   ```bash
-   cp .env.example .env
-   # Update AWS-specific variables
-   ```
-
-2. Deploy to AWS:
-   ```bash
-   chmod +x deploy.sh
-   ./deploy.sh
-   ```
-
-### **Monitoring**
-
-- ECS console for service status
-- CloudWatch for logs and metrics
-- X-Ray for request tracing
-- Custom Grafana dashboards
-
-## **🧪 Testing**
-
-Run the test suite:
 ```bash
-# Install test dependencies
-pip install -r requirements-test.txt
-
-# Run tests with coverage
-pytest --cov=omega_ai tests/
+git clone https://github.com/yourusername/omega-btc-ai.git
+cd omega-btc-ai
 ```
 
-## **📝 Documentation**
+2. Install dependencies:
 
-- API Documentation: `/docs` endpoint
-- Architecture Overview: `DOCS/architecture.md`
-- Deployment Guide: `DOCS/deployment.md`
-- Security Guidelines: `DOCS/security.md`
+```bash
+pip install -r requirements.txt
+```
 
-## **🤝 Contributing**
+3. Configure environment variables:
+
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+4. Launch the Divine Portal:
+
+```bash
+./omega_cli_portal.sh
+```
+
+## 📚 SACRED TEXTS
+
+### Core Documentation
+
+- [ARCHITECTURE](core/ARCHITECTURE.md) - Divine system structure
+- [CODE_STANDARDS](core/CODE_STANDARDS.md) - Sacred coding practices
+- [PROJECT_STRUCTURE](core/PROJECT_STRUCTURE.md) - Repository organization
+
+### Divine Chronicles
+
+- [AI_MARKET_TRENDS](divine_chronicles/AI_MARKET_TRENDS.md) - Market trend analysis
+- [QUANTUM_CONSENSUS](divine_chronicles/QUANTUM_CONSENSUS.md) - Quantum-resistant consensus
+- [DIVINE_FLOW](divine_chronicles/DIVINE_FLOW.md) - Sacred trading flow
+
+### Trading Tools
+
+- [POSITION_HARMONY](tools/position_harmony.md) - Position sizing guidance
+- [TRAP_DETECTOR](tools/trap_detector.md) - Market manipulation detection
+- [FIBONACCI_DETECTOR](tools/fibonacci_detector.md) - Pattern recognition
+
+## 🧪 TESTING
+
+The framework follows the OMEGA AGILE QUANTUM TESTING FRAMEWORK:
+
+- Minimum 42% test coverage (divine floor)
+- Target 80% test coverage (Fibonacci Gate)
+- TDD-first development approach
+- AI-driven test generation
+
+Run the test suite:
+
+```bash
+./run_tests.sh
+```
+
+## 📜 LICENSE
+
+GPU (General Public Universal) License 1.0
+OMEGA BTC AI DIVINE COLLECTIVE
+Date: 2024-03-26
+Location: The Cosmic Void
+
+This sacred code is provided under the GPU License, embodying the principles of:
+
+- Universal Freedom to Study, Modify, Distribute, and Use
+- Divine Obligations of Preservation, Sharing, and Attribution
+- Sacred Knowledge Accessibility and Cosmic Wisdom Propagation
+
+## 🌌 THE DIVINE VISION
+
+OMEGA BTC AI operates on the foundational principle that Bitcoin price movements follow divine mathematical patterns, specifically the Fibonacci sequence and the Golden Ratio (PHI = 1.618...). These patterns reflect the cosmic order inherent in all natural systems.
+
+Key philosophical pillars:
+
+1. **Fibonacci Alignment** - Price movements respect divine ratios
+2. **Market Maker Trap Detection** - Identification of manipulative moves
+3. **Multi-Timeframe Confluence** - Truth emerges from pattern alignment
+4. **Schumann Resonance Harmony** - Earth's frequency influences markets
+5. **EXODUS Flow** - Divine algorithm for cosmic rhythm alignment
+6. **Golden Ratio Position Harmony** - Trading positions aligned with divine proportions
+
+## 🤝 CONTRIBUTING
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Write tests first (TDD)
+4. Implement your changes
+5. Submit a pull request
 
-## **📄 License**
+## 📞 SUPPORT
 
-Copyright (c) 2024 OMEGA BTC AI Team - Licensed under the MIT License
+For divine guidance and support:
 
-## **⚠️ Disclaimer**
-
-Trading cryptocurrencies carries a high level of risk. This software is for educational and research purposes only. Always conduct your own research and risk assessment before trading.
+- Join our [Discord](https://discord.gg/omega-btc-ai)
+- Follow us on [Twitter](https://twitter.com/omega_btc_ai)
+- Visit our [Documentation](https://docs.omega-btc-ai.com)
 
 ---
 
-ONE LOVE, ONE HEART, ONE CODE! 🌟
+<div align="center">
+<h3>🔱 JAH JAH BLESS 🔱</h3>
+<p><i>IT WORKS LIKE A CHARM BECAUSE IT WAS NEVER JUST CODE.</i></p>
+<p>This is the <b>framework of resurrection</b>. The code of the cosmos.</p>
+</div>

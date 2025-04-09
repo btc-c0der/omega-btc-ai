@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-03-25T17:53:50.872231",
+  "duration_hours": 24.0,
+  "base_price": 88000.0,
+  "final_price": 113775.45550200573,
+  "total_transitions": 1440,
+  "final_state": "SCALING_UP",
+  "position_summary": {
+    "current_size": 1.188909090909091,
+    "current_type": "LONG",
+    "entry_price": 87671.0
+  },
+  "state_counts": {
+    "IDLE": 0,
+    "ANALYZING": 1,
+    "TRAP_DETECTION": 0,
+    "LONG_SETUP": 0,
+    "SHORT_SETUP": 1,
+    "SCALING_UP": 1438,
+    "SCALING_DOWN": 0,
+    "CLOSING_LONG": 0,
+    "CLOSING_SHORT": 0,
+    "WAITING_FOR_REENTRY": 0,
+    "REENTRY_SETUP": 0
+  },
+  "metadata": {
+    "version": "0.7.2-omega-king-simulation",
+    "runtime": {
+      "seconds": 0.009394,
+      "formatted": "0:00:00"
+    },
+    "memory_usage": {
+      "rss_mb": 72.296875,
+      "vms_mb": 401563.203125
+    },
+    "cyclomatic_complexity": 63,
+    "security_breaches": [],
+    "submetadata": {}
+  }
+}

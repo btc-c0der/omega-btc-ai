@@ -1,3 +1,11 @@
+"""
+OMEGA BTC AI - RASTA VIBES MODULE
+================================
+
+This module provides divine Rasta-inspired functions for market analysis and alerts.
+"""
+
+from typing import Dict, List, Optional
 import random
 from datetime import datetime
 
@@ -52,10 +60,57 @@ class RastaVibes:
         "MARKET MANIPULATION CANNOT FOOL THE THIRD EYE"
     ]
     
+    # Divine blessings for different performance levels
+    BLESSINGS_DICT = {
+        "high": [
+            "JAH BLESS! Your trading spirit is strong! 🙏",
+            "ZION RISE! Your divine profits are flowing! 🌟",
+            "RASTA BLESS! Your trades are blessed with wisdom! ✨",
+            "ONE LOVE! Your trading path is righteous! 💚",
+            "JAH GUIDE! Your market intuition is divine! 🎯"
+        ],
+        "medium": [
+            "Stay strong, trader! JAH is watching! 🌿",
+            "Keep the faith, your time will come! 💫",
+            "Roots hold strong, profits will follow! 🌱",
+            "Patience is divine, stay focused! 🎯",
+            "JAH BLESS your trading journey! 🙏"
+        ],
+        "low": [
+            "JAH WARN: Time to reflect and heal! ⚠️",
+            "Babylon system testing your faith! 🌪️",
+            "Stay strong, this too shall pass! 💪",
+            "Divine wisdom comes with experience! 📚",
+            "JAH guide you through these times! 🙏"
+        ]
+    }
+    
+    # Divine emojis for different sentiments
+    EMOJIS = {
+        "ZION_RISE": "🚀",
+        "RASTA_BLESS": "✨",
+        "ROOTS_HOLD": "🌿",
+        "BABYLON_FALL": "📉",
+        "JAH_WARN": "⚠️"
+    }
+    
     @classmethod
-    def get_rasta_blessing(cls):
-        """Return a random Rasta blessing."""
-        return random.choice(cls.BLESSINGS)
+    def get_rasta_blessing(cls, win_rate: float) -> str:
+        """
+        Get a divine blessing based on win rate.
+        
+        Args:
+            win_rate: Current win rate (0.0 to 1.0)
+            
+        Returns:
+            A divine blessing message
+        """
+        if win_rate >= 0.6:
+            return random.choice(cls.BLESSINGS_DICT["high"])
+        elif win_rate >= 0.4:
+            return random.choice(cls.BLESSINGS_DICT["medium"])
+        else:
+            return random.choice(cls.BLESSINGS_DICT["low"])
     
     @classmethod
     def get_trap_warning(cls):
@@ -107,7 +162,7 @@ class RastaVibes:
             greeting = "BLESSED EVENING! "
             
         # Base enhanced message
-        enhanced = f"{greeting}{cls.get_rasta_blessing()}!\n\n"
+        enhanced = f"{greeting}{cls.get_rasta_blessing(0.5)}!\n\n"
         
         # Add trap-specific message for different alert types
         if "Liquidity Grab" in alert_type:
@@ -131,3 +186,16 @@ class RastaVibes:
         enhanced += "ONE LOVE, ONE HEART, ONE BLOCKCHAIN! 🌿"
         
         return enhanced
+
+    @classmethod
+    def get_rasta_emoji(cls, sentiment: str) -> str:
+        """
+        Get a divine emoji based on market sentiment.
+        
+        Args:
+            sentiment: Current market sentiment
+            
+        Returns:
+            A divine emoji
+        """
+        return cls.EMOJIS.get(sentiment, "✨")  # Default to sparkles if sentiment not found

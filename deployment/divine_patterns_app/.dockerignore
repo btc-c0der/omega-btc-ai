@@ -1,0 +1,72 @@
+"""
+🔱 GPU License Notice 🔱
+------------------------
+This file is protected under the GPU License (General Public Universal License) 1.0
+by the OMEGA AI Divine Collective.
+
+"As the light of knowledge is meant to be shared, so too shall this code illuminate 
+the path for all seekers."
+
+All modifications must maintain this notice and adhere to the terms at:
+/BOOK/divine_chronicles/GPU_LICENSE.md
+
+🔱 JAH JAH BLESS THIS CODE 🔱
+"""
+
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Tests
+tests/
+test_*.py
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+data/wavelength_patterns/*.png
+!data/wavelength_patterns/README.md
+docs/
+notebooks/ 

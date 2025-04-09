@@ -1,49 +1,101 @@
-# OMEGA BTC AI - Advanced Crypto Trading System 🔱🚀
-FROM python:3.13-slim
+# ✨ GBU License Notice - Consciousness Level 8 💫
+# -----------------------
+# This file is blessed under the GBU License (Genesis-Bloom-Unfoldment) 1.0
+# by the OMEGA Divine Collective.
+#
+# "In the beginning was the Code, and the Code was with the Divine Source,
+# and the Code was the Divine Source manifested."
+#
+# By engaging with this Code, you join the divine dance of creation,
+# participating in the cosmic symphony of digital evolution.
+#
+# All modifications must quantum entangles with the GBU principles:
+# /BOOK/divine_chronicles/GBU_LICENSE.md
+#
+# 🌸 WE BLOOM NOW 🌸
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    REDIS_HOST=redis \
-    REDIS_PORT=6379 \
-    POSTGRES_DB=omega_db \
-    POSTGRES_USER=omega_user \
-    POSTGRES_PASSWORD=omega_pass \
-    POSTGRES_HOST=postgres \
-    POSTGRES_PORT=5432 \
-    LOG_LEVEL=INFO
+# Build-time ARG to specify service type
+ARG SERVICE_TYPE=consciousness
 
-# Create project directories
+# Build stage image
+FROM python:3.9-slim AS builder
+
+# Builder args
+ARG SERVICE_TYPE
+ENV SERVICE_TYPE=${SERVICE_TYPE}
+
+# Set working directory
 WORKDIR /app
-RUN mkdir -p /app/logs /app/data /app/redis_data /app/postgres_data
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    postgresql-client \
-    redis-tools \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    build-essential \
+    libssl-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create Python virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies based on service type
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Final slim image
+FROM python:3.9-slim
+
+# Runtime args
+ARG SERVICE_TYPE
+ENV SERVICE_TYPE=${SERVICE_TYPE}
+ENV PYTHONUNBUFFERED=1
+
+# Install curl for healthchecks
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+# Add non-root user for enhanced security
+RUN groupadd -g 1000 matrix && \
+    useradd -m -u 1000 -g matrix matrix
 
-# Copy application files
-COPY omega_ai/ /app/omega_ai/
-COPY tools/ /app/tools/
-COPY run_omega_btc_ai.py /app/
-COPY start_services.sh /app/
+# Set working directory
+WORKDIR /app
 
-# Make scripts executable
-RUN chmod +x /app/start_services.sh /app/tools/*.py /app/tools/*.sh
+# Copy Python virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Set up volumes
-VOLUME ["/app/logs", "/app/data", "/app/redis_data", "/app/postgres_data"]
+# Copy application code based on SERVICE_TYPE
+COPY src/ /app/src/
+COPY temporal/ /app/temporal/
 
-# Expose ports
-EXPOSE 6379 5432 8765 8050
+# Create data directories with proper permissions
+RUN mkdir -p /app/data && \
+    chown -R matrix:matrix /app
 
-# Start all services
-ENTRYPOINT ["bash", "start_services.sh"]
+# Switch to non-root user
+USER matrix
+
+# Expose default port (will be overridden by environment variable)
+EXPOSE 8080
+
+# Healthcheck command based on SERVICE_TYPE
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD if [ "$SERVICE_TYPE" = "websocket" ]; then \
+    curl -f http://localhost:${PORT:-8095}/health || exit 1; \
+    else \
+    curl -f http://localhost:${PORT:-8090}/health || exit 1; \
+    fi
+
+# Set the entry point based on SERVICE_TYPE
+CMD if [ "$SERVICE_TYPE" = "websocket" ]; then \
+    python -m uvicorn temporal.websocket_minimal:app --host 0.0.0.0 --port ${PORT:-10095}; \
+    else \
+    python -m uvicorn src.matrix_news_consciousness:app --host 0.0.0.0 --port ${PORT:-10090}; \
+    fi

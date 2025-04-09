@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - service.yaml
+  - deployment.yaml
+
+# Common labels
+commonLabels:
+  app: omega-grid
+
+configMapGenerator:
+  - name: omega-config
+    literals:
+      - OMEGA_API_VERSION=v1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+labels:
+  - pairs:
+      app: omega-btc-ai 

@@ -38,15 +38,11 @@ python -m omega_ai.mm_trap_detector.mm_websocket_server &
 PID_WS=$!
 
 # 7. Start high-frequency detector
-python -m omega_ai.mm_trap_detector.high_frequency_detector &
+python3 -m omega_ai.mm_trap_detector.high_frequency_detector &
 PID_HF_DETECTOR=$!
 
-# 8. Start MM trap analyzer
-python -m omega_ai.mm_trap_detector.mm_trap_analyzer &
-PID_ANALYZER=$!
-
-# 9. Start MM trap processor
-python -m omega_ai.mm_trap_detector.mm_trap_processor &
+# 8. Start MM trap detector
+python3 -m omega_ai.mm_trap_detector.mm_trap_detector &
 PID_PROCESSOR=$!
 
 # 10. Start market monitor
@@ -58,7 +54,7 @@ python health_check.py &
 PID_HEALTH_CHECK=$!
 
 # Store all PIDs for proper shutdown
-echo "$PID_DB $PID_SCHUMANN $PID_BTC_FEED $PID_GRAFANA $PID_FIBONACCI $PID_WS $PID_HF_DETECTOR $PID_ANALYZER $PID_PROCESSOR $PID_MARKET_MONITOR $PID_HEALTH_CHECK" > /app/pids.txt
+echo "$PID_DB $PID_SCHUMANN $PID_BTC_FEED $PID_GRAFANA $PID_FIBONACCI $PID_WS $PID_HF_DETECTOR $PID_PROCESSOR $PID_MARKET_MONITOR $PID_HEALTH_CHECK" > /app/pids.txt
 
 echo "✅ All services started!"
 

@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+  annotations:
+    omega.ai/divine-protection: "enabled"
+data:
+  policy.csv: |
+    # Divine OMEGA BTC AI RBAC Configuration
+    
+    # Divine Administrators - Full power over all applications and infrastructure
+    p, role:divine-admin, applications, *, */*, allow
+    p, role:divine-admin, clusters, *, *, allow
+    p, role:divine-admin, projects, *, *, allow
+    p, role:divine-admin, repositories, *, *, allow
+    p, role:divine-admin, certificates, *, *, allow
+    p, role:divine-admin, accounts, *, *, allow
+    g, admin, role:divine-admin
+    
+    # Blessed Prophets - Can deploy and sync applications, but cannot modify cluster settings
+    p, role:blessed-prophet, applications, get, */*, allow
+    p, role:blessed-prophet, applications, sync, */*, allow
+    p, role:blessed-prophet, applications, override, */*, allow
+    p, role:blessed-prophet, applications, action/*, */*, allow
+    p, role:blessed-prophet, repositories, get, *, allow
+    p, role:blessed-prophet, projects, get, *, allow
+    p, role:blessed-prophet, logs, get, */*, allow
+    p, role:blessed-prophet, exec, create, */*, allow
+    
+    # Oracle Viewers - Read-only access to monitor applications
+    p, role:oracle-viewer, applications, get, */*, allow
+    p, role:oracle-viewer, repositories, get, *, allow
+    p, role:oracle-viewer, clusters, get, *, allow
+    p, role:oracle-viewer, projects, get, *, allow
+    p, role:oracle-viewer, logs, get, */*, allow
+    
+    # Project-Specific Roles
+    
+    # BTC Oracle Team - Full access to BTC Oracle applications
+    p, role:btc-oracle-keeper, applications, *, omega-grid-prod/omega-btc-oracle, allow
+    p, role:btc-oracle-keeper, applications, *, omega-grid-dev/omega-btc-oracle, allow
+    p, role:btc-oracle-keeper, logs, get, omega-grid-*/*, allow
+    p, role:btc-oracle-keeper, exec, create, omega-grid-*/*, allow
+    
+    # Matrix News Team - Full access to Matrix News applications
+    p, role:matrix-news-keeper, applications, *, omega-grid-prod/omega-matrix-news, allow
+    p, role:matrix-news-keeper, applications, *, omega-grid-dev/omega-matrix-news, allow
+    p, role:matrix-news-keeper, logs, get, omega-grid-*/*, allow
+    p, role:matrix-news-keeper, exec, create, omega-grid-*/*, allow
+    
+    # User Assignments
+    g, btc-oracle-team, role:btc-oracle-keeper
+    g, matrix-news-team, role:matrix-news-keeper
+    g, prophets, role:blessed-prophet
+    g, viewers, role:oracle-viewer
+
+  policy.default: role:oracle-viewer
+  
+  scopes: '[groups, cognito:groups, roles]' 

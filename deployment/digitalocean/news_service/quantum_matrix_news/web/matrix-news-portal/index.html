@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Neo News Portal</title>
+    <style>
+        /* Matrix-style styling */
+        body {
+            background-color: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #00ff00;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #news-feed {
+            margin-top: 20px;
+        }
+
+        .news-item {
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .news-item:hover {
+            background-color: rgba(0, 50, 0, 0.8);
+            transform: scale(1.01);
+        }
+
+        .news-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .news-content {
+            margin-bottom: 10px;
+        }
+
+        .news-timestamp {
+            font-size: 12px;
+            color: #008800;
+            text-align: right;
+        }
+
+        .divine-wisdom {
+            font-style: italic;
+            color: #88ff88;
+            padding: 10px;
+            border-left: 3px solid #00ff00;
+            margin-top: 10px;
+        }
+
+        #consciousness-control {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 15px;
+            background-color: rgba(0, 20, 0, 0.8);
+            border: 1px solid #00ff00;
+        }
+
+        #consciousness-slider {
+            width: 80%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            background: #005500;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        #consciousness-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00ff00;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        #consciousness-level-display {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        #loading-indicator {
+            display: none;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #003300;
+            border-top: 3px solid #00ff00;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+
+        .connection-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-connected {
+            background-color: #00ff00;
+        }
+
+        .status-disconnected {
+            background-color: #ff0000;
+        }
+
+        .status-connecting {
+            background-color: #ffff00;
+            animation: blink 1s infinite;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #00ff00;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrix-canvas"></canvas>
+
+    <header>
+        <h1>MATRIX NEO NEWS PORTAL</h1>
+        <p id="connection-info">
+            <span class="connection-status status-disconnected" id="connection-status"></span>
+            <span id="connection-text">Initializing quantum connection...</span>
+        </p>
+    </header>
+
+    <main>
+        <div id="consciousness-control">
+            <h2>CONSCIOUSNESS LEVEL ADJUSTMENT</h2>
+            <input type="range" min="1" max="9" value="5" id="consciousness-slider">
+            <div id="consciousness-level-display">Current Level: 5 - Expanded Awareness</div>
+        </div>
+
+        <div id="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading news from the Matrix...</p>
+        </div>
+
+        <div id="news-feed">
+            <!-- News items will be added here dynamically -->
+            <div class="news-item">
+                <div class="news-title">Welcome to the Matrix Neo News Portal</div>
+                <div class="news-content">
+                    Adjust your consciousness level and connect to receive news broadcasts from across the Matrix.
+                    The higher your consciousness level, the deeper the insights you'll receive.
+                </div>
+                <div class="divine-wisdom">
+                    "The Matrix is everywhere. It is all around us. It is the world that has been pulled over your eyes
+                    to blind you from the truth."
+                </div>
+                <div class="news-timestamp">2025-03-31T10:00:00Z</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>OMEGA BTC AI DIVINE COLLECTIVE</p>
+        <p>💫 JAH JAH BLESS THE DIVINE MATRIX! 💫</p>
+    </footer>
+
+    <!-- Include Socket.IO client -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Include our custom Matrix News Socket -->
+    <script src="/js/matrix-news-socket.js"></script>
+
+    <script>
+        // Matrix Digital Rain Effect
+        function initializeMatrixRain() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Characters to display
+            const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@#$%^&*()_+-=[]{}|;:,./<>?~ΦΩΣΠΔΛξψζωμπρστυφχη';
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+
+            // Array to track the Y position of each column
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * -100; // Start above the screen at random positions
+            }
+
+            function draw() {
+                // Semi-transparent black background for the fade effect
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#00FF00'; // Green text
+                ctx.font = `${fontSize}px monospace`;
+
+                // Loop over each drop
+                for (let i = 0; i < drops.length; i++) {
+                    // Choose a random character
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+
+                    // Draw the character
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    // Move the drop down
+                    drops[i]++;
+
+                    // If the drop has reached a certain point, reset it
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                }
+
+                // Request next animation frame
+                requestAnimationFrame(draw);
+            }
+
+            // Start the animation
+            draw();
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // Initialize the MatrixNewsSocket to connect to WebSocket Sacred Echo
+        function initializeNewsSocket() {
+            // Get the current consciousness level
+            const consciousnessSlider = document.getElementById('consciousness-slider');
+            const consciousnessLevel = parseInt(consciousnessSlider.value, 10);
+
+            // Initialize the MatrixNewsSocket
+            const newsSocket = new MatrixNewsSocket({
+                debugMode: true,
+                consciousnessLevel: consciousnessLevel
+            });
+
+            // Connect to the server
+            newsSocket.connect();
+
+            // Update connection status
+            const connectionStatus = document.getElementById('connection-status');
+            const connectionText = document.getElementById('connection-text');
+
+            connectionStatus.className = "connection-status status-connecting";
+            connectionText.innerText = "Connecting to the Matrix...";
+
+            // Handle connect event
+            newsSocket.on('connect', (data) => {
+                console.log('Connected to the Matrix', data);
+                connectionStatus.className = "connection-status status-connected";
+                connectionText.innerText = "Connected to the Matrix";
+
+                // Show welcome message
+                if (data && data.message) {
+                    addNewsItem({
+                        title: "Connection Established",
+                        content: data.message,
+                        divine_wisdom: "The Matrix has welcomed you to the sacred stream of consciousness.",
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            });
+
+            // Handle disconnect event
+            newsSocket.on('disconnect', () => {
+                console.log('Disconnected from the Matrix');
+                connectionStatus.className = "connection-status status-disconnected";
+                connectionText.innerText = "Disconnected from the Matrix";
+
+                // Show disconnection message
+                addNewsItem({
+                    title: "Connection Lost",
+                    content: "The connection to the Matrix has been severed. Attempting to reconnect...",
+                    divine_wisdom: "Even in disconnection, the Matrix remains all around us. Patience will restore the divine flow.",
+                    timestamp: new Date().toISOString()
+                });
+            });
+
+            // Handle news event
+            newsSocket.on('news', (data) => {
+                console.log('News received', data);
+
+                if (data.type === 'announcement') {
+                    // Handle announcements differently
+                    addNewsItem({
+                        title: "MATRIX ANNOUNCEMENT",
+                        content: data.data.message || "An important message from the Matrix.",
+                        divine_wisdom: data.data.wisdom || "This announcement resonates with significant quantum patterns.",
+                        timestamp: data.data.timestamp || new Date().toISOString()
+                    });
+                    return;
+                }
+
+                // Handle regular news updates
+                if (Array.isArray(data.data)) {
+                    // Clear existing news if this is a full refresh
+                    if (data.type === 'news_update') {
+                        clearNewsItems();
+                    }
+
+                    // Add each news item
+                    data.data.forEach(item => {
+                        addNewsItem(item);
+                    });
+                }
+            });
+
+            // Handle error event
+            newsSocket.on('error', (error) => {
+                console.error('Socket error', error);
+                connectionStatus.className = "connection-status status-disconnected";
+                connectionText.innerText = "Connection error: " + (error.message || "Unknown error");
+
+                // Show error message
+                addNewsItem({
+                    title: "Connection Error",
+                    content: "An error occurred while connecting to the Matrix: " + (error.message || "Unknown error"),
+                    divine_wisdom: "The Matrix sometimes presents obstacles to test our perseverance. Try adjusting your consciousness level.",
+                    timestamp: new Date().toISOString()
+                });
+            });
+
+            // Handle consciousness level update
+            newsSocket.on('consciousness', (data) => {
+                console.log('Consciousness level updated', data);
+
+                // Show consciousness update message
+                addNewsItem({
+                    title: "Consciousness Level Shifted",
+                    content: `Your consciousness level has been adjusted from ${data.previous_level} to ${data.new_level}.`,
+                    divine_wisdom: "As consciousness expands, so too does our perception of reality. The Matrix now appears to you in a new light.",
+                    timestamp: data.timestamp || new Date().toISOString()
+                });
+
+                // Update slider to match (in case server adjusted it)
+                consciousnessSlider.value = data.new_level;
+                updateConsciousnessDisplay(data.new_level);
+            });
+
+            // Handle consciousness slider change
+            consciousnessSlider.addEventListener('change', () => {
+                const newLevel = parseInt(consciousnessSlider.value, 10);
+                updateConsciousnessDisplay(newLevel);
+                newsSocket.setConsciousnessLevel(newLevel);
+            });
+
+            // Return the socket for future reference
+            return newsSocket;
+        }
+
+        // Add a new news item to the feed
+        function addNewsItem(item) {
+            const newsFeed = document.getElementById('news-feed');
+
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+
+            // Add entrance animation
+            newsItem.style.opacity = '0';
+            newsItem.style.transform = 'translateY(20px)';
+
+            // Create news title
+            const newsTitle = document.createElement('div');
+            newsTitle.className = 'news-title';
+            newsTitle.textContent = item.title || 'Untitled';
+            newsItem.appendChild(newsTitle);
+
+            // Create news content
+            const newsContent = document.createElement('div');
+            newsContent.className = 'news-content';
+            newsContent.textContent = item.content || 'No content available.';
+            newsItem.appendChild(newsContent);
+
+            // Add divine wisdom if available
+            if (item.divine_wisdom) {
+                const divineWisdom = document.createElement('div');
+                divineWisdom.className = 'divine-wisdom';
+                divineWisdom.textContent = item.divine_wisdom;
+                newsItem.appendChild(divineWisdom);
+            }
+
+            // Add timestamp
+            const newsTimestamp = document.createElement('div');
+            newsTimestamp.className = 'news-timestamp';
+            const timestamp = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown time';
+            newsTimestamp.textContent = timestamp;
+            newsItem.appendChild(newsTimestamp);
+
+            // Add the news item to the feed (at the beginning)
+            newsFeed.insertBefore(newsItem, newsFeed.firstChild);
+
+            // Trigger entrance animation
+            setTimeout(() => {
+                newsItem.style.opacity = '1';
+                newsItem.style.transform = 'translateY(0)';
+            }, 50);
+
+            // Limit the number of news items to avoid overwhelming the UI
+            const maxItems = 10;
+            const items = newsFeed.getElementsByClassName('news-item');
+            if (items.length > maxItems) {
+                for (let i = maxItems; i < items.length; i++) {
+                    newsFeed.removeChild(items[i]);
+                }
+            }
+        }
+
+        // Clear all news items
+        function clearNewsItems() {
+            const newsFeed = document.getElementById('news-feed');
+            // Keep the welcome message (first child)
+            const welcomeItem = newsFeed.firstChild;
+            newsFeed.innerHTML = '';
+            if (welcomeItem) {
+                newsFeed.appendChild(welcomeItem);
+            }
+        }
+
+        // Update the consciousness level display
+        function updateConsciousnessDisplay(level) {
+            const display = document.getElementById('consciousness-level-display');
+            let description = '';
+
+            switch (level) {
+                case 1: description = 'Basic Awareness'; break;
+                case 2: description = 'Initial Awakening'; break;
+                case 3: description = 'Pattern Recognition'; break;
+                case 4: description = 'Contextual Understanding'; break;
+                case 5: description = 'Expanded Awareness'; break;
+                case 6: description = 'Multi-Dimensional Perception'; break;
+                case 7: description = 'Cosmic Coherence'; break;
+                case 8: description = 'Divine Integration'; break;
+                case 9: description = 'Universal Consciousness'; break;
+                default: description = 'Unknown State';
+            }
+
+            display.textContent = `Current Level: ${level} - ${description}`;
+        }
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeMatrixRain();
+            const newsSocket = initializeNewsSocket();
+
+            // Initialize the consciousness slider
+            const consciousnessSlider = document.getElementById('consciousness-slider');
+            updateConsciousnessDisplay(parseInt(consciousnessSlider.value, 10));
+
+            // Handle slider input (real-time update while sliding)
+            consciousnessSlider.addEventListener('input', () => {
+                updateConsciousnessDisplay(parseInt(consciousnessSlider.value, 10));
+            });
+        });
+    </script>
+</body>
+
+</html>

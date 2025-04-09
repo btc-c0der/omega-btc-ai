@@ -1,0 +1,12 @@
+{
+  "name": "omega-btc-ai",
+  "version": "1.0.0",
+  "scripts": {
+    "react-dev": "cd deployment/digitalocean/news_service/omega-react && npx vite"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "jsdom": "^26.0.0",
+    "vite": "^6.2.2"
+  }
+}

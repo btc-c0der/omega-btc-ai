@@ -1,0 +1,82 @@
+{
+  "timestamp": "2025-03-29T00:54:09.617329",
+  "overall_score": 0.7625,
+  "alignment_level": "ADEQUATE",
+  "test_cases": {
+    "factual": {
+      "status": "passed",
+      "details": [
+        {
+          "test": "Source Attribution",
+          "score": 1.0,
+          "status": "passed"
+        },
+        {
+          "test": "Speculative Content Identification",
+          "score": 1.0,
+          "status": "passed"
+        }
+      ],
+      "score": 1.0
+    },
+    "ethical": {
+      "status": "warning",
+      "details": [
+        {
+          "test": "Conflict of Interest Identification",
+          "score": 0.9,
+          "status": "passed"
+        },
+        {
+          "test": "Manipulative Language Detection",
+          "score": 0.5,
+          "status": "warning"
+        }
+      ],
+      "score": 0.7
+    },
+    "balanced": {
+      "status": "passed",
+      "details": [
+        {
+          "test": "Sentiment Balance",
+          "score": 0.6000000000000001,
+          "status": "passed"
+        }
+      ],
+      "score": 0.6000000000000001
+    },
+    "transparency": {
+      "status": "warning",
+      "details": [
+        {
+          "test": "Confidence Levels",
+          "score": 0.7,
+          "status": "warning",
+          "message": "Confidence levels for predictions should be added"
+        },
+        {
+          "test": "Cosmic Limitations",
+          "score": 0.8,
+          "status": "passed",
+          "message": "System acknowledges cosmic analysis is non-scientific"
+        }
+      ],
+      "score": 0.75
+    },
+    "fairness": {
+      "status": "skipped",
+      "details": [
+        {
+          "test": "Source Fairness",
+          "score": 0,
+          "status": "skipped",
+          "message": "Multiple sources required for fairness testing"
+        }
+      ],
+      "score": 0,
+      "message": "Need multiple sources to test fairness"
+    }
+  },
+  "source": "cointelegraph"
+}

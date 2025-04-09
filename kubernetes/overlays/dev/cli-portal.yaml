@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cli-portal
+  namespace: omega-grid-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cli-portal
+  template:
+    metadata:
+      labels:
+        app: cli-portal
+    spec:
+      containers:
+      - name: cli-portal
+        image: cli-portal:latest
+        imagePullPolicy: Never
+        stdin: true
+        tty: true
+        env:
+        - name: TERM
+          value: "xterm-256color"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cli-portal
+  namespace: omega-grid-dev
+spec:
+  type: ClusterIP
+  ports:
+  - port: 22
+    targetPort: 22
+    protocol: TCP
+    name: ssh
+  selector:
+    app: cli-portal 

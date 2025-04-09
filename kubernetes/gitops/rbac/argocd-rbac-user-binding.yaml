@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-user-binding
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-rbac-user-binding
+    app.kubernetes.io/part-of: argocd
+  annotations:
+    omega.ai/divine-protection: "enabled"
+data:
+  # Divine Administrators
+  divine-admins: |
+    - omega-admin@example.com
+    - divine-admin@example.com
+    
+  # Blessed Prophets (Developers with deployment rights)
+  prophets: |
+    - btc-developer@example.com
+    - matrix-developer@example.com
+    - fibonacci-developer@example.com
+    - schumann-developer@example.com
+    
+  # BTC Oracle Team
+  btc-oracle-team: |
+    - btc-lead@example.com
+    - oracle-developer@example.com
+    - fibonacci-developer@example.com
+    
+  # Matrix News Team
+  matrix-news-team: |
+    - matrix-lead@example.com
+    - news-developer@example.com
+    - sentiment-developer@example.com
+    
+  # Oracle Viewers (Read-only users)
+  viewers: |
+    - viewer@example.com
+    - monitoring@example.com
+    - dashboard@example.com 

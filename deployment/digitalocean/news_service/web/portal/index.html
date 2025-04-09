@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - The Matrix Portal</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #00FF00;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00FF00;
+            border-radius: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #00FF00;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .module-card {
+            padding: 12px;
+            border: 1px solid #00FF00;
+            border-radius: 4px;
+            transition: all 0.3s;
+            cursor: pointer;
+            background-color: rgba(0, 255, 0, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card:hover {
+            background-color: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 15px #00FF00;
+            transform: translateY(-5px);
+        }
+
+        .module-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .module-card.in-development {
+            border: 1px dashed #00FF00;
+            background-color: rgba(0, 100, 0, 0.1);
+        }
+
+        .module-card.in-development:hover {
+            background-color: rgba(0, 100, 0, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .dev-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: rgba(0, 100, 0, 0.6);
+            color: #00FF00;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            border: 1px solid #00FF00;
+        }
+
+        .module-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .module-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .module-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        a {
+            color: #00FF00;
+            text-decoration: none;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .status-tag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-bottom-left-radius: 4px;
+            font-weight: bold;
+        }
+
+        .live {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #00FF00;
+            border-left: 1px solid #00FF00;
+            border-bottom: 1px solid #00FF00;
+        }
+
+        .tbd {
+            background-color: rgba(255, 255, 0, 0.2);
+            color: #FFFF00;
+            border-left: 1px solid #FFFF00;
+            border-bottom: 1px solid #FFFF00;
+        }
+
+        .dev {
+            background-color: rgba(255, 165, 0, 0.2);
+            color: #FFA500;
+            border-left: 1px solid #FFA500;
+            border-bottom: 1px solid #FFA500;
+        }
+
+        .module-card.live-module:hover {
+            box-shadow: 0 0 20px #00FF00;
+        }
+
+        .module-card.tbd-module:hover {
+            box-shadow: 0 0 15px #FFFF00;
+        }
+
+        .module-card.dev-module:hover {
+            box-shadow: 0 0 15px #FFA500;
+        }
+
+        .grid-row-title {
+            grid-column: 1 / -1;
+            text-align: left;
+            border-bottom: 1px solid #00FF00;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #00FF00;
+            text-shadow: 0 0 5px #00FF00;
+        }
+
+        .grid-row-title:first-child {
+            margin-top: 0;
+        }
+
+        .version-tag {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            font-size: 0.6rem;
+            opacity: 0.6;
+        }
+
+        /* Feature flag admin controls */
+        .admin-controls {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            background-color: rgba(0, 50, 0, 0.8);
+            padding: 10px;
+            border-top-left-radius: 5px;
+            border: 1px solid #00FF00;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            z-index: 100;
+        }
+
+        .admin-controls.visible {
+            transform: translateY(0);
+        }
+
+        .admin-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 50, 0, 0.8);
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 101;
+            font-size: 0.8rem;
+        }
+
+        .admin-toggle:hover {
+            background-color: rgba(0, 80, 0, 0.8);
+        }
+
+        .feature-toggle {
+            margin: 5px 0;
+            font-size: 0.8rem;
+        }
+
+        .feature-toggle input {
+            margin-right: 5px;
+        }
+
+        @media (max-width: 1200px) {
+            .matrix-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .matrix-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .matrix-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <h1>THE MATRIX PORTAL</h1>
+        <p>OMEGA BTC AI - Your gateway to the digital truth. Navigate the system of over 2 million lines of code.</p>
+
+        <div class="matrix-grid">
+            <!-- Row 1: Information Streams -->
+            <div class="grid-row-title">⚡ INFORMATION STREAMS</div>
+
+            <a href="/api/latest-news" class="module-card live-module" data-feature="global-news">
+                <div class="status-tag live">LIVE</div>
+                <div class="module-icon">📰</div>
+                <div class="module-title">Global News</div>
+                <div class="module-description">Real-time crypto and financial news from around the world.</div>
+                <div class="version-tag">v1.0.0</div>
+            </a>
+
+            <a href="/api/latest-recommendation" class="module-card live-module" data-feature="market-analysis">
+                <div class="status-tag live">LIVE</div>
+                <div class="module-icon">📊</div>
+                <div class="module-title">Market Analysis</div>
+                <div class="module-description">In-depth market analysis and expert insights.</div>
+                <div class="version-tag">v1.0.0</div>
+            </a>
+
+            <a href="/api/status" class="module-card live-module" data-feature="ai-insights">
+                <div class="status-tag live">LIVE</div>
+                <div class="module-icon">🧠</div>
+                <div class="module-title">AI Insights</div>
+                <div class="module-description">AI-powered market predictions and pattern recognition.</div>
+                <div class="version-tag">v1.0.0</div>
+            </a>
+
+            <a href="/portal/divine_chronicles/" class="module-card live-module" data-feature="divine-chronicles">
+                <div class="status-tag live">LIVE</div>
+                <div class="module-icon">📜</div>
+                <div class="module-title">Divine Chronicles</div>
+                <div class="module-description">Exclusive P4NG34 news and updates from the divine chronicles.</div>
+                <div class="version-tag">v1.0.1</div>
+            </a>
+
+            <a href="/portal/system_health/" class="module-card live-module" data-feature="system-health">
+                <div class="status-tag live">LIVE</div>
+                <div class="module-icon">📡</div>
+                <div class="module-title">System Health</div>
+                <div class="module-description">Real-time monitoring of the system health and performance.</div>
+                <div class="version-tag">v1.1.0</div>
+            </a>
+
+            <!-- Row 2: System Infrastructure -->
+            <div class="grid-row-title">🏗️ SYSTEM INFRASTRUCTURE</div>
+
+            <a href="/api/system-architecture" class="module-card tbd-module" data-feature="system-architecture">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🏗️</div>
+                <div class="module-title">System Architecture</div>
+                <div class="module-description">System overview and infrastructure management.</div>
+            </a>
+
+            <a href="/api/data-visualization" class="module-card tbd-module" data-feature="data-vortex">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🌀</div>
+                <div class="module-title">Data Vortex</div>
+                <div class="module-description">Interactive 3D visualization of market data patterns.</div>
+            </a>
+
+            <a href="/api/terminal" class="module-card tbd-module" data-feature="terminal">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🖥️</div>
+                <div class="module-title">Terminal</div>
+                <div class="module-description">Advanced command interface for system control.</div>
+            </a>
+
+            <a href="/api/memory-architect" class="module-card tbd-module" data-feature="memory-architect">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">💾</div>
+                <div class="module-title">Memory Architect</div>
+                <div class="module-description">Manage and explore the immortal memory architecture.</div>
+            </a>
+
+            <a href="/api/network-hub" class="module-card tbd-module" data-feature="network-hub">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🔄</div>
+                <div class="module-title">Network Hub</div>
+                <div class="module-description">Monitor network connections and data flow.</div>
+            </a>
+
+            <!-- Row 3: Analysis Tools -->
+            <div class="grid-row-title">🔬 ANALYSIS TOOLS</div>
+
+            <a href="/api/research-lab" class="module-card tbd-module" data-feature="research-lab">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🧪</div>
+                <div class="module-title">Research Lab</div>
+                <div class="module-description">Experimental features and research tools.</div>
+            </a>
+
+            <a href="/api/trap-radar" class="module-card tbd-module" data-feature="trap-detector">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">📡</div>
+                <div class="module-title">Trap Radar</div>
+                <div class="module-description">Advanced visualization of market manipulation patterns.</div>
+            </a>
+
+            <a href="/api/fibonacci-oracle" class="module-card tbd-module" data-feature="fibonacci-oracle">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🔮</div>
+                <div class="module-title">Fibonacci Oracle</div>
+                <div class="module-description">Mathematical pattern recognition for market predictions.</div>
+            </a>
+
+            <a href="/api/trader-suite" class="module-card tbd-module" data-feature="trader-suite">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">📈</div>
+                <div class="module-title">Trader Suite</div>
+                <div class="module-description">Advanced tools for automated trading strategies.</div>
+            </a>
+
+            <a href="/api/quantum-patterns" class="module-card tbd-module" data-feature="quantum-patterns">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🧩</div>
+                <div class="module-title">Quantum Patterns</div>
+                <div class="module-description">Advanced pattern detection using quantum algorithms.</div>
+            </a>
+
+            <!-- Row 4: Security & Analysis -->
+            <div class="grid-row-title">🔐 SECURITY & ANALYSIS</div>
+
+            <a href="/api/security-console" class="module-card tbd-module" data-feature="security-console">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🔐</div>
+                <div class="module-title">Security Console</div>
+                <div class="module-description">System security monitoring and configuration.</div>
+            </a>
+
+            <a href="/api/sacred-geometry" class="module-card tbd-module" data-feature="sacred-geometry">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">💠</div>
+                <div class="module-title">Sacred Geometry</div>
+                <div class="module-description">Visualization of divine pattern recognition in markets.</div>
+            </a>
+
+            <a href="/api/market-waves" class="module-card tbd-module" data-feature="market-waves">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🌊</div>
+                <div class="module-title">Market Waves</div>
+                <div class="module-description">Analysis of market wave patterns and cycles.</div>
+            </a>
+
+            <a href="/api/divine-monitor" class="module-card tbd-module" data-feature="divine-monitor">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🧿</div>
+                <div class="module-title">Divine Monitor</div>
+                <div class="module-description">Tracking cosmic influences on market patterns.</div>
+            </a>
+
+            <a href="/api/energy-flows" class="module-card tbd-module" data-feature="energy-flows">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">⚡</div>
+                <div class="module-title">Energy Flows</div>
+                <div class="module-description">Analysis of market energy and momentum indicators.</div>
+            </a>
+
+            <!-- Row 5: Utilities -->
+            <div class="grid-row-title">🛠️ UTILITIES</div>
+
+            <a href="/api/mobile-gateway" class="module-card tbd-module" data-feature="mobile-gateway">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">📱</div>
+                <div class="module-title">Mobile Gateway</div>
+                <div class="module-description">Mobile access to all system features and alerts.</div>
+            </a>
+
+            <a href="/portal/divine_chronicles/" class="module-card live-module" data-feature="divine-chronicles">
+                <div class="status-tag live">LIVE</div>
+                <div class="module-icon">📚</div>
+                <div class="module-title">Divine Chronicles</div>
+                <div class="module-description">The sacred texts of system documentation.</div>
+                <div class="version-tag">v1.0.1</div>
+            </a>
+
+            <a href="/api/trading-journal" class="module-card tbd-module" data-feature="trading-journal">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">📝</div>
+                <div class="module-title">Trading Journal</div>
+                <div class="module-description">Record and analyze your trading decisions.</div>
+            </a>
+
+            <a href="/api/market-scanner" class="module-card tbd-module" data-feature="market-scanner">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🔍</div>
+                <div class="module-title">Market Scanner</div>
+                <div class="module-description">Comprehensive market opportunity scanner.</div>
+            </a>
+
+            <a href="/api/omega-central" class="module-card tbd-module" data-feature="omega-central">
+                <div class="status-tag tbd">TBD</div>
+                <div class="module-icon">🔱</div>
+                <div class="module-title">OMEGA Central</div>
+                <div class="module-description">The central command hub for the entire system.</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Divine User Controls (Hidden by default) -->
+    <div class="admin-toggle" id="adminToggle">🔧</div>
+    <div class="admin-controls" id="adminControls">
+        <h3 style="margin-top: 0; color: #00FF00;">Divine Controls</h3>
+        <div id="featureToggleContainer">
+            <!-- Feature toggles will be dynamically added here -->
+        </div>
+        <button id="resetFlags"
+            style="margin-top: 10px; background-color: rgba(0, 80, 0, 0.8); color: #00FF00; border: 1px solid #00FF00; padding: 5px; cursor: pointer; width: 100%;">Reset
+            All Flags</button>
+        <div style="margin-top: 10px; font-size: 0.7rem;">To enable divine access:
+            localStorage.setItem('omega_divine_access', 'true')</div>
+    </div>
+
+    <script src="/portal/js/featureFlags.js"></script>
+    <script>
+        // Matrix Digital Rain Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Make canvas fill the window
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Characters to display
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@#&%!*+-=><~';
+
+        // Font size and columns
+        const fontSize = 18;
+        const columns = Math.floor(canvas.width / fontSize);
+
+        // Array to track the y position of each column
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height);
+        }
+
+        // Drawing function
+        function draw() {
+            // Set semi-transparent black background to create fade effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Set the text color and font
+            ctx.fillStyle = '#00FF00';
+            ctx.font = `${fontSize}px monospace`;
+
+            // For each column
+            for (let i = 0; i < drops.length; i++) {
+                // Choose a random character
+                const text = chars[Math.floor(Math.random() * chars.length)];
+
+                // Draw the character
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // Move the drop down
+                drops[i]++;
+
+                // Reset when it reaches bottom or randomly
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+            }
+        }
+
+        // Animation loop
+        setInterval(draw, 50);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Recalculate columns and drops
+            const newColumns = Math.floor(canvas.width / fontSize);
+
+            // If we have more columns now
+            if (newColumns > drops.length) {
+                for (let i = drops.length; i < newColumns; i++) {
+                    drops[i] = Math.floor(Math.random() * canvas.height);
+                }
+            }
+            // If we have fewer columns now
+            else if (newColumns < drops.length) {
+                drops.length = newColumns;
+            }
+        });
+
+        // Feature Flag Integration
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply feature flags to modules
+            const moduleCards = document.querySelectorAll('.module-card');
+
+            moduleCards.forEach(card => {
+                const featureName = card.getAttribute('data-feature');
+
+                if (featureName) {
+                    // Check if feature is enabled
+                    if (!window.omegaFeatureFlags.isEnabled(featureName)) {
+                        // If it's a TBD module, keep it visible but add disabled class
+                        if (card.classList.contains('tbd-module')) {
+                            card.classList.add('disabled');
+                            card.setAttribute('href', 'javascript:void(0)');
+                        }
+                        // If it's not specifically marked as LIVE or TBD, hide it
+                        else if (!card.classList.contains('live-module')) {
+                            card.style.display = 'none';
+                        }
+                    }
+
+                    // Mark modules in active development (from the roadmap)
+                    if (featureName === 'fibonacci-oracle' || featureName === 'trap-detector' || featureName === 'quantum-patterns') {
+                        const statusTag = card.querySelector('.status-tag');
+                        if (statusTag) {
+                            statusTag.className = 'status-tag dev';
+                            statusTag.textContent = 'DEV';
+                        }
+                        card.classList.remove('tbd-module');
+                        card.classList.add('dev-module');
+                    }
+                }
+            });
+
+            // Setup admin controls if divine user
+            if (window.omegaFeatureFlags.isDivineUser()) {
+                const adminToggle = document.getElementById('adminToggle');
+                const adminControls = document.getElementById('adminControls');
+                const featureToggleContainer = document.getElementById('featureToggleContainer');
+                const resetFlagsButton = document.getElementById('resetFlags');
+
+                // Show admin toggle button
+                adminToggle.style.display = 'block';
+
+                // Toggle admin controls visibility
+                adminToggle.addEventListener('click', function () {
+                    adminControls.classList.toggle('visible');
+                });
+
+                // Create feature toggles
+                Object.keys(window.omegaFeatureFlags.flags).forEach(flag => {
+                    // Skip always-enabled modules
+                    if (flag === 'matrix-portal') return;
+
+                    const isEnabled = window.omegaFeatureFlags.isEnabled(flag);
+
+                    const toggleDiv = document.createElement('div');
+                    toggleDiv.className = 'feature-toggle';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `toggle-${flag}`;
+                    checkbox.checked = isEnabled;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `toggle-${flag}`;
+                    label.textContent = flag;
+
+                    checkbox.addEventListener('change', function () {
+                        if (this.checked) {
+                            window.omegaFeatureFlags.enableFeature(flag);
+                        } else {
+                            window.omegaFeatureFlags.disableFeature(flag);
+                        }
+
+                        // Reload page to apply changes
+                        window.location.reload();
+                    });
+
+                    toggleDiv.appendChild(checkbox);
+                    toggleDiv.appendChild(label);
+                    featureToggleContainer.appendChild(toggleDiv);
+                });
+
+                // Reset button functionality
+                resetFlagsButton.addEventListener('click', function () {
+                    window.omegaFeatureFlags.resetToDefaults();
+                    window.location.reload();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

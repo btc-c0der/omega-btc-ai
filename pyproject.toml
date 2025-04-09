@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omega_ai"
+version = "0.5.3"
+description = "OMEGA BTC AI - Advanced Bitcoin Market Analysis System"
+requires-python = ">=3.8"
+authors = [
+    {name = "OMEGA BTC AI DIVINE COLLECTIVE", email = "divine@omega-btc-ai.com"},
+]
+dependencies = [
+    "flask",
+    "flask-cors",
+    "flask-socketio",
+    "gevent-websocket",
+    "redis",
+    "ccxt",
+    "plotly",
+    "numpy",
+    "pandas",
+    "torch",
+    "diffusers",
+    "transformers",
+    "accelerate",
+    "pillow",
+]
+dynamic = ["readme", "license", "classifiers"]
+
+[tool.setuptools.packages.find]
+include = ["omega_ai*"]
+exclude = ["tests*"] 

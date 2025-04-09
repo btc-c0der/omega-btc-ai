@@ -18,7 +18,7 @@ psql -U omega_user -d omega_db
 3️⃣ Manually Test DB
 SELECT * FROM mm_traps LIMIT 5;
 Expected Output:
- id | timestamp  | btc_price | change  | trap_type 
+ id | timestamp  | btc_price | change  | trap_type
 ----+-----------+-----------+---------+-----------
   1 | 2025-03-07T15:45:10Z | 90235.45 | -2.45% | Fakeout
 (1 row)
@@ -39,19 +39,21 @@ python omega_ai/db_manager/database.py
 2️⃣ Start BTC Live Feed
 python omega_ai/data_feed/btc_live_feed.py
 3️⃣ Run MM Trap Detector
-python omega_ai/mm_trap_detector/mm_trap_analyzer.py
+python omega_ai/mm_trap_detector/mm_trap_detector.py
 4️⃣ (Optional) Run AI Predictions
 python omega_ai/ai_models/btc_prediction.py
 
 📌 One-Line Script to Start Everything
 Want to run everything at once? Create start_omega.sh in the root folder:
-#!/bin/bash
+
+# !/bin/bash
+
 echo "🚀 Starting OMEGA AI BTC System..."
 python omega_ai/db_manager/database.py &
 sleep 2
 python omega_ai/data_feed/btc_live_feed.py &
 sleep 2
-python omega_ai/mm_trap_detector/mm_trap_analyzer.py &
+python omega_ai/mm_trap_detector/mm_trap_detector.py &
 sleep 2
 echo "✅ OMEGA AI BTC System is Live!"
 Run it:
