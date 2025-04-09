@@ -4,93 +4,610 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divine Book Dashboard v3</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600&display=swap">
+    <title>Divine Dashboard v3</title>
+    <meta name="description" content="A powerful dashboard interface for monitoring and management">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="divine-container">
-        <header class="divine-header">
-            <div class="logo">
-                <h1>Divine Book</h1>
-                <span class="version-badge">v3</span>
-            </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="#dashboard" class="active">Dashboard</a></li>
-                    <li><a href="#chronicles">Chronicles</a></li>
-                    <li><a href="#quantum">Quantum</a></li>
-                    <li><a href="#sacred">Sacred Patterns</a></li>
-                    <li><a href="#settings">Settings</a></li>
-                </ul>
-            </nav>
-            <div class="user-controls">
-                <div class="theme-toggle">
-                    <span class="light-icon">☀️</span>
-                    <span class="dark-icon">🌙</span>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Divine Dashboard</span>
                 </div>
-                <div class="user-profile">
-                    <img src="assets/user-avatar.png" alt="User Profile" class="avatar">
-                </div>
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-        </header>
 
-        <main class="divine-content">
-            <section class="dashboard-section active" id="dashboard-section">
+            <div class="sidebar-content">
+                <nav class="main-nav">
+                    <a href="#dashboard" class="nav-link active">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#code-stats" class="nav-link">
+                        <i class="fas fa-code"></i>
+                        <span>Code Stats</span>
+                    </a>
+                    <a href="#performance" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Performance</span>
+                    </a>
+                    <a href="#tasks" class="nav-link">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tasks</span>
+                    </a>
+                    <a href="#settings" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-actions">
+                    <a href="#help" class="nav-link">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Help & Support</span>
+                    </a>
+                    <a href="#docs" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Documentation</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <img src="https://via.placeholder.com/40" alt="User Avatar">
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">John Developer</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="page-title">
+                        <h1>Dashboard</h1>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search...">
+                    </div>
+
+                    <div class="header-actions">
+                        <button class="refresh-btn" title="Refresh Data">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="notifications" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <button class="theme-toggle" title="Toggle Theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="active">
                 <div class="section-header">
-                    <h2>Divine Dashboard</h2>
-                    <p class="subtitle">Cosmic insights and divine metrics</p>
+                    <h2>Dashboard Overview</h2>
+                    <p>Welcome back! Here's what's happening with your projects.</p>
+                </div>
+
+                <div class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stat-card" id="commits-today">
+                        <div class="stat-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Commits Today</div>
+                            <div class="stat-value">--</div>
+                            <div class="stat-change">--</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="lines-changed">
+                        <div class="stat-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Lines Changed</div>
+                            <div class="stat-value">--</div>
+                            <div class="stat-change">--</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="pull-requests">
+                        <div class="stat-icon">
+                            <i class="fas fa-code-merge"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Pull Requests</div>
+                            <div class="stat-value">--</div>
+                            <div class="stat-change">--</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="deployments">
+                        <div class="stat-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Deployments</div>
+                            <div class="stat-value">--</div>
+                            <div class="stat-change">--</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
-                    <div class="card metrics-card">
-                        <h3>Divine Metrics</h3>
-                        <div class="metrics-container" id="divine-metrics">
-                            <!-- Metrics will be loaded here -->
-                            <div class="loading-indicator">Loading divine metrics...</div>
+                    <div class="dashboard-card" id="recent-activity">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                            <div class="card-actions">
+                                <button class="card-action"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-list">
+                                <!-- Activity items will be added here by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" class="view-all">View All Activity</a>
                         </div>
                     </div>
 
-                    <div class="card chronicles-card">
-                        <h3>Recent Chronicles</h3>
-                        <div class="chronicles-list" id="recent-chronicles">
-                            <!-- Chronicles will be loaded here -->
-                            <div class="loading-indicator">Loading chronicles...</div>
+                    <div class="dashboard-card" id="project-status">
+                        <div class="card-header">
+                            <h3>Project Status</h3>
+                            <div class="card-actions">
+                                <button class="card-action"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="project-list">
+                                <div class="project-item">
+                                    <div class="project-info">
+                                        <div class="project-name">Divine Dashboard v3</div>
+                                        <div class="project-desc">Modern dashboard redesign</div>
+                                    </div>
+                                    <div class="project-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress" style="width: 75%"></div>
+                                        </div>
+                                        <div class="progress-value">75%</div>
+                                    </div>
+                                </div>
+
+                                <div class="project-item">
+                                    <div class="project-info">
+                                        <div class="project-name">API Gateway</div>
+                                        <div class="project-desc">Backend services gateway</div>
+                                    </div>
+                                    <div class="project-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress" style="width: 40%"></div>
+                                        </div>
+                                        <div class="progress-value">40%</div>
+                                    </div>
+                                </div>
+
+                                <div class="project-item">
+                                    <div class="project-info">
+                                        <div class="project-name">User Authentication</div>
+                                        <div class="project-desc">Auth service improvements</div>
+                                    </div>
+                                    <div class="project-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress" style="width: 90%"></div>
+                                        </div>
+                                        <div class="progress-value">90%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" class="view-all">View All Projects</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Code Stats Section -->
+            <section id="code-stats">
+                <div class="section-header">
+                    <h2>Code Statistics</h2>
+                    <p>Track your code metrics and repository statistics.</p>
+                </div>
+
+                <div class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+
+                <div class="stats-charts">
+                    <div class="stats-chart-card" id="language-chart">
+                        <div class="card-header">
+                            <h3>Language Distribution</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="placeholder-chart"></div>
                         </div>
                     </div>
 
-                    <div class="card quantum-card">
-                        <h3>Quantum Insights</h3>
-                        <div class="quantum-container" id="quantum-insights">
-                            <!-- Quantum insights will be loaded here -->
-                            <div class="loading-indicator">Loading quantum insights...</div>
+                    <div class="stats-chart-card" id="contribution-chart">
+                        <div class="card-header">
+                            <h3>Contribution Activity</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="placeholder-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-table-container">
+                    <div class="card-header">
+                        <h3>Repositories</h3>
+                        <div class="table-actions">
+                            <button class="table-action"><i class="fas fa-filter"></i> Filter</button>
+                            <button class="table-action"><i class="fas fa-sort"></i> Sort</button>
                         </div>
                     </div>
 
-                    <div class="card sacred-card">
-                        <h3>Sacred Patterns</h3>
-                        <div class="sacred-container" id="sacred-patterns">
-                            <!-- Sacred patterns will be loaded here -->
-                            <div class="loading-indicator">Loading sacred patterns...</div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="repos-table">
+                            <thead>
+                                <tr>
+                                    <th>Repository</th>
+                                    <th>Description</th>
+                                    <th>Language</th>
+                                    <th>Stars</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows will be added by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Performance Section -->
+            <section id="performance">
+                <div class="section-header">
+                    <h2>Performance Metrics</h2>
+                    <p>Monitor application and system performance.</p>
+                </div>
+
+                <div class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+
+                <div class="stats-charts">
+                    <div class="stats-chart-card" id="build-time-chart">
+                        <div class="card-header">
+                            <h3>Build Times</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="placeholder-chart"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-chart-card" id="api-response-chart">
+                        <div class="card-header">
+                            <h3>API Response Times</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="placeholder-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="logs-section">
+                    <div class="card-header">
+                        <h3>System Logs</h3>
+                        <div class="log-filter-container">
+                            <label for="log-filter">Filter:</label>
+                            <select id="log-filter">
+                                <option value="all">All Logs</option>
+                                <option value="info">Info</option>
+                                <option value="warning">Warning</option>
+                                <option value="error">Error</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="logs-container">
+                        <!-- Log items will be added by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section id="tasks">
+                <div class="section-header">
+                    <h2>Tasks & ToDos</h2>
+                    <p>Manage your tasks and track progress.</p>
+                </div>
+
+                <div class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+
+                <div class="tasks-header">
+                    <div class="tasks-actions">
+                        <button id="add-task-btn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                    <div class="tasks-filter">
+                        <input type="text" placeholder="Filter tasks...">
+                    </div>
+                </div>
+
+                <div class="tasks-grid">
+                    <div class="task-list" id="in-progress-tasks">
+                        <div class="task-list-header">
+                            <h3>In Progress <span class="task-count">0</span></h3>
+                        </div>
+                        <div class="task-items">
+                            <!-- Task items will be added by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="task-list" id="completed-tasks">
+                        <div class="task-list-header">
+                            <h3>Completed <span class="task-count">0</span></h3>
+                        </div>
+                        <div class="task-items">
+                            <!-- Task items will be added by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="task-list" id="upcoming-tasks">
+                        <div class="task-list-header">
+                            <h3>Upcoming <span class="task-count">0</span></h3>
+                        </div>
+                        <div class="task-items">
+                            <!-- Task items will be added by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                    <p>Configure your dashboard preferences.</p>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>General Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="settings-group">
+                                <div class="setting-item">
+                                    <div class="setting-label">
+                                        <label>Dark Mode</label>
+                                        <p>Enable dark mode interface</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="switch">
+                                            <input type="checkbox" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-label">
+                                        <label>Email Notifications</label>
+                                        <p>Receive email notifications</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="switch">
+                                            <input type="checkbox">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-label">
+                                        <label>Default Dashboard</label>
+                                        <p>Choose your default view</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select>
+                                            <option>Dashboard Overview</option>
+                                            <option>Tasks</option>
+                                            <option>Code Stats</option>
+                                            <option>Performance</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>Account Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="settings-group">
+                                <div class="setting-item">
+                                    <div class="setting-label">
+                                        <label>User Name</label>
+                                    </div>
+                                    <div class="setting-control">
+                                        <input type="text" value="John Developer">
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-label">
+                                        <label>Email Address</label>
+                                    </div>
+                                    <div class="setting-control">
+                                        <input type="email" value="john@example.com">
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-label">
+                                        <label>Change Password</label>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button class="btn btn-outline">Change Password</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Help & Support Section -->
+            <section id="help">
+                <div class="section-header">
+                    <h2>Help & Support</h2>
+                    <p>Get help with using the Divine Dashboard.</p>
+                </div>
+
+                <div class="help-grid">
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>Documentation</h3>
+                        <p>Browse our comprehensive documentation.</p>
+                        <a href="#" class="btn btn-outline">View Docs</a>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h3>FAQs</h3>
+                        <p>Find answers to common questions.</p>
+                        <a href="#" class="btn btn-outline">View FAQs</a>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h3>Video Tutorials</h3>
+                        <p>Learn with step-by-step tutorials.</p>
+                        <a href="#" class="btn btn-outline">Watch Videos</a>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>Contact Support</h3>
+                        <p>Get help from our support team.</p>
+                        <a href="#" class="btn btn-outline">Contact Us</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Documentation Section -->
+            <section id="docs">
+                <div class="section-header">
+                    <h2>Documentation</h2>
+                    <p>Reference guides and API documentation.</p>
+                </div>
+
+                <div class="docs-search">
+                    <input type="text" placeholder="Search documentation...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="docs-grid">
+                    <div class="docs-sidebar">
+                        <h3>Categories</h3>
+                        <ul class="docs-nav">
+                            <li><a href="#" class="active">Getting Started</a></li>
+                            <li><a href="#">User Interface</a></li>
+                            <li><a href="#">API Reference</a></li>
+                            <li><a href="#">Customization</a></li>
+                            <li><a href="#">Best Practices</a></li>
+                            <li><a href="#">Troubleshooting</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="docs-content">
+                        <h3>Getting Started with Divine Dashboard</h3>
+
+                        <div class="docs-section">
+                            <h4>Introduction</h4>
+                            <p>Divine Dashboard is a modern, responsive dashboard application designed to help you
+                                monitor and manage your projects efficiently.</p>
+                        </div>
+
+                        <div class="docs-section">
+                            <h4>Installation</h4>
+                            <p>To install the Divine Dashboard, follow these steps:</p>
+                            <pre><code>git clone https://github.com/example/divine-dashboard.git
+cd divine-dashboard
+npm install
+npm start</code></pre>
+                        </div>
+
+                        <div class="docs-section">
+                            <h4>Configuration</h4>
+                            <p>Configure the dashboard by editing the <code>config.js</code> file in the root directory.
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
         </main>
-
-        <footer class="divine-footer">
-            <div class="footer-content">
-                <p>Divine Book Dashboard v3 &copy; 2025</p>
-                <p class="license-notice">Blessed under the <a href="BOOK/divine_chronicles/GBU2_LICENSE.html">GBU2™
-                        License</a></p>
-            </div>
-        </footer>
     </div>
 
     <script src="js/main.js"></script>
-    <script src="js/dashboard.js"></script>
 </body>
 
 </html>
