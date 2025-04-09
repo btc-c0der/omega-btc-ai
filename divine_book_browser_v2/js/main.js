@@ -64,24 +64,26 @@ function initDocumentList() {
 // Fetch documents recursively from the entire repository
 async function fetchRepositoryDocuments() {
     try {
-        // This is a simulation for demo - in a real app, you would make a server call
-        // that recursively scans the repository directories
+        // Fetch from API endpoint that returns all markdown files
+        const response = await fetch('/api/documents');
+        if (!response.ok) {
+            throw new Error(`Error fetching documents: ${response.status} ${response.statusText}`);
+        }
 
-        // Load simulated repository structure - in this case we're gathering documents from:
-        // 1. Main BOOK directory
-        // 2. Organized BOOK directory
-        // 3. Source code directories with documentation
-
-        const documents = [
-            ...simulateBookDirectory(),
-            ...simulateOrganizedDirectory(),
-            ...simulateSourceDirectory()
-        ];
+        // Parse the JSON response
+        const documents = await response.json();
+        console.log(`Loaded ${documents.length / 2} documents (${documents.length} entries including HTML versions)`);
 
         return documents;
     } catch (error) {
         console.error('Error fetching repository documents:', error);
-        return [];
+        // Fallback to simulated data if API fails
+        console.log('Falling back to simulated data...');
+        return [
+            ...simulateBookDirectory(),
+            ...simulateOrganizedDirectory(),
+            ...simulateSourceDirectory()
+        ];
     }
 }
 
@@ -303,55 +305,87 @@ function displayDocumentList(category) {
     const documentList = document.getElementById('document-list');
     const categoryTitle = document.getElementById('category-title');
 
-    // Clear the current list
+    if (!documentList || !categoryTitle) {
+        console.error('Document list or category title element not found');
+        return;
+    }
+
+    // Clear the list
     documentList.innerHTML = '';
 
-    // Update category title
+    // Set category title
     if (category === 'all') {
         categoryTitle.textContent = 'All Documents';
     } else {
-        categoryTitle.textContent = `${category} Documents`;
+        categoryTitle.textContent = category;
     }
 
-    // Filter documents by category and only show MD versions (not HTML duplicates)
-    const filteredDocuments = documentDatabase.filter(doc =>
-        (category === 'all' || doc.category === category) && doc.type === 'md'
-    );
+    // Filter documents by category if needed
+    let filteredDocuments = documentDatabase;
+    if (category !== 'all') {
+        filteredDocuments = documentDatabase.filter(doc => doc.category === category && doc.type === 'md');
+    } else {
+        // Just show markdown versions for the full list (not HTML)
+        filteredDocuments = documentDatabase.filter(doc => doc.type === 'md');
+    }
 
-    // Sort documents by title
+    // Sort documents alphabetically by title
     filteredDocuments.sort((a, b) => a.title.localeCompare(b.title));
 
-    // Add documents to the list
-    filteredDocuments.forEach(doc => {
-        const docItem = document.createElement('div');
-        docItem.className = 'document-item';
-        docItem.dataset.path = doc.path;
-        docItem.dataset.htmlPath = doc.path.replace('.md', '.html');
-
-        docItem.innerHTML = `
-            <h4>${doc.title}</h4>
-            <p>${doc.description}</p>
-        `;
-
-        docItem.addEventListener('click', () => {
-            // Remove active class from all items
-            document.querySelectorAll('.document-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // Add active class to clicked item
-            docItem.classList.add('active');
-
-            // Load the document
-            loadDocument(doc.path, doc.path.replace('.md', '.html'), doc.title);
-        });
-
-        documentList.appendChild(docItem);
+    // Count the number of documents in each category
+    const categoryCount = {};
+    documentDatabase.filter(doc => doc.type === 'md').forEach(doc => {
+        categoryCount[doc.category] = (categoryCount[doc.category] || 0) + 1;
     });
 
-    // Show message if no documents found
+    // Display category count
+    if (category === 'all') {
+        categoryTitle.textContent = `All Documents (${filteredDocuments.length})`;
+
+        // Add category summary if showing all documents
+        const categorySummary = document.createElement('div');
+        categorySummary.className = 'category-summary';
+
+        // Sort categories by count (descending)
+        const sortedCategories = Object.entries(categoryCount)
+            .sort((a, b) => b[1] - a[1])
+            .map(([cat, count]) => `${cat}: ${count}`);
+
+        categorySummary.textContent = sortedCategories.join(' | ');
+        documentList.appendChild(categorySummary);
+    } else {
+        categoryTitle.textContent = `${category} (${filteredDocuments.length})`;
+    }
+
+    // Add document items to the list
     if (filteredDocuments.length === 0) {
-        documentList.innerHTML = '<p class="no-docs">No documents found in this category.</p>';
+        const noDocsMessage = document.createElement('div');
+        noDocsMessage.className = 'no-documents';
+        noDocsMessage.textContent = 'No documents found in this category.';
+        documentList.appendChild(noDocsMessage);
+    } else {
+        filteredDocuments.forEach(doc => {
+            const docItem = document.createElement('div');
+            docItem.className = 'document-item';
+            docItem.innerHTML = `
+                <h4 class="document-title">${doc.title}</h4>
+                <p class="document-description">${doc.description || ''}</p>
+                <span class="document-category">${doc.category}</span>
+            `;
+
+            // Add click handler to load the document
+            docItem.addEventListener('click', () => {
+                // Find the corresponding HTML version
+                const htmlDoc = documentDatabase.find(d =>
+                    d.path === doc.path.replace('.md', '.html') && d.type === 'html'
+                );
+
+                const htmlPath = htmlDoc ? htmlDoc.path : doc.path.replace('.md', '.html');
+                loadDocument(doc.path, htmlPath, doc.title);
+            });
+
+            documentList.appendChild(docItem);
+        });
     }
 }
 
@@ -371,10 +405,37 @@ async function loadDocument(mdPath, htmlPath, title) {
     };
 
     try {
-        // In a real application, you would fetch the actual file content
-        // For this demo, we'll use simulated content based on the file path
-        const mdContent = await fetchSimulatedContent(mdPath);
-        const htmlContent = await fetchSimulatedContent(htmlPath);
+        // Show loading indicator
+        markdownViewer.innerHTML = '<div class="loading">Loading document...</div>';
+        htmlViewer.innerHTML = '<div class="loading">Loading document...</div>';
+
+        // Fetch actual document content from the server
+        const mdResponse = await fetch(`/api/content?path=${encodeURIComponent(mdPath)}`);
+        if (!mdResponse.ok) {
+            throw new Error(`Failed to load markdown: ${mdResponse.status} ${mdResponse.statusText}`);
+        }
+        const mdContent = await mdResponse.text();
+
+        // Fetch HTML version if available
+        let htmlContent = '';
+        try {
+            const htmlResponse = await fetch(`/api/content?path=${encodeURIComponent(htmlPath)}`);
+            if (htmlResponse.ok) {
+                htmlContent = await htmlResponse.text();
+            } else {
+                // If HTML version not found, convert markdown to HTML
+                htmlContent = `<div class="no-html-version">
+                    <p>No HTML version available. Showing converted Markdown instead.</p>
+                    ${marked.parse(mdContent)}
+                </div>`;
+            }
+        } catch (htmlError) {
+            console.warn('Error loading HTML version:', htmlError);
+            htmlContent = `<div class="error-html-version">
+                <p>Error loading HTML version. Showing converted Markdown instead.</p>
+                ${marked.parse(mdContent)}
+            </div>`;
+        }
 
         // Render Markdown content
         markdownViewer.innerHTML = marked.parse(mdContent);
@@ -388,7 +449,24 @@ async function loadDocument(mdPath, htmlPath, title) {
 
     } catch (error) {
         console.error('Error loading document:', error);
-        markdownViewer.innerHTML = '<p class="error">Error loading document. Please try again.</p>';
+        markdownViewer.innerHTML = `<p class="error">Error loading document: ${error.message}. Please try again.</p>`;
+        htmlViewer.innerHTML = '<p class="error">Document could not be loaded.</p>';
+
+        // Fall back to simulated content for development/demo purposes
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Falling back to simulated content for development...');
+            try {
+                const mdContent = await fetchSimulatedContent(mdPath);
+                const htmlContent = await fetchSimulatedContent(htmlPath);
+
+                markdownViewer.innerHTML = marked.parse(mdContent);
+                htmlViewer.innerHTML = htmlContent;
+
+                console.log('Loaded simulated content successfully');
+            } catch (fallbackError) {
+                console.error('Even fallback content failed:', fallbackError);
+            }
+        }
     }
 }
 
@@ -505,11 +583,41 @@ function initEventListeners() {
         });
     }
 
-    // Code Stats link (now points to external page)
+    // Code Stats link functionality
     const codeStatsLink = document.getElementById('code-stats-link');
     if (codeStatsLink) {
-        // This is already handled by the href and target="_blank" in HTML
-        // No need for additional JavaScript for a simple link
+        // Add click event that calls initCodeStats function
+        codeStatsLink.addEventListener('click', function (e) {
+            // Since we're using target="_blank", we don't need to prevent default
+            // or manipulate the display - it will open in a new tab
+            // However, we can initialize stats if window.initCodeStats exists
+            if (typeof window.initCodeStats === 'function') {
+                window.initCodeStats();
+            }
+        });
+    }
+
+    // Refresh button for stats
+    const refreshBtn = document.getElementById('refresh-stats');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt spinning"></i> Refreshing...';
+
+            // Simulate API call delay
+            setTimeout(function () {
+                // Call updateCodeStatistics if it exists
+                if (typeof window.updateCodeStatistics === 'function') {
+                    window.updateCodeStatistics();
+                } else if (typeof window.initCodeStats === 'function') {
+                    // Fallback to reinitializing the stats
+                    window.initCodeStats();
+                }
+
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+            }, 1000);
+        });
     }
 
     // Keyboard shortcuts

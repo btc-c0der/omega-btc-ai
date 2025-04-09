@@ -1,3 +1,25 @@
+// Initialize localStorage with default stats if it doesn't exist
+(function initializeLocalStorage() {
+    if (!localStorage.getItem('omega_code_stats')) {
+        console.log('Creating initial statistics in localStorage');
+        // Create initial stats data
+        const initialStats = {
+            total_files: 248,
+            total_lines: 53842,
+            total_bytes: 44563200, // ~42.5MB
+            last_updated: new Date().toISOString(),
+            by_extension: {
+                "py": { files: 32, lines: 12450 },
+                "js": { files: 48, lines: 15890 },
+                "html": { files: 25, lines: 8750 },
+                "css": { files: 18, lines: 6300 },
+                "md": { files: 125, lines: 10452 }
+            }
+        };
+        localStorage.setItem('omega_code_stats', JSON.stringify(initialStats));
+    }
+})();
+
 // Code Statistics Dashboard functionality
 // Make the function globally accessible so it can be called from main.js
 window.initCodeStats = function () {
@@ -22,31 +44,103 @@ window.initCodeStats = function () {
         files: null
     };
 
-    // Function to fetch and update statistics
-    function updateCodeStatistics() {
-        // In a real implementation, this would fetch data from the server
-        // For now, we'll use sample data
-        const statistics = {
-            totalFiles: 248,
-            totalDirectories: 42,
-            totalLines: 53842,
-            lastUpdated: new Date().toLocaleString(),
-            languages: {
-                "Python": 32,
-                "JavaScript": 48,
-                "HTML": 25,
-                "CSS": 18,
-                "Markdown": 125
+    // Function to fetch and update statistics - also made globally accessible
+    window.updateCodeStatistics = function () {
+        // Try to get stats from localStorage first
+        let statistics;
+        try {
+            const savedStats = localStorage.getItem('omega_code_stats');
+            if (savedStats) {
+                const parsed = JSON.parse(savedStats);
+                statistics = {
+                    totalFiles: parsed.total_files,
+                    totalLines: parsed.total_lines,
+                    totalBytes: parsed.total_bytes,
+                    lastUpdated: new Date(parsed.last_updated).toLocaleString(),
+                    languages: {}
+                };
+
+                // Convert by_extension to languages format
+                for (const [ext, data] of Object.entries(parsed.by_extension)) {
+                    const languageName = getLanguageFromExtension(ext);
+                    statistics.languages[languageName] = data.files;
+                }
+            } else {
+                // This shouldn't happen as we initialize localStorage at the start,
+                // but keeping as a fallback
+                console.warn('No stats found in localStorage, creating new data');
+
+                // Fallback to sample data
+                statistics = {
+                    totalFiles: 248,
+                    totalDirectories: 42,
+                    totalLines: 53842,
+                    lastUpdated: new Date().toLocaleString(),
+                    languages: {
+                        "Python": 32,
+                        "JavaScript": 48,
+                        "HTML": 25,
+                        "CSS": 18,
+                        "Markdown": 125
+                    }
+                };
+
+                // Create localStorage entry for future use
+                const initialStats = {
+                    total_files: statistics.totalFiles,
+                    total_lines: statistics.totalLines,
+                    total_bytes: 44563200, // ~42.5MB
+                    last_updated: new Date().toISOString(),
+                    by_extension: {
+                        "py": { files: 32, lines: 12450 },
+                        "js": { files: 48, lines: 15890 },
+                        "html": { files: 25, lines: 8750 },
+                        "css": { files: 18, lines: 6300 },
+                        "md": { files: 125, lines: 10452 }
+                    }
+                };
+                localStorage.setItem('omega_code_stats', JSON.stringify(initialStats));
             }
-        };
+        } catch (error) {
+            console.error('Error parsing stats from localStorage:', error);
+            // Fallback to sample data
+            statistics = {
+                totalFiles: 248,
+                totalDirectories: 42,
+                totalLines: 53842,
+                lastUpdated: new Date().toLocaleString(),
+                languages: {
+                    "Python": 32,
+                    "JavaScript": 48,
+                    "HTML": 25,
+                    "CSS": 18,
+                    "Markdown": 125
+                }
+            };
+        }
+
+        // Make the dashboard visible
+        const dashboard = document.getElementById('code-stats-dashboard');
+        if (dashboard) {
+            dashboard.style.display = 'block';
+
+            // If document browser exists, hide it
+            const docBrowser = document.getElementById('document-browser');
+            if (docBrowser) {
+                docBrowser.style.display = 'none';
+            }
+        }
 
         // Update the statistics in the dashboard
         if (totalFilesEl) totalFilesEl.textContent = statistics.totalFiles;
         if (totalLinesEl) totalLinesEl.textContent = statistics.totalLines.toLocaleString();
         if (analysisDateEl) analysisDateEl.textContent = statistics.lastUpdated;
 
-        // Set total size (this wasn't in the original statistics object)
-        if (totalSizeEl) totalSizeEl.textContent = '42.5 MB';
+        // Set total size (using totalBytes from localStorage or fixed value)
+        if (totalSizeEl) {
+            const sizeInMB = statistics.totalBytes ? (statistics.totalBytes / (1024 * 1024)).toFixed(1) + ' MB' : '42.5 MB';
+            totalSizeEl.textContent = sizeInMB;
+        }
 
         // Since we don't have a language-stats element in the HTML, we'll use
         // the stats-table-body to display language distribution
@@ -73,7 +167,7 @@ window.initCodeStats = function () {
             // Create/update charts
             createCharts(statistics);
         }
-    }
+    };
 
     // Function to create charts
     function createCharts(statistics) {
@@ -133,34 +227,38 @@ window.initCodeStats = function () {
         return colors[language] || colors.default;
     }
 
-    // Set up click handler for refresh button
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function () {
-            refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt spinning"></i> Refreshing...';
+    // Function to get a language name from a file extension
+    function getLanguageFromExtension(ext) {
+        const extensionMap = {
+            "py": "Python",
+            "js": "JavaScript",
+            "html": "HTML",
+            "css": "CSS",
+            "md": "Markdown",
+            "json": "JSON",
+            "sh": "Shell",
+            "yml": "YAML",
+            "yaml": "YAML",
+            "ts": "TypeScript",
+            "jsx": "React",
+            "tsx": "React",
+            "rb": "Ruby",
+            "default": "Other"
+        };
 
-            // Simulate API call delay
-            setTimeout(function () {
-                updateCodeStatistics();
-                refreshBtn.disabled = false;
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
-            }, 1000);
-        });
+        return extensionMap[ext] || extensionMap.default;
     }
 
     // Set up sort functionality
     if (sortSelect) {
-        sortSelect.addEventListener('change', updateCodeStatistics);
+        sortSelect.addEventListener('change', function () {
+            // Call our global updateCodeStatistics function
+            window.updateCodeStatistics();
+        });
     }
 
     // Initial update
-    updateCodeStatistics();
-
-    // Ensure dashboard is visible
-    const dashboard = document.getElementById('code-stats-dashboard');
-    if (dashboard) {
-        dashboard.style.display = 'block';
-    }
+    window.updateCodeStatistics();
 };
 
 // Initialize on load
