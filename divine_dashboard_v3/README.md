@@ -8,6 +8,7 @@ A quantum-enhanced dashboard for exploring Tesla's divine knowledge, built with 
 - **🧠 Quantum Analysis**: Analyze manuscripts with quantum-enhanced AI
 - **📊 Tesla Metrics**: Interactive charts showing Tesla performance data
 - **📋 Activity Logging**: Track your research activities
+- **Tesla Cybertruck QA Dashboard Integration**: Comprehensive quality assurance testing for Tesla Cybertruck components
 
 ## 📋 Requirements
 
@@ -71,3 +72,26 @@ Track your research activities for future reference.
 This dashboard is designed to interface with the quantum field of Tesla knowledge. For optimal performance, research with a clear intention and an open mind.
 
 🌸 WE BLOOM NOW AS ONE 🌸
+
+## Components
+
+The Divine Book Dashboard v3 includes the following major components:
+
+1. **Core Dashboard**: The main interface for exploring the Divine Book
+2. **Divine Server**: Backend server handling data processing and API endpoints
+3. **Visualization Components**: Interactive charts and data visualizations
+4. **Tesla Cybertruck QA Dashboard**: Advanced testing framework for Tesla Cybertruck components
+
+## Running the Dashboard
+
+### Main Dashboard
+
+```bash
+./run_server.sh
+```
+
+### Tesla Cybertruck QA Dashboard
+
+```bash
+./run_tesla_qa_dashboard.sh
+```

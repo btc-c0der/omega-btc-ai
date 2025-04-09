@@ -14,6 +14,7 @@ import os
 import json
 import time
 from pathlib import Path
+from components.tesla_qa_integration import tesla_qa
 
 # Constants for Tesla theming
 TESLA_RED = "#E31937"
@@ -570,7 +571,28 @@ def create_dashboard():
                         col_count=(4, "fixed"),
                         label="Recent Activities"
                     )
-        
+            
+            # Tesla Cybertruck QA Integration
+            with gr.Tab("Tesla QA"):
+                gr.Markdown("# ⚡ Tesla Cybertruck QA Dashboard Integration ⚡")
+                
+                with gr.Row():
+                    with gr.Column():
+                        tesla_status = gr.JSON(label="Tesla QA Status", value={})
+                        refresh_tesla = gr.Button("Refresh Status")
+                        
+                        with gr.Row():
+                            launch_tesla_dash = gr.Button("Launch Tesla QA Dashboard")
+                            run_tesla_tests = gr.Button("Run Tesla Tests")
+                    
+                    with gr.Column():
+                        tesla_components = gr.Dropdown(
+                            label="Select Component", 
+                            choices=["All Components", "Exoskeleton", "Powertrain", "Suspension", "Autopilot"],
+                            value="All Components"
+                        )
+                        tesla_component_details = gr.JSON(label="Component Details", value={})
+            
         # Define event handlers for interactivity
         
         # Book viewing functionality
@@ -656,6 +678,50 @@ def create_dashboard():
             inputs=[metric_selector],
             outputs=[performance_chart, book_size_chart]
         )
+        
+        # Handle Tesla QA interactions
+        def get_tesla_status():
+            return tesla_qa.get_results_summary()
+        
+        def get_component_details(component):
+            if component == "All Components":
+                return tesla_qa.get_results_summary()
+            return tesla_qa.get_component_details(component.lower())
+        
+        def launch_tesla_dashboard():
+            success = tesla_qa.start_dashboard()
+            return "Dashboard launched successfully" if success else "Failed to launch dashboard"
+        
+        def run_tesla_test(component):
+            component_name = None if component == "All Components" else component.lower()
+            success = tesla_qa.run_tests(component_name)
+            status = tesla_qa.get_results_summary()
+            return "Tests completed successfully" if success else "Test execution failed", status
+        
+        refresh_tesla.click(
+            fn=get_tesla_status,
+            outputs=[tesla_status]
+        )
+        
+        tesla_components.change(
+            fn=get_component_details,
+            inputs=[tesla_components],
+            outputs=[tesla_component_details]
+        )
+        
+        launch_tesla_dash.click(
+            fn=launch_tesla_dashboard,
+            outputs=[gr.Textbox(label="Launch Status")]
+        )
+        
+        run_tesla_tests.click(
+            fn=run_tesla_test,
+            inputs=[tesla_components],
+            outputs=[gr.Textbox(label="Test Status"), tesla_status]
+        )
+        
+        # Initialize Tesla QA status
+        tesla_status.value = get_tesla_status()
     
     return dashboard
 
