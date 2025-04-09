@@ -1,6 +1,6 @@
 # Markdown to Medium Converter
 
-A Python utility that converts Markdown files to Medium-ready HTML format.
+A Python utility that converts Markdown files to Medium-ready HTML format, with advanced organization features for large document collections.
 
 ## Features
 
@@ -11,6 +11,10 @@ A Python utility that converts Markdown files to Medium-ready HTML format.
 - Maintains table formatting
 - Supports batch processing of multiple markdown files
 - Includes Medium-friendly CSS styling
+- **NEW**: Recursively scans directories for Markdown files
+- **NEW**: Smart content analysis and categorization
+- **NEW**: Organizes content into a structured directory
+- **NEW**: Generates a beautiful index.html for organized content
 
 ## Requirements
 
@@ -50,6 +54,41 @@ python md_to_medium.py directory_path/ --batch
 ```
 
 This will convert all .md files in the specified directory, creating corresponding .html files.
+
+### Recursively scan and convert Markdown files
+
+```bash
+python md_to_medium.py directory_path/ --recursive
+```
+
+Scans the specified directory and all subdirectories for Markdown files and converts them to Medium-ready HTML.
+
+### Analyze and organize content by category
+
+```bash
+python md_to_medium.py directory_path/ --recursive --organize
+```
+
+This will:
+
+1. Recursively scan the directory for Markdown files
+2. Convert them to Medium-ready HTML
+3. Analyze the content to determine the most appropriate category
+4. Recommend a new organizational structure
+5. If approved, create the new structure and copy all files
+6. Generate an index.html file to browse the organized content
+
+## Content Categories
+
+The script analyzes content and organizes files into these categories:
+
+- **Quantum**: Content related to quantum computing, qubits, entanglement
+- **Divine**: Spiritual, sacred, blessing, or ritual content
+- **Cosmic**: Content about cosmic patterns, matrix systems, oracles
+- **Technical**: Deployment, architecture, infrastructure, Kubernetes, Docker
+- **Trading**: Content about trading, markets, prices, cryptocurrency, positions
+- **Documentation**: Manuals, guides, readme files, catalogs, installation instructions
+- **Uncategorized**: Content that doesn't match any specific category
 
 ## Medium Import Instructions
 
@@ -99,6 +138,16 @@ To add captions to images, use the alt text attribute in your Markdown:
 
 The script will convert this to HTML with proper `<figure>` and `<figcaption>` tags.
 
+### Smart Directory Organization
+
+When using the `--organize` flag, the script creates a new directory structure with:
+
+- A main directory named "BOOK_ORGANIZED_[timestamp]"
+- Subdirectories for each content category
+- Files copied to their appropriate category directories
+- An index.html file that provides easy navigation of all content
+- Both the original Markdown and converted HTML files preserved
+
 ## Troubleshooting
 
 If you encounter any issues:
@@ -106,6 +155,7 @@ If you encounter any issues:
 - Make sure you have all the required dependencies installed
 - Check that your Markdown syntax is valid
 - For complex Markdown features, review the generated HTML to ensure proper conversion
+- If organizing content, ensure you have write permissions in the parent directory
 
 ## License
 
