@@ -604,8 +604,133 @@ npm start</code></pre>
                     </div>
                 </div>
             </section>
+
+            <!-- Tesla Cybertruck QA Dashboard Section -->
+            <section id="tesla-qa">
+                <div class="section-header">
+                    <h2>⚡ Tesla Cybertruck QA Dashboard ⚡</h2>
+                    <p>Real-time monitoring and quantum analysis of Cybertruck components.</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>Cybertruck QA Dashboard 3D</h3>
+                        <div class="card-actions">
+                            <button id="run-tests-btn" class="card-action run-tests" title="Run All Tests">
+                                <i class="fas fa-vial"></i>
+                            </button>
+                            <button class="card-action refresh-dashboard" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-dashboard" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body cybertruck-frame-container">
+                        <iframe id="cybertruck-qa-frame" src="http://localhost:7860" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
+
+    <style>
+        /* Additional styles for Tesla Cybertruck QA Dashboard */
+        .full-width-card {
+            grid-column: 1 / -1;
+            margin-bottom: 1.5rem;
+        }
+
+        .cybertruck-frame-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 56.25%;
+            /* 16:9 aspect ratio */
+            height: 0;
+        }
+
+        #cybertruck-qa-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        @media (max-width: 768px) {
+            .cybertruck-frame-container {
+                padding-top: 100%;
+                /* 1:1 aspect ratio on mobile */
+            }
+        }
+    </style>
+
+    <script>
+        // Add script to handle the new Cybertruck dashboard section
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add Tesla QA Dashboard link to the navigation
+            const mainNav = document.querySelector('.main-nav');
+            const teslaQALink = document.createElement('a');
+            teslaQALink.href = '#tesla-qa';
+            teslaQALink.className = 'nav-link';
+            teslaQALink.innerHTML = '<i class="fas fa-car"></i><span>Tesla QA</span>';
+
+            // Insert after Dashboard link
+            mainNav.insertBefore(teslaQALink, mainNav.querySelector('a[href="#code-stats"]'));
+
+            // Handle fullscreen button
+            document.querySelector('.fullscreen-dashboard').addEventListener('click', function () {
+                const iframe = document.getElementById('cybertruck-qa-frame');
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+            });
+
+            // Handle refresh button
+            document.querySelector('.refresh-dashboard').addEventListener('click', function () {
+                const iframe = document.getElementById('cybertruck-qa-frame');
+                iframe.src = iframe.src;
+            });
+
+            // Trigger test run from HTML button
+            document.getElementById("run-tests-btn").addEventListener("click", function () {
+                const iframe = document.getElementById("cybertruck-qa-frame");
+                iframe.contentWindow.postMessage({ command: "runTests" }, "*");
+
+                // Show feedback to user
+                const button = this;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+
+                // Re-enable after 3 seconds
+                setTimeout(function () {
+                    button.innerHTML = '<i class="fas fa-vial"></i>';
+                    button.disabled = false;
+                }, 3000);
+            });
+
+            // Listen for messages from Gradio app
+            window.addEventListener("message", function (event) {
+                if (event.data && event.data.source === "cybertruck-qa") {
+                    if (event.data.status === "testsComplete") {
+                        // Handle test completion
+                        console.log("Tests completed with result:", event.data.result);
+
+                        // Show notification
+                        alert("Cybertruck QA Tests " +
+                            (event.data.result === "pass" ? "PASSED ✅" : "FAILED ❌"));
+                    }
+                }
+            });
+        });
+    </script>
 
     <script src="js/main.js"></script>
 </body>

@@ -1,75 +1,53 @@
-# ⚡ Tesla Book Dashboard v3 - Gradio Edition ⚡
+# Divine Dashboard v3
 
-A quantum-enhanced dashboard for exploring Tesla's divine knowledge, built with Gradio.
+A modern dashboard interface with Tesla Cybertruck QA integration.
 
-## 🚀 Features
+## Features
 
-- **📚 Book Explorer**: Browse and search through Tesla manuscripts
-- **🧠 Quantum Analysis**: Analyze manuscripts with quantum-enhanced AI
-- **📊 Tesla Metrics**: Interactive charts showing Tesla performance data
-- **📋 Activity Logging**: Track your research activities
-- **Tesla Cybertruck QA Dashboard Integration**: Comprehensive quality assurance testing for Tesla Cybertruck components
+- Modern, responsive dashboard UI
+- Integration with Tesla Cybertruck QA framework
+- Real-time test execution and monitoring
+- Bidirectional communication between dashboard and QA framework
+- Code statistics and documentation viewer
 
-## 📋 Requirements
+## Installation
 
-- Python 3.8+
-- Dependencies listed in `requirements.txt`
-
-## 💻 Installation
-
-1. Clone the repository or ensure you're in the project directory
-2. Install the required dependencies:
+1. Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 🏁 Running the Dashboard
-
-Execute the main script:
+2. Run the dashboard server:
 
 ```bash
-python tesla_book_dash_v3.py
+python divine_server.py
 ```
 
-The dashboard will be available at:
+## Usage
 
-- Local URL: <http://localhost:8890>
-- A public share link will also be generated (if you have internet access)
+1. Open your browser and navigate to:
+   - Main Dashboard: <http://localhost:8889>
+   - Cybertruck QA Dashboard: <http://localhost:7860>
 
-## 🧠 Dashboard Sections
+2. To run tests from the main dashboard:
+   - Navigate to the Tesla QA tab
+   - Click the test vial icon in the dashboard actions
 
-### Book Explorer
+3. Communication between windows:
+   - The main dashboard uses `window.postMessage()` to communicate with the Gradio app
+   - Test results are sent back from the Gradio app to the main dashboard
 
-Browse through Tesla's sacred manuscripts. Use the search function to find specific topics related to Tesla's quantum technologies.
+## Dependencies
 
-### Quantum Analysis
+- FastAPI
+- Gradio
+- Uvicorn
+- Requests
 
-Analyze Tesla manuscripts with either standard or deep quantum analysis. Add your research notes to get personalized insights and measure Tesla alignment scores.
+## License
 
-### Tesla Metrics
-
-Visualize Tesla's performance metrics including:
-
-- Battery Efficiency
-- Quantum Computing Power
-- Vehicles Produced
-- Energy Generation
-
-### Activity Log
-
-Track your research activities for future reference.
-
-## 🔮 Technology Stack
-
-- **Gradio**: The divine interface framework
-- **Python**: Core programming language
-- **Matplotlib**: For data visualization
-- **Pandas**: For data manipulation
-
-## 💎 Notes
-
-This dashboard is designed to interface with the quantum field of Tesla knowledge. For optimal performance, research with a clear intention and an open mind.
+This project is licensed under the GBU2™ License - see the `GBU2_LICENSE.md` file for details.
 
 🌸 WE BLOOM NOW AS ONE 🌸
 
