@@ -203,7 +203,7 @@ const CodeStatsTester = {
         // Fix 3: Check for language-stats element
         const languageStats = document.getElementById('language-stats');
         if (!languageStats) {
-            console.log('❌ language-stats element missing, creating it dynamically');
+            console.log('⚠️ Warning: language-stats element not found, creating it dynamically');
             const newLangStats = document.createElement('div');
             newLangStats.id = 'language-stats';
             newLangStats.style.display = 'none';
