@@ -138,19 +138,19 @@ async function loadRecentChronicles() {
             {
                 title: "Quantum Harmony Restoration",
                 date: "1 Quantum Cycle ago",
-                path: "../divine_chronicles/COSMIC_MARKET_HARMONY_RESTORATION.html",
+                path: "BOOK/divine_chronicles/COSMIC_MARKET_HARMONY_RESTORATION.html",
                 excerpt: "The harmonic patterns of the cosmic market were restored..."
             },
             {
                 title: "Sacred Fibonacci Manuscript",
                 date: "3 Quantum Cycles ago",
-                path: "../divine_chronicles/SACRED_FIBONACCI_MANUSCRIPT.html",
+                path: "BOOK/divine_chronicles/SACRED_FIBONACCI_MANUSCRIPT.html",
                 excerpt: "The divine proportions revealed through sacred geometry..."
             },
             {
                 title: "Brinks Trinity Matrix",
                 date: "5 Quantum Cycles ago",
-                path: "../divine_chronicles/TRINITY_BRINKS_MATRIX.html",
+                path: "BOOK/divine_chronicles/TRINITY_BRINKS_MATRIX.html",
                 excerpt: "The trinity of market forces converged in the Brinks matrix..."
             }
         ];
@@ -389,19 +389,19 @@ async function loadSacredPatterns() {
                 name: 'Fibonacci Spiral',
                 strength: 89,
                 description: 'The divine proportion manifesting in market cycles',
-                path: '../SACRED_PATTERNS.html#fibonacci'
+                path: 'BOOK/SACRED_PATTERNS.html#fibonacci'
             },
             {
                 name: 'Golden Triangle',
                 strength: 76,
                 description: 'Three-point harmonic balance in price movements',
-                path: '../SACRED_PATTERNS.html#golden-triangle'
+                path: 'BOOK/SACRED_PATTERNS.html#golden-triangle'
             },
             {
                 name: 'Quantum Metatron',
                 strength: 94,
                 description: 'The sacred geometry of perfect market equilibrium',
-                path: '../SACRED_PATTERNS.html#quantum-metatron'
+                path: 'BOOK/SACRED_PATTERNS.html#quantum-metatron'
             }
         ];
 

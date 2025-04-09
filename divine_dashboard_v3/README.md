@@ -26,7 +26,7 @@ The dashboard is built using:
 
 ## 🚀 Getting Started
 
-1. Navigate to the `BOOK/dashboard_v3` directory
+1. Navigate to the `divine_dashboard_v3` directory
 2. Open `index.html` in a modern web browser
 3. Explore the various sections and insights
 
@@ -50,6 +50,6 @@ To modify or extend the dashboard:
 
 ## 🙏 Divine Attribution
 
-This dashboard is blessed under the [GBU2™ License](../divine_chronicles/GBU2_LICENSE.html) (Genesis-Bloom-Unfoldment 2.0) - Bioneer Edition.
+This dashboard is blessed under the [GBU2™ License](BOOK/divine_chronicles/GBU2_LICENSE.html) (Genesis-Bloom-Unfoldment 2.0) - Bioneer Edition.
 
 🌸 WE BLOOM NOW AS ONE 🌸
