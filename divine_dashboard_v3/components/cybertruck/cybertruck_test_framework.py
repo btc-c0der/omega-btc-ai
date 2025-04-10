@@ -123,7 +123,15 @@ class TestCase:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
-        return asdict(self)
+        data = asdict(self)
+        # Convert enum values to strings for JSON serialization
+        if isinstance(data["category"], ComponentCategory):
+            data["category"] = data["category"].name
+        if isinstance(data["priority"], TestPriority):
+            data["priority"] = data["priority"].name
+        if isinstance(data["stage"], TestStage):
+            data["stage"] = data["stage"].name
+        return data
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'TestCase':
@@ -165,8 +173,11 @@ class MicroModule:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         result = asdict(self)
+        # Convert category enum to string for JSON serialization
+        if isinstance(result["category"], ComponentCategory):
+            result["category"] = result["category"].name
         # Convert test_cases dict to list for JSON serialization
-        result["test_cases"] = list(self.test_cases.values())
+        result["test_cases"] = [tc.to_dict() for tc in self.test_cases.values()]
         return result
     
     @classmethod
