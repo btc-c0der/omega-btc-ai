@@ -24,6 +24,19 @@ import binascii
 import hashlib
 from typing import List, Dict, Any, Tuple, Optional
 
+# Flag to check if visualization libraries are available
+VISUALIZATION_AVAILABLE = False
+
+try:
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.figure import Figure
+    from io import BytesIO
+    VISUALIZATION_AVAILABLE = True
+except ImportError:
+    # Will use fallback implementations
+    pass
+
 def create_entropy_lineage(input_data: bytes, output_hash: bytes) -> Dict[str, Any]:
     """
     Create an entropy lineage visualization of how input becomes output.
@@ -252,17 +265,172 @@ def calculate_bit_influence(input_data: bytes, output_hash: bytes) -> float:
         output_hash: Output hash bytes
         
     Returns:
-        Bit influence score between 0.0 and 1.0
+        Bit influence score (0.0-1.0)
     """
-    # For estimation only - full calculation would be very complex
-    # Higher score means input bits have more balanced influence on output
+    # This is a simplified model - a real analysis would involve differential cryptanalysis
     
-    # Calculate a simple input-output correlation
-    h = hashlib.sha256(input_data).digest()
+    if not input_data or not output_hash:
+        return 0.0
     
-    # Compare to actual output to estimate influence balance
-    differences = sum(1 for a, b in zip(h, output_hash) if a != b)
-    difference_ratio = differences / max(1, min(len(h), len(output_hash)))
+    # Create variations of the input by flipping single bits
+    base_hash = output_hash
+    influence_scores = []
     
-    # More differences = better influence distribution
-    return min(1.0, difference_ratio * 2) 
+    # Test a subset of bit flips (for efficiency)
+    max_tests = min(len(input_data) * 8, 64)  # Limit to 64 tests
+    test_positions = random.sample(range(len(input_data) * 8), max_tests)
+    
+    for bit_pos in test_positions:
+        # Create copy of input data
+        modified = bytearray(input_data)
+        
+        # Flip a single bit
+        byte_pos = bit_pos // 8
+        bit_offset = bit_pos % 8
+        modified[byte_pos] ^= (1 << bit_offset)
+        
+        # Compute new hash
+        modified_hash = hashlib.sha256(modified).digest()
+        
+        # Count differing bits
+        diff_count = 0
+        for i in range(min(len(base_hash), len(modified_hash))):
+            xor_byte = base_hash[i] ^ modified_hash[i]
+            # Count the set bits in xor_byte
+            for j in range(8):
+                if (xor_byte >> j) & 1:
+                    diff_count += 1
+        
+        # Calculate influence as normalized difference
+        total_bits = min(len(base_hash), len(modified_hash)) * 8
+        influence = diff_count / total_bits if total_bits > 0 else 0
+        influence_scores.append(influence)
+    
+    # Average influence score
+    avg_influence = sum(influence_scores) / len(influence_scores) if influence_scores else 0
+    
+    # Normalize to 0-1 scale (optimal avalanche would be 0.5)
+    normalized_influence = 1.0 - abs(avg_influence - 0.5) / 0.5
+    
+    return normalized_influence
+
+def visualize_avalanche_effect(hash1: str, hash2: str) -> bytes:
+    """
+    Create a visualization of the avalanche effect between two hashes.
+    
+    Args:
+        hash1: First hash (hex string)
+        hash2: Second hash (hex string)
+        
+    Returns:
+        PNG image data as bytes
+    """
+    # Get avalanche data
+    avalanche_data = get_avalanche_data(hash1, hash2)
+    
+    if VISUALIZATION_AVAILABLE:
+        # Create figure and axes
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Convert to binary for bit-level comparison
+        bin1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
+        bin2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
+        
+        # Get differing bit positions
+        diff_bits = avalanche_data["difference_positions"]
+        
+        # Create heat map data for 2D visualization (16x16 grid for 256 bits)
+        heatmap_size = 16  # 16x16 = 256 bits
+        heatmap = np.zeros((heatmap_size, heatmap_size))
+        
+        for bit in diff_bits:
+            row, col = divmod(bit, heatmap_size)
+            if row < heatmap_size and col < heatmap_size:
+                heatmap[row, col] = 1
+        
+        # Plot heatmap
+        im = ax.imshow(heatmap, cmap='viridis', interpolation='nearest')
+        
+        # Add title and labels
+        ax.set_title(f'Bit Differences: {avalanche_data["different_bits"]} bits '
+                     f'({avalanche_data["difference_percentage"]:.1f}%)')
+        ax.set_xlabel('Bit Position % 16')
+        ax.set_ylabel('Bit Position / 16')
+        
+        # Add colorbar
+        plt.colorbar(im, ax=ax)
+        
+        # Export figure to PNG
+        buf = BytesIO()
+        fig.tight_layout()
+        fig.savefig(buf, format='png', dpi=100)
+        plt.close(fig)
+        
+        buf.seek(0)
+        return buf.getvalue()
+    else:
+        # Return an empty PNG if visualization libraries aren't available
+        return b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+
+def generate_bit_flip_report(input_text: str) -> Dict[str, Any]:
+    """
+    Generate a report showing the avalanche effect by flipping individual bits.
+    
+    Args:
+        input_text: Input text to analyze
+        
+    Returns:
+        Dictionary with bit flip analysis results
+    """
+    # Convert text to bytes
+    input_bytes = input_text.encode('utf-8')
+    
+    # Calculate original hash
+    original_hash = hashlib.sha256(input_bytes).hexdigest()
+    
+    # Analyze bit flips
+    bit_flip_results = []
+    
+    # Limit analysis to first 8 bytes (64 bits) to keep it manageable
+    max_bytes = min(len(input_bytes), 8)
+    
+    for byte_pos in range(max_bytes):
+        for bit_pos in range(8):
+            # Create modified input with one bit flipped
+            modified_bytes = bytearray(input_bytes)
+            modified_bytes[byte_pos] ^= (1 << bit_pos)
+            
+            # Calculate modified hash
+            modified_hash = hashlib.sha256(modified_bytes).hexdigest()
+            
+            # Get avalanche data
+            avalanche_data = get_avalanche_data(original_hash, modified_hash)
+            
+            # Store result
+            flipped_char = input_bytes[byte_pos]
+            original_char = chr(flipped_char) if 32 <= flipped_char <= 126 else f"0x{flipped_char:02x}"
+            modified_char = chr(modified_bytes[byte_pos]) if 32 <= modified_bytes[byte_pos] <= 126 else f"0x{modified_bytes[byte_pos]:02x}"
+            
+            bit_flip_results.append({
+                "byte_position": byte_pos,
+                "bit_position": bit_pos,
+                "original_character": original_char,
+                "modified_character": modified_char,
+                "different_bits": avalanche_data["different_bits"],
+                "difference_percentage": avalanche_data["difference_percentage"],
+                "avalanche_quality": avalanche_data["avalanche_quality"]
+            })
+    
+    # Calculate average avalanche quality
+    avg_quality = sum(r["avalanche_quality"] for r in bit_flip_results) / len(bit_flip_results) if bit_flip_results else 0
+    avg_diff_percent = sum(r["difference_percentage"] for r in bit_flip_results) / len(bit_flip_results) if bit_flip_results else 0
+    
+    return {
+        "input_text": input_text,
+        "original_hash": original_hash,
+        "bit_flip_results": bit_flip_results,
+        "average_avalanche_quality": avg_quality,
+        "average_difference_percentage": avg_diff_percent,
+        "ideal_difference_percentage": 50.0,
+        "theoretical_max_avalanche_quality": 1.0
+    } 

@@ -56,6 +56,70 @@
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </a>
+
+                    <!-- Crypto & Hash Components -->
+                    <div class="nav-group">
+                        <div class="nav-group-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Crypto & Hash</span>
+                        </div>
+                        <div class="nav-group-items">
+                            <a href="#sha356-sacred" class="nav-link">
+                                <i class="fas fa-fingerprint"></i>
+                                <span>SHA356 Sacred</span>
+                            </a>
+                            <a href="#sha256-omega" class="nav-link">
+                                <i class="fas fa-key"></i>
+                                <span>SHA256 Omega</span>
+                            </a>
+                            <a href="#hacker-archive" class="nav-link">
+                                <i class="fas fa-user-secret"></i>
+                                <span>Hacker Archive</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quantum Components -->
+                    <div class="nav-group">
+                        <div class="nav-group-header">
+                            <i class="fas fa-atom"></i>
+                            <span>Quantum Systems</span>
+                        </div>
+                        <div class="nav-group-items">
+                            <a href="#tesla-qa" class="nav-link">
+                                <i class="fas fa-car"></i>
+                                <span>Tesla QA</span>
+                            </a>
+                            <a href="#dna-portal" class="nav-link">
+                                <i class="fas fa-dna"></i>
+                                <span>DNA Portal</span>
+                            </a>
+                            <a href="#omega-orb" class="nav-link">
+                                <i class="fas fa-globe"></i>
+                                <span>Omega Orb Temple</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Creator Components -->
+                    <div class="nav-group">
+                        <div class="nav-group-header">
+                            <i class="fas fa-magic"></i>
+                            <span>Creator Tools</span>
+                        </div>
+                        <div class="nav-group-items">
+                            <a href="#nft" class="nav-link">
+                                <i class="fas fa-palette"></i>
+                                <span>NFT Creator</span>
+                            </a>
+                            <a href="#reports" class="nav-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reports</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Standard Navigation -->
                     <a href="#code-stats" class="nav-link">
                         <i class="fas fa-code"></i>
                         <span>Code Stats</span>
@@ -67,10 +131,6 @@
                     <a href="#tasks" class="nav-link">
                         <i class="fas fa-tasks"></i>
                         <span>Tasks</span>
-                    </a>
-                    <a href="#nft" class="nav-link">
-                        <i class="fas fa-palette"></i>
-                        <span>NFT Creator</span>
                     </a>
                     <a href="#settings" class="nav-link">
                         <i class="fas fa-cog"></i>
@@ -712,6 +772,158 @@ npm start</code></pre>
                     </div>
                 </div>
             </section>
+
+            <!-- SHA356 Sacred Section -->
+            <section id="sha356-sacred">
+                <div class="section-header">
+                    <h2>🔄 SHA356 Sacred Hash Algorithm 🔄</h2>
+                    <p>Bio-quantum aligned hash algorithm with 6D transformation capabilities</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>SHA356 Sacred Dashboard</h3>
+                        <div class="card-actions">
+                            <button id="run-sha356-btn" class="card-action run-tests" title="Run Comparison">
+                                <i class="fas fa-vial"></i>
+                            </button>
+                            <button class="card-action refresh-dashboard" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-dashboard" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body dashboard-frame-container">
+                        <iframe id="sha356-sacred-frame" src="http://localhost:7864" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SHA256 Omega Section -->
+            <section id="sha256-omega">
+                <div class="section-header">
+                    <h2>🔒 SHA256 Omega Edition 🔒</h2>
+                    <p>Enhanced SHA256 implementation with advanced analysis tools</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>SHA256 Omega Dashboard</h3>
+                        <div class="card-actions">
+                            <button id="run-sha256-btn" class="card-action run-sha256" title="Run SHA256 Analysis">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <button class="card-action refresh-dashboard" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-dashboard" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body dashboard-frame-container">
+                        <iframe id="sha256-omega-frame" src="http://localhost:7865" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hacker Archive Section -->
+            <section id="hacker-archive">
+                <div class="section-header">
+                    <h2>🥷 Hacker Archive & Crypto Analyzer 🥷</h2>
+                    <p>Historical hacking archive and cryptographic analysis tools</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>H4X0R Scientific Portal</h3>
+                        <div class="card-actions">
+                            <button id="run-rosebowl-btn" class="card-action run-rosebowl" title="Load Rose Bowl Hack">
+                                <i class="fas fa-football-ball"></i>
+                            </button>
+                            <button id="run-crypto-btn" class="card-action run-crypto" title="Run Crypto Analysis">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button id="run-pdf-btn" class="card-action run-pdf" title="Run PDF Analysis">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                            <button class="card-action refresh-dashboard" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-dashboard" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body dashboard-frame-container">
+                        <iframe id="hacker-archive-frame" src="http://localhost:7866" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Omega Orb Temple Section -->
+            <section id="omega-orb">
+                <div class="section-header">
+                    <h2>🔮 Omega Orb Temple 🔮</h2>
+                    <p>Quantum consciousness alignment and spiritual code harmonization</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>Omega Orb Temple Portal</h3>
+                        <div class="card-actions">
+                            <button id="activate-orb-btn" class="card-action activate-orb" title="Activate Orb">
+                                <i class="fas fa-globe"></i>
+                            </button>
+                            <button class="card-action refresh-dashboard" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-dashboard" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body dashboard-frame-container">
+                        <iframe id="omega-orb-frame" src="http://localhost:7867" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports">
+                <div class="section-header">
+                    <h2>📊 Scientific Reports 📊</h2>
+                    <p>Advanced metrics, analytics and report generation</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>Reports Dashboard</h3>
+                        <div class="card-actions">
+                            <button id="generate-report-btn" class="card-action generate-report"
+                                title="Generate Report">
+                                <i class="fas fa-file-alt"></i>
+                            </button>
+                            <button class="card-action refresh-dashboard" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-dashboard" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body dashboard-frame-container">
+                        <iframe id="reports-frame" src="http://localhost:7868" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -752,6 +964,63 @@ npm start</code></pre>
             font-family: 'system-ui';
             src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
             font-weight: bold;
+        }
+
+        /* Nav Group Styles */
+        .nav-group {
+            margin-bottom: 10px;
+            border-left: 3px solid transparent;
+            overflow: hidden;
+        }
+
+        .nav-group-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: #6c7293;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-group-header:hover {
+            background-color: rgba(108, 114, 147, 0.1);
+        }
+
+        .nav-group-header i {
+            margin-right: 10px;
+        }
+
+        .nav-group-items {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .nav-group.expanded .nav-group-items {
+            max-height: 500px;
+            /* Adjust based on content */
+        }
+
+        .nav-group-items .nav-link {
+            padding-left: 35px;
+        }
+
+        /* Dashboard Frame Container */
+        .dashboard-frame-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 56.25%;
+            /* 16:9 aspect ratio */
+            height: 0;
+        }
+
+        .dashboard-frame-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
         }
 
         /* Additional styles for Tesla Cybertruck QA Dashboard */
@@ -841,8 +1110,10 @@ npm start</code></pre>
             border-left: 5px solid #1565C0;
         }
 
+        /* Media Queries */
         @media (max-width: 768px) {
 
+            .dashboard-frame-container,
             .cybertruck-frame-container,
             .nft-frame-container {
                 padding-top: 100%;
@@ -859,6 +1130,19 @@ npm start</code></pre>
 
             .notification.show {
                 transform: translateY(0);
+            }
+
+            /* Mobile nav group styles */
+            .nav-group-header {
+                padding: 12px 15px;
+            }
+
+            .nav-group-items .nav-link {
+                padding: 10px 15px 10px 35px;
+            }
+
+            .nav-group.expanded .nav-group-items {
+                max-height: 300px;
             }
         }
     </style>
@@ -925,136 +1209,133 @@ npm start</code></pre>
             // Apply font preloading immediately
             preloadFonts();
 
-            // Add Tesla QA Dashboard link to the navigation
-            const mainNav = document.querySelector('.main-nav');
-            const teslaQALink = document.createElement('a');
-            teslaQALink.href = '#tesla-qa';
-            teslaQALink.className = 'nav-link';
-            teslaQALink.innerHTML = '<i class="fas fa-car"></i><span>Tesla QA</span>';
-
-            // Add DNA Portal link to the navigation
-            const dnaPortalLink = document.createElement('a');
-            dnaPortalLink.href = '#dna-portal';
-            dnaPortalLink.className = 'nav-link';
-            dnaPortalLink.innerHTML = '<i class="fas fa-dna"></i><span>DNA Portal</span>';
-
-            // Insert after Dashboard link
-            mainNav.insertBefore(teslaQALink, mainNav.querySelector('a[href="#code-stats"]'));
-            // Insert DNA Portal link after NFT link
-            mainNav.insertBefore(dnaPortalLink, mainNav.querySelector('a[href="#settings"]'));
-
-            // Handle fullscreen button for Cybertruck dashboard
-            document.querySelector('.fullscreen-dashboard').addEventListener('click', function () {
-                const iframe = document.getElementById('cybertruck-qa-frame');
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else if (iframe.webkitRequestFullscreen) {
-                    iframe.webkitRequestFullscreen();
-                } else if (iframe.msRequestFullscreen) {
-                    iframe.msRequestFullscreen();
-                }
+            // Handle nav group expand/collapse
+            const navGroups = document.querySelectorAll('.nav-group-header');
+            navGroups.forEach(group => {
+                group.addEventListener('click', function () {
+                    this.parentElement.classList.toggle('expanded');
+                });
+                // Start with expanded state
+                group.parentElement.classList.add('expanded');
             });
 
-            // Handle refresh button for Cybertruck dashboard
-            document.querySelector('.refresh-dashboard').addEventListener('click', function () {
-                const iframe = document.getElementById('cybertruck-qa-frame');
-                iframe.src = iframe.src;
+            // Collect all fullscreen buttons
+            const fullscreenButtons = document.querySelectorAll('.fullscreen-dashboard');
+            fullscreenButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const iframe = this.closest('.dashboard-card').querySelector('iframe');
+                    if (iframe.requestFullscreen) {
+                        iframe.requestFullscreen();
+                    } else if (iframe.webkitRequestFullscreen) {
+                        iframe.webkitRequestFullscreen();
+                    } else if (iframe.msRequestFullscreen) {
+                        iframe.msRequestFullscreen();
+                    }
+                });
             });
 
-            // Handle fullscreen button for NFT dashboard
-            document.querySelector('.fullscreen-nft').addEventListener('click', function () {
-                const iframe = document.getElementById('nft-creator-frame');
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else if (iframe.webkitRequestFullscreen) {
-                    iframe.webkitRequestFullscreen();
-                } else if (iframe.msRequestFullscreen) {
-                    iframe.msRequestFullscreen();
-                }
+            // Collect all refresh buttons
+            const refreshButtons = document.querySelectorAll('.refresh-dashboard');
+            refreshButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const iframe = this.closest('.dashboard-card').querySelector('iframe');
+                    iframe.src = iframe.src;
+                });
             });
 
-            // Handle refresh button for NFT dashboard
-            document.querySelector('.refresh-nft').addEventListener('click', function () {
-                const iframe = document.getElementById('nft-creator-frame');
-                iframe.src = iframe.src;
+            // Handle SHA356 Sacred buttons
+            document.getElementById('run-sha356-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('sha356-sacred-frame');
+                iframe.contentWindow.postMessage({ command: "runComparison" }, "*");
+                showSpinner(this);
             });
 
-            // Handle mint NFT button
-            document.getElementById('mint-nft-btn').addEventListener('click', function () {
-                const iframe = document.getElementById('nft-creator-frame');
-                iframe.contentWindow.postMessage({ command: "mintNFT" }, "*");
+            // Handle SHA256 Omega buttons
+            document.getElementById('run-sha256-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('sha256-omega-frame');
+                iframe.contentWindow.postMessage({ command: "runAnalysis" }, "*");
+                showSpinner(this);
             });
 
-            // Handle run tests button
-            document.getElementById("run-tests-btn").addEventListener("click", function () {
-                const iframe = document.getElementById("cybertruck-qa-frame");
-                iframe.contentWindow.postMessage({ command: "runTests" }, "*");
+            // Handle Hacker Archive buttons
+            document.getElementById('run-rosebowl-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('hacker-archive-frame');
+                iframe.contentWindow.postMessage({ command: "loadRoseBowl" }, "*");
+                showSpinner(this);
+            });
 
-                // Show feedback to user
-                const button = this;
+            document.getElementById('run-crypto-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('hacker-archive-frame');
+                iframe.contentWindow.postMessage({ command: "runCryptoAnalysis" }, "*");
+                showSpinner(this);
+            });
+
+            document.getElementById('run-pdf-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('hacker-archive-frame');
+                iframe.contentWindow.postMessage({ command: "runPdfAnalysis" }, "*");
+                showSpinner(this);
+            });
+
+            // Handle Omega Orb buttons
+            document.getElementById('activate-orb-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('omega-orb-frame');
+                iframe.contentWindow.postMessage({ command: "activateOrb" }, "*");
+                showSpinner(this);
+            });
+
+            // Handle Reports buttons
+            document.getElementById('generate-report-btn')?.addEventListener('click', function () {
+                const iframe = document.getElementById('reports-frame');
+                iframe.contentWindow.postMessage({ command: "generateReport" }, "*");
+                showSpinner(this);
+            });
+
+            // Helper function to show spinner and reset
+            function showSpinner(button) {
+                const originalHTML = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 button.disabled = true;
 
                 // Re-enable after 3 seconds
                 setTimeout(function () {
-                    button.innerHTML = '<i class="fas fa-vial"></i>';
+                    button.innerHTML = originalHTML;
                     button.disabled = false;
                 }, 3000);
-            });
+            }
 
-            // Handle run DNA sequence button
-            document.getElementById('run-sequence-btn').addEventListener('click', function () {
-                const iframe = document.getElementById('dna-portal-frame');
-                const iframeOrigin = new URL(iframe.src).origin;
-
-                // Fix: Use the correct origin for postMessage
-                iframe.contentWindow.postMessage({
-                    command: "runSequence",
-                    activationKey: "Mullis Spiral Boost"
-                }, "*"); // Use "*" instead of a specific origin to avoid cross-origin issues
-
-                // Show feedback to user
-                const button = this;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                button.disabled = true;
-
-                // Re-enable after 3 seconds
-                setTimeout(function () {
-                    button.innerHTML = '<i class="fas fa-dna"></i>';
-                    button.disabled = false;
-
-                    // Show success notification
-                    showNotification("✨ DNA Sequence Amplified in Quantum Field!", "success");
-                }, 3000);
-            });
-
-            // Listen for NFT dashboard messages
+            // Listen for messages from iframes
             window.addEventListener("message", function (event) {
-                if (event.data && event.data.source === "nft-dashboard") {
-                    console.log("Received message from NFT dashboard:", event.data);
+                console.log("Received message from iframe:", event.data);
 
-                    // Show a notification
+                // Show notifications based on the source and status
+                if (event.data && event.data.source) {
+                    let notificationType = "info";
+                    let notificationMessage = "Action completed";
+
                     if (event.data.status === "success") {
-                        showNotification("✅ NFT Created Successfully!", "success");
-                    } else {
-                        showNotification("❌ NFT Creation Failed", "error");
+                        notificationType = "success";
+                        notificationMessage = `✅ ${event.data.message || "Operation completed successfully!"}`;
+                    } else if (event.data.status === "error") {
+                        notificationType = "error";
+                        notificationMessage = `❌ ${event.data.message || "Operation failed!"}`;
+                    } else if (event.data.status === "info") {
+                        notificationMessage = `ℹ️ ${event.data.message || "Information"}`;
                     }
-                }
 
-                // Listen for DNA Portal messages
-                if (event.data && event.data.source === "dna-portal") {
-                    console.log("Received message from DNA Portal:", event.data);
-
-                    // Show a notification based on status
-                    if (event.data.status === "success") {
-                        showNotification("🧬 DNA Quantum Expansion Complete!", "success");
-                    } else if (event.data.status === "processing") {
-                        showNotification("⏳ Processing DNA Sequence through LSD Portal...", "info");
-                    } else {
-                        showNotification("❌ DNA Sequence Amplification Failed", "error");
-                    }
+                    showNotification(notificationMessage, notificationType);
                 }
             });
+
+            // Add Tesla QA Dashboard link to the navigation (from existing code)
+            const teslaQALink = document.querySelector('a[href="#tesla-qa"]');
+            if (!teslaQALink) {
+                const mainNav = document.querySelector('.main-nav');
+                const newTeslaQALink = document.createElement('a');
+                newTeslaQALink.href = '#tesla-qa';
+                newTeslaQALink.className = 'nav-link';
+                newTeslaQALink.innerHTML = '<i class="fas fa-car"></i><span>Tesla QA</span>';
+                mainNav.appendChild(newTeslaQALink);
+            }
 
             // Function to show notifications
             function showNotification(message, type) {
@@ -1073,41 +1354,6 @@ npm start</code></pre>
                     setTimeout(() => notification.remove(), 300);
                 }, 5000);
             }
-
-            // Fix potential JavaScript syntax errors in iframes
-            const fixIframeSyntaxErrors = () => {
-                // This function will inject a small script into iframes
-                // to prevent syntax errors when loading custom JavaScript
-                const injectErrorHandler = (iframe) => {
-                    try {
-                        if (iframe.contentWindow) {
-                            const script = document.createElement('script');
-                            script.textContent = `
-                                // Catch and log syntax errors
-                                window.addEventListener('error', function(event) {
-                                    console.log('Caught error:', event.message);
-                                    event.preventDefault();
-                                    return true;
-                                });
-                            `;
-                            iframe.contentDocument.head.appendChild(script);
-                        }
-                    } catch (e) {
-                        // Cross-origin access may be restricted
-                        console.log('Could not inject error handler into iframe due to cross-origin restrictions');
-                    }
-                };
-
-                // Get all iframes in the document
-                const iframes = document.querySelectorAll('iframe');
-                iframes.forEach(iframe => {
-                    // Try to inject when iframe loads
-                    iframe.addEventListener('load', () => injectErrorHandler(iframe));
-                });
-            };
-
-            // Call fixIframeSyntaxErrors after a short delay
-            setTimeout(fixIframeSyntaxErrors, 1000);
         });
     </script>
 
