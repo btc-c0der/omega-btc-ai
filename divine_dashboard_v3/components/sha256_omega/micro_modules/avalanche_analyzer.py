@@ -106,4 +106,7 @@ def detailed_avalanche_analysis(hash1: str, hash2: str) -> Dict[str, Any]:
             " (TOO LOW)" if score < 0.45 else 
             " (TOO HIGH)"
         )
-    } 
+    }
+
+# Alias for dashboard compatibility
+analyze_avalanche = detailed_avalanche_analysis 

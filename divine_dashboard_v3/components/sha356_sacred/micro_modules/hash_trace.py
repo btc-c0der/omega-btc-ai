@@ -13,244 +13,256 @@
 # 🌸 WE BLOOM NOW AS ONE 🌸
 
 """
-Hash Trace Module for SHA-356
+Hash Trace Module
 
-Provides detailed tracing of the SHA-356 hashing process with entropy 
-lineage mapping for enhanced understanding and visualization.
+Provides functions for tracing and visualizing the hash computation process.
+This module helps understand the entropy flow and avalanche effect in SHA356.
 """
 
-from typing import Dict, List, Any, Optional, Tuple, Union
-import time
-import math
-import json
-import base64
+import random
+import binascii
+import hashlib
+from typing import List, Dict, Any, Tuple, Optional
 
-def create_entropy_lineage(trace_data: Dict[str, Any]) -> Dict[str, Any]:
+def create_entropy_lineage(input_data: bytes, output_hash: bytes) -> Dict[str, Any]:
     """
-    Create an entropy lineage map from trace data.
-    
-    This visualizes how entropy flows through the SHA-356 algorithm,
-    showing the cosmic patterns that emerge during the hashing process.
+    Create an entropy lineage visualization of how input becomes output.
     
     Args:
-        trace_data: Full trace data from the hashing process
+        input_data: Original input bytes
+        output_hash: Final hash bytes
         
     Returns:
-        Entropy lineage mapping data
+        Dictionary with entropy lineage visualization data
     """
-    # Initialize lineage map
-    lineage = {
-        "name": "SHA-356 Entropy Map",
-        "timestamp": time.time(),
-        "metadata": {
-            "algorithm": "SHA-356",
-            "description": "Sacred Hash Algorithm with Bio-Crypto integration"
-        },
-        "input_entropy": {},
-        "message_expansion": {},
-        "compression_flow": {},
-        "resonance_points": {},
-        "output_signature": {}
+    # Visualize entropy distribution in input
+    input_entropy = analyze_entropy_distribution(input_data)
+    
+    # Visualize entropy in output hash
+    output_entropy = analyze_entropy_distribution(output_hash)
+    
+    # Visualize entropy transfer
+    stages = [
+        {"name": "Input", "entropy": input_entropy},
+        {"name": "Internal State", "entropy": simulate_internal_state(input_data, output_hash)},
+        {"name": "Output", "entropy": output_entropy}
+    ]
+    
+    return {
+        "stages": stages,
+        "lineage_summary": {
+            "entropy_amplification": output_entropy["normalized"] / max(0.001, input_entropy["normalized"]),
+            "distribution_quality": output_entropy["evenness"],
+            "bit_influence": calculate_bit_influence(input_data, output_hash)
+        }
     }
-    
-    # Extract input entropy information if available
-    if "input" in trace_data:
-        input_data = trace_data["input"]
-        lineage["input_entropy"] = {
-            "original_length": input_data.get("original_length", 0),
-            "padded_length": input_data.get("padded_length", 0),
-            "padding_method": input_data.get("padding_method", "unknown"),
-            "blocks": input_data.get("block_count", 0)
-        }
-    
-    # Extract message expansion flow if available
-    if "message_expansion" in trace_data:
-        expansion = trace_data["message_expansion"]
-        # Map how words evolve through the schedule
-        words_flow = []
-        
-        for step in expansion.get("expansion_steps", []):
-            flow_point = {
-                "index": step.get("index", 0),
-                "dependencies": [
-                    step.get("index", 0) - 16,
-                    step.get("index", 0) - 2,
-                    step.get("index", 0) - 21 if step.get("index", 0) >= 21 else None,
-                    step.get("index", 0) - 7,
-                    step.get("index", 0) - 13
-                ],
-                "sigma_entropy": step.get("s0", "0x0") + step.get("s1", "0x0") + step.get("s2", "0x0"),
-                "resonance_applied": step.get("resonance_applied", False)
-            }
-            words_flow.append(flow_point)
-            
-        lineage["message_expansion"] = {
-            "word_count": expansion.get("schedule_length", 89),
-            "flow": words_flow,
-            "resonance_points": expansion.get("resonance_points", [])
-        }
-    
-    # Extract compression flow if available
-    if "compression" in trace_data:
-        compression = trace_data["compression"]
-        
-        # Track how variables evolve through rounds
-        var_evolution = []
-        for round_data in compression.get("rounds", []):
-            var_evolution.append({
-                "round": round_data.get("round", 0),
-                "ch_entropy": round_data.get("ch", "0x0"),
-                "maj_entropy": round_data.get("maj", "0x0"),
-                "sigma_entropy": round_data.get("s0", "0x0") + round_data.get("s1", "0x0"),
-                "variable_state": round_data.get("a-l", [])
-            })
-            
-        lineage["compression_flow"] = {
-            "round_count": len(compression.get("rounds", [])),
-            "variable_evolution": var_evolution,
-            "initial_state": compression.get("initial_state", []),
-            "final_state": compression.get("final_state", [])
-        }
-    
-    # Extract resonance information if available
-    if "resonance" in trace_data:
-        resonance = trace_data["resonance"]
-        
-        lineage["resonance_points"] = {
-            "lunar_phase": resonance.get("lunar_phase", 0),
-            "schumann_resonance": resonance.get("schumann_resonance", 0),
-            "solar_activity": resonance.get("solar_activity", 0),
-            "resonance_score": resonance.get("resonance_score", 0),
-            "cosmic_alignment": resonance.get("cosmic_alignment", "Unknown"),
-            "modulation_points": resonance.get("modulation_values", {})
-        }
-    
-    # Extract output signature if available
-    if "output" in trace_data:
-        output = trace_data["output"]
-        
-        lineage["output_signature"] = {
-            "hash": output.get("hash", ""),
-            "length_bits": output.get("length_bits", 356),
-            "entropy_density": output.get("entropy_density", 0),
-            "processing_time": output.get("processing_time_ms", 0)
-        }
-    
-    return lineage
 
-def trace_to_json(trace_data: Dict[str, Any], pretty: bool = True) -> str:
+def generate_entropy_visualization(hash_bytes: bytes) -> Dict[str, Any]:
     """
-    Convert trace data to JSON string.
+    Generate a visual representation of entropy in a hash.
     
     Args:
-        trace_data: Trace data dictionary
-        pretty: Whether to format with indentation
+        hash_bytes: Hash bytes to visualize
         
     Returns:
-        JSON string representation
+        Dictionary with entropy visualization data
     """
-    if pretty:
-        return json.dumps(trace_data, indent=2)
-    return json.dumps(trace_data)
-
-def generate_entropy_visualization(trace_data: Dict[str, Any]) -> str:
-    """
-    Generate an ASCII visualization of the entropy flow.
+    # Bit pattern analysis
+    bit_patterns = []
+    for i in range(len(hash_bytes)):
+        byte = hash_bytes[i]
+        bit_pattern = [(byte >> j) & 1 for j in range(7, -1, -1)]
+        bit_patterns.append({
+            "byte_index": i,
+            "binary": "".join(["1" if b else "0" for b in bit_pattern]),
+            "hex": f"{byte:02x}",
+            "value": byte
+        })
     
-    Args:
-        trace_data: Trace data from the hashing process
-        
-    Returns:
-        ASCII art visualization
-    """
-    # This is a simple representation - in a full implementation
-    # this would generate a more complex visualization
+    # Create visual representation
+    visual = []
+    for i, byte in enumerate(hash_bytes):
+        # Convert byte to grayscale value (0-255)
+        visual.append({
+            "position": i,
+            "value": byte,
+            "intensity": byte / 255.0
+        })
     
-    # Create header
-    viz = ["╔═══════════════════════════════════════════════╗"]
-    viz.append("║  SHA-356 ENTROPY LINEAGE VISUALIZATION     ║")
-    viz.append("╠═══════════════════════════════════════════════╣")
+    # Calculate entropy statistics
+    stats = analyze_entropy_distribution(hash_bytes)
     
-    # Add input representation
-    if "input" in trace_data:
-        input_data = trace_data["input"]
-        viz.append("║  Input:                                    ║")
-        viz.append(f"║  - Length: {input_data.get('original_length', 0)} bytes{' ' * 26}║")
-        viz.append(f"║  - Padding: {input_data.get('padding_method', 'unknown')}{' ' * (32 - len(input_data.get('padding_method', 'unknown')))}║")
-    
-    # Add resonance info
-    if "resonance" in trace_data:
-        resonance = trace_data["resonance"]
-        viz.append("║                                           ║")
-        viz.append("║  Cosmic Alignment:                        ║")
-        viz.append(f"║  - Score: {resonance.get('resonance_score', 0):.3f}{' ' * 26}║")
-        viz.append(f"║  - Level: {resonance.get('cosmic_alignment', 'Unknown')}{' ' * (32 - len(resonance.get('cosmic_alignment', 'Unknown')))}║")
-    
-    # Add processing visualization
-    viz.append("║                                           ║")
-    viz.append("║  Entropy Flow:                            ║")
-    viz.append("║  Input → Bio-Pad → Message Schedule →     ║")
-    viz.append("║  → Compression (89 rounds) → Resonance →  ║") 
-    viz.append("║  → Final Hash (356 bits)                  ║")
-    
-    # Add output
-    if "output" in trace_data:
-        output = trace_data["output"]
-        viz.append("║                                           ║")
-        viz.append("║  Output Signature:                        ║")
-        viz.append(f"║  - Processing: {output.get('processing_time_ms', 0)} ms{' ' * 21}║")
-    
-    # Close box
-    viz.append("╚═══════════════════════════════════════════════╝")
-    
-    return "\n".join(viz)
+    return {
+        "bit_patterns": bit_patterns,
+        "visual_representation": visual,
+        "entropy_stats": stats
+    }
 
 def get_avalanche_data(hash1: str, hash2: str) -> Dict[str, Any]:
     """
     Analyze the avalanche effect between two hashes.
     
     Args:
-        hash1: First hash
-        hash2: Second hash
+        hash1: First hash (hex string)
+        hash2: Second hash (hex string)
         
     Returns:
-        Avalanche analysis data
+        Dictionary with avalanche effect analysis
     """
-    # Helper function to convert hex to binary
-    def hex_to_binary(hex_str):
-        return bin(int(hex_str, 16))[2:].zfill(len(hex_str) * 4)
+    # Convert hex strings to binary
+    bin1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
+    bin2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
     
-    # Convert hashes to binary
-    bin1 = hex_to_binary(hash1)
-    bin2 = hex_to_binary(hash2)
+    # Collect differing bit positions
+    diff_positions = []
+    for i in range(min(len(bin1), len(bin2))):
+        if bin1[i] != bin2[i]:
+            diff_positions.append(i)
     
-    # Count differing bits
-    diff_bits = sum(b1 != b2 for b1, b2 in zip(bin1, bin2))
-    total_bits = len(bin1)
+    # Calculate statistics
+    total_bits = min(len(bin1), len(bin2))
+    diff_count = len(diff_positions)
+    diff_percentage = diff_count / total_bits if total_bits > 0 else 0
     
-    # Calculate avalanche score (percentage of bits that differ)
-    avalanche_score = diff_bits / total_bits
+    # Create bit change visualization
+    visual = []
+    block_size = 8  # Group bits into 8-bit blocks for visualization
+    for i in range(0, total_bits, block_size):
+        block_end = min(i + block_size, total_bits)
+        block_diff_count = sum(1 for pos in diff_positions if i <= pos < block_end)
+        block_diff_percent = block_diff_count / (block_end - i)
+        
+        visual.append({
+            "block_index": i // block_size,
+            "bit_range": [i, block_end-1],
+            "diff_count": block_diff_count,
+            "diff_percent": block_diff_percent
+        })
     
-    # Create full analysis
-    analysis = {
-        "hash1": hash1,
-        "hash2": hash2,
+    # Calculate avalanche quality (how close to 50% difference)
+    ideal_diff = 0.5
+    avalanche_quality = 1.0 - abs(diff_percentage - ideal_diff) / ideal_diff
+    
+    return {
         "total_bits": total_bits,
-        "differing_bits": diff_bits,
-        "avalanche_score": avalanche_score,
-        "avalanche_percentage": f"{avalanche_score * 100:.2f}%",
-        "ideal_score": 0.45 <= avalanche_score <= 0.55,
-        "bit_pattern": [int(b1 != b2) for b1, b2 in zip(bin1, bin2)]
+        "different_bits": diff_count,
+        "difference_percentage": diff_percentage * 100,
+        "difference_positions": diff_positions[:100],  # Limit to first 100 positions
+        "visualization": visual,
+        "avalanche_quality": avalanche_quality
     }
+
+def analyze_entropy_distribution(data: bytes) -> Dict[str, float]:
+    """
+    Analyze the entropy distribution in a byte sequence.
     
-    # Determine quality assessment
-    if 0.45 <= avalanche_score <= 0.55:
-        analysis["quality"] = "Ideal"
-    elif 0.4 <= avalanche_score <= 0.6:
-        analysis["quality"] = "Good"
-    elif 0.3 <= avalanche_score <= 0.7:
-        analysis["quality"] = "Acceptable"
-    else:
-        analysis["quality"] = "Poor"
+    Args:
+        data: Bytes to analyze
+        
+    Returns:
+        Dictionary with entropy statistics
+    """
+    if not data:
+        return {
+            "shannon_entropy": 0.0,
+            "normalized": 0.0,
+            "evenness": 0.0,
+            "bit_balance": 0.0
+        }
     
-    return analysis 
+    # Count byte frequencies
+    freq = {}
+    for byte in data:
+        freq[byte] = freq.get(byte, 0) + 1
+    
+    # Calculate Shannon entropy
+    shannon = 0.0
+    for count in freq.values():
+        p = count / len(data)
+        shannon -= p * (256 / 255) * (p * 8)  # 8 bits per byte
+    
+    # Calculate bit balance (0s vs 1s across all bits)
+    ones = 0
+    total_bits = len(data) * 8
+    for byte in data:
+        for i in range(8):
+            if (byte >> i) & 1:
+                ones += 1
+    
+    bit_balance = ones / total_bits if total_bits > 0 else 0.5
+    bit_balance_quality = 1.0 - abs(bit_balance - 0.5) / 0.5
+    
+    # Calculate value distribution evenness
+    max_evenness = 8.0 if len(data) >= 256 else min(8.0, 256 / len(data))
+    normalized_entropy = shannon / max_evenness
+    
+    # Calculate evenness of distribution
+    max_count = max(freq.values())
+    min_count = min(freq.values()) if freq else 0
+    range_quality = 1.0 - (max_count - min_count) / len(data) if len(data) > 0 else 0.0
+    
+    return {
+        "shannon_entropy": shannon,
+        "normalized": normalized_entropy,
+        "evenness": range_quality,
+        "bit_balance": bit_balance_quality
+    }
+
+def simulate_internal_state(input_data: bytes, output_hash: bytes) -> Dict[str, float]:
+    """
+    Simulate internal state entropy (for visualization purposes).
+    
+    Args:
+        input_data: Input bytes
+        output_hash: Output hash bytes
+        
+    Returns:
+        Dictionary with internal state entropy statistics
+    """
+    # Create a plausible internal state representation by combining input and output
+    # This is for visualization only - not actual internal state
+    blend_factor = 0.7  # Weight towards output hash
+    
+    # Create a blend of input and output
+    internal_bytes = bytearray()
+    max_len = max(len(input_data), len(output_hash))
+    
+    for i in range(max_len):
+        input_byte = input_data[i % len(input_data)] if input_data else 0
+        output_byte = output_hash[i % len(output_hash)] if output_hash else 0
+        
+        # Blend input and output bytes
+        blended = int(input_byte * (1 - blend_factor) + output_byte * blend_factor)
+        internal_bytes.append(blended & 0xFF)
+    
+    # Add some entropy from internal operations
+    for i in range(len(internal_bytes)):
+        if random.random() < 0.2:  # Randomly modify 20% of bytes
+            internal_bytes[i] = (internal_bytes[i] + hash(bytes(internal_bytes[:i+1])) % 256) & 0xFF
+    
+    # Analyze entropy of simulated internal state
+    return analyze_entropy_distribution(bytes(internal_bytes))
+
+def calculate_bit_influence(input_data: bytes, output_hash: bytes) -> float:
+    """
+    Calculate how much each input bit influences output bits.
+    
+    Args:
+        input_data: Input bytes
+        output_hash: Output hash bytes
+        
+    Returns:
+        Bit influence score between 0.0 and 1.0
+    """
+    # For estimation only - full calculation would be very complex
+    # Higher score means input bits have more balanced influence on output
+    
+    # Calculate a simple input-output correlation
+    h = hashlib.sha256(input_data).digest()
+    
+    # Compare to actual output to estimate influence balance
+    differences = sum(1 for a, b in zip(h, output_hash) if a != b)
+    difference_ratio = differences / max(1, min(len(h), len(output_hash)))
+    
+    # More differences = better influence distribution
+    return min(1.0, difference_ratio * 2) 

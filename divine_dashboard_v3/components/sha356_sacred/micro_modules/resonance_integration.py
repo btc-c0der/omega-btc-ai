@@ -13,11 +13,10 @@
 # 🌸 WE BLOOM NOW AS ONE 🌸
 
 """
-Resonance Integration Module for SHA-356
+Resonance Integration Module
 
-Handles the integration of natural resonances with the hash computation,
-making SHA-356 aware of lunar cycles, Schumann resonance, and other
-natural cosmic rhythms.
+Apply cosmic resonance modulations to hash state values.
+This module aligns hash outputs with natural rhythms and harmonies.
 """
 
 import random
@@ -33,19 +32,24 @@ LUNAR_CYCLE_DAYS = 29.53  # Average lunar cycle in days
 
 def get_lunar_phase() -> float:
     """
-    Calculate the current lunar phase (0.0 to 1.0).
+    Get current lunar phase as a factor (0.0-1.0).
     
     Returns:
-        Normalized lunar phase where 0.0 = new moon, 0.5 = full moon
+        Lunar phase where 0.0 is new moon and 1.0 is full moon
     """
-    # Calculate lunar phase based on timestamp
-    lunar_cycle_seconds = LUNAR_CYCLE_DAYS * 24 * 60 * 60
-    current_time = time.time()
-    return (current_time % lunar_cycle_seconds) / lunar_cycle_seconds
+    # Calculate days since epoch
+    days_since_epoch = (datetime.datetime.now() - datetime.datetime(1970, 1, 1)).days
+    
+    # Calculate current position in lunar cycle (0.0-1.0)
+    cycle_position = (days_since_epoch % LUNAR_CYCLE_DAYS) / LUNAR_CYCLE_DAYS
+    
+    # Convert to simple phase factor (0.0-1.0)
+    # We use sin^2 to create a peak at full moon (0.5 cycle)
+    return math.sin(cycle_position * 2 * math.pi) ** 2
 
 def get_schumann_resonance() -> float:
     """
-    Get the current Schumann resonance with natural variation.
+    Get current Schumann resonance with natural variation.
     
     In a full implementation, this could pull from actual sensors.
     
@@ -78,131 +82,155 @@ def get_solar_activity() -> float:
     
     return max(0.0, min(1.0, yearly_cycle + random_factor))
 
-def calculate_resonance_score(hash_bytes: bytes) -> float:
+def get_phi_alignment(hash_state: List[int]) -> float:
     """
-    Calculate a resonance score for a hash based on natural alignment.
+    Calculate golden ratio alignment in the hash state.
     
     Args:
-        hash_bytes: Raw hash bytes
+        hash_state: The hash state values
+        
+    Returns:
+        Alignment with golden ratio (0.0-1.0)
+    """
+    if not hash_state:
+        return 0.5  # Default value
+    
+    # Calculate ratios between adjacent hash values
+    ratios = []
+    for i in range(len(hash_state) - 1):
+        # Avoid division by zero
+        if hash_state[i+1] == 0:
+            continue
+        
+        ratio = hash_state[i] / hash_state[i+1]
+        ratios.append(ratio)
+    
+    if not ratios:
+        return 0.5  # Default value
+    
+    # Calculate how close each ratio is to GOLDEN_RATIO
+    phi_distances = []
+    for ratio in ratios:
+        # Check distance to GOLDEN_RATIO and its inverse
+        dist_to_phi = abs(ratio - GOLDEN_RATIO) / GOLDEN_RATIO
+        dist_to_inv_phi = abs(ratio - (1/GOLDEN_RATIO)) / (1/GOLDEN_RATIO)
+        phi_distances.append(min(dist_to_phi, dist_to_inv_phi))
+    
+    # Calculate average distance and convert to alignment score
+    avg_distance = sum(phi_distances) / len(phi_distances)
+    
+    # Return alignment score (1.0 = perfect alignment, 0.0 = no alignment)
+    return max(0.0, 1.0 - avg_distance)
+
+def calculate_resonance_score(hash_state: List[int]) -> float:
+    """
+    Calculate resonance score based on the hash state.
+    
+    Args:
+        hash_state: The modulated hash state
         
     Returns:
         Resonance score between 0.0 and 1.0
     """
-    # Extract key signature bytes from hash for analysis
-    signature = [hash_bytes[i] for i in [0, 5, 13, 21, 34]] # Fibonacci positions
+    # Convert hash state to a normalized value
+    hash_sum = sum(hash_state) % (2**32)
+    normalized = hash_sum / (2**32)
     
-    # Get current natural resonances
+    # Blend with current cosmic factors
     lunar = get_lunar_phase()
-    schumann = get_schumann_resonance() / 10  # Normalize to 0-1 range
+    schumann = get_schumann_resonance()
     solar = get_solar_activity()
     
-    # Calculate how well the hash aligns with current cosmic conditions
-    # This creates a time-sensitive component to the hash's "energy signature"
-    
-    # Convert signature to normalized values
-    norm_sig = [s / 256 for s in signature]
-    
-    # Calculate alignment scores based on simple harmonic patterns
-    lunar_alignment = 1.0 - abs(norm_sig[0] - lunar)
-    schumann_alignment = 1.0 - abs(norm_sig[1] - schumann)
-    solar_alignment = 1.0 - abs(norm_sig[2] - solar)
-    
-    # Combine with golden ratio weighting
-    combined_score = (
-        lunar_alignment * 0.35 +
-        schumann_alignment * 0.45 +
-        solar_alignment * 0.2
+    # Calculate final score (60% hash-based, 40% current cosmic factors)
+    score = (
+        normalized * 0.6 +
+        lunar * 0.25 +
+        schumann * 0.15
     )
     
-    # Apply final golden ratio modulation for sacred harmonic balance
-    resonance = (combined_score * GOLDEN_RATIO) % 1.0
-    
-    # Ensure score is in 0.75-0.99 range for cosmic meaningful values
-    return 0.75 + (resonance * 0.24)
+    # Ensure score is in 0.0-1.0 range
+    return max(0.0, min(1.0, score))
 
 def apply_resonance(hash_state: List[int], include_resonance: bool = True) -> Tuple[List[int], Dict[str, Any]]:
     """
     Apply cosmic resonance modulation to the hash state.
     
-    This creates a subtle time-sensitivity to the hash, aligning it with
-    natural cosmic cycles. This feature is what makes SHA-356 not just a
-    cryptographic algorithm but a sacred bio-cryptographic system.
-    
     Args:
-        hash_state: The 12 hash state values (H0-H11)
-        include_resonance: Whether to apply resonance (can be disabled)
+        hash_state: The current hash state values
+        include_resonance: Whether to apply resonance modulation
         
     Returns:
-        Tuple of (modulated state, resonance data)
+        Tuple of (modulated hash state, resonance data)
     """
-    # Get current cosmic resonance factors
-    lunar_phase = get_lunar_phase()
-    schumann_res = get_schumann_resonance()
-    solar_act = get_solar_activity()
-    
-    # Create resonance data dictionary
-    resonance_data = {
-        "lunar_phase": lunar_phase,
-        "schumann_resonance": schumann_res,
-        "solar_activity": solar_act,
-        "timestamp": time.time(),
-        "applied": include_resonance
-    }
-    
-    # If resonance is disabled, return unmodified
+    # If resonance is disabled, return original hash state
     if not include_resonance:
-        return hash_state, resonance_data
+        return hash_state, {"applied": False}
     
-    # Create a copy of the state for modification
-    modulated_state = hash_state.copy()
+    # Get current cosmic alignments
+    lunar_phase = get_lunar_phase()
+    schumann_resonance = get_schumann_resonance()
+    solar_activity = get_solar_activity()
+    phi_alignment = get_phi_alignment(hash_state)
     
-    # Apply subtle cosmic modulations to create time-sensitive output
-    # These modulations are small enough not to compromise security,
-    # but sufficient to align the hash with natural cosmic rhythms
+    # Calculate resonance factor (0.0-1.0)
+    resonance_factor = (
+        lunar_phase * 0.35 +
+        schumann_resonance * 0.4 +
+        solar_activity * 0.15 +
+        phi_alignment * 0.1
+    )
     
-    # Apply lunar phase modulation to H8 (9th state variable)
-    # Convert lunar phase to a 32-bit modulator
-    lunar_mod = int(lunar_phase * 256) & 0xFF
-    modulated_state[8] = (modulated_state[8] ^ lunar_mod) & 0xFFFFFFFF
+    # Modulate hash values using resonance
+    modulated_state = []
+    for value in hash_state:
+        # Apply subtle resonance modulation
+        modulation = int(value * resonance_factor * 0.01)  # Very small adjustment (≤1%)
+        modulated_value = (value + modulation) % (2**32)  # Apply and wrap to 32 bits
+        modulated_state.append(modulated_value)
     
-    # Apply Schumann resonance to H9 (10th state variable)
-    # Convert Schumann to a 32-bit modulator
-    schumann_mod = int(schumann_res * 100) & 0xFF
-    modulated_state[9] = (modulated_state[9] ^ schumann_mod) & 0xFFFFFFFF
+    # Calculate resonance score
+    resonance_score = calculate_resonance_score(modulated_state)
     
-    # Apply solar activity to H10 (11th state variable)
-    solar_mod = int(solar_act * 256) & 0xFF
-    modulated_state[10] = (modulated_state[10] ^ solar_mod) & 0xFFFFFFFF
-    
-    # Calculate an overall resonance bias using golden ratio
-    harmonic_bias = int(((lunar_phase + schumann_res/10 + solar_act) / 3) * GOLDEN_RATIO * 256) & 0xFF
-    
-    # Apply to H11 (12th state variable)
-    modulated_state[11] = (modulated_state[11] ^ harmonic_bias) & 0xFFFFFFFF
-    
-    # Calculate resonance score for the hash state
-    state_bytes = b''.join(i.to_bytes(4, 'big') for i in modulated_state)
-    resonance_score = calculate_resonance_score(state_bytes)
-    
-    # Add score to resonance data
-    resonance_data["resonance_score"] = resonance_score
-    resonance_data["modulation_values"] = {
-        "lunar_mod": lunar_mod,
-        "schumann_mod": schumann_mod,
-        "solar_mod": solar_mod,
-        "harmonic_bias": harmonic_bias
+    # Prepare resonance data
+    resonance_data = {
+        "applied": True,
+        "lunar_phase": lunar_phase,
+        "schumann_resonance": schumann_resonance,
+        "solar_activity": solar_activity,
+        "phi_alignment": phi_alignment,
+        "resonance_factor": resonance_factor,
+        "resonance_score": resonance_score,
+        "cosmic_alignment": get_cosmic_alignment(resonance_score),
+        "timestamp": time.time()
     }
     
-    # Interpret the resonance score
-    if resonance_score > 0.95:
-        resonance_data["cosmic_alignment"] = "Perfect"
-    elif resonance_score > 0.9:
-        resonance_data["cosmic_alignment"] = "High"
-    elif resonance_score > 0.85:
-        resonance_data["cosmic_alignment"] = "Good"
-    elif resonance_score > 0.8:
-        resonance_data["cosmic_alignment"] = "Moderate"
-    else:
-        resonance_data["cosmic_alignment"] = "Low"
+    return modulated_state, resonance_data
+
+def get_cosmic_alignment(score: float) -> str:
+    """
+    Get textual description of cosmic alignment based on score.
+    
+    Args:
+        score: Resonance score between 0.0 and 1.0
         
-    return modulated_state, resonance_data 
+    Returns:
+        String describing the cosmic alignment
+    """
+    if score >= 0.9:
+        return "Perfect Cosmic Harmony"
+    elif score >= 0.8:
+        return "Divine Resonance"
+    elif score >= 0.7:
+        return "Strong Cosmic Alignment"
+    elif score >= 0.6:
+        return "Positive Vibrational Harmony"
+    elif score >= 0.5:
+        return "Balanced Cosmic Energy"
+    elif score >= 0.4:
+        return "Subtle Resonance"
+    elif score >= 0.3:
+        return "Weak Cosmic Connection"
+    elif score >= 0.2:
+        return "Minimal Harmonic Structure"
+    else:
+        return "Cosmic Dissonance" 
