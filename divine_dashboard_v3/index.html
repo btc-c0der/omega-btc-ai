@@ -729,6 +729,31 @@ npm start</code></pre>
             transition: background-color 0.3s, color 0.3s;
         }
 
+        /* Font preloading to prevent 404 errors */
+        @font-face {
+            font-family: 'ui-sans-serif';
+            src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'ui-sans-serif';
+            src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'system-ui';
+            src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'system-ui';
+            src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+            font-weight: bold;
+        }
+
         /* Additional styles for Tesla Cybertruck QA Dashboard */
         .full-width-card {
             grid-column: 1 / -1;
@@ -841,6 +866,65 @@ npm start</code></pre>
     <script>
         // Add script to handle the new Cybertruck dashboard section
         document.addEventListener('DOMContentLoaded', function () {
+            // Preload fonts to prevent 404 errors
+            function preloadFonts() {
+                // Define local font alternatives
+                const fontFaces = `
+                    @font-face {
+                        font-family: 'ui-sans-serif';
+                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                        font-weight: normal;
+                    }
+                    
+                    @font-face {
+                        font-family: 'ui-sans-serif';
+                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                        font-weight: bold;
+                    }
+                    
+                    @font-face {
+                        font-family: 'system-ui';
+                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                        font-weight: normal;
+                    }
+                    
+                    @font-face {
+                        font-family: 'system-ui';
+                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                        font-weight: bold;
+                    }
+                `;
+
+                // Add font definitions to document
+                const style = document.createElement('style');
+                style.textContent = fontFaces;
+                document.head.appendChild(style);
+
+                // Also inject in all iframes
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    try {
+                        iframe.addEventListener('load', function () {
+                            try {
+                                if (iframe.contentDocument) {
+                                    const iframeStyle = iframe.contentDocument.createElement('style');
+                                    iframeStyle.textContent = fontFaces;
+                                    iframe.contentDocument.head.appendChild(iframeStyle);
+                                    console.log("Font preloading injected into iframe", iframe.id);
+                                }
+                            } catch (e) {
+                                console.log("Could not inject fonts into iframe due to cross-origin restrictions");
+                            }
+                        });
+                    } catch (e) {
+                        console.log("Error setting up iframe font injection:", e);
+                    }
+                });
+            }
+
+            // Apply font preloading immediately
+            preloadFonts();
+
             // Add Tesla QA Dashboard link to the navigation
             const mainNav = document.querySelector('.main-nav');
             const teslaQALink = document.createElement('a');
@@ -989,44 +1073,6 @@ npm start</code></pre>
                     setTimeout(() => notification.remove(), 300);
                 }, 5000);
             }
-
-            // Preload fonts to avoid 404 errors
-            const preloadFonts = () => {
-                // Define local font alternatives
-                const fontFaces = `
-                    @font-face {
-                        font-family: 'ui-sans-serif';
-                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
-                        font-weight: normal;
-                    }
-                    
-                    @font-face {
-                        font-family: 'ui-sans-serif';
-                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
-                        font-weight: bold;
-                    }
-                    
-                    @font-face {
-                        font-family: 'system-ui';
-                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
-                        font-weight: normal;
-                    }
-                    
-                    @font-face {
-                        font-family: 'system-ui';
-                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
-                        font-weight: bold;
-                    }
-                `;
-
-                // Add font definitions to document
-                const style = document.createElement('style');
-                style.textContent = fontFaces;
-                document.head.appendChild(style);
-            };
-
-            // Call preloadFonts on page load
-            preloadFonts();
 
             // Fix potential JavaScript syntax errors in iframes
             const fixIframeSyntaxErrors = () => {

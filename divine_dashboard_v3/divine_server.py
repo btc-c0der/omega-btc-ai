@@ -337,39 +337,133 @@ def create_gradio_interface():
         # JavaScript for postMessage communication
         gr.HTML("""
         <script>
-        // Listen for messages from the parent window
-        window.addEventListener('message', function(event) {
-            console.log("Received message:", event.data);
-            if (event.data && event.data.command === "runTests") {
-                // Trigger the Run All Tests button programmatically
-                document.querySelector('button:contains("Run All Tests")').click();
-            }
-        });
+        // Wrap in try/catch to prevent errors
+        try {
+            // Listen for messages from the parent window
+            window.addEventListener('message', function(event) {
+                console.log("Received message:", event.data);
+                if (event.data && event.data.command === "runTests") {
+                    try {
+                        // Find the Run All Tests button by text content
+                        var buttons = document.querySelectorAll('button');
+                        var testButton = null;
+                        buttons.forEach(function(btn) {
+                            if (btn.textContent.includes("Run All Tests")) {
+                                testButton = btn;
+                            }
+                        });
+                        
+                        if (testButton) {
+                            testButton.click();
+                        } else {
+                            console.error("Could not find Run All Tests button");
+                        }
+                    } catch (e) {
+                        console.error("Error triggering test button click:", e);
+                    }
+                }
+            });
 
-        // Function to send results back to parent
-        function sendResultsToParent(status, result) {
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({
-                    source: "cybertruck-qa",
-                    status: status,
-                    result: result
-                }, "*");
-                console.log("Sent results to parent:", status, result);
+            // Function to send results back to parent
+            function sendResultsToParent(status, result) {
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({
+                            source: "cybertruck-qa",
+                            status: status,
+                            result: result
+                        }, "*");
+                        console.log("Sent results to parent:", status, result);
+                    }
+                } catch (e) {
+                    console.error("Error sending results to parent:", e);
+                }
             }
-        }
-        
-        // Set interval to check test status
-        let statusCheckInterval;
-        
-        function startStatusChecking() {
-            statusCheckInterval = setInterval(function() {
-                document.querySelector('button:contains("Check Status")').click();
-            }, 1000);
             
-            // Stop checking after 30 seconds to prevent infinite loops
-            setTimeout(function() {
-                clearInterval(statusCheckInterval);
-            }, 30000);
+            // Set interval to check test status
+            var statusCheckInterval;
+            
+            function startStatusChecking() {
+                try {
+                    statusCheckInterval = setInterval(function() {
+                        // Find Check Status button by text content
+                        var buttons = document.querySelectorAll('button');
+                        var statusButton = null;
+                        buttons.forEach(function(btn) {
+                            if (btn.textContent.includes("Check Status")) {
+                                statusButton = btn;
+                            }
+                        });
+                        
+                        if (statusButton) {
+                            statusButton.click();
+                        } else {
+                            console.error("Could not find Check Status button");
+                            clearInterval(statusCheckInterval);
+                        }
+                    }, 1000);
+                    
+                    // Stop checking after 30 seconds to prevent infinite loops
+                    setTimeout(function() {
+                        clearInterval(statusCheckInterval);
+                    }, 30000);
+                } catch (e) {
+                    console.error("Error in startStatusChecking:", e);
+                    if (statusCheckInterval) {
+                        clearInterval(statusCheckInterval);
+                    }
+                }
+            }
+
+            // Add font preloading to prevent 404 errors
+            function preloadFonts() {
+                try {
+                    var style = document.createElement('style');
+                    style.textContent = `
+                        /* Font preloading to prevent 404 errors */
+                        @font-face {
+                            font-family: 'ui-sans-serif';
+                            src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                            font-weight: normal;
+                            font-display: swap;
+                        }
+                        
+                        @font-face {
+                            font-family: 'ui-sans-serif';
+                            src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                            font-weight: bold;
+                            font-display: swap;
+                        }
+                        
+                        @font-face {
+                            font-family: 'system-ui';
+                            src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                            font-weight: normal;
+                            font-display: swap;
+                        }
+                        
+                        @font-face {
+                            font-family: 'system-ui';
+                            src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                            font-weight: bold;
+                            font-display: swap;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    console.log("Font preloading initialized");
+                } catch (e) {
+                    console.error("Error in preloadFonts:", e);
+                }
+            }
+
+            // Run font preloading when DOM is ready
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", preloadFonts);
+            } else {
+                preloadFonts();
+            }
+        } catch (e) {
+            console.error("Critical error in Cybertruck QA Dashboard initialization:", e);
         }
         </script>
         """)
@@ -451,7 +545,7 @@ def create_gradio_interface():
             None,
             None,
             None,
-            _js="startStatusChecking"
+            js="startStatusChecking"
         )
         
         return demo
@@ -508,8 +602,7 @@ def run_servers():
                     nft_gr_interface.launch(
                         server_name="0.0.0.0",
                         server_port=NFT_PORT,
-                        share=False,
-                        app=nft_app
+                        share=True
                     )
                 except Exception as e:
                     logger.error(f"Error launching NFT dashboard: {e}")
@@ -533,7 +626,7 @@ def run_servers():
     
     # Start the Gradio server in the main thread
     logger.info(f"✨ Starting Tesla Cybertruck QA Dashboard on port {GRADIO_PORT} ✨")
-    gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=False, app=gradio_app)
+    gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=True)
 
 if __name__ == "__main__":
     logger.info(f"✨ Divine Dashboard v3 Server starting ✨")

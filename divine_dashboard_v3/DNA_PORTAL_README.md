@@ -94,6 +94,7 @@ Two JavaScript test suites are provided:
 2. **Simple Tests** (`tests/dna_portal_simple.test.js`) - Non-DOM dependent tests for core functionality
 
 JavaScript tests cover:
+
 * Message handling function syntax validation
 * Activation key parameter extraction
 * Cross-origin message safety

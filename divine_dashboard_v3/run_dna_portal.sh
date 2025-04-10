@@ -44,7 +44,6 @@ cat << "EOF"
 EOF
 
 # Run the DNA PCR Quantum LSD Portal
-cd divine_dashboard_v3
 python3 dna_pcr_quantum_portal.py
 
 # Deactivate virtual environment

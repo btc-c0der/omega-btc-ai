@@ -559,97 +559,178 @@ with gr.Blocks(theme=gr.themes.Soft(), title="0M3G4 PCR QUANTUM LSD PORTAL") as 
     
     # This JavaScript snippet adds message handling to receive commands from the parent iframe
     iface.js = """
-    function bindMessageHandler() {
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.command === "runSequence") {
-                // Extract parameters from the activation key
-                console.log("Received command:", event.data);
-                let params = {};
+    // Main initialization function - wrapped in try/catch to prevent errors
+    try {
+        // Add font preloading to prevent 404 errors
+        function preloadFonts() {
+            try {
+                const style = document.createElement('style');
+                style.textContent = `
+                    /* Font preloading to prevent 404 errors */
+                    @font-face {
+                        font-family: 'ui-sans-serif';
+                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                        font-weight: normal;
+                        font-display: swap;
+                    }
+                    
+                    @font-face {
+                        font-family: 'ui-sans-serif';
+                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                        font-weight: bold;
+                        font-display: swap;
+                    }
+                    
+                    @font-face {
+                        font-family: 'system-ui';
+                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                        font-weight: normal;
+                        font-display: swap;
+                    }
+                    
+                    @font-face {
+                        font-family: 'system-ui';
+                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                        font-weight: bold;
+                        font-display: swap;
+                    }
+                `;
+                document.head.appendChild(style);
+                console.log("Font preloading initialized to prevent 404 errors");
+            } catch (e) {
+                console.error("Error in preloadFonts:", e);
+            }
+        }
+
+        function bindMessageHandler() {
+            try {
+                window.addEventListener('message', function(event) {
+                    // Check if the message contains the expected command
+                    if (event.data && event.data.command === "runSequence") {
+                        // Extract parameters from the activation key
+                        console.log("Received command:", event.data);
+                        var params = {};
+                        
+                        // Set default values based on activation key
+                        if (event.data.activationKey === "Mullis Spiral Boost") {
+                            params = {
+                                dna_sequence: "ATGCGTAGCTAGCTAGCTAGCTA",
+                                lsd_dose: 200.0,
+                                schumann_sync: true,
+                                quantum_entanglement: 0.9
+                            };
+                        } else if (event.data.activationKey === "DNA Rain Glitch") {
+                            params = {
+                                dna_sequence: "GCTAGCTAGCTAGCTAGCTA",
+                                lsd_dose: 150.0,
+                                schumann_sync: false,
+                                quantum_entanglement: 0.5
+                            };
+                        } else if (event.data.activationKey === "Neural Lotus Bloom") {
+                            params = {
+                                dna_sequence: "ATCGATCGATCGATCGATCG",
+                                lsd_dose: 300.0,
+                                schumann_sync: true,
+                                quantum_entanglement: 0.8
+                            };
+                        } else {
+                            // Default values
+                            params = {
+                                dna_sequence: "",
+                                lsd_dose: 100.0,
+                                schumann_sync: true,
+                                quantum_entanglement: 0.7
+                            };
+                        }
+                        
+                        // Set the values in the UI
+                        var dnaInput = document.querySelector('textarea[data-testid="textbox"]');
+                        var lsdDose = document.querySelector('input[data-testid="range"]');
+                        var quantumEntanglement = document.querySelectorAll('input[data-testid="range"]')[1];
+                        var schumannSync = document.querySelector('input[data-testid="checkbox"]');
+                        var submitBtn = document.querySelector('button[data-testid="button"]');
+                        
+                        if (dnaInput) dnaInput.value = params.dna_sequence;
+                        if (lsdDose) lsdDose.value = params.lsd_dose;
+                        if (quantumEntanglement) quantumEntanglement.value = params.quantum_entanglement;
+                        if (schumannSync) schumannSync.checked = params.schumann_sync;
+                        
+                        // Trigger input events to update Gradio's internal state
+                        if (dnaInput) dnaInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        if (lsdDose) lsdDose.dispatchEvent(new Event('input', { bubbles: true }));
+                        if (quantumEntanglement) quantumEntanglement.dispatchEvent(new Event('input', { bubbles: true }));
+                        if (schumannSync) schumannSync.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        // Click the submit button after a short delay
+                        setTimeout(function() {
+                            if (submitBtn) submitBtn.click();
+                            
+                            // Send a response back to the parent window - use * for origin to avoid cross-origin issues
+                            try {
+                                window.parent.postMessage({
+                                    source: "dna-portal",
+                                    status: "processing",
+                                    message: "Processing DNA sequence with " + event.data.activationKey
+                                }, "*");
+                                
+                                // After processing, send success message
+                                setTimeout(function() {
+                                    window.parent.postMessage({
+                                        source: "dna-portal",
+                                        status: "success",
+                                        message: "DNA sequence processed successfully with " + event.data.activationKey
+                                    }, "*");
+                                }, 5000);
+                            } catch (e) {
+                                console.error("Error posting message to parent:", e);
+                            }
+                        }, 500);
+                    }
+                });
                 
-                // Set default values based on activation key
-                if (event.data.activationKey === "Mullis Spiral Boost") {
-                    params = {
-                        dna_sequence: "ATGCGTAGCTAGCTAGCTAGCTA",
-                        lsd_dose: 200.0,
-                        schumann_sync: true,
-                        quantum_entanglement: 0.9
-                    };
-                } else if (event.data.activationKey === "DNA Rain Glitch") {
-                    params = {
-                        dna_sequence: "GCTAGCTAGCTAGCTAGCTA",
-                        lsd_dose: 150.0,
-                        schumann_sync: false,
-                        quantum_entanglement: 0.5
-                    };
-                } else if (event.data.activationKey === "Neural Lotus Bloom") {
-                    params = {
-                        dna_sequence: "ATCGATCGATCGATCGATCG",
-                        lsd_dose: 300.0,
-                        schumann_sync: true,
-                        quantum_entanglement: 0.8
-                    };
-                } else {
-                    // Default values
-                    params = {
-                        dna_sequence: "",
-                        lsd_dose: 100.0,
-                        schumann_sync: true,
-                        quantum_entanglement: 0.7
-                    };
+                console.log("DNA Portal message handler initialized");
+            } catch (e) {
+                console.error("Error in bindMessageHandler:", e);
+            }
+        }
+        
+        // Safe DOM ready handler
+        function onDOMReady(fn) {
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", fn);
+            } else {
+                fn();
+            }
+        }
+        
+        // Run preload fonts immediately
+        preloadFonts();
+        
+        // Initialize message handler when DOM is ready
+        onDOMReady(function() {
+            try {
+                // Check if we're in an iframe
+                if (window.parent !== window) {
+                    bindMessageHandler();
+                    console.log("DNA Portal detected iframe context, message handler active");
                 }
                 
-                // Set the values in the UI
-                const dnaInput = document.querySelector('textarea[data-testid="textbox"]');
-                const lsdDose = document.querySelector('input[data-testid="range"]');
-                const quantumEntanglement = document.querySelectorAll('input[data-testid="range"]')[1];
-                const schumannSync = document.querySelector('input[data-testid="checkbox"]');
-                const submitBtn = document.querySelector('button[data-testid="button"]');
-                
-                if (dnaInput) dnaInput.value = params.dna_sequence;
-                if (lsdDose) lsdDose.value = params.lsd_dose;
-                if (quantumEntanglement) quantumEntanglement.value = params.quantum_entanglement;
-                if (schumannSync) schumannSync.checked = params.schumann_sync;
-                
-                // Trigger input events to update Gradio's internal state
-                if (dnaInput) dnaInput.dispatchEvent(new Event('input', { bubbles: true }));
-                if (lsdDose) lsdDose.dispatchEvent(new Event('input', { bubbles: true }));
-                if (quantumEntanglement) quantumEntanglement.dispatchEvent(new Event('input', { bubbles: true }));
-                if (schumannSync) schumannSync.dispatchEvent(new Event('change', { bubbles: true }));
-                
-                // Click the submit button after a short delay
-                setTimeout(() => {
-                    if (submitBtn) submitBtn.click();
-                    
-                    // Send a response back to the parent window
-                    window.parent.postMessage({
-                        source: "dna-portal",
-                        status: "processing",
-                        message: "Processing DNA sequence with " + event.data.activationKey
-                    }, "*");
-                    
-                    // After processing, send success message
-                    setTimeout(() => {
-                        window.parent.postMessage({
-                            source: "dna-portal",
-                            status: "success",
-                            message: "DNA sequence processed successfully with " + event.data.activationKey
-                        }, "*");
-                    }, 5000);
-                }, 500);
+                // Fix style loading issues
+                var links = document.querySelectorAll('link[rel="stylesheet"]');
+                links.forEach(function(link) {
+                    link.addEventListener('error', function(e) {
+                        console.warn('CSS failed to load:', link.href);
+                    });
+                });
+            } catch (e) {
+                console.error("Error in DOMReady handler:", e);
             }
         });
-        
-        console.log("DNA Portal message handler initialized");
-    }
-    
-    // Initialize the message handler when the page loads
-    if (window.parent !== window) {
-        // We're in an iframe
-        bindMessageHandler();
-        console.log("DNA Portal detected iframe context, message handler active");
+    } catch (e) {
+        console.error("Critical error in DNA Portal initialization:", e);
     }
     """
 
 # Launch the interface on port 7863
 if __name__ == "__main__":
-    iface.launch(server_name="0.0.0.0", server_port=7863) 
+    iface.launch(server_name="0.0.0.0", server_port=7863, share=True) 
