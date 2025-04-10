@@ -434,6 +434,48 @@ def run_pcr_lsd_sequence(dna_sequence, lsd_dose, schumann_sync, quantum_entangle
     
     return visual_output, consciousness_map, pcr_plot
 
+# Define a function to handle external messages
+def handle_message(message_data):
+    if not isinstance(message_data, dict):
+        return None
+    
+    if "command" in message_data and message_data["command"] == "runSequence":
+        activation_key = message_data.get("activationKey", "")
+        print(f"Running sequence with activation key: {activation_key}")
+        
+        # Set specific parameters based on activation key
+        if activation_key == "Mullis Spiral Boost":
+            return {
+                "dna_sequence": "ATGCGTAGCTAGCTAGCTAGCTA",
+                "lsd_dose": 200.0,
+                "schumann_sync": True,
+                "quantum_entanglement": 0.9
+            }
+        elif activation_key == "DNA Rain Glitch":
+            return {
+                "dna_sequence": "GCTAGCTAGCTAGCTAGCTA",
+                "lsd_dose": 150.0,
+                "schumann_sync": False,
+                "quantum_entanglement": 0.5
+            }
+        elif activation_key == "Neural Lotus Bloom":
+            return {
+                "dna_sequence": "ATCGATCGATCGATCGATCG",
+                "lsd_dose": 300.0,
+                "schumann_sync": True,
+                "quantum_entanglement": 0.8
+            }
+        else:
+            # Default values
+            return {
+                "dna_sequence": "",
+                "lsd_dose": 100.0,
+                "schumann_sync": True,
+                "quantum_entanglement": 0.7
+            }
+    
+    return None
+
 # Create Gradio interface
 with gr.Blocks(theme=gr.themes.Soft(), title="0M3G4 PCR QUANTUM LSD PORTAL") as iface:
     gr.Markdown("""
@@ -510,51 +552,103 @@ with gr.Blocks(theme=gr.themes.Soft(), title="0M3G4 PCR QUANTUM LSD PORTAL") as 
         outputs=[visual_output, consciousness_output, pcr_plot]
     )
     
-    # Handle external messaging
+    # Set up message handling for iframe communication
     @iface.load(inputs=None, outputs=None)
     def load_interface():
         print("DNA PCR Quantum LSD Portal loaded and ready")
     
-    # Setup message handler for iframe communication
-    def handle_message(message):
-        if "command" in message and message["command"] == "runSequence":
-            activation_key = message.get("activationKey", "")
-            print(f"Running sequence with activation key: {activation_key}")
-            
-            # Set specific parameters based on activation key
-            if activation_key == "Mullis Spiral Boost":
-                return {
-                    "dna_sequence": "ATGCGTAGCTAGCTAGCTAGCTA",
-                    "lsd_dose": 200.0,
-                    "schumann_sync": True,
-                    "quantum_entanglement": 0.9
+    # This JavaScript snippet adds message handling to receive commands from the parent iframe
+    iface.js = """
+    function bindMessageHandler() {
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.command === "runSequence") {
+                // Extract parameters from the activation key
+                console.log("Received command:", event.data);
+                let params = {};
+                
+                // Set default values based on activation key
+                if (event.data.activationKey === "Mullis Spiral Boost") {
+                    params = {
+                        dna_sequence: "ATGCGTAGCTAGCTAGCTAGCTA",
+                        lsd_dose: 200.0,
+                        schumann_sync: true,
+                        quantum_entanglement: 0.9
+                    };
+                } else if (event.data.activationKey === "DNA Rain Glitch") {
+                    params = {
+                        dna_sequence: "GCTAGCTAGCTAGCTAGCTA",
+                        lsd_dose: 150.0,
+                        schumann_sync: false,
+                        quantum_entanglement: 0.5
+                    };
+                } else if (event.data.activationKey === "Neural Lotus Bloom") {
+                    params = {
+                        dna_sequence: "ATCGATCGATCGATCGATCG",
+                        lsd_dose: 300.0,
+                        schumann_sync: true,
+                        quantum_entanglement: 0.8
+                    };
+                } else {
+                    // Default values
+                    params = {
+                        dna_sequence: "",
+                        lsd_dose: 100.0,
+                        schumann_sync: true,
+                        quantum_entanglement: 0.7
+                    };
                 }
-            elif activation_key == "DNA Rain Glitch":
-                return {
-                    "dna_sequence": "GCTAGCTAGCTAGCTAGCTA",
-                    "lsd_dose": 150.0,
-                    "schumann_sync": False,
-                    "quantum_entanglement": 0.5
-                }
-            elif activation_key == "Neural Lotus Bloom":
-                return {
-                    "dna_sequence": "ATCGATCGATCGATCGATCG",
-                    "lsd_dose": 300.0,
-                    "schumann_sync": True,
-                    "quantum_entanglement": 0.8
-                }
-            else:
-                # Default values
-                return {
-                    "dna_sequence": "",
-                    "lsd_dose": 100.0,
-                    "schumann_sync": True,
-                    "quantum_entanglement": 0.7
-                }
+                
+                // Set the values in the UI
+                const dnaInput = document.querySelector('textarea[data-testid="textbox"]');
+                const lsdDose = document.querySelector('input[data-testid="range"]');
+                const quantumEntanglement = document.querySelectorAll('input[data-testid="range"]')[1];
+                const schumannSync = document.querySelector('input[data-testid="checkbox"]');
+                const submitBtn = document.querySelector('button[data-testid="button"]');
+                
+                if (dnaInput) dnaInput.value = params.dna_sequence;
+                if (lsdDose) lsdDose.value = params.lsd_dose;
+                if (quantumEntanglement) quantumEntanglement.value = params.quantum_entanglement;
+                if (schumannSync) schumannSync.checked = params.schumann_sync;
+                
+                // Trigger input events to update Gradio's internal state
+                if (dnaInput) dnaInput.dispatchEvent(new Event('input', { bubbles: true }));
+                if (lsdDose) lsdDose.dispatchEvent(new Event('input', { bubbles: true }));
+                if (quantumEntanglement) quantumEntanglement.dispatchEvent(new Event('input', { bubbles: true }));
+                if (schumannSync) schumannSync.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // Click the submit button after a short delay
+                setTimeout(() => {
+                    if (submitBtn) submitBtn.click();
+                    
+                    // Send a response back to the parent window
+                    window.parent.postMessage({
+                        source: "dna-portal",
+                        status: "processing",
+                        message: "Processing DNA sequence with " + event.data.activationKey
+                    }, "*");
+                    
+                    // After processing, send success message
+                    setTimeout(() => {
+                        window.parent.postMessage({
+                            source: "dna-portal",
+                            status: "success",
+                            message: "DNA sequence processed successfully with " + event.data.activationKey
+                        }, "*");
+                    }, 5000);
+                }, 500);
+            }
+        });
         
-        return None
+        console.log("DNA Portal message handler initialized");
+    }
     
-    gr.add_msg_handler(handle_message)
+    // Initialize the message handler when the page loads
+    if (window.parent !== window) {
+        // We're in an iframe
+        bindMessageHandler();
+        console.log("DNA Portal detected iframe context, message handler active");
+    }
+    """
 
 # Launch the interface on port 7863
 if __name__ == "__main__":
