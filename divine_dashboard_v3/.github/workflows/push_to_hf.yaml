@@ -25,7 +25,7 @@ jobs:
           git config --global user.email "bot@example.com"
           
           echo "Adding Hugging Face Space as remote"
-          git remote add hf https://USER:$HF_TOKEN@huggingface.co/spaces/fartec0/divine-dashboard-v3
+          git remote add hf https://fartec0:$HF_TOKEN@huggingface.co/spaces/fartec0/divine-dashboard-v3
           
           echo "Pushing to Hugging Face Space"
           git push -f hf ${{ github.ref_name }}:main
