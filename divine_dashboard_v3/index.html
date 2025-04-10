@@ -1,10 +1,27 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divine Dashboard v3</title>
+    <title>D1vine Dashboard v3</title>
     <meta name="description" content="A powerful dashboard interface for monitoring and management">
 
     <!-- Stylesheet -->
@@ -50,6 +67,10 @@
                     <a href="#tasks" class="nav-link">
                         <i class="fas fa-tasks"></i>
                         <span>Tasks</span>
+                    </a>
+                    <a href="#nft" class="nav-link">
+                        <i class="fas fa-palette"></i>
+                        <span>NFT Creator</span>
                     </a>
                     <a href="#settings" class="nav-link">
                         <i class="fas fa-cog"></i>
@@ -633,6 +654,64 @@ npm start</code></pre>
                     </div>
                 </div>
             </section>
+
+            <!-- NFT Creator Dashboard Section -->
+            <section id="nft">
+                <div class="section-header">
+                    <h2>🎨 Divine NFT Creator 🎨</h2>
+                    <p>Generate and mint sacred NFTs infused with divine energy.</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>NFT Creator Dashboard</h3>
+                        <div class="card-actions">
+                            <button id="mint-nft-btn" class="card-action mint-nft" title="Mint New NFT">
+                                <i class="fas fa-coins"></i>
+                            </button>
+                            <button class="card-action refresh-nft" title="Refresh Dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-nft" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body nft-frame-container">
+                        <iframe id="nft-creator-frame" src="http://localhost:7862" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Milles DNA PCR Quantum LSD Portal Section -->
+            <section id="dna-portal">
+                <div class="section-header">
+                    <h2>🧬 Milles DNA PCR Quantum LSD Portal 🧬</h2>
+                    <p>Divine biotech interface for DNA quantum amplification and consciousness expansion.</p>
+                </div>
+
+                <div class="dashboard-card full-width-card">
+                    <div class="card-header">
+                        <h3>0M3G4 PCR QUANTUM LSD PORTAL</h3>
+                        <div class="card-actions">
+                            <button id="run-sequence-btn" class="card-action run-sequence" title="Run DNA Sequence">
+                                <i class="fas fa-dna"></i>
+                            </button>
+                            <button class="card-action refresh-portal" title="Refresh Portal">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="card-action fullscreen-portal" title="Fullscreen Mode">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body dna-portal-frame-container">
+                        <iframe id="dna-portal-frame" src="http://localhost:7863" allowfullscreen="true"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -640,6 +719,16 @@ npm start</code></pre>
     <iframe id="metrics-dashboard-frame" src="http://localhost:7861" style="display: none;"></iframe>
 
     <style>
+        /* Main Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafbfd;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
         /* Additional styles for Tesla Cybertruck QA Dashboard */
         .full-width-card {
             grid-column: 1 / -1;
@@ -663,30 +752,89 @@ npm start</code></pre>
             border: 0;
         }
 
+        /* NFT Creator Styles */
+        .nft-frame-container {
+            width: 100%;
+            height: 720px;
+        }
+
+        #nft-creator-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* DNA Portal Styles */
+        .dna-portal-frame-container {
+            width: 100%;
+            height: 720px;
+        }
+
+        #dna-portal-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 9999;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+            border-left: 5px solid #2E7D32;
+        }
+
+        .notification.error {
+            background-color: #F44336;
+            border-left: 5px solid #C62828;
+        }
+
+        .notification.info {
+            background-color: #2196F3;
+            border-left: 5px solid #1565C0;
+        }
+
         @media (max-width: 768px) {
-            .cybertruck-frame-container {
+
+            .cybertruck-frame-container,
+            .nft-frame-container {
                 padding-top: 100%;
                 /* 1:1 aspect ratio on mobile */
             }
-        }
 
-        /* Animation for updated metrics */
-        @keyframes pulse-update {
-            0% {
-                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4);
+            .notification {
+                width: calc(100% - 40px);
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                transform: translateY(110%);
             }
 
-            70% {
-                box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+            .notification.show {
+                transform: translateY(0);
             }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
-            }
-        }
-
-        .stat-card.updated {
-            animation: pulse-update 1s ease-out;
         }
     </style>
 
@@ -700,10 +848,18 @@ npm start</code></pre>
             teslaQALink.className = 'nav-link';
             teslaQALink.innerHTML = '<i class="fas fa-car"></i><span>Tesla QA</span>';
 
+            // Add DNA Portal link to the navigation
+            const dnaPortalLink = document.createElement('a');
+            dnaPortalLink.href = '#dna-portal';
+            dnaPortalLink.className = 'nav-link';
+            dnaPortalLink.innerHTML = '<i class="fas fa-dna"></i><span>DNA Portal</span>';
+
             // Insert after Dashboard link
             mainNav.insertBefore(teslaQALink, mainNav.querySelector('a[href="#code-stats"]'));
+            // Insert DNA Portal link after NFT link
+            mainNav.insertBefore(dnaPortalLink, mainNav.querySelector('a[href="#settings"]'));
 
-            // Handle fullscreen button
+            // Handle fullscreen button for Cybertruck dashboard
             document.querySelector('.fullscreen-dashboard').addEventListener('click', function () {
                 const iframe = document.getElementById('cybertruck-qa-frame');
                 if (iframe.requestFullscreen) {
@@ -715,13 +871,37 @@ npm start</code></pre>
                 }
             });
 
-            // Handle refresh button
+            // Handle refresh button for Cybertruck dashboard
             document.querySelector('.refresh-dashboard').addEventListener('click', function () {
                 const iframe = document.getElementById('cybertruck-qa-frame');
                 iframe.src = iframe.src;
             });
 
-            // Trigger test run from HTML button
+            // Handle fullscreen button for NFT dashboard
+            document.querySelector('.fullscreen-nft').addEventListener('click', function () {
+                const iframe = document.getElementById('nft-creator-frame');
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+            });
+
+            // Handle refresh button for NFT dashboard
+            document.querySelector('.refresh-nft').addEventListener('click', function () {
+                const iframe = document.getElementById('nft-creator-frame');
+                iframe.src = iframe.src;
+            });
+
+            // Handle mint NFT button
+            document.getElementById('mint-nft-btn').addEventListener('click', function () {
+                const iframe = document.getElementById('nft-creator-frame');
+                iframe.contentWindow.postMessage({ command: "mintNFT" }, "*");
+            });
+
+            // Handle run tests button
             document.getElementById("run-tests-btn").addEventListener("click", function () {
                 const iframe = document.getElementById("cybertruck-qa-frame");
                 iframe.contentWindow.postMessage({ command: "runTests" }, "*");
@@ -738,59 +918,94 @@ npm start</code></pre>
                 }, 3000);
             });
 
-            // Listen for messages from Gradio app
+            // Listen for NFT dashboard messages
             window.addEventListener("message", function (event) {
-                if (event.data && event.data.source === "cybertruck-qa") {
-                    if (event.data.status === "testsComplete") {
-                        // Handle test completion
-                        console.log("Tests completed with result:", event.data.result);
+                if (event.data && event.data.source === "nft-dashboard") {
+                    console.log("Received message from NFT dashboard:", event.data);
 
-                        // Show notification
-                        alert("Cybertruck QA Tests " +
-                            (event.data.result === "pass" ? "PASSED ✅" : "FAILED ❌"));
+                    // Show a notification
+                    if (event.data.status === "success") {
+                        showNotification("✅ NFT Created Successfully!", "success");
+                    } else {
+                        showNotification("❌ NFT Creation Failed", "error");
                     }
                 }
             });
 
-            // Listen for metrics updates from Gradio
-            window.addEventListener("message", (event) => {
-                if (event.data && event.data.source === "dashboard-metrics") {
-                    // Handle different metrics
-                    if (event.data.metric === "commits_today") {
-                        document.querySelector("#commits-today .stat-value").innerText = event.data.value;
-                        if (event.data.change) {
-                            document.querySelector("#commits-today .stat-change").innerText = event.data.change;
-                        }
-                    }
-                    else if (event.data.metric === "lines_changed") {
-                        document.querySelector("#lines-changed .stat-value").innerText = event.data.value;
-                        if (event.data.change) {
-                            document.querySelector("#lines-changed .stat-change").innerText = event.data.change;
-                        }
-                    }
-                    else if (event.data.metric === "pull_requests") {
-                        document.querySelector("#pull-requests .stat-value").innerText = event.data.value;
-                        if (event.data.change) {
-                            document.querySelector("#pull-requests .stat-change").innerText = event.data.change;
-                        }
-                    }
-                    else if (event.data.metric === "deployments") {
-                        document.querySelector("#deployments .stat-value").innerText = event.data.value;
-                        if (event.data.change) {
-                            document.querySelector("#deployments .stat-change").innerText = event.data.change;
-                        }
-                    }
+            // Handle fullscreen button for DNA Portal dashboard
+            document.querySelector('.fullscreen-portal').addEventListener('click', function () {
+                const iframe = document.getElementById('dna-portal-frame');
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+            });
 
-                    // Add visual indicator of update
-                    const metricElement = document.getElementById(event.data.metric.replace('_', '-'));
-                    if (metricElement) {
-                        metricElement.classList.add('updated');
-                        setTimeout(() => {
-                            metricElement.classList.remove('updated');
-                        }, 1000);
+            // Handle refresh button for DNA Portal dashboard
+            document.querySelector('.refresh-portal').addEventListener('click', function () {
+                const iframe = document.getElementById('dna-portal-frame');
+                iframe.src = iframe.src;
+            });
+
+            // Handle run DNA sequence button
+            document.getElementById('run-sequence-btn').addEventListener('click', function () {
+                const iframe = document.getElementById('dna-portal-frame');
+                iframe.contentWindow.postMessage({
+                    command: "runSequence",
+                    activationKey: "Mullis Spiral Boost"
+                }, "*");
+
+                // Show feedback to user
+                const button = this;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+
+                // Re-enable after 3 seconds
+                setTimeout(function () {
+                    button.innerHTML = '<i class="fas fa-dna"></i>';
+                    button.disabled = false;
+
+                    // Show success notification
+                    showNotification("✨ DNA Sequence Amplified in Quantum Field!", "success");
+                }, 3000);
+            });
+
+            // Listen for DNA Portal messages
+            window.addEventListener("message", function (event) {
+                if (event.data && event.data.source === "dna-portal") {
+                    console.log("Received message from DNA Portal:", event.data);
+
+                    // Show a notification
+                    if (event.data.status === "success") {
+                        showNotification("🧬 DNA Quantum Expansion Complete!", "success");
+                    } else if (event.data.status === "processing") {
+                        showNotification("⏳ Processing DNA Sequence through LSD Portal...", "info");
+                    } else {
+                        showNotification("❌ DNA Sequence Amplification Failed", "error");
                     }
                 }
             });
+
+            // Function to show notifications
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+
+                document.body.appendChild(notification);
+
+                // Trigger animation
+                setTimeout(() => notification.classList.add('show'), 10);
+
+                // Remove notification after delay
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
         });
     </script>
 
