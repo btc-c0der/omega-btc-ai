@@ -14,11 +14,46 @@ by OMEGA BTC AI.
 import gradio as gr
 import os
 import sys
+import redis
+
+# Redis connection configuration
+REDIS_HOST = os.environ.get("REDIS_HOST", "omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 25061))
+REDIS_USERNAME = os.environ.get("REDIS_USERNAME", "default")
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "AVNS_OXMpU0P0ByYEz337Fgi")
+
+# Initialize Redis connection
+redis_client = None
+try:
+    print("🔄 Connecting to DigitalOcean Redis...")
+    redis_client = redis.Redis(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        username=REDIS_USERNAME,
+        password=REDIS_PASSWORD,
+        ssl=True,
+        decode_responses=True
+    )
+    redis_client.ping()  # Test connection
+    print("✅ Successfully connected to Redis!")
+    
+    # Store connection timestamp in Redis
+    import datetime
+    redis_client.set("last_connection", datetime.datetime.now().isoformat())
+    redis_client.incr("connection_count")
+    
+except Exception as e:
+    print(f"⚠️ Redis connection error: {str(e)}")
+    redis_client = None
 
 # Determine which component to launch based on environment variable
 COMPONENT = os.environ.get("HF_COMPONENT", "DNA_PORTAL")
 
 print(f"🌌 Starting Divine Dashboard v3 - Component: {COMPONENT} 🌌")
+
+# Make Redis client available to imported modules
+def get_redis_client():
+    return redis_client
 
 try:
     if COMPONENT == "DNA_PORTAL":

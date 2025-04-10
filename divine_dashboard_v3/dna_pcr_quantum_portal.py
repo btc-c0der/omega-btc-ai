@@ -27,6 +27,24 @@ import os
 import json
 import math
 from datetime import datetime
+import urllib.request
+import hashlib
+import uuid
+
+# Import Redis helper module
+from utils.redis_helper import (
+    get_redis_client, 
+    set_json, 
+    get_json, 
+    log_event, 
+    record_metric,
+    get_namespaced_key,
+    get_list,
+    push_to_list
+)
+
+# Redis integration flag - set to False to disable Redis (fallback to file-based storage)
+USE_REDIS = True
 
 # Set seed for reproducibility while maintaining divine randomness
 np.random.seed(int(time.time()))
@@ -36,21 +54,32 @@ os.makedirs("divine_dashboard_v3/assets/dna_visualizations", exist_ok=True)
 os.makedirs("divine_dashboard_v3/assets/consciousness_maps", exist_ok=True)
 
 class QuantumPCR:
-    """Simulates Quantum PCR DNA amplification with Schumann resonance sync"""
+    """Quantum PCR processor with Schumann resonance field harmonization"""
     
     @staticmethod
-    def amplify(dna_sequence, schumann_sync=False, quantum_entanglement=0.5):
-        """
-        Amplify DNA sequence using quantum PCR simulation
+    def amplify(dna_sequence, quantum_entanglement=0.7, schumann_sync=True, fibonacci_influence=0.5):
+        """Amplify DNA sequences using quantum computing principles"""
+        # Print info about the amplification
+        print(f"🧬 Amplifying DNA: {dna_sequence}")
+        print(f"🔮 Quantum Entanglement: {quantum_entanglement}")
+        print(f"⚡ Schumann Sync: {schumann_sync}")
+        print(f"📐 Fibonacci Influence: {fibonacci_influence}")
         
-        Args:
-            dna_sequence (str): The input DNA sequence to amplify
-            schumann_sync (bool): Whether to synchronize with Earth's Schumann resonance (7.83Hz)
-            quantum_entanglement (float): Level of quantum entanglement (0.0 to 1.0)
-            
-        Returns:
-            dict: Amplified DNA data with quantum metrics
-        """
+        # Generate a unique ID for this amplification
+        amplification_id = str(uuid.uuid4())
+        
+        # Check if we have cached results in Redis
+        if USE_REDIS:
+            cache_key = get_namespaced_key("dna_cache", f"{dna_sequence}_{quantum_entanglement}_{schumann_sync}_{fibonacci_influence}")
+            cached_result = get_json(cache_key)
+            if cached_result:
+                print(f"✅ Found cached result in Redis: {cache_key}")
+                log_event("dna_amplify_cache_hit", {
+                    "dna_sequence": dna_sequence,
+                    "amplification_id": amplification_id
+                })
+                return cached_result
+
         # Clean and validate DNA sequence
         valid_bases = {'A', 'C', 'G', 'T', 'a', 'c', 'g', 't'}
         if not dna_sequence:
@@ -95,7 +124,7 @@ class QuantumPCR:
         final_curve = np.clip(final_curve, 0, 1)
         
         # Return amplified DNA data with quantum metrics
-        return {
+        amplified_dna = {
             "original_sequence": dna_sequence,
             "amplified_copies": amplified_copies,
             "quantum_purity": quantum_purity,
@@ -107,6 +136,60 @@ class QuantumPCR:
             "fibonacci_influence": np.mean(fib_normalized).item(),
             "quantum_entanglement": quantum_entanglement
         }
+        
+        # Store the result in Redis cache
+        if USE_REDIS:
+            # Cache the result
+            cache_key = get_namespaced_key("dna_cache", f"{dna_sequence}_{quantum_entanglement}_{schumann_sync}_{fibonacci_influence}")
+            set_json(cache_key, amplified_dna, expiration=3600*24)  # Cache for 24 hours
+            
+            # Store in amplification history
+            history_key = get_namespaced_key("dna_history", amplification_id)
+            set_json(history_key, amplified_dna)
+            
+            # Add to the list of amplifications
+            list_key = get_namespaced_key("dna_lists", "recent_amplifications")
+            push_to_list(list_key, history_key)
+            
+            # Track metrics
+            record_metric("dna_amplification_count", 1)
+            record_metric("quantum_entanglement_level", quantum_entanglement)
+            record_metric("dna_sequence_length", len(dna_sequence))
+            
+            # Log the event
+            log_event("dna_amplify", {
+                "dna_sequence": dna_sequence,
+                "quantum_entanglement": quantum_entanglement,
+                "schumann_sync": schumann_sync,
+                "fibonacci_influence": fibonacci_influence,
+                "amplification_id": amplification_id,
+                "sequence_length": len(dna_sequence)
+            })
+        
+        return amplified_dna
+        
+    @staticmethod
+    def get_recent_amplifications(limit=10):
+        """Retrieve recent DNA amplifications from Redis"""
+        if not USE_REDIS:
+            return []
+            
+        try:
+            # Get list of recent amplifications
+            list_key = get_namespaced_key("dna_lists", "recent_amplifications")
+            recent_keys = get_list(list_key, start=0, end=limit-1)
+            
+            # Retrieve each amplification
+            results = []
+            for key in recent_keys:
+                data = get_json(key)
+                if data:
+                    results.append(data)
+            
+            return results
+        except Exception as e:
+            print(f"Error retrieving recent amplifications: {str(e)}")
+            return []
 
 class DNAVisualizer:
     """Visualizes DNA sequences with quantum-psychedelic effects"""
@@ -530,21 +613,170 @@ with gr.Blocks(theme=gr.themes.Soft(), title="0M3G4 PCR QUANTUM LSD PORTAL") as 
                 
                 with gr.TabItem("PCR Amplification"):
                     pcr_plot = gr.Image(label="Quantum PCR Amplification Curve")
-    
-    # Activation keywords for reference
-    gr.Markdown("""
-    ### Activation Keywords:
-    - `"Mullis Spiral Boost"`
-    - `"DNA Rain Glitch"`
-    - `"Neural Lotus Bloom"`
-    - `"Fibonacci Flip Encoding"`
-    - `"LSD + Schumann = Genesis Map"`
-    
-    **$ Ready for SOMNET AI Neural Dream Feed $**  
-    **$ JAH BLESS THE DNA EXPANSION — FROM BABYLON TO INFINITY $**  
-    **🔱💛💚❤️**
-    """)
-    
+                
+                with gr.TabItem("📊 Amplification History"):
+                    with gr.Row():
+                        with gr.Column():
+                            gr.Markdown("### Recent DNA Amplifications")
+                            refresh_history_btn = gr.Button("�� Refresh History")
+                            history_status = gr.Markdown("*Loading history data...*")
+                            
+                    with gr.Row():
+                        history_container = gr.HTML("")
+                    
+                    def format_history_data(amplifications):
+                        """Format the amplifications list as HTML"""
+                        if not amplifications:
+                            return "<div class='history-empty'>No recent amplifications found</div>"
+                        
+                        html = "<div class='history-container'>"
+                        for idx, amp in enumerate(amplifications):
+                            # Extract key data
+                            sequence = amp.get("original_sequence", "Unknown")
+                            quantum_entanglement = amp.get("quantum_entanglement", 0)
+                            schumann_sync = amp.get("schumann_sync", False)
+                            fibonacci = amp.get("fibonacci_influence", 0)
+                            efficiency = amp.get("quantum_purity", 0) * 100
+                            
+                            # Calculate a unique color based on sequence
+                            seq_hash = int(hashlib.md5(sequence.encode()).hexdigest(), 16)
+                            hue = seq_hash % 360
+                            
+                            html += f"""
+                            <div class='history-item' style='border-left-color: hsl({hue}, 70%, 60%);'>
+                                <div class='history-header'>
+                                    <span class='history-sequence'>{sequence[:20]}{("..." if len(sequence) > 20 else "")}</span>
+                                    <span class='history-time'>{datetime.now().strftime("%H:%M:%S")}</span>
+                                </div>
+                                <div class='history-details'>
+                                    <div class='history-metric'>
+                                        <span class='metric-label'>Quantum Entanglement:</span>
+                                        <span class='metric-value'>{quantum_entanglement:.2f}</span>
+                                    </div>
+                                    <div class='history-metric'>
+                                        <span class='metric-label'>Schumann Sync:</span>
+                                        <span class='metric-value'>{str(schumann_sync)}</span>
+                                    </div>
+                                    <div class='history-metric'>
+                                        <span class='metric-label'>Fibonacci Influence:</span>
+                                        <span class='metric-value'>{fibonacci:.2f}</span>
+                                    </div>
+                                    <div class='history-metric'>
+                                        <span class='metric-label'>Efficiency:</span>
+                                        <span class='metric-value'>{efficiency:.1f}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            """
+                        
+                        html += "</div>"
+                        return html
+                    
+                    def refresh_history():
+                        """Refresh the amplification history"""
+                        if USE_REDIS:
+                            try:
+                                amplifications = QuantumPCR.get_recent_amplifications(limit=10)
+                                
+                                if amplifications:
+                                    return (
+                                        f"*Showing {len(amplifications)} recent amplifications from Redis*",
+                                        format_history_data(amplifications)
+                                    )
+                                else:
+                                    return (
+                                        "*No amplification data found in Redis*",
+                                        "<div class='history-empty'>No history data available. Try amplifying some DNA sequences first.</div>"
+                                    )
+                            except Exception as e:
+                                return (
+                                    f"*Error retrieving history: {str(e)}*",
+                                    "<div class='history-error'>Error retrieving amplification history</div>"
+                                )
+                        else:
+                            return (
+                                "*Redis integration is disabled*",
+                                "<div class='history-disabled'>Redis integration is disabled. Enable Redis to see amplification history.</div>"
+                            )
+                    
+                    # Trigger initial history load
+                    refresh_history_btn.click(
+                        fn=refresh_history,
+                        outputs=[history_status, history_container]
+                    )
+                    
+                    # Add CSS for history items
+                    gr.HTML("""
+                    <style>
+                        .history-container {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 16px;
+                            margin-top: 12px;
+                        }
+                        
+                        .history-item {
+                            border-left: 4px solid #6b7280;
+                            padding: 12px 16px;
+                            background: rgba(0, 0, 0, 0.05);
+                            border-radius: 4px;
+                        }
+                        
+                        .history-header {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-bottom: 8px;
+                        }
+                        
+                        .history-sequence {
+                            font-family: monospace;
+                            font-weight: bold;
+                        }
+                        
+                        .history-time {
+                            color: #6b7280;
+                            font-size: 0.8em;
+                        }
+                        
+                        .history-details {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                            gap: 8px;
+                        }
+                        
+                        .history-metric {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        
+                        .metric-label {
+                            color: #4b5563;
+                        }
+                        
+                        .metric-value {
+                            font-weight: bold;
+                        }
+                        
+                        .history-empty, .history-error, .history-disabled {
+                            padding: 30px;
+                            text-align: center;
+                            color: #6b7280;
+                            background: rgba(0, 0, 0, 0.05);
+                            border-radius: 4px;
+                        }
+                        
+                        .history-error {
+                            color: #ef4444;
+                            background: rgba(239, 68, 68, 0.1);
+                        }
+                        
+                        .history-disabled {
+                            color: #a16207;
+                            background: rgba(161, 98, 7, 0.1);
+                        }
+                    </style>
+                    """)
+
     # Handle form submission
     submit_btn.click(
         fn=run_pcr_lsd_sequence,
