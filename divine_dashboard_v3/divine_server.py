@@ -599,11 +599,46 @@ def run_servers():
             # Start NFT dashboard in a separate thread
             def run_nft_dashboard():
                 try:
-                    nft_gr_interface.launch(
-                        server_name="0.0.0.0",
-                        server_port=NFT_PORT,
-                        share=True
-                    )
+                    # Check if we should deploy to Hugging Face Spaces
+                    deploy_to_hf = os.environ.get("HF_DEPLOY", "0") == "1"
+                    if deploy_to_hf:
+                        logger.info("Deploying NFT Dashboard to Hugging Face Spaces...")
+                        try:
+                            import subprocess
+                            # Create a temporary file for NFT dashboard deployment
+                            nft_deployment_file = os.path.join(DIRECTORY, "nft_dashboard_deploy.py")
+                            with open(nft_deployment_file, "w") as f:
+                                f.write("from components.nft.nft_dashboard import create_nft_dashboard\n")
+                                f.write("from fastapi import FastAPI\n")
+                                f.write("import os\n\n")
+                                f.write("# Create NFT dashboard\n")
+                                f.write("nft_app = FastAPI(title=\"Divine NFT Dashboard\")\n")
+                                f.write("nft_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"nft_output\")\n")
+                                f.write("os.makedirs(nft_output_dir, exist_ok=True)\n")
+                                f.write("nft_dashboard, nft_interface = create_nft_dashboard(nft_app, nft_output_dir)\n\n")
+                                f.write("# Launch the interface\n")
+                                f.write("if __name__ == \"__main__\":\n")
+                                f.write("    nft_interface.launch()\n")
+                            
+                            # Run the gradio deploy command
+                            subprocess.run(["gradio", "deploy", 
+                                            "--repo", "divine-nft-dashboard",
+                                            nft_deployment_file])
+                        except Exception as e:
+                            logger.error(f"Error deploying NFT dashboard: {e}")
+                            # Fall back to regular launch
+                            nft_gr_interface.launch(
+                                server_name="0.0.0.0",
+                                server_port=NFT_PORT,
+                                share=True
+                            )
+                    else:
+                        # Regular launch with public link
+                        nft_gr_interface.launch(
+                            server_name="0.0.0.0",
+                            server_port=NFT_PORT,
+                            share=True
+                        )
                 except Exception as e:
                     logger.error(f"Error launching NFT dashboard: {e}")
             
@@ -626,7 +661,35 @@ def run_servers():
     
     # Start the Gradio server in the main thread
     logger.info(f"✨ Starting Tesla Cybertruck QA Dashboard on port {GRADIO_PORT} ✨")
-    gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=True)
+    
+    # Check if we should deploy to Hugging Face Spaces
+    deploy_to_hf = os.environ.get("HF_DEPLOY", "0") == "1"
+    if deploy_to_hf:
+        logger.info("Deploying to Hugging Face Spaces...")
+        try:
+            import subprocess
+            # First, create a requirements.txt file for deployment
+            with open("divine_requirements.txt", "w") as f:
+                f.write("uvicorn>=0.22.0\n")
+                f.write("fastapi>=0.95.2\n")
+                f.write("gradio>=3.32.0\n")
+                f.write("python-multipart>=0.0.6\n")
+                f.write("schedule>=1.2.0\n")
+                f.write("numpy>=1.24.3\n")
+                f.write("matplotlib>=3.7.1\n")
+                f.write("Pillow>=10.0.0\n")
+            
+            # Run the gradio deploy command to deploy to Hugging Face Spaces
+            subprocess.run(["gradio", "deploy", 
+                            "--repo", "divine-dashboard-v3",
+                            "--requirements", "divine_requirements.txt"])
+        except Exception as e:
+            logger.error(f"Error deploying to Hugging Face Spaces: {e}")
+            # Fall back to regular launch with public link
+            gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=True)
+    else:
+        # Regular launch with public link
+        gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=True)
 
 if __name__ == "__main__":
     logger.info(f"✨ Divine Dashboard v3 Server starting ✨")

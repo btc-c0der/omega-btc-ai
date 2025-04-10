@@ -23,10 +23,43 @@ cd "$SCRIPT_DIR"
 echo "✨ Starting Divine Dashboard v3 Server ✨"
 echo "---------------------------------------"
 
+# Check if virtual environment exists, activate or create it
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+fi
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Make sure dependencies are installed
+pip install -q uvicorn fastapi gradio huggingface_hub schedule
+
 # Make sure the script is executable
 chmod +x divine_server.py
 
-# Run the server
-python3 ./divine_server.py
+# Check for deploy flag
+if [[ "$1" == "--local" ]]; then
+    # Run the server locally without deploying
+    python3 ./divine_server.py
+else
+    # Deploy to Hugging Face Spaces
+    echo "🚀 Deploying to Hugging Face Spaces..."
+    
+    # Check if huggingface-cli is installed
+    if ! command -v huggingface-cli &> /dev/null; then
+        pip install -q huggingface_hub
+    fi
+    
+    # Set Hugging Face Space name
+    SPACE_NAME="divine-dashboard-v3"
+    
+    # Login to Hugging Face (will request token if not already logged in)
+    huggingface-cli login
+    
+    # Run with deployment option
+    export HF_DEPLOY=1
+    python3 ./divine_server.py
+fi
 
 echo "Server stopped" 

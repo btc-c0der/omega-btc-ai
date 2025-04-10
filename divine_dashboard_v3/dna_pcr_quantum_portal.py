@@ -733,4 +733,13 @@ with gr.Blocks(theme=gr.themes.Soft(), title="0M3G4 PCR QUANTUM LSD PORTAL") as 
 
 # Launch the interface on port 7863
 if __name__ == "__main__":
-    iface.launch(server_name="0.0.0.0", server_port=7863, share=True) 
+    # Check for Hugging Face Space environment
+    is_hf_space = "SPACE_ID" in os.environ
+    
+    # Determine launch parameters
+    if is_hf_space:
+        # Inside a Hugging Face Space, no need for specific port or public link
+        iface.launch()
+    else:
+        # Regular local launch with public sharing
+        iface.launch(server_name="0.0.0.0", server_port=7863, share=True) 

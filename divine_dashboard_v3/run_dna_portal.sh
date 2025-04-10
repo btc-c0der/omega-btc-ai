@@ -20,11 +20,11 @@ fi
 source venv/bin/activate
 
 # Install requirements if not already installed
-pip install -q gradio numpy matplotlib pillow
+pip install -q gradio numpy matplotlib pillow huggingface_hub
 
 # Create necessary directories
-mkdir -p divine_dashboard_v3/assets/dna_visualizations
-mkdir -p divine_dashboard_v3/assets/consciousness_maps
+mkdir -p assets/dna_visualizations
+mkdir -p assets/consciousness_maps
 
 # Display Quantum ASCII Art
 cat << "EOF"
@@ -43,8 +43,29 @@ cat << "EOF"
  CONNECTING TO QUANTUM FIELD... 
 EOF
 
-# Run the DNA PCR Quantum LSD Portal
-python3 dna_pcr_quantum_portal.py
+# Check for local flag
+if [[ "$1" == "--local" ]]; then
+    # Run locally without deploying
+    python3 dna_pcr_quantum_portal.py
+else
+    # Deploy to Hugging Face Spaces
+    echo "🚀 Deploying DNA Portal to Hugging Face Spaces..."
+    
+    # Check if huggingface-cli is installed
+    if ! command -v huggingface-cli &> /dev/null; then
+        pip install -q huggingface_hub
+    fi
+    
+    # Set Hugging Face Space name
+    SPACE_NAME="dna-quantum-portal"
+    
+    # Login to Hugging Face (will request token if not already logged in)
+    huggingface-cli login
+    
+    # Deploy to Hugging Face Spaces
+    echo "Deploying to Hugging Face Spaces as $SPACE_NAME..."
+    gradio deploy dna_pcr_quantum_portal.py --space "$SPACE_NAME"
+fi
 
 # Deactivate virtual environment
 deactivate
