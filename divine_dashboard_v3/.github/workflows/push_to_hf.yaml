@@ -5,7 +5,8 @@ on:
     branches:
       - main
       - master
-      - divine-book-dashboard-v3  # Add your current branch here
+      - divine-book-dashboard-v3
+      - hf-space-setup  # Add our current branch here
 
 jobs:
   sync-to-hf:
