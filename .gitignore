@@ -225,3 +225,6 @@ src/omega_bot_farm/qa/data/quantum_*.json
 src/omega_bot_farm/qa/quantum_dashboard/assets/*.json
 src/omega_bot_farm/qa/tmp/quantum_*.json
 
+node_modules
+node_modules
+node_modules

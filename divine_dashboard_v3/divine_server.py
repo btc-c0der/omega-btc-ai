@@ -50,6 +50,7 @@ logger = logging.getLogger('divine_server')
 DASHBOARD_PORT = 8889  # Main dashboard port
 GRADIO_PORT = 7860    # Cybertruck QA Dashboard port
 METRICS_PORT = 7861   # Dashboard Metrics port
+NFT_PORT = 7862       # NFT Dashboard port
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -78,6 +79,9 @@ app = FastAPI(title="Divine Dashboard v3 API")
 
 # Create FastAPI app for Gradio
 gradio_app = FastAPI(title="Tesla Cybertruck QA Interface")
+
+# Create FastAPI app for NFT Dashboard
+nft_app = FastAPI(title="Divine NFT Dashboard")
 
 # Global variable to store test results
 test_results = {"status": "idle", "result": None, "details": None}
@@ -484,6 +488,39 @@ def run_servers():
             logger.warning(f"Metrics dashboard not found at {metrics_module_path}")
     except Exception as e:
         logger.error(f"Error importing metrics dashboard: {e}")
+    
+    # Import NFT dashboard
+    try:
+        # Create NFT output directory
+        nft_output_dir = os.path.join(DIRECTORY, "nft_output")
+        os.makedirs(nft_output_dir, exist_ok=True)
+        
+        # Import NFT dashboard module
+        try:
+            from components.nft.nft_dashboard import create_nft_dashboard
+            
+            # Create NFT dashboard
+            nft_dashboard, nft_gr_interface = create_nft_dashboard(nft_app, nft_output_dir)
+            
+            # Start NFT dashboard in a separate thread
+            def run_nft_dashboard():
+                try:
+                    nft_gr_interface.launch(
+                        server_name="0.0.0.0",
+                        server_port=NFT_PORT,
+                        share=False,
+                        app=nft_app
+                    )
+                except Exception as e:
+                    logger.error(f"Error launching NFT dashboard: {e}")
+            
+            nft_thread = threading.Thread(target=run_nft_dashboard, daemon=True)
+            nft_thread.start()
+            logger.info(f"✨ Started NFT Dashboard on port {NFT_PORT} ✨")
+        except ImportError as e:
+            logger.warning(f"Could not import NFT dashboard: {e}")
+    except Exception as e:
+        logger.error(f"Error setting up NFT dashboard: {e}")
     
     # Create a thread to run the main dashboard server
     def run_dashboard_server():

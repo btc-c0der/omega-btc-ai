@@ -1,2 +1,18 @@
+
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+
 RUSER       PID  PPID COMMAND
 fsiqueira 74988 74951 /opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m omega_ai.trading.strategies.trap_aware_dual_traders --symbol BTCUSDT --long-capital 150.0 --short-capital 200.0 --long-leverage 5 --short-leverage 5 --trap-probability-threshold 0.6 --trap-alert-threshold 0.7 --min-free-balance 750.0
