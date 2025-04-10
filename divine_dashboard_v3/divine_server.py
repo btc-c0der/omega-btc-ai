@@ -34,6 +34,20 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 import importlib.util
 import threading
+import redis
+from utils.redis_helper import (
+    get_redis_client, 
+    set_json, 
+    get_json, 
+    log_event, 
+    record_metric,
+    get_namespaced_key,
+    increment,
+    push_to_list,
+    get_list
+)
+import random
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(
@@ -53,6 +67,9 @@ METRICS_PORT = 7861   # Dashboard Metrics port
 NFT_PORT = 7862       # NFT Dashboard port
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Redis integration flag
+USE_REDIS = True
 
 # Try to import the Cybertruck test framework
 try:
@@ -86,6 +103,9 @@ nft_app = FastAPI(title="Divine NFT Dashboard")
 # Global variable to store test results
 test_results = {"status": "idle", "result": None, "details": None}
 test_lock = asyncio.Lock()
+
+# Global variable for telemetry data
+telemetry_data = []
 
 def get_all_documents():
     """Get all markdown and HTML documents from the repository"""
@@ -275,6 +295,82 @@ async def test_status_endpoint():
     """Get the current status of tests"""
     async with test_lock:
         return test_results
+
+async def run_cybertruck_test(test_name):
+    """Run Cybertruck tests"""
+    global test_results
+    logger.info(f"Running test: {test_name}")
+    
+    async with test_lock:
+        test_results = {"status": "running", "result": None, "details": None}
+        
+        try:
+            # Run the test
+            if test_name == "full_system":
+                await asyncio.sleep(5)  # Simulate long test
+                result = True
+                details = "All systems nominal"
+            elif test_name == "battery":
+                await asyncio.sleep(2)
+                result = True
+                details = "Battery capacity at 98.7%"
+            elif test_name == "motor":
+                await asyncio.sleep(3)
+                result = random.choice([True, True, False])  # 2/3 chance of success
+                details = "Motor efficiency at 97.2%" if result else "Motor temperature exceeds normal range"
+            else:
+                result = False
+                details = f"Unknown test: {test_name}"
+            
+            test_results = {
+                "status": "complete", 
+                "result": result, 
+                "details": details,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Store test results in Redis
+            if USE_REDIS:
+                try:
+                    # Create a unique test result key
+                    test_id = f"{test_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                    test_key = get_namespaced_key("cybertruck_tests", test_id)
+                    
+                    # Store test result data
+                    test_data = {
+                        "test_name": test_name,
+                        "result": result,
+                        "details": details,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    set_json(test_key, test_data)
+                    
+                    # Add to test history list
+                    history_key = get_namespaced_key("cybertruck_tests", "history")
+                    push_to_list(history_key, test_key)
+                    
+                    # Track test statistics
+                    if result:
+                        increment(get_namespaced_key("counters", "cybertruck_tests_passed"))
+                    else:
+                        increment(get_namespaced_key("counters", "cybertruck_tests_failed"))
+                    
+                    # Log the test event
+                    log_event("cybertruck_test", {
+                        "test_name": test_name,
+                        "result": result,
+                        "details": details
+                    })
+                    
+                    logger.info(f"Test results stored in Redis: {test_key}")
+                except Exception as e:
+                    logger.error(f"Redis error storing test results: {str(e)}")
+            
+            return test_results
+        except Exception as e:
+            logger.error(f"Error running test: {str(e)}")
+            test_results = {"status": "error", "result": False, "details": str(e)}
+            return test_results
 
 def run_cybertruck_tests():
     """Run all Cybertruck tests"""
@@ -690,6 +786,114 @@ def run_servers():
     else:
         # Regular launch with public link
         gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=True)
+
+def collect_telemetry():
+    """Collect telemetry data from the Cybertruck"""
+    global telemetry_data
+    
+    # Generate random telemetry data
+    current_time = datetime.now().strftime("%H:%M:%S")
+    battery_level = random.uniform(50, 100)
+    motor_temp = random.uniform(60, 90)
+    torque_output = random.uniform(200, 800)
+    power_consumption = random.uniform(15, 30)
+    
+    # Create telemetry data point
+    telemetry_point = {
+        "timestamp": current_time,
+        "battery_level": battery_level,
+        "motor_temp": motor_temp,
+        "torque_output": torque_output,
+        "power_consumption": power_consumption
+    }
+    
+    # Add to telemetry data
+    telemetry_data.append(telemetry_point)
+    
+    # Keep only the most recent 100 data points
+    if len(telemetry_data) > 100:
+        telemetry_data = telemetry_data[-100:]
+    
+    # Store in Redis if enabled
+    if USE_REDIS:
+        try:
+            # Store the latest telemetry point
+            telemetry_key = get_namespaced_key("telemetry", f"cybertruck:{datetime.now().strftime('%Y%m%d%H%M%S')}")
+            set_json(telemetry_key, telemetry_point)
+            
+            # Add to time-series list
+            time_series_key = get_namespaced_key("time_series", "cybertruck_telemetry")
+            push_to_list(time_series_key, json.dumps(telemetry_point))
+            
+            # Record individual metrics
+            record_metric("cybertruck_battery_level", battery_level)
+            record_metric("cybertruck_motor_temp", motor_temp)
+            record_metric("cybertruck_torque_output", torque_output)
+            record_metric("cybertruck_power_consumption", power_consumption)
+            
+            # Log the event
+            log_event("telemetry_collected", {
+                "battery_level": battery_level,
+                "motor_temp": motor_temp
+            })
+        except Exception as e:
+            logger.error(f"Redis error storing telemetry: {str(e)}")
+    
+    return telemetry_point
+
+def get_test_history(limit=10):
+    """Get historical test results from Redis"""
+    if not USE_REDIS:
+        return []
+    
+    try:
+        # Get the list of test keys
+        history_key = get_namespaced_key("cybertruck_tests", "history")
+        test_keys = get_list(history_key, start=0, end=limit-1)
+        
+        # Retrieve each test result
+        results = []
+        for key in test_keys:
+            test_data = get_json(key)
+            if test_data:
+                results.append(test_data)
+        
+        return results
+    except Exception as e:
+        logger.error(f"Error retrieving test history: {str(e)}")
+        return []
+
+def get_cybertruck_metrics():
+    """Get Cybertruck metrics from Redis"""
+    if not USE_REDIS:
+        return {}
+    
+    try:
+        # Get test counters
+        tests_passed = get_json(get_namespaced_key("counters", "cybertruck_tests_passed")) or 0
+        tests_failed = get_json(get_namespaced_key("counters", "cybertruck_tests_failed")) or 0
+        
+        # Get latest telemetry data
+        time_series_key = get_namespaced_key("time_series", "cybertruck_telemetry")
+        latest_telemetry_json = get_list(time_series_key, start=-1, end=-1)
+        
+        latest_telemetry = {}
+        if latest_telemetry_json and len(latest_telemetry_json) > 0:
+            try:
+                import json
+                latest_telemetry = json.loads(latest_telemetry_json[0])
+            except Exception:
+                pass
+        
+        return {
+            "tests_passed": tests_passed,
+            "tests_failed": tests_failed,
+            "test_success_rate": (tests_passed / (tests_passed + tests_failed)) if (tests_passed + tests_failed) > 0 else 0,
+            "latest_telemetry": latest_telemetry
+        }
+    except Exception as e:
+        logger.error(f"Error retrieving Cybertruck metrics: {str(e)}")
+        return {}
 
 if __name__ == "__main__":
     logger.info(f"✨ Divine Dashboard v3 Server starting ✨")
