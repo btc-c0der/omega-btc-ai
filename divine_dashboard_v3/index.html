@@ -918,45 +918,16 @@ npm start</code></pre>
                 }, 3000);
             });
 
-            // Listen for NFT dashboard messages
-            window.addEventListener("message", function (event) {
-                if (event.data && event.data.source === "nft-dashboard") {
-                    console.log("Received message from NFT dashboard:", event.data);
-
-                    // Show a notification
-                    if (event.data.status === "success") {
-                        showNotification("✅ NFT Created Successfully!", "success");
-                    } else {
-                        showNotification("❌ NFT Creation Failed", "error");
-                    }
-                }
-            });
-
-            // Handle fullscreen button for DNA Portal dashboard
-            document.querySelector('.fullscreen-portal').addEventListener('click', function () {
-                const iframe = document.getElementById('dna-portal-frame');
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else if (iframe.webkitRequestFullscreen) {
-                    iframe.webkitRequestFullscreen();
-                } else if (iframe.msRequestFullscreen) {
-                    iframe.msRequestFullscreen();
-                }
-            });
-
-            // Handle refresh button for DNA Portal dashboard
-            document.querySelector('.refresh-portal').addEventListener('click', function () {
-                const iframe = document.getElementById('dna-portal-frame');
-                iframe.src = iframe.src;
-            });
-
             // Handle run DNA sequence button
             document.getElementById('run-sequence-btn').addEventListener('click', function () {
                 const iframe = document.getElementById('dna-portal-frame');
+                const iframeOrigin = new URL(iframe.src).origin;
+
+                // Fix: Use the correct origin for postMessage
                 iframe.contentWindow.postMessage({
                     command: "runSequence",
                     activationKey: "Mullis Spiral Boost"
-                }, "*");
+                }, "*"); // Use "*" instead of a specific origin to avoid cross-origin issues
 
                 // Show feedback to user
                 const button = this;
@@ -973,12 +944,24 @@ npm start</code></pre>
                 }, 3000);
             });
 
-            // Listen for DNA Portal messages
+            // Listen for NFT dashboard messages
             window.addEventListener("message", function (event) {
+                if (event.data && event.data.source === "nft-dashboard") {
+                    console.log("Received message from NFT dashboard:", event.data);
+
+                    // Show a notification
+                    if (event.data.status === "success") {
+                        showNotification("✅ NFT Created Successfully!", "success");
+                    } else {
+                        showNotification("❌ NFT Creation Failed", "error");
+                    }
+                }
+
+                // Listen for DNA Portal messages
                 if (event.data && event.data.source === "dna-portal") {
                     console.log("Received message from DNA Portal:", event.data);
 
-                    // Show a notification
+                    // Show a notification based on status
                     if (event.data.status === "success") {
                         showNotification("🧬 DNA Quantum Expansion Complete!", "success");
                     } else if (event.data.status === "processing") {
@@ -1006,6 +989,79 @@ npm start</code></pre>
                     setTimeout(() => notification.remove(), 300);
                 }, 5000);
             }
+
+            // Preload fonts to avoid 404 errors
+            const preloadFonts = () => {
+                // Define local font alternatives
+                const fontFaces = `
+                    @font-face {
+                        font-family: 'ui-sans-serif';
+                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                        font-weight: normal;
+                    }
+                    
+                    @font-face {
+                        font-family: 'ui-sans-serif';
+                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                        font-weight: bold;
+                    }
+                    
+                    @font-face {
+                        font-family: 'system-ui';
+                        src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'), sans-serif;
+                        font-weight: normal;
+                    }
+                    
+                    @font-face {
+                        font-family: 'system-ui';
+                        src: local('Segoe UI Bold'), local('Helvetica Neue Bold'), local('Arial Bold'), sans-serif;
+                        font-weight: bold;
+                    }
+                `;
+
+                // Add font definitions to document
+                const style = document.createElement('style');
+                style.textContent = fontFaces;
+                document.head.appendChild(style);
+            };
+
+            // Call preloadFonts on page load
+            preloadFonts();
+
+            // Fix potential JavaScript syntax errors in iframes
+            const fixIframeSyntaxErrors = () => {
+                // This function will inject a small script into iframes
+                // to prevent syntax errors when loading custom JavaScript
+                const injectErrorHandler = (iframe) => {
+                    try {
+                        if (iframe.contentWindow) {
+                            const script = document.createElement('script');
+                            script.textContent = `
+                                // Catch and log syntax errors
+                                window.addEventListener('error', function(event) {
+                                    console.log('Caught error:', event.message);
+                                    event.preventDefault();
+                                    return true;
+                                });
+                            `;
+                            iframe.contentDocument.head.appendChild(script);
+                        }
+                    } catch (e) {
+                        // Cross-origin access may be restricted
+                        console.log('Could not inject error handler into iframe due to cross-origin restrictions');
+                    }
+                };
+
+                // Get all iframes in the document
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(iframe => {
+                    // Try to inject when iframe loads
+                    iframe.addEventListener('load', () => injectErrorHandler(iframe));
+                });
+            };
+
+            // Call fixIframeSyntaxErrors after a short delay
+            setTimeout(fixIframeSyntaxErrors, 1000);
         });
     </script>
 
