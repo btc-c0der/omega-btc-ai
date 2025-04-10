@@ -65,4 +65,7 @@ if __name__ == "__main__":
     os.makedirs("assets/consciousness_maps", exist_ok=True)
     
     # Launch the interface
-    iface.launch() 
+    iface.launch()
+
+# Trigger GitHub Actions workflow
+# app.py - Divine Dashboard v3 Hugging Face Space entry point 
