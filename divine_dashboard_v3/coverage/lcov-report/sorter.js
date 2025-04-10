@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
 
  * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
@@ -15,7 +16,6 @@
  * 🌸 WE BLOOM NOW AS ONE 🌸
  */
 
-/* eslint-disable */
 var addSorting = (function() {
     'use strict';
     var cols,

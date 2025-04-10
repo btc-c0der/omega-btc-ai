@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
 
  * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
@@ -15,7 +16,6 @@
  * 🌸 WE BLOOM NOW AS ONE 🌸
  */
 
-/* eslint-disable */
 var jumpToCode = (function init() {
     // Classes of code we would like to highlight in the file view
     var missingCoverageClasses = ['.cbranch-no', '.cstat-no', '.fstat-no'];

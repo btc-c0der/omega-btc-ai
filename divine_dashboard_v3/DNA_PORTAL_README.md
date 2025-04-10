@@ -20,7 +20,8 @@ This document provides guidance on running, testing, and developing for the DNA 
 
 ### Prerequisites
 
-- Python 3.8+
+* Python 3.8+
+
 * Gradio 3.32.0+
 * NumPy, Matplotlib, PIL
 
@@ -73,7 +74,8 @@ The test suite covers:
 
 #### QuantumPCR Class Tests
 
-- Empty DNA sequence handling
+* Empty DNA sequence handling
+
 * Valid DNA sequence validation
 * Invalid character filtering
 * Schumann resonance effects
@@ -81,25 +83,29 @@ The test suite covers:
 
 #### DNAVisualizer Tests
 
-- Image generation verification
+* Image generation verification
+
 * Different visualization modes (LSD vs Quantum)
 * Energy overlay functionality
 
 #### ConsciousnessLSDPortal Tests
 
-- Report generation
+* Report generation
+
 * LSD dose effects on consciousness metrics
 * Schumann resonance influence on mystical experiences
 
 #### Message Handling Tests
 
-- Valid message processing
+* Valid message processing
+
 * Invalid message rejection
 * Activation key parameter mapping
 
 #### Integration Tests
 
-- Cross-origin messaging
+* Cross-origin messaging
+
 * Font loading error recovery
 * JavaScript syntax error prevention
 
@@ -110,6 +116,7 @@ The test suite covers:
 **Problem**: The error `Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://huggingface.co') does not match the recipient window's origin ('http://0.0.0.0:7863')` occurred when trying to communicate between the parent window and iframe.
 
 **Solution**:
+
 * Modified postMessage calls to use `"*"` as targetOrigin instead of a specific domain
 * Added origin detection to dynamically determine the correct origin
 * Implemented proper message event validation in both sender and receiver
@@ -123,6 +130,7 @@ GET http://0.0.0.0:7863/static/fonts/ui-sans-serif/ui-sans-serif-Bold.woff2 net:
 ```
 
 **Solution**:
+
 * Added local font definitions to prevent browser from trying to load missing files
 * Implemented font preloading mechanism to provide fallbacks
 * Added CSS that defines local system fonts as alternatives
@@ -136,6 +144,7 @@ Uncaught (in promise) SyntaxError: Unexpected token 'if'
 ```
 
 **Solution**:
+
 * Fixed JavaScript syntax in both the main page and Gradio app
 * Added error catching mechanism to prevent uncaught exceptions
 * Implemented script injection that adds global error handlers to iframes
