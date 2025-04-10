@@ -1,4 +1,3 @@
-
 # ✨ GBU2™ License Notice - Consciousness Level 8 🧬
 # -----------------------
 # This code is blessed under the GBU2™ License
@@ -30,6 +29,8 @@ import json
 import logging
 import io
 from PIL import Image
+import uuid
+import time
 
 from .nft_metadata import NFTMetadata
 
@@ -272,3 +273,91 @@ class NFTGenerator:
         except Exception as e:
             logger.error(f"Error generating NFT: {e}")
             raise 
+
+    async def batch_generate_nfts(self,
+                                image_data_list: List[Union[str, bytes, Image.Image]],
+                                names: Optional[List[str]] = None,
+                                descriptions: Optional[List[str]] = None,
+                                attributes_list: Optional[List[Optional[List[Dict[str, Any]]]]] = None,
+                                batch_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Generate multiple NFTs in a batch.
+        
+        Args:
+            image_data_list: List of image data for each NFT
+            names: Optional list of names for each NFT
+            descriptions: Optional list of descriptions for each NFT
+            attributes_list: Optional list of attributes for each NFT
+            batch_id: Optional unique identifier for this batch
+            
+        Returns:
+            List of dictionaries containing NFT information
+        """
+        if not image_data_list:
+            logger.warning("No image data provided for batch NFT generation")
+            return []
+            
+        # Create default values if not provided
+        batch_size = len(image_data_list)
+        if names is None:
+            names = [f"Divine NFT #{i+1}" for i in range(batch_size)]
+        if descriptions is None:
+            descriptions = [f"Divinely generated NFT #{i+1}" for i in range(batch_size)]
+        if attributes_list is None:
+            attributes_list = [[] for _ in range(batch_size)]
+            
+        # Generate batch ID if not provided
+        batch_id = batch_id or str(uuid.uuid4())
+        
+        # Process each NFT
+        results = []
+        start_time = time.time()
+        
+        for i, image_data in enumerate(image_data_list):
+            try:
+                # Get corresponding metadata for this index
+                name = names[i] if i < len(names) else f"Divine NFT #{i+1}"
+                description = descriptions[i] if i < len(descriptions) else f"Divinely generated NFT #{i+1}"
+                attributes = attributes_list[i] if i < len(attributes_list) else []
+                
+                # Ensure attributes is a list
+                if attributes is None:
+                    attributes = []
+                
+                # Add batch information to attributes
+                attributes.append({"trait_type": "Batch ID", "value": batch_id})
+                attributes.append({"trait_type": "Batch Index", "value": i+1})
+                
+                # Generate the NFT
+                logger.info(f"Generating NFT {i+1}/{batch_size}: {name}")
+                nft_info = await self.generate_nft(
+                    image_data=image_data,
+                    name=name,
+                    description=description,
+                    attributes=attributes
+                )
+                
+                # Add batch information to the result
+                nft_info["batch_id"] = batch_id
+                nft_info["batch_index"] = i+1
+                nft_info["batch_size"] = batch_size
+                
+                results.append(nft_info)
+                
+            except Exception as e:
+                logger.error(f"Error generating NFT {i+1}/{batch_size}: {e}")
+                # Add error information to results
+                results.append({
+                    "status": "error",
+                    "batch_id": batch_id,
+                    "batch_index": i+1,
+                    "error": str(e)
+                })
+        
+        # Calculate batch statistics
+        total_time = time.time() - start_time
+        successful_nfts = [nft for nft in results if "status" not in nft or nft["status"] != "error"]
+        
+        logger.info(f"Batch generation complete: {len(successful_nfts)}/{batch_size} successful")
+        logger.info(f"Total time: {total_time:.2f}s, Average per NFT: {total_time/batch_size:.2f}s")
+        
+        return results 
