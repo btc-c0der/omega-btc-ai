@@ -1,9 +1,25 @@
 #!/usr/bin/env python3
 """
-Test suite for IBR Spain Routes
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
 
-This module tests the Flask routes for the IBR Spain component,
-including the event management functionality.
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+Test suite for IBR España Routes
+
+This module provides comprehensive testing for the IBR España component of the
+Divine Dashboard v3. It tests all Flask routes and API endpoints related to
+church event management functionality, ensuring divine connectivity between
+the interface and the underlying data models.
 """
 
 import os
@@ -37,7 +53,12 @@ SAMPLE_EVENT = {
 
 @pytest.fixture
 def app():
-    """Create and configure a Flask app for testing."""
+    """
+    Create and configure a Flask app for testing.
+    
+    Returns:
+        Flask application instance with testing configuration and IBR España blueprint registered
+    """
     app = Flask(__name__)
     app.config['TESTING'] = True
     app.config['SECRET_KEY'] = 'test-key'
@@ -60,12 +81,25 @@ def app():
 
 @pytest.fixture
 def client(app):
-    """A test client for the app."""
+    """
+    A test client for the app.
+    
+    Args:
+        app: Flask application instance
+        
+    Returns:
+        Flask test client for making requests
+    """
     return app.test_client()
 
 @pytest.fixture
 def mock_events_manager():
-    """Create a mocked events manager for unit tests."""
+    """
+    Create a mocked events manager for unit tests.
+    
+    Returns:
+        Mock object with predefined test event data
+    """
     with patch('routes.ibr_spain_routes.events_manager') as mock_manager:
         mock_manager.get_upcoming_events.return_value = [
             {
@@ -95,13 +129,29 @@ def mock_events_manager():
 # Unit Tests
 
 def test_index_route(client, mock_events_manager):
-    """Test the index route."""
+    """
+    Test the index route.
+    
+    Ensures that the main dashboard page loads correctly and retrieves upcoming events.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     response = client.get('/ibr-spain/')
     assert response.status_code == 200
     mock_events_manager.get_upcoming_events.assert_called_once()
 
 def test_events_page_route(client, mock_events_manager):
-    """Test the events page route."""
+    """
+    Test the events page route.
+    
+    Verifies that the events listing page loads with all events.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     # Mock the get_all_events method
     mock_events_manager.get_all_events.return_value = mock_events_manager.get_upcoming_events.return_value
     
@@ -110,7 +160,15 @@ def test_events_page_route(client, mock_events_manager):
     mock_events_manager.get_all_events.assert_called_once()
 
 def test_events_page_with_filters(client, mock_events_manager):
-    """Test the events page route with filters."""
+    """
+    Test the events page route with filters.
+    
+    Ensures that the events page correctly applies type and date range filters.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     # Mock the filtered methods
     mock_events_manager.get_events_by_type.return_value = [mock_events_manager.get_upcoming_events.return_value[0]]
     mock_events_manager.get_events_by_date_range.return_value = mock_events_manager.get_upcoming_events.return_value
@@ -128,12 +186,27 @@ def test_events_page_with_filters(client, mock_events_manager):
     mock_events_manager.get_events_by_date_range.assert_called_with(today, next_week)
 
 def test_create_event_get(client):
-    """Test the create event page (GET)."""
+    """
+    Test the create event page (GET).
+    
+    Verifies that the event creation form loads correctly.
+    
+    Args:
+        client: Flask test client
+    """
     response = client.get('/ibr-spain/events/create')
     assert response.status_code == 200
 
 def test_create_event_post(client, mock_events_manager):
-    """Test creating an event (POST)."""
+    """
+    Test creating an event (POST).
+    
+    Ensures that event creation works correctly through the form submission.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     # Mock the add_event method
     mock_events_manager.add_event.return_value = {
         "id": "new_event_id",
@@ -146,7 +219,15 @@ def test_create_event_post(client, mock_events_manager):
     mock_events_manager.add_event.assert_called_once()
 
 def test_view_event(client, mock_events_manager):
-    """Test viewing a single event."""
+    """
+    Test viewing a single event.
+    
+    Verifies that individual event details can be viewed correctly.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the get_event method
@@ -160,7 +241,15 @@ def test_view_event(client, mock_events_manager):
     mock_events_manager.get_event.assert_called_with(event_id)
 
 def test_view_nonexistent_event(client, mock_events_manager):
-    """Test viewing a non-existent event."""
+    """
+    Test viewing a non-existent event.
+    
+    Ensures proper handling when attempting to view an event that doesn't exist.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "nonexistent"
     
     # Mock the get_event method to return None
@@ -171,7 +260,15 @@ def test_view_nonexistent_event(client, mock_events_manager):
     mock_events_manager.get_event.assert_called_with(event_id)
 
 def test_edit_event_get(client, mock_events_manager):
-    """Test the edit event page (GET)."""
+    """
+    Test the edit event page (GET).
+    
+    Verifies that the event edit form loads correctly with existing event data.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the get_event method
@@ -185,7 +282,15 @@ def test_edit_event_get(client, mock_events_manager):
     mock_events_manager.get_event.assert_called_with(event_id)
 
 def test_edit_event_post(client, mock_events_manager):
-    """Test editing an event (POST)."""
+    """
+    Test editing an event (POST).
+    
+    Ensures that event updates work correctly through form submission.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the get_event and update_event methods
@@ -209,7 +314,15 @@ def test_edit_event_post(client, mock_events_manager):
     mock_events_manager.update_event.assert_called_once()
 
 def test_delete_event(client, mock_events_manager):
-    """Test deleting an event."""
+    """
+    Test deleting an event.
+    
+    Verifies that event deletion works correctly.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the delete_event method
@@ -222,7 +335,15 @@ def test_delete_event(client, mock_events_manager):
 # API Tests
 
 def test_api_get_events(client, mock_events_manager):
-    """Test the API endpoint to get events."""
+    """
+    Test the API endpoint to get events.
+    
+    Ensures that the events API returns correct JSON data, including with filters.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     # Mock the methods
     mock_events_manager.get_upcoming_events.return_value = [
         {"id": "event001", "title": "Test Event 1"}, 
@@ -245,7 +366,15 @@ def test_api_get_events(client, mock_events_manager):
     mock_events_manager.get_events_by_type.assert_called_with("worship")
 
 def test_api_get_event(client, mock_events_manager):
-    """Test the API endpoint to get a single event."""
+    """
+    Test the API endpoint to get a single event.
+    
+    Verifies that the individual event API returns correct JSON data.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the get_event method
@@ -266,7 +395,15 @@ def test_api_get_event(client, mock_events_manager):
     assert response.status_code == 404
 
 def test_api_create_event(client, mock_events_manager):
-    """Test the API endpoint to create an event."""
+    """
+    Test the API endpoint to create an event.
+    
+    Ensures that event creation works correctly through the API.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     # Mock the add_event method
     new_event = {
         "id": "new_event_id",
@@ -286,7 +423,15 @@ def test_api_create_event(client, mock_events_manager):
     mock_events_manager.add_event.assert_called_once()
 
 def test_api_update_event(client, mock_events_manager):
-    """Test the API endpoint to update an event."""
+    """
+    Test the API endpoint to update an event.
+    
+    Verifies that event updates work correctly through the API.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the update_event method
@@ -319,7 +464,15 @@ def test_api_update_event(client, mock_events_manager):
     assert response.status_code == 404
 
 def test_api_delete_event(client, mock_events_manager):
-    """Test the API endpoint to delete an event."""
+    """
+    Test the API endpoint to delete an event.
+    
+    Ensures that event deletion works correctly through the API.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     event_id = "event001"
     
     # Mock the delete_event method
@@ -335,7 +488,15 @@ def test_api_delete_event(client, mock_events_manager):
     assert response.status_code == 404
 
 def test_generate_sample_events(client, mock_events_manager):
-    """Test generating sample events."""
+    """
+    Test generating sample events.
+    
+    Verifies that the sample event generation utility works correctly.
+    
+    Args:
+        client: Flask test client
+        mock_events_manager: Mocked events manager
+    """
     # Mock the generate_sample_events method
     mock_events_manager.generate_sample_events.return_value = None
     
@@ -346,11 +507,20 @@ def test_generate_sample_events(client, mock_events_manager):
 # Integration Tests
 
 class TestIntegration:
-    """Integration tests that use a real EventsManager instance."""
+    """
+    Integration tests that use a real EventsManager instance.
+    
+    These tests verify the complete event lifecycle with actual data storage.
+    """
     
     @pytest.fixture
     def integration_client(self):
-        """A test client for integration tests with a real EventsManager."""
+        """
+        A test client for integration tests with a real EventsManager.
+        
+        Returns:
+            Flask test client configured for integration testing
+        """
         app = Flask(__name__, 
                     template_folder='templates',
                     static_folder='static')
@@ -381,7 +551,14 @@ class TestIntegration:
         shutil.rmtree(temp_dir)
     
     def test_event_lifecycle(self, integration_client):
-        """Test the complete lifecycle of an event: create, view, edit, delete."""
+        """
+        Test the complete lifecycle of an event: create, view, edit, delete.
+        
+        Verifies the entire flow of event management with a real data store.
+        
+        Args:
+            integration_client: Flask test client for integration tests
+        """
         # Create an event
         response = integration_client.post(
             '/ibr-spain/events/create',

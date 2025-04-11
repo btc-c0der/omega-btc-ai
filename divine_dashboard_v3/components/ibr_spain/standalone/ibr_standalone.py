@@ -1,3 +1,29 @@
+#!/usr/bin/env python3
+"""
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+IBR España Instagram Manager Standalone Module
+
+This module provides a standalone interface for the IBR España Instagram Manager
+component. It allows users to view Instagram stats, create posts, and analyze
+account performance without requiring the full Divine Dashboard infrastructure.
+
+The standalone interface uses Gradio to create an interactive web UI that can
+be run independently of the main server.
+"""
+
 import os
 import sys
 import json
@@ -18,7 +44,20 @@ logging.basicConfig(
 logger = logging.getLogger('ibr_standalone')
 
 def find_available_port(start_port=7863, max_port=7873):
-    """Find an available port to use for the server, starting from start_port"""
+    """
+    Find an available port to use for the server.
+    
+    This function attempts to bind to ports in the specified range to find one
+    that is not currently in use. It's useful for avoiding port conflicts when
+    running multiple components of the Divine Dashboard ecosystem.
+    
+    Args:
+        start_port: The first port to try (default: 7863)
+        max_port: The last port to try before giving up (default: 7873)
+        
+    Returns:
+        int or None: An available port number, or None if no ports are available
+    """
     for port in range(start_port, max_port + 1):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
@@ -33,9 +72,17 @@ def find_available_port(start_port=7863, max_port=7873):
     logger.error(f"No available ports found in range {start_port}-{max_port}")
     return None
 
-# Create a basic manifest.json to avoid 404 errors
 def create_manifest_json():
-    """Create a basic manifest.json to avoid 404 errors"""
+    """
+    Create a basic manifest.json to avoid 404 errors.
+    
+    This function generates a simple web app manifest file that defines how the
+    application appears when installed on a user's device. It prevents 404 errors
+    when browsers automatically request this file.
+    
+    The manifest includes basic information about the IBR España Instagram Manager
+    such as name, theme colors, and app display mode.
+    """
     manifest = {
         "name": "IBR España Instagram Manager",
         "short_name": "IBR España",
@@ -54,9 +101,26 @@ def create_manifest_json():
     
     logger.info("Created manifest.json")
 
-# Instagram Manager for IBR Spain
 class InstagramManager:
+    """
+    Instagram Manager for IBR España.
+    
+    This class provides functionality to manage the IBR España Instagram account,
+    including fetching account statistics, analyzing performance, and creating posts.
+    
+    The class uses local caching to store account data and reduce the number of
+    network requests to Instagram. It also provides fallback data when the Instagram
+    API or web scraping approaches fail.
+    """
+    
     def __init__(self):
+        """
+        Initialize the Instagram Manager.
+        
+        Sets up the Instagram Manager with default values, loads configuration,
+        ensures the data directory exists, and attempts to fetch the latest
+        Instagram data for the account.
+        """
         # Default values in case fetching fails
         self.followers = 1245
         self.posts = 87
@@ -79,7 +143,13 @@ class InstagramManager:
         self.fetch_instagram_data()
         
     def load_config(self):
-        """Load configuration file with account settings"""
+        """
+        Load configuration file with account settings.
+        
+        Reads the configuration file and updates the Instagram Manager settings
+        if the file exists. This allows customization of the data directory and
+        Instagram account name.
+        """
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r') as f:
@@ -94,7 +164,18 @@ class InstagramManager:
                 logger.error(f"Error loading config: {e}")
     
     def fetch_instagram_data(self):
-        """Fetch Instagram data using web scraping approach"""
+        """
+        Fetch Instagram data using web scraping approach.
+        
+        This method attempts to retrieve Instagram account statistics by:
+        1. Checking for recent cached data first
+        2. If no cache exists or it's too old, making a request to Instagram
+        3. Parsing the response to extract followers and post counts
+        4. Calculating an engagement rate
+        5. Saving the data to cache for future use
+        
+        If any steps fail, it falls back to using cached or default data.
+        """
         try:
             # Check if we have cached data that's less than 1 hour old
             if os.path.exists(self.account_data_file):
@@ -171,7 +252,16 @@ class InstagramManager:
             self.load_fallback_data()
     
     def load_fallback_data(self):
-        """Load fallback data if fetching fails"""
+        """
+        Load fallback data if fetching fails.
+        
+        This method provides a fallback mechanism when Instagram data cannot be
+        fetched. It tries to use previous cached data regardless of age, and if
+        that fails, it uses hardcoded sample data.
+        
+        This ensures the UI always has some data to display, even when
+        connectivity issues occur.
+        """
         logger.info("Loading fallback data for Instagram")
         
         # Try to read from cache first, regardless of age

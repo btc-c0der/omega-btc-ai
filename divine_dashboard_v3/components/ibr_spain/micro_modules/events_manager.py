@@ -1,7 +1,26 @@
 #!/usr/bin/env python3
 """
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
 EventsManager module for IBR España component.
-Handles church event management functionality.
+
+This module provides church event management functionality for the IBR España
+component. It enables the creation, modification, deletion, and retrieval of
+church events with various attributes like title, date, location, etc. 
+
+The module includes utilities for event filtering and rendering in different views.
 """
 
 import os
@@ -20,7 +39,15 @@ logger = logging.getLogger(__name__)
 class EventsManager:
     """
     EventsManager is responsible for managing church events for the IBR España component.
-    Provides functionality for adding, updating, deleting, and retrieving events.
+    
+    This class provides a complete interface for event management, including:
+    - Adding new events
+    - Updating existing events
+    - Deleting events
+    - Retrieving events with various filters
+    - Generating sample events for testing
+    
+    The events are stored as JSON data and persisted to the filesystem.
     """
 
     def __init__(self, data_dir: str = "data/ibr_spain/events"):
@@ -28,7 +55,8 @@ class EventsManager:
         Initialize the EventsManager with the path to store events data.
         
         Args:
-            data_dir: Directory path where events data will be stored
+            data_dir: Directory path where events data will be stored. The path
+                      is automatically created if it doesn't exist.
         """
         self.data_dir = Path(data_dir)
         self.events_file = self.data_dir / "events.json"
@@ -41,7 +69,13 @@ class EventsManager:
         self.load_events()
 
     def load_events(self) -> None:
-        """Load events from the JSON file if it exists."""
+        """
+        Load events from the JSON file if it exists.
+        
+        This method attempts to read the events from the JSON file specified
+        during initialization. If the file doesn't exist or there's an error,
+        an empty list of events is used.
+        """
         try:
             if self.events_file.exists():
                 with open(self.events_file, 'r', encoding='utf-8') as f:
@@ -55,7 +89,13 @@ class EventsManager:
             self.events = []
 
     def save_events(self) -> None:
-        """Save events to the JSON file."""
+        """
+        Save events to the JSON file.
+        
+        This method persists the current events list to the JSON file.
+        It uses UTF-8 encoding to support international text and pretty-prints
+        the JSON with indentation for better readability.
+        """
         try:
             with open(self.events_file, 'w', encoding='utf-8') as f:
                 json.dump(self.events, f, ensure_ascii=False, indent=2)
@@ -67,11 +107,16 @@ class EventsManager:
         """
         Add a new event to the collection.
         
+        This method creates a new event with the provided data, assigns a
+        unique ID, adds default values for missing fields, and persists
+        the updated events collection.
+        
         Args:
-            event_data: Dictionary containing event information
+            event_data: Dictionary containing event information with keys such as
+                       'title', 'date', 'time', 'location', 'description', etc.
             
         Returns:
-            The newly added event with generated ID
+            The newly added event with all fields including the generated ID
         """
         # Generate a unique ID for the event
         event_id = self._generate_event_id()
@@ -103,8 +148,10 @@ class EventsManager:
         """
         Get an event by its ID.
         
+        This method retrieves a specific event from the collection by its ID.
+        
         Args:
-            event_id: The ID of the event to retrieve
+            event_id: The unique identifier of the event to retrieve
             
         Returns:
             The event dictionary if found, None otherwise
@@ -118,12 +165,15 @@ class EventsManager:
         """
         Update an existing event.
         
+        This method updates the fields of an existing event with new values.
+        The event ID cannot be changed.
+        
         Args:
-            event_id: ID of the event to update
-            update_data: Dictionary with fields to update
+            event_id: Unique identifier of the event to update
+            update_data: Dictionary with fields to update and their new values
             
         Returns:
-            The updated event if found, None otherwise
+            The updated event if found and updated successfully, None otherwise
         """
         for i, event in enumerate(self.events):
             if event["id"] == event_id:
@@ -150,11 +200,13 @@ class EventsManager:
         """
         Delete an event by its ID.
         
+        This method removes an event from the collection and persists the change.
+        
         Args:
-            event_id: ID of the event to delete
+            event_id: Unique identifier of the event to delete
             
         Returns:
-            True if the event was deleted, False otherwise
+            True if the event was found and deleted, False otherwise
         """
         for i, event in enumerate(self.events):
             if event["id"] == event_id:
@@ -172,10 +224,10 @@ class EventsManager:
 
     def get_all_events(self) -> List[Dict[str, Any]]:
         """
-        Get all events.
+        Get all events in the collection.
         
         Returns:
-            List of all event dictionaries
+            List of all event dictionaries, unsorted
         """
         return self.events
 
@@ -183,11 +235,14 @@ class EventsManager:
         """
         Get upcoming events for the next specified number of days.
         
+        This method filters events to include only those occurring between
+        today and the specified number of days in the future.
+        
         Args:
-            days: Number of days to look ahead
+            days: Number of days to look ahead from today
             
         Returns:
-            List of upcoming event dictionaries
+            List of upcoming event dictionaries, sorted by date
         """
         upcoming = []
         today = datetime.now().date()
@@ -212,17 +267,23 @@ class EventsManager:
         """
         Get events filtered by type.
         
+        This method filters events to include only those of a specific type,
+        such as 'worship', 'prayer', 'bible_study', etc.
+        
         Args:
-            event_type: Type of events to filter
+            event_type: Type of events to filter (e.g., 'worship', 'prayer')
             
         Returns:
-            List of event dictionaries of the specified type
+            List of event dictionaries matching the specified type
         """
         return [event for event in self.events if event.get("type") == event_type]
 
     def get_events_by_date_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
         """
         Get events within a date range.
+        
+        This method filters events to include only those occurring between
+        the specified start and end dates (inclusive).
         
         Args:
             start_date: Start date in format 'YYYY-MM-DD'
@@ -253,14 +314,19 @@ class EventsManager:
         """
         Generate a unique ID for a new event.
         
+        This method creates a unique identifier for events based on UUID.
+        
         Returns:
-            A unique string ID
+            A unique string ID with 'event_' prefix followed by 8 hex characters
         """
         return f"event_{uuid.uuid4().hex[:8]}"
         
     def generate_sample_events(self, count: int = 5) -> None:
         """
         Generate sample events for testing purposes.
+        
+        This method creates a specified number of sample events with
+        randomized attributes for testing and demonstration purposes.
         
         Args:
             count: Number of sample events to generate
@@ -300,11 +366,14 @@ def render_event_card(event: Dict[str, Any]) -> str:
     """
     Render an event card HTML for display in the dashboard.
     
+    This function generates HTML for an individual event card with
+    formatted date, time, title, location, description, and action buttons.
+    
     Args:
-        event: Event dictionary to render
+        event: Event dictionary to render with keys like 'id', 'title', 'date', etc.
         
     Returns:
-        HTML string representing the event card
+        HTML string representing the event card with appropriate styling
     """
     # Format the date for display
     try:
@@ -343,6 +412,11 @@ def render_event_card(event: Dict[str, Any]) -> str:
 def render_events_calendar(events: List[Dict[str, Any]], view: str = "list") -> str:
     """
     Render events in a calendar view.
+    
+    This function generates HTML for displaying events in different views:
+    - List view: Events displayed vertically in a list
+    - Grid view: Events displayed in a responsive grid
+    - Calendar view: Events grouped by date
     
     Args:
         events: List of event dictionaries to render
