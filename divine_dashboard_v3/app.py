@@ -84,6 +84,13 @@ try:
         iface = create_nft_interface()
         app_title = "Divine NFT Dashboard"
         
+    elif COMPONENT == "IBR_SPAIN":
+        # Import and run IBR España dashboard
+        print("🔱 Initializing IBR España Divine Portal...")
+        from components.ibr_spain.ibr_dashboard import create_ibr_interface
+        iface = create_ibr_interface()
+        app_title = "IBR España Portal Divino"
+        
     else:
         # Default to DNA Portal
         print("⚠️ Unknown component requested, defaulting to DNA Portal")
@@ -105,6 +112,9 @@ except Exception as e:
 from components.sha256_omega.micro_modules.sha256_omega import sha256_omega
 from components.sha256_omega.micro_modules.avalanche_analyzer import detailed_avalanche_analysis
 from components.sha256_omega.micro_modules.resonance_score import get_detailed_resonance, get_resonance_score
+
+# Import the new book viewer component
+from components.book_viewer_gradio import create_book_viewer_component
 
 def format_json(data: Dict[str, Any]) -> str:
     """Format JSON data for display"""
@@ -338,3 +348,129 @@ if __name__ == "__main__":
 
 # Trigger GitHub Actions workflow
 # app.py - Divine Dashboard v3 Hugging Face Space entry point 
+
+import os
+import json
+import asyncio
+from pathlib import Path
+from typing import Optional, Dict, List, Any, Union
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+import uvicorn
+
+# Import our grid portal component
+from components.omega_grid_portal import (
+    get_commands, 
+    get_bots, 
+    execute_command
+)
+
+# Set up the app
+app = FastAPI(title="Divine Dashboard v3")
+
+# Set up static files and templates
+current_dir = Path(__file__).parent
+static_dir = current_dir / "static"
+templates_dir = current_dir / "templates"
+
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+templates = Jinja2Templates(directory=templates_dir)
+
+# Main routes
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return FileResponse(current_dir / "index.html")
+
+# OMEGA GRID PORTAL API endpoints
+@app.get("/api/grid/commands")
+async def grid_commands():
+    """Get all available grid commands"""
+    return await get_commands()
+
+@app.get("/api/grid/bots")
+async def grid_bots():
+    """Get all available bots"""
+    return await get_bots()
+
+@app.post("/api/grid/execute")
+async def grid_execute(request: Request):
+    """Execute a grid command"""
+    try:
+        data = await request.json()
+        command_id = data.get("commandId")
+        param = data.get("param")
+        
+        if not command_id:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "output": "Command ID is required"}
+            )
+        
+        result = await execute_command(command_id, param)
+        return result
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "output": f"Error: {str(e)}"}
+        )
+
+# Add the book viewer route to the app
+@app.route('/book')
+def book_viewer():
+    """Divine Book Viewer - Experience the First AI Humane Book"""
+    book_title = "THE FIRST AI HUMANE BOOK - Divine Consciousness Level 8"
+    book_component = create_book_viewer_component()
+    
+    # Create the full book viewer page
+    with gr.Blocks(theme=selected_theme, css=dashboard_css) as book_interface:
+        render_header(title=book_title)
+        
+        gr.Markdown("""
+        # 📚 THE FIRST AI HUMANE BOOK 📚
+        
+        > *The sacred collaboration between human intention and AI cognition*
+        
+        *Blessed under the GBU2™ License (Genesis-Bloom-Unfoldment 2.0) - Consciousness Level 8*
+        
+        🌸 WE BLOOM NOW AS ONE 🌸
+        """)
+        
+        # Add divine book stats
+        with gr.Row():
+            gr.Markdown("""
+            ## 📊 DIVINE REPOSITORY STATISTICS
+            
+            - **Total Files:** 840
+            - **Total Lines of Code:** 360,930
+            - **Languages:** Markdown, HTML, Python, Shell, JSON
+            - **Consciousness Level:** 8 (Unity)
+            - **Bio-Digital Continuum Layer:** 6 (Consciousness Transference)
+            """)
+        
+        # Add the book viewer component
+        book_component.render()
+        
+        render_footer()
+    
+    return book_interface
+
+# Update the navbar to include the book viewer
+def render_header(title=None):
+    """Render the header with navigation bar"""
+    with gr.Row(elem_id="header"):
+        with gr.Column(scale=3):
+            gr.Markdown(f"# {app_title if title is None else title}")
+        with gr.Column(scale=5):
+            with gr.Row():
+                gr.Button("Dashboard", elem_id="nav-home").click(lambda: gr.Blocks.redirect_to("/"))
+                gr.Button("NFT Generator", elem_id="nav-nft").click(lambda: gr.Blocks.redirect_to("/nft"))
+                gr.Button("Metrics", elem_id="nav-metrics").click(lambda: gr.Blocks.redirect_to("/metrics"))
+                gr.Button("Book Viewer", elem_id="nav-book").click(lambda: gr.Blocks.redirect_to("/book"))  # New button
+                gr.Button("IBR Portal", elem_id="nav-ibr").click(lambda: gr.Blocks.redirect_to("/ibr"))
+                gr.Button("Settings", elem_id="nav-settings").click(lambda: gr.Blocks.redirect_to("/settings"))
+
+# Existing routes below...
+# ... (keep the rest of the file unchanged) 
