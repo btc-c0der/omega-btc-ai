@@ -4,6 +4,59 @@
 
 The IBR España Instagram Manager is a comprehensive tool for managing the church's Instagram account (@ibrespana). This module integrates directly with the Divine Dashboard v3 and provides a complete suite of Instagram management features.
 
+## 🔄 Recent Updates
+
+- **April 11, 2025**: Fixed indentation error in Instagram data fetching code
+- **April 11, 2025**: Reorganized component files into a more maintainable structure
+- **April 11, 2025**: Enhanced follower count extraction from meta description
+
+See [REORGANIZATION.md](./docs/REORGANIZATION.md) for details on the directory structure changes.
+See [BUG_FIX_LOG_IBR_SPAIN.md](./docs/BUG_FIX_LOG_IBR_SPAIN.md) for details on the bug fixes.
+
+## Component Structure
+
+```
+ibr_spain/
+├── docs/                   # Documentation files
+├── standalone/             # Standalone version
+├── tests/                  # Test files
+├── micro_modules/          # Smaller feature modules
+├── ibr_dashboard.py        # Main component implementation
+├── __init__.py             # Package initialization
+└── README.md               # This file
+```
+
+## Running the Component
+
+### Standalone Mode
+
+To run the IBR España component as a standalone dashboard:
+
+```bash
+cd divine_dashboard_v3/components/ibr_spain/standalone
+./run_ibr_standalone.sh
+```
+
+The dashboard will be available at <http://localhost:7863> (or the next available port).
+
+### Integrated with Divine Server
+
+To run the IBR España component integrated with the main Divine Server:
+
+```bash
+cd divine_dashboard_v3/components/ibr_spain/standalone
+./run_ibr_with_server.sh
+```
+
+### Running Tests
+
+To run the tests for the IBR España component:
+
+```bash
+cd divine_dashboard_v3/components/ibr_spain/tests
+./run_ibr_tests.sh
+```
+
 ## Features
 
 ### Post Scheduling
@@ -43,68 +96,40 @@ The IBR España Instagram Manager is a comprehensive tool for managing the churc
 
 ## Technical Details
 
-### Installation
-
-This module is part of the Divine Dashboard v3 and is automatically included when installing the IBR España component.
-
 ### Configuration
 
-No additional configuration is needed beyond the standard IBR España dashboard setup.
+Create a JSON file at `divine_dashboard_v3/config/ibr_spain.json`:
+
+```json
+{
+  "instagram_manager": {
+    "data_dir": "/path/to/data",
+    "account_name": "ibrespana",
+    "api_credentials": {
+      "access_token": "your_access_token",
+      "client_id": "your_client_id",
+      "client_secret": "your_client_secret",
+      "page_id": "your_page_id",
+      "instagram_account_id": "your_instagram_account_id"
+    }
+  }
+}
+```
 
 ### Dependencies
 
 - Python 3.7+
 - Gradio (for UI components)
+- BeautifulSoup4 (for Instagram data extraction)
+- Requests (for API communication)
 - Standard Python libraries: json, pathlib, datetime, logging, uuid
 
-### Data Storage
+## Data Modes
 
-All data is stored locally in JSON format in the following structure:
+The component can operate in two modes:
 
-- `posts/`: Contains scheduled and published posts
-- `comments/`: Contains comments and auto-reply rules
-- `reports/`: Contains analytics reports and scheduled report configurations
-- `campaigns/`: Contains outreach campaign data and leads
-- `livestreams/`: Contains active livestream data and comments
-
-## Usage Guide
-
-### Accessing the Manager
-
-The Instagram Manager is available as a tab in the IBR España dashboard interface. Navigate to "Instagram Manager" to access all features.
-
-### Scheduling Posts
-
-1. Go to the "Schedule Posts" tab
-2. Fill in the image path, caption, and scheduled time
-3. Optionally add a first comment for hashtags
-4. Click "Schedule Post"
-
-### Managing Comments
-
-1. Go to the "Manage Comments" tab
-2. Set up auto-reply rules by defining keywords and reply templates
-3. Click "Process Auto-Replies" to apply rules to existing comments
-
-### Generating Reports
-
-1. Go to the "Analytics" tab
-2. Set the start and end dates for your report
-3. Click "Generate Report" to view metrics
-4. To schedule recurring reports, select frequency and add recipient emails
-
-### Creating Outreach Campaigns
-
-1. Go to the "Outreach" tab
-2. Create a new campaign with a name, target audience, and message template
-3. Add leads to the campaign with custom messages
-
-### Monitoring Livestreams
-
-1. Go to the "Livestream Monitoring" tab
-2. Enter the stream ID and start monitoring
-3. View comments and technical issues in real-time
-4. Stop monitoring when the livestream ends
+1. **Sample Data Mode**: When API credentials are not provided, the component uses sample data
+2. **Real Data Mode**: When API credentials are provided, the component fetches real data from Instagram
 
 ## Support
 
@@ -120,4 +145,4 @@ This software is licensed for the exclusive use of IBR España.
 
 ---
 
-© IBR España 2023 | Desarrollado con �� por OMEGA BTC AI
+© IBR España 2025 | Desarrollado con ❤️ por OMEGA BTC AI

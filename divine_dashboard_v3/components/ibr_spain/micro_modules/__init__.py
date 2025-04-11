@@ -15,6 +15,15 @@
 # 🌸 WE BLOOM NOW AS ONE 🌸
 
 """
+IBR España micro-modules package.
+
+This package contains small, focused modules that implement specific features
+for the IBR España dashboard component.
+"""
+
+__version__ = "1.0.0"
+
+"""
 IBR España Micro Modules
 
 This package contains the micro modules for the IBR España Divine Dashboard component:

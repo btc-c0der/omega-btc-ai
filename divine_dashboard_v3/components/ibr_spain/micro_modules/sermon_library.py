@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-IBR España - Sermon Library Micro Module
+Sermon Library for IBR España
 
-This module provides sermon management functionality for the IBR España dashboard.
+This module provides a sermon library for the IBR España dashboard.
 """
 
 import os
@@ -18,192 +18,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sermon_library")
 
 class SermonLibrary:
-    """Sermon library manager for IBR España"""
+    """Sermon Library for IBR España."""
     
-    def __init__(self, data_dir: Optional[str] = None):
-        """Initialize the sermon library
-        
-        Args:
-            data_dir: Directory to store sermon data (optional)
-        """
-        self.data_dir = Path(data_dir) if data_dir else Path.home() / "ibr_data" / "sermons"
-        
-        # Create data directory if it doesn't exist
-        self.data_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Initialize sermon database
-        self.sermons_file = self.data_dir / "sermons.json"
-        self.sermons = self.load_sermons()
-        
-        logger.info(f"Sermon library initialized with {len(self.sermons)} sermons")
-    
-    def load_sermons(self) -> List[Dict[str, Any]]:
-        """Load sermons from storage"""
-        if not self.sermons_file.exists():
-            # Return sample data if no file exists yet
-            return self._get_sample_sermons()
-            
-        try:
-            with open(self.sermons_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            logger.error(f"Error loading sermons: {e}")
-            return self._get_sample_sermons()
-    
-    def save_sermons(self) -> bool:
-        """Save sermons to storage
-        
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        try:
-            with open(self.sermons_file, "w", encoding="utf-8") as f:
-                json.dump(self.sermons, f, ensure_ascii=False, indent=2)
-            return True
-        except Exception as e:
-            logger.error(f"Error saving sermons: {e}")
-            return False
-    
-    def add_sermon(self, sermon: Dict[str, Any]) -> bool:
-        """Add a new sermon to the library
-        
-        Args:
-            sermon: Sermon data dictionary
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        # Validate sermon data
-        required_fields = ["title", "preacher", "date", "scripture", "language"]
-        for field in required_fields:
-            if field not in sermon:
-                logger.error(f"Missing required field in sermon: {field}")
-                return False
-        
-        # Generate ID if not provided
-        if "id" not in sermon:
-            sermon["id"] = f"sermon_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        
-        # Add sermon to library
-        self.sermons.append(sermon)
-        return self.save_sermons()
-    
-    def get_sermon(self, sermon_id: str) -> Optional[Dict[str, Any]]:
-        """Get a sermon by ID
-        
-        Args:
-            sermon_id: ID of sermon to retrieve
-            
-        Returns:
-            Dict or None: Sermon data if found, None otherwise
-        """
-        for sermon in self.sermons:
-            if sermon.get("id") == sermon_id:
-                return sermon
-        return None
-    
-    def update_sermon(self, sermon_id: str, updated_data: Dict[str, Any]) -> bool:
-        """Update a sermon's data
-        
-        Args:
-            sermon_id: ID of sermon to update
-            updated_data: New sermon data (partial updates supported)
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        for i, sermon in enumerate(self.sermons):
-            if sermon.get("id") == sermon_id:
-                # Update only the provided fields
-                self.sermons[i] = {**sermon, **updated_data}
-                return self.save_sermons()
-        
-        logger.error(f"Sermon not found for update: {sermon_id}")
-        return False
-    
-    def delete_sermon(self, sermon_id: str) -> bool:
-        """Delete a sermon from the library
-        
-        Args:
-            sermon_id: ID of sermon to delete
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        for i, sermon in enumerate(self.sermons):
-            if sermon.get("id") == sermon_id:
-                del self.sermons[i]
-                return self.save_sermons()
-        
-        logger.error(f"Sermon not found for deletion: {sermon_id}")
-        return False
-    
-    def search_sermons(self, query: str = "", language: str = None) -> List[Dict[str, Any]]:
-        """Search sermons by query and/or language
-        
-        Args:
-            query: Search query (searches title, preacher, and scripture)
-            language: Language filter (e.g., 'es', 'en')
-            
-        Returns:
-            List: Matching sermons
-        """
-        results = self.sermons.copy()
-        
-        # Filter by language
-        if language:
-            results = [s for s in results if s.get("language") == language]
-        
-        # Filter by query
-        if query:
-            query = query.lower()
-            results = [
-                s for s in results if (
-                    query in s.get("title", "").lower() or
-                    query in s.get("preacher", "").lower() or
-                    query in s.get("scripture", "").lower()
-                )
-            ]
-        
-        return results
-    
-    def _get_sample_sermons(self) -> List[Dict[str, Any]]:
-        """Get sample sermon data"""
-        return [
+    def __init__(self):
+        """Initialize the sermon library."""
+        self.sermons = [
             {
                 "id": "sermon001",
-                "title": "La Gracia de Dios en Tiempos Difíciles",
-                "preacher": "Pastor Juan Martínez",
-                "date": "2023-10-22",
-                "duration": "45:30",
-                "scripture": "Romanos 8:18-39",
-                "language": "es",
-                "audio_url": "https://ibr-espana.org/sermons/sermon001.mp3",
-                "thumbnail": "https://ibr-espana.org/thumbnails/sermon001.jpg"
+                "title": "El amor de Dios",
+                "speaker": "Pastor Thiago Rodriguez",
+                "date": "2023-11-12",
+                "duration": 45,
+                "description": "Un mensaje sobre el amor incondicional de Dios",
+                "audio_url": "/sermons/sermon001.mp3"
             },
             {
                 "id": "sermon002",
-                "title": "La Soberanía de Dios",
-                "preacher": "Pastor Miguel Rodríguez",
-                "date": "2023-10-15",
-                "duration": "38:22",
-                "scripture": "Job 38:1-41",
-                "language": "es",
-                "audio_url": "https://ibr-espana.org/sermons/sermon002.mp3",
-                "thumbnail": "https://ibr-espana.org/thumbnails/sermon002.jpg"
-            },
-            {
-                "id": "sermon003",
-                "title": "God's Sovereignty in Our Lives",
-                "preacher": "Pastor David Wilson",
-                "date": "2023-10-08",
-                "duration": "41:05",
-                "scripture": "Psalm 139:1-24",
-                "language": "en",
-                "audio_url": "https://ibr-espana.org/sermons/sermon003.mp3",
-                "thumbnail": "https://ibr-espana.org/thumbnails/sermon003.jpg"
+                "title": "La fe en tiempos difíciles",
+                "speaker": "Pastor Thiago Rodriguez",
+                "date": "2023-11-05",
+                "duration": 38,
+                "description": "Cómo mantener nuestra fe durante los tiempos difíciles",
+                "audio_url": "/sermons/sermon002.mp3"
             }
         ]
+        
+    def get_recent_sermons(self, limit=5):
+        """Get the most recent sermons."""
+        return self.sermons[:limit]
 
 
 def render_sermon_card(sermon: Dict[str, Any]) -> str:
