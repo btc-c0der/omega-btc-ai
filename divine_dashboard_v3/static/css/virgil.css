@@ -1,0 +1,496 @@
+/*
+  ✨ VIRGIL GRID UI v1.0.0 — Divine CSS Framework
+  -------------------------------------------------
+  "Typography is Voice. Space is Silence."
+  OMEGA DESIGN AXIOM 02
+*/
+
+/* ------ CSS Variables ------ */
+:root {
+    /* Colors */
+    --color-white: #F5F5F5;
+    --color-black: #0F0F0F;
+    --color-grid: #5D5D5D;
+    --color-divine-blue: #2B5797;
+    --color-sacred-gold: #FFD700;
+    --color-omega-red: #B71C1C;
+    --color-quantum-green: #1E8E3E;
+
+    /* Typography */
+    --font-primary: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, Menlo, Consolas, "Courier New", monospace;
+
+    /* Font Sizes (Fibonacci) */
+    --font-size-divine: 34px;
+    --font-size-grid: 21px;
+    --font-size-subheading: 18px;
+    --font-size-body: 16px;
+    --font-size-small: 13px;
+    --font-size-tiny: 11px;
+    --font-size-code: 14px;
+
+    /* Line Heights (Fibonacci) */
+    --line-height-divine: 55px;
+    --line-height-grid: 34px;
+    --line-height-subheading: 29px;
+    --line-height-body: 26px;
+    --line-height-small: 21px;
+    --line-height-tiny: 18px;
+    --line-height-code: 21px;
+
+    /* Spacing (Fibonacci) */
+    --spacing-xs: 8px;
+    --spacing-s: 13px;
+    --spacing-m: 21px;
+    --spacing-l: 34px;
+    --spacing-xl: 55px;
+    --spacing-xxl: 89px;
+}
+
+/* ------ Base Styles ------ */
+body {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+    color: var(--color-black);
+    background-color: var(--color-white);
+    margin: 0;
+    padding: 0;
+}
+
+/* Code, pre */
+code,
+pre {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-code);
+    line-height: var(--line-height-code);
+}
+
+/* Typography System */
+h1,
+.virgil-h1 {
+    font-size: var(--font-size-divine);
+    line-height: var(--line-height-divine);
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-l);
+}
+
+h2,
+.virgil-h2 {
+    font-size: var(--font-size-grid);
+    line-height: var(--line-height-grid);
+    font-weight: 500;
+    letter-spacing: -0.3px;
+    margin-top: var(--spacing-l);
+    margin-bottom: var(--spacing-m);
+}
+
+h3,
+.virgil-h3 {
+    font-size: var(--font-size-subheading);
+    line-height: var(--line-height-subheading);
+    font-weight: 500;
+    margin-top: var(--spacing-m);
+    margin-bottom: var(--spacing-s);
+}
+
+/* Semantic Typography */
+.divine-heading {
+    font-size: var(--font-size-divine);
+    line-height: var(--line-height-divine);
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+
+/* ------ Core Components ------ */
+
+/* Quotation styling */
+.virgil-quote {
+    position: relative;
+    padding: 0 8px;
+}
+
+.virgil-quote::before {
+    content: "\201C";
+    position: absolute;
+    left: -5px;
+}
+
+.virgil-quote::after {
+    content: "\201D";
+    position: absolute;
+    right: -5px;
+}
+
+/* Buttons */
+.virgil-btn {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-body);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--spacing-xs) var(--spacing-m);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.virgil-btn-primary {
+    background-color: var(--color-divine-blue);
+    color: var(--color-white);
+}
+
+.virgil-btn-primary:hover {
+    background-color: #3A6CB7;
+    transform: translateY(-2px);
+}
+
+.virgil-btn-secondary {
+    background-color: transparent;
+    color: var(--color-divine-blue);
+    border: 2px solid var(--color-divine-blue);
+}
+
+.virgil-btn-secondary:hover {
+    background-color: rgba(43, 87, 151, 0.1);
+}
+
+.virgil-btn-sacred {
+    background: linear-gradient(135deg, var(--color-divine-blue) 0%, var(--color-sacred-gold) 100%);
+    color: var(--color-white);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Cards */
+.virgil-card {
+    background-color: var(--color-white);
+    border-left: 3px solid var(--color-divine-blue);
+    padding: var(--spacing-m);
+    margin-bottom: var(--spacing-m);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.virgil-card-header {
+    margin-bottom: var(--spacing-m);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid rgba(93, 93, 93, 0.2);
+}
+
+.virgil-card-title {
+    font-size: var(--font-size-grid);
+    line-height: var(--line-height-grid);
+    font-weight: 500;
+    margin: 0;
+}
+
+.virgil-card-content {
+    margin-bottom: var(--spacing-m);
+}
+
+.virgil-card-footer {
+    margin-top: var(--spacing-m);
+    padding-top: var(--spacing-xs);
+    border-top: 1px solid rgba(93, 93, 93, 0.2);
+}
+
+/* Terminal Component */
+.virgil-terminal {
+    background-color: #1E1E1E;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-m);
+}
+
+.virgil-terminal-header {
+    display: flex;
+    align-items: center;
+    background-color: #323232;
+    padding: var(--spacing-xs) var(--spacing-m);
+    position: relative;
+}
+
+.virgil-terminal-controls {
+    display: flex;
+    align-items: center;
+}
+
+.virgil-terminal-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-color: #FE5F57;
+}
+
+.virgil-terminal-btn:nth-child(2) {
+    background-color: #FEBC2E;
+}
+
+.virgil-terminal-btn:nth-child(3) {
+    background-color: #28C841;
+}
+
+.virgil-terminal-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #CCCCCC;
+    font-size: var(--font-size-small);
+    font-family: var(--font-mono);
+}
+
+.virgil-terminal-content {
+    padding: var(--spacing-m);
+    color: #E0E0E0;
+}
+
+.virgil-terminal-code {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-code);
+    line-height: var(--line-height-code);
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* Status Indicators */
+.virgil-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: var(--font-size-tiny);
+    font-weight: 500;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.virgil-badge-success {
+    background-color: rgba(30, 142, 62, 0.1);
+    color: var(--color-quantum-green);
+}
+
+.virgil-badge-warning {
+    background-color: rgba(255, 215, 0, 0.1);
+    color: #D4AF00;
+}
+
+.virgil-badge-error {
+    background-color: rgba(183, 28, 28, 0.1);
+    color: var(--color-omega-red);
+}
+
+.virgil-badge-info {
+    background-color: rgba(43, 87, 151, 0.1);
+    color: var(--color-divine-blue);
+}
+
+/* Sacred Symbols */
+.sacred-symbol {
+    display: inline-block;
+    margin: 0 2px;
+    font-weight: bold;
+}
+
+.sacred-symbol.delta {
+    color: var(--color-divine-blue);
+}
+
+.symbol-sequence {
+    display: inline-flex;
+}
+
+.symbol-sequence.level-4 .sacred-symbol:nth-child(4) {
+    color: var(--color-sacred-gold);
+}
+
+/* State Indicators */
+.virgil-state-indicator {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: var(--font-size-small);
+    font-weight: 500;
+    text-transform: uppercase;
+    position: relative;
+}
+
+.virgil-state-indicator::before,
+.virgil-state-indicator::after {
+    content: "\201C";
+    position: absolute;
+}
+
+.virgil-state-indicator::before {
+    left: 1px;
+}
+
+.virgil-state-indicator::after {
+    right: 1px;
+}
+
+.virgil-state-indicator.live {
+    color: var(--color-quantum-green);
+}
+
+.virgil-state-indicator.processing {
+    color: var(--color-divine-blue);
+}
+
+.virgil-state-indicator.archive {
+    color: var(--color-grid);
+}
+
+/* Progress Components */
+.virgil-progress {
+    margin-bottom: var(--spacing-m);
+}
+
+.virgil-progress-label {
+    font-size: var(--font-size-small);
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-grid);
+}
+
+.virgil-progress-bar {
+    height: 6px;
+    background-color: rgba(93, 93, 93, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.virgil-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-divine-blue) 0%, var(--color-sacred-gold) 100%);
+    transition: width 0.4s ease;
+}
+
+.virgil-progress-value {
+    font-size: var(--font-size-small);
+    margin-top: var(--spacing-xs);
+    text-align: right;
+    color: var(--color-grid);
+}
+
+/* Loading Indicator */
+.virgil-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-m);
+}
+
+.virgil-loader-ring {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(43, 87, 151, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--color-divine-blue);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.virgil-loader-text {
+    margin-top: var(--spacing-s);
+    font-size: var(--font-size-small);
+    color: var(--color-grid);
+}
+
+/* Container & Layout */
+.virgil-container {
+    padding: var(--spacing-m);
+    max-width: 1597px;
+    /* Fibonacci 1597 */
+    margin: 0 auto;
+}
+
+.virgil-grid {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    /* Fibonacci 13 */
+    grid-gap: 21px;
+    /* Fibonacci 21 */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 610px) {
+
+    /* Fibonacci 610 */
+    .virgil-container {
+        padding: var(--spacing-s);
+    }
+
+    .virgil-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+@media (min-width: 610px) and (max-width: 987px) {
+
+    /* Fibonacci 987 */
+    .virgil-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+/* Sacred Patterns */
+.virgil-pattern {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.1;
+}
+
+.virgil-pattern.diagonal-lines {
+    background-image: repeating-linear-gradient(45deg,
+            var(--color-divine-blue),
+            var(--color-divine-blue) 1px,
+            transparent 1px,
+            transparent 10px);
+}
+
+.virgil-pattern.dot-matrix {
+    background-image: radial-gradient(var(--color-grid) 1px,
+            transparent 1px);
+    background-size: 10px 10px;
+}
+
+/* Utility Classes */
+.virgil-text-center {
+    text-align: center;
+}
+
+.virgil-mt-s {
+    margin-top: var(--spacing-s);
+}
+
+.virgil-mt-m {
+    margin-top: var(--spacing-m);
+}
+
+.virgil-mt-l {
+    margin-top: var(--spacing-l);
+}
+
+.virgil-mb-s {
+    margin-bottom: var(--spacing-s);
+}
+
+.virgil-mb-m {
+    margin-bottom: var(--spacing-m);
+}
+
+.virgil-mb-l {
+    margin-bottom: var(--spacing-l);
+}

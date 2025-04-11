@@ -25,7 +25,9 @@
     <meta name="description" content="A powerful dashboard interface for monitoring and management">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="static/css/styles.css">
+    <!-- Virgil Abloh / OFF-WHITE™ Edition Stylesheet -->
+    <link rel="stylesheet" href="static/css/omega-grid-virgil.css">
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -75,6 +77,10 @@
                             <a href="#hacker-archive" class="nav-link">
                                 <i class="fas fa-user-secret"></i>
                                 <span>Hacker Archive</span>
+                            </a>
+                            <a href="#omega-grid-portal" class="nav-link">
+                                <i class="fas fa-th"></i>
+                                <span>OMEGA GRID PORTAL</span>
                             </a>
                         </div>
                     </div>
@@ -194,6 +200,9 @@
                         </button>
                         <button class="theme-toggle" title="Toggle Theme">
                             <i class="fas fa-moon"></i>
+                        </button>
+                        <button id="virgil-mode-toggle" class="virgil-mode-toggle" title="Toggle Virgil Mode">
+                            "VIRGIL MODE" OFF
                         </button>
                     </div>
                 </div>
@@ -326,6 +335,72 @@
                         <div class="card-footer">
                             <a href="#" class="view-all">View All Projects</a>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NEW: OMEGA GRID PORTAL Section -->
+            <section id="omega-grid-portal">
+                <div class="section-header">
+                    <h2 class="omega-grid-header">OMEGA GRID PORTAL</h2>
+                    <p>"MANAGE BOTS" — "COMMAND CENTER" — "OFF-WHITE™ EDITION"</p>
+                </div>
+
+                <div class="loading-indicator" id="grid-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+
+                <div class="grid-portal-container">
+                    <!-- Command Grid -->
+                    <div class="grid-portal-column">
+                        <div class="industrial-label">"COMMAND GRID"</div>
+                        <div id="omega-command-grid" class="command-grid">
+                            <!-- Command cards will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Terminal Output and Bot Controls -->
+                    <div class="grid-portal-column">
+                        <div class="industrial-label">"TERMINAL OUTPUT"</div>
+                        <div id="omega-terminal" class="virgil-terminal">
+                            <div class="virgil-terminal-header">
+                                <div class="virgil-terminal-title">"QUANTUM COMPUTING PORTAL"</div>
+                            </div>
+                            <div class="virgil-terminal-content" id="omega-terminal-content">
+                                <!-- Terminal content will be added here by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="industrial-label">"BOT CONTROL"</div>
+                        <div id="omega-bots-list" class="bots-control-panel">
+                            <div class="bot-control-wrapper">
+                                <select id="bot-select" class="bot-select">
+                                    <option value="">SELECT BOT</option>
+                                    <!-- Bot options will be added here by JavaScript -->
+                                </select>
+                                <button class="command-card-button start-bot-btn"
+                                    onclick="omegaGridPortal.executeCommand('start_bot', document.getElementById('bot-select').value)">START</button>
+                                <button class="command-card-button stop-bot-btn"
+                                    onclick="omegaGridPortal.executeCommand('stop_bot', document.getElementById('bot-select').value)">STOP</button>
+                                <button class="command-card-button restart-bot-btn"
+                                    onclick="omegaGridPortal.executeCommand('restart_bot', document.getElementById('bot-select').value)">RESTART</button>
+                            </div>
+                        </div>
+
+                        <div class="industrial-label">"CUSTOM COMMAND"</div>
+                        <div class="custom-command-container">
+                            <input type="text" id="custom-command-input" class="custom-command-input"
+                                placeholder="ENTER CUSTOM COMMAND">
+                            <button id="custom-command-btn" class="command-card-button">EXECUTE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NFT & Web3 Container (Reserved for Future) -->
+                <div class="nft-web3-container">
+                    <div class="nft-web3-label">"NFT & WEB3"</div>
+                    <div class="nft-placeholder">
+                        "SPACE RESERVED FOR FUTURE NFT & WEB3 FUNCTIONALITY"
                     </div>
                 </div>
             </section>
@@ -1357,7 +1432,9 @@ npm start</code></pre>
         });
     </script>
 
-    <script src="js/main.js"></script>
+    <script src="static/js/main.js"></script>
+    <!-- OMEGA GRID PORTAL JavaScript -->
+    <script src="static/js/omega-grid-virgil.js"></script>
 </body>
 
 </html>

@@ -328,4 +328,67 @@ def verify_hash(message: str, hash_value: str, bio_transform: bool = True,
         True if hash matches, False otherwise
     """
     hasher = SHA356Sacred()
-    return hasher.verify(message, hash_value, bio_transform, padding_method) 
+    return hasher.verify(message, hash_value, bio_transform, padding_method)
+
+# Create the sha356_omega function needed for imports
+def sha356_omega(message: Union[str, bytes], 
+               bio_method: Literal["fibonacci", "phi", "schumann", "lunar", "sacred"] = "fibonacci",
+               fibonacci_alignment: bool = True,
+               include_diagnostics: bool = False,
+               lunar_phase_alignment: Optional[float] = None,
+               reference_message: Optional[Union[str, bytes]] = None) -> Dict[str, Any]:
+    """
+    Enhanced SHA356 Sacred hash with bio-inspired transformations and optional diagnostics.
+    
+    Args:
+        message: Input message to hash
+        bio_method: Bio-padding method to use
+        fibonacci_alignment: Whether to apply Fibonacci transformation
+        include_diagnostics: Include detailed diagnostics in result
+        lunar_phase_alignment: Optional lunar phase (0-1) for cosmic alignment
+        reference_message: Optional reference message for avalanche comparison
+        
+    Returns:
+        Dictionary containing the hash and optional diagnostics
+    """
+    hasher = SHA356Sacred()
+    
+    # Process the hash with specified options
+    result = hasher.hash(message, bio_transform=fibonacci_alignment, 
+                         padding_method=bio_method, metadata=include_diagnostics)
+    
+    # If a reference message is provided, calculate avalanche effect
+    if reference_message is not None and include_diagnostics:
+        # Hash the reference message with the same parameters
+        ref_result = hasher.hash(reference_message, bio_transform=fibonacci_alignment, 
+                               padding_method=bio_method, metadata=False)
+        
+        # Calculate bit differences (avalanche effect)
+        hash1_bin = bin(int(result["hash"], 16))[2:].zfill(356)
+        hash2_bin = bin(int(ref_result["hash"], 16))[2:].zfill(356)
+        diff_bits = sum(1 for a, b in zip(hash1_bin, hash2_bin) if a != b)
+        
+        # Add avalanche analysis to result
+        result["avalanche_analysis"] = {
+            "bits_different": diff_bits,
+            "percentage_different": (diff_bits / 356) * 100,
+            "reference_hash": ref_result["hash"]
+        }
+    
+    # Apply lunar phase alignment if provided
+    if lunar_phase_alignment is not None and include_diagnostics:
+        lunar_factor = lunar_phase_alignment * 0.2  # Scale to 0-0.2 impact
+        
+        # Adjust resonance score with lunar phase information
+        if "resonance_score" in result:
+            # Weighted adjustment based on lunar phase
+            result["resonance_score"] = result["resonance_score"] * (1 + lunar_factor)
+            
+            # Ensure score stays in 0-1 range
+            if result["resonance_score"] > 1:
+                result["resonance_score"] = 1.0
+                
+        # Add lunar phase information
+        result["lunar_phase"] = lunar_phase_alignment
+    
+    return result 

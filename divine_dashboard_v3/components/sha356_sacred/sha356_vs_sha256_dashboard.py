@@ -29,6 +29,7 @@ import numpy as np
 from datetime import datetime
 from typing import Dict, Any, List, Tuple, Optional, Union, Literal
 from matplotlib.figure import Figure
+import os
 
 # Import Gradio
 try:
@@ -57,8 +58,9 @@ def format_json(data: Dict[str, Any]) -> str:
 def compare_hashes(input_data: str,
                   padding_method: Literal["fibonacci", "schumann", "golden", "lunar"] = "fibonacci",
                   include_resonance: bool = True,
-                  transform_type: str = "fibonacci",
-                  transform_strength: float = 0.5) -> Dict[str, Any]:
+                  transform_type: Optional[str] = None,
+                  transform_strength: Optional[float] = None,
+                  **kwargs) -> Dict[str, Any]:
     """
     Compare SHA-356 with standard SHA-256.
     
@@ -66,14 +68,21 @@ def compare_hashes(input_data: str,
         input_data: Input string to hash
         padding_method: Bio-padding method for SHA-356
         include_resonance: Whether to include cosmic resonance
-        transform_type: Dimensional transform type
-        transform_strength: Dimensional transform strength
+        transform_type: Dimensional transform type (optional)
+        transform_strength: Dimensional transform strength (optional)
+        **kwargs: Additional keyword arguments to handle extra parameters
         
     Returns:
         Dictionary with comparison results
     """
     # Convert to bytes
     input_bytes = input_data.encode('utf-8')
+    
+    # Set default values if not provided
+    if transform_type is None:
+        transform_type = "fibonacci"
+    if transform_strength is None:
+        transform_strength = 0.5
     
     # Apply dimensional transform
     transformed_bytes = dimensional_transform(
@@ -143,7 +152,8 @@ def compare_hashes(input_data: str,
 
 def run_batch_comparison(input_strings: List[str], 
                         padding_method: Literal["fibonacci", "schumann", "golden", "lunar"],
-                        include_resonance: bool) -> Dict[str, List[float]]:
+                        include_resonance: bool,
+                        **kwargs) -> Dict[str, List[float]]:
     """
     Run batch comparison on multiple strings.
     
@@ -151,6 +161,7 @@ def run_batch_comparison(input_strings: List[str],
         input_strings: List of input strings
         padding_method: Bio-padding method
         include_resonance: Whether to include cosmic resonance
+        **kwargs: Additional keyword arguments to handle extra parameters
         
     Returns:
         Dictionary with batch results
@@ -434,7 +445,7 @@ with gr.Blocks(theme=THEME) as basic_tab:
                     avalanche_plot = gr.Plot(label="Avalanche Effect Visualization")
     
     compare_button.click(
-        fn=lambda inp, pad, res, typ, str: [
+        fn=lambda inp, pad, res, typ, str, **kwargs: [
             compare_hashes(inp, pad, res, typ, str),
             create_hash_distribution_plot(
                 compare_hashes(inp, pad, res, typ, str)["sha256"]["hash"],
@@ -482,7 +493,7 @@ with gr.Blocks(theme=THEME) as batch_tab:
                     batch_result = gr.JSON(label="Batch Results")
     
     batch_button.click(
-        fn=lambda count, pad, res: [
+        fn=lambda count, pad, res, **kwargs: [
             generate_test_data(count),
             run_batch_comparison(generate_test_data(count), pad, res),
             create_performance_comparison(run_batch_comparison(generate_test_data(count), pad, res))
@@ -521,7 +532,7 @@ with gr.Blocks(theme=THEME) as cosmic_tab:
                 cosmic_radar = gr.Plot(label="Cosmic Alignment Comparison")
     
     cosmic_button.click(
-        fn=lambda msg, pad: [
+        fn=lambda msg, pad, **kwargs: [
             get_detailed_resonance(hashlib.sha256(msg.encode()).hexdigest()),
             get_detailed_resonance(sha356(msg, padding_method=pad)["hash"]),
             create_cosmic_alignment_radar(
@@ -561,10 +572,26 @@ with gr.Blocks(theme=THEME) as report_tab:
         with gr.Column(scale=2):
             report_output = gr.Markdown(label="Scientific Report")
     
-    def generate_scientific_report(message: str, padding: str, transform: str) -> str:
-        """Generate a scientific report comparing SHA256 and SHA356."""
+    def generate_scientific_report(message: str, padding: str, transform: str, **kwargs) -> str:
+        """
+        Generate a scientific report on hash characteristics.
+        
+        Args:
+            message: Input message
+            padding: Padding method
+            transform: Transform method
+            **kwargs: Additional keyword arguments to handle extra parameters
+            
+        Returns:
+            Scientific report text
+        """
         # Get comparison data
-        comp_data = compare_hashes(message, padding, True, transform, 0.5)
+        # Cast padding to the correct Literal type
+        padding_method: Literal["fibonacci", "schumann", "golden", "lunar"] = "fibonacci"  # Default
+        if padding in ["fibonacci", "schumann", "golden", "lunar"]:
+            padding_method = padding  # type: ignore
+        
+        comp_data = compare_hashes(message, padding_method, True, transform, 0.5)
         
         # Get detailed resonance data
         sha256_resonance = get_detailed_resonance(comp_data["sha256"]["hash"])
@@ -657,4 +684,7 @@ demo = gr.TabbedInterface(
 
 # Launch the app
 if __name__ == "__main__":
-    demo.launch(share=True) 
+    # Check if environment wants us to share the app
+    share_app = os.environ.get("GRADIO_SHARE", "").lower() == "true"
+    print(f"🔄 Launching SHA-356 vs SHA-256 Dashboard {'with sharing enabled' if share_app else ''}")
+    demo.launch(share=share_app) 

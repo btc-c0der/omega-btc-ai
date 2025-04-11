@@ -342,13 +342,15 @@ class RedisTimeline:
     
     def generate_timeline_visualization(self, 
                                       events: Optional[List[Dict[str, Any]]] = None,
-                                      title: str = "Historical Hack Timeline") -> Tuple[Any, str]:
+                                      title: str = "Historical Hack Timeline",
+                                      visualization_mode: str = "standard") -> Tuple[Any, str]:
         """
         Generate a timeline visualization using matplotlib.
         
         Args:
             events: List of events (if None, all events will be retrieved)
             title: Title for the visualization
+            visualization_mode: Visualization mode ("standard", "5d", "compact")
             
         Returns:
             Tuple of (matplotlib figure, events summary)
@@ -356,12 +358,14 @@ class RedisTimeline:
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
         from matplotlib.figure import Figure
+        import numpy as np
         import io
         import base64
+        from datetime import datetime, timedelta
         
         # Get events if not provided
         if events is None:
-            events = self.get_events(limit=50)
+            events = self.get_events(limit=100)  # Increased limit for big data
         
         if not events:
             fig, ax = plt.subplots(figsize=(10, 2))
@@ -374,6 +378,36 @@ class RedisTimeline:
             events = sorted(events, key=lambda x: datetime.fromisoformat(x["timestamp"]))
         except (ValueError, TypeError) as e:
             logger.warning(f"Error sorting events by timestamp: {e}")
+        
+        # Get date range - ensure it covers 1961 to 2025 at minimum
+        min_date = datetime(1961, 1, 1)
+        max_date = datetime(2025, 12, 31)
+        
+        if events:
+            try:
+                event_min_date = datetime.fromisoformat(events[0]["timestamp"])
+                event_max_date = datetime.fromisoformat(events[-1]["timestamp"])
+                
+                # Only override if event dates are outside the default range
+                if event_min_date < min_date:
+                    min_date = event_min_date
+                if event_max_date > max_date:
+                    max_date = event_max_date
+            except (ValueError, TypeError, KeyError):
+                pass
+        
+        # Choose visualization based on mode
+        if visualization_mode == "5d":
+            return self._generate_5d_visualization(events, title, min_date, max_date)
+        elif visualization_mode == "compact":
+            return self._generate_compact_visualization(events, title, min_date, max_date)
+        else:
+            return self._generate_standard_visualization(events, title, min_date, max_date)
+    
+    def _generate_standard_visualization(self, events, title, min_date, max_date):
+        """Generate standard timeline visualization."""
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
         
         # Create figure
         fig, ax = plt.subplots(figsize=(12, 6))
@@ -401,6 +435,10 @@ class RedisTimeline:
         # Format the x-axis to show dates nicely
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+        
+        # Set date limits to ensure wide coverage
+        ax.set_xlim(min_date, max_date)
+        
         fig.autofmt_xdate()
         
         # Remove y-axis ticks and labels
@@ -410,13 +448,332 @@ class RedisTimeline:
         # Add a horizontal line for the timeline
         ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3, zorder=0)
         
-        # Add title and grid
+        # Add grid for decades
+        ax.grid(True, which='major', alpha=0.3)
+        
+        # Add title
         ax.set_title(title)
-        ax.grid(True, alpha=0.3)
         
         # Create a summary of the events
         summary = f"Timeline contains {len(events)} events from "
         if dates:
             summary += f"{dates[0].strftime('%Y-%m-%d')} to {dates[-1].strftime('%Y-%m-%d')}"
+            summary += f"\nFull timeline range: {min_date.strftime('%Y')} to {max_date.strftime('%Y')}"
         
-        return fig, summary 
+        return fig, summary
+    
+    def _generate_compact_visualization(self, events, title, min_date, max_date):
+        """Generate compact timeline visualization for many events."""
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+        import numpy as np
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        # Extract dates
+        dates = [datetime.fromisoformat(e["timestamp"]) for e in events]
+        
+        # Create a histogram of events by year
+        years = [d.year for d in dates]
+        min_year = min(years) if years else min_date.year
+        max_year = max(years) if years else max_date.year
+        
+        # Ensure we at least show 1961-2025
+        min_year = min(min_year, 1961)
+        max_year = max(max_year, 2025)
+        
+        bins = np.arange(min_year, max_year + 2) - 0.5
+        counts, edges = np.histogram(years, bins=bins)
+        
+        # Plot the histogram
+        ax.bar(np.arange(min_year, max_year + 1), counts, width=0.8, 
+               color='royalblue', alpha=0.7, zorder=3)
+        
+        # Add count labels on top of bars
+        for i, count in enumerate(counts):
+            if count > 0:
+                ax.text(min_year + i, count + 0.1, str(count), 
+                        ha='center', va='bottom', fontsize=9)
+        
+        # Format x-axis
+        ax.set_xticks(np.arange(min_year, max_year + 1, 5))
+        ax.set_xticklabels([str(y) for y in range(min_year, max_year + 1, 5)], rotation=45)
+        
+        # Set axis limits
+        ax.set_xlim(min_year - 0.5, max_year + 0.5)
+        
+        # Add grid
+        ax.grid(True, axis='y', alpha=0.3)
+        
+        # Add title
+        ax.set_title(f"{title} - Events by Year")
+        ax.set_xlabel("Year")
+        ax.set_ylabel("Number of Events")
+        
+        # Create summary
+        summary = f"Timeline contains {len(events)} events spanning from {min_year} to {max_year}"
+        
+        return fig, summary
+    
+    def _generate_5d_visualization(self, events, title, min_date, max_date):
+        """Generate a 5D visualization of the timeline (time + 4 dimensions)."""
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+        import matplotlib.dates as mdates
+        import numpy as np
+        from matplotlib import cm
+        from matplotlib.colors import Normalize
+        
+        # Create figure with 3D projection
+        fig = plt.figure(figsize=(12, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Extract dates
+        dates = [datetime.fromisoformat(e["timestamp"]) for e in events]
+        
+        # Convert dates to numeric values (days since epoch)
+        date_nums = mdates.date2num(dates)
+        
+        # Generate random positions for visualization
+        # These would ideally be meaningful dimensions derived from the data
+        np.random.seed(42)  # For reproducibility
+        
+        # Dimensions:
+        # 1. Time (x-axis)
+        # 2. Significance (y-axis) - derived from tags or event importance
+        # 3. Technical complexity (z-axis) - derived from description or metadata
+        # 4. Cultural impact (color) - derived from tags or metadata
+        # 5. Connection strength (size) - derived from related events
+        
+        # Simulate these dimensions for demonstration
+        significance = []
+        complexity = []
+        cultural_impact = []
+        connection_strength = []
+        
+        for event in events:
+            # Significance based on tags (more tags = more significant)
+            sig = len(event.get("tags", [])) / 5.0 if "tags" in event else np.random.uniform(0.3, 0.8)
+            significance.append(sig)
+            
+            # Complexity based on description length
+            comp = min(1.0, len(event.get("description", "")) / 500.0) if "description" in event else np.random.uniform(0.2, 0.9)
+            complexity.append(comp)
+            
+            # Cultural impact (random for demonstration)
+            cult = np.random.uniform(0.2, 1.0)
+            cultural_impact.append(cult)
+            
+            # Connection strength (random for demonstration)
+            conn = np.random.uniform(20, 100)
+            connection_strength.append(conn)
+        
+        # Normalize dimensions
+        significance = np.array(significance)
+        complexity = np.array(complexity)
+        cultural_impact = np.array(cultural_impact)
+        connection_strength = np.array(connection_strength)
+        
+        # Create colormap based on cultural impact
+        norm = Normalize(vmin=0, vmax=1)
+        colors = cm.viridis(norm(cultural_impact))
+        
+        # Plot in 3D space
+        scatter = ax.scatter(date_nums, significance, complexity, 
+                           s=connection_strength, c=colors, alpha=0.7)
+        
+        # Add event labels for significant events
+        for i, (date, sig, comp, name) in enumerate(zip(dates, significance, complexity, [e["title"] for e in events])):
+            # Only label significant events to avoid clutter
+            if sig > 0.6 or i % max(1, len(events) // 10) == 0:  # Label top events and a sampling of others
+                ax.text(mdates.date2num(date), sig, comp, name, fontsize=8)
+        
+        # Format the axes
+        date_format = mdates.DateFormatter('%Y')
+        ax.xaxis.set_major_formatter(date_format)
+        
+        # Set axis limits
+        ax.set_xlim(mdates.date2num([min_date, max_date]))
+        
+        # Set labels
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Significance')
+        ax.set_zlabel('Technical Complexity')
+        
+        # Add colorbar to represent cultural impact dimension
+        cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap='viridis'), 
+                          ax=ax, label='Cultural Impact')
+        
+        # Add title
+        ax.set_title(f"5D Timeline Visualization: {title}")
+        
+        # Add a legend for the size dimension
+        sizes = [20, 50, 100]
+        labels = ['Low', 'Medium', 'High']
+        legend_elements = [plt.Line2D([0], [0], marker='o', color='w', 
+                                    label=labels[i],
+                                    markerfacecolor='gray', 
+                                    markersize=np.sqrt(s/5)) 
+                         for i, s in enumerate(sizes)]
+        ax.legend(handles=legend_elements, title="Connection Strength", 
+                loc="upper right")
+        
+        # Create summary
+        summary = f"5D Timeline Visualization with {len(events)} events from "
+        if dates:
+            summary += f"{dates[0].strftime('%Y-%m-%d')} to {dates[-1].strftime('%Y-%m-%d')}\n"
+            summary += "Dimensions: Time, Significance, Technical Complexity, Cultural Impact (color), Connection Strength (size)"
+        
+        return fig, summary
+
+    def typo_fixer(self, event_id: str, field: str, new_value: Any) -> bool:
+        """
+        Fix a typo in a timeline event.
+        
+        Args:
+            event_id: ID of the event to fix
+            field: Field to update (title, description, timestamp, etc.)
+            new_value: New value for the field
+            
+        Returns:
+            True if the event was updated, False otherwise
+        """
+        # Get the event
+        event = self.get_event_by_id(event_id)
+        if not event:
+            logger.error(f"Event {event_id} not found")
+            return False
+        
+        # Store original value for logging
+        original_value = event.get(field, None)
+        
+        # Update the field
+        event[field] = new_value
+        
+        # Add edit timestamp
+        if "edit_history" not in event:
+            event["edit_history"] = []
+            
+        # Record the edit
+        edit_entry = {
+            "field": field,
+            "old_value": original_value,
+            "new_value": new_value,
+            "timestamp": datetime.now().isoformat(),
+        }
+        
+        event["edit_history"].append(edit_entry)
+        event["last_edited"] = datetime.now().isoformat()
+        
+        # Store the updated event
+        if self.use_redis:
+            try:
+                event_key = get_namespaced_key(self.namespace, f"event:{event_id}")
+                set_json(event_key, event)
+                
+                # Log the edit
+                log_event("timeline_event_edited", {
+                    "namespace": self.namespace,
+                    "event_id": event_id,
+                    "field": field,
+                })
+                
+                return True
+            
+            except Exception as e:
+                logger.error(f"Redis error updating event: {e}")
+                # Update in local events as fallback
+                for i, e in enumerate(self.local_events):
+                    if e.get("id") == event_id:
+                        self.local_events[i] = event
+                        return True
+                return False
+        else:
+            # Update in local storage
+            for i, e in enumerate(self.local_events):
+                if e.get("id") == event_id:
+                    self.local_events[i] = event
+                    return True
+            return False
+            
+    def bulk_timeline_export(self, format: str = "json", time_range: Tuple[Optional[str], Optional[str]] = (None, None)) -> Any:
+        """
+        Export timeline data in various formats.
+        
+        Args:
+            format: Export format (json, csv, markdown)
+            time_range: Optional tuple of (start_time, end_time) to filter events
+            
+        Returns:
+            Exported data in requested format
+        """
+        # Get events with time range filtering
+        start_time, end_time = time_range
+        events = self.get_events(start_time=start_time, end_time=end_time, limit=1000)
+        
+        if format == "json":
+            return json.dumps(events, indent=2)
+        elif format == "csv":
+            import csv
+            import io
+            
+            output = io.StringIO()
+            if not events:
+                return ""
+                
+            # Get all possible fields from all events
+            fields = set()
+            for event in events:
+                fields.update(event.keys())
+                
+            # Create CSV writer
+            writer = csv.DictWriter(output, fieldnames=sorted(fields))
+            writer.writeheader()
+            
+            # Write events
+            for event in events:
+                writer.writerow(event)
+                
+            return output.getvalue()
+        elif format == "markdown":
+            if not events:
+                return "# Timeline Events\n\nNo events found."
+                
+            # Create markdown output
+            output = "# Timeline Events\n\n"
+            
+            for event in events:
+                try:
+                    dt = datetime.fromisoformat(event["timestamp"])
+                    date_str = dt.strftime("%B %d, %Y at %H:%M")
+                except (ValueError, TypeError):
+                    date_str = event.get("timestamp", "Unknown date")
+                    
+                output += f"## {event['title']}\n\n"
+                output += f"**Date:** {date_str}\n\n"
+                output += f"**Description:** {event.get('description', 'No description')}\n\n"
+                
+                if "location" in event and event["location"]:
+                    output += f"**Location:** {event['location']}\n\n"
+                
+                if "participants" in event and event["participants"]:
+                    participants = ", ".join(event["participants"])
+                    output += f"**Participants:** {participants}\n\n"
+                
+                if "tags" in event and event["tags"]:
+                    tags = ", ".join([f"#{tag}" for tag in event["tags"]])
+                    output += f"**Tags:** {tags}\n\n"
+                
+                if "source" in event and event["source"]:
+                    output += f"**Source:** {event['source']}\n\n"
+                
+                if "id" in event:
+                    output += f"*Event ID: {event['id']}*\n\n"
+                
+                output += "---\n\n"
+                
+            return output
+        else:
+            logger.error(f"Unsupported export format: {format}")
+            return "Error: Unsupported export format" 

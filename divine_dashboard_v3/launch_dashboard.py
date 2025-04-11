@@ -31,6 +31,7 @@ import http.server
 import socketserver
 import importlib.util
 from concurrent.futures import ThreadPoolExecutor
+import re
 
 # Get the current directory
 CURRENT_DIR = Path(__file__).parent.absolute()
@@ -87,6 +88,8 @@ COMPONENTS = {
 
 # Global process list
 processes = []
+# Tracking for sharing links 
+component_links = {}
 
 def check_dependencies():
     """Check if required dependencies are installed."""
@@ -115,6 +118,22 @@ def check_dependencies():
     
     return True
 
+def monitor_process_output(process, component_name, description):
+    """Monitor process output to capture and display Gradio sharing links."""
+    public_url_pattern = re.compile(r'(https://[a-z0-9\-]+\.gradio\.live)')
+    
+    for line in iter(process.stdout.readline, b''):
+        try:
+            decoded_line = line.decode('utf-8').strip()
+            # Look for Gradio public URLs
+            match = public_url_pattern.search(decoded_line)
+            if match:
+                public_url = match.group(1)
+                component_links[component_name] = public_url
+                print(f"🌐 {description} available at: {public_url}")
+        except Exception:
+            pass
+
 def start_component(component_name, component_info):
     """Start a specific component."""
     # Check if the script exists
@@ -129,6 +148,11 @@ def start_component(component_name, component_info):
     try:
         # Use python executable from the current environment
         python_exe = sys.executable
+        
+        # Set environment variable to enable Gradio sharing by default
+        env = os.environ.copy()
+        env["GRADIO_SHARE"] = "true"
+        
         cmd = [python_exe, str(script_path)]
         
         # Start process without showing console window on Windows
@@ -139,16 +163,26 @@ def start_component(component_name, component_info):
                 cmd, 
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                startupinfo=startupinfo
+                startupinfo=startupinfo,
+                env=env
             )
         else:
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                env=env
             )
         
         processes.append(process)
+        
+        # Start a thread to monitor for Gradio sharing links
+        monitor_thread = threading.Thread(
+            target=monitor_process_output,
+            args=(process, component_name, component_info['description']),
+            daemon=True
+        )
+        monitor_thread.start()
         
         # Delay to allow the process to start
         time.sleep(1)
@@ -184,8 +218,21 @@ def start_html_server():
     while port < max_port:
         try:
             httpd = socketserver.TCPServer(("", port), QuietHandler)
-            print(f"📊 Main Dashboard running at http://localhost:{port}")
+            print(f"\n📊 Main Dashboard running at http://localhost:{port}")
             print(f"   Open your browser to this URL to access the Divine Dashboard")
+            
+            # Wait a bit for component links to be discovered
+            time.sleep(5)
+            
+            # Print summary of sharing links
+            if component_links:
+                print("\n🌐 Shared Component Links Summary:")
+                print("="*50)
+                for name, url in component_links.items():
+                    desc = COMPONENTS[name]["description"] if name in COMPONENTS else name
+                    print(f"  📡 {desc}: {url}")
+                print("="*50)
+                print("\n🌸 Share these links to collaborate on the Divine Dashboard! 🌸")
             
             # Open browser after a short delay
             threading.Timer(2, lambda: webbrowser.open(f"http://localhost:{port}")).start()

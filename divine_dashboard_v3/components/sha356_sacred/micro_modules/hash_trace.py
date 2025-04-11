@@ -23,17 +23,23 @@ import random
 import binascii
 import hashlib
 from typing import List, Dict, Any, Tuple, Optional
+from io import BytesIO
 
 # Flag to check if visualization libraries are available
 VISUALIZATION_AVAILABLE = False
 
 try:
     import numpy as np
+    import matplotlib
+    matplotlib.use('Agg')  # Use non-GUI backend
     import matplotlib.pyplot as plt
     from matplotlib.figure import Figure
-    from io import BytesIO
     VISUALIZATION_AVAILABLE = True
 except ImportError:
+    # Define placeholders for when libraries aren't available
+    np = None
+    plt = None
+    Figure = None
     # Will use fallback implementations
     pass
 
@@ -328,7 +334,7 @@ def visualize_avalanche_effect(hash1: str, hash2: str) -> bytes:
     # Get avalanche data
     avalanche_data = get_avalanche_data(hash1, hash2)
     
-    if VISUALIZATION_AVAILABLE:
+    if VISUALIZATION_AVAILABLE and np is not None and plt is not None:
         # Create figure and axes
         fig, ax = plt.subplots(figsize=(10, 6))
         
@@ -346,7 +352,7 @@ def visualize_avalanche_effect(hash1: str, hash2: str) -> bytes:
         for bit in diff_bits:
             row, col = divmod(bit, heatmap_size)
             if row < heatmap_size and col < heatmap_size:
-                heatmap[row, col] = 1
+                heatmap[row][col] = 1
         
         # Plot heatmap
         im = ax.imshow(heatmap, cmap='viridis', interpolation='nearest')

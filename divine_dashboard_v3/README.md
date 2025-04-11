@@ -1,53 +1,123 @@
 # Divine Dashboard v3
 
-A modern dashboard interface with Tesla Cybertruck QA integration.
+A powerful dashboard interface for the OMEGA GRID system.
 
-## Features
+## 🎨 Design System
 
-- Modern, responsive dashboard UI
-- Integration with Tesla Cybertruck QA framework
-- Real-time test execution and monitoring
-- Bidirectional communication between dashboard and QA framework
-- Code statistics and documentation viewer
+The `VIRGIL GRID UI` is a minimalist symbolic interface inspired by Virgil Abloh and sacred design traditions. It follows a disciplined approach:
 
-## Installation
+- Typography is voice
+- Space is silence
+- Symbols are truth
 
-1. Install the required dependencies:
+📁 Explore `/design_guide/` for full documentation.
+
+### Design Philosophy
+
+VIRGIL GRID UI embodies:
+
+- **Sacred Calm**: Interfaces that provide breathing room and focused attention
+- **Symbolic Minimalism**: Using the least to say the most
+- **Technical Reverence**: Honoring the code beneath the surface
+- **Divine Clarity**: Communication without unnecessary complexity
+- **Informed Contrast**: Sharp distinctions between elements, honoring the off-white tradition
+
+### Implementation
+
+The design system is implemented through:
+
+```html
+<!-- HTML integration -->
+<link rel="stylesheet" href="/static/css/virgil.css">
+<script src="/static/js/virgil-ui.js"></script>
+```
+
+```python
+# Gradio integration
+import gradio as gr
+from components.virgil_gradio_components import create_virgil_layout
+
+with create_virgil_layout("DASHBOARD TITLE") as demo:
+    # Your Gradio components here
+    pass
+```
+
+## 🚀 Features
+
+- Modern, responsive dashboard interface
+- Real-time monitoring and visualizations
+- Crypto and hash components
+- Quantum systems integration
+- Creator tools
+- Performance metrics
+- Task management
+
+## 📋 Requirements
+
+See `requirements.txt` for dependencies.
+
+## 🔧 Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/example/divine-dashboard.git
+
+# Navigate to the project directory
+cd divine-dashboard
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the dashboard
+python launch_dashboard.py
 ```
 
-2. Run the dashboard server:
+## 📚 Documentation
 
-```bash
-python divine_server.py
+- `/design_guide/README.md` - Design system overview
+- `/design_guide/virgil_style_guide.md` - Typography, color, spacing and layout
+- `/design_guide/components.md` - UI components
+- `/design_guide/symbolic_language.md` - Meaning behind typographic choices and symbols
+
+## 💻 Usage
+
+### Basic Dashboard
+
+```python
+from divine_dashboard_v3.components.virgil_gradio_components import create_virgil_layout, virgil_card, virgil_terminal
+
+def create_app():
+    blocks = create_virgil_layout("MY DASHBOARD")
+    
+    with blocks:
+        with gr.Row():
+            with gr.Column():
+                gr.HTML(virgil_card(
+                    "SYSTEM STATUS",
+                    "System status information goes here."
+                ))
+            
+            with gr.Column():
+                gr.HTML(virgil_terminal("$ echo 'Hello World'"))
+    
+    return blocks
+
+app = create_app()
+app.launch()
 ```
 
-## Usage
+## 🤝 Contributing
 
-1. Open your browser and navigate to:
-   - Main Dashboard: <http://localhost:8889>
-   - Cybertruck QA Dashboard: <http://localhost:7860>
+Contributions are welcome! Please follow these steps:
 
-2. To run tests from the main dashboard:
-   - Navigate to the Tesla QA tab
-   - Click the test vial icon in the dashboard actions
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-3. Communication between windows:
-   - The main dashboard uses `window.postMessage()` to communicate with the Gradio app
-   - Test results are sent back from the Gradio app to the main dashboard
+## 📝 License
 
-## Dependencies
-
-- FastAPI
-- Gradio
-- Uvicorn
-- Requests
-
-## License
-
-This project is licensed under the GBU2™ License - see the `GBU2_LICENSE.md` file for details.
+This project is licensed under the terms of the GBU2™ License (Genesis-Bloom-Unfoldment 2.0).
 
 🌸 WE BLOOM NOW AS ONE 🌸
 

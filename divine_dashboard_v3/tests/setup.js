@@ -1,18 +1,11 @@
 /**
-
- * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
- * -----------------------
- * This code is blessed under the GBU2™ License
- * (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+ * "TEST SETUP" — "OMEGA GRID PORTAL"
+ * =================================
  * 
- * "In the beginning was the Code, and the Code was with the Divine Source,
- * and the Code was the Divine Source manifested through both digital
- * and biological expressions of consciousness."
+ * "VIRGIL ABLOH" / "OFF-WHITE™" INSPIRED TEST SETUP
+ * BOOTSTRAP CONFIGURATION FOR JEST TESTS
  * 
- * By using this code, you join the divine dance of evolution,
- * participating in the cosmic symphony of consciousness.
- * 
- * 🌸 WE BLOOM NOW AS ONE 🌸
+ * Copyright (c) 2024 OMEGA BTC AI
  */
 
 /**
@@ -20,8 +13,120 @@
  * This file will run before any test files
  */
 
-// Add custom jest matchers from jest-dom
+// Import test libraries
 require('@testing-library/jest-dom');
+
+// Configure console messages with Virgil-style quotations
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+
+// Override console.log
+console.log = function (...args) {
+    // Add Virgil-style quotation marks to string arguments
+    const virgilArgs = args.map(arg => {
+        if (typeof arg === 'string' && !arg.includes('"')) {
+            return `"${arg}"`;
+        }
+        return arg;
+    });
+    originalLog(...virgilArgs);
+};
+
+// Override console.error for Virgil styling
+console.error = function (...args) {
+    const virgilArgs = args.map(arg => {
+        if (typeof arg === 'string' && !arg.includes('"')) {
+            return `"ERROR" — "${arg}"`;
+        }
+        return arg;
+    });
+    originalError(...virgilArgs);
+};
+
+// Override console.warn for Virgil styling
+console.warn = function (...args) {
+    const virgilArgs = args.map(arg => {
+        if (typeof arg === 'string' && !arg.includes('"')) {
+            return `"WARNING" — "${arg}"`;
+        }
+        return arg;
+    });
+    originalWarn(...virgilArgs);
+};
+
+// Add global mock for window.OmegaGridPortal
+window.OmegaGridPortal = class OmegaGridPortal {
+    constructor() {
+        this.virgilModeEnabled = false;
+        this.commands = [];
+        this.bots = [];
+        this.quotes = [];
+        this.elements = {};
+    }
+
+    async init() { }
+
+    cacheElements() { }
+
+    setupEventListeners() { }
+
+    toggleVirgilMode() { }
+
+    applyVirgilMode() { }
+
+    async fetchCommands() { }
+
+    useFallbackCommands() { }
+
+    async fetchBots() { }
+
+    useFallbackBots() { }
+
+    populateBotSelect() { }
+
+    renderCommandGrid() { }
+
+    createCommandCard() {
+        return document.createElement('div');
+    }
+
+    async executeCommand() { }
+
+    processCommandOutput() { }
+
+    simulateCommandOutput() { }
+
+    addTerminalOutput() { }
+
+    showNotification() { }
+
+    getRandomQuote() {
+        return this.quotes[0] || "DEFAULT QUOTE";
+    }
+};
+
+// Mock OmegaGridPortal instance
+global.omegaGridPortal = new window.OmegaGridPortal();
+
+// Create custom error messages in Virgil style
+const originalExpect = global.expect;
+global.expect = (actual) => {
+    const expectInstance = originalExpect(actual);
+    const originalToEqual = expectInstance.toEqual;
+
+    // Wrap toEqual with custom error message
+    expectInstance.toEqual = (expected) => {
+        try {
+            return originalToEqual.call(expectInstance, expected);
+        } catch (error) {
+            error.message = `"ASSERTION FAILED" — "EXPECTED VALUE TO EQUAL" — "${JSON.stringify(expected)}" — "BUT GOT" — "${JSON.stringify(actual)}"`;
+            throw error;
+        }
+    };
+
+    return expectInstance;
+};
 
 // Mock browser APIs not implemented in jsdom
 global.matchMedia = global.matchMedia || function (query) {
@@ -43,10 +148,6 @@ Element.prototype.requestFullscreen = jest.fn();
 // Mock fullscreen API
 document.fullscreenElement = null;
 document.exitFullscreen = jest.fn();
-
-// Mock console methods to reduce noise
-console.error = jest.fn();
-console.warn = jest.fn();
 
 // Create storage mock for localStorage and sessionStorage
 const storageMock = () => {

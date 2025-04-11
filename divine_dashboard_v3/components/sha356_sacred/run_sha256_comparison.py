@@ -67,15 +67,18 @@ def main():
     # Add current directory to path
     sys.path.insert(0, str(current_dir))
     
+    # Set environment variable to enable sharing by default
+    os.environ["GRADIO_SHARE"] = "true"
+
     try:
         # First try to import the dashboard if it exists
         try:
             from sha356_vs_sha256_dashboard import demo
-            print("📊 Launching SHA-356 vs SHA-256 Dashboard...")
-            demo.launch()
+            print("📊 Launching SHA-356 vs SHA-256 Dashboard with sharing enabled...")
+            demo.launch(share=True)
         except ImportError:
             # Fall back to simple comparison script
-            print("📊 Running SHA-356 vs SHA-256 Comparison...")
+            print("�� Running SHA-356 vs SHA-256 Comparison...")
             from compare_sha256 import main as compare_main
             compare_main()
     except Exception as e:
