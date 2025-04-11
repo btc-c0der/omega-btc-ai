@@ -1,0 +1,7 @@
+{
+  "instagram_manager": {
+    "data_dir": "/Users/fsiqueira/ibr_data/instagram_manager",
+    "account_name": "ibrespana",
+    "logging_level": "INFO"
+  }
+}

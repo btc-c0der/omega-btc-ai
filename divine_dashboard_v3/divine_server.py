@@ -61,10 +61,16 @@ logging.basicConfig(
 logger = logging.getLogger('divine_server')
 
 # Server configuration
-DASHBOARD_PORT = 8889  # Main dashboard port
-GRADIO_PORT = 7860    # Cybertruck QA Dashboard port
-METRICS_PORT = 7861   # Dashboard Metrics port
-NFT_PORT = 7862       # NFT Dashboard port
+DASHBOARD_PORT = 8889    # Main dashboard port
+GRADIO_PORT = 7860       # Cybertruck QA Dashboard port
+METRICS_PORT = 7861      # Dashboard Metrics port
+NFT_PORT = 7862          # NFT Dashboard port
+IBR_SPAIN_PORT = 7863    # IBR España Dashboard port
+DIVINE_BOOK_PORT = 7864  # Divine Book Dashboard port
+ORB_TEMPLE_PORT = 7865   # Omega Orb Temple Dashboard port
+HACKER_ARCHIVE_PORT = 7866 # Hacker Archive Dashboard port
+SHA256_OMEGA_PORT = 7867 # SHA256 Omega Dashboard port
+SHA356_SACRED_PORT = 7868 # SHA356 Sacred Dashboard port
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -99,6 +105,24 @@ gradio_app = FastAPI(title="Tesla Cybertruck QA Interface")
 
 # Create FastAPI app for NFT Dashboard
 nft_app = FastAPI(title="Divine NFT Dashboard")
+
+# Create FastAPI app for IBR Spain
+ibr_spain_app = FastAPI(title="IBR España Dashboard")
+
+# Create FastAPI app for Divine Book
+divine_book_app = FastAPI(title="Divine Book Dashboard")
+
+# Create FastAPI app for Omega Orb Temple
+orb_temple_app = FastAPI(title="Omega Orb Temple")
+
+# Create FastAPI app for Hacker Archive
+hacker_archive_app = FastAPI(title="Hacker Archive Dashboard")
+
+# Create FastAPI app for SHA256 Omega
+sha256_omega_app = FastAPI(title="SHA256 Omega Dashboard")
+
+# Create FastAPI app for SHA356 Sacred
+sha356_sacred_app = FastAPI(title="SHA356 Sacred Dashboard")
 
 # Global variable to store test results
 test_results = {"status": "idle", "result": None, "details": None}
@@ -745,6 +769,341 @@ def run_servers():
             logger.warning(f"Could not import NFT dashboard: {e}")
     except Exception as e:
         logger.error(f"Error setting up NFT dashboard: {e}")
+    
+    # Import IBR Spain dashboard
+    try:
+        # Create config directory if it doesn't exist
+        config_dir = os.path.join(DIRECTORY, "config")
+        os.makedirs(config_dir, exist_ok=True)
+        
+        # Create default configuration for IBR Spain if it doesn't exist
+        ibr_spain_config_path = os.path.join(config_dir, "ibr_spain.json")
+        if not os.path.exists(ibr_spain_config_path):
+            default_config = {
+                "instagram_manager": {
+                    "data_dir": os.path.expanduser("~/ibr_data/instagram_manager"),
+                    "account_name": "ibrespana",
+                    "logging_level": "INFO"
+                }
+            }
+            with open(ibr_spain_config_path, "w") as f:
+                json.dump(default_config, f, indent=2)
+            logger.info(f"Created default IBR Spain configuration at {ibr_spain_config_path}")
+        
+        # Import IBR Spain dashboard module
+        try:
+            # Check if IBR Spain component exists
+            ibr_component_dir = os.path.join(DIRECTORY, "components", "ibr_spain")
+            ibr_dashboard_path = os.path.join(ibr_component_dir, "ibr_dashboard.py")
+            
+            if os.path.exists(ibr_dashboard_path):
+                # Import the IBR Spain dashboard
+                spec = importlib.util.spec_from_file_location(
+                    "ibr_dashboard", 
+                    ibr_dashboard_path
+                )
+                if spec is not None and spec.loader is not None:
+                    ibr_dashboard_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(ibr_dashboard_module)
+                    create_ibr_interface = getattr(ibr_dashboard_module, "create_ibr_interface", None)
+                    
+                    if create_ibr_interface:
+                        # Initialize Instagram Manager
+                        try:
+                            # Import Instagram Manager
+                            instagram_manager_path = os.path.join(
+                                ibr_component_dir, 
+                                "micro_modules", 
+                                "instagram_manager.py"
+                            )
+                            if os.path.exists(instagram_manager_path):
+                                instagram_spec = importlib.util.spec_from_file_location(
+                                    "instagram_manager", 
+                                    instagram_manager_path
+                                )
+                                if instagram_spec is not None and instagram_spec.loader is not None:
+                                    instagram_module = importlib.util.module_from_spec(instagram_spec)
+                                    instagram_spec.loader.exec_module(instagram_module)
+                                    InstagramManager = getattr(instagram_module, "InstagramManager", None)
+                                    
+                                    if InstagramManager:
+                                        # Initialize the Instagram Manager
+                                        instagram_manager = InstagramManager()
+                                        logger.info("Instagram Manager initialized successfully")
+                                    else:
+                                        logger.warning("InstagramManager class not found in module")
+                                else:
+                                    logger.warning("Failed to get valid module spec for Instagram Manager")
+                            else:
+                                logger.warning(f"Instagram Manager not found at {instagram_manager_path}")
+                        except Exception as e:
+                            logger.error(f"Error initializing Instagram Manager: {e}")
+                        
+                        # Start IBR Spain dashboard in a separate thread
+                        def run_ibr_spain_dashboard():
+                            try:
+                                # Create the interface
+                                ibr_interface = create_ibr_interface()
+                                
+                                # Launch the interface
+                                ibr_interface.launch(
+                                    server_name="0.0.0.0",
+                                    server_port=IBR_SPAIN_PORT,
+                                    share=True,
+                                    debug=False,
+                                    quiet=True
+                                )
+                            except Exception as e:
+                                logger.error(f"Error launching IBR Spain dashboard: {e}")
+                        
+                        ibr_spain_thread = threading.Thread(target=run_ibr_spain_dashboard, daemon=True)
+                        ibr_spain_thread.start()
+                        logger.info(f"✨ Started IBR España Dashboard on port {IBR_SPAIN_PORT} ✨")
+                    else:
+                        logger.warning("create_ibr_interface function not found in module")
+                else:
+                    logger.warning("Failed to get valid module spec for IBR Spain dashboard")
+            else:
+                logger.warning(f"IBR Spain dashboard not found at {ibr_dashboard_path}")
+        except ImportError as e:
+            logger.warning(f"Could not import IBR Spain dashboard: {e}")
+    except Exception as e:
+        logger.error(f"Error setting up IBR Spain dashboard: {e}")
+    
+    # Import Divine Book dashboard
+    try:
+        # Check if Divine Book component exists
+        divine_book_dir = os.path.join(DIRECTORY, "components", "divine_book")
+        divine_book_path = os.path.join(divine_book_dir, "divine_book_dashboard.py")
+        
+        if os.path.exists(divine_book_path):
+            # Import the Divine Book dashboard
+            spec = importlib.util.spec_from_file_location(
+                "divine_book_dashboard", 
+                divine_book_path
+            )
+            if spec is not None and spec.loader is not None:
+                divine_book_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(divine_book_module)
+                create_divine_book_interface = getattr(divine_book_module, "create_divine_book_dashboard", None)
+                
+                if create_divine_book_interface:
+                    # Start Divine Book dashboard in a separate thread
+                    def run_divine_book_dashboard():
+                        try:
+                            # Create the interface
+                            divine_book_interface = create_divine_book_interface()
+                            
+                            # Launch the interface
+                            divine_book_interface.launch(
+                                server_name="0.0.0.0",
+                                server_port=DIVINE_BOOK_PORT,
+                                share=True,
+                                debug=False,
+                                quiet=True
+                            )
+                        except Exception as e:
+                            logger.error(f"Error launching Divine Book dashboard: {e}")
+                    
+                    divine_book_thread = threading.Thread(target=run_divine_book_dashboard, daemon=True)
+                    divine_book_thread.start()
+                    logger.info(f"✨ Started Divine Book Dashboard on port {DIVINE_BOOK_PORT} ✨")
+                else:
+                    logger.warning("create_divine_book_dashboard function not found in module")
+            else:
+                logger.warning("Failed to get valid module spec for Divine Book dashboard")
+        else:
+            logger.warning(f"Divine Book dashboard not found at {divine_book_path}")
+    except Exception as e:
+        logger.error(f"Error setting up Divine Book dashboard: {e}")
+    
+    # Import Omega Orb Temple dashboard
+    try:
+        # Check if Omega Orb Temple component exists
+        orb_temple_dir = os.path.join(DIRECTORY, "components", "omega_orb_temple")
+        orb_temple_path = os.path.join(orb_temple_dir, "omega_orb_temple.py")
+        
+        if os.path.exists(orb_temple_path):
+            # Import the Omega Orb Temple dashboard
+            spec = importlib.util.spec_from_file_location(
+                "omega_orb_temple", 
+                orb_temple_path
+            )
+            if spec is not None and spec.loader is not None:
+                orb_temple_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(orb_temple_module)
+                create_orb_temple_interface = getattr(orb_temple_module, "create_orb_temple_interface", None)
+                
+                if create_orb_temple_interface:
+                    # Start Omega Orb Temple dashboard in a separate thread
+                    def run_orb_temple_dashboard():
+                        try:
+                            # Create the interface
+                            orb_temple_interface = create_orb_temple_interface()
+                            
+                            # Launch the interface
+                            orb_temple_interface.launch(
+                                server_name="0.0.0.0",
+                                server_port=ORB_TEMPLE_PORT,
+                                share=True,
+                                debug=False,
+                                quiet=True
+                            )
+                        except Exception as e:
+                            logger.error(f"Error launching Omega Orb Temple dashboard: {e}")
+                    
+                    orb_temple_thread = threading.Thread(target=run_orb_temple_dashboard, daemon=True)
+                    orb_temple_thread.start()
+                    logger.info(f"✨ Started Omega Orb Temple Dashboard on port {ORB_TEMPLE_PORT} ✨")
+                else:
+                    logger.warning("create_orb_temple_interface function not found in module")
+            else:
+                logger.warning("Failed to get valid module spec for Omega Orb Temple dashboard")
+        else:
+            logger.warning(f"Omega Orb Temple dashboard not found at {orb_temple_path}")
+    except Exception as e:
+        logger.error(f"Error setting up Omega Orb Temple dashboard: {e}")
+    
+    # Import Hacker Archive dashboard
+    try:
+        # Check if Hacker Archive component exists
+        hacker_archive_dir = os.path.join(DIRECTORY, "components", "hacker_archive")
+        hacker_archive_path = os.path.join(hacker_archive_dir, "hacker_archive_dashboard.py")
+        
+        if os.path.exists(hacker_archive_path):
+            # Import the Hacker Archive dashboard
+            spec = importlib.util.spec_from_file_location(
+                "hacker_archive_dashboard", 
+                hacker_archive_path
+            )
+            if spec is not None and spec.loader is not None:
+                hacker_archive_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(hacker_archive_module)
+                create_hacker_archive_interface = getattr(hacker_archive_module, "create_hacker_dashboard", None)
+                
+                if create_hacker_archive_interface:
+                    # Start Hacker Archive dashboard in a separate thread
+                    def run_hacker_archive_dashboard():
+                        try:
+                            # Create the interface
+                            hacker_archive_interface = create_hacker_archive_interface()
+                            
+                            # Launch the interface
+                            hacker_archive_interface.launch(
+                                server_name="0.0.0.0",
+                                server_port=HACKER_ARCHIVE_PORT,
+                                share=True,
+                                debug=False,
+                                quiet=True
+                            )
+                        except Exception as e:
+                            logger.error(f"Error launching Hacker Archive dashboard: {e}")
+                    
+                    hacker_archive_thread = threading.Thread(target=run_hacker_archive_dashboard, daemon=True)
+                    hacker_archive_thread.start()
+                    logger.info(f"✨ Started Hacker Archive Dashboard on port {HACKER_ARCHIVE_PORT} ✨")
+                else:
+                    logger.warning("create_hacker_dashboard function not found in module")
+            else:
+                logger.warning("Failed to get valid module spec for Hacker Archive dashboard")
+        else:
+            logger.warning(f"Hacker Archive dashboard not found at {hacker_archive_path}")
+    except Exception as e:
+        logger.error(f"Error setting up Hacker Archive dashboard: {e}")
+    
+    # Import SHA256 Omega dashboard
+    try:
+        # Check if SHA256 Omega component exists
+        sha256_omega_dir = os.path.join(DIRECTORY, "components", "sha256_omega")
+        sha256_omega_path = os.path.join(sha256_omega_dir, "sha256_omega_dashboard.py")
+        
+        if os.path.exists(sha256_omega_path):
+            # Import the SHA256 Omega dashboard
+            spec = importlib.util.spec_from_file_location(
+                "sha256_omega_dashboard", 
+                sha256_omega_path
+            )
+            if spec is not None and spec.loader is not None:
+                sha256_omega_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(sha256_omega_module)
+                create_sha256_omega_interface = getattr(sha256_omega_module, "create_interface", None)
+                
+                if create_sha256_omega_interface:
+                    # Start SHA256 Omega dashboard in a separate thread
+                    def run_sha256_omega_dashboard():
+                        try:
+                            # Create the interface
+                            sha256_omega_interface = create_sha256_omega_interface()
+                            
+                            # Launch the interface
+                            sha256_omega_interface.launch(
+                                server_name="0.0.0.0",
+                                server_port=SHA256_OMEGA_PORT,
+                                share=True,
+                                debug=False,
+                                quiet=True
+                            )
+                        except Exception as e:
+                            logger.error(f"Error launching SHA256 Omega dashboard: {e}")
+                    
+                    sha256_omega_thread = threading.Thread(target=run_sha256_omega_dashboard, daemon=True)
+                    sha256_omega_thread.start()
+                    logger.info(f"✨ Started SHA256 Omega Dashboard on port {SHA256_OMEGA_PORT} ✨")
+                else:
+                    logger.warning("create_interface function not found in module")
+            else:
+                logger.warning("Failed to get valid module spec for SHA256 Omega dashboard")
+        else:
+            logger.warning(f"SHA256 Omega dashboard not found at {sha256_omega_path}")
+    except Exception as e:
+        logger.error(f"Error setting up SHA256 Omega dashboard: {e}")
+    
+    # Import SHA356 Sacred dashboard
+    try:
+        # Check if SHA356 Sacred component exists
+        sha356_sacred_dir = os.path.join(DIRECTORY, "components", "sha356_sacred")
+        sha356_sacred_path = os.path.join(sha356_sacred_dir, "sha356_vs_sha256_dashboard.py")
+        
+        if os.path.exists(sha356_sacred_path):
+            # Import the SHA356 Sacred dashboard
+            spec = importlib.util.spec_from_file_location(
+                "sha356_vs_sha256_dashboard", 
+                sha356_sacred_path
+            )
+            if spec is not None and spec.loader is not None:
+                sha356_sacred_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(sha356_sacred_module)
+                create_sha356_sacred_interface = getattr(sha356_sacred_module, "create_dashboard", None)
+                
+                if create_sha356_sacred_interface:
+                    # Start SHA356 Sacred dashboard in a separate thread
+                    def run_sha356_sacred_dashboard():
+                        try:
+                            # Create the interface
+                            sha356_sacred_interface = create_sha356_sacred_interface()
+                            
+                            # Launch the interface
+                            sha356_sacred_interface.launch(
+                                server_name="0.0.0.0",
+                                server_port=SHA356_SACRED_PORT,
+                                share=True,
+                                debug=False,
+                                quiet=True
+                            )
+                        except Exception as e:
+                            logger.error(f"Error launching SHA356 Sacred dashboard: {e}")
+                    
+                    sha356_sacred_thread = threading.Thread(target=run_sha356_sacred_dashboard, daemon=True)
+                    sha356_sacred_thread.start()
+                    logger.info(f"✨ Started SHA356 Sacred Dashboard on port {SHA356_SACRED_PORT} ✨")
+                else:
+                    logger.warning("create_dashboard function not found in module")
+            else:
+                logger.warning("Failed to get valid module spec for SHA356 Sacred dashboard")
+        else:
+            logger.warning(f"SHA356 Sacred dashboard not found at {sha356_sacred_path}")
+    except Exception as e:
+        logger.error(f"Error setting up SHA356 Sacred dashboard: {e}")
     
     # Create a thread to run the main dashboard server
     def run_dashboard_server():

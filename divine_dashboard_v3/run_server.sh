@@ -33,10 +33,19 @@ fi
 source venv/bin/activate
 
 # Make sure dependencies are installed
-pip install -q uvicorn fastapi gradio huggingface_hub schedule
+pip install -q uvicorn fastapi gradio huggingface_hub schedule requests pydantic tenacity python-dotenv python-json-logger
 
 # Make sure the script is executable
 chmod +x divine_server.py
+
+# Display available dashboards
+echo "📊 Divine Dashboard v3 Ecosystem:"
+echo "• Main Dashboard: http://localhost:8889"
+echo "• Cybertruck QA Dashboard: http://localhost:7860"
+echo "• Dashboard Metrics: http://localhost:7861"
+echo "• NFT Dashboard: http://localhost:7862"
+echo "• IBR España Dashboard: http://localhost:7863"
+echo "---------------------------------------"
 
 # Check for deploy flag
 if [[ "$1" == "--local" ]]; then
