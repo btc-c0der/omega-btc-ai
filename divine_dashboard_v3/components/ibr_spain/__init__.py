@@ -47,6 +47,7 @@ from .micro_modules.prayer_requests import PrayerRequests
 from .micro_modules.church_events import ChurchEvents
 from .micro_modules.devotionals import Devotionals
 from .micro_modules.instagram_integration import InstagramIntegration
+from .ibr_spain_elite_dashboard import IBRSpainEliteDashboard  # New GOD MODE UI interface
 
 # Import standalone components
 try:
