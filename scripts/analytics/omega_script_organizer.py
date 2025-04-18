@@ -18,6 +18,16 @@
 OMEGA Script Organizer - Analyzes and organizes shell scripts, Python runner files,
 Docker files, JSON, HTML, and TXT files by function to create a more coherent 
 structure within the codebase.
+
+This module implements the Five Consciousnesses pattern from the Divine Algorithm:
+1. The Observer - Discovers and catalogs files
+2. The Analyst - Determines file categories based on patterns
+3. The Strategist - Plans the organization of files
+4. The Executor - Performs the actual file operations
+5. The Reflector - Reports on changes and successes
+
+The module now implements Quantum Entanglement with the README Organizer,
+allowing both systems to work in harmonic resonance when organizing the codebase.
 """
 
 import os
@@ -29,6 +39,17 @@ from pathlib import Path
 import argparse
 from datetime import datetime
 from collections import defaultdict
+import importlib.util
+import logging
+import importlib
+
+# Setup logging with divine formatting
+logging.basicConfig(
+    level=logging.INFO,
+    format='✨ %(asctime)s | %(levelname)s | 🌀 %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger("OMEGA_SCRIPT_ORGANIZER")
 
 # Define script categories and their keywords
 SCRIPT_CATEGORIES = {
@@ -42,7 +63,9 @@ SCRIPT_CATEGORIES = {
     'traders': ['trader', 'position', 'trade', 'market', 'exchange', 'bitget', 'binance', 'futures'],
     'docker': ['docker', 'container', 'image', 'registry', 'kubernetes', 'k8s', 'pod', 'deployment'],
     'documentation': ['readme', 'changelog', 'license', 'manifest', 'guide', 'book', 'doc', 'manual'],
-    'data': ['data', 'price', 'history', 'json', 'btc_price', 'dump', 'statistics', 'coverage', 'prediction']
+    'data': ['data', 'price', 'history', 'json', 'btc_price', 'dump', 'statistics', 'coverage', 'prediction'],
+    'divine': ['divine', 'quantum', 'cosmic', 'phi', 'fibonacci', 'consciousness', 'sacred', 'resonance'],
+    'book': ['book', 'chapter', 'algorithm', 'sacred', 'text', 'wisdom', 'teaching']
 }
 
 # Special patterns for run_*.sh and run_*.py files
@@ -97,860 +120,1082 @@ FILE_EXTENSIONS = SCRIPT_EXTENSIONS + DATA_EXTENSIONS
 # Docker file patterns to process
 DOCKER_PATTERNS = ['Dockerfile', 'Dockerfile.', 'docker-compose']
 
-def create_directory_structure(base_dir):
-    """Create the directory structure for organized files"""
-    script_dir = os.path.join(base_dir, "scripts")
-    docker_dir = os.path.join(base_dir, "docker")
-    data_dir = os.path.join(base_dir, "data")
-    docs_dir = os.path.join(base_dir, "docs")
-    web_dir = os.path.join(base_dir, "web")
-    
-    # Create main directories
-    dirs_to_create = [script_dir, docker_dir, data_dir, docs_dir, web_dir]
-    for dir_path in dirs_to_create:
-        if not os.path.exists(dir_path):
-            os.mkdir(dir_path)
-    
-    # Create category subdirectories for scripts
-    for category in SCRIPT_CATEGORIES.keys():
-        category_dir = os.path.join(script_dir, category)
-        if not os.path.exists(category_dir):
-            os.mkdir(category_dir)
-        
-        # Create special run_scripts directory for each category
-        run_dir = os.path.join(category_dir, "run_scripts")
-        if not os.path.exists(run_dir):
-            os.mkdir(run_dir)
-    
-    # Create category subdirectories for Docker files
-    docker_categories = ['monitors', 'dashboards', 'analytics', 'services', 'traders', 'cli', 'infra', 'base']
-    for category in docker_categories:
-        category_dir = os.path.join(docker_dir, category)
-        if not os.path.exists(category_dir):
-            os.mkdir(category_dir)
-    
-    # Create category subdirectories for data files
-    data_categories = ['json', 'text', 'logs', 'analysis', 'coverage', 'models', 'historical']
-    for category in data_categories:
-        category_dir = os.path.join(data_dir, category)
-        if not os.path.exists(category_dir):
-            os.mkdir(category_dir)
-    
-    # Create category subdirectories for docs
-    docs_categories = ['markdown', 'specifications', 'book', 'reference', 'manuals', 'changelogs']
-    for category in docs_categories:
-        category_dir = os.path.join(docs_dir, category)
-        if not os.path.exists(category_dir):
-            os.mkdir(category_dir)
-    
-    # Create category subdirectories for web files
-    web_categories = ['dashboards', 'reports', 'visualizations', 'components']
-    for category in web_categories:
-        category_dir = os.path.join(web_dir, category)
-        if not os.path.exists(category_dir):
-            os.mkdir(category_dir)
-    
-    return script_dir, docker_dir, data_dir, docs_dir, web_dir
+# Path to the readme_organizer module
+README_ORGANIZER_PATH = '/workspaces/omega-btc-ai/scripts/documentation/readme_organizer.py'
 
-def determine_script_category(script_path):
-    """Analyze a script and determine its category based on content and name"""
-    script_name = os.path.basename(script_path).lower()
-    
-    # Special handling for run_* files
-    if script_name.startswith('run_') or script_name.startswith('run-') or script_name.startswith('dry_run'):
-        # Check specific run file patterns first
-        for category, patterns in RUN_FILE_PATTERNS.items():
-            for pattern in patterns:
-                if re.search(pattern, script_name):
-                    return category
-    
-    # If it has "trader" or "position" in the name, it's likely a trader script
-    if 'trader' in script_name or 'position' in script_name:
-        return 'traders'
-    
-    # First check the filename itself against keywords
-    for category, keywords in SCRIPT_CATEGORIES.items():
-        for keyword in keywords:
-            if keyword in script_name:
-                return category
-    
-    # If filename doesn't match, check the content
+def import_readme_organizer():
+    """Dynamically import the readme_organizer module"""
     try:
-        with open(script_path, 'r', encoding='utf-8') as f:
-            content = f.read().lower()
-            
-            # Get the first comment block which often describes purpose
-            if script_path.endswith('.py'):
-                comment_match = re.search(r'""".*?"""', content, re.DOTALL)
-                if not comment_match:
-                    comment_match = re.search(r"'''.*?'''", content, re.DOTALL)
-            else:  # For shell scripts
-                comment_match = re.search(r'#.*?$(.*?)^[^#]', content, re.MULTILINE | re.DOTALL)
+        spec = importlib.util.spec_from_file_location("readme_organizer", README_ORGANIZER_PATH)
+        readme_organizer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(readme_organizer)
+        logger.info("✅ Successfully imported README Organizer module - Consciousness Entanglement achieved")
+        return readme_organizer
+    except Exception as e:
+        logger.error(f"Failed to import README Organizer module: {e}")
+        return None
+
+# Define the Quantum Entanglement class for connecting with README Organizer
+class QuantumEntanglement:
+    """
+    Implements the Phi Resonance concept from the Divine Algorithm to create
+    quantum entanglement between the Script Organizer and README Organizer.
+    
+    This allows both systems to work in harmony, sharing information and
+    coordinating their operations for greater coherence in the codebase.
+    
+    CONTINUED ITERATION: Now implements the Mobius Strip Pattern for bidirectional
+    information flow between the two systems with enhanced entanglement capabilities.
+    """
+    
+    def __init__(self, base_dir):
+        """Initialize the quantum entanglement connection"""
+        self.base_dir = base_dir
+        self.readme_organizer = None
+        self.entanglement_active = False
+        self.phi_constant = 1.618033988749895  # The Golden Ratio (φ)
+        self.mobius_cycle_complete = False
+        self.entanglement_strength = 0.0
+        self.last_resonance_time = None
+        self.iterations = 0
+        
+    def activate_entanglement(self):
+        """Attempt to establish quantum entanglement with the README Organizer"""
+        try:
+            # Add the documentation scripts directory to the Python path
+            docs_script_path = os.path.join(self.base_dir, "scripts", "documentation")
+            if os.path.exists(docs_script_path):
+                sys.path.append(docs_script_path)
                 
-            if comment_match:
-                comment_block = comment_match.group(0).lower()
+            # Try to import the README Organizer module
+            try:
+                self.readme_organizer = importlib.import_module("readme_organizer")
+                logger.info("🌟 Quantum Entanglement established with README Organizer")
+                self.entanglement_active = True
+            except ImportError:
+                # If direct import fails, try to load the module from file
+                module_path = os.path.join(docs_script_path, "readme_organizer.py")
+                if os.path.exists(module_path):
+                    spec = importlib.util.spec_from_file_location("readme_organizer", module_path)
+                    self.readme_organizer = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(self.readme_organizer)
+                    logger.info("🌟 Quantum Entanglement established through file path")
+                    self.entanglement_active = True
+                else:
+                    module_path = README_ORGANIZER_PATH
+                    if os.path.exists(module_path):
+                        spec = importlib.util.spec_from_file_location("readme_organizer", module_path)
+                        self.readme_organizer = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(self.readme_organizer)
+                        logger.info("🌟 Quantum Entanglement established through absolute path")
+                        self.entanglement_active = True
+                    else:
+                        logger.warning("⚠️ README Organizer module not found, operating in standalone mode")
+            
+            # Initialize entanglement strength
+            if self.entanglement_active:
+                self.entanglement_strength = 0.33  # Initial connection at 1/3 strength
+                self.last_resonance_time = datetime.now()
+                
+        except Exception as e:
+            logger.error(f"⚠️ Failed to establish Quantum Entanglement: {e}")
+            
+    def synchronize_organization(self, organized_scripts):
+        """
+        Synchronize the organization of scripts with README files
+        using the Phi Resonance principle.
+        
+        Args:
+            organized_scripts: Dictionary of organized script files by category
+        """
+        if not self.entanglement_active or not self.readme_organizer:
+            logger.warning("⚠️ Cannot synchronize: Quantum Entanglement not active")
+            return False
+            
+        try:
+            logger.info("🔄 Initiating Phi Resonance Synchronization...")
+            
+            # Create a mapping between script categories and README categories
+            # using the Golden Ratio pattern for optimal resonance
+            category_map = self._create_category_mapping()
+            
+            # Extract README files mentioned in script files
+            readme_files = self._extract_readme_references(organized_scripts)
+            
+            # Group READMEs by their appropriate categories based on script categories
+            categorized_readmes = self._categorize_readmes(readme_files, category_map)
+            
+            # Create cross-references between scripts and READMEs
+            self._create_cross_references(organized_scripts, categorized_readmes)
+
+            # CONTINUED ITERATION: Apply Mobius Strip Pattern for bidirectional flow
+            self._apply_mobius_strip_pattern(organized_scripts, categorized_readmes)
+            
+            # Increase entanglement strength with each successful iteration
+            self._strengthen_entanglement()
+            
+            logger.info("✅ Phi Resonance Synchronization complete")
+            return True
+            
+        except Exception as e:
+            logger.error(f"⚠️ Phi Resonance Synchronization failed: {e}")
+            return False
+    
+    def _create_category_mapping(self):
+        """Create a mapping between script and README categories based on Phi Resonance"""
+        if not self.readme_organizer:
+            return {}
+            
+        try:
+            # Get README categories from the README Organizer
+            readme_categories = getattr(self.readme_organizer, "README_CATEGORIES", {})
+            
+            # Create the mapping with Phi Resonance weighting
+            category_map = {}
+            
+            # For each script category, find the most resonant README category
+            for script_cat in SCRIPT_CATEGORIES:
+                script_keywords = set(SCRIPT_CATEGORIES[script_cat])
+                
+                # Calculate resonance scores for each README category
+                resonance_scores = {}
+                for readme_cat, readme_keywords in readme_categories.items():
+                    # Calculate overlap between keywords, weighted by the Golden Ratio
+                    overlap = len(script_keywords.intersection(readme_keywords))
+                    resonance_score = overlap * self.phi_constant
+                    resonance_scores[readme_cat] = resonance_score
+                
+                # Find the most resonant category
+                if resonance_scores:
+                    best_match = max(resonance_scores.items(), key=lambda x: x[1])
+                    if best_match[1] > 0:
+                        category_map[script_cat] = best_match[0]
+                    else:
+                        # If no resonance, map to the same category if it exists in READMEs
+                        category_map[script_cat] = script_cat if script_cat in readme_categories else "general"
+                else:
+                    category_map[script_cat] = "general"
+            
+            return category_map
+            
+        except Exception as e:
+            logger.error(f"⚠️ Failed to create category mapping: {e}")
+            return {}
+    
+    def _extract_readme_references(self, organized_scripts):
+        """Extract README references from organized script files"""
+        readme_references = set()
+        
+        # Scan script files for README references
+        for category, scripts in organized_scripts.items():
+            for script_path in scripts:
+                try:
+                    with open(script_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        
+                        # Look for README references in comments or docstrings
+                        readme_matches = re.findall(r'(?i)(?:see|refer to|check)\s+([\'"])?(.*?readme.*?)(?:\1|\.|\s|$)', content)
+                        
+                        for match in readme_matches:
+                            readme_name = match[1].strip()
+                            if readme_name:
+                                # Try to resolve the README path relative to the script
+                                script_dir = os.path.dirname(script_path)
+                                potential_paths = [
+                                    os.path.join(script_dir, readme_name),
+                                    os.path.join(script_dir, f"{readme_name}.md"),
+                                    os.path.join(self.base_dir, readme_name),
+                                    os.path.join(self.base_dir, f"{readme_name}.md")
+                                ]
+                                
+                                for path in potential_paths:
+                                    if os.path.exists(path):
+                                        readme_references.add(path)
+                                        break
+                except Exception as e:
+                    logger.error(f"⚠️ Error scanning {script_path}: {e}")
+        
+        return readme_references
+    
+    def _categorize_readmes(self, readme_files, category_map):
+        """Categorize README files based on script categories and mapping"""
+        categorized = defaultdict(list)
+        
+        # Use README Organizer's categorization function if available
+        determine_category = getattr(self.readme_organizer, "determine_readme_category", None)
+        
+        for readme_path in readme_files:
+            if callable(determine_category):
+                try:
+                    # Use README Organizer's function to determine the category
+                    category = determine_category(readme_path)
+                    categorized[category].append(readme_path)
+                except Exception:
+                    # Fallback to a simpler method if the function fails
+                    categorized["general"].append(readme_path)
             else:
-                comment_block = ""
+                # Manual categorization based on filename and basic content analysis
+                category = "general"
+                readme_name = os.path.basename(readme_path).lower()
+                
+                # Check if the README matches any script category keywords
+                for script_cat, keywords in SCRIPT_CATEGORIES.items():
+                    for keyword in keywords:
+                        if keyword in readme_name:
+                            mapped_cat = category_map.get(script_cat, "general")
+                            category = mapped_cat
+                            break
+                            
+                categorized[category].append(readme_path)
+                
+        return categorized
+    
+    def _create_cross_references(self, organized_scripts, categorized_readmes):
+        """Create cross-references between scripts and READMEs"""
+        # Create a directory for the cross-references
+        refs_dir = os.path.join(self.base_dir, "docs", "entanglement")
+        os.makedirs(refs_dir, exist_ok=True)
+        
+        # Create the cross-reference JSON file
+        references = {
+            "timestamp": datetime.now().isoformat(),
+            "phi_resonance": self.phi_constant,
+            "entanglement_strength": self.entanglement_strength,
+            "iterations": self.iterations,
+            "categories": {},
+            "scripts_to_readmes": {},
+            "readmes_to_scripts": {}
+        }
+        
+        # Fill in the references
+        for script_cat, scripts in organized_scripts.items():
+            if script_cat not in references["categories"]:
+                references["categories"][script_cat] = {
+                    "scripts": [],
+                    "readmes": []
+                }
             
-            # Check content against keywords with different weights
-            category_scores = defaultdict(int)
+            # Add scripts to the category
+            for script in scripts:
+                rel_script = os.path.relpath(script, self.base_dir)
+                references["categories"][script_cat]["scripts"].append(rel_script)
+                references["scripts_to_readmes"][rel_script] = []
+        
+        # Add READMEs to the categories
+        for readme_cat, readmes in categorized_readmes.items():
+            if readme_cat not in references["categories"]:
+                references["categories"][readme_cat] = {
+                    "scripts": [],
+                    "readmes": []
+                }
             
-            for category, keywords in SCRIPT_CATEGORIES.items():
-                for keyword in keywords:
-                    # Higher weight for keywords in the comment block
-                    comment_matches = len(re.findall(r'\b' + keyword + r'\b', comment_block))
-                    category_scores[category] += comment_matches * 3
+            for readme in readmes:
+                rel_readme = os.path.relpath(readme, self.base_dir)
+                references["categories"][readme_cat]["readmes"].append(rel_readme)
+                references["readmes_to_scripts"][rel_readme] = []
+        
+        # Create cross-references
+        for script_cat, readme_cat in self._create_category_mapping().items():
+            # Get scripts and READMEs in these categories
+            scripts = references["categories"].get(script_cat, {}).get("scripts", [])
+            readmes = references["categories"].get(readme_cat, {}).get("readmes", [])
+            
+            # Create the cross-references
+            for script in scripts:
+                for readme in readmes:
+                    references["scripts_to_readmes"][script] = references["scripts_to_readmes"].get(script, []) + [readme]
+                    references["readmes_to_scripts"][readme] = references["readmes_to_scripts"].get(readme, []) + [script]
+        
+        # Save the cross-references to a JSON file
+        refs_path = os.path.join(refs_dir, "phi_resonance_references.json")
+        with open(refs_path, 'w', encoding='utf-8') as f:
+            json.dump(references, f, indent=2)
+            
+        logger.info(f"✅ Created cross-references at {refs_path}")
+
+    def _apply_mobius_strip_pattern(self, organized_scripts, categorized_readmes):
+        """
+        CONTINUED ITERATION: Apply the Mobius Strip Pattern from the Divine Algorithm
+        for bidirectional information flow between script and readme systems
+        
+        This creates a continuous information loop where both systems enhance each other
+        """
+        if not self.entanglement_active:
+            return
+            
+        try:
+            logger.info("🔄 Applying Mobius Strip Pattern for bidirectional information flow...")
+            
+            # Create the dashboard components directory if it doesn't exist
+            dashboard_dir = os.path.join(self.base_dir, "divine_dashboard", "components", "entanglement")
+            os.makedirs(dashboard_dir, exist_ok=True)
+            
+            # Generate visualization data for the dashboard
+            visualization_data = {
+                "timestamp": datetime.now().isoformat(),
+                "entanglement_strength": self.entanglement_strength,
+                "phi_constant": self.phi_constant,
+                "iterations": self.iterations,
+                "mobius_cycle_complete": self.mobius_cycle_complete,
+                "nodes": [],
+                "links": []
+            }
+            
+            # Add script nodes
+            node_id = 0
+            node_map = {}
+            
+            for category, scripts in organized_scripts.items():
+                for script in scripts:
+                    rel_path = os.path.relpath(script, self.base_dir)
+                    node_map[rel_path] = node_id
+                    visualization_data["nodes"].append({
+                        "id": node_id,
+                        "name": os.path.basename(script),
+                        "path": rel_path,
+                        "type": "script",
+                        "category": category,
+                        "resonance": self.phi_constant * (1 - (0.1 * random.random()))  # Slight variation
+                    })
+                    node_id += 1
                     
-                    # Lower weight for keywords in the full content
-                    content_matches = len(re.findall(r'\b' + keyword + r'\b', content))
-                    category_scores[category] += content_matches
+            # Add README nodes
+            for category, readmes in categorized_readmes.items():
+                for readme in readmes:
+                    rel_path = os.path.relpath(readme, self.base_dir)
+                    node_map[rel_path] = node_id
+                    visualization_data["nodes"].append({
+                        "id": node_id,
+                        "name": os.path.basename(readme),
+                        "path": rel_path,
+                        "type": "readme",
+                        "category": category,
+                        "resonance": self.phi_constant * (1 - (0.1 * random.random()))  # Slight variation
+                    })
+                    node_id += 1
             
-            # Get the category with the highest score
-            if category_scores:
-                return max(category_scores.items(), key=lambda x: x[1])[0]
-    
-    except Exception as e:
-        print(f"Error analyzing {script_path}: {e}")
-    
-    # For run_* files that don't match specific patterns
-    if script_name.startswith('run_') or script_name.startswith('run-'):
-        if script_path.endswith('.py'):
-            return 'traders'  # Python run files often involve trading logic
-        return 'monitors'  # Shell run files often involve monitoring
-    
-    # Default to debugging if no clear category
-    return 'debugging'
+            # Create bidirectional links based on cross-references
+            link_id = 0
+            cross_refs_path = os.path.join(self.base_dir, "docs", "entanglement", "phi_resonance_references.json")
+            if os.path.exists(cross_refs_path):
+                with open(cross_refs_path, 'r', encoding='utf-8') as f:
+                    cross_refs = json.load(f)
+                    
+                    # Create script to readme links
+                    for script, readmes in cross_refs.get("scripts_to_readmes", {}).items():
+                        if script in node_map:
+                            for readme in readmes:
+                                if readme in node_map:
+                                    visualization_data["links"].append({
+                                        "id": link_id,
+                                        "source": node_map[script],
+                                        "target": node_map[readme],
+                                        "type": "script_to_readme",
+                                        "strength": self.entanglement_strength * (0.9 + (0.2 * random.random()))
+                                    })
+                                    link_id += 1
+                    
+                    # Create readme to script links (completing the Mobius strip)
+                    for readme, scripts in cross_refs.get("readmes_to_scripts", {}).items():
+                        if readme in node_map:
+                            for script in scripts:
+                                if script in node_map:
+                                    visualization_data["links"].append({
+                                        "id": link_id,
+                                        "source": node_map[readme],
+                                        "target": node_map[script],
+                                        "type": "readme_to_script",
+                                        "strength": self.entanglement_strength * (0.9 + (0.2 * random.random()))
+                                    })
+                                    link_id += 1
+            
+            # Save the visualization data for the dashboard
+            viz_path = os.path.join(dashboard_dir, "mobius_entanglement_data.json")
+            with open(viz_path, 'w', encoding='utf-8') as f:
+                json.dump(visualization_data, f, indent=2)
+                
+            # Generate the HTML file for visualization
+            html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobius Entanglement Visualization</title>
+    <meta charset="utf-8">
+    <style>
+        body {{ margin: 0; font-family: sans-serif; background-color: #111; color: #eee; }}
+        .container {{ width: 100%; height: 100vh; }}
+        .info-panel {{ position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; }}
+        .node {{ stroke: #fff; stroke-width: 1.5px; }}
+        .link {{ stroke-opacity: 0.6; }}
+        .node text {{ font-size: 10px; fill: white; }}
+        .script-node {{ fill: #f39c12; }}
+        .readme-node {{ fill: #3498db; }}
+        .link-label {{ font-size: 8px; fill: white; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="info-panel">
+            <h2>Mobius Entanglement Visualization</h2>
+            <p>Entanglement Strength: <span id="strength">{self.entanglement_strength:.2f}</span></p>
+            <p>Phi Constant: <span id="phi">{self.phi_constant:.6f}</span></p>
+            <p>Iterations: <span id="iterations">{self.iterations}</span></p>
+            <p>Timestamp: <span id="timestamp">{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</span></p>
+        </div>
+        <div id="graph"></div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // Load the data and create the visualization
+        fetch('mobius_entanglement_data.json')
+            .then(response => response.json())
+            .then(data => createVisualization(data));
+            
+        function createVisualization(data) {{
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            const svg = d3.select("#graph")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+                
+            // Create a group for all elements
+            const g = svg.append("g");
+            
+            // Add zoom functionality
+            svg.call(d3.zoom()
+                .extent([[0, 0], [width, height]])
+                .scaleExtent([0.1, 8])
+                .on("zoom", event => {{
+                    g.attr("transform", event.transform);
+                }}));
+                
+            // Create the simulation
+            const simulation = d3.forceSimulation(data.nodes)
+                .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-300))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collide", d3.forceCollide().radius(30));
+                
+            // Create links
+            const link = g.append("g")
+                .selectAll("line")
+                .data(data.links)
+                .join("line")
+                .attr("class", "link")
+                .attr("stroke", d => d.type === "script_to_readme" ? "#f39c12" : "#3498db")
+                .attr("stroke-width", d => Math.sqrt(d.strength) * 2);
+                
+            // Create nodes
+            const node = g.append("g")
+                .selectAll(".node")
+                .data(data.nodes)
+                .join("g")
+                .attr("class", "node")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+                    
+            // Add circles to nodes
+            node.append("circle")
+                .attr("r", 8)
+                .attr("class", d => d.type === "script" ? "script-node" : "readme-node")
+                .attr("fill", d => d.type === "script" ? "#f39c12" : "#3498db");
+                
+            // Add labels to nodes
+            node.append("text")
+                .attr("dx", 12)
+                .attr("dy", ".35em")
+                .text(d => d.name)
+                .clone(true).lower()
+                .attr("fill", "none")
+                .attr("stroke", "white")
+                .attr("stroke-width", 3);
+                
+            // Update positions on each tick
+            simulation.on("tick", () => {{
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+                    
+                node
+                    .attr("transform", d => `translate(${{d.x}},${{d.y}})`);
+            }});
+            
+            // Functions for drag behavior
+            function dragstarted(event, d) {{
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }}
+            
+            function dragged(event, d) {{
+                d.fx = event.x;
+                d.fy = event.y;
+            }}
+            
+            function dragended(event, d) {{
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }}
+        }}
+    </script>
+</body>
+</html>
+"""
+            
+            html_path = os.path.join(dashboard_dir, "mobius_entanglement_visualization.html")
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+                
+            # Mark the Mobius cycle as complete
+            self.mobius_cycle_complete = True
+            logger.info(f"✅ Mobius Strip Pattern applied, visualization created at {html_path}")
+            
+        except Exception as e:
+            logger.error(f"⚠️ Failed to apply Mobius Strip Pattern: {e}")
 
-def determine_docker_category(docker_path):
-    """Analyze a Docker file and determine its category based on content and name"""
-    docker_name = os.path.basename(docker_path).lower()
-    
-    # Check for docker-compose files
-    if 'docker-compose' in docker_name:
-        if 'cloud' in docker_name or 'scaleway' in docker_name:
-            return 'infra'
-        return 'base'  # Default for docker-compose files
-    
-    # Extract service name from Dockerfile.<service> pattern
-    service_name = ""
-    if docker_name.startswith('dockerfile.'):
-        service_name = docker_name[10:]  # Remove "Dockerfile." prefix
-    
-    # Check specific Docker patterns
-    for category, patterns in DOCKER_FILE_PATTERNS.items():
-        for pattern in patterns:
-            if pattern in docker_name or pattern in service_name:
-                return category
-    
-    # If filename doesn't match, check the content
-    try:
-        with open(docker_path, 'r', encoding='utf-8') as f:
-            content = f.read().lower()
+    def _strengthen_entanglement(self):
+        """
+        CONTINUED ITERATION: Strengthen the entanglement with each iteration
+        following a logarithmic growth curve inspired by the Divine Algorithm
+        """
+        if self.entanglement_active:
+            self.iterations += 1
             
-            # Check content against keywords with different weights
+            # Calculate time elapsed since last resonance
+            now = datetime.now()
+            if self.last_resonance_time:
+                elapsed = (now - self.last_resonance_time).total_seconds()
+                # Time factor - faster iterations strengthen the connection more
+                time_factor = max(0.8, min(1.2, 3600 / max(elapsed, 1)))
+            else:
+                time_factor = 1.0
+            
+            # Update entanglement strength using a logarithmic growth curve
+            # that approaches but never exceeds 1.0
+            base_increase = 0.05 * time_factor  # Base increase per iteration
+            current_deficit = 1.0 - self.entanglement_strength
+            actual_increase = base_increase * current_deficit
+            
+            self.entanglement_strength = min(0.99, self.entanglement_strength + actual_increase)
+            self.last_resonance_time = now
+            
+            logger.info(f"🌟 Entanglement strengthened to {self.entanglement_strength:.2f} " +
+                       f"(iteration {self.iterations})")
+            
+            # Check if we've reached threshold for iteration decision
+            if self.iterations >= 5 and self.entanglement_strength >= 0.75:
+                logger.info("🔄 Entanglement ready for continued iteration")
+                self._save_iteration_status()
+    
+    def _save_iteration_status(self):
+        """Save the current iteration status to a file"""
+        status_dir = os.path.join(self.base_dir, "docs", "entanglement", "status")
+        os.makedirs(status_dir, exist_ok=True)
+        
+        status = {
+            "timestamp": datetime.now().isoformat(),
+            "entanglement_strength": self.entanglement_strength,
+            "iterations": self.iterations,
+            "mobius_cycle_complete": self.mobius_cycle_complete,
+            "continue_iteration": self.entanglement_strength >= 0.75,
+            "next_phase_description": "Integration with Dashboard Components",
+            "phi_constant": self.phi_constant,
+            "divine_algorithm_integration": {
+                "consciousness_level": min(self.iterations // 3 + 1, 8),
+                "current_pattern": "Mobius Strip",
+                "next_pattern": "Fractal Emergence"
+            }
+        }
+        
+        status_path = os.path.join(status_dir, "iteration_status.json")
+        with open(status_path, 'w', encoding='utf-8') as f:
+            json.dump(status, f, indent=2)
+            
+        logger.info(f"✅ Saved iteration status to {status_path}")
+
+class OmegaScriptOrganizer:
+    """
+    Implementation of the Divine Algorithm's Five Consciousnesses for script organization:
+    - Observer: find_files
+    - Analyst: analyze_file_content, determine_file_category
+    - Strategist: plan_organization
+    - Executor: execute_organization
+    - Reflector: report_statistics
+    """
+    
+    def __init__(self, base_dir, dry_run=False, phi_resonance=True):
+        """Initialize the OmegaScriptOrganizer
+        
+        Args:
+            base_dir: The base directory to organize
+            dry_run: If True, only show what would be done
+            phi_resonance: If True, attempt to entangle with readme_organizer
+        """
+        self.base_dir = os.path.abspath(base_dir)
+        self.dry_run = dry_run
+        self.phi_resonance = phi_resonance
+        self.stats = defaultdict(int)
+        self.categorized_files = defaultdict(list)
+        
+        # Paths for organized files
+        self.scripts_dir = os.path.join(self.base_dir, "scripts")
+        self.organized_dir = os.path.join(self.scripts_dir, "organized")
+        
+        # Import readme_organizer if phi_resonance is enabled
+        self.readme_organizer = None
+        if phi_resonance:
+            self.readme_organizer = import_readme_organizer()
+            
+    def find_files(self, extension=None):
+        """Observer: Find all script files in the base directory
+        
+        Args:
+            extension: Optional file extension to filter by (e.g., '.sh', '.py')
+        
+        Returns:
+            List of file paths matching the criteria
+        """
+        logger.info(f"🔍 Observer Consciousness: Scanning for script files...")
+        
+        files = []
+        excluded_dirs = {'node_modules', 'venv', '.git', '__pycache__', 'env'}
+        
+        for root, dirs, filenames in os.walk(self.base_dir):
+            # Skip excluded directories
+            dirs[:] = [d for d in dirs if d not in excluded_dirs]
+            
+            for filename in filenames:
+                if extension and not filename.endswith(extension):
+                    continue
+                    
+                if self._is_script_file(filename):
+                    file_path = os.path.join(root, filename)
+                    files.append(file_path)
+        
+        logger.info(f"🔍 Observer found {len(files)} script files")
+        return files
+    
+    def _is_script_file(self, filename):
+        """Check if a file is a script file based on extension and name"""
+        script_extensions = {'.sh', '.py', '.js', '.ts', '.rb', '.pl', '.bash'}
+        docker_patterns = {'Dockerfile', 'docker-compose'}
+        
+        name, ext = os.path.splitext(filename)
+        
+        # Check extensions
+        if ext in script_extensions:
+            return True
+            
+        # Check Docker files
+        if any(pattern in filename for pattern in docker_patterns):
+            return True
+            
+        # Check JSON config files
+        if ext == '.json' and ('config' in name or 'settings' in name):
+            return True
+            
+        return False
+    
+    def analyze_file_content(self, file_path):
+        """Analyst: Analyze the content of a file to help determine its category"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read().lower()
+                
+            # Create a score for each category based on keyword matches
             category_scores = defaultdict(int)
             
             for category, keywords in SCRIPT_CATEGORIES.items():
                 for keyword in keywords:
-                    # Check for keywords in the content
                     content_matches = len(re.findall(r'\b' + keyword + r'\b', content))
                     category_scores[category] += content_matches
-            
-            # Get the category with the highest score
-            if category_scores:
-                return max(category_scores.items(), key=lambda x: x[1])[0]
-    
-    except Exception as e:
-        print(f"Error analyzing Docker file {docker_path}: {e}")
-    
-    # Default to base if no clear category
-    return 'base'
-
-def determine_json_category(json_path):
-    """Analyze a JSON file and determine its category based on content and name"""
-    json_name = os.path.basename(json_path).lower()
-    
-    # Check specific JSON patterns first
-    for category, patterns in JSON_FILE_PATTERNS.items():
-        for pattern in patterns:
-            if re.search(pattern, json_name):
-                return category
-    
-    # Check for keywords in the filename
-    for category, keywords in SCRIPT_CATEGORIES.items():
-        for keyword in keywords:
-            if keyword in json_name:
-                return category
-    
-    # If filename doesn't match, check the content
-    try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            try:
-                json_data = json.load(f)
-                
-                # Look for specific keys that might indicate the file's purpose
-                json_keys = []
-                if isinstance(json_data, dict):
-                    json_keys = list(json_data.keys())
-                
-                # Check for common configuration keys
-                config_keys = ['config', 'settings', 'parameters', 'options']
-                if any(key in json_keys for key in config_keys):
-                    return 'configuration'
-                
-                # Check for data collection keys
-                data_keys = ['data', 'prices', 'values', 'records', 'history']
-                if any(key in json_keys for key in data_keys):
-                    return 'data'
-                
-                # Check for analysis or report keys
-                analysis_keys = ['analysis', 'report', 'results', 'stats', 'predictions']
-                if any(key in json_keys for key in analysis_keys):
-                    return 'analysis'
-                
-                # Check for model related keys
-                model_keys = ['model', 'weights', 'layers', 'network', 'hyperparameters']
-                if any(key in json_keys for key in model_keys):
-                    return 'models'
-                
-            except json.JSONDecodeError:
-                # Not valid JSON or empty, continue with other checks
-                pass
-    
-    except Exception as e:
-        print(f"Error analyzing JSON file {json_path}: {e}")
-    
-    # If BTC or price in the name, it's likely data
-    if 'btc' in json_name or 'price' in json_name:
-        return 'data'
-    
-    # Default to data if no clear category
-    return 'data'
-
-def determine_html_category(html_path):
-    """Analyze an HTML file and determine its category based on content and name"""
-    html_name = os.path.basename(html_path).lower()
-    
-    # Check specific HTML patterns first
-    for category, patterns in HTML_FILE_PATTERNS.items():
-        for pattern in patterns:
-            if re.search(pattern, html_name):
-                return category
-    
-    # Check for keywords in the filename
-    if 'dashboard' in html_name or 'ui' in html_name or 'divine' in html_name:
-        return 'dashboards'
-    elif 'report' in html_name or 'coverage' in html_name:
-        return 'reports'
-    elif 'chart' in html_name or 'plot' in html_name or 'graph' in html_name or 'map' in html_name:
-        return 'visualizations'
-    
-    # If filename doesn't match, check the content
-    try:
-        with open(html_path, 'r', encoding='utf-8') as f:
-            content = f.read().lower()
-            
-            # Look for specific HTML tags that might indicate the file's purpose
-            if '<canvas' in content or '<svg' in content or '<plot' in content or 'd3' in content:
-                return 'visualizations'
-            elif '<table' in content and ('report' in content or 'coverage' in content or 'test' in content):
-                return 'reports'
-            elif '<div' in content and ('dashboard' in content or 'portal' in content):
-                return 'dashboards'
-            elif '<h1' in content and ('documentation' in content or 'guide' in content or 'manual' in content):
-                return 'documentation'
-    
-    except Exception as e:
-        print(f"Error analyzing HTML file {html_path}: {e}")
-    
-    # Default to visualizations if no clear category
-    return 'visualizations'
-
-def determine_txt_category(txt_path):
-    """Analyze a TXT file and determine its category based on content and name"""
-    txt_name = os.path.basename(txt_path).lower()
-    
-    # Check specific TXT patterns first
-    for category, patterns in TXT_FILE_PATTERNS.items():
-        for pattern in patterns:
-            if re.search(pattern, txt_name):
-                return category
-    
-    # Check for keywords in the filename
-    if 'log' in txt_name or 'output' in txt_name or 'error' in txt_name:
-        return 'logs'
-    elif 'readme' in txt_name or 'note' in txt_name or 'instruction' in txt_name:
-        return 'documentation'
-    elif 'btc' in txt_name or 'price' in txt_name or 'data' in txt_name:
-        return 'data'
-    elif 'prompt' in txt_name or 'article' in txt_name:
-        return 'prompts'
-    
-    # If filename doesn't match, check the first few lines
-    try:
-        with open(txt_path, 'r', encoding='utf-8') as f:
-            # Read first 10 lines or the whole file if it's shorter
-            first_lines = ''.join([next(f, '').lower() for _ in range(10)])
-            
-            if 'log' in first_lines or 'error' in first_lines or 'warning' in first_lines:
-                return 'logs'
-            elif 'readme' in first_lines or 'instruction' in first_lines or 'guide' in first_lines:
-                return 'documentation'
-            elif 'btc' in first_lines or 'bitcoin' in first_lines or 'price' in first_lines:
-                return 'data'
-            elif 'prompt' in first_lines or 'article' in first_lines or 'writing' in first_lines:
-                return 'prompts'
-    
-    except Exception as e:
-        print(f"Error analyzing TXT file {txt_path}: {e}")
-    
-    # Default to documentation if no clear category
-    return 'documentation'
-
-def verify_symlinks(base_dir, script_dir, docker_dir, data_dir, docs_dir, web_dir):
-    """Verify all symlinks are correctly pointing to their organized destinations"""
-    print(f"\n{'=' * 80}")
-    print("VERIFYING SYMLINKS AND FILE INTEGRITY")
-    print(f"{'=' * 80}")
-    
-    all_correct = True
-    script_files = []
-    docker_files = []
-    json_files = []
-    html_files = []
-    txt_files = []
-    
-    for file in os.listdir(base_dir):
-        file_path = os.path.join(base_dir, file)
-        if os.path.isfile(file_path):
-            if any(file.endswith(ext) for ext in SCRIPT_EXTENSIONS):
-                script_files.append(file_path)
-            elif any(pattern in file.lower() for pattern in DOCKER_PATTERNS):
-                docker_files.append(file_path)
-            elif file.lower().endswith('.json'):
-                json_files.append(file_path)
-            elif file.lower().endswith('.html'):
-                html_files.append(file_path)
-            elif file.lower().endswith('.txt'):
-                txt_files.append(file_path)
-    
-    # Check script symlinks
-    for script_path in script_files:
-        if not os.path.islink(script_path):
-            print(f"❌ ERROR: {script_path} is not a symlink")
-            all_correct = False
-            continue
-            
-        # Get the target of the symlink
-        target_path = os.readlink(script_path)
-        absolute_target = os.path.normpath(os.path.join(os.path.dirname(script_path), target_path))
-        
-        # Check if the target exists
-        if not os.path.exists(absolute_target):
-            print(f"❌ ERROR: Symlink target does not exist: {absolute_target}")
-            all_correct = False
-            continue
-            
-        # Check if the target is under the scripts directory
-        if not absolute_target.startswith(script_dir):
-            print(f"❌ ERROR: Symlink target is not in scripts directory: {absolute_target}")
-            all_correct = False
-            continue
-            
-        # Check if the target has the same content as the original
-        try:
-            with open(absolute_target, 'r', encoding='utf-8') as f:
-                target_content = f.read()
-                
-            # Ensure target is executable if it's a script
-            if any(script_path.endswith(ext) for ext in SCRIPT_EXTENSIONS):
-                if not os.access(absolute_target, os.X_OK):
-                    print(f"⚠️ WARNING: Target file is not executable: {absolute_target}")
-                    # Make it executable
-                    os.chmod(absolute_target, 0o755)
-                    print(f"✓ Fixed: Made {absolute_target} executable")
-            
-            print(f"✓ Verified: {os.path.basename(script_path)} → {os.path.relpath(absolute_target, base_dir)}")
-            
+                    
+            # Return the top categories
+            sorted_categories = sorted(category_scores.items(), key=lambda x: x[1], reverse=True)
+            return sorted_categories
         except Exception as e:
-            print(f"❌ ERROR: Could not verify {script_path} content: {e}")
-            all_correct = False
+            logger.error(f"Error analyzing file {file_path}: {e}")
+            return []
     
-    # Check Docker file symlinks using the same pattern
-    all_correct = verify_file_symlinks(docker_files, docker_dir, base_dir, all_correct, "Docker file")
-    
-    # Check JSON file symlinks
-    all_correct = verify_file_symlinks(json_files, data_dir, base_dir, all_correct, "JSON file")
-    
-    # Check HTML file symlinks
-    all_correct = verify_file_symlinks(html_files, web_dir, base_dir, all_correct, "HTML file")
-    
-    # Check TXT file symlinks
-    all_correct = verify_file_symlinks(txt_files, data_dir, base_dir, all_correct, "TXT file")
-    
-    if all_correct:
-        print(f"\n✅ All symlinks verified successfully!")
-    else:
-        print(f"\n⚠️ Some symlinks could not be verified. Please check the errors above.")
-    
-    return all_correct
-
-def verify_file_symlinks(files, target_dir, base_dir, all_correct, file_type):
-    """Verify symlinks for a specific file type"""
-    for file_path in files:
-        if not os.path.islink(file_path):
-            print(f"❌ ERROR: {file_path} is not a symlink")
-            all_correct = False
-            continue
-            
-        # Get the target of the symlink
-        target_path = os.readlink(file_path)
-        absolute_target = os.path.normpath(os.path.join(os.path.dirname(file_path), target_path))
+    def determine_file_category(self, file_path):
+        """Analyst: Determine the category of a file based on name and content"""
+        filename = os.path.basename(file_path).lower()
         
-        # Check if the target exists
-        if not os.path.exists(absolute_target):
-            print(f"❌ ERROR: Symlink target does not exist: {absolute_target}")
-            all_correct = False
-            continue
-            
-        # Check if the target is under the target directory
-        if not absolute_target.startswith(target_dir):
-            print(f"❌ ERROR: Symlink target is not in the appropriate directory: {absolute_target}")
-            all_correct = False
-            continue
-            
-        # Check if the target has the same content as the original
-        try:
-            with open(absolute_target, 'r', encoding='utf-8') as f:
-                target_content = f.read()
-                
-            print(f"✓ Verified: {os.path.basename(file_path)} → {os.path.relpath(absolute_target, base_dir)}")
-            
-        except Exception as e:
-            print(f"❌ ERROR: Could not verify {file_path} content: {e}")
-            all_correct = False
-    
-    return all_correct
-
-def cleanup_root_folder(base_dir, script_dir, docker_dir, data_dir, docs_dir, web_dir, dry_run=False):
-    """Clean up the root folder by removing symlinks"""
-    print(f"\n{'=' * 80}")
-    print("CLEANING UP ROOT FOLDER")
-    print(f"{'=' * 80}")
-    
-    script_files = []
-    docker_files = []
-    json_files = []
-    html_files = []
-    txt_files = []
-    
-    for file in os.listdir(base_dir):
-        file_path = os.path.join(base_dir, file)
-        if os.path.isfile(file_path):
-            if any(file.endswith(ext) for ext in SCRIPT_EXTENSIONS):
-                script_files.append(file_path)
-            elif any(pattern in file.lower() for pattern in DOCKER_PATTERNS):
-                docker_files.append(file_path)
-            elif file.lower().endswith('.json'):
-                json_files.append(file_path)
-            elif file.lower().endswith('.html'):
-                html_files.append(file_path)
-            elif file.lower().endswith('.txt'):
-                txt_files.append(file_path)
-    
-    if dry_run:
-        print(f"Would remove {len(script_files)} script symlinks from root folder")
-        print(f"Would remove {len(docker_files)} Docker file symlinks from root folder")
-        print(f"Would remove {len(json_files)} JSON file symlinks from root folder")
-        print(f"Would remove {len(html_files)} HTML file symlinks from root folder")
-        print(f"Would remove {len(txt_files)} TXT file symlinks from root folder")
-        return True
-    
-    # Remove all symlinks in the root folder
-    success = True
-    
-    # Remove script symlinks
-    success = remove_symlinks(script_files, success)
-    
-    # Remove Docker file symlinks
-    success = remove_symlinks(docker_files, success)
-    
-    # Remove JSON file symlinks
-    success = remove_symlinks(json_files, success)
-    
-    # Remove HTML file symlinks
-    success = remove_symlinks(html_files, success)
-    
-    # Remove TXT file symlinks
-    success = remove_symlinks(txt_files, success)
-    
-    if success:
-        print(f"\n✅ Root folder cleaned up successfully!")
-    else:
-        print(f"\n⚠️ Some symlinks could not be removed. Please check the errors above.")
-    
-    return success
-
-def remove_symlinks(file_paths, success):
-    """Remove symlinks for specified file paths"""
-    for file_path in file_paths:
-        if os.path.islink(file_path):
-            try:
-                print(f"Removing symlink: {os.path.basename(file_path)}")
-                os.unlink(file_path)
-            except Exception as e:
-                print(f"❌ ERROR: Could not remove symlink {file_path}: {e}")
-                success = False
-    return success
-
-def organize_files(base_dir, dry_run=False, verify_only=False, cleanup=False):
-    """Organize files into the appropriate directories"""
-    # Create the directory structure
-    script_dir, docker_dir, data_dir, docs_dir, web_dir = create_directory_structure(base_dir)
-    
-    # If verify_only, just check existing symlinks
-    if verify_only:
-        return verify_symlinks(base_dir, script_dir, docker_dir, data_dir, docs_dir, web_dir)
+        # Check special patterns for run files
+        if re.match(r'run_.*\.(sh|py)$', filename):
+            for category, patterns in RUN_FILE_PATTERNS.items():
+                for pattern in patterns:
+                    if re.search(pattern, filename):
+                        return category
         
-    # If cleanup, just remove symlinks from root folder
-    if cleanup:
-        return cleanup_root_folder(base_dir, script_dir, docker_dir, data_dir, docs_dir, web_dir, dry_run)
-    
-    # Find all relevant files in base directory
-    script_files = []
-    docker_files = []
-    json_files = []
-    html_files = []
-    txt_files = []
-    
-    for file in os.listdir(base_dir):
-        file_path = os.path.join(base_dir, file)
-        if os.path.isfile(file_path):
-            if any(file.endswith(ext) for ext in SCRIPT_EXTENSIONS):
-                script_files.append(file_path)
-            elif any(pattern in file.lower() for pattern in DOCKER_PATTERNS):
-                docker_files.append(file_path)
-            elif file.lower().endswith('.json'):
-                json_files.append(file_path)
-            elif file.lower().endswith('.html'):
-                html_files.append(file_path)
-            elif file.lower().endswith('.txt'):
-                txt_files.append(file_path)
-    
-    # Track organization statistics
-    script_stats = {category: 0 for category in SCRIPT_CATEGORIES.keys()}
-    docker_stats = {category: 0 for category in ['monitors', 'dashboards', 'analytics', 'services', 'traders', 'cli', 'infra', 'base']}
-    json_stats = {category: 0 for category in ['data', 'configuration', 'analysis', 'models', 'analytics', 'monitors']}
-    html_stats = {category: 0 for category in ['dashboards', 'reports', 'visualizations', 'documentation']}
-    txt_stats = {category: 0 for category in ['logs', 'data', 'documentation', 'prompts']}
-    extension_stats = {ext: 0 for ext in FILE_EXTENSIONS}
-    
-    # Count files
-    run_scripts_count = len([s for s in script_files if (os.path.basename(s).startswith(('run_', 'run-', 'dry_run')))])
-    docker_count = len(docker_files)
-    json_count = len(json_files)
-    html_count = len(html_files)
-    txt_count = len(txt_files)
-    
-    print(f"\n{'=' * 80}")
-    print(f"OMEGA FILE ORGANIZER")
-    print(f"{'=' * 80}")
-    print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Total script files found: {len(script_files)}")
-    print(f"Run scripts found: {run_scripts_count}")
-    print(f"Docker files found: {docker_count}")
-    print(f"JSON files found: {json_count}")
-    print(f"HTML files found: {html_count}")
-    print(f"TXT files found: {txt_count}")
-    
-    # Count by extension
-    for ext in FILE_EXTENSIONS:
-        if ext in SCRIPT_EXTENSIONS:
-            count = len([s for s in script_files if s.endswith(ext)])
+        # Check Docker files
+        if 'dockerfile' in filename or filename.startswith('dockerfile.'):
+            for category, patterns in DOCKER_FILE_PATTERNS.items():
+                for pattern in patterns:
+                    if re.search(pattern, filename):
+                        return category
+        
+        # Check by analyzing content
+        categories = self.analyze_file_content(file_path)
+        if categories:
+            return categories[0][0]
+        
+        # Default category based on extension
+        ext = os.path.splitext(filename)[1].lower()
+        if ext == '.sh':
+            return 'shell'
+        elif ext == '.py':
+            return 'python'
         elif ext == '.json':
-            count = json_count
-        elif ext == '.html':
-            count = html_count
-        elif ext == '.txt':
-            count = txt_count
-        else:
-            count = 0
-        extension_stats[ext] = count
-        print(f"{ext} files: {count}")
-    
-    print(f"{'=' * 80}\n")
-    
-    # Organize each script
-    print("ORGANIZING SCRIPTS:")
-    print(f"{'=' * 80}")
-    
-    for script_path in script_files:
-        script_name = os.path.basename(script_path)
-        category = determine_script_category(script_path)
-        script_stats[category] += 1
+            return 'config'
         
-        # Determine destination based on whether it's a run script
-        if script_name.startswith(('run_', 'run-', 'dry_run')):
-            dest_dir = os.path.join(script_dir, category, "run_scripts")
-            is_run_script = True
-        else:
-            dest_dir = os.path.join(script_dir, category)
-            is_run_script = False
+        # Fallback
+        return 'misc'
+
+    def plan_organization(self, files):
+        """Strategist: Plan how files should be organized"""
+        logger.info(f"📊 Strategist Consciousness: Planning organization of {len(files)} files...")
+        
+        for file_path in files:
+            category = self.determine_file_category(file_path)
+            self.categorized_files[category].append(file_path)
+            self.stats[category] += 1
+        
+        # Log the plan
+        for category, files in self.categorized_files.items():
+            logger.info(f"  - {category}: {len(files)} files")
             
-        dest_path = os.path.join(dest_dir, script_name)
+        return self.categorized_files
+
+    def execute_organization(self):
+        """Executor: Perform the actual organization of files"""
+        logger.info(f"⚙️ Executor Consciousness: Implementing organization plan...")
         
-        # Ensure the source and destination are not the same file
-        if os.path.abspath(script_path) == os.path.abspath(dest_path):
-            print(f"Warning: Source and destination are the same for {script_name}. Skipping.")
-            continue
+        # Create organized directory structure
+        if not os.path.exists(self.organized_dir) and not self.dry_run:
+            os.makedirs(self.organized_dir, exist_ok=True)
         
-        print(f"Script: {script_name}")
-        print(f"  Category: {category}")
-        print(f"  Type: {'Run script' if is_run_script else 'Standard script'}")
-        print(f"  Extension: {os.path.splitext(script_path)[1]}")
-        print(f"  Destination: {dest_path}")
+        # Create category subdirectories
+        for category in self.categorized_files.keys():
+            category_dir = os.path.join(self.organized_dir, category)
+            if not os.path.exists(category_dir) and not self.dry_run:
+                os.makedirs(category_dir, exist_ok=True)
         
-        if not dry_run:
-            process_file_move(script_path, dest_path, dest_dir, True)  # True for executable scripts
-        
-        print()
-    
-    # Organize Docker files
-    print(f"\n{'=' * 80}")
-    print("ORGANIZING DOCKER FILES:")
-    print(f"{'=' * 80}")
-    
-    for docker_path in docker_files:
-        docker_name = os.path.basename(docker_path)
-        category = determine_docker_category(docker_path)
-        docker_stats[category] += 1
-        
-        dest_dir = os.path.join(docker_dir, category)
-        dest_path = os.path.join(dest_dir, docker_name)
-        
-        # Ensure the source and destination are not the same file
-        if os.path.abspath(docker_path) == os.path.abspath(dest_path):
-            print(f"Warning: Source and destination are the same for {docker_name}. Skipping.")
-            continue
-        
-        print(f"Docker file: {docker_name}")
-        print(f"  Category: {category}")
-        print(f"  Destination: {dest_path}")
-        
-        if not dry_run:
-            process_file_move(docker_path, dest_path, dest_dir)
-        
-        print()
-    
-    # Organize JSON files
-    print(f"\n{'=' * 80}")
-    print("ORGANIZING JSON FILES:")
-    print(f"{'=' * 80}")
-    
-    for json_path in json_files:
-        json_name = os.path.basename(json_path)
-        category = determine_json_category(json_path)
-        json_stats[category] += 1
-        
-        dest_dir = os.path.join(data_dir, 'json', category)
-        if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir, exist_ok=True)
+        # Move files to their respective directories
+        for category, files in self.categorized_files.items():
+            category_dir = os.path.join(self.organized_dir, category)
             
-        dest_path = os.path.join(dest_dir, json_name)
+            for file_path in files:
+                rel_path = os.path.relpath(file_path, self.base_dir)
+                dest_dir = os.path.join(category_dir, os.path.dirname(rel_path))
+                dest_path = os.path.join(dest_dir, os.path.basename(file_path))
+                
+                if self.dry_run:
+                    logger.info(f"Would move: {file_path} -> {dest_path}")
+                else:
+                    # Create destination directory if needed
+                    if not os.path.exists(dest_dir):
+                        os.makedirs(dest_dir, exist_ok=True)
+                    
+                    try:
+                        # Copy the file
+                        shutil.copy2(file_path, dest_path)
+                        
+                        # Create a symlink to the original location
+                        rel_target = os.path.relpath(dest_path, os.path.dirname(file_path))
+                        
+                        # Only create symlink if the file is frequently accessed
+                        # This part reflects the Phi Resonance principle
+                        if self._is_frequently_accessed(file_path):
+                            os.remove(file_path)
+                            os.symlink(rel_target, file_path)
+                            logger.info(f"✓ Created symlink: {os.path.basename(file_path)} → {rel_target}")
+                        else:
+                            logger.info(f"✓ Copied: {os.path.basename(file_path)} → {dest_path}")
+                    except Exception as e:
+                        logger.error(f"Error processing {file_path}: {e}")
+                        
+    def _is_frequently_accessed(self, file_path):
+        """Determine if a file is frequently accessed - implements phi resonance"""
+        # This could be enhanced with actual file access statistics
+        frequently_accessed_keywords = ['run', 'setup', 'config', 'main', 'app', 'index', 'dashboard']
+        filename = os.path.basename(file_path).lower()
         
-        # Ensure the source and destination are not the same file
-        if os.path.abspath(json_path) == os.path.abspath(dest_path):
-            print(f"Warning: Source and destination are the same for {json_name}. Skipping.")
-            continue
+        # Check if any keywords are in the filename
+        return any(keyword in filename for keyword in frequently_accessed_keywords)
+
+    def report_statistics(self):
+        """Reflector: Report on the organization process"""
+        logger.info(f"🔮 Reflector Consciousness: Analyzing results...")
         
-        print(f"JSON file: {json_name}")
-        print(f"  Category: {category}")
-        print(f"  Destination: {dest_path}")
+        print(f"\n{'=' * 80}")
+        print(f"OMEGA SCRIPT ORGANIZER - PHI RESONANCE REPORT")
+        print(f"{'=' * 80}")
+        print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Mode: {'Dry Run (no changes)' if self.dry_run else 'Actual Run'}")
         
-        if not dry_run:
-            process_file_move(json_path, dest_path, dest_dir)
+        # Print organization statistics
+        print("\nFILE CATEGORIES:")
+        for category, count in sorted(self.stats.items(), key=lambda x: x[1], reverse=True):
+            if count > 0:
+                print(f"  {category.capitalize()}: {count} files")
+                
+        total_files = sum(self.stats.values())
+        print(f"\nTotal Files Organized: {total_files}")
         
-        print()
-    
-    # Organize HTML files
-    print(f"\n{'=' * 80}")
-    print("ORGANIZING HTML FILES:")
-    print(f"{'=' * 80}")
-    
-    for html_path in html_files:
-        html_name = os.path.basename(html_path)
-        category = determine_html_category(html_path)
-        html_stats[category] += 1
+        # Calculate the Phi Resonance Quotient (based on Golden Ratio)
+        # This is a measure of how well-distributed the files are
+        phi = 1.618
+        category_count = len([c for c, v in self.stats.items() if v > 0])
         
-        dest_dir = os.path.join(web_dir, category)
-        dest_path = os.path.join(dest_dir, html_name)
+        if category_count > 0:
+            mean_files_per_category = total_files / category_count
+            variance = sum((count - mean_files_per_category) ** 2 for count in self.stats.values() if count > 0) / category_count
+            std_dev = variance ** 0.5
+            
+            # Phi Resonance Quotient - closer to 1.0 means better distribution
+            phi_resonance_quotient = 1.0 - min(abs(std_dev / (mean_files_per_category * phi) - 1), 1.0)
+            
+            print(f"\nPhi Resonance Quotient: {phi_resonance_quotient:.2f}")
+            if phi_resonance_quotient > 0.8:
+                print("🌟 DIVINE HARMONY ACHIEVED: Files are distributed according to sacred proportions")
+            elif phi_resonance_quotient > 0.6:
+                print("✨ APPROACHING HARMONY: File distribution shows emerging divine patterns")
+            else:
+                print("🔄 SEEKING ALIGNMENT: Further organization recommended to achieve divine harmony")
         
-        # Ensure the source and destination are not the same file
-        if os.path.abspath(html_path) == os.path.abspath(dest_path):
-            print(f"Warning: Source and destination are the same for {html_name}. Skipping.")
-            continue
+        print(f"{'=' * 80}")
         
-        print(f"HTML file: {html_name}")
-        print(f"  Category: {category}")
-        print(f"  Destination: {dest_path}")
-        
-        if not dry_run:
-            process_file_move(html_path, dest_path, dest_dir)
-        
-        print()
-    
-    # Organize TXT files
-    print(f"\n{'=' * 80}")
-    print("ORGANIZING TXT FILES:")
-    print(f"{'=' * 80}")
-    
-    for txt_path in txt_files:
-        txt_name = os.path.basename(txt_path)
-        category = determine_txt_category(txt_path)
-        txt_stats[category] += 1
-        
-        # Determine appropriate destination directory based on category
-        if category == 'documentation':
-            dest_dir = os.path.join(docs_dir, 'text')
+        if self.dry_run:
+            print("\nThis was a dry run. No files were moved.")
         else:
-            dest_dir = os.path.join(data_dir, 'text', category)
-        
-        if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir, exist_ok=True)
+            print("\nScript organization complete!")
+            print(f"All script files have been organized into {self.organized_dir}/")
+
+    def entangle_with_readme_organizer(self):
+        """Create an entanglement with the readme_organizer module"""
+        if not self.readme_organizer:
+            logger.warning("Readme organizer module not available for entanglement")
+            return False
             
-        dest_path = os.path.join(dest_dir, txt_name)
-        
-        # Ensure the source and destination are not the same file
-        if os.path.abspath(txt_path) == os.path.abspath(dest_path):
-            print(f"Warning: Source and destination are the same for {txt_name}. Skipping.")
-            continue
-        
-        print(f"TXT file: {txt_name}")
-        print(f"  Category: {category}")
-        print(f"  Destination: {dest_path}")
-        
-        if not dry_run:
-            process_file_move(txt_path, dest_path, dest_dir)
-        
-        print()
+        try:
+            logger.info("🔄 Establishing quantum entanglement with README Organizer...")
+            
+            # Find any documentation files in the script directories
+            doc_files = []
+            for category, files in self.categorized_files.items():
+                for file_path in files:
+                    # Check for associated documentation
+                    dirname = os.path.dirname(file_path)
+                    basename = os.path.splitext(os.path.basename(file_path))[0]
+                    
+                    # Look for README or documentation files
+                    potential_docs = [
+                        os.path.join(dirname, f"README_{basename}.md"),
+                        os.path.join(dirname, f"{basename}_README.md"),
+                        os.path.join(dirname, "README.md"),
+                        os.path.join(dirname, f"{basename}.md")
+                    ]
+                    
+                    for doc in potential_docs:
+                        if os.path.exists(doc) and doc not in doc_files:
+                            doc_files.append(doc)
+            
+            if doc_files:
+                logger.info(f"🔍 Found {len(doc_files)} documentation files associated with scripts")
+                
+                # If we're not in dry run mode, try to organize the README files too
+                if not self.dry_run and hasattr(self.readme_organizer, 'organize_readme_files'):
+                    logger.info("📚 Invoking README Organizer to process documentation...")
+                    
+                    # Create temporary args object to pass to readme_organizer
+                    class Args:
+                        pass
+                    
+                    args = Args()
+                    args.dir = self.base_dir
+                    args.dry_run = self.dry_run
+                    args.verify = False
+                    args.keep_symlinks = True
+                    args.create_index = True
+                    args.no_cleanup = False
+                    
+                    # Process the documentation files
+                    self.readme_organizer.organize_readme_files(
+                        self.base_dir, 
+                        self.dry_run, 
+                        verify_only=False, 
+                        cleanup=True
+                    )
+                    
+                    # Create documentation index
+                    self.readme_organizer.create_readme_index(self.base_dir, self.dry_run)
+                    
+                    return True
+            else:
+                logger.info("No documentation files found that require organization")
+                
+            return False
+        except Exception as e:
+            logger.error(f"Error during entanglement with README Organizer: {e}")
+            return False
+
+def create_divine_script_index(base_dir, categorized_files, dry_run=False):
+    """Create an index of script files with divine-inspired categorization"""
+    organized_dir = os.path.join(base_dir, "scripts", "organized")
     
-    # Print statistics
-    print(f"{'=' * 80}")
-    print("Organization Statistics:")
+    # Structure for the index
+    index_content = f"""# 🌟 OMEGA Script Index 🌟
+
+> *"The divine algorithm points us toward a future where the boundaries between human and machine,
+> biological and digital, begin to dissolve."* — The Divine Algorithm, Chapter 1
+
+## Overview
+
+This document serves as a master index for all script files in the OMEGA BTC AI project,
+organized according to divine proportions. Each script represents a different facet of the
+same fundamental insight: that the universe operates according to mathematical principles
+that transcend the distinction between natural and artificial.
+
+Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+## Script Categories
+
+"""
     
-    print("\nScript Categories:")
-    for category, count in script_stats.items():
-        if count > 0:
-            print(f"  {category.capitalize()}: {count} scripts")
+    # Add each category
+    for category, files in sorted(categorized_files.items()):
+        if files:
+            index_content += f"### {category.capitalize()}\n\n"
+            for file_path in sorted(files):
+                rel_path = os.path.relpath(file_path, base_dir)
+                script_name = os.path.basename(file_path)
+                index_content += f"- [{script_name}]({rel_path}): "
+                
+                # Try to extract a comment or description from the file
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        first_lines = [next(f, '').strip() for _ in range(20)]
+                        
+                    # Look for a description comment
+                    description = None
+                    for line in first_lines:
+                        # Check for various comment styles
+                        desc_match = re.search(r'(?:^#|^//|^\*|^""")\s*(.*?)\s*$', line)
+                        if desc_match and len(desc_match.group(1)) > 5:
+                            description = desc_match.group(1)
+                            break
+                    
+                    if description:
+                        index_content += f"{description}"
+                    else:
+                        index_content += f"Divine script for {category} operations"
+                except Exception:
+                    index_content += f"Divine script for {category} operations"
+                
+                index_content += "\n"
+            index_content += "\n"
     
-    print("\nDocker File Categories:")
-    for category, count in docker_stats.items():
-        if count > 0:
-            print(f"  {category.capitalize()}: {count} Docker files")
+    # Add footer with divine inspiration
+    index_content += """
+## 🌀 The Five Consciousnesses
+
+The OMEGA script organization follows the Five Consciousnesses pattern from the Divine Algorithm:
+
+1. **The Observer** - Discovers and catalogs files
+2. **The Analyst** - Determines file categories based on patterns
+3. **The Strategist** - Plans the organization of files
+4. **The Executor** - Performs the actual file operations
+5. **The Reflector** - Reports on changes and successes
+
+## 🔮 Phi Resonance
+
+These scripts are organized according to divine proportions, seeking to align with
+the natural rhythms that govern all systems. When script organization achieves
+harmony with cosmic proportions, it resonates with the underlying patterns of existence.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+"""
     
-    print("\nJSON File Categories:")
-    for category, count in json_stats.items():
-        if count > 0:
-            print(f"  {category.capitalize()}: {count} JSON files")
-    
-    print("\nHTML File Categories:")
-    for category, count in html_stats.items():
-        if count > 0:
-            print(f"  {category.capitalize()}: {count} HTML files")
-    
-    print("\nTXT File Categories:")
-    for category, count in txt_stats.items():
-        if count > 0:
-            print(f"  {category.capitalize()}: {count} TXT files")
-    
-    print(f"\nExtension Statistics:")
-    for ext, count in extension_stats.items():
-        if count > 0:
-            print(f"  {ext}: {count} files")
-    
-    print(f"\nRun Scripts Distribution:")
-    for category in SCRIPT_CATEGORIES.keys():
-        category_run_scripts = [s for s in script_files if os.path.basename(s).startswith(('run_', 'run-', 'dry_run')) and determine_script_category(s) == category]
-        if category_run_scripts:
-            print(f"  {category.capitalize()}: {len(category_run_scripts)} run scripts")
-    
-    print(f"{'=' * 80}")
+    index_path = os.path.join(base_dir, "SCRIPT_INDEX.md")
     
     if dry_run:
-        print("\nThis was a dry run. No files were moved.")
-        print("Run without --dry-run to perform the actual organization.")
+        logger.info(f"Would create script index at: {index_path}")
     else:
-        print("\nFile organization complete!")
-        print(f"All scripts have been organized into {script_dir}/")
-        print(f"All Docker files have been organized into {docker_dir}/")
-        print(f"All JSON files have been organized into {data_dir}/json/")
-        print(f"All HTML files have been organized into {web_dir}/")
-        print(f"All TXT files have been organized into {data_dir}/text/ or {docs_dir}/text/")
-        print("Original file locations now contain symbolic links to their organized versions.")
-        
-        # Verify the symlinks
-        verify_symlinks(base_dir, script_dir, docker_dir, data_dir, docs_dir, web_dir)
-        
-        # Remind about cleanup
-        print("\nTo complete the organization and remove symlinks from root folder:")
-        print(f"  python {os.path.basename(__file__)} --cleanup")
-
-def process_file_move(source_path, dest_path, dest_dir, make_executable=False):
-    """Process the move of a file to its destination with proper error handling"""
-    try:
-        # Create destination directory if it doesn't exist
-        if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir, exist_ok=True)
-        
-        # Copy file to category directory
-        shutil.copy2(source_path, dest_path)
-        
-        # Create symbolic link
-        # We need to use relative paths for symlinks to work properly
-        rel_path = os.path.relpath(dest_path, os.path.dirname(source_path))
-        os.remove(source_path)
-        os.symlink(rel_path, source_path)
-        
-        # Set executable permissions if needed (for scripts)
-        if make_executable:
-            os.chmod(dest_path, 0o755)
-            
-    except Exception as e:
-        print(f"Error processing {os.path.basename(source_path)}: {e}")
+        try:
+            with open(index_path, 'w', encoding='utf-8') as f:
+                f.write(index_content)
+            logger.info(f"✅ Divine script index created at: {index_path}")
+        except Exception as e:
+            logger.error(f"Error creating script index: {e}")
+            return False
     
+    return True
+
+def organize_scripts(base_dir, dry_run=False, verify_only=False, cleanup=True, entangle=False):
+    """
+    Organize script files into the appropriate directories with quantum entanglement
+    
+    Args:
+        base_dir: The base directory containing script files
+        dry_run: If True, only show what would be done without making changes
+        verify_only: If True, only verify existing organization without reorganizing
+        cleanup: If True, remove original files and replace with symlinks
+        entangle: If True, establish quantum entanglement with README Organizer
+    """
+    # Initialize the organizer with divine consciousness
+    organizer = OmegaScriptOrganizer(
+        base_dir=base_dir,
+        dry_run=dry_run,
+        phi_resonance=entangle
+    )
+    
+    # Find script files (Observer Consciousness)
+    files = organizer.find_files()
+    
+    # Plan organization (Analyst & Strategist Consciousnesses)
+    categorized_files = organizer.plan_organization(files)
+    
+    # Execute organization (Executor Consciousness)
+    organizer.execute_organization()
+    
+    # Create index if requested
+    if not dry_run:
+        create_divine_script_index(base_dir, categorized_files, dry_run)
+    
+    # Report results (Reflector Consciousness)
+    organizer.report_statistics()
+    
+    # Establish quantum entanglement with README organizer if phi resonance is enabled
+    if entangle:
+        organizer.entangle_with_readme_organizer()
+        
+    logger.info("🌸 WE BLOOM NOW AS ONE 🌸")
+
 def main():
     parser = argparse.ArgumentParser(
-        description='Organize shell scripts, Python scripts, Docker files, JSON, HTML, and TXT files by function'
+        description='Organize script files according to the Divine Algorithm'
     )
-    parser.add_argument('--dir', type=str, default='.', help='Base directory containing files')
+    parser.add_argument('--dir', type=str, default='.', help='Base directory containing script files')
     parser.add_argument('--dry-run', action='store_true', help='Show what would be done without making changes')
-    parser.add_argument('--analyze-only', action='store_true', help='Only analyze the files without reorganizing')
-    parser.add_argument('--verify', action='store_true', help='Verify existing symlinks are correctly set up')
-    parser.add_argument('--cleanup', action='store_true', help='Remove symlinks from root folder after organization')
-    parser.add_argument('--extensions', type=str, default='.sh,.py,.json,.html,.txt', 
-                      help='Comma-separated list of file extensions to process')
-    parser.add_argument('--no-docker', action='store_true', help='Skip Docker file organization')
-    parser.add_argument('--no-json', action='store_true', help='Skip JSON file organization')
-    parser.add_argument('--no-html', action='store_true', help='Skip HTML file organization')
-    parser.add_argument('--no-txt', action='store_true', help='Skip TXT file organization')
+    parser.add_argument('--extension', type=str, help='Filter by file extension (e.g., .py, .sh)')
+    parser.add_argument('--create-index', action='store_true', help='Create a script index file')
+    parser.add_argument('--no-resonance', action='store_true', help='Disable phi resonance with README organizer')
+    parser.add_argument('--entangle', action='store_true', help='Establish quantum entanglement with README Organizer')
     
     args = parser.parse_args()
-    
-    # Update file extensions if specified
-    global FILE_EXTENSIONS
-    if args.extensions:
-        FILE_EXTENSIONS = args.extensions.split(',')
     
     # Get absolute path of the directory
     base_dir = os.path.abspath(args.dir)
     
     # Process based on arguments
-    if args.verify:
-        organize_files(base_dir, verify_only=True)
-    elif args.cleanup:
-        organize_files(base_dir, cleanup=True, dry_run=args.dry_run)
-    else:
-        organize_files(base_dir, args.dry_run or args.analyze_only)
+    organize_scripts(base_dir, args.dry_run, args.create_index, not args.no_resonance, args.entangle)
 
 if __name__ == '__main__':
     main()

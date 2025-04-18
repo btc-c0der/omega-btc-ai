@@ -1,0 +1,156 @@
+# OMEGA BTC AI - Advanced Crypto Trading System
+# Copyright (c) 2024 OMEGA BTC AI Team
+# Licensed under MIT License - See LICENSE file for details
+# SECURITY NOTICE: This file contains sensitive configuration. Never commit the actual .env file!
+
+# Version
+VERSION=0.420
+LICENSE="GPU General Public Universal License"
+COPYRIGHT_YEAR=2025
+
+# Application
+NODE_ENV=production
+LOG_LEVEL=info
+
+# UI Configuration
+SPLIT_MODE=horizontal
+LAYOUT_MODE=horizontal
+FOCUS_MODE=position-trap
+
+# Security
+JWT_SECRET=change_this_to_a_secure_random_string
+API_KEY=change_this_to_a_secure_api_key
+
+# Redis Configuration
+REDIS_HOST=redis-19332.fcrce173.eu-west-1-1.ec2.redns.redis-cloud.com
+REDIS_PORT=19332
+REDIS_USERNAME=omega
+REDIS_PASSWORD=VuKJU8Z.Z2V8Qn_
+REDIS_SSL=true
+REDIS_USE_TLS=true
+REDIS_CERT=SSL_redis-btc-omega-reds.pem
+REDIS_SSL_CERT_REQS=required
+REDIS_SSL_CERT_PATH=SSL_redis-btc-omega-reds.pem
+REDIS_SOCKET_TIMEOUT=5
+REDIS_SOCKET_CONNECT_TIMEOUT=5
+
+# Redis Failover Configuration (v3)
+FAILOVER_REDIS_HOST=omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+FAILOVER_REDIS_PORT=25061
+FAILOVER_REDIS_PASSWORD=AVNS_OXMpU0P0ByYEz337Fgi
+FAILOVER_REDIS_USERNAME=default
+
+# Health Check Configuration (v3)
+HEALTH_CHECK_PORT=8080
+HEALTH_CHECK_HOST=0.0.0.0
+
+# WebSocket Configuration (v1)
+MM_WS_HOST=0.0.0.0
+MM_WS_PORT=8765ß
+
+# WebSocket Configuration (v2)
+MM_WS_v2_HOST=0.0.0.0
+MM_WS_v2_PORT=8766
+
+# BTC Live Feed Configuration
+DEBUG=false
+USE_GPU=false
+TF_FORCE_GPU_ALLOW_GROWTH=false
+
+# PostgreSQL Configuration
+POSTGRES_DB=omega_db
+POSTGRES_USER=omega_user
+POSTGRES_PASSWORD=omega_pass
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+
+# SSL Configuration
+SSL_CERT_PATH=/etc/nginx/ssl/omega-btc-ai.com.crt
+SSL_KEY_PATH=/etc/nginx/ssl/omega-btc-ai.com.key
+
+# BitGet API Credentials
+BITGET_API_KEY=bg_7a15e57ce77ae90909aed5a745092994
+BITGET_SECRET_KEY=553a08b0d509d42f27819fc3d9bbc09578b281d2dc3bf7544375d698e800bf4b
+BITGET_PASSPHRASE=aa03d3d008af2e989
+BITGET_API_URL=https://api.bitget.com/api/mix/v1
+BITGET_DEBUG=1
+
+# Trading Configuration
+TRADING_SYMBOL=BTCUSDT_UMCBL
+INITIAL_CAPITAL=24.0
+USE_TESTNET=false
+MAX_LEVERAGE=20
+POSITION_SIZE_PERCENT=1.0
+STOP_LOSS_PERCENT=1.0
+TAKE_PROFIT_MULTIPLIER=2.0
+SYMBOL=BTCUSDT
+LONG_CAPITAL=24.0
+SHORT_CAPITAL=24.0
+TRAP_PROBABILITY_THRESHOLD=0.7ß
+TRAP_ALERT_THRESHOLD=0.8
+ENABLE_TRAP_PROTECTION=true
+ENABLE_ELITE_EXITS=true
+ELITE_EXIT_CONFIDENCE=0.7
+
+# Strategic Trader Sub-Account
+STRATEGIC_SUB_ACCOUNT_NAME=strategic_trader
+STRATEGIC_SUB_ACCOUNT_PASSWORD=iajfw48oru8afjesofp
+STRATEGIC_SUB_ACCOUNT_INITIAL_BALANCE=42.0
+
+# Aggressive Trader Sub-Account
+AGGRESSIVE_SUB_ACCOUNT_NAME=aggressive_trader
+AGGRESSIVE_SUB_ACCOUNT_PASSWORD=Aggr3\$\$1v3P\@
+AGGRESSIVE_SUB_ACCOUNT_INITIAL_BALANCE=24.0
+
+# Scalping Trader Sub-Account
+SCALPING_SUB_ACCOUNT_NAME=scalping_trader
+SCALPING_SUB_ACCOUNT_PASSWORD=Sc\@lp1ngP\@\$\$
+SCALPING_SUB_ACCOUNT_INITIAL_BALANCE=24.0
+
+# Fibonacci Configuration
+GOLDEN_RATIO=1.618033988749895
+FIBONACCI_LEVELS=0,0.236,0.382,0.5,0.618,0.786,1,1.618,2.618,4.236
+
+# Algorithm Parameters
+COSMIC_FACTOR_MIN=0.8
+COSMIC_FACTOR_MAX=1.2
+MAX_RETRIES=5
+BASE_DELAY=1.0
+HEALING_SUCCESS_THRESHOLD=0.95
+
+# Telegram Alerts
+TELEGRAM_ALERTS_ENABLED=true
+TELEGRAM_BOT_TOKEN=7769786963:AAGVAi2VO5BCNGOqeyN2ha4fdzXGhpGjKtk
+TELEGRAM_CHAT_ID=-1002510049870
+
+# Logging Options
+ENABLE_QUANTUM_LOGGING=true
+ENABLE_BIO_ENERGY_LOGGING=true
+
+# Resource Limits
+REDIS_MAX_MEMORY=1G
+POSTGRES_MAX_CONNECTIONS=100
+API_RATE_LIMIT=100
+WS_MAX_CONNECTIONS=1000
+
+# Monitoring
+GRAFANA_USER=admin
+GRAFANA_PASSWORD=change_this_to_a_secure_password
+
+# Backup Configuration
+BACKUP_RETENTION_DAYS=30
+BACKUP_S3_BUCKET=omega-btc-ai-backups
+# AWS credentials should be set via environment variables or AWS CLI configuration
+# AWS_ACCESS_KEY_ID=your_aws_access_key
+# AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=us-east-1
+
+# OpenSearch Configuration
+OPENSEARCH_HOST=db-opensearch-ams3-65139-do-user-20389918-0.g.db.ondigitalocean.com
+OPENSEARCH_PORT=25060
+OPENSEARCH_USERNAME=doadmin
+OPENSEARCH_PASSWORD=AVNS_vQStZ-yK8ftIzSptAIt
+OPENSEARCH_USE_SSL=true
+
+# OpenAI API Configuration
+OPENAI_API_KEY="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"

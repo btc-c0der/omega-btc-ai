@@ -1,0 +1,36 @@
+# 🔱 OMEGA BTC AI - Divine Instagram Automation Dockerfile 🔱
+FROM python:3.9-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libffi-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first to leverage Docker cache
+COPY scripts/requirements-instagram.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the Instagram automation script
+COPY scripts/omega_ig_automation.py /app/
+COPY scripts/omega_ig_post.sh /app/
+
+# Create necessary directories
+RUN mkdir -p /app/config /app/content/images /app/assets/fonts
+
+# Set permissions
+RUN chmod +x /app/omega_ig_automation.py
+RUN chmod +x /app/omega_ig_post.sh
+
+# Default command
+ENTRYPOINT ["python", "omega_ig_automation.py"] 
