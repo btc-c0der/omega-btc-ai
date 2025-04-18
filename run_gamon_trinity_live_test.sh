@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/analytics/run_gamon_trinity_live_test.sh

@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/cli/run_elite_exit_trader.sh

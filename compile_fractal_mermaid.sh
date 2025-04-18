@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/debugging/compile_fractal_mermaid.sh

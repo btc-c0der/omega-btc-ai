@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/services/start_services.sh

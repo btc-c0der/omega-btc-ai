@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/deploy_to_scaleway.sh

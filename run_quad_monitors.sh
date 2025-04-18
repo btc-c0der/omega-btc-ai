@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/monitors/run_quad_monitors.sh

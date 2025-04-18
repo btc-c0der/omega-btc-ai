@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/services/run_redis_only_monitor.sh

@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/monitors/check_trap_data.sh

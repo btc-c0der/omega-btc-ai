@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/dashboards/test_bitget_env.sh

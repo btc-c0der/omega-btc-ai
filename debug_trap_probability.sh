@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/monitors/debug_trap_probability.sh

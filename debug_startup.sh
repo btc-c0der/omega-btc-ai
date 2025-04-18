@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/services/debug_startup.sh

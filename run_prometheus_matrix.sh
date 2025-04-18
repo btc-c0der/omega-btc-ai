@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/analytics/run_prometheus_matrix.sh

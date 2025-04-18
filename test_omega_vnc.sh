@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/test_omega_vnc.sh

@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/monitors/test_trap_progress_bar.sh

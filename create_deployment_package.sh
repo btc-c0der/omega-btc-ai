@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/create_deployment_package.sh

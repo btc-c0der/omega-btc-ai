@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/install_btcdate.sh

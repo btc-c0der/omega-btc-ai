@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/setup_default_config.sh

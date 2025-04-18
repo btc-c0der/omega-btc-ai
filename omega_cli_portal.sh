@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/dashboards/omega_cli_portal.sh

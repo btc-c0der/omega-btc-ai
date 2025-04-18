@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/setup_divine_visualization.sh

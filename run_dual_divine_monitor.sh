@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/dashboards/run_dual_divine_monitor.sh

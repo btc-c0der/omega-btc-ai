@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/build_omega_portal.sh

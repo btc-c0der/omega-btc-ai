@@ -1,1 +1,0 @@
-/workspaces/omega-btc-ai/scripts/deployment/setup_scaleway_vnc.sh
