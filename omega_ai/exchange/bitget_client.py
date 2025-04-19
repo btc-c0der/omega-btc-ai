@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 """
+BitGet Exchange API Client
+
+This module implements the BitGet exchange API client for interacting
+with the BitGet cryptocurrency exchange.
+
+Copyright (c) 2024 OMEGA BTC AI
+Licensed under the GBU2 License - see LICENSE file for details
+
 OMEGA BTC AI - BitGet Exchange Client
 ===================================
 

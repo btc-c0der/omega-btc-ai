@@ -1,0 +1,160 @@
+{
+    "version": "1.0.0",
+    "test_suites": {
+        "DiscordBot": {
+            "description": "Tests for Discord bot functionality",
+            "tests": [
+                {
+                    "name": "Discord Token Validation",
+                    "id": "discord_token",
+                    "description": "Test if the Discord bot token is valid.",
+                    "category": "security"
+                },
+                {
+                    "name": "Command Registration Check",
+                    "id": "commands_registered",
+                    "description": "Test if Discord bot commands are properly registered.",
+                    "category": "functionality"
+                },
+                {
+                    "name": "Ping Command Connectivity",
+                    "id": "ping_command_connectivity",
+                    "description": "Test connectivity related to the Discord ping command.",
+                    "category": "network"
+                }
+            ]
+        },
+        "Network": {
+            "description": "Tests for network connectivity",
+            "tests": [
+                {
+                    "name": "DNS Resolution Test",
+                    "id": "dns_resolution",
+                    "description": "Test DNS resolution for critical services.",
+                    "category": "network"
+                },
+                {
+                    "name": "HTTP Connectivity Test",
+                    "id": "http_connectivity",
+                    "description": "Test HTTP connectivity to critical services.",
+                    "category": "network"
+                }
+            ]
+        },
+        "System": {
+            "description": "Tests for system health and performance",
+            "tests": [
+                {
+                    "name": "System Resources Check",
+                    "id": "system_resources",
+                    "description": "Test if system has sufficient resources.",
+                    "category": "performance"
+                },
+                {
+                    "name": "Python Environment Check",
+                    "id": "python_environment",
+                    "description": "Test if required Python packages are installed.",
+                    "category": "environment"
+                }
+            ]
+        },
+        "InteractionTests": {
+            "description": "Tests for Discord interaction endpoints",
+            "tests": [
+                {
+                    "name": "Response Send Message",
+                    "id": "response_send_message",
+                    "description": "Test sending a direct message response",
+                    "category": "discord_api"
+                },
+                {
+                    "name": "Response Defer",
+                    "id": "response_defer",
+                    "description": "Test deferring a response",
+                    "category": "discord_api"
+                },
+                {
+                    "name": "Response Edit",
+                    "id": "response_edit",
+                    "description": "Test editing an initial response",
+                    "category": "discord_api"
+                },
+                {
+                    "name": "Response Is Done",
+                    "id": "response_is_done",
+                    "description": "Test checking if a response is done",
+                    "category": "discord_api"
+                },
+                {
+                    "name": "Error Handling",
+                    "id": "error_handling",
+                    "description": "Test error handling during interaction",
+                    "category": "discord_api"
+                },
+                {
+                    "name": "Original Response",
+                    "id": "original_response",
+                    "description": "Test getting the original response",
+                    "category": "discord_api"
+                }
+            ]
+        },
+        "QuantumDashboard": {
+            "description": "Tests for Quantum 5D QA Dashboard",
+            "tests": [
+                {
+                    "name": "Dashboard Connectivity",
+                    "id": "dashboard_connectivity",
+                    "description": "Test if the Quantum Dashboard server is running and accessible.",
+                    "category": "ui"
+                },
+                {
+                    "name": "Metrics Collection",
+                    "id": "metrics_collection",
+                    "description": "Test if metrics are being collected correctly for the dashboard.",
+                    "category": "data"
+                },
+                {
+                    "name": "Visualization Rendering",
+                    "id": "visualization_rendering",
+                    "description": "Test if 5D visualizations are rendering correctly.",
+                    "category": "ui"
+                }
+            ]
+        }
+    },
+    "categories": {
+        "security": {
+            "description": "Security and authentication tests",
+            "icon": "🔒"
+        },
+        "functionality": {
+            "description": "Core functionality tests",
+            "icon": "⚙️"
+        },
+        "network": {
+            "description": "Network connectivity tests",
+            "icon": "🌐"
+        },
+        "performance": {
+            "description": "System performance tests",
+            "icon": "⚡"
+        },
+        "environment": {
+            "description": "Environment configuration tests",
+            "icon": "🔧"
+        },
+        "discord_api": {
+            "description": "Discord API interaction tests",
+            "icon": "🤖"
+        },
+        "data": {
+            "description": "Data collection and processing tests",
+            "icon": "📊"
+        },
+        "ui": {
+            "description": "User interface tests",
+            "icon": "🖥️"
+        }
+    }
+}

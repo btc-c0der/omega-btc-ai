@@ -1,8 +1,0 @@
-# 🔱 OMEGA BTC AI - Divine Instagram Automation Requirements 🔱
-# Install with: pip install -r requirements-ig-automation.txt
-
-# Core dependencies
-instagrapi>=1.20.0
-pillow>=9.2.0
-requests>=2.28.1
-python-dotenv>=0.20.0 

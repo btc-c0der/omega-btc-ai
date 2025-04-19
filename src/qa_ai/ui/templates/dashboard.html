@@ -1,0 +1,146 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <!-- Test Coverage Section -->
+            <div class="bg-white shadow rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Test Coverage</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-blue-800">Unit Tests</h3>
+                        <p class="text-3xl font-bold text-blue-600">{{ metrics.test_coverage.unit }}%</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-green-800">Integration Tests</h3>
+                        <p class="text-3xl font-bold text-green-600">{{ metrics.test_coverage.integration }}%</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-yellow-800">E2E Tests</h3>
+                        <p class="text-3xl font-bold text-yellow-600">{{ metrics.test_coverage.e2e }}%</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-purple-800">Overall</h3>
+                        <p class="text-3xl font-bold text-purple-600">{{ metrics.test_coverage.overall }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results Section -->
+            <div class="bg-white shadow rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-800">Total Tests</h3>
+                        <p class="text-3xl font-bold text-gray-600">{{ metrics.test_results.total }}</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-green-800">Passed</h3>
+                        <p class="text-3xl font-bold text-green-600">{{ metrics.test_results.passed }}</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-red-800">Failed</h3>
+                        <p class="text-3xl font-bold text-red-600">{{ metrics.test_results.failed }}</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-yellow-800">Skipped</h3>
+                        <p class="text-3xl font-bold text-yellow-600">{{ metrics.test_results.skipped }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics Section -->
+            <div class="bg-white shadow rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Performance Metrics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-blue-800">Response Time (ms)</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-blue-600">Average: {{ metrics.performance_metrics.response_time.avg
+                                }}</p>
+                            <p class="text-sm text-blue-600">P95: {{ metrics.performance_metrics.response_time.p95 }}
+                            </p>
+                            <p class="text-sm text-blue-600">P99: {{ metrics.performance_metrics.response_time.p99 }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-green-800">Throughput</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-green-600">Requests/sec: {{
+                                metrics.performance_metrics.throughput.requests_per_second }}</p>
+                            <p class="text-sm text-green-600">Concurrent Users: {{
+                                metrics.performance_metrics.throughput.concurrent_users }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Impact Section -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">Business Impact</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-red-800">Critical Issues</h3>
+                        <p class="text-3xl font-bold text-red-600">{{ metrics.business_impact.critical_issues }}</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-orange-800">High Priority</h3>
+                        <p class="text-3xl font-bold text-orange-600">{{ metrics.business_impact.high_priority }}</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-yellow-800">Medium Priority</h3>
+                        <p class="text-3xl font-bold text-yellow-600">{{ metrics.business_impact.medium_priority }}</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-green-800">Low Priority</h3>
+                        <p class="text-3xl font-bold text-green-600">{{ metrics.business_impact.low_priority }}</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize charts and other dynamic content here
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add any JavaScript functionality needed
+        });
+    </script>
+</body>
+
+</html>

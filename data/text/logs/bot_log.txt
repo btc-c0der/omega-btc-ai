@@ -1,0 +1,50 @@
+
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+
+2025-04-07 08:25:29,113 - discord_bot - INFO - Connected to Redis successfully
+INFO:discord_bot:Connected to Redis successfully
+WARNING:discord.client:PyNaCl is not installed, voice will NOT be supported
+INFO:bitget_position_analyzer_b0t:Quantum-secure logger initialized with golden ratio protection: φ=1.618033988749895
+WARNING:root:ExchangeClientB0t not available. Will try other connection methods.
+ERROR:discord.bitget_position_commands:Failed to initialize default BitgetPositionAnalyzerB0t: name 'CCXT_AVAILABLE' is not defined
+/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/discord/bot.py:325: RuntimeWarning: coroutine 'BotBase.add_cog' was never awaited
+  self.add_cog(BitgetPositionCommands(self))
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+2025-04-07 08:25:29,396 - discord_bot - INFO - BitGet Position Commands registered successfully
+INFO:discord_bot:BitGet Position Commands registered successfully
+/Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/discord/bot.py:336: RuntimeWarning: coroutine 'BotBase.add_cog' was never awaited
+  self.add_cog(MatrixBotCommands(self))
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+2025-04-07 08:25:29,399 - discord_bot - INFO - Matrix Bot Commands registered successfully
+INFO:discord_bot:Matrix Bot Commands registered successfully
+2025-04-07 08:25:29,399 - discord_bot - INFO - Starting Discord bot...
+INFO:discord_bot:Starting Discord bot...
+[2025-04-07 08:25:29] [INFO    ] discord.client: logging in using static token
+INFO:discord.client:logging in using static token
+2025-04-07 08:25:30,401 - discord_bot - INFO - Commands synced with Discord
+INFO:discord_bot:Commands synced with Discord
+[2025-04-07 08:25:30] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: edda0d5e13b7799ef1e234cd4eb9bf20).
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: edda0d5e13b7799ef1e234cd4eb9bf20).
+2025-04-07 08:25:32,981 - discord_bot - INFO - Logged in as 0m3g4_B1Tg3T_b0t#2447 (ID: 1358189845931098130)
+INFO:discord_bot:Logged in as 0m3g4_B1Tg3T_b0t#2447 (ID: 1358189845931098130)
+2025-04-07 08:25:32,982 - discord_bot - INFO - Bot is ready!
+INFO:discord_bot:Bot is ready!
+ERROR:bitget_position_analyzer_b0t:Block 1 hash invalid. Self-healing initiated.
+INFO:bitget_position_analyzer_b0t:Integrity chain repaired from block 0
+[2025-04-07 08:58:24] [INFO    ] discord.gateway: Shard ID None has successfully RESUMED session edda0d5e13b7799ef1e234cd4eb9bf20.
+INFO:discord.gateway:Shard ID None has successfully RESUMED session edda0d5e13b7799ef1e234cd4eb9bf20.
+[2025-04-07 10:32:57] [INFO    ] discord.gateway: Shard ID None has successfully RESUMED session edda0d5e13b7799ef1e234cd4eb9bf20.
+INFO:discord.gateway:Shard ID None has successfully RESUMED session edda0d5e13b7799ef1e234cd4eb9bf20.

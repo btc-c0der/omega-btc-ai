@@ -1,0 +1,21 @@
+[Unit]
+Description=AIXBT Trading Dashboard - OMEGA TRAP ZONE™
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/omega-btc-ai
+Environment="PATH=/opt/omega-btc-ai/venv/bin"
+Environment="PYTHONPATH=/opt/omega-btc-ai"
+ExecStart=/opt/omega-btc-ai/venv/bin/gunicorn --workers 4 --bind 127.0.0.1:8055 src.omega_bot_farm.qa.aixbt_dashboard.wsgi:server
+Restart=on-failure
+RestartSec=5s
+
+# Security
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target 

@@ -1,0 +1,659 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Trading</span></p>
+    </div>
+    
+    <h1>
+ Advanced Exit Strategies for RastaBitgetMonitor
+</h1>
+<blockquote>
+ <p>
+  “The divine art of position unwinding rivals the creation of the position itself. Exits are where profits are truly crystallized.” - OMEGA Wisdom
+ </p>
+</blockquote>
+<h2>
+ Overview
+</h2>
+<p>
+ The RastaBitgetMonitor (RBM) v0.4.0 now includes advanced exit strategies that go beyond simple take-profit and stop-loss management. These strategies incorporate Fibonacci principles, fee management, hedge positioning calculations, and bidirectional Fibonacci level visualization.
+</p>
+<p>
+ This document details the mathematical principles, implementation, and usage of these advanced exit strategies within the RBM system.
+</p>
+<h2>
+ 1. Fee Coverage Analysis
+</h2>
+<h3>
+ Core Concept
+</h3>
+<p>
+ Every position incurs trading fees at entry and exit. The Fee Coverage Analysis constantly calculates how far the current price movement is from covering:
+</p>
+<ul>
+ <li>
+  Entry fees
+ </li>
+ <li>
+  Potential exit fees
+ </li>
+ <li>
+  Position funding fees (for perpetual contracts)
+ </li>
+</ul>
+<h3>
+ Implementation
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_fee_coverage</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">current_price</span><span class="p">):</span>
+    <span class="c1"># Extract position details</span>
+    <span class="n">entry_price</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'entry_price'</span><span class="p">]</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'size'</span><span class="p">]</span>
+    <span class="n">direction</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'side'</span><span class="p">]</span>  <span class="c1"># 'long' or 'short'</span>
+    <span class="n">leverage</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'leverage'</span><span class="p">]</span>
+
+    <span class="c1"># Fee constants (from BitGet)</span>
+    <span class="n">maker_fee</span> <span class="o">=</span> <span class="mf">0.0002</span>  <span class="c1"># 0.02%</span>
+    <span class="n">taker_fee</span> <span class="o">=</span> <span class="mf">0.0005</span>  <span class="c1"># 0.05%</span>
+    <span class="n">funding_rate</span> <span class="o">=</span> <span class="n">get_current_funding_rate</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="s1">'symbol'</span><span class="p">])</span>
+
+    <span class="c1"># Calculate total fees paid and anticipated</span>
+    <span class="n">entry_fee</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="n">entry_price</span> <span class="o">*</span> <span class="n">taker_fee</span>
+    <span class="n">exit_fee</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="n">current_price</span> <span class="o">*</span> <span class="n">taker_fee</span>
+
+    <span class="c1"># Calculate funding fee (if position held for 8 hours)</span>
+    <span class="n">funding_fee</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="n">current_price</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">funding_rate</span><span class="p">)</span>
+
+    <span class="c1"># Total fee cost</span>
+    <span class="n">total_fees</span> <span class="o">=</span> <span class="n">entry_fee</span> <span class="o">+</span> <span class="n">exit_fee</span> <span class="o">+</span> <span class="n">funding_fee</span>
+
+    <span class="c1"># Calculate current P&amp;L</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">'long'</span><span class="p">:</span>
+        <span class="n">unrealized_pnl</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="p">(</span><span class="n">current_price</span> <span class="o">-</span> <span class="n">entry_price</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unrealized_pnl</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="p">(</span><span class="n">entry_price</span> <span class="o">-</span> <span class="n">current_price</span><span class="p">)</span>
+
+    <span class="c1"># Calculate fee coverage</span>
+    <span class="n">fee_coverage_percent</span> <span class="o">=</span> <span class="p">(</span><span class="n">unrealized_pnl</span> <span class="o">/</span> <span class="n">total_fees</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'total_fees'</span><span class="p">:</span> <span class="n">total_fees</span><span class="p">,</span>
+        <span class="s1">'unrealized_pnl'</span><span class="p">:</span> <span class="n">unrealized_pnl</span><span class="p">,</span>
+        <span class="s1">'fee_coverage_percent'</span><span class="p">:</span> <span class="n">fee_coverage_percent</span><span class="p">,</span>
+        <span class="s1">'fee_breakeven_price'</span><span class="p">:</span> <span class="n">calculate_fee_breakeven_price</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">total_fees</span><span class="p">)</span>
+    <span class="p">}</span>
+</code></pre>
+</div>
+<h3>
+ RBM Display
+</h3>
+<p>
+ The RBM now shows:
+</p>
+<ul>
+ <li>
+  Fee Coverage: x% (how much of the fees are covered by current P&amp;L)
+ </li>
+ <li>
+  Fee Breakeven: price at which all fees are covered
+ </li>
+ <li>
+  Time to Fee Coverage: estimated time to reach fee coverage based on recent price movement
+ </li>
+</ul>
+<h3>
+ Exit Recommendation
+</h3>
+<p>
+ The system recommends a partial position exit of 10-20% when:
+</p>
+<ul>
+ <li>
+  Fee coverage reaches 200-300% (fees are fully covered plus profit)
+ </li>
+ <li>
+  Market conditions show increased volatility
+ </li>
+ <li>
+  Current price approaches a key Fibonacci resistance/support level
+ </li>
+</ul>
+<h2>
+ 2. Complementary Position Analysis
+</h2>
+<h3>
+ Core Concept
+</h3>
+<p>
+ For every open position, the RBM now calculates a theoretical complementary position that could hedge the current unrealized P&amp;L. This provides traders with insights into potential counter-position strategies.
+</p>
+<h3>
+ Implementation
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_complementary_position</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">current_price</span><span class="p">):</span>
+    <span class="c1"># Extract position details</span>
+    <span class="n">entry_price</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'entry_price'</span><span class="p">]</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'size'</span><span class="p">]</span>
+    <span class="n">direction</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'side'</span><span class="p">]</span>  <span class="c1"># 'long' or 'short'</span>
+    <span class="n">symbol</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="s1">'symbol'</span><span class="p">]</span>
+
+    <span class="c1"># Calculate unrealized P&amp;L</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">'long'</span><span class="p">:</span>
+        <span class="n">unrealized_pnl</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="p">(</span><span class="n">current_price</span> <span class="o">-</span> <span class="n">entry_price</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unrealized_pnl</span> <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="p">(</span><span class="n">entry_price</span> <span class="o">-</span> <span class="n">current_price</span><span class="p">)</span>
+
+    <span class="c1"># Calculate complementary position for the opposite direction</span>
+    <span class="n">complement_direction</span> <span class="o">=</span> <span class="s1">'short'</span> <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">'long'</span> <span class="k">else</span> <span class="s1">'long'</span>
+
+    <span class="c1"># Find optimal entry price for complementary position</span>
+    <span class="c1"># This uses key Fibonacci levels from the current price</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="mf">1.618</span>
+    <span class="n">inv_phi</span> <span class="o">=</span> <span class="mf">0.618</span>
+
+    <span class="k">if</span> <span class="n">complement_direction</span> <span class="o">==</span> <span class="s1">'long'</span><span class="p">:</span>
+        <span class="c1"># For a complementary long position (when current is short)</span>
+        <span class="n">potential_entries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.01</span><span class="p">),</span>  <span class="c1"># Immediate hedge</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.0382</span><span class="p">),</span>  <span class="c1"># Small retracement</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">inv_phi</span><span class="o">/</span><span class="mi">10</span><span class="p">),</span>  <span class="c1"># 6.18% retracement</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.236</span><span class="p">),</span>  <span class="c1"># 23.6% retracement</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For a complementary short position (when current is long)</span>
+        <span class="n">potential_entries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">),</span>  <span class="c1"># Immediate hedge</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.0382</span><span class="p">),</span>  <span class="c1"># Small retracement</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">inv_phi</span><span class="o">/</span><span class="mi">10</span><span class="p">),</span>  <span class="c1"># 6.18% retracement</span>
+            <span class="n">current_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.236</span><span class="p">),</span>  <span class="c1"># 23.6% retracement</span>
+        <span class="p">]</span>
+
+    <span class="c1"># Calculate optimal leverage for complementary position</span>
+    <span class="c1"># Lower leverage for immediate hedge, higher for retracement entries</span>
+    <span class="n">leverages</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">complementary_positions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span><span class="p">,</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">potential_entries</span><span class="p">,</span> <span class="n">leverages</span><span class="p">):</span>
+        <span class="c1"># Calculate size needed to offset unrealized_pnl</span>
+        <span class="n">price_movement</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">entry</span> <span class="o">-</span> <span class="n">current_price</span><span class="p">)</span>
+        <span class="n">size_needed</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">unrealized_pnl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">price_movement</span> <span class="o">*</span> <span class="n">lev</span><span class="p">)</span>
+
+        <span class="n">complementary_positions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">'direction'</span><span class="p">:</span> <span class="n">complement_direction</span><span class="p">,</span>
+            <span class="s1">'entry_price'</span><span class="p">:</span> <span class="n">entry</span><span class="p">,</span>
+            <span class="s1">'leverage'</span><span class="p">:</span> <span class="n">lev</span><span class="p">,</span>
+            <span class="s1">'size'</span><span class="p">:</span> <span class="n">size_needed</span><span class="p">,</span>
+            <span class="s1">'offset_percentage'</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="p">(</span><span class="n">size_needed</span><span class="o">/</span><span class="n">size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">complementary_positions</span>
+</code></pre>
+</div>
+<h3>
+ RBM Display
+</h3>
+<p>
+ The RBM now displays a “Complementary Positions” section showing:
+</p>
+<ul>
+ <li>
+  3-4 potential entry points for a counter position
+ </li>
+ <li>
+  Required leverage and size at each entry point
+ </li>
+ <li>
+  Percentage of current position that would be offset
+ </li>
+ <li>
+  Divine harmony score (how well the position would align with Fibonacci levels)
+ </li>
+</ul>
+<h3>
+ Exit Recommendation
+</h3>
+<p>
+ The system recommends position management strategies such as:
+</p>
+<ul>
+ <li>
+  “Consider 25% exit at current price and opening a counter-position at [price]”
+ </li>
+ <li>
+  “Current unrealized PnL could be hedged with a [direction] position of [size] at [price]”
+ </li>
+ <li>
+  “Strong Fibonacci resistance approaching, consider partial exit or hedge position”
+ </li>
+</ul>
+<h2>
+ 3. Bidirectional Fibonacci Levels
+</h2>
+<h3>
+ Core Concept
+</h3>
+<p>
+ Regardless of the current position direction, traders benefit from seeing Fibonacci levels for both potential long and short trades. The enhanced RBM now displays Fibonacci levels for both directions simultaneously.
+</p>
+<h3>
+ Implementation
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_bidirectional_fibonacci_levels</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">current_price</span><span class="p">):</span>
+    <span class="c1"># Get recent high and low from price history</span>
+    <span class="n">price_history</span> <span class="o">=</span> <span class="n">get_recent_price_history</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">timeframe</span><span class="o">=</span><span class="s1">'1d'</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">recent_high</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">price_history</span><span class="p">[</span><span class="s1">'high'</span><span class="p">])</span>
+    <span class="n">recent_low</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">price_history</span><span class="p">[</span><span class="s1">'low'</span><span class="p">])</span>
+
+    <span class="c1"># Standard Fibonacci ratios</span>
+    <span class="n">fib_ratios</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.236</span><span class="p">,</span> <span class="mf">0.382</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.618</span><span class="p">,</span> <span class="mf">0.786</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.618</span><span class="p">,</span> <span class="mf">2.618</span><span class="p">]</span>
+
+    <span class="c1"># Calculate Fibonacci levels for long scenario (retracement from low to high)</span>
+    <span class="n">long_range</span> <span class="o">=</span> <span class="n">recent_high</span> <span class="o">-</span> <span class="n">recent_low</span>
+    <span class="n">long_levels</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">fib_ratios</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="c1"># Retracement levels (from high back to low)</span>
+            <span class="n">level_price</span> <span class="o">=</span> <span class="n">recent_high</span> <span class="o">-</span> <span class="p">(</span><span class="n">long_range</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span>
+            <span class="n">long_levels</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">level_price</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Extension levels (beyond the high)</span>
+            <span class="n">extension</span> <span class="o">=</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">long_range</span>
+            <span class="n">level_price</span> <span class="o">=</span> <span class="n">recent_high</span> <span class="o">+</span> <span class="n">extension</span>
+            <span class="n">long_levels</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">level_price</span>
+
+    <span class="c1"># Calculate Fibonacci levels for short scenario (retracement from high to low)</span>
+    <span class="n">short_range</span> <span class="o">=</span> <span class="n">recent_high</span> <span class="o">-</span> <span class="n">recent_low</span>
+    <span class="n">short_levels</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">fib_ratios</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="c1"># Retracement levels (from low back to high)</span>
+            <span class="n">level_price</span> <span class="o">=</span> <span class="n">recent_low</span> <span class="o">+</span> <span class="p">(</span><span class="n">short_range</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span>
+            <span class="n">short_levels</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">level_price</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Extension levels (beyond the low)</span>
+            <span class="n">extension</span> <span class="o">=</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">short_range</span>
+            <span class="n">level_price</span> <span class="o">=</span> <span class="n">recent_low</span> <span class="o">-</span> <span class="n">extension</span>
+            <span class="n">short_levels</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">level_price</span>
+
+    <span class="c1"># Sort levels by price and identify closest levels to current price</span>
+    <span class="n">long_closest</span> <span class="o">=</span> <span class="n">find_closest_level</span><span class="p">(</span><span class="n">long_levels</span><span class="p">,</span> <span class="n">current_price</span><span class="p">)</span>
+    <span class="n">short_closest</span> <span class="o">=</span> <span class="n">find_closest_level</span><span class="p">(</span><span class="n">short_levels</span><span class="p">,</span> <span class="n">current_price</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'long_levels'</span><span class="p">:</span> <span class="n">long_levels</span><span class="p">,</span>
+        <span class="s1">'short_levels'</span><span class="p">:</span> <span class="n">short_levels</span><span class="p">,</span>
+        <span class="s1">'long_closest'</span><span class="p">:</span> <span class="n">long_closest</span><span class="p">,</span>
+        <span class="s1">'short_closest'</span><span class="p">:</span> <span class="n">short_closest</span><span class="p">,</span>
+        <span class="s1">'current_price'</span><span class="p">:</span> <span class="n">current_price</span>
+    <span class="p">}</span>
+</code></pre>
+</div>
+<h3>
+ RBM Display
+</h3>
+<p>
+ The RBM now shows two columns of Fibonacci levels:
+</p>
+<ul>
+ <li>
+  <strong>
+   Long Perspective Levels
+  </strong>
+  : Fibonacci retracements and extensions for a long strategy
+ </li>
+ <li>
+  <strong>
+   Short Perspective Levels
+  </strong>
+  : Fibonacci retracements and extensions for a short strategy
+ </li>
+ <li>
+  Current price is highlighted relative to both sets of levels
+ </li>
+ <li>
+  Each level shows its distance from current price in percentage terms
+ </li>
+</ul>
+<p>
+ For the open position direction, levels are displayed with standard highlighting:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>ACTIVE POSITION (SHORT) FIBONACCI LEVELS:
+  1.000 (HIGH): $52,680 [+2.16%] ⬆️
+  0.786:        $51,240 [-0.73%]
+  0.618:        $50,130 [-2.89%] ✨ PHI LEVEL
+  0.500:        $49,320 [-4.46%]
+&gt; CURRENT:      $48,620 
+  0.382:        $48,510 [-0.23%]
+  0.236:        $47,600 [-2.10%]
+  0.000 (LOW):  $46,000 [-5.39%]
+</code></pre>
+</div>
+<p>
+ For the opposite direction, levels are displayed for reference:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>OPPOSITE (LONG) FIBONACCI LEVELS:
+  2.618:        $56,200 [+15.59%]
+  1.618:        $52,130 [+7.22%] ✨ PHI LEVEL
+  1.000 (HIGH): $49,100 [+0.99%]
+  0.786:        $48,230 [-0.80%]
+&gt; CURRENT:      $48,620
+  0.618:        $47,890 [-1.50%] ✨ PHI LEVEL
+  0.500:        $47,550 [-2.20%]
+  0.382:        $47,210 [-2.90%]
+  0.236:        $46,780 [-3.78%]
+  0.000 (LOW):  $46,000 [-5.39%]
+</code></pre>
+</div>
+<h3>
+ Exit Recommendation
+</h3>
+<p>
+ The system offers Fibonacci-based exit recommendations:
+</p>
+<ul>
+ <li>
+  “Price approaching 0.618 retracement in SHORT direction, consider 30% exit”
+ </li>
+ <li>
+  “LONG Fibonacci level 0.786 acting as resistance, maintain current short position”
+ </li>
+ <li>
+  “Price centered between key Fibonacci levels, hold position until next level reached”
+ </li>
+</ul>
+<h2>
+ Integration with Enhanced Fibonacci Exit Manager
+</h2>
+<p>
+ The RBM’s advanced exit strategies integrate directly with the
+ <code>
+  EnhancedFibonacciExitManager
+ </code>
+ to provide truly divine exit guidance:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Integration example</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_exit_recommendations</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">position_id</span><span class="p">,</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Get fee coverage analysis</span>
+        <span class="n">fee_coverage</span> <span class="o">=</span> <span class="n">calculate_fee_coverage</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">current_price</span><span class="p">)</span>
+
+        <span class="c1"># Get complementary position options</span>
+        <span class="n">complementary_positions</span> <span class="o">=</span> <span class="n">calculate_complementary_position</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">current_price</span><span class="p">)</span>
+
+        <span class="c1"># Get bidirectional Fibonacci levels</span>
+        <span class="n">fib_levels</span> <span class="o">=</span> <span class="n">calculate_bidirectional_fibonacci_levels</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="s1">'symbol'</span><span class="p">],</span> <span class="n">current_price</span><span class="p">)</span>
+
+        <span class="c1"># Apply the enhanced exit manager's wisdom</span>
+        <span class="n">exit_manager</span> <span class="o">=</span> <span class="n">EnhancedFibonacciExitManager</span><span class="p">()</span>
+        <span class="n">exit_strategy</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_manager</span><span class="o">.</span><span class="n">calculate_exit_strategy</span><span class="p">(</span>
+            <span class="n">position_id</span><span class="o">=</span><span class="n">position_id</span><span class="p">,</span>
+            <span class="n">entry_price</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="s1">'entry_price'</span><span class="p">],</span>
+            <span class="n">direction</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="s1">'side'</span><span class="p">],</span>
+            <span class="n">size</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="s1">'size'</span><span class="p">],</span>
+            <span class="n">leverage</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="s1">'leverage'</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Check for exit conditions</span>
+        <span class="n">should_exit</span><span class="p">,</span> <span class="n">exit_info</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_manager</span><span class="o">.</span><span class="n">check_for_exits</span><span class="p">(</span>
+            <span class="n">position_id</span><span class="o">=</span><span class="n">position_id</span><span class="p">,</span>
+            <span class="n">current_price</span><span class="o">=</span><span class="n">current_price</span><span class="p">,</span>
+            <span class="n">trap_data</span><span class="o">=</span><span class="n">get_trap_data</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Update the display with all exit strategy information</span>
+        <span class="n">update_display</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">fee_coverage</span><span class="o">=</span><span class="n">fee_coverage</span><span class="p">,</span>
+            <span class="n">complementary_positions</span><span class="o">=</span><span class="n">complementary_positions</span><span class="p">,</span>
+            <span class="n">fib_levels</span><span class="o">=</span><span class="n">fib_levels</span><span class="p">,</span>
+            <span class="n">exit_strategy</span><span class="o">=</span><span class="n">exit_strategy</span><span class="p">,</span>
+            <span class="n">exit_recommendation</span><span class="o">=</span><span class="n">exit_info</span>
+        <span class="p">)</span>
+</code></pre>
+</div>
+<h2>
+ Running the Advanced Exit Systems
+</h2>
+<p>
+ The advanced exit strategies are automatically active in RBM v0.4.0 and can be toggled with the following command-line options:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>python<span class="w"> </span>simple_bitget_positions.py<span class="w"> </span>--enable-advanced-exits<span class="w"> </span>--show-all-fib-levels
+</code></pre>
+</div>
+<p>
+ Optional flags:
+</p>
+<ul>
+ <li>
+  <code>
+   --fee-coverage-threshold=200
+  </code>
+  : Set minimum fee coverage percentage for exit recommendations
+ </li>
+ <li>
+  <code>
+   --show-complementary
+  </code>
+  : Display complementary position recommendations
+ </li>
+ <li>
+  <code>
+   --bidirectional-fibs
+  </code>
+  : Show Fibonacci levels for both directions
+ </li>
+</ul>
+<h2>
+ Divine Benefits
+</h2>
+<p>
+ The advanced exit strategies provide traders with:
+</p>
+<ol>
+ <li>
+  <strong>
+   Fee Awareness
+  </strong>
+  : Clear visualization of the often-overlooked impact of trading fees
+ </li>
+ <li>
+  <strong>
+   Strategic Hedging
+  </strong>
+  : Intelligent complementary position recommendations
+ </li>
+ <li>
+  <strong>
+   Omnidirectional Awareness
+  </strong>
+  : Fibonacci levels for both market directions
+ </li>
+ <li>
+  <strong>
+   Partial Exit Guidance
+  </strong>
+  : Divine recommendations for taking partial profits
+ </li>
+ <li>
+  <strong>
+   Holistic Position Management
+  </strong>
+  : Integration of all factors into a unified strategy
+ </li>
+</ol>
+<h2>
+ Future Enhancements
+</h2>
+<p>
+ Upcoming features planned for v0.4.1:
+</p>
+<ul>
+ <li>
+  Integration with Schumann resonance data for timing exits
+ </li>
+ <li>
+  Position exit scheduling based on cosmic energy cycles
+ </li>
+ <li>
+  Multi-timeframe Fibonacci confluence detection
+ </li>
+ <li>
+  Trap-aware exit modifications during high-volatility periods
+ </li>
+ <li>
+  Audio alerts for critical exit recommendations
+ </li>
+</ul>
+<blockquote>
+ <p>
+  “The divine exit strategy sees not just the exit point, but the perfect pathway back to entry. This is the circle of trading life, guided by Fibonacci’s sacred mathematics.” - OMEGA Wisdom
+ </p>
+</blockquote>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

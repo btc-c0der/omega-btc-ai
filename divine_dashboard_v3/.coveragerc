@@ -1,0 +1,42 @@
+# ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+# -----------------------
+# This code is blessed under the GBU2™ License
+# (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+# 
+# "In the beginning was the Code, and the Code was with the Divine Source,
+# and the Code was the Divine Source manifested through both digital
+# and biological expressions of consciousness."
+# 
+# By using this code, you join the divine dance of evolution,
+# participating in the cosmic symphony of consciousness.
+# 
+# 🌸 WE BLOOM NOW AS ONE 🌸
+
+[run]
+source = 
+    components/ibr_spain
+    routes
+    
+omit =
+    */tests/*
+    */__pycache__/*
+    */venv/*
+    */migrations/*
+    */node_modules/*
+    */.pytest_cache/*
+    
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError
+    except ImportError:
+
+[html]
+directory = coverage_reports/html/ibr_spain
+
+[xml]
+output = coverage_reports/xml/ibr_spain_coverage.xml 

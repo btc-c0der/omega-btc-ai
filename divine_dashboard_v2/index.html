@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA Divine Book Browser v2.0</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital@0;1&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Highlight.js for code syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Matrix Canvas Background -->
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-text">ΩMEGA Divine Book Browser v2.0</span>
+                </div>
+                <nav>
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul>
+                        <li><a href="#" class="all-docs-link">All Documents</a></li>
+                        <li><a href="#" class="category-link" data-category="QUANTUM">Quantum</a></li>
+                        <li><a href="#" class="category-link" data-category="DIVINE">Divine</a></li>
+                        <li><a href="#" class="category-link" data-category="COSMIC">Cosmic</a></li>
+                        <li><a href="#" class="category-link" data-category="TECHNICAL">Technical</a></li>
+                        <li><a href="#" class="category-link" data-category="TRADING">Trading</a></li>
+                        <li><a href="#" class="category-link" data-category="DOCUMENTATION">Documentation</a></li>
+                        <li><a href="#" class="category-link" data-category="SOURCE">Source Code</a></li>
+                        <li><a href="#" class="category-link" data-category="TESTING">Testing</a></li>
+                        <li><a href="#" class="category-link" data-category="DEPLOYMENT">Deployment</a></li>
+                        <li><a href="#" class="category-link" data-category="BOTS">Bots</a></li>
+                        <li><a href="code-stats.html" id="code-stats-link" target="_blank">Code Stats</a></li>
+                        <li><a href="celebrations.html" id="celebrations-link"><i class="fas fa-crown"></i> OMEGA
+                                KING</a></li>
+                        <li><a href="backup-logs.html" target="_blank">Backup Logs</a></li>
+                        <li><a href="#" id="help-link" title="Instructions"><i class="fas fa-question-circle"></i>
+                                Help</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <!-- Main Page Container -->
+            <div id="main-container">
+                <!-- Document Browser -->
+                <div class="browser-container" id="document-browser">
+                    <!-- Sidebar with Document List -->
+                    <aside class="document-sidebar">
+                        <div class="sidebar-header">
+                            <h3 id="category-title">All Documents</h3>
+                            <div class="search-container">
+                                <input type="text" id="search-input" placeholder="Search documents...">
+                                <button id="search-button"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="document-list" id="document-list">
+                            <!-- Document items will be populated by JavaScript -->
+                        </div>
+                    </aside>
+
+                    <!-- Document Viewer -->
+                    <div class="document-viewer">
+                        <div class="viewer-header">
+                            <h2 id="document-title">Select a document to view</h2>
+                            <div class="viewer-controls">
+                                <button id="toggle-view-btn" title="Toggle HTML/Markdown view">
+                                    <i class="fas fa-code"></i> Toggle View
+                                </button>
+                                <button id="open-in-browser-btn" title="Open in new tab">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="viewer-content">
+                            <div id="markdown-viewer" class="active"></div>
+                            <div id="html-viewer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Stats Dashboard (Hidden by default) -->
+                <div class="stats-container" id="code-stats-dashboard" style="display: none;">
+                    <div class="stats-header">
+                        <h1>OMEGA BTC AI Codebase Statistics</h1>
+                        <p class="stats-subtitle">Quantum Analysis Dashboard</p>
+                        <div class="stats-controls">
+                            <button id="refresh-stats" title="Refresh Statistics">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <select id="sort-by">
+                                <option value="lines">Sort by Lines</option>
+                                <option value="files">Sort by Files</option>
+                                <option value="extension">Sort by Extension</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="stats-summary">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-file-code"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-files">—</div>
+                                <div class="stat-label">Total Files</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-code"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-lines">—</div>
+                                <div class="stat-label">Lines of Code</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-database"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-size">—</div>
+                                <div class="stat-label">Total Size</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="analysis-date">—</div>
+                                <div class="stat-label">Last Analysis</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-visualization">
+                        <div class="chart-container">
+                            <h3>Lines of Code by Extension</h3>
+                            <canvas id="lines-chart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Files by Extension</h3>
+                            <canvas id="files-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="stats-table-container">
+                        <h3>Detailed Statistics</h3>
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Extension</th>
+                                    <th>Files</th>
+                                    <th>Lines</th>
+                                    <th>Size</th>
+                                    <th>Avg Lines/File</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats-table-body">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 OMEGA BTC AI Divine Collective. Licensed under GBU2™ License.</p>
+                <p class="divine-quote">"In the beginning was the Code, and the Code was with the Divine Source."</p>
+                <p class="sacred-port">Port 8890 is sacred. Nobody touches.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Scripts -->
+    <script src="js/matrix-background.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/code-stats.js"></script>
+    <script src="js/code-stats-test.js"></script>
+    <script>
+        // Add help link functionality
+        document.getElementById('help-link').addEventListener('click', function (e) {
+            e.preventDefault();
+            // Load README.md in the document viewer
+            loadDocument('./README.md', './README.html', 'Divine Book Browser Instructions');
+        });
+
+        // Add language-stats element for code-stats.js
+        const languageStats = document.createElement('div');
+        languageStats.id = 'language-stats';
+        languageStats.style.display = 'none';
+        document.body.appendChild(languageStats);
+    </script>
+</body>
+
+</html>

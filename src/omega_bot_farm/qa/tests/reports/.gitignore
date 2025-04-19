@@ -1,0 +1,11 @@
+# Ignore test report files
+*.json
+*.html
+*.xml
+
+# Ignore generated directories
+html/
+*/
+
+# Only keep the .gitignore file itself
+!.gitignore 

@@ -1,0 +1,138 @@
+{
+    "report": {
+        "name": "AIXBT Divine Monitor Coverage Report",
+        "description": "Configuration for the AIXBT Divine Monitor coverage report generation",
+        "version": "1.0.0",
+        "template": {
+            "html": "coverage_report_template.html",
+            "css": "coverage_report_style.css",
+            "output_dir": "coverage_reports",
+            "output_file": "coverage_report.html"
+        },
+        "data": {
+            "coverage_file": "coverage.json",
+            "history_file": "coverage_history.json",
+            "badge_file": "coverage.svg",
+            "badge_template": "coverage_badge_template.svg"
+        },
+        "style": {
+            "theme": "divine",
+            "colors": {
+                "primary": "#4CAF50",
+                "secondary": "#2196F3",
+                "accent": "#9C27B0",
+                "background": "#1a1a1a",
+                "surface": "#2d2d2d",
+                "text": "#ffffff",
+                "text_secondary": "#888888",
+                "border": "#444444"
+            },
+            "fonts": {
+                "primary": "Arial",
+                "secondary": "DejaVu Sans",
+                "fallback": [
+                    "Verdana",
+                    "Geneva",
+                    "sans-serif"
+                ]
+            },
+            "sizes": {
+                "container_width": "1200px",
+                "header_padding": "2rem",
+                "section_padding": "2rem",
+                "card_padding": "1.5rem",
+                "table_padding": "1rem",
+                "badge_padding": "0.5rem 1rem"
+            }
+        },
+        "metrics": {
+            "coverage": {
+                "thresholds": {
+                    "low": 60,
+                    "medium": 80,
+                    "high": 90
+                },
+                "colors": {
+                    "low": "#F44336",
+                    "medium": "#FFC107",
+                    "high": "#4CAF50"
+                }
+            },
+            "divine": {
+                "harmony": {
+                    "weight": 0.4,
+                    "threshold": 0.8
+                },
+                "balance": {
+                    "weight": 0.3,
+                    "threshold": 0.7
+                },
+                "resonance": {
+                    "weight": 0.3,
+                    "threshold": 0.75
+                }
+            }
+        },
+        "visualization": {
+            "trend_chart": {
+                "enabled": true,
+                "type": "line",
+                "options": {
+                    "show_points": true,
+                    "line_width": 3,
+                    "grid_color": "rgba(255,255,255,0.1)",
+                    "axis_color": "#888888",
+                    "label_color": "#ffffff"
+                }
+            },
+            "divine_chart": {
+                "enabled": true,
+                "type": "radar",
+                "options": {
+                    "fill_opacity": 0.5,
+                    "line_width": 2,
+                    "point_size": 4
+                }
+            }
+        },
+        "features": {
+            "badge": {
+                "enabled": true,
+                "auto_update": true,
+                "show_trend": true
+            },
+            "history": {
+                "enabled": true,
+                "max_entries": 100,
+                "trend_window": 7
+            },
+            "divine_effects": {
+                "glow": true,
+                "pulse": true,
+                "gradient": true,
+                "shadow": true
+            }
+        },
+        "export": {
+            "formats": [
+                "html",
+                "json",
+                "svg"
+            ],
+            "compress": false,
+            "include_assets": true
+        },
+        "notifications": {
+            "slack": {
+                "enabled": false,
+                "webhook_url": "",
+                "channel": "#coverage"
+            },
+            "email": {
+                "enabled": false,
+                "recipients": [],
+                "subject": "AIXBT Coverage Report"
+            }
+        }
+    }
+}

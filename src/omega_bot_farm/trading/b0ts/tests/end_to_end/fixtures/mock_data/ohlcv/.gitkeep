@@ -1,0 +1,2 @@
+# This file ensures that the ohlcv directory is tracked by git
+# This directory will contain mock OHLCV data for end-to-end tests 

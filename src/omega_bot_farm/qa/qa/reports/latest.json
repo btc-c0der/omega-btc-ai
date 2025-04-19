@@ -1,0 +1,20 @@
+{
+  "id": "20250406_231252",
+  "timestamp": "2025-04-06T23:12:52.198548",
+  "trigger": "scheduled",
+  "source_files": [],
+  "results": {
+    "COMPLIANCE": {
+      "dimension": "COMPLIANCE",
+      "state": "SKIPPED",
+      "duration": 0.0,
+      "timestamp": "2025-04-06T23:12:52.199383",
+      "details": {
+        "error": "Test script not found: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa/src/omega_bot_farm/qa/tests/compliance"
+      },
+      "entangled_dimensions": []
+    }
+  },
+  "state": "PASSED",
+  "total_duration": 0.0
+}

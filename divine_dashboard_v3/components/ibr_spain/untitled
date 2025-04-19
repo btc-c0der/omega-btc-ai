@@ -1,0 +1,163 @@
+
+
+I'll fix the error in the Divine Dashboard v3 server script and help you run it. The error is in the Gradio interface creation where `_js` is being used instead of `js`.
+
+Read file: divine_dashboard_v3/divine_server.py
+
+
+I see the issue now. Let me check if there are any other Gradio-related files that might help understand the context better:
+
+Ran tool
+
+
+Now let's look at the `run_server.sh` script to understand how the server is started:
+
+Read file: divine_dashboard_v3/run_server.sh
+
+
+Let's fix the issue in the divine_server.py file. The error is in the `_js` parameter which should be `js` according to the error message:
+
+```python:divine_dashboard_v3/divine_server.py
+        # JavaScript to automatically start checking status after running tests
+        run_btn.click(
+            None,
+            None,
+            None,
+            js="startStatusChecking"
+        )
+```
+
+
+Don't worry about the linter errors. They're just indicating that the environment doesn't have these packages installed, but they should be available in the execution environment when the script runs.
+
+Now let's run the server and see if it works:
+
+```bash
+cd divine_dashboard_v3 && ./run_server.sh
+```
+
+
+It seems there's a directory nesting issue. Let's try running the server from the correct location:
+
+```bash
+cd .. && ./run_server.sh
+```
+
+
+We fixed the original `_js` error, but we're encountering another issue. There's a problem with the Gradio launch method - it doesn't accept the `app` parameter. Let's fix that issue as well:
+
+```python:divine_dashboard_v3/divine_server.py
+    # Start the Gradio server in the main thread
+    logger.info(f"✨ Starting Tesla Cybertruck QA Dashboard on port {GRADIO_PORT} ✨")
+    gradio_interface.launch(server_name="0.0.0.0", server_port=GRADIO_PORT, share=False)
+```
+
+
+Now, we need to fix the similar issue in the NFT dashboard launch method:
+
+```python:divine_dashboard_v3/divine_server.py
+            # Start NFT dashboard in a separate thread
+            def run_nft_dashboard():
+                try:
+                    nft_gr_interface.launch(
+                        server_name="0.0.0.0",
+                        server_port=NFT_PORT,
+                        share=False
+                    )
+                except Exception as e:
+                    logger.error(f"Error launching NFT dashboard: {e}")
+```
+
+
+Now let's also check for the missing module 'schedule' in the error messages:
+
+Read file: divine_dashboard_v3/requirements.txt
+
+
+I see that schedule is in requirements.txt, but it might not be installed in your virtual environment. Let's add the missing packages and run the server:
+
+```bash
+pip install -r requirements.txt
+```
+
+
+There's an issue with installing Pillow. Let's install just the missing schedule package:
+
+```bash
+pip install schedule
+```
+
+
+Now let's run the server again and see if our fixes worked:
+
+```bash
+./run_server.sh
+```
+
+
+Great! The server is now running in the background. Now let's try running the DNA Portal:
+
+```bash
+cd divine_dashboard_v3 && ./run_dna_portal.sh
+```
+
+
+Let's check the contents of the run_dna_portal.sh script to see what path it's looking for:
+
+Read file: divine_dashboard_v3/run_dna_portal.sh
+
+
+I see the issue. The script has a directory nesting problem. Let's fix the run_dna_portal.sh script:
+
+```shell script:divine_dashboard_v3/run_dna_portal.sh
+# Run the DNA PCR Quantum LSD Portal
+python3 dna_pcr_quantum_portal.py
+```
+
+
+Now let's run the DNA portal again:
+
+```bash
+./run_dna_portal.sh
+```
+
+
+Great! Now the DNA PCR Quantum LSD Portal is running. Let's check the status of the processes to make sure everything is up and running:
+
+```bash
+ps aux | grep -E '(dna_pcr|divine_server)' | grep -v grep
+```
+
+
+Perfect! Both servers are running:
+1. The Divine Dashboard server (`divine_server.py`) - Main dashboard on port 8889
+2. The DNA PCR Quantum LSD Portal (`dna_pcr_quantum_portal.py`) - DNA Portal on port 7863
+
+Let's check which ports are actually open and listening:
+
+```bash
+lsof -i -P | grep -E '(7860|7861|7862|7863|8889)' | grep LISTEN
+```
+
+
+Excellent! All the required ports are open and listening:
+
+1. 8889 - Main Dashboard (divine_server.py)
+2. 7860 - Tesla Cybertruck QA Dashboard (divine_server.py)
+3. 7862 - NFT Dashboard (divine_server.py)
+4. 7863 - DNA PCR Quantum LSD Portal (dna_pcr_quantum_portal.py)
+
+Now you can access the Divine Dashboard v3 and all its components by opening these URLs in your browser:
+
+- Main Dashboard: http://localhost:8889
+- Tesla Cybertruck QA Dashboard: http://localhost:7860
+- NFT Dashboard: http://localhost:7862
+- DNA PCR Quantum LSD Portal: http://localhost:7863
+
+The fixes we made:
+
+1. Changed `_js` to `js` in the Gradio interface call to fix the initial error
+2. Removed the `app` parameter from the Gradio launch methods since it's not supported in this version of Gradio
+3. Fixed the directory path issue in the run_dna_portal.sh script by removing the unnecessary `cd` command
+
+The whole Divine Dashboard v3 system is now up and running successfully with all its components!

@@ -1,0 +1,375 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: s4t0sh1-metrics
+  labels:
+    app: qpow-s4t0sh1
+    type: metrics-testnet
+    creator: omega-divine-collective
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s4t0sh1-testnet-config
+  namespace: s4t0sh1-metrics
+data:
+  testnet.conf: |
+    {
+      "node_count": 3,
+      "mining_interval_seconds": 20,
+      "transaction_interval_seconds": 5,
+      "quantum_resistance_level": "high",
+      "validator_privacy_mode": "enhanced",
+      "metrics_enabled": true,
+      "metrics_output_directory": "/data/metrics",
+      "log_level": "info"
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s4t0sh1-metrics-config
+  namespace: s4t0sh1-metrics
+data:
+  metrics.conf: |
+    {
+      "collection_interval_seconds": 10,
+      "output_directory": "/data/metrics",
+      "dashboard_dir": "/data/dashboard",
+      "dashboard_refresh_interval_seconds": 30,
+      "prometheus_enabled": true,
+      "prometheus_endpoint": "/metrics",
+      "prometheus_port": 9090,
+      "retention_days": 7,
+      "security_metrics": {
+        "hash_metrics": true,
+        "validator_privacy": true,
+        "signature_metrics": true,
+        "attack_simulation": true
+      }
+    }
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: s4t0sh1-metrics-data
+  namespace: s4t0sh1-metrics
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: s4t0sh1-metrics-sa
+  namespace: s4t0sh1-metrics
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: s4t0sh1-metrics-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: s4t0sh1-metrics-role-binding
+subjects:
+- kind: ServiceAccount
+  name: s4t0sh1-metrics-sa
+  namespace: s4t0sh1-metrics
+roleRef:
+  kind: ClusterRole
+  name: s4t0sh1-metrics-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s4t0sh1-testnet-metrics
+  namespace: s4t0sh1-metrics
+  labels:
+    app: s4t0sh1-testnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s4t0sh1-testnet
+  template:
+    metadata:
+      labels:
+        app: s4t0sh1-testnet
+    spec:
+      serviceAccountName: s4t0sh1-metrics-sa
+      volumes:
+        - name: metrics-data
+          persistentVolumeClaim:
+            claimName: s4t0sh1-metrics-data
+        - name: testnet-config
+          configMap:
+            name: s4t0sh1-testnet-config
+        - name: metrics-config
+          configMap:
+            name: s4t0sh1-metrics-config
+      containers:
+        - name: s4t0sh1-testnet-runner
+          image: qpow-testnet:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--nodes=3"
+            - "--mining-interval=20"
+            - "--transaction-interval=5"
+            - "--data-dir=/data/testnet"
+            - "--metrics-dir=/data/metrics"
+            - "--validator-privacy=enhanced"
+          volumeMounts:
+            - name: metrics-data
+              mountPath: /data
+            - name: testnet-config
+              mountPath: /app/config/testnet
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          ports:
+            - containerPort: 9000
+              name: node1
+            - containerPort: 9001
+              name: node2
+            - containerPort: 9002
+              name: node3
+            - containerPort: 9003
+              name: api
+        
+        - name: s4t0sh1-metrics-dashboard
+          image: qpow-testnet:latest
+          imagePullPolicy: IfNotPresent
+          command: 
+            - "python"
+            - "-m"
+            - "quantum_pow.run_metrics_dashboard"
+            - "server"
+            - "--metrics-path=/data/metrics"
+            - "--dashboard-path=/data/dashboard"
+            - "--host=0.0.0.0"
+            - "--port=8080"
+          volumeMounts:
+            - name: metrics-data
+              mountPath: /data
+            - name: metrics-config
+              mountPath: /app/config/metrics
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "384Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          ports:
+            - containerPort: 8080
+              name: dashboard
+            - containerPort: 9090
+              name: prometheus
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s4t0sh1-testnet
+  namespace: s4t0sh1-metrics
+  labels:
+    app: s4t0sh1-testnet
+spec:
+  type: ClusterIP
+  selector:
+    app: s4t0sh1-testnet
+  ports:
+    - port: 9000
+      targetPort: 9000
+      name: node1
+    - port: 9001
+      targetPort: 9001
+      name: node2
+    - port: 9002
+      targetPort: 9002
+      name: node3
+    - port: 9003
+      targetPort: 9003
+      name: api
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s4t0sh1-metrics
+  namespace: s4t0sh1-metrics
+  labels:
+    app: s4t0sh1-testnet
+    component: metrics
+spec:
+  type: ClusterIP
+  selector:
+    app: s4t0sh1-testnet
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: dashboard
+    - port: 9090
+      targetPort: 9090
+      name: prometheus
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: s4t0sh1-metrics-collector
+  namespace: s4t0sh1-metrics
+spec:
+  schedule: "*/5 * * * *"  # Every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: s4t0sh1-metrics-sa
+          containers:
+          - name: metrics-collector
+            image: qpow-testnet:latest
+            command: 
+              - "python"
+              - "-m"
+              - "quantum_pow.run_metrics_dashboard"
+              - "collect"
+              - "--config-path=/app/config/metrics/metrics.conf"
+              - "--output-dir=/data/metrics"
+            volumeMounts:
+              - name: metrics-data
+                mountPath: /data
+              - name: metrics-config
+                configMap:
+                  name: s4t0sh1-metrics-config
+          restartPolicy: OnFailure
+          volumes:
+            - name: metrics-data
+              persistentVolumeClaim:
+                claimName: s4t0sh1-metrics-data
+            - name: metrics-config
+              configMap:
+                name: s4t0sh1-metrics-config
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: s4t0sh1-health-reporter
+  namespace: s4t0sh1-metrics
+spec:
+  schedule: "*/10 * * * *"  # Every 10 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: health-reporter
+            image: qpow-testnet:latest
+            command: 
+              - "python"
+              - "-c"
+              - |
+                import requests
+                import json
+                import datetime
+                import os
+                
+                # Create health report directory if it doesn't exist
+                health_dir = "/data/health"
+                os.makedirs(health_dir, exist_ok=True)
+                
+                # Collect health data from testnet nodes
+                nodes = ["http://s4t0sh1-testnet:9000", "http://s4t0sh1-testnet:9001", "http://s4t0sh1-testnet:9002"]
+                report = {
+                    "timestamp": datetime.datetime.now().isoformat(),
+                    "nodes": []
+                }
+                
+                for i, node_url in enumerate(nodes):
+                    try:
+                        resp = requests.get(f"{node_url}/health", timeout=5)
+                        report["nodes"].append({
+                            "node_id": i,
+                            "status": "healthy" if resp.status_code == 200 else "unhealthy",
+                            "response_time_ms": resp.elapsed.total_seconds() * 1000,
+                            "details": resp.json() if resp.status_code == 200 else {}
+                        })
+                    except Exception as e:
+                        report["nodes"].append({
+                            "node_id": i,
+                            "status": "error",
+                            "error": str(e)
+                        })
+                
+                # Save report
+                filename = f"{health_dir}/health_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                with open(filename, "w") as f:
+                    json.dump(report, f, indent=2)
+                
+                # Create latest symlink
+                latest = f"{health_dir}/health_latest.json"
+                if os.path.exists(latest):
+                    os.remove(latest)
+                os.symlink(filename, latest)
+                
+                print(f"Health report saved to {filename}")
+            volumeMounts:
+              - name: metrics-data
+                mountPath: /data
+          restartPolicy: OnFailure
+          volumes:
+            - name: metrics-data
+              persistentVolumeClaim:
+                claimName: s4t0sh1-metrics-data 

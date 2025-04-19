@@ -1,0 +1,751 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Trading</span></p>
+    </div>
+    
+    <h1>
+ Fibonacci Trading Metrics: Technical Implementation
+</h1>
+<h2>
+ Introduction
+</h2>
+<p>
+ This document details the technical implementation of the Fibonacci Golden Ratio analytics used in the BitGet trading dashboard. These metrics leverage the mathematical properties of the Fibonacci sequence and the Golden Ratio (Φ = 1.618…) to analyze trading positions and market movements.
+</p>
+<h2>
+ Core Mathematical Principles
+</h2>
+<h3>
+ The Fibonacci Sequence
+</h3>
+<p>
+ The Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, …) has the property that each number is the sum of the two preceding ones. The ratio of consecutive Fibonacci numbers converges to the Golden Ratio (Φ = 1.618033988749895…).
+</p>
+<h3>
+ Key Fibonacci Ratios
+</h3>
+<p>
+ The implementation uses the following key ratios derived from the Fibonacci sequence:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Core Fibonacci ratios</span>
+<span class="n">PHI</span> <span class="o">=</span> <span class="mf">1.618033988749895</span>  <span class="c1"># Golden Ratio (Φ)</span>
+<span class="n">PHI_INVERSE</span> <span class="o">=</span> <span class="mf">0.618033988749895</span>  <span class="c1"># 1/Φ</span>
+<span class="n">PHI_SQUARED</span> <span class="o">=</span> <span class="mf">2.618033988749895</span>  <span class="c1"># Φ²</span>
+<span class="n">PHI_CUBED</span> <span class="o">=</span> <span class="mf">4.236067977499790</span>  <span class="c1"># Φ³</span>
+
+<span class="c1"># Fibonacci retracement/extension levels</span>
+<span class="n">FIBONACCI_LEVELS</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.236</span><span class="p">,</span> <span class="mf">0.382</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.618</span><span class="p">,</span> <span class="mf">0.786</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.618</span><span class="p">,</span> <span class="mf">2.618</span><span class="p">,</span> <span class="mf">4.236</span><span class="p">]</span>
+</code></pre>
+</div>
+<h2>
+ Algorithm Implementations
+</h2>
+<h3>
+ 1. Phi Resonance Calculation
+</h3>
+<p>
+ Phi Resonance measures how closely position sizing aligns with the Golden Ratio:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_phi_resonance</span><span class="p">(</span><span class="n">long_positions</span><span class="p">,</span> <span class="n">short_positions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculate how closely the ratio of long to short positions</span>
+<span class="sd">    aligns with the Golden Ratio (Φ) or its inverse (1/Φ).</span>
+
+<span class="sd">    Returns a value between 0-1, where 1 is perfect alignment.</span>
+<span class="sd">    """</span>
+    <span class="c1"># Default to 0.5 if no positions</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">long_positions</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">short_positions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.5</span>
+
+    <span class="n">total_long_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'contracts'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">long_positions</span><span class="p">)</span>
+    <span class="n">total_short_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'contracts'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">short_positions</span><span class="p">)</span>
+
+    <span class="c1"># If only one side has positions</span>
+    <span class="k">if</span> <span class="n">total_long_size</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">total_short_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.618</span>  <span class="c1"># Golden ratio as the baseline</span>
+
+    <span class="c1"># Calculate ratio between long and short positions</span>
+    <span class="n">long_short_ratio</span> <span class="o">=</span> <span class="n">total_long_size</span> <span class="o">/</span> <span class="n">total_short_size</span>
+
+    <span class="c1"># Calculate how close the ratio is to PHI (1.618) or its inverse (0.618)</span>
+    <span class="n">phi_alignment</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+        <span class="nb">abs</span><span class="p">(</span><span class="n">long_short_ratio</span> <span class="o">-</span> <span class="n">PHI</span><span class="p">)</span> <span class="o">/</span> <span class="n">PHI</span><span class="p">,</span>
+        <span class="nb">abs</span><span class="p">(</span><span class="n">long_short_ratio</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">PHI</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">PHI</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Normalize to a 0-1 scale where 1 is perfect alignment</span>
+    <span class="n">phi_resonance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">phi_alignment</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">phi_resonance</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</code></pre>
+</div>
+<h3>
+ 2. Entry Harmony Calculation
+</h3>
+<p>
+ Entry Harmony measures how well entry prices align with Fibonacci levels:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_entry_harmony</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">current_price</span><span class="p">,</span> <span class="n">market_high</span><span class="p">,</span> <span class="n">market_low</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculate how well an entry price aligns with Fibonacci retracement levels</span>
+<span class="sd">    based on recent market high/low.</span>
+
+<span class="sd">    Returns a value between 0-1, where 1 is perfect harmony.</span>
+<span class="sd">    """</span>
+    <span class="n">entry_price</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">position</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'entryPrice'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">entry_price</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">market_high</span> <span class="o">==</span> <span class="n">market_low</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.5</span>  <span class="c1"># Default value if no entry price or flat market</span>
+
+    <span class="c1"># Calculate all Fibonacci retracement levels</span>
+    <span class="n">fib_levels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">price_range</span> <span class="o">=</span> <span class="n">market_high</span> <span class="o">-</span> <span class="n">market_low</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">FIBONACCI_LEVELS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>  <span class="c1"># Retracement levels</span>
+            <span class="n">fib_levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">market_high</span> <span class="o">-</span> <span class="p">(</span><span class="n">price_range</span> <span class="o">*</span> <span class="n">level</span><span class="p">))</span>
+
+    <span class="c1"># Find closest Fibonacci level to entry price</span>
+    <span class="n">closest_distance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">fib_levels</span><span class="p">:</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">entry_price</span> <span class="o">-</span> <span class="n">level</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">closest_distance</span><span class="p">:</span>
+            <span class="n">closest_distance</span> <span class="o">=</span> <span class="n">distance</span>
+
+    <span class="c1"># Normalize the distance as a percentage of the price range</span>
+    <span class="n">normalized_distance</span> <span class="o">=</span> <span class="n">closest_distance</span> <span class="o">/</span> <span class="n">price_range</span>
+
+    <span class="c1"># Convert to harmony score (1 = perfect alignment, 0 = furthest from any Fib level)</span>
+    <span class="n">harmony</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">normalized_distance</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># Scale to make it stricter</span>
+
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">harmony</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</code></pre>
+</div>
+<h3>
+ 3. Fibonacci Price Level Generation
+</h3>
+<p>
+ This algorithm generates Fibonacci retracement and extension levels for a given price range:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_levels</span><span class="p">(</span><span class="n">entry_price</span><span class="p">,</span> <span class="n">is_long</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">range_percent</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Generate Fibonacci retracement and extension levels based on entry price.</span>
+<span class="sd">    For long positions, retracements are below entry, extensions above.</span>
+<span class="sd">    For short positions, retracements are above entry, extensions below.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        entry_price (float): Entry price of the position</span>
+<span class="sd">        is_long (bool): True if long position, False if short</span>
+<span class="sd">        range_percent (float): Percentage of price to use for range calculation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Fibonacci levels keyed by ratio</span>
+<span class="sd">    """</span>
+    <span class="n">fib_levels</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">is_long</span><span class="p">:</span>
+        <span class="c1"># For long positions</span>
+        <span class="n">range_high</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">range_percent</span><span class="p">)</span>
+        <span class="n">range_low</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">range_percent</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For short positions (inverse)</span>
+        <span class="n">range_high</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">range_percent</span><span class="p">)</span>
+        <span class="n">range_low</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">range_percent</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">FIBONACCI_LEVELS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_long</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="c1"># Levels below entry (retracement)</span>
+                <span class="n">fib_levels</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">-</span> <span class="p">((</span><span class="n">entry_price</span> <span class="o">-</span> <span class="n">range_low</span><span class="p">)</span> <span class="o">*</span> <span class="n">level</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Levels above entry (extension)</span>
+                <span class="n">normalized_level</span> <span class="o">=</span> <span class="p">(</span><span class="n">level</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.5</span>  <span class="c1"># Normalize to 0-1 range</span>
+                <span class="n">fib_levels</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">+</span> <span class="p">((</span><span class="n">range_high</span> <span class="o">-</span> <span class="n">entry_price</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalized_level</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># For short positions, reverse the direction</span>
+            <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="c1"># Levels above entry (retracement)</span>
+                <span class="n">fib_levels</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">+</span> <span class="p">((</span><span class="n">range_high</span> <span class="o">-</span> <span class="n">entry_price</span><span class="p">)</span> <span class="o">*</span> <span class="n">level</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Levels below entry (extension)</span>
+                <span class="n">normalized_level</span> <span class="o">=</span> <span class="p">(</span><span class="n">level</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.5</span>
+                <span class="n">fib_levels</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entry_price</span> <span class="o">-</span> <span class="p">((</span><span class="n">entry_price</span> <span class="o">-</span> <span class="n">range_low</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalized_level</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fib_levels</span>
+</code></pre>
+</div>
+<h3>
+ 4. Position Balance Calculation
+</h3>
+<p>
+ Position Balance analyzes the ratio of long to short positions against the Golden Ratio:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_position_balance</span><span class="p">(</span><span class="n">long_positions</span><span class="p">,</span> <span class="n">short_positions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculate position balance metrics based on Golden Ratio principles.</span>
+<span class="sd">    Optimal balance is when long:short ratio approaches 0.618:1 or 1:1.618.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Position balance metrics</span>
+<span class="sd">    """</span>
+    <span class="n">total_long_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'contracts'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">long_positions</span><span class="p">)</span>
+    <span class="n">total_short_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'contracts'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">short_positions</span><span class="p">)</span>
+
+    <span class="c1"># Calculate position ratios</span>
+    <span class="k">if</span> <span class="n">total_short_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">long_short_ratio</span> <span class="o">=</span> <span class="n">total_long_size</span> <span class="o">/</span> <span class="n">total_short_size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">long_short_ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">total_long_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">short_long_ratio</span> <span class="o">=</span> <span class="n">total_short_size</span> <span class="o">/</span> <span class="n">total_long_size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">short_long_ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">)</span>
+
+    <span class="c1"># Calculate optimal ratios based on Golden Ratio</span>
+    <span class="n">ls_optimal</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">long_short_ratio</span> <span class="o">-</span> <span class="n">PHI_INVERSE</span><span class="p">)</span> <span class="o">/</span> <span class="n">PHI_INVERSE</span>
+    <span class="n">sl_optimal</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">short_long_ratio</span> <span class="o">-</span> <span class="n">PHI_INVERSE</span><span class="p">)</span> <span class="o">/</span> <span class="n">PHI_INVERSE</span>
+
+    <span class="c1"># Determine the more balanced ratio</span>
+    <span class="k">if</span> <span class="n">ls_optimal</span> <span class="o">&lt;=</span> <span class="n">sl_optimal</span><span class="p">:</span>
+        <span class="n">optimal_ratio</span> <span class="o">=</span> <span class="s2">"long:short"</span>
+        <span class="n">optimal_value</span> <span class="o">=</span> <span class="n">PHI_INVERSE</span>
+        <span class="n">current_ratio</span> <span class="o">=</span> <span class="n">long_short_ratio</span>
+        <span class="n">balance_score</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ls_optimal</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">optimal_ratio</span> <span class="o">=</span> <span class="s2">"short:long"</span>
+        <span class="n">optimal_value</span> <span class="o">=</span> <span class="n">PHI_INVERSE</span>
+        <span class="n">current_ratio</span> <span class="o">=</span> <span class="n">short_long_ratio</span>
+        <span class="n">balance_score</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">sl_optimal</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"ratio_type"</span><span class="p">:</span> <span class="n">optimal_ratio</span><span class="p">,</span>
+        <span class="s2">"optimal_value"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">optimal_value</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"current_ratio"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">current_ratio</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"balance_score"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">balance_score</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">}</span>
+</code></pre>
+</div>
+<h3>
+ 5. Harmonic State Calculation
+</h3>
+<p>
+ Harmonic State determines the overall market harmony based on PnL distribution:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_harmonic_state</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">performance_metrics</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculate the harmonic state of positions and performance.</span>
+<span class="sd">    Combines multiple Fibonacci metrics into a single harmony score.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Harmonic state metrics</span>
+<span class="sd">    """</span>
+    <span class="c1"># Extract relevant metrics</span>
+    <span class="n">phi_resonance</span> <span class="o">=</span> <span class="n">performance_metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'phi_resonance'</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">win_rate</span> <span class="o">=</span> <span class="n">performance_metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'win_rate'</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">profit_factor</span> <span class="o">=</span> <span class="n">performance_metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'profit_factor'</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># Calculate deviation from ideal Fibonacci targets</span>
+    <span class="n">win_rate_target</span> <span class="o">=</span> <span class="n">PHI_INVERSE</span>  <span class="c1"># 0.618</span>
+    <span class="n">win_rate_deviation</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">win_rate</span> <span class="o">-</span> <span class="n">win_rate_target</span><span class="p">)</span> <span class="o">/</span> <span class="n">win_rate_target</span>
+
+    <span class="n">profit_factor_target</span> <span class="o">=</span> <span class="n">PHI_SQUARED</span>  <span class="c1"># 2.618</span>
+    <span class="k">if</span> <span class="n">profit_factor</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">profit_factor_deviation</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">profit_factor</span> <span class="o">-</span> <span class="n">profit_factor_target</span><span class="p">)</span> <span class="o">/</span> <span class="n">profit_factor_target</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">profit_factor_deviation</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Maximum deviation</span>
+
+    <span class="c1"># Calculate PnL distribution harmony</span>
+    <span class="n">total_profit</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+        <span class="n">pnl</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'unrealizedPnl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">pnl</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">total_profit</span> <span class="o">+=</span> <span class="n">pnl</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">total_loss</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pnl</span><span class="p">)</span>
+
+    <span class="c1"># Calculate profit:loss ratio and compare to PHI</span>
+    <span class="k">if</span> <span class="n">total_loss</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">profit_loss_ratio</span> <span class="o">=</span> <span class="n">total_profit</span> <span class="o">/</span> <span class="n">total_loss</span>
+        <span class="n">pl_deviation</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">profit_loss_ratio</span> <span class="o">-</span> <span class="n">PHI</span><span class="p">)</span> <span class="o">/</span> <span class="n">PHI</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pl_deviation</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># No losses is harmonious</span>
+
+    <span class="c1"># Combine all harmony factors (weighted)</span>
+    <span class="n">harmony_factors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">phi_resonance</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>            <span class="c1"># Position sizing harmony</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">win_rate_deviation</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span>   <span class="c1"># Win rate harmony</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">profit_factor_deviation</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="c1"># Profit factor harmony</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pl_deviation</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>          <span class="c1"># PnL distribution harmony</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Calculate weighted harmony score</span>
+    <span class="n">harmony_score</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score</span> <span class="o">*</span> <span class="n">weight</span> <span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">harmony_factors</span><span class="p">)</span>
+
+    <span class="c1"># Classify harmony state</span>
+    <span class="k">if</span> <span class="n">harmony_score</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="s2">"Divine Harmony"</span>
+    <span class="k">elif</span> <span class="n">harmony_score</span> <span class="o">&gt;=</span> <span class="mf">0.6</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="s2">"Balanced Flow"</span>
+    <span class="k">elif</span> <span class="n">harmony_score</span> <span class="o">&gt;=</span> <span class="mf">0.4</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="s2">"Neutral State"</span>
+    <span class="k">elif</span> <span class="n">harmony_score</span> <span class="o">&gt;=</span> <span class="mf">0.2</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="s2">"Mild Dissonance"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="s2">"Chaotic Disharmony"</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"harmony_score"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">harmony_score</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"state"</span><span class="p">:</span> <span class="n">state</span><span class="p">,</span>
+        <span class="s2">"component_scores"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"position_harmony"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">phi_resonance</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="s2">"win_rate_harmony"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">win_rate_deviation</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="s2">"profit_factor_harmony"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">profit_factor_deviation</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="s2">"pnl_distribution_harmony"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pl_deviation</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+</div>
+<h2>
+ Bio-Energy Integration
+</h2>
+<p>
+ For traders using the QuantumBitGetTrader, additional metrics are calculated that integrate quantum principles with Fibonacci harmony:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_bio_energy_metrics</span><span class="p">(</span><span class="n">position_data</span><span class="p">,</span> <span class="n">market_data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculate quantum bio-energy metrics based on position alignment</span>
+<span class="sd">    with Fibonacci patterns and quantum resonance.</span>
+
+<span class="sd">    This is an advanced feature that integrates with QuantumBitGetTrader</span>
+<span class="sd">    if available, otherwise uses synthetic approximations.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Bio-energy metrics</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Try to import QuantumBitGetTrader</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">omega_ai.trading.quantum.bitget_quantum_trader</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumBitGetTrader</span>
+        <span class="n">quantum_trader</span> <span class="o">=</span> <span class="n">QuantumBitGetTrader</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">quantum_trader</span><span class="o">.</span><span class="n">calculate_bio_energy</span><span class="p">(</span><span class="n">position_data</span><span class="p">,</span> <span class="n">market_data</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="c1"># Fallback to synthetic bio-energy approximation</span>
+        <span class="k">return</span> <span class="n">_approximate_bio_energy</span><span class="p">(</span><span class="n">position_data</span><span class="p">,</span> <span class="n">market_data</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_approximate_bio_energy</span><span class="p">(</span><span class="n">position_data</span><span class="p">,</span> <span class="n">market_data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Approximate bio-energy metrics when quantum trader is unavailable.</span>
+<span class="sd">    Uses Fibonacci patterns to create synthetic bio-energy readings.</span>
+<span class="sd">    """</span>
+    <span class="c1"># Extract position metrics</span>
+    <span class="n">phi_resonance</span> <span class="o">=</span> <span class="n">position_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'phi_resonance'</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="c1"># Extract market data</span>
+    <span class="n">current_price</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">market_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'price'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">daily_range</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">market_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'daily_range'</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Calculate normalized price position in daily range</span>
+    <span class="k">if</span> <span class="s1">'daily_high'</span> <span class="ow">in</span> <span class="n">market_data</span> <span class="ow">and</span> <span class="s1">'daily_low'</span> <span class="ow">in</span> <span class="n">market_data</span><span class="p">:</span>
+        <span class="n">daily_high</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">market_data</span><span class="p">[</span><span class="s1">'daily_high'</span><span class="p">])</span>
+        <span class="n">daily_low</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">market_data</span><span class="p">[</span><span class="s1">'daily_low'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">daily_high</span> <span class="o">!=</span> <span class="n">daily_low</span><span class="p">:</span>
+            <span class="n">price_position</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_price</span> <span class="o">-</span> <span class="n">daily_low</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">daily_high</span> <span class="o">-</span> <span class="n">daily_low</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">price_position</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">price_position</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="c1"># Find closest Fibonacci level</span>
+    <span class="n">closest_fib_level</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">FIBONACCI_LEVELS</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">price_position</span><span class="p">))</span>
+    <span class="n">fib_alignment</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">price_position</span> <span class="o">-</span> <span class="n">closest_fib_level</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Calculate bio-energy components</span>
+    <span class="n">market_energy</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">fib_alignment</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Scale to 0-10</span>
+    <span class="n">position_energy</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">phi_resonance</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Scale to 0-10</span>
+
+    <span class="c1"># Combined energy (weighted average)</span>
+    <span class="n">combined_energy</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">market_energy</span> <span class="o">*</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">position_energy</span> <span class="o">*</span> <span class="mf">0.4</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"market_energy"</span><span class="p">:</span> <span class="n">market_energy</span><span class="p">,</span>
+        <span class="s2">"position_energy"</span><span class="p">:</span> <span class="n">position_energy</span><span class="p">,</span> 
+        <span class="s2">"combined_energy"</span><span class="p">:</span> <span class="n">combined_energy</span><span class="p">,</span>
+        <span class="s2">"energy_state"</span><span class="p">:</span> <span class="n">_classify_energy_state</span><span class="p">(</span><span class="n">combined_energy</span><span class="p">),</span>
+        <span class="s2">"fib_alignment"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">fib_alignment</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_classify_energy_state</span><span class="p">(</span><span class="n">energy_level</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Classify energy level into a descriptive state"""</span>
+    <span class="k">if</span> <span class="n">energy_level</span> <span class="o">&gt;=</span> <span class="mf">8.5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Quantum Flow"</span>
+    <span class="k">elif</span> <span class="n">energy_level</span> <span class="o">&gt;=</span> <span class="mf">7.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Harmonic Resonance"</span>
+    <span class="k">elif</span> <span class="n">energy_level</span> <span class="o">&gt;=</span> <span class="mf">5.5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Balanced Energy"</span>
+    <span class="k">elif</span> <span class="n">energy_level</span> <span class="o">&gt;=</span> <span class="mf">4.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Neutral Flow"</span>
+    <span class="k">elif</span> <span class="n">energy_level</span> <span class="o">&gt;=</span> <span class="mf">2.5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Energy Drain"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Quantum Dissonance"</span>
+</code></pre>
+</div>
+<h2>
+ Performance Metrics with Fibonacci Targets
+</h2>
+<p>
+ The system calculates trading performance metrics with targets based on Fibonacci ratios:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_performance_metrics</span><span class="p">(</span><span class="n">trade_history</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculate performance metrics with Fibonacci-aligned targets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trade_history (list): List of historical trades</span>
+<span class="sd">        positions (list): Current open positions</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Performance metrics</span>
+<span class="sd">    """</span>
+    <span class="c1"># Calculate win/loss metrics</span>
+    <span class="n">total_trades</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trade_history</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_trades</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"win_rate"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">"profit_factor"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">"phi_resonance"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">"fibonacci_alignment"</span><span class="p">:</span> <span class="mf">0.5</span>
+        <span class="p">}</span>
+
+    <span class="n">winning_trades</span> <span class="o">=</span> <span class="p">[</span><span class="n">trade</span> <span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="n">trade_history</span> <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">trade</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'realizedPnl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">losing_trades</span> <span class="o">=</span> <span class="p">[</span><span class="n">trade</span> <span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="n">trade_history</span> <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">trade</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'realizedPnl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">win_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">winning_trades</span><span class="p">)</span>
+    <span class="n">loss_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">losing_trades</span><span class="p">)</span>
+
+    <span class="c1"># Calculate win rate</span>
+    <span class="n">win_rate</span> <span class="o">=</span> <span class="n">win_count</span> <span class="o">/</span> <span class="n">total_trades</span> <span class="k">if</span> <span class="n">total_trades</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="c1"># Calculate profit factor</span>
+    <span class="n">total_profit</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">trade</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'realizedPnl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="n">winning_trades</span><span class="p">)</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">trade</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'realizedPnl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span> <span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="n">losing_trades</span><span class="p">)</span>
+
+    <span class="n">profit_factor</span> <span class="o">=</span> <span class="n">total_profit</span> <span class="o">/</span> <span class="n">total_loss</span> <span class="k">if</span> <span class="n">total_loss</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">)</span>
+
+    <span class="c1"># Calculate open position metrics</span>
+    <span class="n">long_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'side'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'long'</span><span class="p">]</span>
+    <span class="n">short_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'side'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'short'</span><span class="p">]</span>
+
+    <span class="c1"># Calculate Phi resonance of current positions</span>
+    <span class="n">phi_resonance</span> <span class="o">=</span> <span class="n">calculate_phi_resonance</span><span class="p">(</span><span class="n">long_positions</span><span class="p">,</span> <span class="n">short_positions</span><span class="p">)</span>
+
+    <span class="c1"># Calculate deviation from Fibonacci target metrics</span>
+    <span class="n">win_rate_target</span> <span class="o">=</span> <span class="n">PHI_INVERSE</span>  <span class="c1"># 0.618</span>
+    <span class="n">win_rate_alignment</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">win_rate</span> <span class="o">-</span> <span class="n">win_rate_target</span><span class="p">)</span> <span class="o">/</span> <span class="n">win_rate_target</span><span class="p">)</span>
+
+    <span class="n">profit_factor_target</span> <span class="o">=</span> <span class="n">PHI_SQUARED</span>  <span class="c1"># 2.618</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">profit_factor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">profit_factor</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">profit_factor_alignment</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">profit_factor</span> <span class="o">-</span> <span class="n">profit_factor_target</span><span class="p">)</span> <span class="o">/</span> <span class="n">profit_factor_target</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">profit_factor_alignment</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># Default value</span>
+
+    <span class="c1"># Combined alignment score</span>
+    <span class="n">fibonacci_alignment</span> <span class="o">=</span> <span class="p">(</span><span class="n">win_rate_alignment</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">profit_factor_alignment</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"win_rate"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">win_rate</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"win_rate_target"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">win_rate_target</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"win_rate_alignment"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">win_rate_alignment</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"profit_factor"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">profit_factor</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">profit_factor</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">),</span>
+        <span class="s2">"profit_factor_target"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">profit_factor_target</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"profit_factor_alignment"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">profit_factor_alignment</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"phi_resonance"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">phi_resonance</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">"fibonacci_alignment"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">fibonacci_alignment</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">}</span>
+</code></pre>
+</div>
+<h2>
+ Mathematical Properties and Formulas
+</h2>
+<h3>
+ Golden Ratio Properties
+</h3>
+<p>
+ The implementation leverages these mathematical properties of the Golden Ratio:
+</p>
+<ol>
+ <li>
+  Φ² = Φ + 1 ≈ 2.618
+ </li>
+ <li>
+  1/Φ = Φ - 1 ≈ 0.618
+ </li>
+ <li>
+  Φ³ = Φ² + Φ ≈ 4.236
+ </li>
+</ol>
+<h3>
+ Fibonacci Retracement Formulas
+</h3>
+<p>
+ For a price range with high (H) and low (L):
+</p>
+<ul>
+ <li>
+  0% level = H
+ </li>
+ <li>
+  23.6% level = H - 0.236(H-L)
+ </li>
+ <li>
+  38.2% level = H - 0.382(H-L)
+ </li>
+ <li>
+  50.0% level = H - 0.5(H-L)
+ </li>
+ <li>
+  61.8% level = H - 0.618(H-L)
+ </li>
+ <li>
+  78.6% level = H - 0.786(H-L)
+ </li>
+ <li>
+  100% level = L
+ </li>
+</ul>
+<h3>
+ Fibonacci Extension Formulas
+</h3>
+<ul>
+ <li>
+  161.8% level = L - 0.618(H-L)
+ </li>
+ <li>
+  261.8% level = L - 1.618(H-L)
+ </li>
+ <li>
+  423.6% level = L - 3.236(H-L)
+ </li>
+</ul>
+<h2>
+ Position Sizing Guidelines
+</h2>
+<p>
+ The implementation uses these Golden Ratio-based position sizing guidelines:
+</p>
+<ol>
+ <li>
+  <strong>
+   Balanced Portfolio
+  </strong>
+  : Maintain long:short ratio near 0.618:1.000
+ </li>
+ <li>
+  <strong>
+   Position Increments
+  </strong>
+  : Scale position sizes by factors of 0.618 or 1.618
+ </li>
+ <li>
+  <strong>
+   Account Risk
+  </strong>
+  : Total position risk should be at most 1/Φ² (≈ 14.6%) of account value
+ </li>
+ <li>
+  <strong>
+   Risk-Reward Ratio
+  </strong>
+  : Target minimum risk:reward ratio of 1:Φ (1:1.618)
+ </li>
+</ol>
+<h2>
+ Conclusion
+</h2>
+<p>
+ These algorithms provide a mathematically sound implementation of Fibonacci-based trading metrics. By quantifying how closely trading positions align with the Golden Ratio and its derivatives, traders can identify natural harmonic patterns in their trading strategy and market movements.
+</p>
+<p>
+ The implementation balances mathematical rigor with practical trading application, providing actionable metrics that can guide position sizing, entry/exit points, and overall portfolio balance.
+</p>
+<h2>
+ References
+</h2>
+<ol>
+ <li>
+  Fibonacci, L. (1202).
+  <em>
+   Liber Abaci
+  </em>
+ </li>
+ <li>
+  Elliott, R. N. (1946).
+  <em>
+   Nature’s Law: The Secret of the Universe
+  </em>
+ </li>
+ <li>
+  Prechter, R. R. &amp; Frost, A. J. (1978).
+  <em>
+   Elliott Wave Principle
+  </em>
+ </li>
+ <li>
+  Boroden, C. (2008).
+  <em>
+   Fibonacci Trading: How to Master the Time and Price Advantage
+  </em>
+ </li>
+</ol>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

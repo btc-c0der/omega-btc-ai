@@ -1,0 +1,201 @@
+---
+# qPoW Testnet Kubernetes Deployment
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qpow-testnet-config
+data:
+  testnet-config.json: |
+    {
+      "node_count": 3,
+      "mine_interval": 10,
+      "tx_interval": 5,
+      "run_time": null
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qpow-testnet
+  labels:
+    app: qpow-testnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qpow-testnet
+  template:
+    metadata:
+      labels:
+        app: qpow-testnet
+    spec:
+      containers:
+      - name: qpow-testnet-runner
+        image: qpow-testnet:latest  # This would be replaced with your built image
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "quantum_pow.testnet", "--nodes=3", "--mine-interval=10", "--tx-interval=5"]
+        ports:
+        - containerPort: 9000
+          name: node-0
+        - containerPort: 9001
+          name: node-1
+        - containerPort: 9002
+          name: node-2
+        resources:
+          limits:
+            cpu: "2"
+            memory: "1Gi"
+          requests:
+            cpu: "1"
+            memory: "512Mi"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: qpow-testnet-config
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qpow-testnet-service
+  labels:
+    app: qpow-testnet
+spec:
+  type: NodePort
+  ports:
+  - port: 9000
+    targetPort: 9000
+    nodePort: 30900
+    name: node-0
+  - port: 9001
+    targetPort: 9001
+    nodePort: 30901
+    name: node-1
+  - port: 9002
+    targetPort: 9002
+    nodePort: 30902
+    name: node-2
+  selector:
+    app: qpow-testnet
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qpow-init-blockchain
+spec:
+  template:
+    spec:
+      containers:
+      - name: init-blockchain
+        image: qpow-testnet:latest  # This would be replaced with your built image
+        command: ["/bin/sh"]
+        args:
+        - "-c"
+        - >
+          python -c "
+          from quantum_pow.block_structure import BlockHeader, Transaction, QuantumBlock;
+          from quantum_pow.hash_functions import QuantumResistantHash;
+          import time;
+          header = BlockHeader(version=1, prev_block_hash=b'\\x00'*64, merkle_root=b'\\x00'*64, timestamp=int(time.time()), bits=0x1f00ffff, nonce=0);
+          coinbase_tx = Transaction(sender='genesis', recipient='miner_1', amount=50.0, signature='genesis_signature');
+          block = QuantumBlock(header=header, transactions=[coinbase_tx]);
+          block.mine(max_attempts=10000);
+          print('Genesis block created with hash:', block.header.hash().hex());
+          "
+      restartPolicy: Never
+  backoffLimit: 4
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qpow-testnet-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: qpow-testnet.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: qpow-testnet-service
+            port:
+              number: 9000
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qpow-blockchain-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qpow-testnet-scripts
+data:
+  start-testnet.sh: |
+    #!/bin/bash
+    echo "Starting qPoW Testnet with $(cat /app/config/testnet-config.json | jq .node_count) nodes"
+    python -m quantum_pow.testnet \
+      --nodes=$(cat /app/config/testnet-config.json | jq .node_count) \
+      --mine-interval=$(cat /app/config/testnet-config.json | jq .mine_interval) \
+      --tx-interval=$(cat /app/config/testnet-config.json | jq .tx_interval)
+  
+  check-blockchain.sh: |
+    #!/bin/bash
+    echo "Checking qPoW blockchain status"
+    # This would be replaced with an actual script to query the blockchain
+    python -c "
+    from quantum_pow.testnet import Testnet, TestnetConfig;
+    config = TestnetConfig();
+    testnet = Testnet(config);
+    print(testnet.get_blockchain_stats());
+    "
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qpow-testnet-stats
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: testnet-stats
+            image: qpow-testnet:latest  # This would be replaced with your built image
+            command: ["/bin/sh", "/app/config/check-blockchain.sh"]
+            volumeMounts:
+            - name: scripts-volume
+              mountPath: /app/config
+          volumes:
+          - name: scripts-volume
+            configMap:
+              name: qpow-testnet-scripts
+              defaultMode: 0755  # Make the scripts executable
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qpow-testnet-logs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi 

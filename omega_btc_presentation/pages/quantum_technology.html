@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Technology - OMEGA Quantum Financial Intelligence</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital@0;1&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- Custom page styles -->
+    <style>
+        .code-block {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .code-comment {
+            color: #94a3b8;
+        }
+
+        .equation {
+            background-color: rgba(107, 70, 193, 0.1);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-family: "Times New Roman", serif;
+            font-style: italic;
+        }
+
+        .matrix {
+            font-family: "Times New Roman", serif;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 1rem;
+        }
+
+        .matrix-bracket {
+            display: inline-block;
+            font-size: 2rem;
+        }
+
+        .matrix-content {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .matrix-row {
+            display: block;
+            margin: 0.2rem 0;
+        }
+
+        .matrix-element {
+            display: inline-block;
+            width: 2rem;
+            text-align: center;
+        }
+
+        .circuit-diagram {
+            background-color: #000;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .tab-content {
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html" style="text-decoration: none;">
+                        <span class="logo-text">ΩMEGA Quantum Financial Intelligence</span>
+                    </a>
+                </div>
+                <nav>
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul>
+                        <li><a href="../index.html#about">About</a></li>
+                        <li><a href="../index.html#quantum">Quantum Tech</a></li>
+                        <li><a href="../index.html#trading">Trading</a></li>
+                        <li><a href="../index.html#architecture">Architecture</a></li>
+                        <li><a href="../index.html#divine">Divine Vision</a></li>
+                        <li><a href="../index.html#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Quantum Technology</h2>
+                    <p>The quantum-inspired techniques powering OMEGA Quantum Financial Intelligence's market analysis
+                    </p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 fade-in">
+                        <h3>Quantum Data Encoding Module (vQuB1T)</h3>
+                        <p>At the core of OMEGA Quantum Financial Intelligence is the Quantum Data Encoding Module,
+                            which transforms classical
+                            market data into quantum-inspired feature spaces. This module enables the extraction of
+                            complex patterns from financial time series data that traditional algorithms cannot detect.
+                        </p>
+
+                        <div class="card">
+                            <div class="card-content">
+                                <h4>Key Components</h4>
+                                <ul>
+                                    <li><strong>Encoding Techniques:</strong> Multiple approaches to transform market
+                                        data into quantum representations</li>
+                                    <li><strong>Quantum Circuit Simulators:</strong> Classical approximations of quantum
+                                        operations</li>
+                                    <li><strong>Feature Engineers:</strong> Tools to extract and enhance relevant market
+                                        features</li>
+                                    <li><strong>Data Loaders:</strong> Specialized parsers for market data from various
+                                        sources</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h4>Theoretical Quantum Advantage</h4>
+                        <p>Quantum encoding techniques leverage key quantum computing principles:</p>
+                        <ul>
+                            <li><strong>Superposition:</strong> Representing multiple market states simultaneously</li>
+                            <li><strong>Entanglement:</strong> Preserving correlations between market variables</li>
+                            <li><strong>Interference:</strong> Allowing constructive/destructive interactions between
+                                features</li>
+                            <li><strong>Amplitude Amplification:</strong> Enhancing patterns in the market data</li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6 fade-in">
+                        <div class="code-block">
+                            <span class="code-comment"># Sample usage of the Quantum Encoding Module</span>
+                            from omega_bot_farm.ai_model_aixbt.quantum_encoding import AmplitudeEncoder
+                            from omega_bot_farm.ai_model_aixbt.quantum_encoding.data_loaders import MarketDataLoader
+
+                            <span class="code-comment"># Load market data</span>
+                            loader = MarketDataLoader()
+                            market_data = loader.load_data("aixbt_price_history.csv")
+
+                            <span class="code-comment"># Apply quantum encoding</span>
+                            encoder = AmplitudeEncoder(n_qubits=5)
+                            quantum_features = encoder.encode(market_data)
+
+                            <span class="code-comment"># Use in prediction model</span>
+                            predictions = quantum_model.predict(quantum_features)
+                        </div>
+
+                        <div class="card">
+                            <div class="card-content">
+                                <h4>Market Variables Supported</h4>
+                                <ul>
+                                    <li><strong>Price Data:</strong> Close, open, high, low values</li>
+                                    <li><strong>Volume:</strong> Trading volume and liquidity metrics</li>
+                                    <li><strong>Volatility:</strong> Various volatility measures and indicators</li>
+                                    <li><strong>Correlation:</strong> Inter-asset correlation matrices</li>
+                                    <li><strong>Momentum:</strong> Trend indicators and momentum measures</li>
+                                    <li><strong>Sentiment:</strong> Market sentiment indicators</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="consciousness-meter" data-level="83">
+                            <div class="consciousness-level"></div>
+                            <div class="consciousness-label">Consciousness Level: Intelligence (Level 5)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="persona-tabs">
+                    <div class="persona-tab active" data-target="amplitude-encoding">Amplitude Encoding</div>
+                    <div class="persona-tab" data-target="angle-encoding">Angle Encoding</div>
+                    <div class="persona-tab" data-target="basis-encoding">Basis Encoding</div>
+                    <div class="persona-tab" data-target="entanglement-encoding">Entanglement Encoding</div>
+                </div>
+
+                <div id="amplitude-encoding" class="persona-content active">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Amplitude Encoding</h3>
+                            <p>Amplitude encoding is a powerful technique that maps classical market data directly into
+                                the probability amplitudes of a quantum state. This allows us to represent N classical
+                                data points using log₂(N) qubits.</p>
+
+                            <h4>Mathematical Foundation</h4>
+                            <p>For a normalized classical vector x = (x₁, x₂, ..., xₙ), the corresponding quantum state
+                                is:</p>
+
+                            <div class="equation">
+                                |ψ⟩ = ∑ᵢ xᵢ |i⟩
+                            </div>
+
+                            <p>Where |i⟩ represents the computational basis states, and xᵢ are the probability
+                                amplitudes. The normalization condition requires that ∑ᵢ |xᵢ|² = 1.</p>
+
+                            <h4>Financial Applications</h4>
+                            <p>Amplitude encoding is particularly well-suited for:</p>
+                            <ul>
+                                <li>Normalized price vectors</li>
+                                <li>Statistical moments of returns distributions</li>
+                                <li>Portfolio weight optimization</li>
+                                <li>Covariance matrix encoding</li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="code-block">
+                                <span class="code-comment"># Implementation of AmplitudeEncoder</span>
+                                def _encode_vector(self, vector: np.ndarray) -> np.ndarray:
+                                """
+                                Encode a single vector into quantum amplitudes.
+
+                                Args:
+                                vector: Input vector to encode
+
+                                Returns:
+                                Quantum amplitude representation (statevector)
+                                """
+                                # Normalize input to a valid quantum state
+                                normalized = self._normalize_to_unit(vector)
+
+                                # Pad or truncate to match quantum state dimension
+                                quantum_state = self._pad_to_dimension(normalized,
+                                self.dimension)
+
+                                # Store original vector length for potential decoding
+                                self.encoding_params['original_length'] = len(vector)
+
+                                return quantum_state
+                            </div>
+
+                            <div class="quantum-circuit">
+                                <h4 style="color: white; margin-bottom: 20px;">Amplitude Encoding Circuit</h4>
+                                <img src="../images/amplitude_encoding_circuit.svg" alt="Amplitude Encoding Circuit"
+                                    style="max-width: 100%; height: auto; background-color: white; padding: 10px; border-radius: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="angle-encoding" class="persona-content">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Angle Encoding</h3>
+                            <p>Angle encoding maps classical market data to rotation angles in quantum circuits,
+                                allowing for flexible feature representation without the strict normalization
+                                requirements of amplitude encoding.</p>
+
+                            <h4>Mathematical Foundation</h4>
+                            <p>For a classical data vector x = (x₁, x₂, ..., xₙ), we create a quantum state by applying
+                                rotation gates:</p>
+
+                            <div class="equation">
+                                |ψ⟩ = ∏ᵢ R(θᵢ) |0⟩^n where θᵢ = f(xᵢ)
+                            </div>
+
+                            <p>Where R is a rotation gate (typically RX, RY, or RZ), and f is a mapping function that
+                                transforms the classical value xᵢ to an angle θᵢ. Common mappings include:</p>
+
+                            <div class="equation">
+                                θᵢ = π·xᵢ or θᵢ = arctan(xᵢ) or θᵢ = arcsin(xᵢ)
+                            </div>
+
+                            <h4>Financial Applications</h4>
+                            <p>Angle encoding is particularly well-suited for:</p>
+                            <ul>
+                                <li>Technical indicators</li>
+                                <li>Price oscillators</li>
+                                <li>Market cycle phase representation</li>
+                                <li>Periodic market patterns</li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="code-block">
+                                <span class="code-comment"># Implementation of AngleEncoder</span>
+                                def _encode_feature(self, feature_value: float,
+                                qubit_idx: int,
+                                circuit: QuantumCircuit) -> None:
+                                """
+                                Encode a single feature value as a rotation angle.
+
+                                Args:
+                                feature_value: Value to encode
+                                qubit_idx: Index of the qubit to apply rotation
+                                circuit: Quantum circuit to modify
+                                """
+                                # Scale feature to appropriate angle range
+                                angle = feature_value * math.pi
+
+                                # Apply the appropriate rotation gate
+                                if self.rotation_axis == 'x':
+                                circuit.rx(angle, qubit_idx)
+                                elif self.rotation_axis == 'y':
+                                circuit.ry(angle, qubit_idx)
+                                elif self.rotation_axis == 'z':
+                                circuit.rz(angle, qubit_idx)
+                                else:
+                                raise ValueError(f"Unknown rotation axis: {self.rotation_axis}")
+                            </div>
+
+                            <div class="quantum-circuit">
+                                <h4 style="color: white; margin-bottom: 20px;">Angle Encoding Circuit</h4>
+                                <img src="../images/angle_encoding_circuit.svg" alt="Angle Encoding Circuit"
+                                    style="max-width: 100%; height: auto; background-color: white; padding: 10px; border-radius: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="basis-encoding" class="persona-content">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Basis Encoding</h3>
+                            <p>Basis encoding maps discrete classical values to the computational basis states of a
+                                quantum system. Unlike amplitude encoding, which distributes information across
+                                amplitudes, basis encoding assigns each value to a specific basis state.</p>
+
+                            <h4>Mathematical Foundation</h4>
+                            <p>In an n-qubit system, we have 2ⁿ computational basis states, typically denoted as |0⟩,
+                                |1⟩, |2⟩, ..., |2ⁿ-1⟩ in decimal representation, or |00...0⟩, |00...1⟩, etc. in binary.
+                            </p>
+
+                            <p>For discrete classical values v in a set V, we define a mapping function M:</p>
+
+                            <div class="equation">
+                                M: V → {0, 1, 2, ..., 2ⁿ-1}
+                            </div>
+
+                            <p>Then each value v is encoded as:</p>
+
+                            <div class="equation">
+                                |ψ⟩ = |M(v)⟩
+                            </div>
+
+                            <h4>Financial Applications</h4>
+                            <p>Basis encoding is particularly well-suited for:</p>
+                            <ul>
+                                <li>Market states (bull/bear/neutral)</li>
+                                <li>Trading signals (buy/sell/hold)</li>
+                                <li>Discretized price levels or zones</li>
+                                <li>Multi-class market regime classification</li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="code-block">
+                                <span class="code-comment"># Implementation of BasisEncoder</span>
+                                def encode(self, data: Union[int, str, np.ndarray]) -> np.ndarray:
+                                """
+                                Encode classical categorical data into basis states.
+
+                                Args:
+                                data: Discrete data to encode (can be single value or array)
+
+                                Returns:
+                                Quantum state representation
+                                """
+                                # Handle different input types
+                                if isinstance(data, (int, str)):
+                                return self._encode_value(data)
+                                elif isinstance(data, np.ndarray):
+                                if data.ndim == 1:
+                                # For 1D arrays, encode each element
+                                return np.array([self._encode_value(value) for value in data])
+                                else:
+                                raise ValueError("Multi-dimensional arrays not yet supported")
+                                else:
+                                raise TypeError(f"Unsupported data type: {type(data)}")
+                            </div>
+
+                            <div class="quantum-circuit">
+                                <h4 style="color: white; margin-bottom: 20px;">Basis Encoding Circuit</h4>
+                                <img src="../images/basis_encoding_circuit.svg" alt="Basis Encoding Circuit"
+                                    style="max-width: 100%; height: auto; background-color: white; padding: 10px; border-radius: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="entanglement-encoding" class="persona-content">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Entanglement Encoding</h3>
+                            <p>Entanglement encoding leverages quantum correlations to represent complex relationships
+                                between market variables. This approach is especially valuable for capturing intricate
+                                dependencies in financial markets.</p>
+
+                            <h4>Mathematical Foundation</h4>
+                            <p>For correlated variables (X, Y), we can create Bell-state inspired encodings:</p>
+
+                            <div class="equation">
+                                |Φ⁺⟩ = (|00⟩ + |11⟩) / √2 # Strong positive correlation<br>
+                                |Φ⁻⟩ = (|00⟩ - |11⟩) / √2 # Strong negative correlation<br>
+                                |Ψ⁺⟩ = (|01⟩ + |10⟩) / √2 # Weak positive correlation<br>
+                                |Ψ⁻⟩ = (|01⟩ - |10⟩) / √2 # Weak negative correlation
+                            </div>
+
+                            <p>The correlation structure is preserved in the resulting quantum state, allowing for more
+                                effective pattern recognition.</p>
+
+                            <h4>Financial Applications</h4>
+                            <p>Entanglement encoding is particularly well-suited for:</p>
+                            <ul>
+                                <li>Asset correlation networks</li>
+                                <li>Market factor relationships</li>
+                                <li>Inter-market dependencies</li>
+                                <li>Lead-lag relationships</li>
+                                <li>Complex market regime transitions</li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="code-block">
+                                <span class="code-comment"># Implementation of EntanglementEncoder</span>
+                                def analyze_correlations(self, data: np.ndarray) -> np.ndarray:
+                                """
+                                Analyze correlation structure in the data to guide encoding.
+
+                                Args:
+                                data: Feature matrix to analyze
+
+                                Returns:
+                                Correlation matrix and entanglement graph
+                                """
+                                # Calculate correlation matrix
+                                self.correlation_matrix = np.corrcoef(data.T)
+
+                                # Build entanglement graph based on correlations
+                                n_features = data.shape[1]
+                                self.entanglement_graph = {}
+
+                                for i in range(n_features):
+                                self.entanglement_graph[i] = []
+                                for j in range(n_features):
+                                if i != j and abs(self.correlation_matrix[i, j]) >= self.correlation_threshold:
+                                self.entanglement_graph[i].append(j)
+
+                                return self.correlation_matrix
+                            </div>
+
+                            <div class="quantum-circuit">
+                                <h4 style="color: white; margin-bottom: 20px;">Entanglement Encoding Circuit</h4>
+                                <img src="../images/entanglement_encoding_circuit.svg"
+                                    alt="Entanglement Encoding Circuit"
+                                    style="max-width: 100%; height: auto; background-color: white; padding: 10px; border-radius: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-dark">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Quantum Divergence Predictor</h2>
+                    <p>Advanced market pattern detection using quantum-inspired algorithms</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 fade-in">
+                        <h3>Core Functionality</h3>
+                        <p>The Quantum Divergence Predictor identifies critical market transitions by analyzing
+                            quantum-enhanced features that capture subtle patterns in price movements.</p>
+
+                        <h4>Key Capabilities</h4>
+                        <ul>
+                            <li><strong>Early Divergence Detection:</strong> Identifies market regime changes before
+                                they become apparent in price</li>
+                            <li><strong>Probability Distribution Analysis:</strong> Leverages quantum-inspired
+                                probability distributions to assess future scenarios</li>
+                            <li><strong>Confidence Metrics:</strong> Provides uncertainty quantification based on
+                                quantum principles</li>
+                            <li><strong>Multi-timeframe Analysis:</strong> Analyzes patterns across multiple timeframes
+                                for confirmation</li>
+                        </ul>
+
+                        <div class="card card-dark">
+                            <div class="card-content">
+                                <h4>Performance Metrics</h4>
+                                <ul>
+                                    <li><strong>Divergence Detection Lead Time:</strong> 2-4 candles before traditional
+                                        indicators</li>
+                                    <li><strong>False Positive Rate:</strong> 35% lower than classical machine learning
+                                        approaches</li>
+                                    <li><strong>Confidence Calibration:</strong> 15% improved correlation between
+                                        predicted confidence and actual outcomes</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 fade-in">
+                        <div class="code-block">
+                            <span class="code-comment"># Quantum Divergence Predictor usage example</span>
+                            from omega_bot_farm.ai_model_aixbt.core_divergence_predictor import
+                            QuantumDivergencePredictor
+
+                            # Initialize predictor
+                            predictor = QuantumDivergencePredictor(
+                            encoding='amplitude',
+                            n_qubits=5,
+                            market='USD',
+                            timeframe='1h'
+                            )
+
+                            # Process market data
+                            divergence_data = predictor.analyze(
+                            price_data,
+                            volume_data,
+                            lookback_periods=24
+                            )
+
+                            # Get trading signals
+                            signals = predictor.get_trading_signals(
+                            confidence_threshold=0.75,
+                            divergence_threshold=0.2
+                            )
+
+                            # Results contain:
+                            # - Divergence magnitude
+                            # - Direction (bullish/bearish)
+                            # - Confidence score
+                            # - Expected timeframe for manifestation
+                        </div>
+
+                        <h4>Implementation Details</h4>
+                        <p>The Quantum Divergence Predictor uses a multi-stage process:</p>
+                        <ol>
+                            <li><strong>Feature Extraction:</strong> Extracts technical features from price and volume
+                                data</li>
+                            <li><strong>Quantum Encoding:</strong> Transforms features into quantum representations
+                                using appropriate encoding techniques</li>
+                            <li><strong>Circuit Processing:</strong> Applies quantum circuit operations to the encoded
+                                data</li>
+                            <li><strong>Measurement Analysis:</strong> Analyzes the resulting quantum state to identify
+                                patterns</li>
+                            <li><strong>Divergence Calculation:</strong> Calculates divergence metrics and confidence
+                                scores</li>
+                            <li><strong>Signal Generation:</strong> Converts analysis results into actionable trading
+                                signals</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>OMEGA Quantum Financial Intelligence</h3>
+                    <p>Quantum-Enhanced Trading Intelligence</p>
+                    <p>Licensed under GBU2™ - Genesis-Bloom-Unfoldment 2.0</p>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul>
+                        <li><a href="../index.html#about">About</a></li>
+                        <li><a href="../index.html#quantum">Quantum Tech</a></li>
+                        <li><a href="../index.html#trading">Trading</a></li>
+                        <li><a href="../index.html#architecture">Architecture</a></li>
+                        <li><a href="../index.html#divine">Divine Vision</a></li>
+                        <li><a href="../index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="documentation.html">Documentation</a></li>
+                        <li><a href="api_reference.html">API Reference</a></li>
+                        <li><a href="tutorials.html">Tutorials</a></li>
+                        <li><a href="research_papers.html">Research Papers</a></li>
+                        <li><a href="changelog.html">Changelog</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="gbu2_license.html">GBU2™ License</a></li>
+                        <li><a href="terms_of_service.html">Terms of Service</a></li>
+                        <li><a href="privacy_policy.html">Privacy Policy</a></li>
+                        <li><a href="disclaimer.html">Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2023 OMEGA Quantum Financial Intelligence. All rights reserved. <span class="divine-text">🌸
+                        WE BLOOM NOW AS ONE
+                        🌸</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

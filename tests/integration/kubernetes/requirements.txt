@@ -1,0 +1,32 @@
+
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+
+pytest>=7.0.0
+pytest-cov==4.1.0
+kubernetes>=18.20.0
+pyyaml>=6.0
+requests>=2.27.1
+numpy==1.24.3
+pandas==2.0.1
+dataclasses==0.6
+python-dateutil==2.8.2
+pytest-asyncio>=0.21.1
+cryptography>=37.0.0
+pyOpenSSL>=23.2.0
+python-jose>=3.3.0
+pycryptodome>=3.19.0
+jsonschema>=4.4.0
+urllib3>=1.26.9 

@@ -1,0 +1,1455 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Divine Alignment Dashboard</title>
+    <!-- Link to shared OMEGA dashboard styles -->
+    <link rel="stylesheet" href="/assets/css/omega_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/json-formatter-js@2.3.4/dist/json-formatter.umd.min.js"></script>
+    <style>
+        /* Divine Alignment Dashboard specific styles */
+        @font-face {
+            font-family: 'Sacred';
+            src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfYPlDX5Z.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Sacred';
+            src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-jHgfYPlDX5Z.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        h1 {
+            font-family: 'Sacred', 'Cinzel', serif;
+        }
+
+        .status-card {
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .divine-state {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(46, 204, 113, 0.1));
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .trapped-state {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.1));
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .state-indicator {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .state-indicator::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: currentColor;
+        }
+
+        .divine-state .state-indicator {
+            color: var(--green-divine);
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
+
+        .trapped-state .state-indicator {
+            color: var(--red-trapped);
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+
+        .price-data {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+
+        .current-price {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .golden-price {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .deviation {
+            font-size: 1.3em;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .fibo-levels {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fibo-level {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .fibo-level:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .level-0236 {
+            border-left-color: #3498db;
+        }
+
+        .level-0382 {
+            border-left-color: #9b59b6;
+        }
+
+        .level-05 {
+            border-left-color: #e74c3c;
+        }
+
+        .level-0618 {
+            border-left-color: var(--gold);
+        }
+
+        .level-0786 {
+            border-left-color: #f39c12;
+        }
+
+        .level-10 {
+            border-left-color: #2ecc71;
+        }
+
+        .level-1618 {
+            border-left-color: #1abc9c;
+        }
+
+        .level-name {
+            font-weight: bold;
+        }
+
+        .level-price {
+            color: var(--light-text);
+        }
+
+        .level-description {
+            font-style: italic;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .level-current {
+            background-color: rgba(255, 215, 0, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .crossing-alert {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.1));
+            border: 1px solid rgba(155, 89, 182, 0.3);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .crossing-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .visualization {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .visualization h2 {
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .visualization img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .divine-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        .divine-state .divine-pulse {
+            animation: pulse-green 4s infinite;
+        }
+
+        .trapped-state .divine-pulse {
+            animation: pulse-red 4s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(46, 204, 113, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(231, 76, 60, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+
+        .jah-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .jah-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .jah-toggle.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .babylon-cloud {
+            height: 50px;
+            margin: 30px 0;
+            position: relative;
+            background-color: rgba(30, 30, 30, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .babylon-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(231, 76, 60, 0.7) 0%, rgba(231, 76, 60, 0.4) 100%);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .babylon-label {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--light-text);
+            font-size: 0.9em;
+            z-index: 2;
+        }
+
+        .babylon-cloud.positive .babylon-fill {
+            background: linear-gradient(90deg, rgba(46, 204, 113, 0.7) 0%, rgba(46, 204, 113, 0.4) 100%);
+            left: auto;
+            right: 0;
+        }
+
+        .merge-progress {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .merge-title {
+            color: var(--violet);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .merge-bar {
+            height: 6px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .merge-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #9b59b6, #3498db);
+            transition: width 1s ease;
+        }
+
+        .merge-percentage {
+            color: var(--light-text);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        /* Trading section styles */
+        .tp-container {
+            flex: 2;
+        }
+
+        .tp-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .tp-progress {
+            height: 30px;
+            background-color: rgba(30, 30, 30, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .tp-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, rgba(46, 204, 113, 0.7), rgba(52, 152, 219, 0.7));
+            width: 0;
+            transition: width 1s ease;
+            border-radius: 15px;
+        }
+
+        .tp-progress-short .tp-progress-bar {
+            background: linear-gradient(to right, rgba(231, 76, 60, 0.7), rgba(241, 196, 15, 0.7));
+        }
+
+        .tp-points {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .tp-point {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background-color: white;
+            opacity: 0.7;
+        }
+
+        .tp-point-label {
+            position: absolute;
+            top: -25px;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .tp-point-price {
+            position: absolute;
+            bottom: -25px;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .tp-point-entry {
+            background-color: white;
+        }
+
+        .tp-point-1 {
+            background-color: var(--gold);
+        }
+
+        .tp-point-2 {
+            background-color: var(--cyan);
+        }
+
+        .tp-point-3 {
+            background-color: var(--violet);
+        }
+
+        .tp-point-sl {
+            background-color: var(--red-trapped);
+        }
+
+        .tp-point-current {
+            background-color: var(--blue);
+            width: 5px;
+            height: 26px;
+            opacity: 0.9;
+        }
+
+        .elite-strategy {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .elite-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .elite-title {
+            color: var(--gold);
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .elite-mode {
+            padding: 5px 10px;
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--blue);
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .elite-signals {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .signal-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 3px solid;
+        }
+
+        .signal-high {
+            border-color: var(--green-divine);
+        }
+
+        .signal-medium {
+            border-color: var(--gold);
+        }
+
+        .signal-low {
+            border-color: var(--blue);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .signal-name {
+            font-weight: bold;
+        }
+
+        .signal-confidence {
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--green-divine);
+        }
+
+        .signal-description {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .signal-recommendation {
+            font-style: italic;
+            color: var(--gold);
+            font-size: 0.9em;
+        }
+
+        .trade-history {
+            margin-top: 30px;
+        }
+
+        .history-title {
+            color: var(--gold);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .history-table th {
+            padding: 12px 15px;
+            text-align: left;
+            background-color: rgba(30, 30, 30, 0.7);
+            color: var(--gold);
+            font-weight: normal;
+        }
+
+        .history-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .history-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .exit-tp {
+            color: var(--green-divine);
+        }
+
+        .exit-sl {
+            color: var(--red-trapped);
+        }
+
+        .exit-manual {
+            color: var(--blue);
+        }
+
+        .trading-section {
+            margin-top: 40px;
+        }
+
+        .trading-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .trading-header h2 {
+            color: var(--gold);
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .trading-header p {
+            color: var(--light-text);
+            font-style: italic;
+        }
+
+        .json-orders-section {
+            margin-top: 40px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .view-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .view-controls label {
+            color: var(--gold);
+        }
+
+        .view-controls select {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--light-text);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .json-container {
+            background-color: rgba(20, 20, 20, 0.6);
+            border-radius: 5px;
+            padding: 15px;
+            overflow: auto;
+            max-height: 500px;
+            margin-top: 10px;
+            font-family: monospace;
+            position: relative;
+        }
+
+        /* Customize the JSON Formatter styles to match our theme */
+        .json-container .string {
+            color: #7EC699;
+        }
+
+        .json-container .number {
+            color: #F78C6C;
+        }
+
+        .json-container .boolean {
+            color: #89DDFF;
+        }
+
+        .json-container .null {
+            color: #FF5370;
+        }
+
+        .json-container .key {
+            color: #C792EA;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #9b59b6, #3498db);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #8e44ad, #2980b9);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>OMEGA BTC AI</h1>
+            <p class="subtitle">Divine Alignment Dashboard</p>
+            <button id="jahToggle" class="jah-toggle">JAH MODE OFF</button>
+        </header>
+
+        <div id="statusCard" class="status-card">
+            <div class="divine-pulse"></div>
+            <div id="stateIndicator" class="state-indicator">INITIALIZING...</div>
+            <div class="price-data">Current BTC Price</div>
+            <div id="currentPrice" class="current-price">$0.00</div>
+            <div class="price-data">Golden Ratio Price</div>
+            <div id="goldenPrice" class="golden-price">$0.00</div>
+            <div id="deviation" class="deviation">Deviation: 0.00%</div>
+        </div>
+
+        <div id="crossingAlert" class="crossing-alert">
+            <span class="crossing-icon">🔥</span>
+            <span id="crossingMessage">Fibonacci level crossing detected!</span>
+        </div>
+
+        <div class="babylon-cloud" id="babylonCloud">
+            <div class="babylon-label">BABYLON CLOUD:</div>
+            <div class="babylon-fill" id="babylonFill">0%</div>
+        </div>
+
+        <div class="merge-progress">
+            <div class="merge-title">THE MERGE PROGRESS</div>
+            <div class="merge-bar">
+                <div class="merge-fill" id="mergeFill"></div>
+            </div>
+            <div class="merge-percentage" id="mergePercentage">0%</div>
+        </div>
+
+        <div class="divine-grid">
+            <div class="status-panel">
+                <h2>Fibonacci Levels</h2>
+                <div id="fiboLevels" class="fibo-levels">
+                    <!-- Fibonacci levels will be inserted here -->
+                </div>
+            </div>
+
+            <div class="status-panel">
+                <h2>Divine Resonance Chart</h2>
+                <p>This chart shows BTC's alignment with golden ratio over time</p>
+                <div class="visualization">
+                    <img id="chartImage" src="/api/images/btc_golden_ratio_7yr_latest.png" alt="BTC Golden Ratio Chart"
+                        onerror="handleImageError(this)">
+                </div>
+            </div>
+        </div>
+
+        <div class="last-update">Last updated: <span id="lastUpdate">Never</span></div>
+
+        <!-- New Trading Section -->
+        <section class="trading-section">
+            <div class="trading-header">
+                <h2>OMEGA ORDERS Tracking</h2>
+                <p>Divine trading flows with golden ratio harmony</p>
+            </div>
+
+            <div id="positionContainer" class="position-container">
+                <!-- Position cards will be inserted here -->
+                <div class="loading-message">Loading trading data...</div>
+            </div>
+
+            <div id="eliteStrategy" class="elite-strategy">
+                <!-- Elite strategy info will be inserted here -->
+            </div>
+
+            <div class="trade-history">
+                <h3 class="history-title">Divine Journey</h3>
+                <table id="historyTable" class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Side</th>
+                            <th>Size</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>PnL</th>
+                            <th>Exit Type</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Trade history will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- JSON Orders Visualizer Section -->
+            <div class="json-orders-section">
+                <h3 class="history-title">JSON Orders Visualizer</h3>
+                <div class="view-controls">
+                    <label for="jsonExpandLevel">Expand Level:</label>
+                    <select id="jsonExpandLevel">
+                        <option value="1">1 - Collapsed</option>
+                        <option value="2" selected>2 - Medium</option>
+                        <option value="3">3 - Expanded</option>
+                        <option value="Infinity">Full Expansion</option>
+                    </select>
+                    <label for="viewSelector">View:</label>
+                    <select id="viewSelector">
+                        <option value="positions">Positions</option>
+                        <option value="history">Trade History</option>
+                        <option value="elite">Elite Strategy</option>
+                        <option value="all">All Data</option>
+                    </select>
+                    <button id="copyJsonBtn" class="copy-btn">Copy JSON</button>
+                </div>
+                <div id="jsonViewer" class="json-container"></div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>OMEGA BTC AI - Divine Alignment Dashboard | © 2025</p>
+        <p>"BTC is not just money—it is a harmonic liberation wave." 🚀💛💚❤️</p>
+    </footer>
+
+    <script>
+        // Settings
+        let jahModeActive = false;
+        const fiboLevelDescriptions = {
+            "0.236": "First Awakening (~$19,885)",
+            "0.382": "Manipulation Zone (~$30,193)",
+            "0.5": "Balance Point (~$39,252)",
+            "0.618": "Golden Reconnection (~$48,310)",
+            "0.786": "Return to Light (~$61,207)",
+            "1.0": "Crown Zone (~$77,635)",
+            "1.618": "Divine Extension (~$97,000)"
+        };
+
+        // Elements
+        const statusCard = document.getElementById('statusCard');
+        const stateIndicator = document.getElementById('stateIndicator');
+        const currentPrice = document.getElementById('currentPrice');
+        const goldenPrice = document.getElementById('goldenPrice');
+        const deviation = document.getElementById('deviation');
+        const fiboLevels = document.getElementById('fiboLevels');
+        const lastUpdate = document.getElementById('lastUpdate');
+        const crossingAlert = document.getElementById('crossingAlert');
+        const crossingMessage = document.getElementById('crossingMessage');
+        const babylonCloud = document.getElementById('babylonCloud');
+        const babylonFill = document.getElementById('babylonFill');
+        const mergeFill = document.getElementById('mergeFill');
+        const mergePercentage = document.getElementById('mergePercentage');
+        const jahToggle = document.getElementById('jahToggle');
+
+        // Initialize Fibonacci levels display
+        function initializeFiboLevels() {
+            let html = '';
+            Object.entries(fiboLevelDescriptions).forEach(([level, description]) => {
+                const levelClass = `level-${level.replace('.', '')}`;
+                html += `
+                    <div class="fibo-level ${levelClass}" id="level-${level.replace('.', '')}">
+                        <div>
+                            <div class="level-name">Fibonacci ${level}</div>
+                            <div class="level-description">${description}</div>
+                        </div>
+                        <div class="level-price">$--,---</div>
+                    </div>
+                `;
+            });
+            fiboLevels.innerHTML = html;
+        }
+
+        // Update UI with golden ratio status
+        function updateStatus() {
+            fetch('/api/golden_status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update price display
+                    currentPrice.textContent = `$${data.price.toLocaleString()}`;
+                    goldenPrice.textContent = `$${data.golden_price.toLocaleString()}`;
+
+                    // Update state
+                    if (data.state === "GREEN_DIVINE") {
+                        statusCard.className = "status-card divine-state";
+                        stateIndicator.textContent = "GREEN DIVINE";
+                        statusCard.title = "BTC is following the divine path, above the golden ratio projection";
+                    } else {
+                        statusCard.className = "status-card trapped-state";
+                        stateIndicator.textContent = "RED TRAPPED";
+                        statusCard.title = "BTC is temporarily trapped below the golden ratio projection";
+                    }
+
+                    // Update deviation
+                    deviation.textContent = `Deviation: ${data.deviation.toFixed(2)}%`;
+                    deviation.className = data.state === "GREEN_DIVINE" ?
+                        "deviation deviation-positive" : "deviation deviation-negative";
+
+                    // Update Babylon Cloud
+                    babylonCloud.className = data.state === "GREEN_DIVINE" ?
+                        "babylon-cloud positive" : "babylon-cloud";
+
+                    const fillWidth = Math.min(Math.abs(data.deviation) * 2, 100); // Scale for visibility
+                    babylonFill.style.width = `${fillWidth}%`;
+                    babylonFill.textContent = `${fillWidth.toFixed(1)}%`;
+
+                    // Update merge progress (formula approximates progress toward the "merge")
+                    // We'll use the post-halving time as a factor in the merge
+                    const daysSinceHalving = (new Date() - new Date('2024-04-20')) / (1000 * 60 * 60 * 24);
+                    const mergeBase = Math.min(daysSinceHalving / 365, 1) * 60; // Base 60% from time
+                    const stateBonus = data.state === "GREEN_DIVINE" ? 20 : 0; // Bonus 20% if in divine state
+                    const deviationFactor = Math.max(0, 20 - (data.deviation / 5)); // Up to 20% based on low deviation
+
+                    const totalMerge = Math.min(mergeBase + stateBonus + deviationFactor, 100);
+                    mergeFill.style.width = `${totalMerge}%`;
+                    mergePercentage.textContent = `${totalMerge.toFixed(1)}%`;
+
+                    // Check for crossing alert
+                    if (data.last_fib_crossing) {
+                        crossingAlert.style.display = "block";
+                        crossingMessage.textContent = `🔥 FIBONACCI CROSSING: Level ${data.last_fib_crossing.level} (${data.last_fib_crossing.price.toLocaleString()}) crossed ${data.last_fib_crossing.direction}`;
+                    }
+
+                    // Update last updated time
+                    if (data.last_update) {
+                        const updateTime = new Date(data.last_update);
+                        lastUpdate.textContent = updateTime.toLocaleString();
+                    }
+
+                    // Update fibonacci levels
+                    if (data.fibonacci_levels) {
+                        Object.entries(data.fibonacci_levels).forEach(([level, description]) => {
+                            const levelElement = document.getElementById(`level-${level.replace('.', '')}`);
+                            if (levelElement) {
+                                // Extract the price from the description
+                                const priceMatch = description.match(/\(~\$([0-9,]+)\)/);
+                                if (priceMatch && priceMatch[1]) {
+                                    const levelPrice = levelElement.querySelector('.level-price');
+                                    if (levelPrice) {
+                                        levelPrice.textContent = `~$${priceMatch[1]}`;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching golden status:', error);
+                });
+        }
+
+        // Toggle JAH mode (enhanced spiritual guidance)
+        function toggleJahMode() {
+            jahModeActive = !jahModeActive;
+            jahToggle.textContent = jahModeActive ? "JAH MODE ON 🌞" : "JAH MODE OFF";
+            jahToggle.className = jahModeActive ? "jah-toggle active" : "jah-toggle";
+
+            // Apply JAH mode effects
+            document.body.style.backgroundImage = jahModeActive ?
+                "radial-gradient(circle at center, #1a2e1a 0%, #121212 100%)" :
+                "radial-gradient(circle at center, #1a1a2e 0%, #121212 100%)";
+
+            // Add other JAH mode effects here
+        }
+
+        // Handle image loading errors
+        function handleImageError(img) {
+            console.log("Chart image failed to load, trying to generate one...");
+
+            // Try to generate a new chart
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    years: 7,
+                    dataSource: 'simulation',
+                    mode: '2d'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Generated new chart:", data.file);
+                        img.src = data.file;
+                    } else {
+                        console.error("Failed to generate chart:", data.error);
+                        // Fallback to a static message
+                        const container = img.parentNode;
+                        container.innerHTML = '<div style="padding: 40px; text-align: center;"><p>Divine visualization will appear when connection to The Source is aligned.</p><p>Current status: Creating harmonic resonance...</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error generating chart:", error);
+                    // Change to a text message if image can't be loaded
+                    const container = img.parentNode;
+                    container.innerHTML = '<div style="padding: 40px; text-align: center;"><p>Divine visualization will appear here when connection to The Source is aligned.</p><p>Current status: Creating harmonic resonance...</p></div>';
+                });
+        }
+
+        // Add this function to render the JSON data
+        function updateJsonViewer(data) {
+            const jsonViewer = document.getElementById('jsonViewer');
+            const viewSelector = document.getElementById('viewSelector');
+            const jsonExpandLevel = document.getElementById('jsonExpandLevel');
+
+            // Determine which data to show based on the view selector
+            let jsonData = data;
+            switch (viewSelector.value) {
+                case 'positions':
+                    jsonData = data.positions;
+                    break;
+                case 'history':
+                    jsonData = data.history;
+                    break;
+                case 'elite':
+                    jsonData = data.elite_strategy;
+                    break;
+                case 'all':
+                default:
+                    jsonData = data;
+                    break;
+            }
+
+            // Get the expand level
+            const expandLevel = jsonExpandLevel.value === 'Infinity'
+                ? Infinity
+                : parseInt(jsonExpandLevel.value);
+
+            // Clear previous content
+            jsonViewer.innerHTML = '';
+
+            // Create a new formatter and render
+            const formatter = new JSONFormatter(jsonData, expandLevel, {
+                hoverPreviewEnabled: true,
+                hoverPreviewArrayCount: 100,
+                hoverPreviewFieldCount: 5,
+                animateOpen: true,
+                animateClose: true
+            });
+
+            jsonViewer.appendChild(formatter.render());
+        }
+
+        // Update the updateTradingData function to also update the JSON viewer
+        function updateTradingData() {
+            fetch('/api/trading_data')
+                .then(response => response.json())
+                .then(data => {
+                    // Update positions
+                    renderPositions(data.positions);
+
+                    // Update elite strategy
+                    renderEliteStrategy(data.elite_strategy);
+
+                    // Update trade history
+                    renderTradeHistory(data.history);
+
+                    // Update JSON viewer
+                    updateJsonViewer(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching trading data:', error);
+                });
+        }
+
+        // Add event listeners for the view and expand level selectors
+        function initializeJsonViewer() {
+            const viewSelector = document.getElementById('viewSelector');
+            const jsonExpandLevel = document.getElementById('jsonExpandLevel');
+            const copyJsonBtn = document.getElementById('copyJsonBtn');
+
+            viewSelector.addEventListener('change', () => {
+                fetch('/api/trading_data')
+                    .then(response => response.json())
+                    .then(data => updateJsonViewer(data))
+                    .catch(error => console.error('Error fetching data for JSON viewer:', error));
+            });
+
+            jsonExpandLevel.addEventListener('change', () => {
+                fetch('/api/trading_data')
+                    .then(response => response.json())
+                    .then(data => updateJsonViewer(data))
+                    .catch(error => console.error('Error fetching data for JSON viewer:', error));
+            });
+
+            // Add copy button functionality
+            copyJsonBtn.addEventListener('click', () => {
+                const viewSelector = document.getElementById('viewSelector');
+
+                // Get the current data
+                fetch('/api/trading_data')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Get the selected data view
+                        let jsonData = data;
+                        switch (viewSelector.value) {
+                            case 'positions':
+                                jsonData = data.positions;
+                                break;
+                            case 'history':
+                                jsonData = data.history;
+                                break;
+                            case 'elite':
+                                jsonData = data.elite_strategy;
+                                break;
+                            case 'all':
+                            default:
+                                jsonData = data;
+                                break;
+                        }
+
+                        // Convert to string with proper formatting
+                        const jsonString = JSON.stringify(jsonData, null, 2);
+
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(jsonString).then(
+                            () => {
+                                // Visual feedback
+                                copyJsonBtn.textContent = "Copied!";
+                                copyJsonBtn.classList.add('copied');
+
+                                // Reset button text after 2 seconds
+                                setTimeout(() => {
+                                    copyJsonBtn.textContent = "Copy JSON";
+                                    copyJsonBtn.classList.remove('copied');
+                                }, 2000);
+                            },
+                            (err) => {
+                                console.error('Could not copy text: ', err);
+                                copyJsonBtn.textContent = "Copy Failed";
+
+                                // Reset button text after 2 seconds
+                                setTimeout(() => {
+                                    copyJsonBtn.textContent = "Copy JSON";
+                                }, 2000);
+                            }
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data for copy:', error);
+                        copyJsonBtn.textContent = "Copy Failed";
+
+                        // Reset button text after 2 seconds
+                        setTimeout(() => {
+                            copyJsonBtn.textContent = "Copy JSON";
+                        }, 2000);
+                    });
+            });
+        }
+
+        // Initialize the dashboard
+        function initializeDashboard() {
+            initializeFiboLevels();
+            updateStatus();
+            updateTradingData();
+            initializeJsonViewer();
+
+            // Set up automatic refresh every 60 seconds
+            setInterval(updateStatus, 60000);
+            setInterval(updateTradingData, 30000);
+
+            // Set up JAH mode toggle
+            jahToggle.addEventListener('click', toggleJahMode);
+        }
+
+        // New functions for trading data
+        function renderPositions(positions) {
+            const container = document.getElementById('positionContainer');
+
+            if (!positions || positions.length === 0) {
+                container.innerHTML = '<div class="no-positions">No active positions</div>';
+                return;
+            }
+
+            let html = '';
+
+            positions.forEach(position => {
+                const isPnlPositive = position.pnl >= 0;
+                const pnlClass = isPnlPositive ? 'pnl-positive' : 'pnl-negative';
+                const sideClass = position.side === 'long' ? 'position-side-long' : 'position-side-short';
+                const sideIcon = position.side === 'long' ? '▲' : '▼';
+
+                html += `
+                <div class="position-card">
+                    <div class="position-header">
+                        <div class="position-side ${sideClass}">
+                            ${sideIcon} ${position.side.toUpperCase()} ${position.symbol}
+                        </div>
+                        <div class="position-pnl ${pnlClass}">
+                            ${isPnlPositive ? '+' : ''}${position.pnl.toFixed(2)} USDT (${isPnlPositive ? '+' : ''}${position.pnl_percent.toFixed(2)}%)
+                        </div>
+                    </div>
+                    <div class="position-details">
+                        <div class="position-info">
+                            <div class="position-info-row">
+                                <span class="position-info-label">Entry Price</span>
+                                <span class="position-info-value">$${position.entry_price.toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Current Price</span>
+                                <span class="position-info-value">$${position.current_price.toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Size</span>
+                                <span class="position-info-value">${position.size} BTC</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Leverage</span>
+                                <span class="position-info-value">${position.leverage}x</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Open Time</span>
+                                <span class="position-info-value">${new Date(position.open_time).toLocaleString()}</span>
+                            </div>
+                            <div class="position-info-row">
+                                <span class="position-info-label">Type</span>
+                                <span class="position-info-value">${position.type}</span>
+                            </div>
+                        </div>
+                        <div class="tp-container">
+                            <div class="tp-title">Divine Path Progress</div>
+                            ${renderTakeProfit(position)}
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderTakeProfit(position) {
+            // Create take profit visualization
+            const tpPoints = position.take_profits;
+            const entryPrice = position.entry_price;
+            const currentPrice = position.current_price;
+            const stopLoss = position.stop_loss;
+
+            // Determine min and max for the scale
+            let minPrice, maxPrice;
+
+            if (position.side === 'long') {
+                const lowestPrice = Math.min(entryPrice, stopLoss, currentPrice);
+                const highestPrice = Math.max(
+                    entryPrice,
+                    stopLoss,
+                    currentPrice,
+                    ...tpPoints.map(tp => tp.price)
+                );
+
+                minPrice = lowestPrice * 0.998;  // Add a small margin
+                maxPrice = highestPrice * 1.002;
+            } else {
+                const lowestPrice = Math.min(
+                    entryPrice,
+                    stopLoss,
+                    currentPrice,
+                    ...tpPoints.map(tp => tp.price)
+                );
+                const highestPrice = Math.max(entryPrice, stopLoss, currentPrice);
+
+                minPrice = lowestPrice * 0.998;
+                maxPrice = highestPrice * 1.002;
+            }
+
+            const priceRange = maxPrice - minPrice;
+
+            // Calculate position on 0-100 scale
+            const getPosition = (price) => {
+                return ((price - minPrice) / priceRange) * 100;
+            };
+
+            // Calculate entry, current, and TP positions
+            const entryPosition = getPosition(entryPrice);
+            const currentPosition = getPosition(currentPrice);
+            const slPosition = getPosition(stopLoss);
+
+            // Create progress bar
+            let progressWidth;
+
+            if (position.side === 'long') {
+                if (currentPrice <= entryPrice) {
+                    progressWidth = 0;
+                } else {
+                    const maxTpPrice = Math.max(...tpPoints.map(tp => tp.price));
+                    progressWidth = ((currentPrice - entryPrice) / (maxTpPrice - entryPrice)) * 100;
+                    progressWidth = Math.min(progressWidth, 100);  // Cap at 100%
+                }
+            } else {
+                if (currentPrice >= entryPrice) {
+                    progressWidth = 0;
+                } else {
+                    const minTpPrice = Math.min(...tpPoints.map(tp => tp.price));
+                    progressWidth = ((entryPrice - currentPrice) / (entryPrice - minTpPrice)) * 100;
+                    progressWidth = Math.min(progressWidth, 100);  // Cap at 100%
+                }
+            }
+
+            // Create HTML
+            let html = `
+            <div class="tp-progress ${position.side === 'short' ? 'tp-progress-short' : ''}">
+                <div class="tp-progress-bar" style="width: ${progressWidth}%"></div>
+                <div class="tp-points">
+                    <div class="tp-point tp-point-entry" style="left: ${entryPosition}%">
+                        <div class="tp-point-label">Entry</div>
+                        <div class="tp-point-price">$${entryPrice.toLocaleString()}</div>
+                    </div>
+                    <div class="tp-point tp-point-current" style="left: ${currentPosition}%">
+                        <div class="tp-point-label">Current</div>
+                        <div class="tp-point-price">$${currentPrice.toLocaleString()}</div>
+                    </div>
+                    <div class="tp-point tp-point-sl" style="left: ${slPosition}%">
+                        <div class="tp-point-label">SL</div>
+                        <div class="tp-point-price">$${stopLoss.toLocaleString()}</div>
+                    </div>
+            `;
+
+            // Add TP points
+            tpPoints.forEach((tp, index) => {
+                const tpPosition = getPosition(tp.price);
+                html += `
+                    <div class="tp-point tp-point-${index + 1}" style="left: ${tpPosition}%">
+                        <div class="tp-point-label">TP${index + 1} (${tp.level})</div>
+                        <div class="tp-point-price">$${tp.price.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+            </div>
+            <div class="tp-stats">
+            `;
+
+            // Add TP stats
+            tpPoints.forEach((tp, index) => {
+                const distance = position.side === 'long'
+                    ? tp.price - currentPrice
+                    : currentPrice - tp.price;
+
+                const distancePercent = Math.abs(tp.distance_percent);
+
+                html += `
+                <div class="position-info-row">
+                    <span class="position-info-label">TP${index + 1} (${tp.percentage}%)</span>
+                    <span class="position-info-value">
+                        $${tp.price.toLocaleString()} 
+                        (${distancePercent.toFixed(2)}% ${distance > 0 ? 'away' : 'reached'})
+                    </span>
+                </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            return html;
+        }
+
+        function renderEliteStrategy(strategy) {
+            const container = document.getElementById('eliteStrategy');
+
+            if (!strategy) {
+                container.innerHTML = '<div class="no-strategy">No elite strategy data available</div>';
+                return;
+            }
+
+            let html = `
+            <div class="elite-header">
+                <div class="elite-title">${strategy.name}</div>
+                <div class="elite-mode">${strategy.mode}</div>
+            </div>
+            
+            <div class="position-info-row">
+                <span class="position-info-label">Current Pattern</span>
+                <span class="position-info-value">${strategy.current_pattern}</span>
+            </div>
+            
+            <div class="position-info-row">
+                <span class="position-info-label">Trap Probability</span>
+                <span class="position-info-value">${(strategy.trap_probability * 100).toFixed(1)}%</span>
+            </div>
+            
+            <div class="elite-signals">
+            `;
+
+            // Add active signals
+            strategy.active_signals.forEach(signal => {
+                const confidenceLevel = signal.confidence >= 0.8 ? 'high' : (signal.confidence >= 0.6 ? 'medium' : 'low');
+
+                html += `
+                <div class="signal-card signal-${confidenceLevel}">
+                    <div class="signal-header">
+                        <div class="signal-name">${signal.name}</div>
+                        <div class="signal-confidence">${(signal.confidence * 100).toFixed(0)}% Confidence</div>
+                    </div>
+                    <div class="signal-description">${signal.description}</div>
+                    <div class="signal-recommendation">${signal.recommendation}</div>
+                </div>
+                `;
+            });
+
+            html += `
+            </div>
+            
+            <div class="position-info-row">
+                <span class="position-info-label">Last Updated</span>
+                <span class="position-info-value">${new Date(strategy.last_update).toLocaleString()}</span>
+            </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderTradeHistory(history) {
+            const tbody = document.querySelector('#historyTable tbody');
+
+            if (!history || history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">No trade history available</td></tr>';
+                return;
+            }
+
+            let html = '';
+
+            history.forEach(trade => {
+                const isPnlPositive = trade.pnl >= 0;
+                const pnlClass = isPnlPositive ? 'pnl-positive' : 'pnl-negative';
+
+                let exitClass = '';
+                if (trade.exit_reason === 'tp_hit') exitClass = 'exit-tp';
+                else if (trade.exit_reason === 'stop_loss') exitClass = 'exit-sl';
+                else if (trade.exit_reason === 'manual') exitClass = 'exit-manual';
+
+                html += `
+                <tr>
+                    <td>${trade.side.toUpperCase()}</td>
+                    <td>${trade.size} BTC</td>
+                    <td>$${trade.entry_price.toLocaleString()}</td>
+                    <td>$${trade.exit_price.toLocaleString()}</td>
+                    <td class="${pnlClass}">${isPnlPositive ? '+' : ''}${trade.pnl.toFixed(2)}</td>
+                    <td class="${exitClass}">${trade.exit_reason.replace('_', ' ').toUpperCase()}</td>
+                    <td>${new Date(trade.close_time).toLocaleString()}</td>
+                </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Start when page loads
+        window.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+
+</html>

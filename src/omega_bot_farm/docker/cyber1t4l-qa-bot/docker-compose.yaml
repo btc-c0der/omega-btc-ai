@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  cyber1t4l-qa-bot:
+    build:
+      context: ../../..
+      dockerfile: src/omega_bot_farm/docker/cyber1t4l-qa-bot/Dockerfile
+    image: omega-btc-ai/cyber1t4l-qa-bot:latest
+    container_name: cyber1t4l-qa-bot
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CYBER1T4L_APP_ID=${CYBER1T4L_APP_ID}
+      - CYBER1T4L_PUBLIC_KEY=${CYBER1T4L_PUBLIC_KEY}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - COVERAGE_THRESHOLD=80.0
+      - TESTING_INTERVAL_MINUTES=60
+      - PYTHONPATH=/app
+    volumes:
+      - ../../../:/app
+      - ./config:/app/config
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    networks:
+      - omega-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  omega-network:
+    external: true

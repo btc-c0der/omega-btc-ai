@@ -1,0 +1,10 @@
+# Ignore test report files
+*.json
+*.html
+*.xml
+
+# Ignore timestamped directories
+20*/
+
+# Only keep the .gitignore file itself
+!.gitignore 

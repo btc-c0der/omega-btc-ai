@@ -1,0 +1,433 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Code Coverage Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        .subtitle {
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-group {
+            margin: 10px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #6e8efb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background-color: #5a7de9;
+        }
+
+        button.secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        button.secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .report-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-section h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        #coverage-report {
+            width: 100%;
+        }
+
+        .sample-data {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 3px 8px;
+            font-size: 0.8em;
+            background-color: #ddd;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .coverage-error {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .control-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>NFT Code Coverage Dashboard</h1>
+            <p class="subtitle">Visualize and analyze test coverage for NFT components</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="data-source">Coverage Data Source:</label>
+                <select id="data-source">
+                    <option value="sample-coverage-data.json" selected>Sample Data</option>
+                    <option value="api">Live API Data</option>
+                    <option value="custom">Custom Source</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="custom-source-group" style="display: none;">
+                <label for="custom-source">Custom Source URL/Path:</label>
+                <input type="text" id="custom-source" placeholder="Enter URL or file path">
+            </div>
+
+            <div class="control-group">
+                <label for="target-coverage">Target Coverage (%):</label>
+                <input type="number" id="target-coverage" min="0" max="100" value="90" step="5">
+            </div>
+
+            <div class="control-group">
+                <button id="generate-report-btn">Generate Report</button>
+                <button id="download-report-btn" class="secondary">Download HTML Report</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="report-section">
+                <h2>Sample Coverage Data</h2>
+                <p>This is example data that would typically come from your test runner or coverage tool.</p>
+                <div class="sample-data">
+                    <button class="copy-btn">Copy</button>
+                    <pre id="sample-data-json">{
+  "coverageTimestamp": "2025-04-10T10:15:30Z",
+  "targetCoverage": 90,
+  "overallStats": {
+    "totalLines": 2450,
+    "coveredLines": 1960,
+    "coverage": 80
+  },
+  "components": [
+    {
+      "name": "NFTContractManager",
+      "path": "components/nft/ContractManager.js",
+      "lines": 350,
+      "coveredLines": 315,
+      "coverage": 90,
+      "complexity": 24,
+      "uncoveredLines": [45, 87, 122, 190, 191, 192, 205, 206, 208, 209, 295, 320]
+    },
+    {
+      "name": "NFTMetadataGenerator",
+      "path": "components/nft/MetadataGenerator.js",
+      "lines": 280,
+      "coveredLines": 196,
+      "coverage": 70,
+      "complexity": 18,
+      "uncoveredLines": [22, 23, 24, 67, 68, 69, 70, 71, 72, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 198, 199, 200, 201, 202, 203, 204, 205, 245, 246, 247, 248, 249, 250]
+    },
+    {
+      "name": "NFTAssetRenderer",
+      "path": "components/nft/AssetRenderer.js",
+      "lines": 420,
+      "coveredLines": 386,
+      "coverage": 92,
+      "complexity": 32,
+      "uncoveredLines": [87, 88, 89, 90, 91, 92, 93, 94, 145, 146, 147, 148, 149, 150, 400, 401, 402, 403, 404, 405]
+    },
+    {
+      "name": "NFTMarketplace",
+      "path": "components/nft/Marketplace.js",
+      "lines": 510,
+      "coveredLines": 357,
+      "coverage": 70,
+      "complexity": 38,
+      "uncoveredLines": [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300]
+    },
+    {
+      "name": "NFTQuantumSecurity",
+      "path": "components/nft/quantum_security/QuantumSigner.js",
+      "lines": 180,
+      "coveredLines": 162,
+      "coverage": 90,
+      "complexity": 14,
+      "uncoveredLines": [34, 35, 36, 42, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108]
+    },
+    {
+      "name": "EntropyCollector",
+      "path": "components/nft/quantum_security/EntropyCollector.js",
+      "lines": 150,
+      "coveredLines": 105,
+      "coverage": 70,
+      "complexity": 12,
+      "uncoveredLines": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 87, 88, 89, 90, 91, 92, 93, 108, 109, 110, 111, 112, 113, 114, 115, 116]
+    },
+    {
+      "name": "NFTTransactionVerifier",
+      "path": "components/nft/TransactionVerifier.js",
+      "lines": 210,
+      "coveredLines": 189,
+      "coverage": 90,
+      "complexity": 18,
+      "uncoveredLines": [45, 46, 47, 48, 49, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
+    },
+    {
+      "name": "NFTGalleryUI",
+      "path": "components/nft/ui/GalleryUI.js",
+      "lines": 350,
+      "coveredLines": 280,
+      "coverage": 80,
+      "complexity": 22,
+      "uncoveredLines": [56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170]
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h2>Coverage Report</h2>
+                <div id="coverage-report">
+                    <p>Click "Generate Report" to view the coverage analysis.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>NFT Code Coverage Dashboard | Divine Dashboard v3 | © 2025 All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        // Import the coverage reporter
+        import NFTCoverageReporter from './utils/coverage_reporter.js';
+
+        // DOM elements
+        const dataSourceSelect = document.getElementById('data-source');
+        const customSourceGroup = document.getElementById('custom-source-group');
+        const customSourceInput = document.getElementById('custom-source');
+        const targetCoverageInput = document.getElementById('target-coverage');
+        const generateReportBtn = document.getElementById('generate-report-btn');
+        const downloadReportBtn = document.getElementById('download-report-btn');
+        const sampleDataJson = document.getElementById('sample-data-json');
+        const copyBtn = document.querySelector('.copy-btn');
+
+        // Sample data
+        const sampleData = JSON.parse(sampleDataJson.textContent);
+
+        // Toggle custom source input visibility
+        dataSourceSelect.addEventListener('change', () => {
+            customSourceGroup.style.display =
+                dataSourceSelect.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Copy sample data button
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(sampleDataJson.textContent)
+                .then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+        });
+
+        // Create a mock file URL for the sample data
+        function createSampleDataUrl() {
+            const blob = new Blob([JSON.stringify(sampleData, null, 2)], { type: 'application/json' });
+            return URL.createObjectURL(blob);
+        }
+
+        // Generate the report
+        generateReportBtn.addEventListener('click', async () => {
+            const reportContainer = document.getElementById('coverage-report');
+            reportContainer.innerHTML = '<p>Loading coverage data...</p>';
+
+            try {
+                // Determine the data source
+                let dataSource;
+                switch (dataSourceSelect.value) {
+                    case 'sample-coverage-data.json':
+                        dataSource = createSampleDataUrl();
+                        break;
+                    case 'api':
+                        dataSource = '/api/coverage-data';
+                        break;
+                    case 'custom':
+                        dataSource = customSourceInput.value;
+                        break;
+                }
+
+                // Get target coverage
+                const targetCoverage = parseInt(targetCoverageInput.value, 10);
+
+                // Create and initialize the reporter
+                const reporter = new NFTCoverageReporter({
+                    dataSource,
+                    targetCoverage,
+                    reportContainer: 'coverage-report',
+                    chartContainer: 'coverage-chart'
+                });
+
+                await reporter.initialize();
+
+                // Enable download button
+                downloadReportBtn.disabled = false;
+
+                // Store reporter instance for download
+                window.currentReporter = reporter;
+
+            } catch (error) {
+                reportContainer.innerHTML = `
+          <div class="coverage-error">
+            <h3>Error Generating Report</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+                console.error('Report generation error:', error);
+            }
+        });
+
+        // Download the report
+        downloadReportBtn.addEventListener('click', () => {
+            if (window.currentReporter) {
+                window.currentReporter.downloadReport();
+            } else {
+                alert('Please generate a report first');
+            }
+        });
+
+        // Mock data for direct testing without server
+        window.mockCoverageData = sampleData;
+    </script>
+</body>
+
+</html>

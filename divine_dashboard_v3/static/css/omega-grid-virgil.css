@@ -1,0 +1,580 @@
+/*
+  ✨ OMEGA GRID PORTAL - VIRGIL ABLOH / OFF-WHITE™ EDITION
+  ---------------------------------------------------------
+  "Typography is Voice. Space is Silence."
+  OMEGA DESIGN AXIOM 02
+*/
+
+/* Import Helvetica Neue font (or closest web-safe alternative) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Colors */
+    --color-white: #F5F5F5;
+    --color-black: #0F0F0F;
+    --color-yellow: #FFD700;
+    --color-soft-black: #222222;
+    --color-grid: #5D5D5D;
+    --color-divine-blue: #2B5797;
+    --color-sacred-gold: #FFD700;
+    --color-omega-red: #B71C1C;
+    --color-quantum-green: #1E8E3E;
+
+    /* Typography */
+    --font-primary: "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, Menlo, Consolas, "Courier New", monospace;
+
+    /* Font Sizes (Industrial) */
+    --font-size-divine: 34px;
+    --font-size-grid: 21px;
+    --font-size-subheading: 18px;
+    --font-size-body: 16px;
+    --font-size-small: 13px;
+    --font-size-tiny: 11px;
+    --font-size-code: 14px;
+
+    /* Spacing */
+    --spacing-xs: 8px;
+    --spacing-s: 13px;
+    --spacing-m: 21px;
+    --spacing-l: 34px;
+    --spacing-xl: 55px;
+    --spacing-xxl: 89px;
+}
+
+/* OFF-WHITE Basic Styles */
+body.virgil-mode {
+    font-family: var(--font-primary);
+    background-color: var(--color-white);
+    color: var(--color-black);
+    line-height: 1.5;
+    font-weight: 400;
+    padding: 0;
+    margin: 0;
+}
+
+/* Virgil Quotation Styling */
+.virgil-quote {
+    font-style: normal;
+    position: relative;
+    padding: 0 5px;
+}
+
+.virgil-quote::before {
+    content: "\201C";
+    position: absolute;
+    left: -5px;
+}
+
+.virgil-quote::after {
+    content: "\201D";
+    position: absolute;
+    right: -5px;
+}
+
+/* Virgil Mode Toggle */
+.virgil-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: var(--color-soft-black);
+    color: var(--color-white);
+    border: none;
+    padding: 10px 15px;
+    font-family: var(--font-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.virgil-mode-toggle:hover {
+    background: var(--color-yellow);
+    color: var(--color-black);
+}
+
+/* OMEGA GRID PORTAL Header */
+.omega-grid-header {
+    font-family: var(--font-primary);
+    font-weight: 800;
+    font-size: 32px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 40px;
+    position: relative;
+    display: inline-block;
+}
+
+.omega-grid-header::after {
+    content: "\2122";
+    position: absolute;
+    top: 0;
+    right: -20px;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* Terminal Component */
+.virgil-terminal {
+    background-color: #1E1E1E;
+    border-radius: 0;
+    overflow: hidden;
+    margin-bottom: var(--spacing-m);
+    font-family: var(--font-mono);
+    position: relative;
+    border: 2px solid var(--color-black);
+}
+
+.virgil-terminal-header {
+    display: flex;
+    align-items: center;
+    background-color: #323232;
+    padding: var(--spacing-xs) var(--spacing-m);
+    position: relative;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.virgil-terminal-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #CCCCCC;
+    font-size: var(--font-size-small);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+}
+
+.virgil-terminal-content {
+    padding: var(--spacing-m);
+    color: #E0E0E0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.virgil-terminal-code {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-code);
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* Command Card (Virgil Style) */
+.command-card {
+    font-family: var(--font-primary);
+    background-color: white;
+    border: 2px solid black;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.command-card-header {
+    background-color: white;
+    padding: 12px 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 2px solid black;
+    position: relative;
+    font-size: 14px;
+}
+
+.command-card-content {
+    padding: 20px;
+    position: relative;
+}
+
+.command-card-overlay {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 72px;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.05);
+    transform: translateY(-50%) rotate(-30deg);
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: -3px;
+}
+
+.command-card-button {
+    font-family: var(--font-primary);
+    background-color: var(--color-black);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-align: center;
+}
+
+.command-card-button:hover {
+    background-color: var(--color-yellow);
+    color: var(--color-black);
+}
+
+/* Command Grid */
+.command-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
+}
+
+/* Status Tags */
+.status-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: var(--color-black);
+    color: white;
+    margin-right: 10px;
+}
+
+.status-tag.live {
+    background-color: var(--color-quantum-green);
+}
+
+.status-tag.processing {
+    background-color: var(--color-sacred-gold);
+    color: var(--color-black);
+}
+
+.status-tag.inactive {
+    background-color: var(--color-grid);
+}
+
+.status-tag.error {
+    background-color: var(--color-omega-red);
+}
+
+/* Divine Echo Feed */
+.divine-echo-feed {
+    background-color: #1E1E1E;
+    color: white;
+    font-family: var(--font-mono);
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+    border: 2px solid black;
+    position: relative;
+}
+
+.divine-echo-feed-header {
+    position: sticky;
+    top: 0;
+    background-color: #1E1E1E;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+    z-index: 1;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.divine-echo-entry {
+    margin-bottom: 8px;
+    border-left: 3px solid var(--color-sacred-gold);
+    padding-left: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.divine-echo-timestamp {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+/* Notification System */
+.virgil-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--color-black);
+    color: white;
+    padding: 15px 20px;
+    font-family: var(--font-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+}
+
+.virgil-notification.show {
+    transform: translateX(0);
+}
+
+/* Industrial Bold Labels */
+.industrial-label {
+    font-family: var(--font-primary);
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+/* Virgil Audio Player (for THX loop) */
+.virgil-audio-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--color-black);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    z-index: 9999;
+}
+
+.virgil-audio-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.virgil-audio-label {
+    font-family: var(--font-primary);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* NFT & Web3 Container */
+.nft-web3-container {
+    border: 2px solid var(--color-black);
+    padding: 20px;
+    margin-top: 40px;
+    position: relative;
+}
+
+.nft-web3-label {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background-color: var(--color-white);
+    padding: 0 10px;
+    font-family: var(--font-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+/* Placeholder for future NFT content */
+.nft-placeholder {
+    border: 2px dashed var(--color-grid);
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-grid);
+    font-family: var(--font-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .command-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* OMEGA GRID PORTAL Specific Styles */
+#omega-grid-portal {
+    padding: 20px;
+    margin-bottom: 40px;
+}
+
+.grid-portal-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.grid-portal-column {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Bot Control Panel */
+.bots-control-panel {
+    background-color: white;
+    border: 2px solid var(--color-black);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.bot-control-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.bot-select {
+    flex: 1;
+    min-width: 200px;
+    font-family: var(--font-primary);
+    padding: 8px 12px;
+    border: 2px solid var(--color-black);
+    background-color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.start-bot-btn {
+    background-color: var(--color-quantum-green);
+}
+
+.stop-bot-btn {
+    background-color: var(--color-omega-red);
+}
+
+.restart-bot-btn {
+    background-color: var(--color-divine-blue);
+}
+
+/* Custom Command Input */
+.custom-command-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.custom-command-input {
+    flex: 1;
+    font-family: var(--font-mono);
+    padding: 8px 12px;
+    border: 2px solid var(--color-black);
+    background-color: white;
+    font-size: var(--font-size-code);
+}
+
+/* Terminal Lines Styling */
+#omega-terminal-content {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-code);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    max-height: 400px;
+    padding: 15px;
+}
+
+.terminal-line {
+    margin-bottom: 5px;
+    word-break: break-word;
+}
+
+.terminal-line.command {
+    color: var(--color-sacred-gold);
+    font-weight: bold;
+}
+
+.terminal-line.error {
+    color: var(--color-omega-red);
+}
+
+.terminal-line.success {
+    color: var(--color-quantum-green);
+}
+
+.terminal-line.header {
+    color: var(--color-divine-blue);
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.terminal-line.divider {
+    color: var(--color-grid);
+    margin: 5px 0;
+}
+
+.terminal-line.quote {
+    color: var(--color-sacred-gold);
+    font-style: italic;
+}
+
+.terminal-timestamp {
+    color: rgba(224, 224, 224, 0.5);
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+/* Command Description */
+.command-description {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.command-param-container {
+    margin-bottom: 15px;
+}
+
+.command-param-select {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid var(--color-black);
+    background-color: white;
+    font-family: var(--font-primary);
+    font-weight: 600;
+}
+
+/* Virgil Grid Style */
+.virgil-grid {
+    position: relative;
+}
+
+.virgil-grid::before {
+    content: "\" GRID SYSTEM\"";
+    position: absolute;
+    top: -30px;
+    right: 0;
+    font-family: var(--font-primary);
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--color-grid);
+}
+
+/* Loading Indicator */
+#grid-loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+#grid-loading.show {
+    display: block;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .grid-portal-container {
+        flex-direction: column;
+    }
+
+    .grid-portal-column {
+        width: 100%;
+    }
+}

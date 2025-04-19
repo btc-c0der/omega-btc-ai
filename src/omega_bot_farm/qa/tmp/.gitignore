@@ -1,0 +1,5 @@
+# Ignore all quantum JSON files
+quantum_*.json
+
+# Except keep the .gitignore file itself
+!.gitignore 

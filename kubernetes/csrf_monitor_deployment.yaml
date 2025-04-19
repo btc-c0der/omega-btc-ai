@@ -1,0 +1,193 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csrf-monitor
+  labels:
+    app: csrf-monitor
+    component: quantum-security
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csrf-monitor
+  template:
+    metadata:
+      labels:
+        app: csrf-monitor
+        component: quantum-security
+    spec:
+      containers:
+      - name: monitor
+        image: quantum-pow:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "quantum_pow.security.csrf_server"]
+        env:
+        - name: WHITELIST_FILE
+          value: "/app/data/csrf_whitelist.json"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8081
+          name: csrf-api
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: csrf-api
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: csrf-api
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: csrf-data
+          mountPath: /app/data
+      volumes:
+      - name: csrf-data
+        persistentVolumeClaim:
+          claimName: csrf-monitor-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: csrf-monitor
+  labels:
+    app: csrf-monitor
+spec:
+  selector:
+    app: csrf-monitor
+  ports:
+  - port: 8081
+    targetPort: csrf-api
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: csrf-monitor-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: csrf-monitor-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: csrf-monitor
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          component: quantum-mining
+    - podSelector:
+        matchLabels:
+          component: quantum-security
+    ports:
+    - protocol: TCP
+      port: 8081
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          component: quantum-mining
+    - podSelector:
+        matchLabels:
+          component: quantum-security
+    ports:
+    - protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csrf-monitor-config
+data:
+  csrf-config.json: |
+    {
+      "whitelist_file": "/app/data/csrf_whitelist.json",
+      "log_level": "INFO",
+      "alert_threshold": 5,
+      "notification_endpoint": "http://omega-prm-miner:8080/api/security/alerts",
+      "security_patterns": {
+        "sql_injection": true,
+        "xss": true,
+        "command_injection": true,
+        "path_traversal": true
+      },
+      "auto_whitelist": false,
+      "whitelist_trusted_ips": [
+        "10.0.0.0/8",
+        "172.16.0.0/12"
+      ]
+    }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: csrf-whitelist-backup
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: whitelist-backup
+            image: quantum-pow:latest
+            imagePullPolicy: IfNotPresent
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              cp /app/data/csrf_whitelist.json /app/backup/csrf_whitelist_$(date +%Y%m%d_%H%M%S).json &&
+              echo "Backup completed: $(date)"
+            volumeMounts:
+            - name: csrf-data
+              mountPath: /app/data
+            - name: backup-volume
+              mountPath: /app/backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: csrf-data
+            persistentVolumeClaim:
+              claimName: csrf-monitor-pvc
+          - name: backup-volume
+            persistentVolumeClaim:
+              claimName: csrf-monitor-backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: csrf-monitor-backup-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi 

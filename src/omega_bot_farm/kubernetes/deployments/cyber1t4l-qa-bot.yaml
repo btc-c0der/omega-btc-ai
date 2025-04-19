@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyber1t4l-qa-bot
+  namespace: omega-bot-farm
+  labels:
+    app: cyber1t4l-qa-bot
+    component: quality-assurance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cyber1t4l-qa-bot
+  template:
+    metadata:
+      labels:
+        app: cyber1t4l-qa-bot
+        component: quality-assurance
+    spec:
+      containers:
+      - name: cyber1t4l-qa-bot
+        image: omega-btc-ai/cyber1t4l-qa-bot:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-port
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: CYBER1T4L_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: discord-credentials
+              key: cyber1t4l-app-id
+        - name: CYBER1T4L_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: discord-credentials
+              key: cyber1t4l-public-key
+        - name: DISCORD_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: discord-credentials
+              key: token
+        - name: COVERAGE_THRESHOLD
+          value: "80.0"
+        - name: TESTING_INTERVAL_MINUTES
+          value: "60"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8082
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: test-reports-volume
+          mountPath: /app/reports
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cyber1t4l-qa-bot-config
+      - name: test-reports-volume
+        persistentVolumeClaim:
+          claimName: cyber1t4l-test-reports-pvc
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyber1t4l-qa-bot
+  namespace: omega-bot-farm
+  labels:
+    app: cyber1t4l-qa-bot
+    component: quality-assurance
+spec:
+  selector:
+    app: cyber1t4l-qa-bot
+  ports:
+  - port: 8082
+    targetPort: 8082
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyber1t4l-qa-bot-config
+  namespace: omega-bot-farm
+data:
+  config.yaml: |
+    bot:
+      name: CyBer1t4L
+      description: Advanced Quality Assurance Bot for OMEGA Trading Ecosystem
+      version: 1.0.0
+    testing:
+      coverage_threshold: 80.0
+      monitor_components:
+        - trading
+        - discord
+        - matrix
+      critical_modules:
+        - src/omega_bot_farm/trading/b0ts/ccxt/ccxt_strategic_trader.py
+        - src/omega_bot_farm/bitget_positions_info.py
+        - src/omega_bot_farm/matrix_cli_live_positions.py
+      report_directory: /app/reports
+    notifications:
+      test_coverage_alerts: true
+      critical_test_failure_alerts: true
+      daily_reports: true
+    monitoring:
+      enabled: true
+      interval_minutes: 60
+      realtime_monitoring: true
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cyber1t4l-test-reports-pvc
+  namespace: omega-bot-farm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Update the existing discord-credentials Secret to include the CyBer1t4L credentials
+# This assumes the Secret already exists from discord-bot.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: discord-credentials
+  namespace: omega-bot-farm
+type: Opaque
+data:
+  # These base64 encoded placeholder values will be replaced during deployment
+  cyber1t4l-app-id: MTM1Nzc4MTQ0MDAwNzI0MTgxOQ==  # base64 encoded "1357781440007241819"
+  cyber1t4l-public-key: MzA5MWU5Mjc3MjAzN2FiNGZkMDdjYWNkMzViN2JjYWRmMmY3MjA1YTM1MjkzMzdjZWE1NmU4NjM3NTA1YjJkOQ==  # base64 encoded key 

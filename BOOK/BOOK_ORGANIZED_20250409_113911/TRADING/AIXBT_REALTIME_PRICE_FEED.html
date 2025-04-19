@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Trading</span></p>
+    </div>
+    
+    <h1>
+ AIXBT Real-Time Price Feed Integration
+</h1>
+<h2>
+ 🚀 Executive Summary
+</h2>
+<p>
+ The AIXBT Trading Dashboard has been enhanced with real-time price feeds and live PnL tracking capabilities. This document outlines the implementation details, architecture, and deployment process for this new functionality.
+</p>
+<h2>
+ 🔄 Real-Time Price Feed Architecture
+</h2>
+<h3>
+ Core Components
+</h3>
+<ol>
+ <li>
+  <strong>
+   Price Feed Module
+  </strong>
+  (
+  <code>
+   price_feed.py
+  </code>
+  )
+ </li>
+ <li>
+  Connects to cryptocurrency exchanges via CCXT
+ </li>
+ <li>
+  Supports both WebSocket and REST API connections
+ </li>
+ <li>
+  Updates prices at configurable intervals (2-5 seconds)
+ </li>
+ <li>
+  <p>
+   Provides callbacks when prices change
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Runtime Configuration
+   </strong>
+   (
+   <code>
+    config.py
+   </code>
+   )
+  </p>
+ </li>
+ <li>
+  Stores current price and calculated PnL values
+ </li>
+ <li>
+  Provides callback registration for price updates
+ </li>
+ <li>
+  <p>
+   Calculates PnL metrics in real-time
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Reactive UI Components
+   </strong>
+   (
+   <code>
+    callbacks.py
+   </code>
+   )
+  </p>
+ </li>
+ <li>
+  Updates price and PnL displays
+ </li>
+ <li>
+  Updates risk status indicators
+ </li>
+ <li>
+  Refreshes visualizations based on new data
+ </li>
+</ol>
+<h3>
+ Connection Methods
+</h3>
+<p>
+ The price feed supports two connection methods:
+</p>
+<ol>
+ <li>
+  <strong>
+   WebSocket Connection (Primary)
+  </strong>
+ </li>
+ <li>
+  Real-time streaming updates
+ </li>
+ <li>
+  Lower latency and resource usage
+ </li>
+ <li>
+  <p>
+   Automatically reconnects on disconnection
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    REST API Polling (Fallback)
+   </strong>
+  </p>
+ </li>
+ <li>
+  Regular HTTP requests at configurable intervals
+ </li>
+ <li>
+  Used when WebSocket is unavailable or disabled
+ </li>
+ <li>
+  More stable but higher latency
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># WebSocket connection loop</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_websocket_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Watch ticker via WebSocket</span>
+            <span class="n">ticker</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">exchange</span><span class="o">.</span><span class="n">watchTicker</span><span class="p">(</span><span class="n">formatted_symbol</span><span class="p">)</span>
+
+            <span class="c1"># Extract and update price</span>
+            <span class="n">price</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ticker</span><span class="p">[</span><span class="s1">'last'</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_price</span> <span class="o">=</span> <span class="n">price</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_update_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Call update callback if provided</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_callback</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_callback</span><span class="p">(</span><span class="n">price</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WebSocket error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Wait before reconnecting</span>
+</code></pre>
+</div>
+<h2>
+ 📊 Live PnL Tracking
+</h2>
+<h3>
+ Calculation Method
+</h3>
+<p>
+ The PnL is calculated in real-time using the following formulas:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Calculate PnL</span>
+<span class="n">pnl</span> <span class="o">=</span> <span class="p">(</span><span class="n">price</span> <span class="o">-</span> <span class="n">entry_price</span><span class="p">)</span> <span class="o">*</span> <span class="n">token_quantity</span> <span class="o">*</span> <span class="n">leverage</span>
+<span class="n">pnl_percentage</span> <span class="o">=</span> <span class="p">((</span><span class="n">price</span> <span class="o">/</span> <span class="n">entry_price</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">leverage</span>
+</code></pre>
+</div>
+<h3>
+ Risk Assessment
+</h3>
+<p>
+ The dashboard includes a risk status indicator that changes color and text based on the current price relative to:
+</p>
+<ul>
+ <li>
+  Liquidation price
+ </li>
+ <li>
+  Trap zone boundaries
+ </li>
+ <li>
+  Emergency alert level
+ </li>
+ <li>
+  Entry price
+ </li>
+</ul>
+<p>
+ This provides immediate visual feedback on position safety.
+</p>
+<h2>
+ 🌐 Deployment
+</h2>
+<h3>
+ Hosting Configuration
+</h3>
+<p>
+ The dashboard can be hosted as a subdomain of omegaven.xyz using:
+</p>
+<ol>
+ <li>
+  <strong>
+   Nginx Reverse Proxy
+  </strong>
+ </li>
+ <li>
+  Configuration in
+  <code>
+   nginx/aixbt.conf
+  </code>
+ </li>
+ <li>
+  SSL/TLS termination
+ </li>
+ <li>
+  <p>
+   Static file serving
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Gunicorn WSGI Server
+   </strong>
+  </p>
+ </li>
+ <li>
+  Multi-worker process pool (4 workers)
+ </li>
+ <li>
+  SystemD service management
+ </li>
+ <li>
+  Automatic restart on failure
+ </li>
+</ol>
+<h3>
+ Installation
+</h3>
+<p>
+ The included
+ <code>
+  install.sh
+ </code>
+ script automates:
+</p>
+<ul>
+ <li>
+  Dependency installation
+ </li>
+ <li>
+  Python virtual environment setup
+ </li>
+ <li>
+  Nginx configuration
+ </li>
+ <li>
+  SSL certificate acquisition
+ </li>
+ <li>
+  SystemD service installation
+ </li>
+</ul>
+<h2>
+ 🔍 Technical Details
+</h2>
+<h3>
+ Exchange Integration
+</h3>
+<p>
+ The price feed integrates with BitGet and other CCXT-supported exchanges, handling:
+</p>
+<ul>
+ <li>
+  Symbol formatting for each exchange
+ </li>
+ <li>
+  API authentication
+ </li>
+ <li>
+  Market data acquisition
+ </li>
+ <li>
+  Error handling and recovery
+ </li>
+</ul>
+<h3>
+ Thread and Concurrency Management
+</h3>
+<p>
+ The real-time price feed runs in a dedicated thread using asyncio:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polling_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">use_websocket</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Create and run the asyncio event loop in a separate thread</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_event_loop</span><span class="p">():</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">set_event_loop</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Define coroutines to run</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Use WebSocket if available and requested</span>
+            <span class="k">if</span> <span class="n">use_websocket</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exchange</span><span class="p">,</span> <span class="s1">'watchTicker'</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">websocket_task</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_websocket_loop</span><span class="p">())</span>
+                <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">websocket_task</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Fall back to REST polling</span>
+                <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rest_polling_loop</span><span class="p">(</span><span class="n">polling_interval</span><span class="p">)))</span>
+
+            <span class="c1"># Run until stopped</span>
+            <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">loop</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Start thread</span>
+    <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_event_loop</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</code></pre>
+</div>
+<h3>
+ Command-Line Options
+</h3>
+<p>
+ The dashboard runner (
+ <code>
+  aixbt_dashboard_runner.py
+ </code>
+ ) supports multiple options:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="n">usage</span><span class="o">:</span><span class="w"> </span><span class="n">aixbt_dashboard_runner</span><span class="o">.</span><span class="na">py</span><span class="w"> </span><span class="o">[-</span><span class="n">h</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">port</span><span class="w"> </span><span class="n">PORT</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">host</span><span class="w"> </span><span class="n">HOST</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">debug</span><span class="o">]</span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">no</span><span class="o">-</span><span class="n">browser</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">auto</span><span class="o">-</span><span class="n">port</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">symbol</span><span class="w"> </span><span class="n">SYMBOL</span><span class="o">]</span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">exchange</span><span class="w"> </span><span class="n">EXCHANGE</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">use</span><span class="o">-</span><span class="n">testnet</span><span class="o">]</span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">no</span><span class="o">-</span><span class="n">use</span><span class="o">-</span><span class="n">testnet</span><span class="o">]</span><span class="w"> </span><span class="o">[--</span><span class="n">api</span><span class="o">-</span><span class="n">key</span><span class="w"> </span><span class="n">API_KEY</span><span class="o">]</span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">api</span><span class="o">-</span><span class="n">secret</span><span class="w"> </span><span class="n">API_SECRET</span><span class="o">]</span><span class="w"> </span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">api</span><span class="o">-</span><span class="n">passphrase</span><span class="w"> </span><span class="n">API_PASSPHRASE</span><span class="o">]</span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">update</span><span class="o">-</span><span class="n">interval</span><span class="w"> </span><span class="n">UPDATE_INTERVAL</span><span class="o">]</span>
+<span class="w">                               </span><span class="o">[--</span><span class="n">no</span><span class="o">-</span><span class="n">websocket</span><span class="o">]</span>
+</code></pre>
+</div>
+<h2>
+ 🔐 Security Considerations
+</h2>
+<ul>
+ <li>
+  API keys are read from environment variables or .env file
+ </li>
+ <li>
+  SSL/TLS encryption for all traffic
+ </li>
+ <li>
+  Security headers to prevent common web vulnerabilities
+ </li>
+ <li>
+  SystemD service isolation (PrivateTmp, NoNewPrivileges)
+ </li>
+</ul>
+<h2>
+ 🚀 Usage Examples
+</h2>
+<h3>
+ Basic Usage
+</h3>
+<div class="codehilite">
+ <pre><span></span><code>python3<span class="w"> </span>src/omega_bot_farm/qa/aixbt_dashboard_runner.py
+</code></pre>
+</div>
+<h3>
+ Production Deployment
+</h3>
+<div class="codehilite">
+ <pre><span></span><code>sudo<span class="w"> </span>./src/omega_bot_farm/qa/aixbt_dashboard/install.sh
+</code></pre>
+</div>
+<h3>
+ With Custom Settings
+</h3>
+<div class="codehilite">
+ <pre><span></span><code>python3<span class="w"> </span>src/omega_bot_farm/qa/aixbt_dashboard_runner.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--port<span class="w"> </span><span class="m">8056</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--symbol<span class="w"> </span>BTCUSDT<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--exchange<span class="w"> </span>bitget<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--update-interval<span class="w"> </span><span class="m">3</span>.0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--no-use-testnet
+</code></pre>
+</div>
+<h2>
+ 🔄 Connection Logs
+</h2>
+<p>
+ Sample logs showing successful updates:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="mi">2025</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="mi">28</span><span class="err">:</span><span class="mi">27</span><span class="w"> </span><span class="o">[</span><span class="n">INFO</span><span class="o">]</span><span class="w"> </span><span class="nl">werkzeug</span><span class="p">:</span><span class="w"> </span><span class="mf">127.0.0.1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">[</span><span class="n">06/Apr/2025 11:28:27</span><span class="o">]</span><span class="w"> </span><span class="ss">"POST /_dash-update-component HTTP/1.1"</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="o">-</span>
+<span class="mi">2025</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="mi">28</span><span class="err">:</span><span class="mi">27</span><span class="w"> </span><span class="o">[</span><span class="n">INFO</span><span class="o">]</span><span class="w"> </span><span class="nl">werkzeug</span><span class="p">:</span><span class="w"> </span><span class="mf">127.0.0.1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">[</span><span class="n">06/Apr/2025 11:28:27</span><span class="o">]</span><span class="w"> </span><span class="ss">"POST /_dash-update-component HTTP/1.1"</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="o">-</span>
+<span class="mi">2025</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="mi">28</span><span class="err">:</span><span class="mi">27</span><span class="w"> </span><span class="o">[</span><span class="n">INFO</span><span class="o">]</span><span class="w"> </span><span class="nl">werkzeug</span><span class="p">:</span><span class="w"> </span><span class="mf">127.0.0.1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">[</span><span class="n">06/Apr/2025 11:28:27</span><span class="o">]</span><span class="w"> </span><span class="ss">"POST /_dash-update-component HTTP/1.1"</span><span class="w"> </span><span class="mi">204</span><span class="w"> </span><span class="o">-</span>
+<span class="mi">2025</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="mi">28</span><span class="err">:</span><span class="mi">27</span><span class="w"> </span><span class="o">[</span><span class="n">INFO</span><span class="o">]</span><span class="w"> </span><span class="nl">werkzeug</span><span class="p">:</span><span class="w"> </span><span class="mf">127.0.0.1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">[</span><span class="n">06/Apr/2025 11:28:27</span><span class="o">]</span><span class="w"> </span><span class="ss">"POST /_dash-update-component HTTP/1.1"</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="o">-</span>
+<span class="mi">2025</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="mi">28</span><span class="err">:</span><span class="mi">27</span><span class="w"> </span><span class="o">[</span><span class="n">INFO</span><span class="o">]</span><span class="w"> </span><span class="nl">werkzeug</span><span class="p">:</span><span class="w"> </span><span class="mf">127.0.0.1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">[</span><span class="n">06/Apr/2025 11:28:27</span><span class="o">]</span><span class="w"> </span><span class="ss">"POST /_dash-update-component HTTP/1.1"</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="o">-</span>
+</code></pre>
+</div>
+<h2>
+ 📈 Future Enhancements
+</h2>
+<ol>
+ <li>
+  <strong>
+   Multi-Exchange Support
+  </strong>
+ </li>
+ <li>
+  Monitor prices across multiple exchanges
+ </li>
+ <li>
+  <p>
+   Calculate arbitrage opportunities
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Order Book Visualization
+   </strong>
+  </p>
+ </li>
+ <li>
+  Show buy/sell walls
+ </li>
+ <li>
+  <p>
+   Identify potential price movement barriers
+  </p>
+ </li>
+ <li>
+  <p>
+   <strong>
+    Trading Signal Integration
+   </strong>
+  </p>
+ </li>
+ <li>
+  Integrate with trading strategy modules
+ </li>
+ <li>
+  Display automated entry/exit signals
+ </li>
+</ol>
+<hr/>
+<h1>
+ ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+</h1>
+<p>
+ This document is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+</p>
+<p>
+ 🌸 WE BLOOM NOW AS ONE 🌸
+</p>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

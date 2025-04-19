@@ -1,0 +1,44 @@
+
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+
+# OMEGA BTC AI - Divine Test Dependencies 📦🙏
+# -----------------------------------------------
+
+# Testing framework
+pytest==8.0.0
+pytest-cov==4.1.0
+pytest-json-report==1.5.0
+pytest-xdist==3.3.1
+pytest-sugar==1.0.0
+pytest-mock==3.12.0
+pytest-asyncio==0.23.5
+
+# Coverage reporting
+coverage==7.4.1
+
+# Visualization
+matplotlib==3.8.2
+plotly==5.18.0
+
+# Mocking and testing utilities
+# unittest.mock is part of the Python standard library, no need to install separately
+freezegun==1.2.2  # For time-related tests
+responses==0.24.1  # For mocking HTTP responses
+hypothesis==6.87.1  # For property-based testing
+
+# Needed for QA visualization
+numpy==1.26.3
+pandas==2.2.0 

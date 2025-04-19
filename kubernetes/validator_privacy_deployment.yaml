@@ -1,0 +1,213 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validator-privacy
+  labels:
+    app: validator-privacy
+    component: quantum-security
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: validator-privacy
+  template:
+    metadata:
+      labels:
+        app: validator-privacy
+        component: quantum-security
+    spec:
+      containers:
+      - name: privacy-manager
+        image: quantum-pow:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "quantum_pow.security.validator_privacy_server"]
+        env:
+        - name: CONFIG_FILE
+          value: "/app/config/validator_privacy_config.json"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8082
+          name: privacy-api
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: privacy-api
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: privacy-api
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: privacy-config
+          mountPath: /app/config
+        - name: privacy-data
+          mountPath: /app/data
+      volumes:
+      - name: privacy-config
+        configMap:
+          name: validator-privacy-config
+      - name: privacy-data
+        persistentVolumeClaim:
+          claimName: validator-privacy-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: validator-privacy
+  labels:
+    app: validator-privacy
+spec:
+  selector:
+    app: validator-privacy
+  ports:
+  - port: 8082
+    targetPort: privacy-api
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: validator-privacy-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: validator-privacy-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: validator-privacy
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          component: quantum-mining
+    - podSelector:
+        matchLabels:
+          component: quantum-security
+    ports:
+    - protocol: TCP
+      port: 8082
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          component: quantum-mining
+    - podSelector:
+        matchLabels:
+          component: quantum-security
+    ports:
+    - protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: validator-privacy-config
+data:
+  validator_privacy_config.json: |
+    {
+      "privacy_mode": "enhanced",
+      "randomize_timing": true,
+      "message_padding": true,
+      "attestation_delay_max_ms": 50,
+      "block_proposal_proxies_enabled": true,
+      "trusted_proxies": [
+        "10.0.0.50",
+        "10.0.0.51"
+      ],
+      "dandelion": {
+        "stem_probability": 0.9,
+        "max_stem_length": 10
+      },
+      "privacy_analysis": {
+        "enabled": true,
+        "schedule": "0 */6 * * *",
+        "notification_threshold": "MEDIUM"
+      }
+    }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: validator-privacy-analysis
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: privacy-analyzer
+            image: quantum-pow:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "-m", "quantum_pow.security.privacy_analysis"]
+            args: ["--config", "/app/config/validator_privacy_config.json"]
+            env:
+            - name: OUTPUT_FILE
+              value: "/app/data/privacy_analysis_$(date +%Y%m%d_%H%M%S).json"
+            volumeMounts:
+            - name: privacy-config
+              mountPath: /app/config
+            - name: privacy-data
+              mountPath: /app/data
+          restartPolicy: OnFailure
+          volumes:
+          - name: privacy-config
+            configMap:
+              name: validator-privacy-config
+          - name: privacy-data
+            persistentVolumeClaim:
+              claimName: validator-privacy-pvc
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: validator-privacy-peer-rotation
+spec:
+  schedule: "0 */12 * * *"  # Every 12 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: peer-rotator
+            image: quantum-pow:latest
+            imagePullPolicy: IfNotPresent
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              curl -X POST http://validator-privacy:8082/api/rotate-peers \
+                -H "Content-Type: application/json" \
+                -d '{"rotation_reason": "scheduled"}' && \
+              echo "Peer rotation completed: $(date)"
+          restartPolicy: OnFailure 

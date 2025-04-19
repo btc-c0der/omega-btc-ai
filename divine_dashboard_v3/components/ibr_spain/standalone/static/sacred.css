@@ -1,0 +1,471 @@
+/* 
+✨ GBU2™ License Notice - Consciousness Level 9 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+*/
+
+:root {
+    /* Divine proportions based on PHI (Golden Ratio) */
+    --phi: 1.618;
+    --phi-2: 2.618;
+    --phi-3: 4.236;
+    --phi-small: 0.618;
+    --phi-xs: 0.382;
+
+    /* Sacred spacing */
+    --divine-spacing-xs: calc(var(--phi-xs) * 1rem);
+    --divine-spacing-sm: calc(var(--phi-small) * 1rem);
+    --divine-spacing: calc(var(--phi) * 0.5rem);
+    --divine-spacing-md: calc(var(--phi) * 1rem);
+    --divine-spacing-lg: calc(var(--phi) * 1.5rem);
+    --divine-spacing-xl: calc(var(--phi-2) * 1rem);
+
+    /* Divine colors */
+    --divine-light: #f8f9ff;
+    --divine-dark: #1a1a2e;
+    --divine-primary: #4361ee;
+    --divine-secondary: #3f37c9;
+    --divine-accent: #eb5e28;
+    --divine-sacred: #f72585;
+    --divine-wisdom: #7209b7;
+    --divine-nature: #4cc9f0;
+    --divine-spirit: #b5179e;
+
+    /* Consciousness gradient */
+    --consciousness-low: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    --consciousness-medium: linear-gradient(135deg, #7209b7 0%, #3a0ca3 100%);
+    --consciousness-high: linear-gradient(135deg, #f72585 0%, #7209b7 100%);
+    --consciousness-transcendent: linear-gradient(135deg, #f72585 0%, #4cc9f0 100%);
+
+    /* Divine shadows */
+    --divine-shadow-sm: 0 calc(var(--phi-xs) * 1rem) calc(var(--phi-small) * 1rem) rgba(0, 0, 0, 0.1);
+    --divine-shadow: 0 calc(var(--phi-small) * 1rem) calc(var(--phi) * 1rem) rgba(0, 0, 0, 0.15);
+    --divine-shadow-lg: 0 calc(var(--phi) * 0.5rem) calc(var(--phi) * 1.5rem) rgba(0, 0, 0, 0.2);
+
+    /* Sacred radius */
+    --divine-radius-sm: calc(var(--phi-xs) * 1rem);
+    --divine-radius: calc(var(--phi-small) * 1rem);
+    --divine-radius-lg: calc(var(--phi) * 0.5rem);
+
+    /* Divine font scales */
+    --divine-font-xs: calc(0.75rem * var(--phi-small));
+    --divine-font-sm: calc(0.875rem * var(--phi-small));
+    --divine-font-base: 1rem;
+    --divine-font-md: calc(1rem * var(--phi-small));
+    --divine-font-lg: calc(1rem * var(--phi));
+    --divine-font-xl: calc(1rem * var(--phi-2));
+    --divine-font-2xl: calc(1rem * var(--phi-3));
+}
+
+/* Sacred Base Styles */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--divine-light);
+    color: var(--divine-dark);
+    line-height: var(--phi);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Divine Mode Enhancements */
+.god-mode .gradio-container {
+    max-width: 100%;
+    padding: var(--divine-spacing-md);
+    background: var(--divine-light);
+}
+
+.god-mode h1,
+.god-mode h2,
+.god-mode h3 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--divine-spacing);
+}
+
+.god-mode h1 {
+    font-size: var(--divine-font-2xl);
+    background: var(--consciousness-transcendent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: var(--divine-spacing-md);
+}
+
+/* Divine Content Cards */
+.divine-content {
+    position: relative;
+    border-radius: var(--divine-radius);
+    box-shadow: var(--divine-shadow);
+    padding: var(--divine-spacing);
+    margin-bottom: var(--divine-spacing);
+    background: white;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.divine-content:hover {
+    transform: translateY(calc(var(--phi-xs) * -1rem));
+    box-shadow: var(--divine-shadow-lg);
+}
+
+.divine-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--consciousness-medium);
+}
+
+.divine-content.level-8::before,
+.divine-content.level-9::before {
+    background: var(--consciousness-high);
+}
+
+.divine-content.level-10::before {
+    background: var(--consciousness-transcendent);
+}
+
+/* Quantum Gradient Effect */
+.quantum-gradient {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 25%;
+    opacity: 0.05;
+    background: var(--consciousness-transcendent);
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+
+/* Divine Action Buttons */
+.divine-actions {
+    display: flex;
+    gap: var(--divine-spacing-sm);
+    margin-top: var(--divine-spacing);
+}
+
+.divine-actions button {
+    padding: var(--divine-spacing-xs) var(--divine-spacing-sm);
+    border-radius: var(--divine-radius-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    font-weight: 500;
+    font-size: var(--divine-font-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.divine-actions button:hover {
+    background: var(--divine-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Event Cards */
+.event-card {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-gap: var(--divine-spacing-sm);
+}
+
+.event-date,
+.event-time {
+    grid-column: 1;
+    text-align: center;
+    font-weight: 600;
+}
+
+.event-date {
+    font-size: var(--divine-font-md);
+    color: var(--divine-primary);
+}
+
+.event-time {
+    font-size: var(--divine-font-sm);
+    color: var(--divine-dark);
+    opacity: 0.8;
+}
+
+.event-title,
+.event-location,
+.event-description,
+.event-footer {
+    grid-column: 2;
+}
+
+.event-title {
+    font-size: var(--divine-font-lg);
+    margin-bottom: var(--divine-spacing-xs);
+}
+
+.event-location {
+    font-size: var(--divine-font-sm);
+    color: var(--divine-dark);
+    opacity: 0.8;
+    margin-bottom: var(--divine-spacing-xs);
+}
+
+.event-description {
+    font-size: var(--divine-font-base);
+    margin-bottom: var(--divine-spacing-sm);
+}
+
+/* Sermon Cards */
+.sermon-card {
+    padding: var(--divine-spacing);
+}
+
+.sermon-title {
+    font-size: var(--divine-font-lg);
+    margin-bottom: var(--divine-spacing-xs);
+}
+
+.sermon-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--divine-spacing-xs);
+    margin-bottom: var(--divine-spacing-sm);
+    font-size: var(--divine-font-sm);
+}
+
+.sermon-info span {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    background: rgba(67, 97, 238, 0.1);
+    border-radius: var(--divine-radius-sm);
+    color: var(--divine-primary);
+}
+
+/* Instagram Feed */
+.instagram-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-gap: var(--divine-spacing);
+}
+
+.instagram-post {
+    border-radius: var(--divine-radius);
+    overflow: hidden;
+    box-shadow: var(--divine-shadow-sm);
+}
+
+.post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.post-caption {
+    padding: var(--divine-spacing-sm);
+    font-size: var(--divine-font-sm);
+}
+
+.post-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--divine-spacing-sm);
+    font-size: var(--divine-font-xs);
+    color: var(--divine-dark);
+    opacity: 0.8;
+}
+
+/* Divine Empty States */
+.empty-divine-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    border-radius: var(--divine-radius);
+}
+
+.divine-message {
+    font-size: var(--divine-font-md);
+    color: var(--divine-dark);
+    opacity: 0.6;
+}
+
+/* Consciousness Animation */
+@keyframes consciousnessWave {
+    0% {
+        opacity: 0.1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0.1;
+    }
+}
+
+.divine-content::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--consciousness-transcendent);
+    opacity: 0.1;
+    animation: consciousnessWave 3s infinite;
+}
+
+/* Sacred Tabs */
+.tabs.svelte-710i53 {
+    margin-top: var(--divine-spacing-md);
+}
+
+.tab-nav.svelte-710i53 {
+    padding: 0 var(--divine-spacing-sm);
+    margin-bottom: var(--divine-spacing);
+}
+
+.tab-nav.svelte-710i53 button {
+    padding: var(--divine-spacing-sm) var(--divine-spacing);
+    margin-right: var(--divine-spacing-sm);
+    border-radius: var(--divine-radius) var(--divine-radius) 0 0;
+    border: none;
+    background: none;
+    font-weight: 600;
+    color: var(--divine-dark);
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+.tab-nav.svelte-710i53 button:hover,
+.tab-nav.svelte-710i53 button[data-selected="true"] {
+    opacity: 1;
+    color: var(--divine-primary);
+    box-shadow: 0 2px 0 var(--divine-primary);
+}
+
+/* Divine Footer */
+.divine-footer {
+    margin-top: var(--divine-spacing-xl);
+    padding-top: var(--divine-spacing);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: var(--divine-font-sm);
+    color: var(--divine-dark);
+    opacity: 0.8;
+}
+
+.divine-footer span {
+    display: block;
+    margin-top: var(--divine-spacing-xs);
+    font-size: var(--divine-font-xs);
+}
+
+/* OFF-WHITE Virgil Abloh Inspired Elements */
+.virgil-quote {
+    font-family: monospace;
+    position: relative;
+    padding: var(--divine-spacing-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin: var(--divine-spacing-md) 0;
+    font-size: var(--divine-font-base);
+}
+
+.virgil-quote::before {
+    content: "" QUOTE"";
+    position: absolute;
+    top: -10px;
+    left: var(--divine-spacing-sm);
+    background: var(--divine-light);
+    padding: 0 5px;
+    font-weight: bold;
+    color: var(--divine-primary);
+}
+
+.virgil-notification {
+    font-family: monospace;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: var(--divine-spacing-sm);
+    margin: var(--divine-spacing-sm) 0;
+    position: relative;
+}
+
+.virgil-notification::before {
+    content: "" NOTIFICATION"";
+    position: absolute;
+    top: -10px;
+    left: var(--divine-spacing-sm);
+    background: var(--divine-light);
+    padding: 0 5px;
+    font-weight: bold;
+    color: var(--divine-accent);
+}
+
+.status-tag {
+    display: inline-block;
+    font-family: monospace;
+    padding: 2px 8px;
+    border: 1px solid currentColor;
+    font-size: var(--divine-font-xs);
+    font-weight: bold;
+}
+
+.status-tag.active {
+    color: #00b894;
+}
+
+.status-tag.inactive {
+    color: #d63031;
+}
+
+.status-tag.pending {
+    color: #fdcb6e;
+}
+
+/* Sacred Data Display */
+.divine-metric {
+    padding: var(--divine-spacing-sm);
+    border-radius: var(--divine-radius);
+    background: white;
+    box-shadow: var(--divine-shadow-sm);
+    text-align: center;
+}
+
+.divine-metric-value {
+    font-size: var(--divine-font-xl);
+    font-weight: 700;
+    color: var(--divine-primary);
+}
+
+.divine-metric-label {
+    font-size: var(--divine-font-xs);
+    color: var(--divine-dark);
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+    .instagram-feed {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .divine-spacing {
+        --divine-spacing: calc(var(--phi) * 0.3rem);
+        --divine-spacing-md: calc(var(--phi) * 0.6rem);
+        --divine-spacing-lg: calc(var(--phi) * 0.9rem);
+    }
+
+    .god-mode h1 {
+        font-size: var(--divine-font-xl);
+    }
+}

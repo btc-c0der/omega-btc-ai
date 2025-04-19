@@ -1,0 +1,34 @@
+name: Push to Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - divine-book-dashboard-v3
+      - hf-space-setup  # Add our current branch here
+
+jobs:
+  sync-to-hf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "Setting up Git for Hugging Face push"
+          git config --global user.name "HF Space Sync Bot"
+          git config --global user.email "bot@example.com"
+          
+          echo "Adding Hugging Face Space as remote"
+          git remote add hf https://fartec0:$HF_TOKEN@huggingface.co/spaces/fartec0/divine-dashboard-v3
+          
+          echo "Pushing to Hugging Face Space"
+          git push -f hf ${{ github.ref_name }}:main
+          
+          echo "Sync completed successfully" 

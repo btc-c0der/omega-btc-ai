@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMEGA BTC AI - Quantum Project Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --matrix-dark-green: #003b09;
+            --matrix-black: #0d0208;
+            --matrix-light: #22b455;
+            --beige-light: #f5f5dc;
+            --beige-dark: #e8e8c8;
+            --beige-darker: #d8d8b8;
+            --text-dark: #333;
+            --accent: #6b46c1;
+            --accent-light: #9f7aea;
+            --accent-dark: #553c9a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--beige-light);
+            position: relative;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--matrix-black), var(--matrix-dark-green));
+            color: var(--matrix-green);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--matrix-green);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--matrix-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .nav-links a:hover {
+            color: var(--matrix-green);
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+        }
+
+        .hero {
+            background: linear-gradient(to right, var(--beige-light), var(--beige-dark));
+            padding: 5rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--beige-darker);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-dark);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: var(--text-dark);
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .section {
+            padding: 4rem 0;
+            border-bottom: 1px solid var(--beige-darker);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            color: var(--accent-dark);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--accent-light);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--accent);
+            color: white;
+            padding: 1.5rem;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-body p {
+            margin-bottom: 1rem;
+        }
+
+        .card-footer {
+            padding: 1rem 1.5rem;
+            background-color: var(--beige-light);
+            text-align: right;
+        }
+
+        .diagram-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .column {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .persona-section {
+            margin: 3rem 0;
+        }
+
+        .persona-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .persona-title h3 {
+            margin-left: 1rem;
+            color: var(--accent-dark);
+        }
+
+        .persona-icon {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        footer {
+            background-color: var(--matrix-black);
+            color: var(--matrix-light);
+            padding: 2rem 0;
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--matrix-light);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--matrix-green);
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+        }
+
+        .matrix-accent {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--matrix-dark-green);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">OMEGA BTC AI - QUANTUM SYSTEM</div>
+            <nav class="nav-links">
+                <a href="QUANTUM_PROJECT_OVERVIEW.html">Overview</a>
+                <a href="QUANTUM_TECHNICAL_ARCHITECTURE.html">Architecture</a>
+                <a href="QUANTUM_BUSINESS_VALUE.html">Business Value</a>
+                <a href="QUANTUM_API_DOCUMENTATION.html">API</a>
+                <a href="QUANTUM_DEMO_SHOWCASE.html">Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Quantum-Enhanced Cryptocurrency Trading System</h1>
+            <p>OMEGA BTC AI leverages quantum-inspired algorithms to revolutionize cryptocurrency trading, offering
+                unprecedented market insights and trading advantages through advanced mathematical modeling.</p>
+            <div class="cta-buttons">
+                <a href="QUANTUM_BUSINESS_VALUE.html" class="btn">Explore Business Value</a>
+                <a href="QUANTUM_TECHNICAL_ARCHITECTURE.html" class="btn btn-outline">View Technical Architecture</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Project Overview</h2>
+            </div>
+            <p>The OMEGA BTC AI system combines quantum-inspired computing techniques with advanced financial analysis
+                to create a next-generation cryptocurrency trading platform. While not using actual quantum hardware,
+                the system implements mathematical approaches derived from quantum computing theory to analyze and
+                predict market movements with unprecedented accuracy.</p>
+
+            <div class="diagram-container">
+                <svg viewBox="0 0 800 400" width="100%" height="400">
+                    <!-- Background -->
+                    <rect width="800" height="400" fill="#f8f8f0" rx="10" ry="10" />
+
+                    <!-- Title -->
+                    <text x="400" y="40" text-anchor="middle" font-size="20" font-weight="bold" fill="#553c9a">OMEGA BTC
+                        AI - System Overview</text>
+
+                    <!-- Boxes -->
+                    <!-- Market Data Source -->
+                    <rect x="50" y="80" width="160" height="80" rx="8" ry="8" fill="#e8e8c8" stroke="#553c9a"
+                        stroke-width="2" />
+                    <text x="130" y="115" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Market Data
+                        Sources</text>
+                    <text x="130" y="135" text-anchor="middle" font-size="12" fill="#555">BTC & Crypto Markets</text>
+
+                    <!-- Quantum Encoding -->
+                    <rect x="320" y="80" width="160" height="80" rx="8" ry="8" fill="#d8d8b8" stroke="#553c9a"
+                        stroke-width="2" />
+                    <text x="400" y="115" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Quantum
+                        Encoding</text>
+                    <text x="400" y="135" text-anchor="middle" font-size="12" fill="#555">Data Transformation</text>
+
+                    <!-- Analysis System -->
+                    <rect x="590" y="80" width="160" height="80" rx="8" ry="8" fill="#e8e8c8" stroke="#553c9a"
+                        stroke-width="2" />
+                    <text x="670" y="115" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Pattern
+                        Analysis</text>
+                    <text x="670" y="135" text-anchor="middle" font-size="12" fill="#555">Feature Extraction</text>
+
+                    <!-- Prediction Engine -->
+                    <rect x="320" y="220" width="160" height="80" rx="8" ry="8" fill="#d8d8b8" stroke="#553c9a"
+                        stroke-width="2" />
+                    <text x="400" y="255" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Prediction
+                        Engine</text>
+                    <text x="400" y="275" text-anchor="middle" font-size="12" fill="#555">Quantum Neural Net</text>
+
+                    <!-- Trading System -->
+                    <rect x="50" y="220" width="160" height="80" rx="8" ry="8" fill="#e8e8c8" stroke="#553c9a"
+                        stroke-width="2" />
+                    <text x="130" y="255" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Trading
+                        System</text>
+                    <text x="130" y="275" text-anchor="middle" font-size="12" fill="#555">Position Management</text>
+
+                    <!-- Portfolio Optimizer -->
+                    <rect x="590" y="220" width="160" height="80" rx="8" ry="8" fill="#e8e8c8" stroke="#553c9a"
+                        stroke-width="2" />
+                    <text x="670" y="255" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Portfolio
+                        Optimizer</text>
+                    <text x="670" y="275" text-anchor="middle" font-size="12" fill="#555">Risk Management</text>
+
+                    <!-- Arrows -->
+                    <!-- Market Data to Quantum Encoding -->
+                    <line x1="210" y1="120" x2="320" y2="120" stroke="#553c9a" stroke-width="2" />
+                    <polygon points="315,115 325,120 315,125" fill="#553c9a" />
+
+                    <!-- Quantum Encoding to Analysis System -->
+                    <line x1="480" y1="120" x2="590" y2="120" stroke="#553c9a" stroke-width="2" />
+                    <polygon points="585,115 595,120 585,125" fill="#553c9a" />
+
+                    <!-- Analysis System to Prediction Engine -->
+                    <line x1="670" y1="160" x2="670" y2="200" stroke="#553c9a" stroke-width="2" />
+                    <line x1="670" y1="200" x2="480" y2="240" stroke="#553c9a" stroke-width="2" />
+                    <polygon points="485,237 480,240 483,233" fill="#553c9a" />
+
+                    <!-- Prediction Engine to Portfolio Optimizer -->
+                    <line x1="480" y1="260" x2="590" y2="260" stroke="#553c9a" stroke-width="2" />
+                    <polygon points="585,255 595,260 585,265" fill="#553c9a" />
+
+                    <!-- Portfolio Optimizer to Trading System -->
+                    <line x1="590" y1="260" x2="210" y2="260" stroke="#553c9a" stroke-width="2" />
+                    <polygon points="215,255 205,260 215,265" fill="#553c9a" />
+
+                    <!-- Trading System to Market Data (feedback loop) -->
+                    <line x1="130" y1="220" x2="130" y2="160" stroke="#553c9a" stroke-width="2" />
+                    <polygon points="125,165 130,160 135,165" fill="#553c9a" />
+
+                    <!-- Legend -->
+                    <rect x="50" y="330" width="15" height="15" fill="#d8d8b8" stroke="#553c9a" stroke-width="1" />
+                    <text x="75" y="343" font-size="12" fill="#333">Core Quantum Components</text>
+
+                    <rect x="250" y="330" width="15" height="15" fill="#e8e8c8" stroke="#553c9a" stroke-width="1" />
+                    <text x="275" y="343" font-size="12" fill="#333">Supporting Systems</text>
+                </svg>
+            </div>
+
+            <p>The OMEGA BTC AI system is built on a modular architecture that processes market data through various
+                quantum-inspired techniques to generate trading signals and portfolio recommendations. This approach
+                allows for more accurate pattern recognition and prediction capabilities compared to traditional
+                statistical methods.</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Key Components</h2>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Quantum Encoding Module</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Transforms classical market data into quantum-inspired representations that capture complex
+                            relationships and patterns not visible through traditional analysis.</p>
+                        <p>Implements amplitude encoding, angle encoding, basis encoding, and entanglement-inspired
+                            algorithms to create rich feature spaces for pattern detection.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="QUANTUM_TECHNICAL_ARCHITECTURE.html#encoding" class="btn btn-outline">Learn More</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Quantum Neural Networks</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Neural network architectures inspired by quantum circuits that process encoded market data to
+                            identify complex patterns and make predictions.</p>
+                        <p>Enables more effective exploration of the feature space, allowing for detection of subtle
+                            market signals and correlations.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="QUANTUM_TECHNICAL_ARCHITECTURE.html#neural" class="btn btn-outline">Learn More</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Portfolio Optimizer</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Uses quantum-inspired optimization algorithms to balance risk and reward across
+                            cryptocurrency positions, considering quantum entropy measures for true diversification.</p>
+                        <p>Implements QAOA (Quantum Approximate Optimization Algorithm) principles for portfolio
+                            construction and rebalancing.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="QUANTUM_TECHNICAL_ARCHITECTURE.html#optimizer" class="btn btn-outline">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Designed for Different Personas</h2>
+            </div>
+
+            <div class="persona-section">
+                <div class="persona-title">
+                    <div class="persona-icon">👔</div>
+                    <h3>Executive Leaders</h3>
+                </div>
+                <p>If you're a CEO, CTO, or other executive, you'll appreciate how OMEGA BTC AI provides competitive
+                    advantage through quantum-inspired technology without requiring quantum hardware. The system
+                    delivers measurable results in trading performance and risk management.</p>
+                <p><a href="QUANTUM_BUSINESS_VALUE.html" class="btn">View Business Value</a></p>
+            </div>
+
+            <div class="persona-section">
+                <div class="persona-title">
+                    <div class="persona-icon">👩‍💻</div>
+                    <h3>Technical Teams</h3>
+                </div>
+                <p>For developers, data scientists, and technical leaders, OMEGA BTC AI offers a sophisticated
+                    architecture implementing quantum-inspired algorithms in a modular, maintainable system. The code is
+                    well-documented and follows best practices for quantum-classical hybrid systems.</p>
+                <p><a href="QUANTUM_TECHNICAL_ARCHITECTURE.html" class="btn">Explore the Architecture</a></p>
+            </div>
+
+            <div class="persona-section">
+                <div class="persona-title">
+                    <div class="persona-icon">📊</div>
+                    <h3>Traders & Analysts</h3>
+                </div>
+                <p>Trading professionals will benefit from the system's advanced pattern recognition and prediction
+                    capabilities, providing an edge in volatile cryptocurrency markets. The system integrates with
+                    existing trading infrastructure and provides actionable insights.</p>
+                <p><a href="QUANTUM_DEMO_SHOWCASE.html" class="btn">See the Demo</a></p>
+            </div>
+
+            <div class="persona-section">
+                <div class="persona-title">
+                    <div class="persona-icon">🧠</div>
+                    <h3>Non-Technical Stakeholders</h3>
+                </div>
+                <p>Even without a technical background, you can understand how OMEGA BTC AI transforms trading through
+                    advanced mathematics. The system's performance metrics and visualizations make the benefits clear,
+                    regardless of your quantum computing knowledge.</p>
+                <p><a href="QUANTUM_BUSINESS_VALUE.html#non-technical" class="btn">Non-Technical Overview</a></p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Getting Started</h2>
+            </div>
+            <div class="two-columns">
+                <div class="column">
+                    <h3>Installation</h3>
+                    <p>OMEGA BTC AI can be installed through various methods to suit your infrastructure:</p>
+                    <ol>
+                        <li>One-line installer script for quick setup</li>
+                        <li>Docker container deployment for isolated environments</li>
+                        <li>Manual installation for customized configurations</li>
+                        <li>Cloud deployment options for scalable performance</li>
+                    </ol>
+                    <p><a href="QUANTUM_TECHNICAL_ARCHITECTURE.html#installation" class="btn btn-outline">Installation
+                            Guide</a></p>
+                </div>
+                <div class="column">
+                    <h3>API Access</h3>
+                    <p>Integrate OMEGA BTC AI into your existing systems through our comprehensive API:</p>
+                    <ul>
+                        <li>RESTful API for simple integration</li>
+                        <li>WebSocket streaming for real-time updates</li>
+                        <li>Python client library for seamless code integration</li>
+                        <li>Command-line interface for direct interaction</li>
+                    </ul>
+                    <p><a href="QUANTUM_API_DOCUMENTATION.html" class="btn btn-outline">API Documentation</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="logo">OMEGA BTC AI - QUANTUM SYSTEM</div>
+            <div class="footer-links">
+                <a href="QUANTUM_PROJECT_OVERVIEW.html">Overview</a>
+                <a href="QUANTUM_TECHNICAL_ARCHITECTURE.html">Architecture</a>
+                <a href="QUANTUM_BUSINESS_VALUE.html">Business Value</a>
+                <a href="QUANTUM_API_DOCUMENTATION.html">API</a>
+                <a href="QUANTUM_DEMO_SHOWCASE.html">Demo</a>
+            </div>
+            <p>&copy; 2023 OMEGA BTC AI - Licensed under GBU2™ (Genesis-Bloom-Unfoldment 2.0)</p>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+#!/bin/bash
+# ╭────────────────────────────────────────────────────────────────────────────╮
+# │                                                                            │
+# │                  🧬 GITBLESS - QUANTUM CONSECRATION TOOL                   │
+# │                                                                            │
+# ╰────────────────────────────────────────────────────────────────────────────╯
+
+# Get the path to git_bless.py
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+GIT_BLESS_PATH="${PROJECT_ROOT}/src/omega_bot_farm/ai_model_aixbt/quantum_neural_net/git_bless.py"
+
+# If we're using the installed version in ~/.omega, use that instead
+if [ -f "$HOME/.omega/git_bless.py" ]; then
+    GIT_BLESS_PATH="$HOME/.omega/git_bless.py"
+fi
+
+# Check if Python is available
+if ! command -v python &> /dev/null; then
+    echo "Error: Python is not installed or not in your PATH"
+    exit 1
+fi
+
+# Execute the git bless script
+python "$GIT_BLESS_PATH" "$@" 

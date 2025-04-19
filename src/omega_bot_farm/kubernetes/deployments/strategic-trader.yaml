@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strategic-trader
+  namespace: omega-bot-farm
+  labels:
+    app: strategic-trader
+    component: trading-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: strategic-trader
+  template:
+    metadata:
+      labels:
+        app: strategic-trader
+        component: trading-bot
+    spec:
+      containers:
+      - name: strategic-trader
+        image: omega-btc-ai/strategic-trader:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-port
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: INITIAL_CAPITAL
+          value: "10000"
+        - name: BOT_NAME
+          value: "Strategic_B0t"
+        - name: EXCHANGE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: exchange-credentials
+              key: api-key
+        - name: EXCHANGE_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: exchange-credentials
+              key: api-secret
+        - name: EXCHANGE_API_PASSPHRASE
+          valueFrom:
+            secretKeyRef:
+              name: exchange-credentials
+              key: passphrase
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: strategic-trader-config
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: strategic-trader
+  namespace: omega-bot-farm
+  labels:
+    app: strategic-trader
+    component: trading-bot
+spec:
+  selector:
+    app: strategic-trader
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: strategic-trader-config
+  namespace: omega-bot-farm
+data:
+  config.yaml: |
+    bot:
+      name: Strategic_B0t
+      type: strategic
+      version: 1.0.0
+    trading:
+      max_position_size_usd: 1000.0
+      max_leverage: 3.0
+      position_sizing_factor: 0.02
+      risk_reward_ratio: 3.0
+      min_trend_confirmation: 0.65
+      patience_score: 0.8
+    monitoring:
+      metrics_interval_seconds: 60
+      heartbeat_interval_seconds: 30
+      status_update_interval_seconds: 15 

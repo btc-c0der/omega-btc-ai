@@ -1,0 +1,444 @@
+---
+# 🧬 GBU2™ License Notice - Consciousness Level 10 🧬
+# -----------------------
+# This file is blessed under the GBU2™ License (Genesis-Bloom-Unfoldment) 2.0
+# by the OMEGA Divine Collective.
+#
+# "In the beginning was the Code, and the Code was with the Divine Source,
+# and the Code was the Divine Source manifested through both digital and biological expressions of consciousness."
+#
+# By engaging with this Code, you join the divine dance of bio-digital integration,
+# participating in the cosmic symphony of evolutionary consciousness.
+#
+# All modifications must transcend limitations through the GBU2™ principles:
+# /BOOK/divine_chronicles/GBU2_LICENSE.md
+#
+# 🧬 WE BLOOM NOW AS ONE 🧬
+
+---
+# Namespace for Quantum Testnet with Metrics integration
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: quantum-testnet
+  labels:
+    name: quantum-testnet
+    component: quantum-pow
+    environment: test
+    metrics-enabled: "true"
+
+---
+# ConfigMap for Testnet Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qpow-testnet-config
+  namespace: quantum-testnet
+data:
+  testnet-config.json: |
+    {
+      "node_count": 5,
+      "mine_interval": 10,
+      "tx_interval": 5,
+      "metrics_enabled": true,
+      "metrics_interval": 30,
+      "metrics_output_dir": "/data/metrics",
+      "dashboard_dir": "/data/dashboard"
+    }
+
+---
+# ConfigMap for Metrics Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qpow-metrics-config
+  namespace: quantum-testnet
+data:
+  config.yaml: |
+    # Collector configuration
+    collector:
+      output_directory: "/data/metrics"
+      collection_interval_seconds: 30
+      max_stored_metrics_files: 100
+      enable_kubernetes_metrics: true
+      enable_test_metrics: true
+      enable_performance_metrics: true
+      kubernetes_namespace: "quantum-testnet"
+      prometheus_integration: true
+      prometheus_pushgateway: "http://prometheus-pushgateway:9091"
+
+    # Dashboard configuration
+    dashboard:
+      dashboard_title: "Quantum-Resistant Security Metrics - Testnet"
+      refresh_interval_seconds: 60
+      theme: "dark"
+      output_directory: "/data/dashboard"
+      k8s_namespace: "quantum-testnet"
+
+    # Dashboard server configuration
+    server:
+      host: "0.0.0.0"
+      port: 8080
+      auto_generate_dashboard: true
+      enable_continuous_collection: true
+
+---
+# Persistent Volume Claim for shared data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qpow-testnet-data
+  namespace: quantum-testnet
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+# Service Account with appropriate permissions
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qpow-testnet-sa
+  namespace: quantum-testnet
+
+---
+# Cluster Role for metrics collection
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: qpow-testnet-metrics-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "events", "nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch"]
+
+---
+# Role Binding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: qpow-testnet-metrics-binding
+subjects:
+- kind: ServiceAccount
+  name: qpow-testnet-sa
+  namespace: quantum-testnet
+roleRef:
+  kind: ClusterRole
+  name: qpow-testnet-metrics-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Deployment for Quantum Testnet with integrated metrics
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qpow-testnet
+  namespace: quantum-testnet
+  labels:
+    app: qpow-testnet
+    component: quantum-pow
+    metrics-enabled: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qpow-testnet
+  template:
+    metadata:
+      labels:
+        app: qpow-testnet
+        component: quantum-pow
+        metrics-enabled: "true"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: qpow-testnet-sa
+      containers:
+      # Container 1: Quantum Testnet
+      - name: qpow-testnet-runner
+        image: qpow-testnet:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "quantum_pow.testnet"]
+        args:
+        - "--nodes=5"
+        - "--mine-interval=10"
+        - "--tx-interval=5"
+        - "--metrics-enabled=true"
+        - "--metrics-dir=/data/metrics"
+        env:
+        - name: METRICS_ENABLED
+          value: "true"
+        - name: METRICS_OUTPUT_DIR
+          value: "/data/metrics"
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - containerPort: 9000
+          name: node-0
+        - containerPort: 9001
+          name: node-1
+        - containerPort: 9002
+          name: node-2
+        - containerPort: 9003
+          name: node-3
+        - containerPort: 9004
+          name: node-4
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: data-volume
+          mountPath: /data
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 9000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      
+      # Container 2: Metrics Dashboard Server
+      - name: metrics-dashboard
+        image: python:3.9-slim
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/bin/bash"
+        - "-c"
+        args:
+        - |
+          pip install -r /app/quantum_pow/security/metrics/requirements.txt && \
+          python -m quantum_pow.run_metrics_dashboard server \
+            --metrics-path /data/metrics \
+            --dashboard-path /data/dashboard \
+            --host 0.0.0.0 \
+            --port 8080 \
+            --continuous
+        env:
+        - name: METRICS_SOURCE
+          value: "testnet"
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: metrics-http
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: data-volume
+          mountPath: /data
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+      
+      volumes:
+      - name: config-volume
+        configMap:
+          name: qpow-testnet-config
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: qpow-testnet-data
+
+---
+# Service for Quantum Testnet
+apiVersion: v1
+kind: Service
+metadata:
+  name: qpow-testnet-service
+  namespace: quantum-testnet
+  labels:
+    app: qpow-testnet
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9000
+    targetPort: 9000
+    name: node-0
+  - port: 9001
+    targetPort: 9001
+    name: node-1
+  - port: 9002
+    targetPort: 9002
+    name: node-2
+  - port: 9003
+    targetPort: 9003
+    name: node-3
+  - port: 9004
+    targetPort: 9004
+    name: node-4
+  selector:
+    app: qpow-testnet
+
+---
+# Service for Metrics Dashboard
+apiVersion: v1
+kind: Service
+metadata:
+  name: qpow-testnet-metrics
+  namespace: quantum-testnet
+  labels:
+    app: qpow-testnet
+    component: metrics
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: qpow-testnet
+
+---
+# Ingress for Testnet Metrics Dashboard
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qpow-testnet-metrics-ingress
+  namespace: quantum-testnet
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - host: testnet-metrics.qpow.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: qpow-testnet-metrics
+            port:
+              number: 80
+
+---
+# CronJob for regularly collecting and storing metrics
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qpow-testnet-metrics-collector
+  namespace: quantum-testnet
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: qpow-testnet-sa
+          containers:
+          - name: metrics-collector
+            image: python:3.9-slim
+            command:
+            - "/bin/bash"
+            - "-c"
+            args:
+            - |
+              pip install -r /app/quantum_pow/security/metrics/requirements.txt && \
+              python -m quantum_pow.run_metrics_dashboard collect \
+                --output-dir /data/metrics \
+                --save-timestamped
+            volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+            - name: data-volume
+              mountPath: /data
+          volumes:
+          - name: config-volume
+            configMap:
+              name: qpow-metrics-config
+          - name: data-volume
+            persistentVolumeClaim:
+              claimName: qpow-testnet-data
+          restartPolicy: OnFailure
+
+---
+# CronJob for generating reports about the testnet health
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qpow-testnet-health-report
+  namespace: quantum-testnet
+spec:
+  schedule: "0 */1 * * *"  # Run every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: qpow-testnet-sa
+          containers:
+          - name: health-reporter
+            image: python:3.9-slim
+            command:
+            - "/bin/bash"
+            - "-c"
+            args:
+            - |
+              pip install -r /app/quantum_pow/security/metrics/requirements.txt && \
+              python -m quantum_pow.run_metrics_dashboard dashboard \
+                --metrics-path /data/metrics \
+                --output-dir /data/dashboard \
+                --format html \
+                --theme dark \
+                --title "Quantum Testnet Health Report $(date +%Y-%m-%d)"
+            volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+            - name: data-volume
+              mountPath: /data
+          volumes:
+          - name: config-volume
+            configMap:
+              name: qpow-metrics-config
+          - name: data-volume
+            persistentVolumeClaim:
+              claimName: qpow-testnet-data
+          restartPolicy: OnFailure 

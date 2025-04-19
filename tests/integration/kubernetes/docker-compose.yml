@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  k8s-tests:
+    build:
+      context: ../..
+      dockerfile: tests/integration/kubernetes/Dockerfile
+    volumes:
+      - ${HOME}/.kube:/home/testuser/.kube:ro
+      - ../../tests/integration/kubernetes:/app
+    environment:
+      - KUBERNETES_SERVICE_HOST=host.docker.internal
+      - KUBERNETES_SERVICE_PORT=6443
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: pytest -v

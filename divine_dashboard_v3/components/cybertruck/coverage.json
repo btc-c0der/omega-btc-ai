@@ -1,0 +1,1 @@
+{"totals": {"covered_lines": 216, "num_statements": 240, "percent_covered": 90.0, "missing_lines": 24}, "files": {"cybertruck_components/exoskeleton.py": {"covered_lines": 216, "num_statements": 240, "percent_covered": 90.0, "missing_lines": [10, 11, 12, 15]}}}

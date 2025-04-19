@@ -1,0 +1,26 @@
+# GBU2™ Blockchain Tools Requirements
+# =================================
+
+# Web3 Dependencies
+web3>=5.31.1
+eth-account>=0.5.9
+eth-utils>=2.1.0
+
+# Environment Variables
+python-dotenv>=0.19.0
+
+# Blockchain APIs
+requests>=2.27.0
+
+# NFT & IPFS Support
+# ipfshttpclient is optional, uncomment if needed
+# ipfshttpclient>=0.8.0a2
+Pillow>=9.0.0  # For image processing
+
+# CLI Tools
+colorama>=0.4.4  # For colored terminal output
+tqdm>=4.62.0     # For progress bars
+
+# Optional: Smart Contract Development
+# Install separately if needed:
+# pip install eth-brownie 
