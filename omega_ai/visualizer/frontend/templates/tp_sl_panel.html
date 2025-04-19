@@ -1,0 +1,84 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP/SL Management Panel</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../assets/css/tp_sl_panel.css">
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Main container for the TP/SL Management Panel -->
+    <div id="tp-sl-panel-container"></div>
+
+    <!-- Demo controls (for testing) -->
+    <div class="demo-controls" style="margin-top: 20px; padding: 15px;">
+        <button onclick="demoNewPosition()">New Demo Position</button>
+        <button onclick="demoUpdatePrice()">Update Price</button>
+        <button onclick="demoToggleTrailing()">Toggle Trailing</button>
+    </div>
+
+    <script type="module">
+        import TPSLManagementPanel from '../assets/js/tp_sl_management_panel.js';
+
+        // Initialize the panel
+        const panel = new TPSLManagementPanel('tp-sl-panel-container');
+
+        // Demo functions
+        window.demoNewPosition = () => {
+            const demoPosition = {
+                side: Math.random() > 0.5 ? 'LONG' : 'SHORT',
+                entryPrice: 50000,
+                currentPrice: 50000,
+                stopLoss: 49000,
+                takeProfit: 52000,
+                size: 1.0
+            };
+            panel.updatePosition(demoPosition);
+        };
+
+        window.demoUpdatePrice = () => {
+            if (panel.position) {
+                panel.position.currentPrice += (Math.random() - 0.5) * 1000;
+                panel.render();
+            }
+        };
+
+        window.demoToggleTrailing = () => {
+            const toggle = document.getElementById('trailing-stop-toggle');
+            if (toggle) {
+                toggle.checked = !toggle.checked;
+                const event = new Event('change');
+                toggle.dispatchEvent(event);
+            }
+        };
+
+        // Initialize with a demo position
+        demoNewPosition();
+    </script>
+</body>
+
+</html>

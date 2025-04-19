@@ -1,0 +1,352 @@
+{
+  "total_tests": 21,
+  "passed": 15,
+  "failed": 3,
+  "skipped": 3,
+  "execution_time": 30.934832298654342,
+  "component_results": {
+    "exoskeleton": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 1,
+      "total": 3,
+      "coverage": 74.56981542478427,
+      "tests": {
+        "armor_integrity": {
+          "passed": 0,
+          "failed": 0,
+          "skipped": 1,
+          "execution_time": 1.2169872346576358
+        },
+        "panel_alignment": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 1.5465065644510656
+        },
+        "impact_resistance": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 0.6793872314787153
+        }
+      }
+    },
+    "battery": {
+      "passed": 2,
+      "failed": 1,
+      "skipped": 0,
+      "total": 3,
+      "coverage": 71.40264838218685,
+      "tests": {
+        "range_verification": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.090898088026066
+        },
+        "charge_cycle": {
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0,
+          "execution_time": 0.7656624432020145
+        },
+        "thermal_management": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.386816050612326
+        }
+      }
+    },
+    "motor": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "total": 3,
+      "coverage": 92.8965691823079,
+      "tests": {
+        "torque_output": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.101028388997256
+        },
+        "efficiency_curve": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 0.12509142991798952
+        },
+        "cooling_system": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 0.7934588680447151
+        }
+      }
+    },
+    "suspension": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "total": 3,
+      "coverage": 79.80744628082492,
+      "tests": {
+        "adaptive_response": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.957915082149989
+        },
+        "clearance_adjustment": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 0.8527966704106931
+        },
+        "load_balancing": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.4472237778348993
+        }
+      }
+    },
+    "autopilot": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "total": 3,
+      "coverage": 80.71773237276699,
+      "tests": {
+        "object_detection": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.4475166925048324
+        },
+        "navigation": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 1.5339445154370748
+        },
+        "emergency_response": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 1.8138174436652594
+        }
+      }
+    },
+    "ui": {
+      "passed": 1,
+      "failed": 1,
+      "skipped": 1,
+      "total": 3,
+      "coverage": 90.9407656003504,
+      "tests": {
+        "control_responsiveness": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 0.5488849674702531
+        },
+        "display_calibration": {
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0,
+          "execution_time": 0.8710129206963688
+        },
+        "voice_commands": {
+          "passed": 0,
+          "failed": 0,
+          "skipped": 1,
+          "execution_time": 0.8242370872678811
+        }
+      }
+    },
+    "charging": {
+      "passed": 1,
+      "failed": 1,
+      "skipped": 1,
+      "total": 3,
+      "coverage": 80.90948062270576,
+      "tests": {
+        "supercharger_compatibility": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "execution_time": 2.8424211517654023
+        },
+        "home_charging": {
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0,
+          "execution_time": 1.009054988174651
+        },
+        "regenerative_braking": {
+          "passed": 0,
+          "failed": 0,
+          "skipped": 1,
+          "execution_time": 1.0801707018892448
+        }
+      }
+    }
+  },
+  "test_history": [
+    {
+      "component": "exoskeleton",
+      "test": "armor_integrity",
+      "status": "skipped",
+      "execution_time": 1.2169872346576358,
+      "timestamp": "2025-04-09T23:30:53.943077"
+    },
+    {
+      "component": "exoskeleton",
+      "test": "panel_alignment",
+      "status": "passed",
+      "execution_time": 1.5465065644510656,
+      "timestamp": "2025-04-09T23:30:54.045036"
+    },
+    {
+      "component": "exoskeleton",
+      "test": "impact_resistance",
+      "status": "passed",
+      "execution_time": 0.6793872314787153,
+      "timestamp": "2025-04-09T23:30:54.148037"
+    },
+    {
+      "component": "battery",
+      "test": "range_verification",
+      "status": "passed",
+      "execution_time": 2.090898088026066,
+      "timestamp": "2025-04-09T23:30:54.253202"
+    },
+    {
+      "component": "battery",
+      "test": "charge_cycle",
+      "status": "failed",
+      "execution_time": 0.7656624432020145,
+      "timestamp": "2025-04-09T23:30:54.357152"
+    },
+    {
+      "component": "battery",
+      "test": "thermal_management",
+      "status": "passed",
+      "execution_time": 2.386816050612326,
+      "timestamp": "2025-04-09T23:30:54.458208"
+    },
+    {
+      "component": "motor",
+      "test": "torque_output",
+      "status": "passed",
+      "execution_time": 2.101028388997256,
+      "timestamp": "2025-04-09T23:30:54.560058"
+    },
+    {
+      "component": "motor",
+      "test": "efficiency_curve",
+      "status": "passed",
+      "execution_time": 0.12509142991798952,
+      "timestamp": "2025-04-09T23:30:54.661124"
+    },
+    {
+      "component": "motor",
+      "test": "cooling_system",
+      "status": "passed",
+      "execution_time": 0.7934588680447151,
+      "timestamp": "2025-04-09T23:30:54.764987"
+    },
+    {
+      "component": "suspension",
+      "test": "adaptive_response",
+      "status": "passed",
+      "execution_time": 2.957915082149989,
+      "timestamp": "2025-04-09T23:30:54.865395"
+    },
+    {
+      "component": "suspension",
+      "test": "clearance_adjustment",
+      "status": "passed",
+      "execution_time": 0.8527966704106931,
+      "timestamp": "2025-04-09T23:30:54.965675"
+    },
+    {
+      "component": "suspension",
+      "test": "load_balancing",
+      "status": "passed",
+      "execution_time": 2.4472237778348993,
+      "timestamp": "2025-04-09T23:30:55.066940"
+    },
+    {
+      "component": "autopilot",
+      "test": "object_detection",
+      "status": "passed",
+      "execution_time": 2.4475166925048324,
+      "timestamp": "2025-04-09T23:30:55.170452"
+    },
+    {
+      "component": "autopilot",
+      "test": "navigation",
+      "status": "passed",
+      "execution_time": 1.5339445154370748,
+      "timestamp": "2025-04-09T23:30:55.275640"
+    },
+    {
+      "component": "autopilot",
+      "test": "emergency_response",
+      "status": "passed",
+      "execution_time": 1.8138174436652594,
+      "timestamp": "2025-04-09T23:30:55.380897"
+    },
+    {
+      "component": "ui",
+      "test": "control_responsiveness",
+      "status": "passed",
+      "execution_time": 0.5488849674702531,
+      "timestamp": "2025-04-09T23:30:55.482048"
+    },
+    {
+      "component": "ui",
+      "test": "display_calibration",
+      "status": "failed",
+      "execution_time": 0.8710129206963688,
+      "timestamp": "2025-04-09T23:30:55.587372"
+    },
+    {
+      "component": "ui",
+      "test": "voice_commands",
+      "status": "skipped",
+      "execution_time": 0.8242370872678811,
+      "timestamp": "2025-04-09T23:30:55.692676"
+    },
+    {
+      "component": "charging",
+      "test": "supercharger_compatibility",
+      "status": "passed",
+      "execution_time": 2.8424211517654023,
+      "timestamp": "2025-04-09T23:30:55.795716"
+    },
+    {
+      "component": "charging",
+      "test": "home_charging",
+      "status": "failed",
+      "execution_time": 1.009054988174651,
+      "timestamp": "2025-04-09T23:30:55.901521"
+    },
+    {
+      "component": "charging",
+      "test": "regenerative_braking",
+      "status": "skipped",
+      "execution_time": 1.0801707018892448,
+      "timestamp": "2025-04-09T23:30:56.002194"
+    }
+  ],
+  "current_run_id": "8116f100-3145-4490-9eb6-6c09e674761a",
+  "start_time": "2025-04-09T23:29:12.034243",
+  "end_time": "2025-04-09T23:30:56.002379",
+  "pass_rate": 71.42857142857143,
+  "overall_coverage": 81.60635112370387
+}

@@ -1,0 +1,2 @@
+# This file ensures that the visualizations directory is tracked by git.
+# This directory will contain generated charts and visualizations for the codebase metrics. 

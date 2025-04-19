@@ -1,0 +1,206 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ccxt-strategic-trader
+  namespace: omega-bot-farm
+  labels:
+    app: ccxt-strategic-trader
+    component: trading-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ccxt-strategic-trader
+  template:
+    metadata:
+      labels:
+        app: ccxt-strategic-trader
+        component: trading-bot
+    spec:
+      containers:
+      - name: ccxt-strategic-trader
+        image: omega-btc-ai/strategic-trader:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-port
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: INITIAL_CAPITAL
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: initial-capital
+        - name: BOT_NAME
+          value: "CCXT_Strategic_B0t"
+        - name: BITGET_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: exchange-credentials
+              key: bitget-api-key
+        - name: BITGET_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: exchange-credentials
+              key: bitget-secret-key
+        - name: BITGET_PASSPHRASE
+          valueFrom:
+            secretKeyRef:
+              name: exchange-credentials
+              key: bitget-passphrase
+        - name: BITGET_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: bitget-api-url
+        - name: USE_TESTNET
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: use-testnet
+        - name: TRADING_SYMBOL
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: trading-symbol
+        - name: SYMBOL
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: symbol
+        - name: MAX_POSITION_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: position-size-percent
+        - name: MAX_LEVERAGE
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: max-leverage
+        - name: TRADING_INTERVAL_SECONDS
+          value: "60"
+        - name: STOP_LOSS_PERCENT
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: stop-loss-percent
+        - name: TAKE_PROFIT_MULTIPLIER
+          valueFrom:
+            configMapKeyRef:
+              name: trading-config
+              key: take-profit-multiplier
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ccxt-strategic-trader-config
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ccxt-strategic-trader
+  namespace: omega-bot-farm
+  labels:
+    app: ccxt-strategic-trader
+    component: trading-bot
+spec:
+  selector:
+    app: ccxt-strategic-trader
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trading-config
+  namespace: omega-bot-farm
+data:
+  initial-capital: "24.0"
+  position-size-percent: "1.0"
+  stop-loss-percent: "1.0"
+  take-profit-multiplier: "2.0"
+  max-leverage: "20"
+  use-testnet: "false"
+  symbol: "BTCUSDT"
+  trading-symbol: "BTCUSDT_UMCBL"
+  bitget-api-url: "https://api.bitget.com/api/mix/v1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: exchange-credentials
+  namespace: omega-bot-farm
+type: Opaque
+data:
+  # These are placeholder base64 values - these will be replaced with actual credentials during deployment
+  bitget-api-key: YmdfN2ExNWU1N2NlNzdhZTkwOTA5YWVkNWE3NDUwOTI5OTQ=
+  bitget-secret-key: NTUzYTA4YjBkNTA5ZDQyZjI3ODE5ZmMzZDliYmMwOTU3OGIyODFkMmRjM2JmNzU0NDM3NWQ2OThlODAwYmY0Yg==
+  bitget-passphrase: YWEwM2QzZDAwOGFmMmU5ODk=
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ccxt-strategic-trader-config
+  namespace: omega-bot-farm
+data:
+  config.yaml: |
+    bot:
+      name: CCXT_Strategic_B0t
+      type: ccxt-strategic
+      version: 1.0.0
+    trading:
+      symbol: BTCUSDT
+      trading_symbol: BTCUSDT_UMCBL
+      max_position_size: 0.01
+      max_leverage: 20
+      position_sizing_factor: 0.02
+      risk_reward_ratio: 3.0
+      min_trend_confirmation: 0.65
+      patience_score: 0.8
+      interval_seconds: 60
+      stop_loss_percent: 1.0
+      take_profit_multiplier: 2.0
+    exchange:
+      id: bitget
+      use_testnet: false
+    monitoring:
+      metrics_interval_seconds: 60
+      heartbeat_interval_seconds: 30
+      status_update_interval_seconds: 15 

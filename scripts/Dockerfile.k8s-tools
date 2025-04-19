@@ -1,0 +1,62 @@
+# 🔱 OMEGA BTC AI - Divine Kubernetes Tools Container 🔱
+FROM alpine:3.17
+
+# Install required packages
+RUN apk add --no-cache \
+    bash \
+    curl \
+    docker-cli \
+    jq \
+    kubectl \
+    netcat-openbsd \
+    openssl \
+    procps \
+    py3-pip \
+    python3 \
+    sudo \
+    tzdata
+
+# Set up working directory
+WORKDIR /omega-btc-ai
+
+# Create script directories
+RUN mkdir -p /omega-btc-ai/scripts
+
+# Copy divine scripts
+COPY scripts/restart_k8s.sh \
+    scripts/dashboard_access_check.sh \
+    scripts/kubernetes_diagnostics.sh \
+    scripts/docker_k8s_divine_setup.sh \
+    scripts/test_k8s_divine_setup.sh \
+    scripts/start_kubernetes_dashboard.sh \
+    scripts/find_available_port.py \
+    /omega-btc-ai/scripts/
+
+# Set permissions
+RUN chmod +x /omega-btc-ai/scripts/*.sh
+
+# Create symbolic links for easy access
+RUN ln -s /omega-btc-ai/scripts/restart_k8s.sh /usr/local/bin/k8s-reborn && \
+    ln -s /omega-btc-ai/scripts/dashboard_access_check.sh /usr/local/bin/k8s-dashboard-check && \
+    ln -s /omega-btc-ai/scripts/kubernetes_diagnostics.sh /usr/local/bin/k8s-diagnostics && \
+    ln -s /omega-btc-ai/scripts/test_k8s_divine_setup.sh /usr/local/bin/k8s-test && \
+    ln -s /omega-btc-ai/scripts/start_kubernetes_dashboard.sh /usr/local/bin/k8s-dashboard
+
+# Create a container init script
+RUN echo '#!/bin/bash\necho "🔱 OMEGA BTC AI - Divine Kubernetes Tools"\necho "Available commands:"\necho "  - k8s-reborn         : Restart and reinitialize Kubernetes"\necho "  - k8s-dashboard      : Start Kubernetes dashboard"\necho "  - k8s-dashboard-check: Check dashboard access"\necho "  - k8s-diagnostics    : Run Kubernetes diagnostics"\necho "  - k8s-test           : Run Kubernetes test suite"\necho\necho "JAH JAH BLESS THE KUBERNETES FLOW!"\necho\nexec "$@"' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+# Setup Python environment
+RUN pip install kubernetes requests
+
+# Set environment
+ENV PATH="/omega-btc-ai/scripts:${PATH}"
+
+# Add Docker socket volume mount instructions
+VOLUME /var/run/docker.sock
+
+# Set the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Default command (when no command is provided)
+CMD ["bash"] 

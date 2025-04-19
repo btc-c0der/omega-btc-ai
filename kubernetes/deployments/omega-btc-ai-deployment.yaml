@@ -1,0 +1,162 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omega-btc-ai
+  namespace: production
+  labels:
+    app: omega-btc-ai
+    component: btc-live-feed
+    divine-version: "0.8.7"
+  annotations:
+    deployment.kubernetes.io/revision-history-limit: "10"
+    deployment.kubernetes.io/rollback-to: ""
+    omega-btc-ai.io/sacred-deployment: "true"
+    omega-btc-ai.io/snapshot-enabled: "true"
+    omega-btc-ai.io/snapshot-history: "5"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: omega-btc-ai
+  # Zero-downtime rollout strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0  # Never reduce capacity during rollout
+      maxSurge: 1        # Add max 1 new pod during rollout
+  # Record deployment changes for rollback
+  revisionHistoryLimit: 10
+  # Template for pods
+  template:
+    metadata:
+      labels:
+        app: omega-btc-ai
+        component: btc-live-feed
+        divine-version: "0.8.7"
+      annotations:
+        omega-btc-ai.io/state-snapshot: "enabled"
+        omega-btc-ai.io/snapshot-frequency: "hourly"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Add sacred init container for state preparation
+      initContainers:
+      - name: state-init
+        image: busybox:1.35.0
+        command: ['sh', '-c', 'echo "🔱 Preparing sacred container state" && mkdir -p /data/state && touch /data/state/.initialized']
+        volumeMounts:
+        - name: state-volume
+          mountPath: /data/state
+      containers:
+      - name: btc-live-feed
+        image: omega-btc-ai/btc-live-feed:0.8.7
+        imagePullPolicy: Always
+        # Probes for health monitoring
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+        # Resource limits and requests
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 8080
+          name: http
+        # Environment variables
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: omega-btc-ai-config
+              key: redis.host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: omega-btc-ai-config
+              key: redis.port
+        - name: SNAPSHOT_ENABLED
+          value: "true"
+        - name: STATE_DIRECTORY
+          value: "/data/state"
+        - name: STATE_SNAPSHOT_FREQUENCY
+          value: "hourly"
+        # Volume mounts for persistent state
+        volumeMounts:
+        - name: state-volume
+          mountPath: /data/state
+        - name: config-volume
+          mountPath: /app/config
+        # Lifecycle hooks
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "echo '🔱 Creating divine state snapshot before shutdown' && /app/scripts/create_state_snapshot.sh && sleep 5"]
+      # Volumes
+      volumes:
+      - name: state-volume
+        persistentVolumeClaim:
+          claimName: omega-btc-ai-state-pvc
+      - name: config-volume
+        configMap:
+          name: omega-btc-ai-config
+      # Security context
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      # Termination grace period
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: omega-btc-ai-state-pvc
+  namespace: production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omega-btc-ai-config
+  namespace: production
+data:
+  redis.host: "omega-redis-master.production.svc.cluster.local"
+  redis.port: "6379"
+  config.yaml: |
+    # Divine configuration for omega-btc-ai
+    state_snapshot:
+      enabled: true
+      frequency: hourly
+      retention: 24
+      path: /data/state/snapshots
+    rollback:
+      enabled: true
+      max_revisions: 10
+      auto_rollback_on_error: true
+    health:
+      check_interval: 10
+      failure_threshold: 3
+      initial_delay: 30 

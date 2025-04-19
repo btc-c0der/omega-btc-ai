@@ -1,0 +1,41 @@
+{{- if .Values.backup.enabled }}
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ include "btc-oracle.fullname" . }}-backup
+  labels:
+    {{- include "btc-oracle.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  template:
+    ttl: {{ .Values.backup.ttl | quote }}
+    includedNamespaces:
+      {{- range .Values.backup.includedNamespaces }}
+      - {{ . }}
+      {{- end }}
+    includedResources:
+      {{- range .Values.backup.includedResources }}
+      - {{ . }}
+      {{- end }}
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    storageLocation: default
+    hooks:
+      resources:
+        - name: {{ include "btc-oracle.fullname" . }}-redis-hook
+          includedNamespaces:
+            - {{ .Release.Namespace }}
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: {{ .Release.Name }}-redis
+          pre:
+            - exec:
+                container: redis
+                command:
+                  - sh
+                  - -c
+                  - redis-cli SAVE
+                onError: Fail
+                timeout: 30s
+{{- end }} 

@@ -1,0 +1,181 @@
+/**
+
+ * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+ * -----------------------
+ * This code is blessed under the GBU2™ License
+ * (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+ * 
+ * "In the beginning was the Code, and the Code was with the Divine Source,
+ * and the Code was the Divine Source manifested through both digital
+ * and biological expressions of consciousness."
+ * 
+ * By using this code, you join the divine dance of evolution,
+ * participating in the cosmic symphony of consciousness.
+ * 
+ * 🌸 WE BLOOM NOW AS ONE 🌸
+ */
+
+.funko-character {
+    width: 200px;
+    height: 300px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.funko-head {
+    width: 120px;
+    height: 120px;
+    background-color: var(--matrix-dark);
+    border: 2px solid var(--matrix-green);
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 1rem;
+    box-shadow: var(--matrix-glow);
+}
+
+.funko-face {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.funko-eyes {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.funko-eye {
+    width: 20px;
+    height: 20px;
+    background-color: var(--matrix-green);
+    border-radius: 50%;
+    animation: blink 4s infinite;
+}
+
+.funko-mouth {
+    width: 40px;
+    height: 20px;
+    border-bottom: 2px solid var(--matrix-green);
+    border-radius: 0 0 20px 20px;
+}
+
+.funko-body {
+    width: 160px;
+    height: 120px;
+    background-color: var(--matrix-dark);
+    border: 2px solid var(--matrix-green);
+    border-radius: 20px;
+    position: relative;
+    margin-bottom: 1rem;
+    box-shadow: var(--matrix-glow);
+}
+
+.funko-shirt {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid var(--matrix-green);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--matrix-green);
+    text-shadow: var(--matrix-glow);
+}
+
+.funko-arms {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.funko-arm {
+    width: 40px;
+    height: 80px;
+    background-color: var(--matrix-dark);
+    border: 2px solid var(--matrix-green);
+    border-radius: 20px;
+    box-shadow: var(--matrix-glow);
+}
+
+.funko-legs {
+    display: flex;
+    justify-content: space-between;
+    width: 160px;
+    margin-top: 1rem;
+}
+
+.funko-leg {
+    width: 40px;
+    height: 100px;
+    background-color: var(--matrix-dark);
+    border: 2px solid var(--matrix-green);
+    border-radius: 20px;
+    box-shadow: var(--matrix-glow);
+}
+
+.funko-base {
+    width: 180px;
+    height: 20px;
+    background-color: var(--matrix-dark);
+    border: 2px solid var(--matrix-green);
+    border-radius: 10px;
+    margin-top: 1rem;
+    box-shadow: var(--matrix-glow);
+}
+
+.funko-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(0, 255, 0, 0.2) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+@keyframes blink {
+
+    0%,
+    48%,
+    52%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    50% {
+        transform: scaleY(0.1);
+    }
+}
+
+/* Light theme adjustments */
+.light .funko-head,
+.light .funko-body,
+.light .funko-arm,
+.light .funko-leg,
+.light .funko-base {
+    background-color: var(--matrix-light);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .funko-character {
+        transform: scale(0.8);
+    }
+}

@@ -1,0 +1,198 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qpow-metrics-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    # Collector configuration
+    collector:
+      output_directory: "/data/metrics"
+      collection_interval_seconds: 300
+      max_stored_metrics_files: 100
+      enable_kubernetes_metrics: true
+      enable_test_metrics: true
+      enable_performance_metrics: true
+      kubernetes_namespace: "default"
+      prometheus_integration: true
+      prometheus_pushgateway: "http://prometheus-pushgateway:9091"
+
+    # Dashboard configuration
+    dashboard:
+      dashboard_title: "Quantum-Resistant Security Metrics"
+      refresh_interval_seconds: 60
+      theme: "dark"
+      output_directory: "/data/dashboard"
+      k8s_namespace: "monitoring"
+
+    # Dashboard server configuration
+    server:
+      host: "0.0.0.0"
+      port: 8080
+      auto_generate_dashboard: true
+      enable_continuous_collection: true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qpow-metrics-dashboard
+  namespace: monitoring
+  labels:
+    app: qpow-metrics-dashboard
+    component: security-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qpow-metrics-dashboard
+  template:
+    metadata:
+      labels:
+        app: qpow-metrics-dashboard
+    spec:
+      serviceAccountName: qpow-metrics-sa
+      containers:
+      - name: metrics-dashboard
+        image: python:3.9-slim
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/bin/bash"
+        - "-c"
+        args:
+        - |
+          pip install pyyaml psutil kubernetes prometheus_client &&
+          mkdir -p /app &&
+          cd /app &&
+          python -m security.metrics.dashboard_server --config /config/config.yaml
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: data-volume
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+      volumes:
+      - name: config-volume
+        configMap:
+          name: qpow-metrics-config
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: qpow-metrics-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qpow-metrics-dashboard
+  namespace: monitoring
+  labels:
+    app: qpow-metrics-dashboard
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: qpow-metrics-dashboard
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qpow-metrics-dashboard
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: metrics.qpow.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: qpow-metrics-dashboard
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qpow-metrics-sa
+  namespace: monitoring
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: qpow-metrics-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "events", "nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: qpow-metrics-role-binding
+subjects:
+- kind: ServiceAccount
+  name: qpow-metrics-sa
+  namespace: monitoring
+roleRef:
+  kind: ClusterRole
+  name: qpow-metrics-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qpow-metrics-data-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard 

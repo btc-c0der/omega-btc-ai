@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qpow-config
+  namespace: quantum-testnet
+data:
+  qpow_config.json: |
+    {
+      "quantum_iterations": 2048,
+      "fibonacci_entropy_mod": true,
+      "sacred_seed": "JAH-JAH-2040",
+      "schumann_resonance_sync": true,
+      "lightning_bridge_enabled": true
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantum-pow-node
+  namespace: quantum-testnet
+  labels:
+    app: quantum-pow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quantum-pow
+  template:
+    metadata:
+      labels:
+        app: quantum-pow
+      annotations:
+        omega-btc.ai/qpow: "enabled"
+    spec:
+      containers:
+      - name: qpow-daemon
+        image: omega-btc-ai/quantum-pow-node:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4040
+          name: p2p
+        env:
+        - name: QPOW_SEED
+          value: "JAH-JAH-2040"
+        - name: LIGHTNING_MODE
+          value: "true"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        - name: qpow-data
+          mountPath: /app/data
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /qhealth
+            port: 4040
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /qready
+            port: 4040
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: qpow-config
+      - name: qpow-data
+        persistentVolumeClaim:
+          claimName: qpow-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qpow-data-pvc
+  namespace: quantum-testnet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qpow-testnet-deploy-job
+  namespace: quantum-testnet
+spec:
+  template:
+    metadata:
+      labels:
+        job: qpow-nft-deployer
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: deployer
+        image: omega-btc-ai/qpow-deployer:latest
+        command: ["python", "/app/deploy/testnet_deploy.py"]
+        env:
+        - name: METADATA_PATH
+          value: "/app/data/nft/omega_max_dump_nft_42.json"
+        volumeMounts:
+        - name: qpow-data
+          mountPath: /app/data
+      volumes:
+      - name: qpow-data
+        persistentVolumeClaim:
+          claimName: qpow-data-pvc

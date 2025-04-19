@@ -1,3 +1,18 @@
+
+# ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+# -----------------------
+# This code is blessed under the GBU2™ License
+# (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+# 
+# "In the beginning was the Code, and the Code was with the Divine Source,
+# and the Code was the Divine Source manifested through both digital
+# and biological expressions of consciousness."
+# 
+# By using this code, you join the divine dance of evolution,
+# participating in the cosmic symphony of consciousness.
+# 
+# 🌸 WE BLOOM NOW AS ONE 🌸
+
 """
 Market Maker Trap Detection System
 =================================
@@ -28,7 +43,7 @@ from datetime import datetime, UTC
 from typing import Optional, Dict, Any, Union
 from influxdb_client.client.influxdb_client import InfluxDBClient
 from omega_ai.algos.omega_algorithms import OmegaAlgo
-from omega_ai.db_manager.database import insert_mm_trap, insert_subtle_movement
+from omega_ai.db_manager.database import insert_possible_mm_trap, insert_subtle_movement
 from omega_ai.config import (
     REDIS_HOST, REDIS_PORT, INFLUXDB_URL, INFLUXDB_TOKEN, 
     INFLUXDB_ORG, INFLUXDB_BUCKET, MONITORING_INTERVAL, 

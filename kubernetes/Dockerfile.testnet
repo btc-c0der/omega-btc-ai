@@ -1,0 +1,32 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install required system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the requirements file
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the quantum_pow package
+COPY quantum_pow/ /app/quantum_pow/
+
+# Create directories for logs and data
+RUN mkdir -p /app/logs /app/data
+
+# Set the environment variables
+ENV PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONUNBUFFERED=1
+
+# Port range for testnet nodes
+EXPOSE 9000-9010
+
+# Default command to run the testnet
+CMD ["python", "-m", "quantum_pow.testnet"] 

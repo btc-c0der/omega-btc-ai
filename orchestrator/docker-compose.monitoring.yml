@@ -1,0 +1,144 @@
+# 🔱 OMEGA BTC AI - SACRED MONITORING STACK 🔱
+
+version: '3.8'
+
+services:
+  # Divine Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: divine-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infra/monitoring/prometheus/rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - omega-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: divine-grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - omega-net
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Alert Manager
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: divine-alertmanager
+    ports:
+      - "${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./infra/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - omega-net
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9093/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Divine Redis
+  redis:
+    image: redis:7-alpine
+    container_name: divine-redis
+    restart: always
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/sentinel.conf:/usr/local/etc/redis/sentinel.conf
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    ports:
+      - "6379:6379"
+      - "26379:26379" # Sentinel port
+    networks:
+      - omega-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-divine_omega_redis_password}
+      - SENTINEL_PASSWORD=${SENTINEL_PASSWORD:-divine_omega_sentinel_password}
+    labels:
+      org.omega.service: redis
+      org.omega.role: memory-node
+      org.omega.version: "7.0"
+      org.omega.mode: standalone
+
+  # Divine Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: divine-redis-exporter
+    restart: always
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://:${REDIS_PASSWORD:-divine_omega_redis_password}@redis:6379
+    depends_on:
+      - redis
+    networks:
+      - omega-net
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:9121/metrics" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      org.omega.service: redis-exporter
+      org.omega.role: metrics-collector
+      org.omega.version: "latest"
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: divine-nginx-exporter
+    ports:
+      - "9113:9113"
+    command:
+      - -nginx.scrape-uri=http://nginx/nginx_status
+    networks:
+      - divine-monitoring
+    depends_on:
+      - nginx
+
+networks:
+  omega-net:
+    external: true
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:

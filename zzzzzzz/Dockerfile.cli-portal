@@ -1,0 +1,45 @@
+FROM ubuntu:22.04
+
+# Divine color codes for sacred terminal output
+ENV BLACK='\033[0;30m'
+ENV WHITE='\033[1;37m'
+ENV ORANGE='\033[0;33m'
+ENV GREEN='\033[0;32m'
+ENV BLUE='\033[0;34m'
+ENV RED='\033[0;31m'
+ENV YELLOW='\033[1;33m'
+ENV RESET='\033[0m'
+
+# Install divine dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    tmux \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up divine Python environment
+RUN pip3 install --no-cache-dir \
+    numpy \
+    pandas \
+    requests \
+    redis \
+    psutil
+
+# Create divine working directory
+WORKDIR /app
+
+# Copy divine portal script
+COPY omega_cli_portal.sh /app/
+RUN chmod +x /app/omega_cli_portal.sh
+
+# Copy divine scripts directory
+COPY scripts /app/scripts/
+
+# Set divine environment variables
+ENV TERM=xterm-256color
+ENV PYTHONUNBUFFERED=1
+
+# Divine entrypoint
+ENTRYPOINT ["/app/omega_cli_portal.sh"] 

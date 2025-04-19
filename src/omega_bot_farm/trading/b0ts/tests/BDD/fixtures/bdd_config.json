@@ -1,0 +1,45 @@
+{
+    "use_mock_exchange": true,
+    "test_symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT"
+    ],
+    "mock_data_path": "fixtures/mock_data",
+    "output_path": "fixtures/output",
+    "test_timeframes": [
+        "15m",
+        "1h",
+        "4h",
+        "1d"
+    ],
+    "discord": {
+        "command_prefix": "!",
+        "alert_channel_id": "123456789",
+        "admin_role_id": "987654321"
+    },
+    "risk_thresholds": {
+        "LOW": 0.05,
+        "MEDIUM": 0.15,
+        "HIGH": 0.25,
+        "EXTREME": 0.4
+    },
+    "fibonacci_levels": [
+        0.0,
+        0.236,
+        0.382,
+        0.5,
+        0.618,
+        0.786,
+        1.0
+    ],
+    "harmony_thresholds": {
+        "high": 0.7,
+        "medium": 0.5,
+        "low": 0.3
+    },
+    "visualization": {
+        "generate_charts": true,
+        "save_reports": true
+    }
+}

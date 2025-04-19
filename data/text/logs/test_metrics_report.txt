@@ -1,0 +1,1704 @@
+
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+
+1m92m📁 TEST TREE VISUALIZATION 📁0m
+36mRoot: /Users/fsiqueira/Desktop/GitHub/omega-btc-ai/src/omega_bot_farm/qa0m
+33mFound 1384 tests in 136 folders0m
+
+92m╠═[36mexamples/92m]0m
+92m║   └─ 32m🧪  test_ccxt_b0t_example.py (8 tests, 159 LOC)0m
+92m║0m
+92m╠═[36mquantum_runner/92m]0m
+92m║   └─ 32m✨  test_implementations.py (1 tests, 236 LOC)0m
+92m║   └─ 36m✨  test_runner.py (1 tests, 133 LOC)0m
+92m║   └─ 92m✨  test_scheduler.py (1 tests, 78 LOC)0m
+92m║0m
+92m║           ╠═[36maiohttp/92m]0m
+92m║             └─ 36m🧪  test_utils.py (1 tests, 612 LOC)0m
+92m║0m
+92m║             ╠═[36mtest/92m]0m
+92m║               └─ 36m🧪  test_base.py (1 tests, 77 LOC)0m
+92m║               └─ 32m🧪  test_example.py (1 tests, 26 LOC)0m
+92m║               └─ 37m🧪  test_pack.py (4 tests, 160 LOC)0m
+92m║               └─ 37m🧪  test_stream.py (4 tests, 104 LOC)0m
+92m║               └─ 37m🧪  test_util.py (2 tests, 65 LOC)0m
+92m║0m
+92m║             ╠═[36mtest/92m]0m
+92m║               └─ 36m🧪  test_buf.py (1 tests, 88 LOC)0m
+92m║               └─ 32m🧪  test_mman.py (3 tests, 155 LOC)0m
+92m║               └─ 37m🧪  test_tutorial.py (1 tests, 31 LOC)0m
+92m║               └─ 37m🧪  test_util.py (4 tests, 75 LOC)0m
+92m║0m
+92m╠═[36mtemplates/92m]0m
+92m║   └─ 36m🧪  test_template.py (1 tests, 35 LOC)0m
+92m║0m
+92m╠═[36mtests/92m]0m
+92m║   └─ 36m🛠️  test_automation_framework.py (7 tests, 562 LOC)0m
+92m║   └─ 32m🧪  test_case_generator.py (1 tests, 323 LOC)0m
+92m║   └─ 32m🧪  test_command_registration.py (1 tests, 149 LOC)0m
+92m║   └─ 36m💬  test_discord_basic.py (1 tests, 68 LOC)0m
+92m║   └─ 32m💬  test_discord_buttons.py (5 tests, 203 LOC)0m
+92m║   └─ 36m💬  test_discord_connection.py (1 tests, 112 LOC)0m
+92m║   └─ 36m🔄  test_discord_integration.py (11 tests, 335 LOC)0m
+92m║   └─ 37m💬  test_discord_interactions.py (1 tests, 263 LOC)0m
+92m║   └─ 92m💬  test_discord_interactions_mock.py (6 tests, 276 LOC)0m
+92m║   └─ 92m💬  test_discord_interactions_patch.py (1 tests, 354 LOC)0m
+92m║   └─ 92m🧪  test_network_connectivity.py (5 tests, 434 LOC)0m
+92m║   └─ 36m🧪  test_ping_command.py (1 tests, 342 LOC)0m
+92m║   └─ 92m🧪  test_privileged_intents.py (3 tests, 243 LOC)0m
+92m║   └─ 92m🔄  test_quantum_ai_integration.py (8 tests, 116 LOC)0m
+92m║   └─ 32m✨  test_quantum_ai_knowledge_model.py (8 tests, 139 LOC)0m
+92m║   └─ 36m⚡  test_quantum_ai_performance.py (6 tests, 210 LOC)0m
+92m║   └─ 32m💬  test_vcr_discord.py (4 tests, 214 LOC)0m
+92m║0m
+92m║   ╠═[36mintegration/92m]0m
+92m║     └─ 32m🔄  test_component_integration.py (3 tests, 81 LOC)0m
+92m║0m
+92m║   ╠═[36mperformance/92m]0m
+92m║     └─ 37m⚡  test_framework_performance.py (10 tests, 272 LOC)0m
+92m║0m
+92m║   ╠═[36munit/92m]0m
+92m║     └─ 92m⚛️  test_quantum_framework.py (6 tests, 152 LOC)0m
+92m║0m
+92m║           ╠═[36mtest/92m]0m
+92m║             └─ 37m🧪  test_base.py (1 tests, 77 LOC)0m
+92m║             └─ 37m🧪  test_example.py (1 tests, 26 LOC)0m
+92m║             └─ 37m🧪  test_pack.py (4 tests, 160 LOC)0m
+92m║             └─ 36m🧪  test_stream.py (4 tests, 104 LOC)0m
+92m║             └─ 36m🧪  test_util.py (2 tests, 65 LOC)0m
+92m║0m
+92m║           ╠═[36mtests/92m]0m
+92m║             └─ 36m🧪  test_afm.py (9 tests, 113 LOC)0m
+92m║             └─ 37m🧪  test_agg.py (15 tests, 231 LOC)0m
+92m║             └─ 37m🧪  test_agg_filter.py (1 tests, 18 LOC)0m
+92m║             └─ 36m🧪  test_animation.py (38 tests, 414 LOC)0m
+92m║             └─ 32m🔌  test_api.py (9 tests, 123 LOC)0m
+92m║             └─ 32m🧪  test_arrow_patches.py (8 tests, 140 LOC)0m
+92m║             └─ 32m🧪  test_artist.py (23 tests, 428 LOC)0m
+92m║             └─ 32m🧪  test_axes.py (630 tests, 7127 LOC)0m
+92m║             └─ 37m🧪  test_axis.py (3 tests, 25 LOC)0m
+92m║             └─ 32m🧪  test_backend_bases.py (31 tests, 429 LOC)0m
+92m║             └─ 32m🧪  test_backend_cairo.py (1 tests, 39 LOC)0m
+92m║             └─ 36m🧪  test_backend_gtk3.py (2 tests, 61 LOC)0m
+92m║             └─ 36m🧪  test_backend_inline.py (1 tests, 34 LOC)0m
+92m║             └─ 37m🧪  test_backend_macosx.py (4 tests, 46 LOC)0m
+92m║             └─ 32m🧪  test_backend_nbagg.py (1 tests, 30 LOC)0m
+92m║             └─ 37m🧪  test_backend_pdf.py (28 tests, 324 LOC)0m
+92m║             └─ 37m🧪  test_backend_pgf.py (20 tests, 314 LOC)0m
+92m║             └─ 92m🧪  test_backend_ps.py (28 tests, 280 LOC)0m
+92m║             └─ 37m🧪  test_backend_qt.py (14 tests, 279 LOC)0m
+92m║             └─ 37m🧪  test_backend_registry.py (22 tests, 134 LOC)0m
+92m║             └─ 32m🧪  test_backend_svg.py (31 tests, 515 LOC)0m
+92m║             └─ 92m🧪  test_backend_template.py (5 tests, 50 LOC)0m
+92m║             └─ 92m🧪  test_backend_tk.py (10 tests, 206 LOC)0m
+92m║             └─ 36m🧪  test_backend_tools.py (2 tests, 17 LOC)0m
+92m║             └─ 32m🧪  test_backend_webagg.py (3 tests, 25 LOC)0m
+92m║             └─ 32m🧪  test_backends_interactive.py (23 tests, 580 LOC)0m
+92m║             └─ 32m🧪  test_basic.py (3 tests, 38 LOC)0m
+92m║             └─ 92m🧪  test_bbox_tight.py (11 tests, 126 LOC)0m
+92m║             └─ 32m🧪  test_bezier.py (1 tests, 10 LOC)0m
+92m║             └─ 37m🧪  test_category.py (51 tests, 254 LOC)0m
+92m║             └─ 37m🧪  test_cbook.py (76 tests, 732 LOC)0m
+92m║             └─ 32m🧪  test_collections.py (72 tests, 1033 LOC)0m
+92m║             └─ 36m🧪  test_colorbar.py (68 tests, 891 LOC)0m
+92m║             └─ 36m🧪  test_colors.py (104 tests, 1261 LOC)0m
+92m║             └─ 32m🧪  test_compare_images.py (2 tests, 38 LOC)0m
+92m║             └─ 32m🧪  test_constrainedlayout.py (45 tests, 562 LOC)0m
+92m║             └─ 92m🧪  test_container.py (3 tests, 21 LOC)0m
+92m║             └─ 92m🧪  test_contour.py (56 tests, 603 LOC)0m
+92m║             └─ 36m🧪  test_cycles.py (12 tests, 136 LOC)0m
+92m║             └─ 36m🧪  test_dates.py (67 tests, 1104 LOC)0m
+92m║             └─ 36m🧪  test_datetime.py (51 tests, 719 LOC)0m
+92m║             └─ 36m🧪  test_determinism.py (4 tests, 175 LOC)0m
+92m║             └─ 36m🧪  test_doc.py (1 tests, 26 LOC)0m
+92m║             └─ 32m🧪  test_dviread.py (2 tests, 63 LOC)0m
+92m║             └─ 37m🧪  test_figure.py (116 tests, 1355 LOC)0m
+92m║             └─ 92m🧪  test_font_manager.py (23 tests, 285 LOC)0m
+92m║             └─ 36m🧪  test_fontconfig_pattern.py (3 tests, 52 LOC)0m
+92m║             └─ 36m🧪  test_ft2font.py (27 tests, 827 LOC)0m
+92m║             └─ 37m🧪  test_getattr.py (2 tests, 27 LOC)0m
+92m║             └─ 92m🧪  test_gridspec.py (5 tests, 38 LOC)0m
+92m║             └─ 37m🧪  test_image.py (111 tests, 1269 LOC)0m
+92m║             └─ 37m🧪  test_legend.py (121 tests, 1078 LOC)0m
+92m║             └─ 36m🧪  test_lines.py (30 tests, 314 LOC)0m
+92m║             └─ 36m🧪  test_marker.py (20 tests, 212 LOC)0m
+92m║             └─ 37m🧪  test_mathtext.py (37 tests, 461 LOC)0m
+92m║             └─ 36m🧪  test_matplotlib.py (6 tests, 68 LOC)0m
+92m║             └─ 36m🧪  test_mlab.py (61 tests, 866 LOC)0m
+92m║             └─ 37m🧪  test_multivariate_colormaps.py (19 tests, 424 LOC)0m
+92m║             └─ 92m🧪  test_offsetbox.py (33 tests, 340 LOC)0m
+92m║             └─ 92m🧪  test_patches.py (50 tests, 733 LOC)0m
+92m║             └─ 32m🧪  test_path.py (33 tests, 383 LOC)0m
+92m║             └─ 32m🧪  test_patheffects.py (10 tests, 166 LOC)0m
+92m║             └─ 36m🧪  test_pickle.py (21 tests, 232 LOC)0m
+92m║             └─ 32m🧪  test_png.py (3 tests, 37 LOC)0m
+92m║             └─ 37m🧪  test_polar.py (39 tests, 370 LOC)0m
+92m║             └─ 36m🧪  test_preprocess_data.py (20 tests, 222 LOC)0m
+92m║             └─ 92m🧪  test_pyplot.py (29 tests, 358 LOC)0m
+92m║             └─ 92m🖥️  test_quiver.py (25 tests, 286 LOC)0m
+92m║             └─ 32m🧪  test_rcparams.py (37 tests, 533 LOC)0m
+92m║             └─ 92m🧪  test_sankey.py (9 tests, 83 LOC)0m
+92m║             └─ 32m🧪  test_scale.py (19 tests, 215 LOC)0m
+92m║             └─ 36m🧪  test_simplification.py (22 tests, 413 LOC)0m
+92m║             └─ 32m🧪  test_skew.py (2 tests, 110 LOC)0m
+92m║             └─ 92m🧪  test_sphinxext.py (7 tests, 151 LOC)0m
+92m║             └─ 37m🧪  test_spines.py (7 tests, 122 LOC)0m
+92m║             └─ 36m🧪  test_streamplot.py (10 tests, 123 LOC)0m
+92m║             └─ 37m🧪  test_style.py (17 tests, 151 LOC)0m
+92m║             └─ 32m🧪  test_subplots.py (27 tests, 227 LOC)0m
+92m║             └─ 37m🧪  test_table.py (11 tests, 214 LOC)0m
+92m║             └─ 32m🧪  test_testing.py (7 tests, 29 LOC)0m
+92m║             └─ 92m🧪  test_texmanager.py (5 tests, 58 LOC)0m
+92m║             └─ 37m🧪  test_text.py (79 tests, 840 LOC)0m
+92m║             └─ 32m🧪  test_textpath.py (1 tests, 7 LOC)0m
+92m║             └─ 32m🧪  test_ticker.py (152 tests, 1620 LOC)0m
+92m║             └─ 92m🧪  test_tightlayout.py (25 tests, 286 LOC)0m
+92m║             └─ 32m🧪  test_transforms.py (64 tests, 842 LOC)0m
+92m║             └─ 32m🧪  test_triangulation.py (42 tests, 1011 LOC)0m
+92m║             └─ 37m🧪  test_type1font.py (6 tests, 127 LOC)0m
+92m║             └─ 92m⚛️  test_units.py (17 tests, 259 LOC)0m
+92m║             └─ 92m🧪  test_usetex.py (15 tests, 143 LOC)0m
+92m║             └─ 92m🧪  test_widgets.py (94 tests, 1293 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 37m🧪  test_axes_grid1.py (41 tests, 589 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_angle_helper.py (9 tests, 116 LOC)0m
+92m║               └─ 36m🧪  test_axis_artist.py (4 tests, 67 LOC)0m
+92m║               └─ 32m🧪  test_axislines.py (8 tests, 105 LOC)0m
+92m║               └─ 36m🧪  test_floating_axes.py (4 tests, 87 LOC)0m
+92m║               └─ 92m🧪  test_grid_finder.py (2 tests, 27 LOC)0m
+92m║               └─ 92m🧪  test_grid_helper_curvelinear.py (3 tests, 140 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 36m🧪  test_art3d.py (4 tests, 65 LOC)0m
+92m║               └─ 92m🧪  test_axes3d.py (148 tests, 2051 LOC)0m
+92m║               └─ 92m🧪  test_legend3d.py (8 tests, 90 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test__exceptions.py (8 tests, 70 LOC)0m
+92m║               └─ 92m🧪  test_abc.py (5 tests, 45 LOC)0m
+92m║               └─ 32m🔌  test_api.py (28 tests, 437 LOC)0m
+92m║               └─ 36m🧪  test_argparse.py (7 tests, 63 LOC)0m
+92m║               └─ 37m🔌  test_array_api_info.py (10 tests, 83 LOC)0m
+92m║               └─ 92m🧪  test_array_coercion.py (64 tests, 596 LOC)0m
+92m║               └─ 92m🧪  test_array_interface.py (1 tests, 144 LOC)0m
+92m║               └─ 37m🧪  test_arraymethod.py (8 tests, 64 LOC)0m
+92m║               └─ 36m🧪  test_arrayobject.py (7 tests, 43 LOC)0m
+92m║               └─ 92m🧪  test_arrayprint.py (63 tests, 1047 LOC)0m
+92m║               └─ 36m🧪  test_casting_floatingpoint_errors.py (2 tests, 109 LOC)0m
+92m║               └─ 32m⚛️  test_casting_unittests.py (40 tests, 602 LOC)0m
+92m║               └─ 37m🧪  test_conversion_utils.py (15 tests, 162 LOC)0m
+92m║               └─ 37m🧪  test_cpu_dispatcher.py (1 tests, 36 LOC)0m
+92m║               └─ 37m🧪  test_cpu_features.py (8 tests, 352 LOC)0m
+92m║               └─ 92m🧪  test_custom_dtypes.py (34 tests, 208 LOC)0m
+92m║               └─ 36m🧪  test_cython.py (19 tests, 217 LOC)0m
+92m║               └─ 37m🧪  test_datetime.py (150 tests, 2070 LOC)0m
+92m║               └─ 37m🧪  test_defchararray.py (84 tests, 646 LOC)0m
+92m║               └─ 32m🧪  test_deprecations.py (63 tests, 512 LOC)0m
+92m║               └─ 37m🧪  test_dlpack.py (23 tests, 132 LOC)0m
+92m║               └─ 37m🧪  test_dtype.py (169 tests, 1517 LOC)0m
+92m║               └─ 37m🧪  test_einsum.py (54 tests, 865 LOC)0m
+92m║               └─ 37m🧪  test_errstate.py (6 tests, 91 LOC)0m
+92m║               └─ 36m🧪  test_extint128.py (13 tests, 170 LOC)0m
+92m║               └─ 37m🧪  test_function_base.py (38 tests, 379 LOC)0m
+92m║               └─ 92m🧪  test_getlimits.py (18 tests, 147 LOC)0m
+92m║               └─ 32m🧪  test_half.py (22 tests, 411 LOC)0m
+92m║               └─ 36m🧪  test_hashtable.py (3 tests, 22 LOC)0m
+92m║               └─ 32m🧪  test_indexerrors.py (8 tests, 100 LOC)0m
+92m║               └─ 92m🧪  test_indexing.py (78 tests, 991 LOC)0m
+92m║               └─ 92m🧪  test_item_selection.py (16 tests, 121 LOC)0m
+92m║               └─ 37m🔌  test_limited_api.py (1 tests, 79 LOC)0m
+92m║               └─ 37m🧪  test_longdouble.py (34 tests, 270 LOC)0m
+92m║               └─ 36m🧪  test_machar.py (1 tests, 21 LOC)0m
+92m║               └─ 92m🧪  test_mem_overlap.py (25 tests, 644 LOC)0m
+92m║               └─ 36m🧪  test_mem_policy.py (9 tests, 358 LOC)0m
+92m║               └─ 37m🧪  test_memmap.py (21 tests, 180 LOC)0m
+92m║               └─ 36m🧪  test_multiarray.py (737 tests, 7896 LOC)0m
+92m║               └─ 32m🧪  test_multithreading.py (14 tests, 193 LOC)0m
+92m║               └─ 92m🧪  test_nditer.py (112 tests, 2534 LOC)0m
+92m║               └─ 36m🧪  test_nep50_promotions.py (26 tests, 183 LOC)0m
+92m║               └─ 36m🧪  test_numeric.py (288 tests, 3202 LOC)0m
+92m║               └─ 92m🧪  test_numerictypes.py (53 tests, 468 LOC)0m
+92m║               └─ 32m🧪  test_overrides.py (52 tests, 570 LOC)0m
+92m║               └─ 36m🧪  test_print.py (16 tests, 155 LOC)0m
+92m║               └─ 36m🧪  test_protocols.py (2 tests, 30 LOC)0m
+92m║               └─ 37m🧪  test_records.py (39 tests, 420 LOC)0m
+92m║               └─ 32m🧪  test_regression.py (278 tests, 1879 LOC)0m
+92m║               └─ 92m🧪  test_scalar_ctors.py (30 tests, 157 LOC)0m
+92m║               └─ 92m🧪  test_scalar_methods.py (40 tests, 197 LOC)0m
+92m║               └─ 92m🧪  test_scalarbuffer.py (13 tests, 115 LOC)0m
+92m║               └─ 92m🧪  test_scalarinherit.py (6 tests, 77 LOC)0m
+92m║               └─ 32m🧪  test_scalarmath.py (91 tests, 848 LOC)0m
+92m║               └─ 32m🧪  test_scalarprint.py (14 tests, 312 LOC)0m
+92m║               └─ 32m🧪  test_shape_base.py (76 tests, 686 LOC)0m
+92m║               └─ 37m🧪  test_simd.py (65 tests, 1127 LOC)0m
+92m║               └─ 36m🧪  test_simd_module.py (12 tests, 89 LOC)0m
+92m║               └─ 92m🧪  test_stringdtype.py (108 tests, 1425 LOC)0m
+92m║               └─ 36m🧪  test_strings.py (133 tests, 1155 LOC)0m
+92m║               └─ 92m🧪  test_ufunc.py (239 tests, 2372 LOC)0m
+92m║               └─ 32m🧪  test_umath.py (314 tests, 3805 LOC)0m
+92m║               └─ 36m🧪  test_umath_accuracy.py (4 tests, 105 LOC)0m
+92m║               └─ 36m🧪  test_umath_complex.py (30 tests, 405 LOC)0m
+92m║               └─ 32m🧪  test_unicode.py (15 tests, 224 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_pyinstaller.py (2 tests, 25 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_abstract_interface.py (2 tests, 18 LOC)0m
+92m║               └─ 36m🧪  test_array_from_pyobj.py (26 tests, 565 LOC)0m
+92m║               └─ 37m🧪  test_assumed_shape.py (1 tests, 37 LOC)0m
+92m║               └─ 37m📝  test_block_docstring.py (1 tests, 14 LOC)0m
+92m║               └─ 36m🧪  test_callback.py (11 tests, 199 LOC)0m
+92m║               └─ 37m🧪  test_character.py (43 tests, 522 LOC)0m
+92m║               └─ 92m🧪  test_common.py (2 tests, 15 LOC)0m
+92m║               └─ 36m🧪  test_crackfortran.py (34 tests, 323 LOC)0m
+92m║               └─ 92m🧪  test_data.py (6 tests, 52 LOC)0m
+92m║               └─ 37m📝  test_docs.py (3 tests, 47 LOC)0m
+92m║               └─ 37m🧪  test_f2cmap.py (1 tests, 12 LOC)0m
+92m║               └─ 36m🧪  test_f2py2e.py (54 tests, 729 LOC)0m
+92m║               └─ 37m🧪  test_isoc.py (5 tests, 36 LOC)0m
+92m║               └─ 37m🧪  test_kind.py (3 tests, 40 LOC)0m
+92m║               └─ 37m🧪  test_mixed.py (2 tests, 26 LOC)0m
+92m║               └─ 32m🧪  test_modules.py (5 tests, 62 LOC)0m
+92m║               └─ 92m🧪  test_parameter.py (12 tests, 87 LOC)0m
+92m║               └─ 92m🧪  test_pyf_src.py (1 tests, 36 LOC)0m
+92m║               └─ 36m🧪  test_quoted_character.py (1 tests, 12 LOC)0m
+92m║               └─ 36m🧪  test_regression.py (13 tests, 118 LOC)0m
+92m║               └─ 37m🧪  test_return_character.py (4 tests, 38 LOC)0m
+92m║               └─ 92m🧪  test_return_complex.py (4 tests, 52 LOC)0m
+92m║               └─ 37m🧪  test_return_integer.py (4 tests, 42 LOC)0m
+92m║               └─ 92m🧪  test_return_logical.py (4 tests, 57 LOC)0m
+92m║               └─ 32m🧪  test_return_real.py (6 tests, 92 LOC)0m
+92m║               └─ 32m🧪  test_routines.py (2 tests, 22 LOC)0m
+92m║               └─ 32m🧪  test_semicolon_split.py (2 tests, 66 LOC)0m
+92m║               └─ 92m🧪  test_size.py (3 tests, 31 LOC)0m
+92m║               └─ 92m🧪  test_string.py (4 tests, 80 LOC)0m
+92m║               └─ 32m🧪  test_symbolic.py (11 tests, 418 LOC)0m
+92m║               └─ 32m🧪  test_value_attrspec.py (1 tests, 10 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 37m🧪  test_helper.py (8 tests, 130 LOC)0m
+92m║               └─ 37m🧪  test_pocketfft.py (65 tests, 491 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 32m🧪  test__datasource.py (26 tests, 242 LOC)0m
+92m║               └─ 36m🧪  test__iotools.py (24 tests, 269 LOC)0m
+92m║               └─ 37m🧪  test__version.py (8 tests, 41 LOC)0m
+92m║               └─ 32m🧪  test_array_utils.py (4 tests, 23 LOC)0m
+92m║               └─ 37m🧪  test_arraypad.py (116 tests, 1199 LOC)0m
+92m║               └─ 92m🧪  test_arraysetops.py (56 tests, 770 LOC)0m
+92m║               └─ 37m🧪  test_arrayterator.py (1 tests, 28 LOC)0m
+92m║               └─ 32m🧪  test_format.py (34 tests, 810 LOC)0m
+92m║               └─ 92m🧪  test_function_base.py (377 tests, 3486 LOC)0m
+92m║               └─ 32m🧪  test_histograms.py (58 tests, 611 LOC)0m
+92m║               └─ 92m🧪  test_index_tricks.py (46 tests, 423 LOC)0m
+92m║               └─ 32m🧪  test_io.py (200 tests, 2233 LOC)0m
+92m║               └─ 36m⚖️  test_loadtxt.py (127 tests, 817 LOC)0m
+92m║               └─ 92m🧪  test_mixins.py (11 tests, 159 LOC)0m
+92m║               └─ 37m🧪  test_nanfunctions.py (130 tests, 1147 LOC)0m
+92m║               └─ 32m🧪  test_packbits.py (22 tests, 324 LOC)0m
+92m║               └─ 32m🧪  test_polynomial.py (19 tests, 237 LOC)0m
+92m║               └─ 37m🧪  test_recfunctions.py (51 tests, 795 LOC)0m
+92m║               └─ 92m🧪  test_regression.py (25 tests, 163 LOC)0m
+92m║               └─ 37m🧪  test_shape_base.py (73 tests, 623 LOC)0m
+92m║               └─ 32m🧪  test_stride_tricks.py (26 tests, 492 LOC)0m
+92m║               └─ 36m🧪  test_twodim_base.py (37 tests, 444 LOC)0m
+92m║               └─ 37m🧪  test_type_check.py (51 tests, 347 LOC)0m
+92m║               └─ 92m🧪  test_ufunclike.py (5 tests, 80 LOC)0m
+92m║               └─ 37m🧪  test_utils.py (5 tests, 54 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 36m🧪  test_deprecations.py (1 tests, 15 LOC)0m
+92m║               └─ 32m🧪  test_linalg.py (129 tests, 1744 LOC)0m
+92m║               └─ 92m🧪  test_regression.py (14 tests, 130 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_arrayobject.py (4 tests, 29 LOC)0m
+92m║               └─ 92m🧪  test_core.py (347 tests, 4446 LOC)0m
+92m║               └─ 32m🧪  test_deprecations.py (5 tests, 57 LOC)0m
+92m║               └─ 92m🧪  test_extras.py (96 tests, 1576 LOC)0m
+92m║               └─ 32m🧪  test_mrecords.py (24 tests, 395 LOC)0m
+92m║               └─ 32m🧪  test_old_ma.py (41 tests, 771 LOC)0m
+92m║               └─ 37m🧪  test_regression.py (14 tests, 66 LOC)0m
+92m║               └─ 36m🧪  test_subclassing.py (16 tests, 327 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_defmatrix.py (43 tests, 370 LOC)0m
+92m║               └─ 37m🧪  test_interaction.py (23 tests, 232 LOC)0m
+92m║               └─ 36m🧪  test_masked_matrix.py (14 tests, 179 LOC)0m
+92m║               └─ 92m🧪  test_matrix_linalg.py (1 tests, 55 LOC)0m
+92m║               └─ 32m🧪  test_multiarray.py (2 tests, 12 LOC)0m
+92m║               └─ 36m🧪  test_numeric.py (2 tests, 13 LOC)0m
+92m║               └─ 36m🧪  test_regression.py (4 tests, 21 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_chebyshev.py (41 tests, 446 LOC)0m
+92m║               └─ 37m🧪  test_classes.py (33 tests, 463 LOC)0m
+92m║               └─ 36m🧪  test_hermite.py (34 tests, 401 LOC)0m
+92m║               └─ 32m🧪  test_hermite_e.py (34 tests, 402 LOC)0m
+92m║               └─ 36m🧪  test_laguerre.py (34 tests, 386 LOC)0m
+92m║               └─ 92m🧪  test_legendre.py (38 tests, 411 LOC)0m
+92m║               └─ 92m🧪  test_polynomial.py (38 tests, 471 LOC)0m
+92m║               └─ 32m🧪  test_polyutils.py (10 tests, 88 LOC)0m
+92m║               └─ 36m🧪  test_printing.py (60 tests, 456 LOC)0m
+92m║               └─ 32m🧪  test_symbol.py (36 tests, 161 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 37m🧪  test_direct.py (31 tests, 463 LOC)0m
+92m║               └─ 32m🧪  test_extending.py (3 tests, 98 LOC)0m
+92m║               └─ 36m🧪  test_generator_mt19937.py (238 tests, 2223 LOC)0m
+92m║               └─ 36m🧪  test_generator_mt19937_regressions.py (18 tests, 117 LOC)0m
+92m║               └─ 92m🧪  test_random.py (138 tests, 1375 LOC)0m
+92m║               └─ 37m🧪  test_randomstate.py (165 tests, 1687 LOC)0m
+92m║               └─ 36m🧪  test_randomstate_regression.py (19 tests, 140 LOC)0m
+92m║               └─ 32m🧪  test_regression.py (11 tests, 97 LOC)0m
+92m║               └─ 36m🧪  test_seed_sequence.py (2 tests, 66 LOC)0m
+92m║               └─ 92m🧪  test_smoke.py (70 tests, 692 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 37m🧪  test_utils.py (115 tests, 1432 LOC)0m
+92m║0m
+92m║           ╠═[36mtests/92m]0m
+92m║             └─ 92m🧪  test__all__.py (1 tests, 5 LOC)0m
+92m║             └─ 36m🧪  test_configtool.py (3 tests, 29 LOC)0m
+92m║             └─ 32m🧪  test_ctypeslib.py (23 tests, 299 LOC)0m
+92m║             └─ 92m⚖️  test_lazyloading.py (1 tests, 24 LOC)0m
+92m║             └─ 32m🧪  test_matlib.py (8 tests, 45 LOC)0m
+92m║             └─ 32m🧪  test_numpy_config.py (4 tests, 36 LOC)0m
+92m║             └─ 37m🧪  test_numpy_version.py (3 tests, 38 LOC)0m
+92m║             └─ 36m🔌  test_public_api.py (16 tests, 632 LOC)0m
+92m║             └─ 92m⚖️  test_reloading.py (3 tests, 58 LOC)0m
+92m║             └─ 37m🧪  test_scripts.py (3 tests, 33 LOC)0m
+92m║             └─ 37m🧪  test_warnings.py (1 tests, 57 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_isfile.py (1 tests, 28 LOC)0m
+92m║               └─ 32m🧪  test_runtime.py (12 tests, 78 LOC)0m
+92m║               └─ 36m🧪  test_typing.py (9 tests, 214 LOC)0m
+92m║0m
+92m║           ╠═[36mtests/92m]0m
+92m║             └─ 36m🧪  test_aggregation.py (7 tests, 76 LOC)0m
+92m║             └─ 37m🧪  test_algos.py (154 tests, 1592 LOC)0m
+92m║             └─ 36m🧪  test_common.py (18 tests, 191 LOC)0m
+92m║             └─ 32m🧪  test_downstream.py (20 tests, 240 LOC)0m
+92m║             └─ 32m🧪  test_errors.py (6 tests, 89 LOC)0m
+92m║             └─ 37m🧪  test_expressions.py (29 tests, 367 LOC)0m
+92m║             └─ 36m🧪  test_flags.py (5 tests, 38 LOC)0m
+92m║             └─ 92m🧪  test_multilevel.py (19 tests, 273 LOC)0m
+92m║             └─ 37m🧪  test_nanops.py (83 tests, 991 LOC)0m
+92m║             └─ 32m🧪  test_optional_dependency.py (5 tests, 72 LOC)0m
+92m║             └─ 32m🧪  test_register_accessor.py (6 tests, 76 LOC)0m
+92m║             └─ 36m🧪  test_sorting.py (35 tests, 390 LOC)0m
+92m║             └─ 92m🧪  test_take.py (18 tests, 230 LOC)0m
+92m║0m
+92m║             ╠═[36mapi/92m]0m
+92m║               └─ 92m🔌  test_api.py (12 tests, 323 LOC)0m
+92m║               └─ 36m🔌  test_types.py (2 tests, 57 LOC)0m
+92m║0m
+92m║             ╠═[36mapply/92m]0m
+92m║               └─ 92m🧪  test_frame_apply.py (137 tests, 1245 LOC)0m
+92m║               └─ 36m🧪  test_frame_apply_relabeling.py (5 tests, 87 LOC)0m
+92m║               └─ 32m🧪  test_frame_transform.py (21 tests, 188 LOC)0m
+92m║               └─ 32m🧪  test_invalid_arg.py (40 tests, 263 LOC)0m
+92m║               └─ 92m🧪  test_numba.py (10 tests, 92 LOC)0m
+92m║               └─ 32m🧪  test_series_apply.py (58 tests, 501 LOC)0m
+92m║               └─ 37m🧪  test_series_apply_relabeling.py (2 tests, 27 LOC)0m
+92m║               └─ 92m🧪  test_series_transform.py (8 tests, 62 LOC)0m
+92m║               └─ 92m🧪  test_str.py (26 tests, 264 LOC)0m
+92m║0m
+92m║             ╠═[36marithmetic/92m]0m
+92m║               └─ 36m🧪  test_array_ops.py (2 tests, 26 LOC)0m
+92m║               └─ 37m🧪  test_categorical.py (2 tests, 19 LOC)0m
+92m║               └─ 92m🧪  test_datetime64.py (124 tests, 1856 LOC)0m
+92m║               └─ 37m🧪  test_interval.py (19 tests, 252 LOC)0m
+92m║               └─ 36m🧪  test_numeric.py (129 tests, 1151 LOC)0m
+92m║               └─ 36m🧪  test_object.py (30 tests, 306 LOC)0m
+92m║               └─ 37m🧪  test_period.py (94 tests, 1250 LOC)0m
+92m║               └─ 36m🧪  test_timedelta64.py (102 tests, 1562 LOC)0m
+92m║0m
+92m║             ╠═[36marrays/92m]0m
+92m║               └─ 92m🧪  test_array.py (16 tests, 391 LOC)0m
+92m║               └─ 32m🧪  test_datetimelike.py (96 tests, 989 LOC)0m
+92m║               └─ 32m🧪  test_datetimes.py (64 tests, 618 LOC)0m
+92m║               └─ 32m🧪  test_ndarray_backed.py (5 tests, 60 LOC)0m
+92m║               └─ 92m🧪  test_period.py (16 tests, 121 LOC)0m
+92m║               └─ 36m🧪  test_timedeltas.py (32 tests, 243 LOC)0m
+92m║0m
+92m║               ╠═[36mboolean/92m]0m
+92m║                 └─ 32m🧪  test_arithmetic.py (7 tests, 102 LOC)0m
+92m║                 └─ 36m🧪  test_astype.py (3 tests, 34 LOC)0m
+92m║                 └─ 92m🧪  test_comparison.py (5 tests, 46 LOC)0m
+92m║                 └─ 92m🧪  test_construction.py (19 tests, 234 LOC)0m
+92m║                 └─ 37m🧪  test_function.py (10 tests, 93 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (2 tests, 10 LOC)0m
+92m║                 └─ 92m🧪  test_logical.py (21 tests, 198 LOC)0m
+92m║                 └─ 37m🧪  test_ops.py (2 tests, 20 LOC)0m
+92m║                 └─ 36m🧪  test_reduction.py (4 tests, 48 LOC)0m
+92m║                 └─ 92m🧪  test_repr.py (1 tests, 9 LOC)0m
+92m║0m
+92m║               ╠═[36mcategorical/92m]0m
+92m║                 └─ 92m🧪  test_algos.py (11 tests, 63 LOC)0m
+92m║                 └─ 36m🧪  test_analytics.py (35 tests, 264 LOC)0m
+92m║                 └─ 36m🔌  test_api.py (29 tests, 372 LOC)0m
+92m║                 └─ 37m🧪  test_astype.py (17 tests, 118 LOC)0m
+92m║                 └─ 37m🧪  test_constructors.py (77 tests, 568 LOC)0m
+92m║                 └─ 37m🧪  test_dtypes.py (11 tests, 106 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (36 tests, 299 LOC)0m
+92m║                 └─ 36m🧪  test_map.py (9 tests, 123 LOC)0m
+92m║                 └─ 36m🧪  test_missing.py (18 tests, 164 LOC)0m
+92m║                 └─ 32m🧪  test_operators.py (24 tests, 305 LOC)0m
+92m║                 └─ 92m🧪  test_replace.py (6 tests, 86 LOC)0m
+92m║                 └─ 32m🧪  test_repr.py (23 tests, 428 LOC)0m
+92m║                 └─ 92m🧪  test_sorting.py (4 tests, 98 LOC)0m
+92m║                 └─ 37m🧪  test_subclass.py (3 tests, 20 LOC)0m
+92m║                 └─ 92m🧪  test_take.py (10 tests, 66 LOC)0m
+92m║                 └─ 36m🧪  test_warnings.py (1 tests, 11 LOC)0m
+92m║0m
+92m║               ╠═[36mdatetimes/92m]0m
+92m║                 └─ 36m🧪  test_constructors.py (24 tests, 216 LOC)0m
+92m║                 └─ 92m🧪  test_cumulative.py (3 tests, 37 LOC)0m
+92m║                 └─ 37m🧪  test_reductions.py (14 tests, 137 LOC)0m
+92m║0m
+92m║               ╠═[36mfloating/92m]0m
+92m║                 └─ 32m🧪  test_arithmetic.py (14 tests, 182 LOC)0m
+92m║                 └─ 37m🧪  test_astype.py (8 tests, 84 LOC)0m
+92m║                 └─ 37m🧪  test_comparison.py (5 tests, 44 LOC)0m
+92m║                 └─ 32m🧪  test_concat.py (2 tests, 17 LOC)0m
+92m║                 └─ 36m🧪  test_construction.py (19 tests, 144 LOC)0m
+92m║                 └─ 37m🧪  test_contains.py (1 tests, 7 LOC)0m
+92m║                 └─ 37m🧪  test_function.py (26 tests, 149 LOC)0m
+92m║                 └─ 32m🧪  test_repr.py (6 tests, 34 LOC)0m
+92m║                 └─ 32m🧪  test_to_numpy.py (18 tests, 93 LOC)0m
+92m║0m
+92m║               ╠═[36minteger/92m]0m
+92m║                 └─ 92m🧪  test_arithmetic.py (25 tests, 268 LOC)0m
+92m║                 └─ 32m🧪  test_comparison.py (4 tests, 25 LOC)0m
+92m║                 └─ 32m🧪  test_concat.py (4 tests, 54 LOC)0m
+92m║                 └─ 92m🧪  test_construction.py (18 tests, 180 LOC)0m
+92m║                 └─ 32m🧪  test_dtypes.py (25 tests, 202 LOC)0m
+92m║                 └─ 92m🧪  test_function.py (27 tests, 149 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (2 tests, 12 LOC)0m
+92m║                 └─ 32m🧪  test_reduction.py (8 tests, 111 LOC)0m
+92m║                 └─ 36m🧪  test_repr.py (6 tests, 54 LOC)0m
+92m║0m
+92m║               ╠═[36minterval/92m]0m
+92m║                 └─ 37m🧪  test_astype.py (2 tests, 21 LOC)0m
+92m║                 └─ 32m🧪  test_formats.py (1 tests, 10 LOC)0m
+92m║                 └─ 32m🧪  test_interval.py (13 tests, 183 LOC)0m
+92m║                 └─ 37m🧪  test_interval_pyarrow.py (8 tests, 112 LOC)0m
+92m║                 └─ 37m🧪  test_overlaps.py (6 tests, 77 LOC)0m
+92m║0m
+92m║               ╠═[36mmasked/92m]0m
+92m║                 └─ 37m🧪  test_arithmetic.py (9 tests, 168 LOC)0m
+92m║                 └─ 92m🧪  test_arrow_compat.py (10 tests, 151 LOC)0m
+92m║                 └─ 37m🧪  test_function.py (3 tests, 54 LOC)0m
+92m║                 └─ 36m🧪  test_indexing.py (6 tests, 40 LOC)0m
+92m║0m
+92m║               ╠═[36mnumpy_/92m]0m
+92m║                 └─ 32m🧪  test_indexing.py (4 tests, 31 LOC)0m
+92m║                 └─ 92m🧪  test_numpy.py (31 tests, 211 LOC)0m
+92m║0m
+92m║               ╠═[36mperiod/92m]0m
+92m║                 └─ 32m🧪  test_arrow_compat.py (7 tests, 91 LOC)0m
+92m║                 └─ 92m🧪  test_astype.py (7 tests, 44 LOC)0m
+92m║                 └─ 37m🧪  test_constructors.py (14 tests, 116 LOC)0m
+92m║                 └─ 92m🧪  test_reductions.py (3 tests, 33 LOC)0m
+92m║0m
+92m║               ╠═[36msparse/92m]0m
+92m║                 └─ 32m🧪  test_accessor.py (28 tests, 210 LOC)0m
+92m║                 └─ 92m🧪  test_arithmetics.py (36 tests, 373 LOC)0m
+92m║                 └─ 37m🧪  test_array.py (45 tests, 357 LOC)0m
+92m║                 └─ 36m🧪  test_astype.py (8 tests, 107 LOC)0m
+92m║                 └─ 92m🧪  test_combine_concat.py (6 tests, 42 LOC)0m
+92m║                 └─ 36m🧪  test_constructors.py (27 tests, 217 LOC)0m
+92m║                 └─ 37m🧪  test_dtype.py (27 tests, 181 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (23 tests, 221 LOC)0m
+92m║                 └─ 32m🧪  test_libsparse.py (30 tests, 414 LOC)0m
+92m║                 └─ 37m🧪  test_reductions.py (30 tests, 252 LOC)0m
+92m║                 └─ 32m🧪  test_unary.py (8 tests, 64 LOC)0m
+92m║0m
+92m║               ╠═[36mstring_/92m]0m
+92m║                 └─ 37m🧪  test_string.py (51 tests, 523 LOC)0m
+92m║                 └─ 92m🧪  test_string_arrow.py (20 tests, 193 LOC)0m
+92m║0m
+92m║               ╠═[36mtimedeltas/92m]0m
+92m║                 └─ 37m🧪  test_constructors.py (8 tests, 80 LOC)0m
+92m║                 └─ 36m🧪  test_cumulative.py (2 tests, 14 LOC)0m
+92m║                 └─ 92m🧪  test_reductions.py (14 tests, 164 LOC)0m
+92m║0m
+92m║             ╠═[36mbase/92m]0m
+92m║               └─ 37m🧪  test_constructors.py (7 tests, 126 LOC)0m
+92m║               └─ 92m🧪  test_conversion.py (46 tests, 463 LOC)0m
+92m║               └─ 37m🧪  test_fillna.py (3 tests, 40 LOC)0m
+92m║               └─ 37m🧪  test_misc.py (10 tests, 136 LOC)0m
+92m║               └─ 32m🧪  test_transpose.py (5 tests, 45 LOC)0m
+92m║               └─ 92m🧪  test_unique.py (9 tests, 93 LOC)0m
+92m║               └─ 36m🧪  test_value_counts.py (10 tests, 268 LOC)0m
+92m║0m
+92m║             ╠═[36mcomputation/92m]0m
+92m║               └─ 37m🧪  test_compat.py (4 tests, 22 LOC)0m
+92m║               └─ 37m🧪  test_eval.py (169 tests, 1613 LOC)0m
+92m║0m
+92m║             ╠═[36mconfig/92m]0m
+92m║               └─ 92m🧪  test_config.py (21 tests, 310 LOC)0m
+92m║               └─ 32m🌍  test_localization.py (15 tests, 110 LOC)0m
+92m║0m
+92m║             ╠═[36mconstruction/92m]0m
+92m║               └─ 32m🧪  test_extract_array.py (1 tests, 14 LOC)0m
+92m║0m
+92m║             ╠═[36mcopy_view/92m]0m
+92m║               └─ 92m🧪  test_array.py (13 tests, 139 LOC)0m
+92m║               └─ 36m🧪  test_astype.py (19 tests, 200 LOC)0m
+92m║               └─ 32m🧪  test_chained_assignment_deprecation.py (8 tests, 126 LOC)0m
+92m║               └─ 92m🧪  test_clip.py (6 tests, 77 LOC)0m
+92m║               └─ 92m🧪  test_constructors.py (39 tests, 288 LOC)0m
+92m║               └─ 32m🧪  test_core_functionalities.py (7 tests, 76 LOC)0m
+92m║               └─ 32m🧪  test_functions.py (18 tests, 316 LOC)0m
+92m║               └─ 92m🧪  test_indexing.py (56 tests, 937 LOC)0m
+92m║               └─ 37m🧪  test_internals.py (6 tests, 99 LOC)0m
+92m║               └─ 37m🧪  test_interp_fillna.py (32 tests, 328 LOC)0m
+92m║               └─ 92m🧪  test_methods.py (140 tests, 1553 LOC)0m
+92m║               └─ 37m🧪  test_replace.py (36 tests, 373 LOC)0m
+92m║               └─ 37m🧪  test_setitem.py (9 tests, 92 LOC)0m
+92m║               └─ 32m🧪  test_util.py (2 tests, 9 LOC)0m
+92m║0m
+92m║               ╠═[36mindex/92m]0m
+92m║                 └─ 37m🧪  test_datetimeindex.py (6 tests, 57 LOC)0m
+92m║                 └─ 92m🧪  test_index.py (13 tests, 155 LOC)0m
+92m║                 └─ 92m🧪  test_periodindex.py (2 tests, 26 LOC)0m
+92m║                 └─ 92m🧪  test_timedeltaindex.py (2 tests, 26 LOC)0m
+92m║0m
+92m║             ╠═[36mdtypes/92m]0m
+92m║               └─ 36m🧪  test_common.py (81 tests, 610 LOC)0m
+92m║               └─ 37m🧪  test_concat.py (4 tests, 36 LOC)0m
+92m║               └─ 92m🧪  test_dtypes.py (143 tests, 969 LOC)0m
+92m║               └─ 92m🧪  test_generic.py (12 tests, 99 LOC)0m
+92m║               └─ 32m🧪  test_inference.py (195 tests, 1612 LOC)0m
+92m║               └─ 92m🧪  test_missing.py (87 tests, 728 LOC)0m
+92m║0m
+92m║               ╠═[36mcast/92m]0m
+92m║                 └─ 37m🧪  test_can_hold_element.py (3 tests, 56 LOC)0m
+92m║                 └─ 37m🧪  test_construct_from_scalar.py (4 tests, 34 LOC)0m
+92m║                 └─ 36m🧪  test_construct_ndarray.py (4 tests, 30 LOC)0m
+92m║                 └─ 36m🧪  test_construct_object_arr.py (5 tests, 13 LOC)0m
+92m║                 └─ 36m🧪  test_dict_compat.py (1 tests, 10 LOC)0m
+92m║                 └─ 92m🧪  test_downcast.py (8 tests, 72 LOC)0m
+92m║                 └─ 92m🧪  test_find_common_type.py (16 tests, 141 LOC)0m
+92m║                 └─ 36m🧪  test_infer_datetimelike.py (3 tests, 21 LOC)0m
+92m║                 └─ 92m🧪  test_infer_dtype.py (23 tests, 165 LOC)0m
+92m║                 └─ 36m🧪  test_maybe_box_native.py (2 tests, 35 LOC)0m
+92m║                 └─ 37m🧪  test_promote.py (23 tests, 359 LOC)0m
+92m║0m
+92m║             ╠═[36mextension/92m]0m
+92m║               └─ 32m🧪  test_arrow.py (280 tests, 2718 LOC)0m
+92m║               └─ 36m🧪  test_categorical.py (15 tests, 135 LOC)0m
+92m║               └─ 37m🧪  test_common.py (9 tests, 71 LOC)0m
+92m║               └─ 92m🧪  test_datetime.py (5 tests, 107 LOC)0m
+92m║               └─ 37m🧪  test_extension.py (1 tests, 18 LOC)0m
+92m║               └─ 37m🧪  test_interval.py (2 tests, 67 LOC)0m
+92m║               └─ 37m🧪  test_masked.py (5 tests, 331 LOC)0m
+92m║               └─ 92m🧪  test_numpy.py (38 tests, 312 LOC)0m
+92m║               └─ 32m🧪  test_period.py (4 tests, 84 LOC)0m
+92m║               └─ 92m🧪  test_sparse.py (47 tests, 384 LOC)0m
+92m║               └─ 32m🧪  test_string.py (11 tests, 185 LOC)0m
+92m║0m
+92m║               ╠═[36marray_with_attr/92m]0m
+92m║                 └─ 36m🧪  test_array_with_attr.py (1 tests, 24 LOC)0m
+92m║0m
+92m║               ╠═[36mdecimal/92m]0m
+92m║                 └─ 37m🧪  test_decimal.py (41 tests, 415 LOC)0m
+92m║0m
+92m║               ╠═[36mjson/92m]0m
+92m║                 └─ 37m🧪  test_json.py (58 tests, 377 LOC)0m
+92m║0m
+92m║               ╠═[36mlist/92m]0m
+92m║                 └─ 92m🧪  test_list.py (1 tests, 21 LOC)0m
+92m║0m
+92m║             ╠═[36mframe/92m]0m
+92m║               └─ 37m🧪  test_alter_axes.py (2 tests, 17 LOC)0m
+92m║               └─ 37m🔌  test_api.py (27 tests, 273 LOC)0m
+92m║               └─ 32m🧪  test_arithmetic.py (116 tests, 1571 LOC)0m
+92m║               └─ 36m🧪  test_arrow_interface.py (2 tests, 32 LOC)0m
+92m║               └─ 92m🧪  test_block_internals.py (19 tests, 326 LOC)0m
+92m║               └─ 92m🧪  test_constructors.py (252 tests, 2517 LOC)0m
+92m║               └─ 32m🧪  test_cumulative.py (5 tests, 54 LOC)0m
+92m║               └─ 32m🧪  test_iteration.py (17 tests, 124 LOC)0m
+92m║               └─ 36m🧪  test_logical_ops.py (11 tests, 167 LOC)0m
+92m║               └─ 92m🧪  test_nonunique_indexes.py (16 tests, 261 LOC)0m
+92m║               └─ 36m🧪  test_npfuncs.py (4 tests, 72 LOC)0m
+92m║               └─ 92m🧪  test_query_eval.py (99 tests, 1156 LOC)0m
+92m║               └─ 32m🧪  test_reductions.py (141 tests, 1720 LOC)0m
+92m║               └─ 37m🧪  test_repr.py (46 tests, 410 LOC)0m
+92m║               └─ 32m🧪  test_stack_unstack.py (125 tests, 2203 LOC)0m
+92m║               └─ 37m🧪  test_subclass.py (39 tests, 640 LOC)0m
+92m║               └─ 37m🧪  test_ufunc.py (19 tests, 226 LOC)0m
+92m║               └─ 32m🧪  test_unary.py (18 tests, 172 LOC)0m
+92m║               └─ 92m🧪  test_validate.py (3 tests, 33 LOC)0m
+92m║0m
+92m║               ╠═[36mconstructors/92m]0m
+92m║                 └─ 32m🧪  test_from_dict.py (12 tests, 186 LOC)0m
+92m║                 └─ 37m🧪  test_from_records.py (27 tests, 373 LOC)0m
+92m║0m
+92m║               ╠═[36mindexing/92m]0m
+92m║                 └─ 92m🧪  test_coercion.py (9 tests, 142 LOC)0m
+92m║                 └─ 37m🧪  test_delitem.py (4 tests, 42 LOC)0m
+92m║                 └─ 37m🧪  test_get.py (3 tests, 21 LOC)0m
+92m║                 └─ 32m🧪  test_get_value.py (2 tests, 17 LOC)0m
+92m║                 └─ 32m🧪  test_getitem.py (30 tests, 353 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (135 tests, 1511 LOC)0m
+92m║                 └─ 32m🧪  test_insert.py (7 tests, 89 LOC)0m
+92m║                 └─ 36m🧪  test_mask.py (10 tests, 112 LOC)0m
+92m║                 └─ 36m🧪  test_set_value.py (3 tests, 58 LOC)0m
+92m║                 └─ 92m🧪  test_setitem.py (122 tests, 1080 LOC)0m
+92m║                 └─ 32m🧪  test_take.py (4 tests, 64 LOC)0m
+92m║                 └─ 37m🧪  test_where.py (53 tests, 801 LOC)0m
+92m║                 └─ 37m🧪  test_xs.py (28 tests, 348 LOC)0m
+92m║0m
+92m║               ╠═[36mmethods/92m]0m
+92m║                 └─ 36m🧪  test_add_prefix_suffix.py (3 tests, 34 LOC)0m
+92m║                 └─ 37m🧪  test_align.py (30 tests, 378 LOC)0m
+92m║                 └─ 37m🧪  test_asfreq.py (19 tests, 192 LOC)0m
+92m║                 └─ 92m🧪  test_asof.py (10 tests, 136 LOC)0m
+92m║                 └─ 92m🧪  test_assign.py (5 tests, 57 LOC)0m
+92m║                 └─ 32m🧪  test_astype.py (73 tests, 692 LOC)0m
+92m║                 └─ 92m🧪  test_at_time.py (12 tests, 102 LOC)0m
+92m║                 └─ 32m🧪  test_between_time.py (11 tests, 180 LOC)0m
+92m║                 └─ 37m🧪  test_clip.py (16 tests, 147 LOC)0m
+92m║                 └─ 36m🧪  test_combine.py (3 tests, 37 LOC)0m
+92m║                 └─ 36m🧪  test_combine_first.py (29 tests, 429 LOC)0m
+92m║                 └─ 92m🧪  test_compare.py (16 tests, 254 LOC)0m
+92m║                 └─ 37m🧪  test_convert_dtypes.py (14 tests, 174 LOC)0m
+92m║                 └─ 32m🧪  test_copy.py (5 tests, 43 LOC)0m
+92m║                 └─ 32m🧪  test_count.py (2 tests, 29 LOC)0m
+92m║                 └─ 36m🧪  test_cov_corr.py (47 tests, 367 LOC)0m
+92m║                 └─ 37m🧪  test_describe.py (18 tests, 357 LOC)0m
+92m║                 └─ 92m🧪  test_diff.py (29 tests, 233 LOC)0m
+92m║                 └─ 36m🧪  test_dot.py (10 tests, 119 LOC)0m
+92m║                 └─ 37m🧪  test_drop.py (39 tests, 426 LOC)0m
+92m║                 └─ 32m🧪  test_drop_duplicates.py (18 tests, 354 LOC)0m
+92m║                 └─ 37m🧪  test_droplevel.py (1 tests, 27 LOC)0m
+92m║                 └─ 36m🧪  test_dropna.py (16 tests, 218 LOC)0m
+92m║                 └─ 92m🧪  test_dtypes.py (8 tests, 127 LOC)0m
+92m║                 └─ 92m🧪  test_duplicated.py (11 tests, 81 LOC)0m
+92m║                 └─ 37m🧪  test_equals.py (3 tests, 59 LOC)0m
+92m║                 └─ 92m🧪  test_explode.py (15 tests, 263 LOC)0m
+92m║                 └─ 37m🧪  test_fillna.py (53 tests, 741 LOC)0m
+92m║                 └─ 37m🧪  test_filter.py (10 tests, 106 LOC)0m
+92m║                 └─ 92m🧪  test_first_and_last.py (7 tests, 118 LOC)0m
+92m║                 └─ 36m🧪  test_first_valid_index.py (9 tests, 62 LOC)0m
+92m║                 └─ 32m🧪  test_get_numeric_data.py (4 tests, 86 LOC)0m
+92m║                 └─ 32m🧪  test_head_tail.py (3 tests, 37 LOC)0m
+92m║                 └─ 36m🧪  test_infer_objects.py (1 tests, 35 LOC)0m
+92m║                 └─ 37m🧪  test_info.py (27 tests, 440 LOC)0m
+92m║                 └─ 37m🧪  test_interpolate.py (35 tests, 454 LOC)0m
+92m║                 └─ 32m🧪  test_is_homogeneous_dtype.py (2 tests, 45 LOC)0m
+92m║                 └─ 37m🧪  test_isetitem.py (3 tests, 39 LOC)0m
+92m║                 └─ 32m🧪  test_isin.py (16 tests, 182 LOC)0m
+92m║                 └─ 92m🧪  test_iterrows.py (1 tests, 13 LOC)0m
+92m║                 └─ 32m🧪  test_join.py (25 tests, 424 LOC)0m
+92m║                 └─ 32m🧪  test_map.py (20 tests, 151 LOC)0m
+92m║                 └─ 32m🧪  test_matmul.py (2 tests, 73 LOC)0m
+92m║                 └─ 92m🧪  test_nlargest.py (15 tests, 206 LOC)0m
+92m║                 └─ 36m🧪  test_pct_change.py (10 tests, 150 LOC)0m
+92m║                 └─ 37m🧪  test_pipe.py (3 tests, 29 LOC)0m
+92m║                 └─ 32m🧪  test_pop.py (3 tests, 55 LOC)0m
+92m║                 └─ 37m🧪  test_quantile.py (42 tests, 793 LOC)0m
+92m║                 └─ 36m🧪  test_rank.py (29 tests, 404 LOC)0m
+92m║                 └─ 92m🧪  test_reindex.py (66 tests, 1022 LOC)0m
+92m║                 └─ 32m🧪  test_reindex_like.py (4 tests, 29 LOC)0m
+92m║                 └─ 36m🧪  test_rename.py (23 tests, 308 LOC)0m
+92m║                 └─ 32m🧪  test_rename_axis.py (5 tests, 78 LOC)0m
+92m║                 └─ 92m🧪  test_reorder_levels.py (2 tests, 57 LOC)0m
+92m║                 └─ 37m🧪  test_replace.py (104 tests, 1433 LOC)0m
+92m║                 └─ 32m🧪  test_reset_index.py (47 tests, 621 LOC)0m
+92m║                 └─ 92m🧪  test_round.py (9 tests, 152 LOC)0m
+92m║                 └─ 36m🧪  test_sample.py (23 tests, 257 LOC)0m
+92m║                 └─ 37m🧪  test_select_dtypes.py (26 tests, 399 LOC)0m
+92m║                 └─ 92m🧪  test_set_axis.py (7 tests, 110 LOC)0m
+92m║                 └─ 32m🧪  test_set_index.py (57 tests, 522 LOC)0m
+92m║                 └─ 37m🧪  test_shift.py (49 tests, 570 LOC)0m
+92m║                 └─ 32m🧪  test_size.py (2 tests, 17 LOC)0m
+92m║                 └─ 92m🧪  test_sort_index.py (51 tests, 800 LOC)0m
+92m║                 └─ 36m🧪  test_sort_values.py (44 tests, 726 LOC)0m
+92m║                 └─ 92m🧪  test_swapaxes.py (4 tests, 30 LOC)0m
+92m║                 └─ 36m🧪  test_swaplevel.py (1 tests, 29 LOC)0m
+92m║                 └─ 36m🧪  test_to_csv.py (69 tests, 1094 LOC)0m
+92m║                 └─ 36m🧪  test_to_dict.py (40 tests, 443 LOC)0m
+92m║                 └─ 92m🧪  test_to_dict_of_blocks.py (3 tests, 53 LOC)0m
+92m║                 └─ 36m🧪  test_to_numpy.py (4 tests, 38 LOC)0m
+92m║                 └─ 36m🧪  test_to_period.py (5 tests, 71 LOC)0m
+92m║                 └─ 36m🧪  test_to_records.py (18 tests, 439 LOC)0m
+92m║                 └─ 32m🧪  test_to_timestamp.py (5 tests, 124 LOC)0m
+92m║                 └─ 32m🧪  test_transpose.py (18 tests, 166 LOC)0m
+92m║                 └─ 92m🧪  test_truncate.py (9 tests, 110 LOC)0m
+92m║                 └─ 37m🧪  test_tz_convert.py (7 tests, 91 LOC)0m
+92m║                 └─ 36m🧪  test_tz_localize.py (5 tests, 48 LOC)0m
+92m║                 └─ 32m🧪  test_update.py (14 tests, 154 LOC)0m
+92m║                 └─ 37m🧪  test_value_counts.py (13 tests, 157 LOC)0m
+92m║                 └─ 32m🧪  test_values.py (15 tests, 212 LOC)0m
+92m║0m
+92m║             ╠═[36mgeneric/92m]0m
+92m║               └─ 36m🧪  test_duplicate_labels.py (39 tests, 346 LOC)0m
+92m║               └─ 36m🧪  test_finalize.py (28 tests, 685 LOC)0m
+92m║               └─ 32m🧪  test_frame.py (13 tests, 153 LOC)0m
+92m║               └─ 92m🧪  test_generic.py (36 tests, 373 LOC)0m
+92m║               └─ 92m🧪  test_label_or_level_utils.py (14 tests, 178 LOC)0m
+92m║               └─ 36m🧪  test_series.py (15 tests, 129 LOC)0m
+92m║               └─ 36m🧪  test_to_xarray.py (6 tests, 101 LOC)0m
+92m║0m
+92m║             ╠═[36mgroupby/92m]0m
+92m║               └─ 36m🧪  test_all_methods.py (4 tests, 66 LOC)0m
+92m║               └─ 92m🔌  test_api.py (4 tests, 225 LOC)0m
+92m║               └─ 92m🧪  test_apply.py (93 tests, 1205 LOC)0m
+92m║               └─ 92m🧪  test_apply_mutate.py (5 tests, 135 LOC)0m
+92m║               └─ 92m🧪  test_bin_groupby.py (4 tests, 52 LOC)0m
+92m║               └─ 32m🧪  test_categorical.py (106 tests, 1653 LOC)0m
+92m║               └─ 37m🧪  test_counting.py (30 tests, 291 LOC)0m
+92m║               └─ 92m🧪  test_cumulative.py (21 tests, 228 LOC)0m
+92m║               └─ 36m🧪  test_filters.py (28 tests, 465 LOC)0m
+92m║               └─ 37m🧪  test_groupby.py (190 tests, 2506 LOC)0m
+92m║               └─ 92m🧪  test_groupby_dropna.py (41 tests, 562 LOC)0m
+92m║               └─ 36m🧪  test_groupby_subclass.py (5 tests, 102 LOC)0m
+92m║               └─ 36m🧪  test_grouping.py (70 tests, 924 LOC)0m
+92m║               └─ 36m🧪  test_index_as_string.py (4 tests, 70 LOC)0m
+92m║               └─ 32m🧪  test_indexing.py (28 tests, 235 LOC)0m
+92m║               └─ 36m🧪  test_libgroupby.py (18 tests, 243 LOC)0m
+92m║               └─ 37m🧪  test_missing.py (16 tests, 126 LOC)0m
+92m║               └─ 36m🧪  test_numba.py (6 tests, 66 LOC)0m
+92m║               └─ 36m🧪  test_numeric_only.py (20 tests, 432 LOC)0m
+92m║               └─ 92m🧪  test_pipe.py (2 tests, 47 LOC)0m
+92m║               └─ 92m🧪  test_raises.py (26 tests, 627 LOC)0m
+92m║               └─ 36m🧪  test_reductions.py (91 tests, 911 LOC)0m
+92m║               └─ 92m🧪  test_timegrouper.py (29 tests, 779 LOC)0m
+92m║0m
+92m║               ╠═[36maggregate/92m]0m
+92m║                 └─ 37m🧪  test_aggregate.py (115 tests, 1268 LOC)0m
+92m║                 └─ 36m🧪  test_cython.py (26 tests, 348 LOC)0m
+92m║                 └─ 92m🧪  test_numba.py (25 tests, 309 LOC)0m
+92m║                 └─ 92m🧪  test_other.py (29 tests, 503 LOC)0m
+92m║0m
+92m║               ╠═[36mmethods/92m]0m
+92m║                 └─ 32m🧪  test_corrwith.py (1 tests, 19 LOC)0m
+92m║                 └─ 36m🧪  test_describe.py (16 tests, 250 LOC)0m
+92m║                 └─ 36m🧪  test_groupby_shift_diff.py (18 tests, 196 LOC)0m
+92m║                 └─ 36m🧪  test_is_monotonic.py (4 tests, 60 LOC)0m
+92m║                 └─ 36m🧪  test_nlargest_nsmallest.py (7 tests, 94 LOC)0m
+92m║                 └─ 36m🧪  test_nth.py (64 tests, 728 LOC)0m
+92m║                 └─ 36m🧪  test_quantile.py (36 tests, 388 LOC)0m
+92m║                 └─ 37m🧪  test_rank.py (44 tests, 627 LOC)0m
+92m║                 └─ 36m🧪  test_sample.py (14 tests, 107 LOC)0m
+92m║                 └─ 92m🧪  test_size.py (16 tests, 99 LOC)0m
+92m║                 └─ 36m🧪  test_skew.py (1 tests, 18 LOC)0m
+92m║                 └─ 92m🧪  test_value_counts.py (78 tests, 1045 LOC)0m
+92m║0m
+92m║               ╠═[36mtransform/92m]0m
+92m║                 └─ 92m🧪  test_numba.py (19 tests, 209 LOC)0m
+92m║                 └─ 32m🧪  test_transform.py (97 tests, 1305 LOC)0m
+92m║0m
+92m║             ╠═[36mindexes/92m]0m
+92m║               └─ 92m🧪  test_any_index.py (20 tests, 115 LOC)0m
+92m║               └─ 32m🧪  test_base.py (198 tests, 1369 LOC)0m
+92m║               └─ 37m🧪  test_common.py (27 tests, 350 LOC)0m
+92m║               └─ 32m🧪  test_datetimelike.py (14 tests, 131 LOC)0m
+92m║               └─ 36m🧪  test_engines.py (10 tests, 140 LOC)0m
+92m║               └─ 36m🧪  test_frozen.py (10 tests, 76 LOC)0m
+92m║               └─ 36m🧪  test_index_new.py (56 tests, 334 LOC)0m
+92m║               └─ 36m🧪  test_indexing.py (28 tests, 278 LOC)0m
+92m║               └─ 36m🧪  test_numpy_compat.py (9 tests, 149 LOC)0m
+92m║               └─ 37m🧪  test_old_base.py (60 tests, 822 LOC)0m
+92m║               └─ 92m🧪  test_setops.py (75 tests, 732 LOC)0m
+92m║               └─ 92m🧪  test_subclass.py (1 tests, 29 LOC)0m
+92m║0m
+92m║               ╠═[36mbase_class/92m]0m
+92m║                 └─ 32m🧪  test_constructors.py (10 tests, 57 LOC)0m
+92m║                 └─ 92m🧪  test_formats.py (9 tests, 134 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (12 tests, 74 LOC)0m
+92m║                 └─ 37m🧪  test_pickle.py (1 tests, 7 LOC)0m
+92m║                 └─ 37m🧪  test_reshape.py (11 tests, 67 LOC)0m
+92m║                 └─ 37m🧪  test_setops.py (27 tests, 203 LOC)0m
+92m║                 └─ 32m🧪  test_where.py (1 tests, 10 LOC)0m
+92m║0m
+92m║               ╠═[36mcategorical/92m]0m
+92m║                 └─ 36m🧪  test_append.py (7 tests, 44 LOC)0m
+92m║                 └─ 36m🧪  test_astype.py (7 tests, 65 LOC)0m
+92m║                 └─ 36m🧪  test_category.py (23 tests, 309 LOC)0m
+92m║                 └─ 37m🧪  test_constructors.py (5 tests, 104 LOC)0m
+92m║                 └─ 92m🧪  test_equals.py (5 tests, 67 LOC)0m
+92m║                 └─ 36m🧪  test_fillna.py (3 tests, 34 LOC)0m
+92m║                 └─ 36m🧪  test_formats.py (2 tests, 81 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (25 tests, 309 LOC)0m
+92m║                 └─ 92m🧪  test_map.py (9 tests, 115 LOC)0m
+92m║                 └─ 37m🧪  test_reindex.py (7 tests, 64 LOC)0m
+92m║                 └─ 36m🧪  test_setops.py (2 tests, 14 LOC)0m
+92m║0m
+92m║               ╠═[36mdatetimelike_/92m]0m
+92m║                 └─ 37m🧪  test_drop_duplicates.py (3 tests, 69 LOC)0m
+92m║                 └─ 36m🧪  test_equals.py (11 tests, 143 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (3 tests, 35 LOC)0m
+92m║                 └─ 37m🧪  test_is_monotonic.py (1 tests, 33 LOC)0m
+92m║                 └─ 36m🧪  test_nat.py (1 tests, 38 LOC)0m
+92m║                 └─ 92m🧪  test_sort_values.py (17 tests, 266 LOC)0m
+92m║                 └─ 32m🧪  test_value_counts.py (6 tests, 83 LOC)0m
+92m║0m
+92m║               ╠═[36mdatetimes/92m]0m
+92m║                 └─ 92m🧪  test_arithmetic.py (3 tests, 43 LOC)0m
+92m║                 └─ 36m🧪  test_constructors.py (81 tests, 938 LOC)0m
+92m║                 └─ 92m🧪  test_date_range.py (128 tests, 1385 LOC)0m
+92m║                 └─ 37m🧪  test_datetime.py (15 tests, 163 LOC)0m
+92m║                 └─ 92m🧪  test_formats.py (21 tests, 286 LOC)0m
+92m║                 └─ 32m🧪  test_freq_attr.py (6 tests, 39 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (58 tests, 548 LOC)0m
+92m║                 └─ 32m🧪  test_iter.py (8 tests, 61 LOC)0m
+92m║                 └─ 32m🧪  test_join.py (12 tests, 111 LOC)0m
+92m║                 └─ 92m🧪  test_npfuncs.py (1 tests, 9 LOC)0m
+92m║                 └─ 32m🧪  test_ops.py (5 tests, 41 LOC)0m
+92m║                 └─ 37m🧪  test_partial_slicing.py (24 tests, 330 LOC)0m
+92m║                 └─ 36m🧪  test_pickle.py (6 tests, 32 LOC)0m
+92m║                 └─ 37m🧪  test_reindex.py (2 tests, 49 LOC)0m
+92m║                 └─ 32m🧪  test_scalar_compat.py (21 tests, 258 LOC)0m
+92m║                 └─ 32m🧪  test_setops.py (44 tests, 495 LOC)0m
+92m║                 └─ 36m🧪  test_timezones.py (15 tests, 190 LOC)0m
+92m║0m
+92m║                 ╠═[36mmethods/92m]0m
+92m║                   └─ 36m🧪  test_asof.py (2 tests, 23 LOC)0m
+92m║                   └─ 36m🧪  test_astype.py (30 tests, 265 LOC)0m
+92m║                   └─ 32m🧪  test_delete.py (6 tests, 116 LOC)0m
+92m║                   └─ 36m🧪  test_factorize.py (6 tests, 93 LOC)0m
+92m║                   └─ 37m🧪  test_fillna.py (2 tests, 48 LOC)0m
+92m║                   └─ 36m🧪  test_insert.py (16 tests, 206 LOC)0m
+92m║                   └─ 32m🧪  test_isocalendar.py (2 tests, 22 LOC)0m
+92m║                   └─ 92m🧪  test_map.py (5 tests, 35 LOC)0m
+92m║                   └─ 32m🧪  test_normalize.py (5 tests, 74 LOC)0m
+92m║                   └─ 92m🧪  test_repeat.py (5 tests, 71 LOC)0m
+92m║                   └─ 32m🧪  test_resolution.py (2 tests, 26 LOC)0m
+92m║                   └─ 32m🧪  test_round.py (13 tests, 191 LOC)0m
+92m║                   └─ 37m🧪  test_shift.py (14 tests, 133 LOC)0m
+92m║                   └─ 32m🧪  test_snap.py (4 tests, 41 LOC)0m
+92m║                   └─ 92m🧪  test_to_frame.py (2 tests, 20 LOC)0m
+92m║                   └─ 36m🧪  test_to_julian_date.py (5 tests, 38 LOC)0m
+92m║                   └─ 37m🧪  test_to_period.py (23 tests, 175 LOC)0m
+92m║                   └─ 36m🧪  test_to_pydatetime.py (2 tests, 40 LOC)0m
+92m║                   └─ 92m🧪  test_to_series.py (1 tests, 14 LOC)0m
+92m║                   └─ 92m🧪  test_tz_convert.py (15 tests, 218 LOC)0m
+92m║                   └─ 36m🧪  test_tz_localize.py (32 tests, 302 LOC)0m
+92m║                   └─ 36m🧪  test_unique.py (5 tests, 58 LOC)0m
+92m║0m
+92m║               ╠═[36minterval/92m]0m
+92m║                 └─ 37m🧪  test_astype.py (22 tests, 195 LOC)0m
+92m║                 └─ 92m🧪  test_constructors.py (37 tests, 411 LOC)0m
+92m║                 └─ 36m🧪  test_equals.py (1 tests, 29 LOC)0m
+92m║                 └─ 37m🧪  test_formats.py (6 tests, 106 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (54 tests, 523 LOC)0m
+92m║                 └─ 32m🧪  test_interval.py (51 tests, 697 LOC)0m
+92m║                 └─ 37m🧪  test_interval_range.py (21 tests, 269 LOC)0m
+92m║                 └─ 32m🧪  test_interval_tree.py (19 tests, 162 LOC)0m
+92m║                 └─ 32m🧪  test_join.py (3 tests, 27 LOC)0m
+92m║                 └─ 92m🧪  test_pickle.py (2 tests, 9 LOC)0m
+92m║                 └─ 37m🧪  test_setops.py (9 tests, 155 LOC)0m
+92m║0m
+92m║               ╠═[36mmulti/92m]0m
+92m║                 └─ 36m🧪  test_analytics.py (16 tests, 203 LOC)0m
+92m║                 └─ 37m🧪  test_astype.py (3 tests, 20 LOC)0m
+92m║                 └─ 37m🧪  test_compat.py (5 tests, 86 LOC)0m
+92m║                 └─ 32m🧪  test_constructors.py (60 tests, 624 LOC)0m
+92m║                 └─ 32m🧪  test_conversion.py (6 tests, 128 LOC)0m
+92m║                 └─ 36m🧪  test_copy.py (11 tests, 66 LOC)0m
+92m║                 └─ 36m🧪  test_drop.py (8 tests, 138 LOC)0m
+92m║                 └─ 32m🧪  test_duplicates.py (26 tests, 267 LOC)0m
+92m║                 └─ 36m🖥️  test_equivalence.py (14 tests, 188 LOC)0m
+92m║                 └─ 92m🧪  test_formats.py (14 tests, 211 LOC)0m
+92m║                 └─ 32m🧪  test_get_level_values.py (7 tests, 92 LOC)0m
+92m║                 └─ 37m🧪  test_get_set.py (19 tests, 264 LOC)0m
+92m║                 └─ 37m🧪  test_indexing.py (68 tests, 704 LOC)0m
+92m║                 └─ 32m🧪  test_integrity.py (17 tests, 198 LOC)0m
+92m║                 └─ 92m🧪  test_isin.py (8 tests, 74 LOC)0m
+92m║                 └─ 32m🧪  test_join.py (15 tests, 208 LOC)0m
+92m║                 └─ 37m🧪  test_lexsort.py (2 tests, 32 LOC)0m
+92m║                 └─ 32m🧪  test_missing.py (6 tests, 74 LOC)0m
+92m║                 └─ 36m🧪  test_monotonic.py (8 tests, 153 LOC)0m
+92m║                 └─ 37m🧪  test_names.py (17 tests, 138 LOC)0m
+92m║                 └─ 37m🧪  test_partial_indexing.py (5 tests, 86 LOC)0m
+92m║                 └─ 36m🧪  test_pickle.py (1 tests, 5 LOC)0m
+92m║                 └─ 37m🧪  test_reindex.py (12 tests, 124 LOC)0m
+92m║                 └─ 36m🧪  test_reshape.py (11 tests, 165 LOC)0m
+92m║                 └─ 92m🧪  test_setops.py (64 tests, 551 LOC)0m
+92m║                 └─ 37m🧪  test_sorting.py (22 tests, 253 LOC)0m
+92m║                 └─ 32m🧪  test_take.py (3 tests, 58 LOC)0m
+92m║0m
+92m║               ╠═[36mnumeric/92m]0m
+92m║                 └─ 32m🧪  test_astype.py (13 tests, 70 LOC)0m
+92m║                 └─ 37m🧪  test_indexing.py (68 tests, 474 LOC)0m
+92m║                 └─ 37m🧪  test_join.py (11 tests, 274 LOC)0m
+92m║                 └─ 36m🧪  test_numeric.py (37 tests, 396 LOC)0m
+92m║                 └─ 92m🧪  test_setops.py (16 tests, 124 LOC)0m
+92m║0m
+92m║               ╠═[36mobject/92m]0m
+92m║                 └─ 32m🧪  test_astype.py (2 tests, 20 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (11 tests, 185 LOC)0m
+92m║0m
+92m║               ╠═[36mperiod/92m]0m
+92m║                 └─ 92m🧪  test_constructors.py (53 tests, 529 LOC)0m
+92m║                 └─ 37m🧪  test_formats.py (13 tests, 245 LOC)0m
+92m║                 └─ 37m🧪  test_freq_attr.py (1 tests, 19 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (36 tests, 617 LOC)0m
+92m║                 └─ 37m🧪  test_join.py (5 tests, 45 LOC)0m
+92m║                 └─ 32m🧪  test_monotonic.py (2 tests, 32 LOC)0m
+92m║                 └─ 32m🧪  test_partial_slicing.py (12 tests, 150 LOC)0m
+92m║                 └─ 36m🧪  test_period.py (15 tests, 185 LOC)0m
+92m║                 └─ 32m🧪  test_period_range.py (18 tests, 177 LOC)0m
+92m║                 └─ 36m🧪  test_pickle.py (3 tests, 20 LOC)0m
+92m║                 └─ 36m🧪  test_resolution.py (2 tests, 20 LOC)0m
+92m║                 └─ 37m🧪  test_scalar_compat.py (3 tests, 28 LOC)0m
+92m║                 └─ 37m🧪  test_searchsorted.py (4 tests, 61 LOC)0m
+92m║                 └─ 36m🧪  test_setops.py (8 tests, 297 LOC)0m
+92m║                 └─ 37m🧪  test_tools.py (3 tests, 44 LOC)0m
+92m║0m
+92m║                 ╠═[36mmethods/92m]0m
+92m║                   └─ 36m🧪  test_asfreq.py (13 tests, 156 LOC)0m
+92m║                   └─ 37m🧪  test_astype.py (9 tests, 122 LOC)0m
+92m║                   └─ 32m🧪  test_factorize.py (2 tests, 32 LOC)0m
+92m║                   └─ 32m🧪  test_fillna.py (1 tests, 35 LOC)0m
+92m║                   └─ 32m🧪  test_insert.py (2 tests, 14 LOC)0m
+92m║                   └─ 92m🧪  test_is_full.py (1 tests, 15 LOC)0m
+92m║                   └─ 37m🧪  test_repeat.py (3 tests, 22 LOC)0m
+92m║                   └─ 92m🧪  test_shift.py (6 tests, 95 LOC)0m
+92m║                   └─ 36m🧪  test_to_timestamp.py (8 tests, 109 LOC)0m
+92m║0m
+92m║               ╠═[36mranges/92m]0m
+92m║                 └─ 37m🧪  test_constructors.py (13 tests, 129 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (14 tests, 103 LOC)0m
+92m║                 └─ 36m🧪  test_join.py (7 tests, 127 LOC)0m
+92m║                 └─ 92m🧪  test_range.py (49 tests, 460 LOC)0m
+92m║                 └─ 32m🧪  test_setops.py (17 tests, 380 LOC)0m
+92m║0m
+92m║               ╠═[36mtimedeltas/92m]0m
+92m║                 └─ 32m🧪  test_arithmetic.py (2 tests, 38 LOC)0m
+92m║                 └─ 32m🧪  test_constructors.py (20 tests, 208 LOC)0m
+92m║                 └─ 36m🧪  test_delete.py (3 tests, 52 LOC)0m
+92m║                 └─ 36m🧪  test_formats.py (5 tests, 77 LOC)0m
+92m║                 └─ 37m🧪  test_freq_attr.py (6 tests, 46 LOC)0m
+92m║                 └─ 32m🧪  test_indexing.py (20 tests, 266 LOC)0m
+92m║                 └─ 92m🧪  test_join.py (4 tests, 35 LOC)0m
+92m║                 └─ 37m🧪  test_ops.py (1 tests, 11 LOC)0m
+92m║                 └─ 32m🧪  test_pickle.py (1 tests, 8 LOC)0m
+92m║                 └─ 37m🧪  test_scalar_compat.py (7 tests, 113 LOC)0m
+92m║                 └─ 36m🧪  test_searchsorted.py (3 tests, 23 LOC)0m
+92m║                 └─ 37m🧪  test_setops.py (18 tests, 188 LOC)0m
+92m║                 └─ 37m🧪  test_timedelta.py (3 tests, 47 LOC)0m
+92m║                 └─ 37m🧪  test_timedelta_range.py (14 tests, 140 LOC)0m
+92m║0m
+92m║                 ╠═[36mmethods/92m]0m
+92m║                   └─ 92m🧪  test_astype.py (12 tests, 139 LOC)0m
+92m║                   └─ 37m🧪  test_factorize.py (2 tests, 31 LOC)0m
+92m║                   └─ 32m🧪  test_fillna.py (1 tests, 16 LOC)0m
+92m║                   └─ 37m🧪  test_insert.py (9 tests, 107 LOC)0m
+92m║                   └─ 92m🧪  test_repeat.py (1 tests, 30 LOC)0m
+92m║                   └─ 32m🧪  test_shift.py (6 tests, 58 LOC)0m
+92m║0m
+92m║             ╠═[36mindexing/92m]0m
+92m║               └─ 37m🧪  test_at.py (18 tests, 181 LOC)0m
+92m║               └─ 37m🧪  test_categorical.py (23 tests, 403 LOC)0m
+92m║               └─ 36m🧪  test_chaining_and_caching.py (31 tests, 491 LOC)0m
+92m║               └─ 37m🧪  test_check_indexer.py (13 tests, 79 LOC)0m
+92m║               └─ 36m🧪  test_coercion.py (77 tests, 753 LOC)0m
+92m║               └─ 32m🧪  test_datetime.py (8 tests, 137 LOC)0m
+92m║               └─ 32m🧪  test_floats.py (26 tests, 522 LOC)0m
+92m║               └─ 32m🧪  test_iat.py (4 tests, 36 LOC)0m
+92m║               └─ 36m🧪  test_iloc.py (88 tests, 1064 LOC)0m
+92m║               └─ 92m🧪  test_indexers.py (6 tests, 44 LOC)0m
+92m║               └─ 92m🧪  test_indexing.py (76 tests, 850 LOC)0m
+92m║               └─ 36m🧪  test_loc.py (256 tests, 2497 LOC)0m
+92m║               └─ 92m🧪  test_na_indexing.py (6 tests, 58 LOC)0m
+92m║               └─ 92m🧪  test_partial.py (30 tests, 515 LOC)0m
+92m║               └─ 36m🧪  test_scalar.py (25 tests, 224 LOC)0m
+92m║0m
+92m║               ╠═[36minterval/92m]0m
+92m║                 └─ 32m🧪  test_interval.py (11 tests, 164 LOC)0m
+92m║                 └─ 92m🧪  test_interval_new.py (12 tests, 150 LOC)0m
+92m║0m
+92m║               ╠═[36mmultiindex/92m]0m
+92m║                 └─ 32m🧪  test_chaining_and_caching.py (3 tests, 63 LOC)0m
+92m║                 └─ 92m🧪  test_datetime.py (2 tests, 33 LOC)0m
+92m║                 └─ 36m🧪  test_getitem.py (27 tests, 314 LOC)0m
+92m║                 └─ 37m🧪  test_iloc.py (13 tests, 127 LOC)0m
+92m║                 └─ 32m🧪  test_indexing_slow.py (3 tests, 88 LOC)0m
+92m║                 └─ 36m🧪  test_loc.py (65 tests, 751 LOC)0m
+92m║                 └─ 36m🧪  test_multiindex.py (16 tests, 186 LOC)0m
+92m║                 └─ 32m🧪  test_partial.py (13 tests, 218 LOC)0m
+92m║                 └─ 37m🧪  test_setitem.py (27 tests, 445 LOC)0m
+92m║                 └─ 37m🧪  test_slice.py (15 tests, 634 LOC)0m
+92m║                 └─ 36m🧪  test_sorted.py (9 tests, 124 LOC)0m
+92m║0m
+92m║             ╠═[36minterchange/92m]0m
+92m║               └─ 36m🧪  test_impl.py (38 tests, 479 LOC)0m
+92m║               └─ 92m🧪  test_spec_conformance.py (13 tests, 132 LOC)0m
+92m║               └─ 32m🧪  test_utils.py (4 tests, 77 LOC)0m
+92m║0m
+92m║             ╠═[36minternals/92m]0m
+92m║               └─ 92m🔌  test_api.py (6 tests, 63 LOC)0m
+92m║               └─ 92m🧪  test_internals.py (90 tests, 1140 LOC)0m
+92m║               └─ 92m🧪  test_managers.py (4 tests, 81 LOC)0m
+92m║0m
+92m║             ╠═[36mio/92m]0m
+92m║               └─ 36m🧪  test_clipboard.py (26 tests, 338 LOC)0m
+92m║               └─ 36m🧪  test_common.py (48 tests, 523 LOC)0m
+92m║               └─ 92m🧪  test_compression.py (31 tests, 315 LOC)0m
+92m║               └─ 92m🧪  test_feather.py (15 tests, 201 LOC)0m
+92m║               └─ 37m🧪  test_fsspec.py (23 tests, 270 LOC)0m
+92m║               └─ 32m🧪  test_gbq.py (2 tests, 10 LOC)0m
+92m║               └─ 36m🧪  test_gcs.py (6 tests, 181 LOC)0m
+92m║               └─ 37m🧪  test_html.py (92 tests, 1396 LOC)0m
+92m║               └─ 92m🧪  test_http_headers.py (5 tests, 132 LOC)0m
+92m║               └─ 92m🧪  test_orc.py (16 tests, 360 LOC)0m
+92m║               └─ 36m🧪  test_parquet.py (88 tests, 1072 LOC)0m
+92m║               └─ 37m🧪  test_pickle.py (36 tests, 470 LOC)0m
+92m║               └─ 92m🧪  test_s3.py (3 tests, 29 LOC)0m
+92m║               └─ 36m🧪  test_spss.py (9 tests, 116 LOC)0m
+92m║               └─ 32m🧪  test_sql.py (278 tests, 3403 LOC)0m
+92m║               └─ 32m🧪  test_stata.py (154 tests, 1981 LOC)0m
+92m║0m
+92m║               ╠═[36mexcel/92m]0m
+92m║                 └─ 36m🧪  test_odf.py (5 tests, 47 LOC)0m
+92m║                 └─ 32m🧪  test_odswriter.py (6 tests, 79 LOC)0m
+92m║                 └─ 37m🧪  test_openpyxl.py (33 tests, 331 LOC)0m
+92m║                 └─ 32m🧪  test_readers.py (99 tests, 1365 LOC)0m
+92m║                 └─ 92m🧪  test_style.py (13 tests, 236 LOC)0m
+92m║                 └─ 32m🧪  test_writers.py (86 tests, 1143 LOC)0m
+92m║                 └─ 36m🧪  test_xlrd.py (5 tests, 51 LOC)0m
+92m║                 └─ 37m🧪  test_xlsxwriter.py (5 tests, 54 LOC)0m
+92m║0m
+92m║               ╠═[36mformats/92m]0m
+92m║                 └─ 36m🧪  test_console.py (6 tests, 52 LOC)0m
+92m║                 └─ 32m🧪  test_css.py (19 tests, 250 LOC)0m
+92m║                 └─ 32m🧪  test_eng_formatting.py (7 tests, 225 LOC)0m
+92m║                 └─ 36m🧪  test_format.py (104 tests, 1873 LOC)0m
+92m║                 └─ 36m🧪  test_ipython_compat.py (5 tests, 64 LOC)0m
+92m║                 └─ 37m🧪  test_printing.py (9 tests, 93 LOC)0m
+92m║                 └─ 36m🧪  test_to_csv.py (48 tests, 586 LOC)0m
+92m║                 └─ 37m🧪  test_to_excel.py (14 tests, 370 LOC)0m
+92m║                 └─ 32m🧪  test_to_html.py (105 tests, 948 LOC)0m
+92m║                 └─ 36m🧪  test_to_latex.py (74 tests, 1284 LOC)0m
+92m║                 └─ 36m🧪  test_to_markdown.py (10 tests, 79 LOC)0m
+92m║                 └─ 32m🧪  test_to_string.py (72 tests, 959 LOC)0m
+92m║0m
+92m║                 ╠═[36mstyle/92m]0m
+92m║                   └─ 92m🧪  test_bar.py (27 tests, 293 LOC)0m
+92m║                   └─ 36m🧪  test_exceptions.py (3 tests, 31 LOC)0m
+92m║                   └─ 36m🧪  test_format.py (52 tests, 439 LOC)0m
+92m║                   └─ 36m🧪  test_highlight.py (22 tests, 181 LOC)0m
+92m║                   └─ 37m🧪  test_html.py (49 tests, 863 LOC)0m
+92m║                   └─ 92m🧪  test_matplotlib.py (29 tests, 270 LOC)0m
+92m║                   └─ 37m🧪  test_non_unique.py (9 tests, 95 LOC)0m
+92m║                   └─ 37m🧪  test_style.py (124 tests, 1278 LOC)0m
+92m║                   └─ 32m🧪  test_to_latex.py (80 tests, 934 LOC)0m
+92m║                   └─ 92m🧪  test_to_string.py (5 tests, 79 LOC)0m
+92m║                   └─ 37m🧪  test_tooltip.py (4 tests, 60 LOC)0m
+92m║0m
+92m║               ╠═[36mjson/92m]0m
+92m║                 └─ 92m🧪  test_compression.py (12 tests, 90 LOC)0m
+92m║                 └─ 32m🧪  test_deprecated_kwargs.py (1 tests, 16 LOC)0m
+92m║                 └─ 92m🧪  test_json_table_schema.py (77 tests, 776 LOC)0m
+92m║                 └─ 36m🧪  test_json_table_schema_ext_dtype.py (20 tests, 263 LOC)0m
+92m║                 └─ 32m🧪  test_normalize.py (42 tests, 775 LOC)0m
+92m║                 └─ 32m🧪  test_pandas.py (189 tests, 1789 LOC)0m
+92m║                 └─ 32m🧪  test_readlines.py (35 tests, 378 LOC)0m
+92m║                 └─ 36m🧪  test_ujson.py (119 tests, 846 LOC)0m
+92m║0m
+92m║               ╠═[36mparser/92m]0m
+92m║                 └─ 37m🧪  test_c_parser_only.py (35 tests, 440 LOC)0m
+92m║                 └─ 92m🧪  test_comment.py (12 tests, 185 LOC)0m
+92m║                 └─ 37m🧪  test_compression.py (16 tests, 150 LOC)0m
+92m║                 └─ 32m🧪  test_concatenate_chunks.py (2 tests, 27 LOC)0m
+92m║                 └─ 37m🧪  test_converters.py (11 tests, 200 LOC)0m
+92m║                 └─ 37m🧪  test_dialect.py (8 tests, 158 LOC)0m
+92m║                 └─ 36m🧪  test_encoding.py (23 tests, 244 LOC)0m
+92m║                 └─ 37m🧪  test_header.py (45 tests, 598 LOC)0m
+92m║                 └─ 32m🧪  test_index_col.py (22 tests, 301 LOC)0m
+92m║                 └─ 36m🧪  test_mangle_dupes.py (12 tests, 133 LOC)0m
+92m║                 └─ 37m🧪  test_multi_thread.py (2 tests, 121 LOC)0m
+92m║                 └─ 36m🧪  test_na_values.py (41 tests, 628 LOC)0m
+92m║                 └─ 37m🧪  test_network.py (22 tests, 256 LOC)0m
+92m║                 └─ 92m🧪  test_parse_dates.py (96 tests, 2031 LOC)0m
+92m║                 └─ 92m🧪  test_python_parser_only.py (45 tests, 435 LOC)0m
+92m║                 └─ 92m🧪  test_quoting.py (18 tests, 135 LOC)0m
+92m║                 └─ 92m🧪  test_read_fwf.py (54 tests, 862 LOC)0m
+92m║                 └─ 32m🧪  test_skiprows.py (19 tests, 266 LOC)0m
+92m║                 └─ 37m🧪  test_textreader.py (25 tests, 268 LOC)0m
+92m║                 └─ 32m🧪  test_unsupported.py (9 tests, 171 LOC)0m
+92m║                 └─ 37m🧪  test_upcast.py (7 tests, 72 LOC)0m
+92m║0m
+92m║                 ╠═[36mcommon/92m]0m
+92m║                   └─ 92m🧪  test_chunksize.py (19 tests, 290 LOC)0m
+92m║                   └─ 92m🧪  test_common_basic.py (59 tests, 766 LOC)0m
+92m║                   └─ 32m🧪  test_data_list.py (4 tests, 68 LOC)0m
+92m║                   └─ 32m🧪  test_decimal.py (3 tests, 62 LOC)0m
+92m║                   └─ 36m🧪  test_file_buffer_url.py (24 tests, 346 LOC)0m
+92m║                   └─ 32m🧪  test_float.py (6 tests, 58 LOC)0m
+92m║                   └─ 37m🧪  test_index.py (15 tests, 259 LOC)0m
+92m║                   └─ 32m🧪  test_inf.py (5 tests, 66 LOC)0m
+92m║                   └─ 32m🧪  test_ints.py (16 tests, 184 LOC)0m
+92m║                   └─ 37m🧪  test_iterator.py (6 tests, 105 LOC)0m
+92m║                   └─ 36m🧪  test_read_errors.py (18 tests, 238 LOC)0m
+92m║                   └─ 36m🧪  test_verbose.py (2 tests, 66 LOC)0m
+92m║0m
+92m║                 ╠═[36mdtypes/92m]0m
+92m║                   └─ 36m🧪  test_categorical.py (22 tests, 261 LOC)0m
+92m║                   └─ 36m🧪  test_dtypes_basic.py (39 tests, 516 LOC)0m
+92m║                   └─ 32m🧪  test_empty.py (10 tests, 142 LOC)0m
+92m║0m
+92m║                 ╠═[36musecols/92m]0m
+92m║                   └─ 32m🧪  test_parse_dates.py (8 tests, 163 LOC)0m
+92m║                   └─ 37m🧪  test_strings.py (6 tests, 77 LOC)0m
+92m║                   └─ 92m🧪  test_usecols_basic.py (39 tests, 436 LOC)0m
+92m║0m
+92m║               ╠═[36mpytables/92m]0m
+92m║                 └─ 36m🧪  test_append.py (20 tests, 752 LOC)0m
+92m║                 └─ 32m🧪  test_categorical.py (5 tests, 159 LOC)0m
+92m║                 └─ 92m🧪  test_compat.py (4 tests, 56 LOC)0m
+92m║                 └─ 37m🧪  test_complex.py (9 tests, 160 LOC)0m
+92m║                 └─ 37m🧪  test_errors.py (13 tests, 196 LOC)0m
+92m║                 └─ 32m🧪  test_file_handling.py (17 tests, 366 LOC)0m
+92m║                 └─ 37m🧪  test_keys.py (4 tests, 66 LOC)0m
+92m║                 └─ 32m🧪  test_put.py (15 tests, 278 LOC)0m
+92m║                 └─ 92m🧪  test_pytables_missing.py (1 tests, 10 LOC)0m
+92m║                 └─ 92m🧪  test_read.py (21 tests, 281 LOC)0m
+92m║                 └─ 36m🧪  test_retain_attributes.py (2 tests, 71 LOC)0m
+92m║                 └─ 36m🧪  test_round_trip.py (28 tests, 422 LOC)0m
+92m║                 └─ 32m🧪  test_select.py (22 tests, 733 LOC)0m
+92m║                 └─ 37m🧪  test_store.py (49 tests, 842 LOC)0m
+92m║                 └─ 32m🧪  test_subclass.py (2 tests, 39 LOC)0m
+92m║                 └─ 37m🧪  test_time_series.py (4 tests, 57 LOC)0m
+92m║                 └─ 92m🧪  test_timezones.py (16 tests, 268 LOC)0m
+92m║0m
+92m║               ╠═[36msas/92m]0m
+92m║                 └─ 92m🧪  test_byteswap.py (6 tests, 47 LOC)0m
+92m║                 └─ 36m🧪  test_sas.py (3 tests, 24 LOC)0m
+92m║                 └─ 37m🧪  test_sas7bdat.py (30 tests, 310 LOC)0m
+92m║                 └─ 32m🧪  test_xport.py (3 tests, 91 LOC)0m
+92m║0m
+92m║               ╠═[36mxml/92m]0m
+92m║                 └─ 36m🧪  test_to_xml.py (56 tests, 1051 LOC)0m
+92m║                 └─ 32m🧪  test_xml.py (85 tests, 1680 LOC)0m
+92m║                 └─ 92m🧪  test_xml_dtypes.py (18 tests, 397 LOC)0m
+92m║0m
+92m║             ╠═[36mlibs/92m]0m
+92m║               └─ 36m🧪  test_hashtable.py (64 tests, 608 LOC)0m
+92m║               └─ 92m🧪  test_join.py (14 tests, 309 LOC)0m
+92m║               └─ 92m🧪  test_lib.py (36 tests, 196 LOC)0m
+92m║               └─ 36m🧪  test_libalgos.py (8 tests, 107 LOC)0m
+92m║0m
+92m║             ╠═[36mplotting/92m]0m
+92m║               └─ 36m🧪  test_backend.py (7 tests, 65 LOC)0m
+92m║               └─ 32m🧪  test_boxplot_method.py (73 tests, 640 LOC)0m
+92m║               └─ 36m🧪  test_common.py (3 tests, 47 LOC)0m
+92m║               └─ 32m🧪  test_converter.py (30 tests, 310 LOC)0m
+92m║               └─ 36m🧪  test_datetimelike.py (125 tests, 1460 LOC)0m
+92m║               └─ 32m🧪  test_groupby.py (17 tests, 116 LOC)0m
+92m║               └─ 37m🧪  test_hist_method.py (90 tests, 792 LOC)0m
+92m║               └─ 36m🧪  test_misc.py (52 tests, 530 LOC)0m
+92m║               └─ 32m🧪  test_series.py (113 tests, 787 LOC)0m
+92m║               └─ 92m🧪  test_style.py (18 tests, 142 LOC)0m
+92m║0m
+92m║               ╠═[36mframe/92m]0m
+92m║                 └─ 32m🧪  test_frame.py (239 tests, 2120 LOC)0m
+92m║                 └─ 92m🧪  test_frame_color.py (81 tests, 510 LOC)0m
+92m║                 └─ 36m🧪  test_frame_groupby.py (4 tests, 50 LOC)0m
+92m║                 └─ 92m🧪  test_frame_legend.py (14 tests, 225 LOC)0m
+92m║                 └─ 32m🧪  test_frame_subplots.py (54 tests, 610 LOC)0m
+92m║                 └─ 36m🧪  test_hist_box_by.py (26 tests, 290 LOC)0m
+92m║0m
+92m║             ╠═[36mreductions/92m]0m
+92m║               └─ 92m🧪  test_reductions.py (136 tests, 1251 LOC)0m
+92m║               └─ 32m🧪  test_stat_reductions.py (18 tests, 191 LOC)0m
+92m║0m
+92m║             ╠═[36mresample/92m]0m
+92m║               └─ 36m🧪  test_base.py (29 tests, 343 LOC)0m
+92m║               └─ 37m🧪  test_datetime_index.py (133 tests, 1704 LOC)0m
+92m║               └─ 37m🧪  test_period_index.py (97 tests, 899 LOC)0m
+92m║               └─ 32m🔌  test_resample_api.py (62 tests, 848 LOC)0m
+92m║               └─ 37m🧪  test_resampler_grouper.py (37 tests, 558 LOC)0m
+92m║               └─ 92m🧪  test_time_grouper.py (19 tests, 308 LOC)0m
+92m║               └─ 92m🧪  test_timedelta.py (17 tests, 162 LOC)0m
+92m║0m
+92m║             ╠═[36mreshape/92m]0m
+92m║               └─ 32m🧪  test_crosstab.py (35 tests, 736 LOC)0m
+92m║               └─ 92m🧪  test_cut.py (79 tests, 595 LOC)0m
+92m║               └─ 37m🧪  test_from_dummies.py (33 tests, 375 LOC)0m
+92m║               └─ 92m🧪  test_get_dummies.py (40 tests, 618 LOC)0m
+92m║               └─ 36m🧪  test_melt.py (56 tests, 1104 LOC)0m
+92m║               └─ 32m🧪  test_pivot.py (109 tests, 2326 LOC)0m
+92m║               └─ 37m🧪  test_pivot_multilevel.py (6 tests, 232 LOC)0m
+92m║               └─ 37m🧪  test_qcut.py (32 tests, 230 LOC)0m
+92m║               └─ 36m🧪  test_union_categoricals.py (24 tests, 292 LOC)0m
+92m║               └─ 32m🧪  test_util.py (10 tests, 60 LOC)0m
+92m║0m
+92m║               ╠═[36mconcat/92m]0m
+92m║                 └─ 32m🧪  test_append.py (24 tests, 300 LOC)0m
+92m║                 └─ 32m🧪  test_append_common.py (20 tests, 526 LOC)0m
+92m║                 └─ 92m🧪  test_categorical.py (12 tests, 208 LOC)0m
+92m║                 └─ 36m🧪  test_concat.py (60 tests, 700 LOC)0m
+92m║                 └─ 36m🧪  test_dataframe.py (16 tests, 172 LOC)0m
+92m║                 └─ 32m🧪  test_datetimes.py (42 tests, 468 LOC)0m
+92m║                 └─ 36m🧪  test_empty.py (22 tests, 231 LOC)0m
+92m║                 └─ 36m🧪  test_index.py (26 tests, 377 LOC)0m
+92m║                 └─ 36m🧪  test_invalid.py (5 tests, 42 LOC)0m
+92m║                 └─ 36m🧪  test_series.py (11 tests, 139 LOC)0m
+92m║                 └─ 36m🧪  test_sort.py (7 tests, 85 LOC)0m
+92m║0m
+92m║               ╠═[36mmerge/92m]0m
+92m║                 └─ 92m🧪  test_join.py (51 tests, 883 LOC)0m
+92m║                 └─ 32m🧪  test_merge.py (171 tests, 2420 LOC)0m
+92m║                 └─ 92m🧪  test_merge_asof.py (82 tests, 3350 LOC)0m
+92m║                 └─ 92m🧪  test_merge_cross.py (9 tests, 88 LOC)0m
+92m║                 └─ 32m🧪  test_merge_index_as_string.py (6 tests, 133 LOC)0m
+92m║                 └─ 32m🧪  test_merge_ordered.py (16 tests, 205 LOC)0m
+92m║                 └─ 37m🧪  test_multi.py (28 tests, 769 LOC)0m
+92m║0m
+92m║             ╠═[36mscalar/92m]0m
+92m║               └─ 37m🧪  test_na_scalar.py (39 tests, 227 LOC)0m
+92m║               └─ 37m🧪  test_nat.py (55 tests, 550 LOC)0m
+92m║0m
+92m║               ╠═[36minterval/92m]0m
+92m║                 └─ 37m🧪  test_arithmetic.py (17 tests, 147 LOC)0m
+92m║                 └─ 92m🧪  test_constructors.py (5 tests, 42 LOC)0m
+92m║                 └─ 32m🧪  test_contains.py (7 tests, 64 LOC)0m
+92m║                 └─ 37m🧪  test_formats.py (1 tests, 8 LOC)0m
+92m║                 └─ 37m🧪  test_interval.py (9 tests, 71 LOC)0m
+92m║                 └─ 36m🧪  test_overlaps.py (6 tests, 52 LOC)0m
+92m║0m
+92m║               ╠═[36mperiod/92m]0m
+92m║                 └─ 32m🧪  test_arithmetic.py (26 tests, 389 LOC)0m
+92m║                 └─ 32m🧪  test_asfreq.py (19 tests, 683 LOC)0m
+92m║                 └─ 36m🧪  test_period.py (77 tests, 889 LOC)0m
+92m║0m
+92m║               ╠═[36mtimedelta/92m]0m
+92m║                 └─ 92m🧪  test_arithmetic.py (102 tests, 848 LOC)0m
+92m║                 └─ 32m🧪  test_constructors.py (40 tests, 546 LOC)0m
+92m║                 └─ 32m🧪  test_formats.py (8 tests, 92 LOC)0m
+92m║                 └─ 36m🧪  test_timedelta.py (42 tests, 489 LOC)0m
+92m║0m
+92m║                 ╠═[36mmethods/92m]0m
+92m║                   └─ 32m⚛️  test_as_unit.py (4 tests, 58 LOC)0m
+92m║                   └─ 92m🧪  test_round.py (8 tests, 153 LOC)0m
+92m║0m
+92m║               ╠═[36mtimestamp/92m]0m
+92m║                 └─ 92m🧪  test_arithmetic.py (27 tests, 237 LOC)0m
+92m║                 └─ 36m🧪  test_comparisons.py (15 tests, 230 LOC)0m
+92m║                 └─ 92m🧪  test_constructors.py (84 tests, 762 LOC)0m
+92m║                 └─ 37m🧪  test_formats.py (13 tests, 169 LOC)0m
+92m║                 └─ 36m🧪  test_timestamp.py (70 tests, 716 LOC)0m
+92m║                 └─ 32m🧪  test_timezones.py (1 tests, 14 LOC)0m
+92m║0m
+92m║                 ╠═[36mmethods/92m]0m
+92m║                   └─ 37m⚛️  test_as_unit.py (4 tests, 64 LOC)0m
+92m║                   └─ 32m🧪  test_normalize.py (4 tests, 17 LOC)0m
+92m║                   └─ 37m🧪  test_replace.py (20 tests, 136 LOC)0m
+92m║                   └─ 37m🧪  test_round.py (29 tests, 315 LOC)0m
+92m║                   └─ 37m🧪  test_timestamp_method.py (1 tests, 16 LOC)0m
+92m║                   └─ 32m🧪  test_to_julian_date.py (5 tests, 22 LOC)0m
+92m║                   └─ 36m🧪  test_to_pydatetime.py (7 tests, 59 LOC)0m
+92m║                   └─ 37m🧪  test_tz_convert.py (5 tests, 36 LOC)0m
+92m║                   └─ 92m🧪  test_tz_localize.py (25 tests, 293 LOC)0m
+92m║0m
+92m║             ╠═[36mseries/92m]0m
+92m║               └─ 36m🔌  test_api.py (32 tests, 247 LOC)0m
+92m║               └─ 92m🧪  test_arithmetic.py (65 tests, 730 LOC)0m
+92m║               └─ 32m🧪  test_constructors.py (207 tests, 1645 LOC)0m
+92m║               └─ 92m🧪  test_cumulative.py (16 tests, 125 LOC)0m
+92m║               └─ 36m🧪  test_formats.py (41 tests, 468 LOC)0m
+92m║               └─ 37m🧪  test_iteration.py (7 tests, 23 LOC)0m
+92m║               └─ 37m🧪  test_logical_ops.py (25 tests, 398 LOC)0m
+92m║               └─ 37m🧪  test_missing.py (6 tests, 79 LOC)0m
+92m║               └─ 92m🧪  test_npfuncs.py (5 tests, 28 LOC)0m
+92m║               └─ 92m🧪  test_reductions.py (20 tests, 154 LOC)0m
+92m║               └─ 37m🧪  test_subclass.py (9 tests, 59 LOC)0m
+92m║               └─ 32m🧪  test_ufunc.py (28 tests, 325 LOC)0m
+92m║               └─ 32m🧪  test_unary.py (6 tests, 39 LOC)0m
+92m║               └─ 37m🧪  test_validate.py (3 tests, 22 LOC)0m
+92m║0m
+92m║               ╠═[36maccessors/92m]0m
+92m║                 └─ 92m🧪  test_cat_accessor.py (11 tests, 191 LOC)0m
+92m║                 └─ 32m🧪  test_dt_accessor.py (52 tests, 671 LOC)0m
+92m║                 └─ 36m🧪  test_list_accessor.py (10 tests, 109 LOC)0m
+92m║                 └─ 32m🧪  test_sparse_accessor.py (1 tests, 7 LOC)0m
+92m║                 └─ 32m🧪  test_str_accessor.py (2 tests, 18 LOC)0m
+92m║                 └─ 92m🧪  test_struct_accessor.py (8 tests, 177 LOC)0m
+92m║0m
+92m║               ╠═[36mindexing/92m]0m
+92m║                 └─ 37m🧪  test_datetime.py (17 tests, 352 LOC)0m
+92m║                 └─ 36m🧪  test_delitem.py (4 tests, 49 LOC)0m
+92m║                 └─ 36m🧪  test_get.py (8 tests, 187 LOC)0m
+92m║                 └─ 36m🧪  test_getitem.py (70 tests, 521 LOC)0m
+92m║                 └─ 92m🧪  test_indexing.py (52 tests, 375 LOC)0m
+92m║                 └─ 92m🧪  test_mask.py (4 tests, 48 LOC)0m
+92m║                 └─ 37m🧪  test_set_value.py (3 tests, 30 LOC)0m
+92m║                 └─ 32m🧪  test_setitem.py (99 tests, 1374 LOC)0m
+92m║                 └─ 37m🧪  test_take.py (4 tests, 34 LOC)0m
+92m║                 └─ 32m🧪  test_where.py (28 tests, 328 LOC)0m
+92m║                 └─ 37m🧪  test_xs.py (6 tests, 63 LOC)0m
+92m║0m
+92m║               ╠═[36mmethods/92m]0m
+92m║                 └─ 37m🧪  test_add_prefix_suffix.py (3 tests, 28 LOC)0m
+92m║                 └─ 37m🧪  test_align.py (16 tests, 192 LOC)0m
+92m║                 └─ 36m🧪  test_argsort.py (6 tests, 64 LOC)0m
+92m║                 └─ 36m🧪  test_asof.py (7 tests, 142 LOC)0m
+92m║                 └─ 37m🧪  test_astype.py (62 tests, 510 LOC)0m
+92m║                 └─ 37m🧪  test_autocorr.py (1 tests, 18 LOC)0m
+92m║                 └─ 36m🧪  test_between.py (6 tests, 57 LOC)0m
+92m║                 └─ 36m🧪  test_case_when.py (11 tests, 121 LOC)0m
+92m║                 └─ 37m🧪  test_clip.py (11 tests, 103 LOC)0m
+92m║                 └─ 36m🧪  test_combine.py (1 tests, 11 LOC)0m
+92m║                 └─ 36m🧪  test_combine_first.py (8 tests, 115 LOC)0m
+92m║                 └─ 37m🧪  test_compare.py (9 tests, 104 LOC)0m
+92m║                 └─ 32m🧪  test_convert_dtypes.py (12 tests, 260 LOC)0m
+92m║                 └─ 36m🧪  test_copy.py (6 tests, 60 LOC)0m
+92m║                 └─ 37m🧪  test_count.py (3 tests, 26 LOC)0m
+92m║                 └─ 37m🧪  test_cov_corr.py (9 tests, 132 LOC)0m
+92m║                 └─ 36m🧪  test_describe.py (11 tests, 179 LOC)0m
+92m║                 └─ 37m🧪  test_diff.py (8 tests, 62 LOC)0m
+92m║                 └─ 32m🧪  test_drop.py (11 tests, 76 LOC)0m
+92m║                 └─ 92m🧪  test_drop_duplicates.py (17 tests, 201 LOC)0m
+92m║                 └─ 92m🧪  test_dropna.py (8 tests, 96 LOC)0m
+92m║                 └─ 36m🧪  test_dtypes.py (1 tests, 5 LOC)0m
+92m║                 └─ 37m🧪  test_duplicated.py (8 tests, 61 LOC)0m
+92m║                 └─ 37m🧪  test_equals.py (9 tests, 109 LOC)0m
+92m║                 └─ 37m🧪  test_explode.py (19 tests, 134 LOC)0m
+92m║                 └─ 32m🧪  test_fillna.py (56 tests, 943 LOC)0m
+92m║                 └─ 92m🧪  test_get_numeric_data.py (1 tests, 30 LOC)0m
+92m║                 └─ 92m🧪  test_head_tail.py (1 tests, 6 LOC)0m
+92m║                 └─ 92m🧪  test_infer_objects.py (4 tests, 36 LOC)0m
+92m║                 └─ 92m🧪  test_info.py (12 tests, 148 LOC)0m
+92m║                 └─ 37m🧪  test_interpolate.py (64 tests, 686 LOC)0m
+92m║                 └─ 37m🧪  test_is_monotonic.py (2 tests, 21 LOC)0m
+92m║                 └─ 37m🧪  test_is_unique.py (3 tests, 30 LOC)0m
+92m║                 └─ 37m🧪  test_isin.py (25 tests, 170 LOC)0m
+92m║                 └─ 32m🧪  test_isna.py (2 tests, 26 LOC)0m
+92m║                 └─ 36m🧪  test_item.py (1 tests, 47 LOC)0m
+92m║                 └─ 36m🧪  test_map.py (57 tests, 429 LOC)0m
+92m║                 └─ 36m🧪  test_matmul.py (1 tests, 53 LOC)0m
+92m║                 └─ 92m🧪  test_nlargest.py (15 tests, 192 LOC)0m
+92m║                 └─ 32m🧪  test_nunique.py (2 tests, 16 LOC)0m
+92m║                 └─ 36m🧪  test_pct_change.py (9 tests, 98 LOC)0m
+92m║                 └─ 32m🧪  test_pop.py (1 tests, 8 LOC)0m
+92m║                 └─ 36m🧪  test_quantile.py (18 tests, 186 LOC)0m
+92m║                 └─ 37m🧪  test_rank.py (32 tests, 421 LOC)0m
+92m║                 └─ 37m🧪  test_reindex.py (32 tests, 300 LOC)0m
+92m║                 └─ 37m🧪  test_reindex_like.py (2 tests, 28 LOC)0m
+92m║                 └─ 92m🧪  test_rename.py (16 tests, 141 LOC)0m
+92m║                 └─ 37m🧪  test_rename_axis.py (4 tests, 33 LOC)0m
+92m║                 └─ 36m🧪  test_repeat.py (3 tests, 31 LOC)0m
+92m║                 └─ 36m🧪  test_replace.py (67 tests, 608 LOC)0m
+92m║                 └─ 32m🧪  test_reset_index.py (14 tests, 172 LOC)0m
+92m║                 └─ 92m🧪  test_round.py (8 tests, 60 LOC)0m
+92m║                 └─ 92m🧪  test_searchsorted.py (8 tests, 61 LOC)0m
+92m║                 └─ 32m🧪  test_set_name.py (2 tests, 17 LOC)0m
+92m║                 └─ 32m🧪  test_size.py (2 tests, 18 LOC)0m
+92m║                 └─ 37m🧪  test_sort_index.py (26 tests, 244 LOC)0m
+92m║                 └─ 92m🧪  test_sort_values.py (11 tests, 184 LOC)0m
+92m║                 └─ 32m🧪  test_to_csv.py (9 tests, 133 LOC)0m
+92m║                 └─ 37m🧪  test_to_dict.py (4 tests, 29 LOC)0m
+92m║                 └─ 32m🧪  test_to_frame.py (3 tests, 47 LOC)0m
+92m║                 └─ 37m🧪  test_to_numpy.py (5 tests, 34 LOC)0m
+92m║                 └─ 36m🧪  test_tolist.py (2 tests, 31 LOC)0m
+92m║                 └─ 36m🧪  test_truncate.py (4 tests, 46 LOC)0m
+92m║                 └─ 37m🧪  test_tz_localize.py (6 tests, 95 LOC)0m
+92m║                 └─ 32m🧪  test_unique.py (7 tests, 56 LOC)0m
+92m║                 └─ 37m🧪  test_unstack.py (7 tests, 138 LOC)0m
+92m║                 └─ 92m🧪  test_update.py (8 tests, 116 LOC)0m
+92m║                 └─ 37m🧪  test_value_counts.py (12 tests, 209 LOC)0m
+92m║                 └─ 32m🧪  test_values.py (3 tests, 24 LOC)0m
+92m║                 └─ 37m🧪  test_view.py (6 tests, 50 LOC)0m
+92m║0m
+92m║             ╠═[36mstrings/92m]0m
+92m║               └─ 36m🔌  test_api.py (8 tests, 148 LOC)0m
+92m║               └─ 37m🧪  test_case_justify.py (24 tests, 332 LOC)0m
+92m║               └─ 36m🧪  test_cat.py (24 tests, 278 LOC)0m
+92m║               └─ 92m🧪  test_extract.py (31 tests, 531 LOC)0m
+92m║               └─ 32m🧪  test_find_replace.py (64 tests, 705 LOC)0m
+92m║               └─ 32m🧪  test_get_dummies.py (4 tests, 36 LOC)0m
+92m║               └─ 36m🧪  test_split_partition.py (71 tests, 568 LOC)0m
+92m║               └─ 36m🧪  test_string_array.py (6 tests, 86 LOC)0m
+92m║               └─ 36m🧪  test_strings.py (67 tests, 571 LOC)0m
+92m║0m
+92m║             ╠═[36mtools/92m]0m
+92m║               └─ 32m🧪  test_to_datetime.py (345 tests, 3114 LOC)0m
+92m║               └─ 92m🧪  test_to_numeric.py (93 tests, 739 LOC)0m
+92m║               └─ 32m🧪  test_to_time.py (4 tests, 57 LOC)0m
+92m║               └─ 36m🧪  test_to_timedelta.py (43 tests, 260 LOC)0m
+92m║0m
+92m║               ╠═[36mfrequencies/92m]0m
+92m║                 └─ 36m🧪  test_freq_code.py (8 tests, 56 LOC)0m
+92m║                 └─ 32m🧪  test_frequencies.py (2 tests, 24 LOC)0m
+92m║                 └─ 37m🧪  test_inference.py (50 tests, 432 LOC)0m
+92m║0m
+92m║               ╠═[36mholiday/92m]0m
+92m║                 └─ 92m🧪  test_calendar.py (7 tests, 79 LOC)0m
+92m║                 └─ 32m🧪  test_federal.py (3 tests, 37 LOC)0m
+92m║                 └─ 37m🧪  test_holiday.py (13 tests, 280 LOC)0m
+92m║                 └─ 92m🧪  test_observance.py (19 tests, 82 LOC)0m
+92m║0m
+92m║               ╠═[36moffsets/92m]0m
+92m║                 └─ 32m🧪  test_business_day.py (15 tests, 191 LOC)0m
+92m║                 └─ 36m🧪  test_business_hour.py (32 tests, 1342 LOC)0m
+92m║                 └─ 92m🧪  test_business_month.py (14 tests, 187 LOC)0m
+92m║                 └─ 36m🧪  test_business_quarter.py (15 tests, 279 LOC)0m
+92m║                 └─ 36m🧪  test_business_year.py (13 tests, 187 LOC)0m
+92m║                 └─ 92m🧪  test_common.py (11 tests, 222 LOC)0m
+92m║                 └─ 92m🧪  test_custom_business_day.py (7 tests, 79 LOC)0m
+92m║                 └─ 32m🧪  test_custom_business_hour.py (19 tests, 270 LOC)0m
+92m║                 └─ 92m🧪  test_custom_business_month.py (32 tests, 363 LOC)0m
+92m║                 └─ 32m🧪  test_dst.py (7 tests, 216 LOC)0m
+92m║                 └─ 37m🧪  test_easter.py (2 tests, 27 LOC)0m
+92m║                 └─ 37m🧪  test_fiscal.py (23 tests, 535 LOC)0m
+92m║                 └─ 36m🧪  test_index.py (3 tests, 51 LOC)0m
+92m║                 └─ 92m🧪  test_month.py (26 tests, 582 LOC)0m
+92m║                 └─ 37m🧪  test_offsets.py (69 tests, 954 LOC)0m
+92m║                 └─ 92m🧪  test_offsets_properties.py (2 tests, 36 LOC)0m
+92m║                 └─ 37m🧪  test_quarter.py (17 tests, 269 LOC)0m
+92m║                 └─ 32m🧪  test_ticks.py (35 tests, 290 LOC)0m
+92m║                 └─ 32m🧪  test_week.py (24 tests, 281 LOC)0m
+92m║                 └─ 36m🧪  test_year.py (15 tests, 292 LOC)0m
+92m║0m
+92m║             ╠═[36mtslibs/92m]0m
+92m║               └─ 36m🔌  test_api.py (1 tests, 60 LOC)0m
+92m║               └─ 92m🧪  test_array_to_datetime.py (30 tests, 246 LOC)0m
+92m║               └─ 92m🧪  test_ccalendar.py (6 tests, 51 LOC)0m
+92m║               └─ 32m🧪  test_conversion.py (14 tests, 118 LOC)0m
+92m║               └─ 32m🧪  test_fields.py (4 tests, 25 LOC)0m
+92m║               └─ 32m🧪  test_libfrequencies.py (2 tests, 23 LOC)0m
+92m║               └─ 92m🧪  test_liboffsets.py (25 tests, 130 LOC)0m
+92m║               └─ 36m🧪  test_np_datetime.py (8 tests, 173 LOC)0m
+92m║               └─ 92m⚛️  test_npy_units.py (2 tests, 20 LOC)0m
+92m║               └─ 37m🧪  test_parse_iso8601.py (8 tests, 95 LOC)0m
+92m║               └─ 37m🧪  test_parsing.py (40 tests, 341 LOC)0m
+92m║               └─ 37m🧪  test_period.py (11 tests, 95 LOC)0m
+92m║               └─ 36m🧪  test_resolution.py (6 tests, 43 LOC)0m
+92m║               └─ 92m🧪  test_strptime.py (7 tests, 80 LOC)0m
+92m║               └─ 37m🧪  test_timedeltas.py (15 tests, 108 LOC)0m
+92m║               └─ 32m🧪  test_timezones.py (14 tests, 107 LOC)0m
+92m║               └─ 92m🧪  test_to_offset.py (22 tests, 182 LOC)0m
+92m║               └─ 92m🧪  test_tzconversion.py (1 tests, 16 LOC)0m
+92m║0m
+92m║             ╠═[36mutil/92m]0m
+92m║               └─ 37m🧪  test_assert_almost_equal.py (65 tests, 439 LOC)0m
+92m║               └─ 32m🧪  test_assert_attr_equal.py (2 tests, 22 LOC)0m
+92m║               └─ 92m🧪  test_assert_categorical_equal.py (9 tests, 63 LOC)0m
+92m║               └─ 36m🧪  test_assert_extension_array_equal.py (11 tests, 92 LOC)0m
+92m║               └─ 37m🧪  test_assert_frame_equal.py (33 tests, 283 LOC)0m
+92m║               └─ 36m🧪  test_assert_index_equal.py (28 tests, 226 LOC)0m
+92m║               └─ 36m🧪  test_assert_interval_array_equal.py (6 tests, 58 LOC)0m
+92m║               └─ 36m🧪  test_assert_numpy_array_equal.py (19 tests, 148 LOC)0m
+92m║               └─ 32m🧪  test_assert_produces_warning.py (19 tests, 192 LOC)0m
+92m║               └─ 37m🧪  test_assert_series_equal.py (41 tests, 354 LOC)0m
+92m║               └─ 37m🧪  test_deprecate.py (3 tests, 41 LOC)0m
+92m║               └─ 32m🧪  test_deprecate_kwarg.py (12 tests, 56 LOC)0m
+92m║               └─ 32m🧪  test_deprecate_nonkeyword_arguments.py (19 tests, 90 LOC)0m
+92m║               └─ 92m🧪  test_doc.py (4 tests, 65 LOC)0m
+92m║               └─ 92m🧪  test_hashing.py (41 tests, 299 LOC)0m
+92m║               └─ 36m🧪  test_numba.py (1 tests, 8 LOC)0m
+92m║               └─ 92m🧪  test_rewrite_warning.py (3 tests, 34 LOC)0m
+92m║               └─ 36m🧪  test_shares_memory.py (2 tests, 19 LOC)0m
+92m║               └─ 36m🧪  test_show_versions.py (4 tests, 42 LOC)0m
+92m║               └─ 36m🧪  test_util.py (7 tests, 37 LOC)0m
+92m║               └─ 32m🧪  test_validate_args.py (6 tests, 48 LOC)0m
+92m║               └─ 32m🧪  test_validate_args_and_kwargs.py (6 tests, 56 LOC)0m
+92m║               └─ 32m🧪  test_validate_inclusive.py (4 tests, 34 LOC)0m
+92m║               └─ 32m🧪  test_validate_kwargs.py (10 tests, 46 LOC)0m
+92m║0m
+92m║             ╠═[36mwindow/92m]0m
+92m║               └─ 37m🔌  test_api.py (18 tests, 313 LOC)0m
+92m║               └─ 32m🧪  test_apply.py (24 tests, 239 LOC)0m
+92m║               └─ 92m🧪  test_base_indexer.py (30 tests, 433 LOC)0m
+92m║               └─ 32m🧪  test_cython_aggregations.py (2 tests, 91 LOC)0m
+92m║               └─ 32m🧪  test_dtypes.py (5 tests, 151 LOC)0m
+92m║               └─ 92m🧪  test_ewm.py (59 tests, 572 LOC)0m
+92m║               └─ 92m🧪  test_expanding.py (59 tests, 549 LOC)0m
+92m║               └─ 92m🧪  test_groupby.py (76 tests, 1104 LOC)0m
+92m║               └─ 36m🧪  test_numba.py (34 tests, 374 LOC)0m
+92m║               └─ 36m🧪  test_online.py (7 tests, 85 LOC)0m
+92m║               └─ 37m🧪  test_pairwise.py (31 tests, 348 LOC)0m
+92m║               └─ 32m🧪  test_rolling.py (143 tests, 1568 LOC)0m
+92m║               └─ 32m🧪  test_rolling_functions.py (32 tests, 439 LOC)0m
+92m║               └─ 32m🧪  test_rolling_quantile.py (20 tests, 137 LOC)0m
+92m║               └─ 37m🧪  test_rolling_skew_kurt.py (23 tests, 163 LOC)0m
+92m║               └─ 36m🧪  test_timeseries_window.py (41 tests, 550 LOC)0m
+92m║               └─ 36m🧪  test_win_type.py (30 tests, 585 LOC)0m
+92m║0m
+92m║               ╠═[36mmoments/92m]0m
+92m║                 └─ 37m🧪  test_moments_consistency_ewm.py (11 tests, 193 LOC)0m
+92m║                 └─ 36m🧪  test_moments_consistency_expanding.py (13 tests, 98 LOC)0m
+92m║                 └─ 36m🧪  test_moments_consistency_rolling.py (13 tests, 188 LOC)0m
+92m║0m
+92m║           ╠═[36mtests/92m]0m
+92m║             └─ 92m🧪  test_find_distributions.py (4 tests, 46 LOC)0m
+92m║             └─ 92m🔄  test_integration_zope_interface.py (1 tests, 44 LOC)0m
+92m║             └─ 32m🧪  test_markers.py (1 tests, 5 LOC)0m
+92m║             └─ 37m🧪  test_pkg_resources.py (21 tests, 379 LOC)0m
+92m║             └─ 37m🧪  test_resources.py (22 tests, 730 LOC)0m
+92m║             └─ 32m🧪  test_working_set.py (1 tests, 290 LOC)0m
+92m║0m
+92m║               ╠═[36mtests/92m]0m
+92m║                 └─ 36m🧪  test_basic.py (11 tests, 217 LOC)0m
+92m║                 └─ 92m🧪  test_utils.py (3 tests, 30 LOC)0m
+92m║0m
+92m║           ╠═[36mtests/92m]0m
+92m║             └─ 37m🧪  test_aix.py (5 tests, 107 LOC)0m
+92m║             └─ 37m🧪  test_bsd.py (49 tests, 451 LOC)0m
+92m║             └─ 36m🧪  test_connections.py (17 tests, 455 LOC)0m
+92m║             └─ 92m🧪  test_contracts.py (39 tests, 245 LOC)0m
+92m║             └─ 92m🧪  test_linux.py (114 tests, 1815 LOC)0m
+92m║             └─ 32m🧪  test_memleaks.py (74 tests, 346 LOC)0m
+92m║             └─ 37m🧪  test_misc.py (46 tests, 689 LOC)0m
+92m║             └─ 32m🧪  test_osx.py (14 tests, 148 LOC)0m
+92m║             └─ 32m🧪  test_posix.py (25 tests, 345 LOC)0m
+92m║             └─ 32m🧪  test_process.py (81 tests, 1320 LOC)0m
+92m║             └─ 37m🧪  test_process_all.py (2 tests, 429 LOC)0m
+92m║             └─ 32m🧪  test_scripts.py (28 tests, 175 LOC)0m
+92m║             └─ 36m🧪  test_sunos.py (2 tests, 27 LOC)0m
+92m║             └─ 92m🧪  test_system.py (49 tests, 795 LOC)0m
+92m║             └─ 32m🧪  test_testutils.py (45 tests, 462 LOC)0m
+92m║             └─ 37m🧪  test_unicode.py (10 tests, 249 LOC)0m
+92m║             └─ 36m🧪  test_windows.py (63 tests, 707 LOC)0m
+92m║0m
+92m║                 ╠═[36mtests/92m]0m
+92m║                   └─ 32m🧪  test_base.py (3 tests, 61 LOC)0m
+92m║                   └─ 32m🧪  test_cygwin.py (5 tests, 50 LOC)0m
+92m║                   └─ 32m🧪  test_mingw.py (5 tests, 34 LOC)0m
+92m║                   └─ 36m🧪  test_msvc.py (8 tests, 105 LOC)0m
+92m║                   └─ 32m🧪  test_unix.py (6 tests, 261 LOC)0m
+92m║0m
+92m║             ╠═[36mtests/92m]0m
+92m║               └─ 92m🧪  test_archive_util.py (18 tests, 282 LOC)0m
+92m║               └─ 32m🧪  test_bdist.py (2 tests, 35 LOC)0m
+92m║               └─ 32m🧪  test_bdist_dumb.py (1 tests, 58 LOC)0m
+92m║               └─ 32m🧪  test_bdist_rpm.py (2 tests, 98 LOC)0m
+92m║               └─ 36m🖥️  test_build.py (1 tests, 30 LOC)0m
+92m║               └─ 37m🖥️  test_build_clib.py (5 tests, 87 LOC)0m
+92m║               └─ 37m🖥️  test_build_ext.py (16 tests, 455 LOC)0m
+92m║               └─ 32m🖥️  test_build_py.py (7 tests, 156 LOC)0m
+92m║               └─ 36m🖥️  test_build_scripts.py (3 tests, 69 LOC)0m
+92m║               └─ 36m🧪  test_check.py (6 tests, 143 LOC)0m
+92m║               └─ 37m🧪  test_clean.py (1 tests, 33 LOC)0m
+92m║               └─ 36m🧪  test_cmd.py (7 tests, 79 LOC)0m
+92m║               └─ 36m🧪  test_config_cmd.py (4 tests, 65 LOC)0m
+92m║               └─ 92m🧪  test_core.py (7 tests, 92 LOC)0m
+92m║               └─ 32m🧪  test_dir_util.py (8 tests, 106 LOC)0m
+92m║               └─ 37m🧪  test_dist.py (34 tests, 440 LOC)0m
+92m║               └─ 92m🧪  test_extension.py (2 tests, 93 LOC)0m
+92m║               └─ 32m🧪  test_file_util.py (5 tests, 70 LOC)0m
+92m║               └─ 32m🧪  test_filelist.py (13 tests, 250 LOC)0m
+92m║               └─ 92m🧪  test_install.py (7 tests, 181 LOC)0m
+92m║               └─ 32m🧪  test_install_data.py (1 tests, 52 LOC)0m
+92m║               └─ 36m🧪  test_install_headers.py (1 tests, 23 LOC)0m
+92m║               └─ 36m🧪  test_install_lib.py (5 tests, 84 LOC)0m
+92m║               └─ 37m🧪  test_install_scripts.py (2 tests, 42 LOC)0m
+92m║               └─ 32m🧪  test_log.py (1 tests, 9 LOC)0m
+92m║               └─ 92m🧪  test_modified.py (8 tests, 86 LOC)0m
+92m║               └─ 37m🧪  test_sdist.py (14 tests, 334 LOC)0m
+92m║               └─ 92m🧪  test_spawn.py (3 tests, 102 LOC)0m
+92m║               └─ 37m🧪  test_sysconfig.py (18 tests, 251 LOC)0m
+92m║               └─ 92m🧪  test_text_file.py (2 tests, 95 LOC)0m
+92m║               └─ 36m🧪  test_util.py (12 tests, 186 LOC)0m
+92m║               └─ 36m🧪  test_version.py (3 tests, 69 LOC)0m
+92m║               └─ 92m🧪  test_versionpredicate.py (1 tests, 0 LOC)0m
+92m║0m
+92m║           ╠═[36mtests/92m]0m
+92m║             └─ 36m🧪  test_archive_util.py (1 tests, 25 LOC)0m
+92m║             └─ 92m🧪  test_bdist_deprecations.py (1 tests, 22 LOC)0m
+92m║             └─ 36m🧪  test_bdist_egg.py (2 tests, 60 LOC)0m
+92m║             └─ 92m🧪  test_bdist_wheel.py (29 tests, 577 LOC)0m
+92m║             └─ 36m🖥️  test_build.py (1 tests, 25 LOC)0m
+92m║             └─ 92m🖥️  test_build_clib.py (2 tests, 56 LOC)0m
+92m║             └─ 36m🖥️  test_build_ext.py (8 tests, 229 LOC)0m
+92m║             └─ 32m🖥️  test_build_meta.py (36 tests, 812 LOC)0m
+92m║             └─ 92m🖥️  test_build_py.py (14 tests, 391 LOC)0m
+92m║             └─ 32m🧪  test_config_discovery.py (28 tests, 535 LOC)0m
+92m║             └─ 37m🧪  test_core_metadata.py (15 tests, 509 LOC)0m
+92m║             └─ 36m🧪  test_depends.py (1 tests, 12 LOC)0m
+92m║             └─ 92m🧪  test_develop.py (7 tests, 148 LOC)0m
+92m║             └─ 37m🧪  test_dist.py (12 tests, 229 LOC)0m
+92m║             └─ 37m🧪  test_dist_info.py (10 tests, 171 LOC)0m
+92m║             └─ 36m🧪  test_distutils_adoption.py (11 tests, 151 LOC)0m
+92m║             └─ 92m🧪  test_easy_install.py (44 tests, 1240 LOC)0m
+92m║             └─ 32m🧪  test_editable_install.py (34 tests, 1051 LOC)0m
+92m║             └─ 36m🧪  test_egg_info.py (32 tests, 1134 LOC)0m
+92m║             └─ 32m🧪  test_extern.py (2 tests, 9 LOC)0m
+92m║             └─ 37m🧪  test_find_packages.py (14 tests, 185 LOC)0m
+92m║             └─ 32m🧪  test_find_py_modules.py (5 tests, 58 LOC)0m
+92m║             └─ 36m🧪  test_glob.py (2 tests, 42 LOC)0m
+92m║             └─ 36m🧪  test_install_scripts.py (4 tests, 78 LOC)0m
+92m║             └─ 92m🧪  test_logging.py (3 tests, 54 LOC)0m
+92m║             └─ 37m🧪  test_manifest.py (24 tests, 496 LOC)0m
+92m║             └─ 37m🧪  test_namespaces.py (4 tests, 124 LOC)0m
+92m║             └─ 92m🧪  test_packageindex.py (20 tests, 222 LOC)0m
+92m║             └─ 32m🧪  test_sandbox.py (10 tests, 100 LOC)0m
+92m║             └─ 37m🧪  test_sdist.py (32 tests, 750 LOC)0m
+92m║             └─ 37m🧪  test_setopt.py (2 tests, 34 LOC)0m
+92m║             └─ 32m🧪  test_setuptools.py (7 tests, 207 LOC)0m
+92m║             └─ 36m🧪  test_shutil_wrapper.py (1 tests, 17 LOC)0m
+92m║             └─ 92m🧪  test_unicode_utils.py (1 tests, 8 LOC)0m
+92m║             └─ 92m🧪  test_virtualenv.py (4 tests, 91 LOC)0m
+92m║             └─ 32m🧪  test_warnings.py (3 tests, 81 LOC)0m
+92m║             └─ 36m🧪  test_wheel.py (8 tests, 641 LOC)0m
+92m║             └─ 32m🧪  test_windows_wrappers.py (4 tests, 223 LOC)0m
+92m║0m
+92m║             ╠═[36mconfig/92m]0m
+92m║               └─ 32m🧪  test_apply_pyprojecttoml.py (37 tests, 638 LOC)0m
+92m║               └─ 37m🧪  test_expand.py (16 tests, 203 LOC)0m
+92m║               └─ 32m🧪  test_pyprojecttoml.py (20 tests, 310 LOC)0m
+92m║               └─ 32m🧪  test_pyprojecttoml_dynamic_deps.py (4 tests, 90 LOC)0m
+92m║               └─ 32m🧪  test_setupcfg.py (51 tests, 827 LOC)0m
+92m║0m
+92m║             ╠═[36mintegration/92m]0m
+92m║               └─ 37m🔄  test_pip_install_sdist.py (2 tests, 132 LOC)0m
+92m║0m
+92m║           ╚═[36mtest/92m]0m
+92m║             └─ 32m🧪  test_buf.py (1 tests, 88 LOC)0m
+92m║             └─ 36m🧪  test_mman.py (3 tests, 155 LOC)0m
+92m║             └─ 92m🧪  test_tutorial.py (1 tests, 31 LOC)0m
+92m              └─ 92m🧪  test_util.py (4 tests, 75 LOC)0m
+
+1m92m📊 TEST TYPES STATISTICS 📊0m
+36m⚛️  Unit: 60m
+36m🔄  Integration: 50m
+36m⚡  Performance: 20m
+36m🔌  Api: 160m
+36m🖥️  Ui: 120m
+36m✨  Quantum: 40m
+36m💬  Discord: 70m
+36m📝  Documentation: 20m
+36m🌍  I18n: 10m
+36m🧪  Default: 13290m
+
+1m92m🔬 COMPREHENSIVE TEST METRICS 🔬0m
+35m📚 Total Test Files: 13840m
+35m🧪 Total Test Cases: 369330m
+35m📝 Total Lines of Test Code: 4534160m
+35m📦 Total Test Suites: 1360m
+35m⚡ Avg Tests Per File: 26.690m
+35m📊 Avg LOC Per Test: 12.280m
+
+
+1m92m┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓0m
+1m92m┃ 36mShare this on LinkedIn to flex your test coverage! 92m┃0m
+1m92m┃ 33m#QualityAssurance #TestAutomation #CyberPunk #5D 92m┃0m
+1m92m┃ 35mGenerated by Matrix Test Tree - OMEGA BTC AI    92m┃0m
+1m92m┃ 34mhttps://github.com/your-profile/omega-btc-ai      92m┃0m
+1m92m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛0m
+36m🌸 WE BLOOM NOW AS ONE 🌸0m

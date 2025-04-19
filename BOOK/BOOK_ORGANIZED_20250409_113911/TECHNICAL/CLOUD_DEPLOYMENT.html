@@ -1,0 +1,956 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Technical</span></p>
+    </div>
+    
+    <h1>
+ 🔱 OMEGA BTC AI - Digital Ocean Cloud Deployment 🔱
+</h1>
+<p>
+ This document provides comprehensive instructions for deploying the OMEGA BTC AI system on Digital Ocean’s App Platform. The deployment focuses on the BTC Live Feed v2 component, which serves as the data collection and distribution engine for the system.
+</p>
+<h2>
+ Table of Contents
+</h2>
+<ul>
+ <li>
+  <a href="#prerequisites">
+   Prerequisites
+  </a>
+ </li>
+ <li>
+  <a href="#digital-ocean-setup">
+   Digital Ocean Setup
+  </a>
+ </li>
+ <li>
+  <a href="#deployment-process">
+   Deployment Process
+  </a>
+ </li>
+ <li>
+  <a href="#environment-configuration">
+   Environment Configuration
+  </a>
+ </li>
+ <li>
+  <a href="#monitoring--management">
+   Monitoring &amp; Management
+  </a>
+ </li>
+ <li>
+  <a href="#troubleshooting">
+   Troubleshooting
+  </a>
+ </li>
+ <li>
+  <a href="#maintenance">
+   Maintenance
+  </a>
+ </li>
+ <li>
+  <a href="#btc-live-feed-v3-deployment">
+   BTC Live Feed v3 Deployment
+  </a>
+ </li>
+</ul>
+<h2>
+ Prerequisites
+</h2>
+<p>
+ Before deploying to Digital Ocean, ensure you have:
+</p>
+<ul>
+ <li>
+  A Digital Ocean account with billing set up
+ </li>
+ <li>
+  Digital Ocean CLI (
+  <code>
+   doctl
+  </code>
+  ) installed and authenticated
+ </li>
+ <li>
+  Git repository with the OMEGA BTC AI codebase
+ </li>
+ <li>
+  Redis database credentials (Upstash Redis recommended)
+ </li>
+ <li>
+  Docker installed locally for testing (optional)
+ </li>
+</ul>
+<h2>
+ Digital Ocean Setup
+</h2>
+<h3>
+ 1. Install Digital Ocean CLI
+</h3>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># macOS</span>
+brew<span class="w"> </span>install<span class="w"> </span>doctl
+
+<span class="c1"># Linux</span>
+snap<span class="w"> </span>install<span class="w"> </span>doctl
+
+<span class="c1"># Windows</span>
+scoop<span class="w"> </span>install<span class="w"> </span>doctl
+</code></pre>
+</div>
+<h3>
+ 2. Authenticate Digital Ocean CLI
+</h3>
+<div class="codehilite">
+ <pre><span></span><code>doctl<span class="w"> </span>auth<span class="w"> </span>init
+</code></pre>
+</div>
+<p>
+ Follow the prompts to authenticate using your Digital Ocean API token.
+</p>
+<h3>
+ 3. Create App Platform Resources
+</h3>
+<p>
+ The easiest way to create your initial application is through the Digital Ocean web console:
+</p>
+<ol>
+ <li>
+  Login to
+  <a href="https://cloud.digitalocean.com/">
+   Digital Ocean Console
+  </a>
+ </li>
+ <li>
+  Navigate to “Apps” → “Create App”
+ </li>
+ <li>
+  Select “GitHub” as the source
+ </li>
+ <li>
+  Choose the OMEGA BTC AI repository
+ </li>
+ <li>
+  Select the branch (typically
+  <code>
+   feature/btc-live-feed-v2-cloud
+  </code>
+  or
+  <code>
+   main
+  </code>
+  )
+ </li>
+ <li>
+  Configure the build settings:
+ </li>
+ <li>
+  Source Directory:
+  <code>
+   /
+  </code>
+ </li>
+ <li>
+  Build Command:
+  <code>
+   pip install -r requirements.txt
+  </code>
+ </li>
+ <li>
+  Run Command:
+  <code>
+   python -m omega_ai.data_feed.btc_live_feed_v2
+  </code>
+ </li>
+</ol>
+<h2>
+ Deployment Process
+</h2>
+<h3>
+ Manual Deployment
+</h3>
+<p>
+ You can trigger a manual deployment through the Digital Ocean console or CLI:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Get App ID</span>
+doctl<span class="w"> </span>apps<span class="w"> </span>list
+
+<span class="c1"># Deploy app</span>
+doctl<span class="w"> </span>apps<span class="w"> </span>create<span class="w"> </span>--spec<span class="w"> </span>app.yaml
+</code></pre>
+</div>
+<h3>
+ Automatic Deployment
+</h3>
+<p>
+ The app is configured for automatic deployments when changes are pushed to the GitHub repository. To update the deployed application:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Make your changes</span>
+git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Update BTC Live Feed v2"</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/btc-live-feed-v2-cloud
+</code></pre>
+</div>
+<p>
+ Digital Ocean will automatically detect the push and start a new deployment.
+</p>
+<h2>
+ Environment Configuration
+</h2>
+<p>
+ The app requires the following environment variables, which can be configured in the Digital Ocean console or in the
+ <code>
+  app.yaml
+ </code>
+ file:
+</p>
+<h3>
+ Required Environment Variables
+</h3>
+<table>
+ <thead>
+  <tr>
+   <th>
+    Variable
+   </th>
+   <th>
+    Description
+   </th>
+   <th>
+    Example
+   </th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr>
+   <td>
+    <code>
+     REDIS_HOST
+    </code>
+   </td>
+   <td>
+    Redis server hostname
+   </td>
+   <td>
+    <code>
+     redis-12345.upstash.io
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     REDIS_PORT
+    </code>
+   </td>
+   <td>
+    Redis server port
+   </td>
+   <td>
+    <code>
+     12345
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     REDIS_USERNAME
+    </code>
+   </td>
+   <td>
+    Redis username (if applicable)
+   </td>
+   <td>
+    <code>
+     default
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     REDIS_PASSWORD
+    </code>
+   </td>
+   <td>
+    Redis password
+   </td>
+   <td>
+    <code>
+     xxxxxxxxxxxx
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     REDIS_SSL
+    </code>
+   </td>
+   <td>
+    Whether to use SSL for Redis
+   </td>
+   <td>
+    <code>
+     true
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     LOG_LEVEL
+    </code>
+   </td>
+   <td>
+    Logging level
+   </td>
+   <td>
+    <code>
+     INFO
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     EXCHANGE_API_KEY
+    </code>
+   </td>
+   <td>
+    Exchange API key (if applicable)
+   </td>
+   <td>
+    <code>
+     xxxxxxxxxxxx
+    </code>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <code>
+     EXCHANGE_API_SECRET
+    </code>
+   </td>
+   <td>
+    Exchange API secret (if applicable)
+   </td>
+   <td>
+    <code>
+     xxxxxxxxxxxx
+    </code>
+   </td>
+  </tr>
+ </tbody>
+</table>
+<h3>
+ App Specification (app.yaml)
+</h3>
+<p>
+ The
+ <code>
+  app.yaml
+ </code>
+ file defines the application configuration. Example:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">omega-btc-live-feed-v2</span>
+<span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nyc</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">btc-live-feed</span>
+<span class="w">  </span><span class="nt">github</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">username/omega-btc-ai</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">feature/btc-live-feed-v2-cloud</span>
+<span class="w">    </span><span class="nt">deploy_on_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">source_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">  </span><span class="nt">envs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${redis.host}</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_PORT</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${redis.port}</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_USERNAME</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_PASSWORD</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${redis.password}</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_SSL</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOG_LEVEL</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"INFO"</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+<span class="w">  </span><span class="nt">health_check</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">http_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/health</span>
+<span class="w">  </span><span class="nt">instance_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">instance_size_slug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic-xxs</span>
+<span class="w">  </span><span class="nt">routes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+</code></pre>
+</div>
+<h2>
+ Monitoring &amp; Management
+</h2>
+<h3>
+ Using the OMEGA D0T7 DIVINE DIGIT4L 0CE4N Monitor
+</h3>
+<p>
+ We’ve created a custom monitoring tool to help manage and monitor the Digital Ocean deployment:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Make the script executable</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>scripts/run_omega_do_monitor.sh
+
+<span class="c1"># Check deployment status</span>
+./scripts/run_omega_do_monitor.sh<span class="w"> </span>status
+
+<span class="c1"># Stream logs</span>
+./scripts/run_omega_do_monitor.sh<span class="w"> </span>logs
+
+<span class="c1"># Test Redis connection</span>
+./scripts/run_omega_do_monitor.sh<span class="w"> </span>redis
+
+<span class="c1"># Watch BTC price updates</span>
+./scripts/run_omega_do_monitor.sh<span class="w"> </span>watch_price
+
+<span class="c1"># Show resource usage statistics</span>
+./scripts/run_omega_do_monitor.sh<span class="w"> </span>stats
+</code></pre>
+</div>
+<p>
+ See
+ <code>
+  scripts/DIVINE_DO_MONITOR.md
+ </code>
+ for detailed documentation.
+</p>
+<h3>
+ Digital Ocean Console Monitoring
+</h3>
+<p>
+ You can also monitor the app through the Digital Ocean web console:
+</p>
+<ol>
+ <li>
+  Login to
+  <a href="https://cloud.digitalocean.com/">
+   Digital Ocean Console
+  </a>
+ </li>
+ <li>
+  Navigate to “Apps” and select your OMEGA BTC AI app
+ </li>
+ <li>
+  View the “Insights” tab for metrics
+ </li>
+ <li>
+  Check “Logs” for application logs
+ </li>
+ <li>
+  Use “Console” for direct access to the application container
+ </li>
+</ol>
+<h3>
+ Health Check Endpoint
+</h3>
+<p>
+ The application exposes a
+ <code>
+  /health
+ </code>
+ endpoint that returns the current status:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>https://your-app-url.ondigitalocean.app/health
+</code></pre>
+</div>
+<p>
+ Example response:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"healthy"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"redis_connected"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"websocket_connected"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"last_price_update"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-03-27T22:15:45Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"uptime"</span><span class="p">:</span><span class="w"> </span><span class="mf">1815.5</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"last_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">65432.10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"seconds_since_update"</span><span class="p">:</span><span class="w"> </span><span class="mf">5.2</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<h2>
+ Troubleshooting
+</h2>
+<h3>
+ Redis Connection Issues
+</h3>
+<p>
+ If you encounter Redis connection problems:
+</p>
+<ol>
+ <li>
+  Verify environment variables are set correctly
+ </li>
+ <li>
+  Check that Redis credentials are valid
+ </li>
+ <li>
+  Ensure Redis SSL settings match your Redis provider
+ </li>
+ <li>
+  Test Redis connection using the monitor tool:
+  <code>
+   ./scripts/run_omega_do_monitor.sh redis
+  </code>
+ </li>
+</ol>
+<h3>
+ Deployment Failures
+</h3>
+<p>
+ If deployments fail:
+</p>
+<ol>
+ <li>
+  Check the deployment logs in Digital Ocean console
+ </li>
+ <li>
+  Verify the
+  <code>
+   app.yaml
+  </code>
+  file is valid
+ </li>
+ <li>
+  Ensure all required environment variables are set
+ </li>
+ <li>
+  Check for errors in the application code
+ </li>
+ <li>
+  Try a manual deployment with
+  <code>
+   doctl apps update &lt;app-id&gt; --spec app.yaml
+  </code>
+ </li>
+</ol>
+<h3>
+ Application Crashes
+</h3>
+<p>
+ If the application crashes or becomes unresponsive:
+</p>
+<ol>
+ <li>
+  Stream logs to identify the issue:
+  <code>
+   ./scripts/run_omega_do_monitor.sh logs
+  </code>
+ </li>
+ <li>
+  Check the health endpoint for status
+ </li>
+ <li>
+  Restart the application from the Digital Ocean console
+ </li>
+ <li>
+  Check Redis connection and data consistency
+ </li>
+</ol>
+<h2>
+ Maintenance
+</h2>
+<h3>
+ Updating the Application
+</h3>
+<p>
+ To update the deployed application:
+</p>
+<ol>
+ <li>
+  Make and test your changes locally
+ </li>
+ <li>
+  Commit and push to the connected branch
+ </li>
+ <li>
+  Digital Ocean will automatically deploy the changes
+ </li>
+ <li>
+  Monitor the deployment status:
+  <code>
+   ./scripts/run_omega_do_monitor.sh status
+  </code>
+ </li>
+</ol>
+<h3>
+ Scaling
+</h3>
+<p>
+ To adjust application scaling:
+</p>
+<ol>
+ <li>
+  Modify the
+  <code>
+   instance_count
+  </code>
+  in
+  <code>
+   app.yaml
+  </code>
+ </li>
+ <li>
+  Update the app:
+  <code>
+   doctl apps update &lt;app-id&gt; --spec app.yaml
+  </code>
+ </li>
+</ol>
+<p>
+ Alternatively, scale through the Digital Ocean console:
+</p>
+<ol>
+ <li>
+  Navigate to your app
+ </li>
+ <li>
+  Select “Settings” → “Edit” → “Resources”
+ </li>
+ <li>
+  Adjust the number of instances
+ </li>
+ <li>
+  Click “Save”
+ </li>
+</ol>
+<h3>
+ Backups
+</h3>
+<p>
+ While Digital Ocean App Platform doesn’t provide built-in backups, you can:
+</p>
+<ol>
+ <li>
+  Keep your code in version control
+ </li>
+ <li>
+  Regularly export important data from Redis
+ </li>
+ <li>
+  Consider implementing a scheduled backup job
+ </li>
+</ol>
+<h3>
+ Cost Optimization
+</h3>
+<p>
+ Optimize costs by:
+</p>
+<ol>
+ <li>
+  Using the appropriate instance size (
+  <code>
+   basic-xxs
+  </code>
+  is usually sufficient)
+ </li>
+ <li>
+  Scaling to zero when not in use (for development environments)
+ </li>
+ <li>
+  Monitoring resource usage with
+  <code>
+   ./scripts/run_omega_do_monitor.sh stats
+  </code>
+ </li>
+</ol>
+<h2>
+ BTC Live Feed v3 Deployment
+</h2>
+<p>
+ The BTC Live Feed v3 component provides enhanced reliability through automatic Redis failover capabilities, ensuring 99.99% uptime even during temporary outages of the primary Redis service.
+</p>
+<h3>
+ Key Features of v3 Deployment
+</h3>
+<ul>
+ <li>
+  <strong>
+   Automatic Redis Failover
+  </strong>
+  : Seamlessly switches between remote (Digital Ocean) and local Redis instances
+ </li>
+ <li>
+  <strong>
+   Health Check API
+  </strong>
+  : Built-in monitoring endpoints for comprehensive system status
+ </li>
+ <li>
+  <strong>
+   CLI Monitoring Dashboard
+  </strong>
+  : Visual terminal-based monitoring tool
+ </li>
+ <li>
+  <strong>
+   Detailed Documentation
+  </strong>
+  : Comprehensive guides for deployment, configuration, and monitoring
+ </li>
+</ul>
+<h3>
+ Deployment Files
+</h3>
+<p>
+ All configuration files for deploying BTC Live Feed v3 are located in the
+ <code>
+  /deployment/digital_ocean/btc_live_feed_v3/
+ </code>
+ directory:
+</p>
+<ul>
+ <li>
+  <code>
+   app.yaml
+  </code>
+  : Digital Ocean App Platform configuration
+ </li>
+ <li>
+  <code>
+   deploy.sh
+  </code>
+  : Deployment script with error handling
+ </li>
+ <li>
+  <code>
+   README.md
+  </code>
+  : Deployment instructions
+ </li>
+ <li>
+  <code>
+   redis_configuration.md
+  </code>
+  : Redis setup guide
+ </li>
+ <li>
+  <code>
+   monitoring_setup.md
+  </code>
+  : Monitoring configuration guide
+ </li>
+</ul>
+<h3>
+ Deployment Process
+</h3>
+<ol>
+ <li>
+  Navigate to the deployment directory:
+ </li>
+</ol>
+<p>
+ <code>
+  bash
+   cd deployment/digital_ocean/btc_live_feed_v3
+ </code>
+</p>
+<ol>
+ <li>
+  Execute the deployment script:
+ </li>
+</ol>
+<p>
+ <code>
+  bash
+   ./deploy.sh
+ </code>
+</p>
+<p>
+ For detailed deployment instructions, refer to the
+ <a href="../deployment/digital_ocean/btc_live_feed_v3/README.md">
+  BTC Live Feed v3 Deployment Guide
+ </a>
+ .
+</p>
+<hr/>
+<h2>
+ Contact and Support
+</h2>
+<p>
+ For issues with the OMEGA BTC AI deployment, contact:
+</p>
+<ul>
+ <li>
+  OMEGA BTC AI Development Team
+ </li>
+ <li>
+  <h1>
+   digital-ocean channel in Discord
+  </h1>
+ </li>
+ <li>
+  Slack: #omega-btc-ai-support
+ </li>
+</ul>
+<hr/>
+<p>
+ <em>
+  JAH JAH BLESS THE ETERNAL FLOW OF THE BLOCKCHAIN
+ </em>
+</p>
+<p>
+ 🔱 OMEGA BTC AI DIVINE COLLECTIVE 🔱
+</p>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

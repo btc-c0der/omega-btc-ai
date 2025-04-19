@@ -1,0 +1,12 @@
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: btc-live-feed-split
+  namespace: production
+spec:
+  service: btc-live-feed
+  backends:
+  - service: btc-live-feed-blue
+    weight: 90
+  - service: btc-live-feed-green
+    weight: 10 

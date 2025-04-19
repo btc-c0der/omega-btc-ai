@@ -1,2 +1,0 @@
-RUSER       PID  PPID COMMAND
-fsiqueira 74988 74951 /opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -m omega_ai.trading.strategies.trap_aware_dual_traders --symbol BTCUSDT --long-capital 150.0 --short-capital 200.0 --long-leverage 5 --short-leverage 5 --trap-probability-threshold 0.6 --trap-alert-threshold 0.7 --min-free-balance 750.0

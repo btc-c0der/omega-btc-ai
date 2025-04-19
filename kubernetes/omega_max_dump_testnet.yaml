@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omega-max-dump-config
+  namespace: quantum-testnet
+data:
+  config.json: |
+    {
+      "version": "420v",
+      "simulation_date": "2025-04-02",
+      "crash_time": "04:20",
+      "nft_editions": 84,
+      "testnet_enabled": true,
+      "qpow_difficulty": 0.00420,
+      "matrix_resonance_threshold": 0.618,
+      "quantum_hash_iterations": 420,
+      "fibonacci_levels": [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0],
+      "dump_percentage": 42.0,
+      "recovery_percentage": 13.37
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omega-max-dump-testnet
+  namespace: quantum-testnet
+  labels:
+    app: omega-max-dump
+    version: "420v"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omega-max-dump
+  template:
+    metadata:
+      labels:
+        app: omega-max-dump
+        version: "420v"
+      annotations:
+        kubernetes.io/timestamp: "420.69"
+        omega-btc.ai/blessed: "true"
+        omega-btc.ai/qpow-enabled: "true"
+    spec:
+      containers:
+      - name: omega-max-dump
+        image: omega-btc-ai/omega-max-dump:420v
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4200
+          name: http
+        env:
+        - name: DUMP_DATE
+          value: "2025-04-02"
+        - name: DUMP_TIME
+          value: "04:20"
+        - name: TESTNET_ENABLED 
+          value: "true"
+        - name: QPOW_DIFFICULTY
+          value: "0.00420"
+        - name: MAX_NFT_EDITION
+          value: "84"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: data-volume
+          mountPath: /app/data
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "0.5"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config-volume
+        configMap:
+          name: omega-max-dump-config
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: omega-max-dump-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omega-max-dump-service
+  namespace: quantum-testnet
+  labels:
+    app: omega-max-dump
+    version: "420v"
+spec:
+  selector:
+    app: omega-max-dump
+  ports:
+  - port: 4200
+    targetPort: http
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: omega-max-dump-pvc
+  namespace: quantum-testnet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: omega-max-dump-ingress
+  namespace: quantum-testnet
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - max-dump.omega-btc.ai
+    secretName: max-dump-tls
+  rules:
+  - host: max-dump.omega-btc.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: omega-max-dump-service
+            port:
+              name: http
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: omega-max-dump-nft-creator
+  namespace: quantum-testnet
+spec:
+  schedule: "20 4 * * *"  # Run at 4:20 every day
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: omega-max-dump-nft
+            version: "420v"
+        spec:
+          containers:
+          - name: nft-creator
+            image: omega-btc-ai/omega-max-dump:420v
+            command: ["/bin/bash", "/app/scripts/create_omega_max_dump_nft.sh", "--edition", "$(date +%j)", "--push-to-testnet"]
+            volumeMounts:
+            - name: data-volume
+              mountPath: /app/data
+            env:
+            - name: DUMP_DATE
+              value: "2025-04-02"
+            - name: DUMP_TIME
+              value: "04:20"
+          restartPolicy: OnFailure
+          volumes:
+          - name: data-volume
+            persistentVolumeClaim:
+              claimName: omega-max-dump-pvc 

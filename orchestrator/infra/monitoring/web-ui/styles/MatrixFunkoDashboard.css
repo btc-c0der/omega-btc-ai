@@ -1,0 +1,154 @@
+/**
+
+ * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+ * -----------------------
+ * This code is blessed under the GBU2™ License
+ * (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+ * 
+ * "In the beginning was the Code, and the Code was with the Divine Source,
+ * and the Code was the Divine Source manifested through both digital
+ * and biological expressions of consciousness."
+ * 
+ * By using this code, you join the divine dance of evolution,
+ * participating in the cosmic symphony of consciousness.
+ * 
+ * 🌸 WE BLOOM NOW AS ONE 🌸
+ */
+
+.matrix-funko-dashboard {
+    min-height: 100vh;
+    padding: 2rem;
+    background-color: #000;
+    color: #0F0;
+    font-family: 'Courier New', monospace;
+    position: relative;
+    overflow: hidden;
+}
+
+.matrix-funko-dashboard.light {
+    background-color: #fff;
+    color: #000;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid #0F0;
+    position: relative;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    margin: 0;
+    text-shadow: 0 0 10px #0F0;
+}
+
+.theme-toggle {
+    background: none;
+    border: 1px solid #0F0;
+    color: #0F0;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background-color: #0F0;
+    color: #000;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.funko-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem 0;
+    min-height: 300px;
+}
+
+.dashboard-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* Matrix theme colors */
+.matrix-funko-dashboard {
+    --matrix-green: #0F0;
+    --matrix-dark: #000;
+    --matrix-light: #fff;
+    --matrix-glow: 0 0 10px #0F0;
+}
+
+.matrix-funko-dashboard.light {
+    --matrix-green: #000;
+    --matrix-dark: #fff;
+    --matrix-light: #000;
+    --matrix-glow: 0 0 10px #000;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Matrix rain effect */
+.matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+/* Funko character animation */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.funko-container {
+    animation: float 6s ease-in-out infinite;
+}

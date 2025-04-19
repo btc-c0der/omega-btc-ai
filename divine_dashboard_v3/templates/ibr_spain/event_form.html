@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Edit Event" if action == 'edit' else "Create New Event" }} | IBR España{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/omega-grid-virgil.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="virgil-container">
+    <div class="industrial-label">
+        <span class="label-text">{{ "EDIT EVENT" if action == 'edit' else "CREATE EVENT" }}</span>
+        <span class="quotation-marks">"</span>
+    </div>
+
+    <div class="event-form-container virgil-box">
+        <form method="POST" class="virgil-form">
+            <div class="form-group">
+                <label class="virgil-label" for="title">"TITLE"</label>
+                <input type="text" name="title" id="title" class="virgil-input"
+                    value="{{ event.title if event else '' }}" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="virgil-label" for="date">"DATE"</label>
+                    <input type="date" name="date" id="date" class="virgil-input"
+                        value="{{ event.date if event else '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="virgil-label" for="time">"START TIME"</label>
+                    <input type="time" name="time" id="time" class="virgil-input"
+                        value="{{ event.time if event else '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="virgil-label" for="end_time">"END TIME"</label>
+                    <input type="time" name="end_time" id="end_time" class="virgil-input"
+                        value="{{ event.end_time if event else '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="virgil-label" for="location">"LOCATION"</label>
+                <input type="text" name="location" id="location" class="virgil-input"
+                    value="{{ event.location if event else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="virgil-label" for="type">"EVENT TYPE"</label>
+                <select name="type" id="type" class="virgil-select" required>
+                    <option value="">-- SELECT TYPE --</option>
+                    <option value="worship" {{ 'selected' if event and event.type=='worship' else '' }}>WORSHIP SERVICE
+                    </option>
+                    <option value="prayer" {{ 'selected' if event and event.type=='prayer' else '' }}>PRAYER MEETING
+                    </option>
+                    <option value="bible_study" {{ 'selected' if event and event.type=='bible_study' else '' }}>BIBLE
+                        STUDY</option>
+                    <option value="conference" {{ 'selected' if event and event.type=='conference' else '' }}>CONFERENCE
+                    </option>
+                    <option value="community" {{ 'selected' if event and event.type=='community' else '' }}>COMMUNITY
+                        EVENT</option>
+                    <option value="youth" {{ 'selected' if event and event.type=='youth' else '' }}>YOUTH EVENT</option>
+                    <option value="other" {{ 'selected' if event and event.type=='other' else '' }}>OTHER</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="virgil-label" for="description">"DESCRIPTION"</label>
+                <textarea name="description" id="description" rows="4"
+                    class="virgil-textarea">{{ event.description if event else '' }}</textarea>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" name="recurring" id="recurring" class="virgil-checkbox" {{ 'checked' if event and
+                    event.recurring else '' }}>
+                <label class="virgil-label" for="recurring">"RECURRING EVENT"</label>
+            </div>
+
+            <div class="form-group" id="recurrence-container"
+                style="{{ 'display: block' if event and event.recurring else 'display: none' }}">
+                <label class="virgil-label" for="recurrence_pattern">"RECURRENCE PATTERN"</label>
+                <select name="recurrence_pattern" id="recurrence_pattern" class="virgil-select">
+                    <option value="weekly" {{ 'selected' if event and event.recurrence_pattern=='weekly' else '' }}>
+                        WEEKLY</option>
+                    <option value="biweekly" {{ 'selected' if event and event.recurrence_pattern=='biweekly' else '' }}>
+                        BI-WEEKLY</option>
+                    <option value="monthly" {{ 'selected' if event and event.recurrence_pattern=='monthly' else '' }}>
+                        MONTHLY</option>
+                </select>
+            </div>
+
+            <div class="form-buttons">
+                <a href="{{ url_for('ibr_spain.events_page') }}" class="virgil-button secondary">
+                    "CANCEL"
+                </a>
+                <button type="submit" class="virgil-button primary">
+                    "{{ 'UPDATE' if action == 'edit' else 'CREATE' }}"
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const recurringCheckbox = document.getElementById('recurring');
+        const recurrenceContainer = document.getElementById('recurrence-container');
+
+        recurringCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                recurrenceContainer.style.display = 'block';
+            } else {
+                recurrenceContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

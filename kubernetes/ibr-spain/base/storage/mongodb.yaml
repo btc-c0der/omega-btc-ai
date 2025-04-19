@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-init
+  namespace: ibr-spain
+data:
+  init-mongo.sh: |
+    #!/bin/bash
+    set -e
+
+    # Create users for each database
+    mongo <<EOF
+    use admin
+    db.auth('${MONGO_INITDB_ROOT_USERNAME}', '${MONGO_INITDB_ROOT_PASSWORD}')
+    
+    use ibr-sermon
+    db.createUser({
+      user: '${SERMON_DB_USER}',
+      pwd: '${SERMON_DB_PASSWORD}',
+      roles: [{ role: 'readWrite', db: 'ibr-sermon' }]
+    })
+    
+    use ibr-event
+    db.createUser({
+      user: '${EVENT_DB_USER}',
+      pwd: '${EVENT_DB_PASSWORD}',
+      roles: [{ role: 'readWrite', db: 'ibr-event' }]
+    })
+    
+    use ibr-devotional
+    db.createUser({
+      user: '${DEVOTIONAL_DB_USER}',
+      pwd: '${DEVOTIONAL_DB_PASSWORD}',
+      roles: [{ role: 'readWrite', db: 'ibr-devotional' }]
+    })
+    
+    use ibr-prayer
+    db.createUser({
+      user: '${PRAYER_DB_USER}',
+      pwd: '${PRAYER_DB_PASSWORD}',
+      roles: [{ role: 'readWrite', db: 'ibr-prayer' }]
+    })
+    EOF
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-admin-credentials
+  namespace: ibr-spain
+type: Opaque
+data:
+  username: "${MONGO_ROOT_USER_BASE64}"
+  password: "${MONGO_ROOT_PASSWORD_BASE64}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-service-credentials
+  namespace: ibr-spain
+type: Opaque
+data:
+  SERMON_DB_USER: "${SERMON_DB_USER_BASE64}"
+  SERMON_DB_PASSWORD: "${SERMON_DB_PASSWORD_BASE64}"
+  EVENT_DB_USER: "${EVENT_DB_USER_BASE64}"
+  EVENT_DB_PASSWORD: "${EVENT_DB_PASSWORD_BASE64}"
+  DEVOTIONAL_DB_USER: "${DEVOTIONAL_DB_USER_BASE64}"
+  DEVOTIONAL_DB_PASSWORD: "${DEVOTIONAL_DB_PASSWORD_BASE64}"
+  PRAYER_DB_USER: "${PRAYER_DB_USER_BASE64}"
+  PRAYER_DB_PASSWORD: "${PRAYER_DB_PASSWORD_BASE64}"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-data
+  namespace: ibr-spain
+  labels:
+    app: mongodb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: ibr-spain
+  labels:
+    app: mongodb
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-admin-credentials
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-admin-credentials
+              key: password
+        - name: SERMON_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: SERMON_DB_USER
+        - name: SERMON_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: SERMON_DB_PASSWORD
+        - name: EVENT_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: EVENT_DB_USER
+        - name: EVENT_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: EVENT_DB_PASSWORD
+        - name: DEVOTIONAL_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: DEVOTIONAL_DB_USER
+        - name: DEVOTIONAL_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: DEVOTIONAL_DB_PASSWORD
+        - name: PRAYER_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: PRAYER_DB_USER
+        - name: PRAYER_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-service-credentials
+              key: PRAYER_DB_PASSWORD
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d/init-mongo.sh
+          subPath: init-mongo.sh
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          exec:
+            command:
+              - mongo
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - mongo
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: init-script
+        configMap:
+          name: mongodb-init
+          defaultMode: 0755
+      - name: mongodb-data
+        persistentVolumeClaim:
+          claimName: mongodb-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: ibr-spain
+  labels:
+    app: mongodb
+spec:
+  type: ClusterIP
+  ports:
+  - port: 27017
+    targetPort: 27017
+    protocol: TCP
+    name: mongodb
+  selector:
+    app: mongodb 

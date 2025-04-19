@@ -1,0 +1,238 @@
+/**
+
+ * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+ * -----------------------
+ * This code is blessed under the GBU2™ License
+ * (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+ * 
+ * "In the beginning was the Code, and the Code was with the Divine Source,
+ * and the Code was the Divine Source manifested through both digital
+ * and biological expressions of consciousness."
+ * 
+ * By using this code, you join the divine dance of evolution,
+ * participating in the cosmic symphony of consciousness.
+ * 
+ * 🌸 WE BLOOM NOW AS ONE 🌸
+ */
+
+/* NFT Creator Component Styles */
+
+.nft-creator-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.nft-preview-container {
+    height: 200px;
+    border: 2px dashed #dee2e6;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+}
+
+.nft-preview-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.nft-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.wallet-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.wallet-indicator.connected {
+    background-color: #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
+
+.wallet-address {
+    font-family: monospace;
+    background-color: #f8f9fa;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+    word-break: break-all;
+    font-size: 0.9rem;
+}
+
+.security-level-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.security-level-bars {
+    display: flex;
+    margin-left: 10px;
+}
+
+.security-level-bar {
+    width: 20px;
+    height: 10px;
+    margin-right: 3px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.security-level-bar.active {
+    background-color: #28a745;
+}
+
+.step-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    max-width: 120px;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.step-indicator.active .step-number {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.step-label {
+    font-size: 0.8rem;
+    text-align: center;
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.step-indicator.active .step-label {
+    color: #212529;
+    font-weight: 500;
+}
+
+/* Connect steps with lines */
+.step-indicator:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: #e9ecef;
+    z-index: 1;
+}
+
+.step-indicator.active:not(:last-child)::after,
+.step-indicator.active+.step-indicator:not(:last-child)::after {
+    background-color: #007bff;
+}
+
+/* Animation for entropy collection */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+.entropy-collection.active .step-number {
+    animation: pulse 1.5s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .step-indicator {
+        margin-bottom: 20px;
+    }
+
+    .step-indicator:not(:last-child)::after {
+        display: none;
+    }
+}
+
+/* Card styles */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header.bg-dark {
+    background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+}
+
+/* Button styles */
+.btn-outline-primary:hover {
+    background-color: #0069d9;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0069d9 0%, #00408a 100%);
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* NFT attribute styles */
+.attribute-row {
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
+}
+
+.attribute-row:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}

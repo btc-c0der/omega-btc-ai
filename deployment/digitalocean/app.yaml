@@ -1,0 +1,134 @@
+name: omega-btc-ai-live-feed-v3
+region: sfo
+services:
+- name: btc-live-feed-v3
+  github:
+    repo: btc-c0der/omega-btc-ai
+    branch: feature/btc-live-feed-v3-resilient
+    deploy_on_push: true
+  source_dir: deployment/digitalocean/btc_live_feed_v3/src
+  build_command: cd .. && pip install -r requirements.txt && pip install .
+  run_command: python -m omega_ai.data_feed.btc_live_feed_v3
+  envs:
+  - key: PYTHONPATH
+    scope: RUN_TIME
+    value: /workspace
+  - key: REDIS_HOST
+    scope: RUN_TIME
+    value: omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+  - key: REDIS_PORT
+    scope: RUN_TIME
+    value: "25061"
+  - key: REDIS_USERNAME
+    scope: RUN_TIME
+    value: default
+  - key: REDIS_PASSWORD
+    scope: RUN_TIME
+    value: AVNS_OXMpU0P0ByYEz337Fgi
+  - key: REDIS_USE_SSL
+    scope: RUN_TIME
+    value: "true"
+  - key: REDIS_CERT
+    scope: RUN_TIME
+    value: /workspace/SSL_redis-btc-omega-redis.pem
+  - key: REDIS_SSL_CERT_REQS
+    scope: RUN_TIME
+    value: required
+  - key: FAILOVER_REDIS_HOST
+    scope: RUN_TIME
+    value: localhost
+  - key: FAILOVER_REDIS_PORT
+    scope: RUN_TIME
+    value: "6379"
+  - key: HEALTH_CHECK_PORT
+    scope: RUN_TIME
+    value: "8080"
+  - key: HEALTH_CHECK_HOST
+    scope: RUN_TIME
+    value: 0.0.0.0
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 30
+    period_seconds: 60
+    timeout_seconds: 10
+    success_threshold: 1
+    failure_threshold: 3
+    port: 8080
+  http_port: 8080
+  instance_count: 1
+  instance_size_slug: basic-xs
+- name: btc-live-feed-v3-health
+  github:
+    repo: btc-c0der/omega-btc-ai
+    branch: feature/btc-live-feed-v3-resilient
+    deploy_on_push: true
+  source_dir: deployment/digitalocean/btc_live_feed_v3/src
+  build_command: cd .. && pip install -r requirements.txt && pip install .
+  run_command: python -m omega_ai.data_feed.health_check
+  envs:
+  - key: PYTHONPATH
+    scope: RUN_TIME
+    value: /workspace
+  - key: REDIS_HOST
+    scope: RUN_TIME
+    value: omega-btc-ai-redis-do-user-20389918-0.d.db.ondigitalocean.com
+  - key: REDIS_PORT
+    scope: RUN_TIME
+    value: "25061"
+  - key: REDIS_USERNAME
+    scope: RUN_TIME
+    value: default
+  - key: REDIS_PASSWORD
+    scope: RUN_TIME
+    value: AVNS_OXMpU0P0ByYEz337Fgi
+  - key: REDIS_USE_SSL
+    scope: RUN_TIME
+    value: "true"
+  - key: REDIS_CERT
+    scope: RUN_TIME
+    value: /workspace/SSL_redis-btc-omega-redis.pem
+  - key: REDIS_SSL_CERT_REQS
+    scope: RUN_TIME
+    value: required
+  - key: HEALTH_CHECK_PORT
+    scope: RUN_TIME
+    value: "8080"
+  - key: HEALTH_CHECK_HOST
+    scope: RUN_TIME
+    value: 0.0.0.0
+  http_port: 8080
+  instance_count: 1
+  instance_size_slug: basic-xs
+ingress:
+  rules:
+  - component:
+      name: btc-live-feed-v3
+    match:
+      path:
+        prefix: /health
+  - component:
+      name: btc-live-feed-v3
+    match:
+      path:
+        prefix: /metrics
+  - component:
+      name: btc-live-feed-v3
+    match:
+      path:
+        prefix: /redis/status
+  - component:
+      name: btc-live-feed-v3-health
+    match:
+      path:
+        prefix: /
+databases:
+- cluster_name: omega-btc-ai-redis
+  engine: REDIS
+  name: redis
+  production: true
+  version: "7"
+alerts:
+- rule: DEPLOYMENT_LIVE
+- rule: DEPLOYMENT_FAILED
+- rule: DOMAIN_LIVE
+- rule: DOMAIN_FAILED 

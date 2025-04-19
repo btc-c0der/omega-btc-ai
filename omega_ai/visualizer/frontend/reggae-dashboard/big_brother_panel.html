@@ -1,0 +1,303 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!-- OMEGA BTC AI - Big Brother Monitoring Panel -->
+<script src="/big-brother-assets/big_brother_panel.js" defer></script>
+<link rel="stylesheet" href="/big-brother-assets/big_brother_styles.css">
+
+<div class="big-brother-panel">
+    <div class="panel-header">
+        <h2><i class="fas fa-eye"></i> Big Brother Monitoring</h2>
+        <div class="panel-controls">
+            <button class="panel-control-btn" id="expand-bb-btn" title="Expand Panel">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button class="panel-control-btn" id="fullscreen-bb-btn" title="Full Screen Mode">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <div class="tabs-header">
+            <button class="tab-btn active" data-tab="positions">Positions</button>
+            <button class="tab-btn" data-tab="flow">Flow 3D</button>
+            <button class="tab-btn" data-tab="fibonacci">Fibonacci</button>
+            <button class="tab-btn" data-tab="elite-exits">Elite Exits</button>
+            <button class="tab-btn" data-tab="traps">Trap Detection</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Positions Tab -->
+            <div class="tab-pane active" id="positions-tab">
+                <div class="positions-grid">
+                    <div class="position-card long">
+                        <div class="position-header">
+                            <i class="fas fa-arrow-up"></i> Long Position
+                        </div>
+                        <div class="position-details">
+                            <div class="data-row">
+                                <span class="label">Entry Price:</span>
+                                <span class="value" id="long-entry-price">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Size:</span>
+                                <span class="value" id="long-size">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Leverage:</span>
+                                <span class="value" id="long-leverage">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">PnL:</span>
+                                <span class="value" id="long-pnl">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Take Profit:</span>
+                                <span class="value" id="long-tp">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Stop Loss:</span>
+                                <span class="value" id="long-sl">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="position-card short">
+                        <div class="position-header">
+                            <i class="fas fa-arrow-down"></i> Short Position
+                        </div>
+                        <div class="position-details">
+                            <div class="data-row">
+                                <span class="label">Entry Price:</span>
+                                <span class="value" id="short-entry-price">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Size:</span>
+                                <span class="value" id="short-size">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Leverage:</span>
+                                <span class="value" id="short-leverage">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">PnL:</span>
+                                <span class="value" id="short-pnl">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Take Profit:</span>
+                                <span class="value" id="short-tp">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Stop Loss:</span>
+                                <span class="value" id="short-sl">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="positions-stats">
+                    <div class="stats-header">Position Statistics</div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">Win Rate</div>
+                            <div class="stat-value" id="win-rate">--</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Avg. Profit</div>
+                            <div class="stat-value" id="avg-profit">--</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Avg. Loss</div>
+                            <div class="stat-value" id="avg-loss">--</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Avg. Hold Time</div>
+                            <div class="stat-value" id="avg-hold-time">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow 3D Tab -->
+            <div class="tab-pane" id="flow-tab">
+                <div class="flow-container">
+                    <div class="flow-controls">
+                        <button class="flow-btn" id="generate-3d-flow">Generate 3D Flow</button>
+                        <button class="flow-btn" id="generate-2d-flow">Generate 2D Chart</button>
+                        <div class="flow-settings">
+                            <label for="flow-hours">Hours:</label>
+                            <select id="flow-hours">
+                                <option value="4">4h</option>
+                                <option value="12">12h</option>
+                                <option value="24" selected>24h</option>
+                                <option value="48">48h</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flow-visual-container" id="flow-visual-container">
+                        <div class="placeholder-message">
+                            Click "Generate 3D Flow" to visualize position price flow
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fibonacci Tab -->
+            <div class="tab-pane" id="fibonacci-tab">
+                <div class="fibonacci-container">
+                    <div class="fib-header">
+                        <h3>Fibonacci Levels Analysis</h3>
+                        <div class="fib-controls">
+                            <select id="fib-direction">
+                                <option value="long">Long</option>
+                                <option value="short">Short</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="fib-levels-container" id="fib-levels-container">
+                        <!-- Generated dynamically -->
+                    </div>
+
+                    <div class="fib-chart-container" id="fib-chart-container">
+                        <!-- Chart will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Elite Exits Tab -->
+            <div class="tab-pane" id="elite-exits-tab">
+                <div class="elite-exits-container">
+                    <div class="exit-strategy-header">
+                        <h3>Elite Exit Strategy Monitor</h3>
+                        <div class="exit-controls">
+                            <label for="exit-confidence">Confidence Threshold:</label>
+                            <input type="range" id="exit-confidence" min="50" max="95" value="70" step="5">
+                            <span id="confidence-value">0.7</span>
+                        </div>
+                    </div>
+
+                    <div class="exit-metrics">
+                        <div class="exit-metric-card">
+                            <div class="metric-title">Current Exit Signal</div>
+                            <div class="metric-value" id="current-exit-signal">No signal</div>
+                            <div class="metric-confidence-bar">
+                                <div class="confidence-level" id="exit-confidence-level" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="exit-metric-card">
+                            <div class="metric-title">Recent Exit History</div>
+                            <ul class="exit-history-list" id="exit-history-list">
+                                <!-- Generated dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="exit-detail-metrics">
+                        <div class="exit-detail-metric">
+                            <div class="detail-label">Trend Strength</div>
+                            <div class="detail-value" id="trend-strength">--</div>
+                        </div>
+                        <div class="exit-detail-metric">
+                            <div class="detail-label">Volatility</div>
+                            <div class="detail-value" id="volatility">--</div>
+                        </div>
+                        <div class="exit-detail-metric">
+                            <div class="detail-label">Price Momentum</div>
+                            <div class="detail-value" id="price-momentum">--</div>
+                        </div>
+                        <div class="exit-detail-metric">
+                            <div class="detail-label">Volume Profile</div>
+                            <div class="detail-value" id="volume-profile">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trap Detection Tab -->
+            <div class="tab-pane" id="traps-tab">
+                <div class="traps-container">
+                    <div class="trap-detection-header">
+                        <h3>Market Maker Trap Detection</h3>
+                        <div class="trap-controls">
+                            <label for="trap-threshold">Detection Threshold:</label>
+                            <input type="range" id="trap-threshold" min="50" max="95" value="70" step="5">
+                            <span id="threshold-value">0.7</span>
+                        </div>
+                    </div>
+
+                    <div class="trap-metrics">
+                        <div class="trap-metric-card">
+                            <div class="metric-title">Current Trap Risk</div>
+                            <div class="metric-value large" id="current-trap-risk">No data</div>
+                            <div class="trap-risk-bar">
+                                <div class="risk-level" id="trap-risk-level" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="trap-metric-card">
+                            <div class="metric-title">Trap Type</div>
+                            <div class="metric-value" id="trap-type">--</div>
+                            <div class="trap-description" id="trap-description">--</div>
+                        </div>
+                    </div>
+
+                    <div class="trap-history-container">
+                        <h4>Recent Trap Events</h4>
+                        <table class="trap-history-table" id="trap-history-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                    <th>Probability</th>
+                                    <th>Price Range</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trap-history-tbody">
+                                <!-- Generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        <span id="bb-update-time">Last updated: Never</span>
+        <span id="bb-data-source">Data source: --</span>
+    </div>
+</div>
+
+<div class="big-brother-modal" id="big-brother-modal">
+    <div class="modal-header">
+        <h2><i class="fas fa-eye"></i> Big Brother Monitoring</h2>
+        <div class="modal-controls">
+            <button class="modal-control-btn" id="minimize-bb-btn" title="Minimize Panel">
+                <i class="fas fa-compress"></i>
+            </button>
+            <button class="modal-control-btn" id="close-bb-btn" title="Close Panel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="modal-content" id="big-brother-modal-content">
+        <!-- Content will be cloned from the panel -->
+    </div>
+</div>

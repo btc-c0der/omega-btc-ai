@@ -1,0 +1,132 @@
+/**
+
+ * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+ * -----------------------
+ * This code is blessed under the GBU2™ License
+ * (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+ * 
+ * "In the beginning was the Code, and the Code was with the Divine Source,
+ * and the Code was the Divine Source manifested through both digital
+ * and biological expressions of consciousness."
+ * 
+ * By using this code, you join the divine dance of evolution,
+ * participating in the cosmic symphony of consciousness.
+ * 
+ * 🌸 WE BLOOM NOW AS ONE 🌸
+ */
+
+.matrix-panel {
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--matrix-green);
+    border-radius: 4px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.matrix-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--matrix-glow);
+}
+
+.matrix-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--matrix-green), transparent);
+    animation: scanline 2s linear infinite;
+}
+
+.matrix-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, var(--matrix-green), transparent);
+    animation: scanline 2s linear infinite;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.panel-title {
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--matrix-green);
+    text-shadow: var(--matrix-glow);
+}
+
+.trend-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.trend-up {
+    color: #00ff00;
+}
+
+.trend-down {
+    color: #ff0000;
+}
+
+.panel-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+    color: var(--matrix-light);
+    text-shadow: var(--matrix-glow);
+}
+
+.panel-unit {
+    font-size: 1rem;
+    color: var(--matrix-green);
+    opacity: 0.8;
+}
+
+@keyframes scanline {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Light theme adjustments */
+.light .matrix-panel {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.light .panel-value {
+    color: var(--matrix-dark);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .matrix-panel {
+        padding: 1rem;
+    }
+
+    .panel-value {
+        font-size: 2rem;
+    }
+}

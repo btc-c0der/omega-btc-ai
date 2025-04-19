@@ -1,0 +1,2 @@
+# This file ensures that the output directory is tracked by git
+# This directory will contain output files from BDD tests 

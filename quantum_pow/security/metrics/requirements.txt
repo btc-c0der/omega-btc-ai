@@ -1,0 +1,24 @@
+# Quantum-Resistant Security Metrics System Dependencies
+# 🧬 GBU2™ License - OMEGA Divine Collective 🧬
+
+# Core dependencies
+pyyaml>=6.0           # Configuration file handling
+psutil>=5.9.0         # System metrics collection
+requests>=2.27.1      # API calls and external integrations
+matplotlib>=3.5.1     # Dashboard visualization components
+jinja2>=3.0.0         # HTML templating for dashboards
+
+# Kubernetes integration
+kubernetes>=23.6.0    # Kubernetes API client
+urllib3<2.0.0         # Required by kubernetes client
+
+# Prometheus integration (optional)
+prometheus-client>=0.14.1  # For pushing metrics to Prometheus
+
+# Testing dependencies
+pytest>=7.0.0         # For running test metrics
+coverage>=6.3.0       # For analyzing test coverage metrics
+
+# Web server for dashboard
+six>=1.16.0           # Required by various dependencies
+typing-extensions>=4.1.0  # For enhanced type hints 

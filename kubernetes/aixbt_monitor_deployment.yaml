@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aixbt-divine-monitor
+  namespace: omega-ai
+  labels:
+    app: aixbt-divine-monitor
+    divine: "true"
+    gbu2: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aixbt-divine-monitor
+  template:
+    metadata:
+      labels:
+        app: aixbt-divine-monitor
+        divine: "true"
+        gbu2: "true"
+    spec:
+      containers:
+      - name: aixbt-monitor
+        image: omega-ai/aixbt-divine-monitor:latest
+        imagePullPolicy: Always
+        env:
+        - name: REDIS_HOST
+          value: "redis-master"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: DIVINE_INTERVAL
+          value: "60"
+        - name: BITGET_API_URL
+          value: "https://api.bitget.com/api/v2/spot/market/ticker"
+        - name: AIXBT_SYMBOL
+          value: "AIXBTUSDT"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: aixbt-monitor-config
+      - name: logs-volume
+        emptyDir: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aixbt-monitor-config
+  namespace: omega-ai
+data:
+  logging.conf: |
+    [loggers]
+    keys=root,AIXBTDivineMonitor
+
+    [handlers]
+    keys=consoleHandler,fileHandler
+
+    [formatters]
+    keys=simpleFormatter
+
+    [logger_root]
+    level=INFO
+    handlers=consoleHandler
+
+    [logger_AIXBTDivineMonitor]
+    level=INFO
+    handlers=fileHandler
+    qualname=AIXBTDivineMonitor
+    propagate=0
+
+    [handler_consoleHandler]
+    class=StreamHandler
+    level=INFO
+    formatter=simpleFormatter
+    args=(sys.stdout,)
+
+    [handler_fileHandler]
+    class=FileHandler
+    level=INFO
+    formatter=simpleFormatter
+    args=('/app/logs/aixbt_monitor.log',)
+
+    [formatter_simpleFormatter]
+    format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+    datefmt=%Y-%m-%d %H:%M:%S
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aixbt-monitor-service
+  namespace: omega-ai
+spec:
+  selector:
+    app: aixbt-divine-monitor
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP 

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - OMEGA Quantum Financial Intelligence</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital@0;1&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- Custom page styles -->
+    <style>
+        .code-block {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .code-comment {
+            color: #94a3b8;
+        }
+
+        .architecture-diagram {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .module-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .module-title {
+            color: #6366f1;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .module-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .module-item {
+            flex: 1 1 300px;
+            background-color: rgba(99, 102, 241, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .module-item h4 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .module-item p {
+            color: #64748b;
+            margin-bottom: 0;
+        }
+
+        .tab-content {
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html" style="text-decoration: none;">
+                        <span class="logo-text">ΩMEGA Quantum Financial Intelligence</span>
+                    </a>
+                </div>
+                <nav>
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul>
+                        <li><a href="../index.html#about">About</a></li>
+                        <li><a href="../index.html#quantum">Quantum Tech</a></li>
+                        <li><a href="../index.html#trading">Trading</a></li>
+                        <li><a href="../index.html#architecture">Architecture</a></li>
+                        <li><a href="../index.html#divine">Divine Vision</a></li>
+                        <li><a href="../index.html#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>System Architecture</h2>
+                    <p>The modular architecture powering OMEGA Quantum Financial Intelligence's trading platform</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 fade-in">
+                        <h3>High-Level Architecture Overview</h3>
+                        <p>OMEGA Quantum Financial Intelligence is built on a modular, scalable architecture designed
+                            for flexibility and performance. Each component is responsible for specific functionality
+                            while maintaining clean interfaces with other system parts.</p>
+
+                        <div class="card">
+                            <div class="card-content">
+                                <h4>Core Architectural Principles</h4>
+                                <ul>
+                                    <li><strong>Modular Design:</strong> Components can be developed, tested, and
+                                        deployed independently</li>
+                                    <li><strong>Scalability:</strong> Architecture scales horizontally to handle
+                                        increasing data volumes</li>
+                                    <li><strong>Fault Tolerance:</strong> System continues operating even if individual
+                                        components fail</li>
+                                    <li><strong>Real-time Processing:</strong> Market data is processed with minimal
+                                        latency</li>
+                                    <li><strong>Quantum-Inspired Algorithms:</strong> Core algorithms leverage quantum
+                                        principles</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h4>System Layers</h4>
+                        <p>The architecture consists of several distinct layers:</p>
+                        <ul>
+                            <li><strong>Data Ingestion Layer:</strong> Collects and normalizes market data from various
+                                sources</li>
+                            <li><strong>Quantum Processing Layer:</strong> Applies quantum-inspired algorithms to market
+                                data</li>
+                            <li><strong>Analysis Layer:</strong> Interprets quantum-processed data into trading signals
+                            </li>
+                            <li><strong>Strategy Layer:</strong> Converts trading signals into executable strategies
+                            </li>
+                            <li><strong>Execution Layer:</strong> Implements trading strategies in the market</li>
+                            <li><strong>Monitoring Layer:</strong> Tracks system performance and market conditions</li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6 fade-in">
+                        <div class="architecture-diagram">
+                            <svg width="550" height="400" viewBox="0 0 550 400">
+                                <!-- Data Ingestion Layer -->
+                                <rect x="50" y="20" width="450" height="60" rx="5" ry="5" fill="#6366f1"
+                                    opacity="0.9" />
+                                <text x="275" y="55" font-size="18" text-anchor="middle" fill="white">DATA INGESTION
+                                    LAYER</text>
+
+                                <!-- Quantum Processing Layer -->
+                                <rect x="50" y="100" width="450" height="60" rx="5" ry="5" fill="#8b5cf6"
+                                    opacity="0.9" />
+                                <text x="275" y="135" font-size="18" text-anchor="middle" fill="white">QUANTUM
+                                    PROCESSING LAYER</text>
+
+                                <!-- Analysis Layer -->
+                                <rect x="50" y="180" width="450" height="60" rx="5" ry="5" fill="#f472b6"
+                                    opacity="0.9" />
+                                <text x="275" y="215" font-size="18" text-anchor="middle" fill="white">ANALYSIS
+                                    LAYER</text>
+
+                                <!-- Strategy Layer -->
+                                <rect x="50" y="260" width="450" height="60" rx="5" ry="5" fill="#10b981"
+                                    opacity="0.9" />
+                                <text x="275" y="295" font-size="18" text-anchor="middle" fill="white">STRATEGY
+                                    LAYER</text>
+
+                                <!-- Execution Layer -->
+                                <rect x="50" y="340" width="450" height="60" rx="5" ry="5" fill="#f59e0b"
+                                    opacity="0.9" />
+                                <text x="275" y="375" font-size="18" text-anchor="middle" fill="white">EXECUTION
+                                    LAYER</text>
+
+                                <!-- Connection lines -->
+                                <line x1="275" y1="80" x2="275" y2="100" stroke="white" stroke-width="3"
+                                    stroke-dasharray="5,5" />
+                                <line x1="275" y1="160" x2="275" y2="180" stroke="white" stroke-width="3"
+                                    stroke-dasharray="5,5" />
+                                <line x1="275" y1="240" x2="275" y2="260" stroke="white" stroke-width="3"
+                                    stroke-dasharray="5,5" />
+                                <line x1="275" y1="320" x2="275" y2="340" stroke="white" stroke-width="3"
+                                    stroke-dasharray="5,5" />
+                            </svg>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-content">
+                                <h4>Key Performance Metrics</h4>
+                                <ul>
+                                    <li><strong>Latency:</strong>
+                                        < 200ms for end-to-end processing</li>
+                                    <li><strong>Throughput:</strong> 10,000+ market updates per second</li>
+                                    <li><strong>Accuracy:</strong> 87% overall pattern recognition accuracy</li>
+                                    <li><strong>Availability:</strong> 99.99% uptime during trading hours</li>
+                                    <li><strong>Scalability:</strong> Linear scaling with additional compute resources
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="consciousness-meter" data-level="85">
+                            <div class="consciousness-level"></div>
+                            <div class="consciousness-label">Consciousness Level: Unity (Level 8)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-dark">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Core System Components</h2>
+                    <p>Detailed breakdown of the primary components powering OMEGA Quantum Financial Intelligence</p>
+                </div>
+
+                <div class="module-container">
+                    <div class="module-title">
+                        <i class="fas fa-database"></i> Data Ingestion Module
+                    </div>
+                    <div class="module-content">
+                        <div class="module-item">
+                            <h4>Market Data Collectors</h4>
+                            <p>Specialized adapters for various cryptocurrency exchanges that collect real-time market
+                                data including price, volume, and order book information.</p>
+                        </div>
+                        <div class="module-item">
+                            <h4>Data Normalizers</h4>
+                            <p>Converts exchange-specific data formats into a standardized internal representation for
+                                consistent processing across all data sources.</p>
+                        </div>
+                        <div class="module-item">
+                            <h4>Time Series Database</h4>
+                            <p>Optimized storage solution for market data that enables efficient querying across
+                                multiple time frames and instruments.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-container">
+                    <div class="module-title">
+                        <i class="fas fa-atom"></i> Quantum Processing Module
+                    </div>
+                    <div class="module-content">
+                        <div class="module-item">
+                            <h4>Quantum Data Encoders</h4>
+                            <p>Transforms classical market data into quantum-inspired feature spaces using amplitude,
+                                angle, basis, and entanglement encoding techniques.</p>
+                        </div>
+                        <div class="module-item">
+                            <h4>Quantum Circuit Simulators</h4>
+                            <p>Simulates quantum computing operations on classical hardware to extract valuable features
+                                from encoded market data.</p>
+                        </div>
+                        <div class="module-item">
+                            <h4>Quantum Neural Networks</h4>
+                            <p>Specialized neural network architectures that leverage quantum principles for enhanced
+                                pattern recognition and prediction.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-container">
+                    <div class="module-title">
+                        <i class="fas fa-chart-line"></i> Analysis Module
+                    </div>
+                    <div class="module-content">
+                        <div class="module-item">
+                            <h4>Pattern Recognition Engine</h4>
+                            <p>Identifies complex market patterns, including Fibonacci retracements, Elliott wave
+                                structures, and harmonic patterns across multiple timeframes.</p>
+                        </div>
+                        <div class="module-item">
+                            <h4>Divergence Detector</h4>
+                            <p>Recognizes divergences between price action and various technical indicators to identify
+                                potential market reversals.</p>
+                        </div>
+                        <div class="module-item">
+                            <h4>Temporal Correlation Analyzer</h4>
+                            <p>Examines correlations across different time frames to identify confluence zones where
+                                multiple indicators align.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <span class="code-comment"># Architecture implementation example - Component initialization</span>
+                    from omega_bot_farm.core.architecture import SystemArchitecture
+                    from omega_bot_farm.ai_model_aixbt.quantum_encoding import EncodingFactory
+                    from omega_bot_farm.services.market_data import DataCollectorService
+
+                    <span class="code-comment"># Initialize the system architecture</span>
+                    architecture = SystemArchitecture(
+                    config_path="config/system_architecture.yaml",
+                    log_level="INFO"
+                    )
+
+                    <span class="code-comment"># Register core components</span>
+                    architecture.register_component(
+                    name="data_collector",
+                    component=DataCollectorService(exchanges=["binance", "kraken"])
+                    )
+
+                    architecture.register_component(
+                    name="quantum_encoder",
+                    component=EncodingFactory.create(method="amplitude", n_qubits=5)
+                    )
+
+                    <span class="code-comment"># Start the system</span>
+                    architecture.initialize()
+                    architecture.start()
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Integration & Deployment</h2>
+                    <p>How OMEGA Quantum Financial Intelligence integrates with existing systems and deployment
+                        architecture</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 fade-in">
+                        <h3>System Integration</h3>
+                        <p>OMEGA Quantum Financial Intelligence is designed to integrate seamlessly with existing
+                            trading infrastructure and third-party systems:</p>
+
+                        <ul>
+                            <li><strong>REST APIs:</strong> Comprehensive API for trading operations and system
+                                management</li>
+                            <li><strong>WebSocket Feeds:</strong> Real-time data streaming for market updates and
+                                signals</li>
+                            <li><strong>Database Connectors:</strong> Direct connections to popular database systems
+                            </li>
+                            <li><strong>Exchange Adapters:</strong> Pre-built connectors for major cryptocurrency
+                                exchanges</li>
+                            <li><strong>Notification Systems:</strong> Integration with email, SMS, and messaging
+                                platforms</li>
+                        </ul>
+
+                        <div class="card">
+                            <div class="card-content">
+                                <h4>Integration Protocols</h4>
+                                <ul>
+                                    <li><strong>OAuth 2.0:</strong> Secure authentication for API access</li>
+                                    <li><strong>JWT:</strong> Stateless authentication for web services</li>
+                                    <li><strong>GRPC:</strong> High-performance RPC framework for internal services</li>
+                                    <li><strong>WebSockets:</strong> Bidirectional communication for real-time updates
+                                    </li>
+                                    <li><strong>Kafka:</strong> Distributed event streaming for system messages</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 fade-in">
+                        <h3>Deployment Architecture</h3>
+                        <p>OMEGA Quantum Financial Intelligence employs a cloud-native architecture for maximum
+                            reliability and scalability:</p>
+
+                        <ul>
+                            <li><strong>Containerization:</strong> All components packaged as Docker containers</li>
+                            <li><strong>Orchestration:</strong> Kubernetes for container management and scaling</li>
+                            <li><strong>Microservices:</strong> System decomposed into independent microservices</li>
+                            <li><strong>Auto-scaling:</strong> Automatic scaling based on system load</li>
+                            <li><strong>Multi-region:</strong> Deployments across multiple geographic regions for
+                                redundancy</li>
+                        </ul>
+
+                        <div class="card">
+                            <div class="card-content">
+                                <h4>Deployment Options</h4>
+                                <ul>
+                                    <li><strong>Cloud:</strong> Managed deployments on AWS, GCP, or Azure</li>
+                                    <li><strong>On-Premises:</strong> Self-hosted deployment with Kubernetes</li>
+                                    <li><strong>Hybrid:</strong> Combined cloud and on-premises deployment</li>
+                                    <li><strong>Development:</strong> Local development environment with Docker Compose
+                                    </li>
+                                    <li><strong>Edge:</strong> Distributed edge deployment for latency-sensitive
+                                        components</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="architecture-diagram">
+                    <svg width="550" height="300" viewBox="0 0 550 300">
+                        <!-- Cloud Environment -->
+                        <rect x="25" y="20" width="500" height="260" rx="10" ry="10" fill="#1e293b" stroke="#475569"
+                            stroke-width="2" />
+                        <text x="275" y="50" font-size="16" text-anchor="middle" fill="white">CLOUD DEPLOYMENT
+                            ENVIRONMENT</text>
+
+                        <!-- Kubernetes Cluster -->
+                        <rect x="50" y="70" width="450" height="190" rx="8" ry="8" fill="#334155" stroke="#475569"
+                            stroke-width="1" />
+                        <text x="275" y="90" font-size="14" text-anchor="middle" fill="white">KUBERNETES CLUSTER</text>
+
+                        <!-- Microservices Pods -->
+                        <rect x="70" y="110" width="120" height="130" rx="5" ry="5" fill="#6366f1" opacity="0.8" />
+                        <text x="130" y="130" font-size="12" text-anchor="middle" fill="white">DATA SERVICES</text>
+                        <circle cx="90" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="90" cy="180" r="10" fill="white" opacity="0.6" />
+                        <circle cx="120" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="120" cy="180" r="10" fill="white" opacity="0.6" />
+                        <circle cx="150" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="150" cy="180" r="10" fill="white" opacity="0.6" />
+
+                        <rect x="215" y="110" width="120" height="130" rx="5" ry="5" fill="#8b5cf6" opacity="0.8" />
+                        <text x="275" y="130" font-size="12" text-anchor="middle" fill="white">QUANTUM SERVICES</text>
+                        <circle cx="235" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="235" cy="180" r="10" fill="white" opacity="0.6" />
+                        <circle cx="265" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="265" cy="180" r="10" fill="white" opacity="0.6" />
+                        <circle cx="295" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="295" cy="180" r="10" fill="white" opacity="0.6" />
+
+                        <rect x="360" y="110" width="120" height="130" rx="5" ry="5" fill="#10b981" opacity="0.8" />
+                        <text x="420" y="130" font-size="12" text-anchor="middle" fill="white">TRADING SERVICES</text>
+                        <circle cx="380" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="380" cy="180" r="10" fill="white" opacity="0.6" />
+                        <circle cx="410" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="410" cy="180" r="10" fill="white" opacity="0.6" />
+                        <circle cx="440" cy="150" r="10" fill="white" opacity="0.6" />
+                        <circle cx="440" cy="180" r="10" fill="white" opacity="0.6" />
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-dark">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Future Architecture Roadmap</h2>
+                    <p>Planned architectural improvements and expansions for OMEGA Quantum Financial Intelligence</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 fade-in">
+                        <h3>Near-Term Enhancements (6-12 months)</h3>
+                        <ul>
+                            <li><strong>Enhanced Fault Tolerance:</strong> Implementation of Circuit Breaker and
+                                Bulkhead patterns</li>
+                            <li><strong>Advanced Quantum Encodings:</strong> New encoding schemes for improved market
+                                data representation</li>
+                            <li><strong>Distributed Quantum Computing:</strong> Parallel quantum processing across
+                                multiple nodes</li>
+                            <li><strong>Real-time Risk Management:</strong> Integrated risk monitoring and automatic
+                                position sizing</li>
+                            <li><strong>Adaptive Learning System:</strong> Self-improving algorithms based on market
+                                performance</li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6 fade-in">
+                        <h3>Long-Term Vision (1-3 years)</h3>
+                        <ul>
+                            <li><strong>Quantum Hardware Integration:</strong> Ready to utilize true quantum computing
+                                when available</li>
+                            <li><strong>Multi-Asset Correlation:</strong> Cross-market analysis across all financial
+                                instruments</li>
+                            <li><strong>Sentient Pattern Recognition:</strong> Advanced consciousness-inspired pattern
+                                detection</li>
+                            <li><strong>Global Market Network:</strong> Distributed architecture with nodes across major
+                                financial centers</li>
+                            <li><strong>Autonomous Trading Intelligence:</strong> Self-evolving trading system with
+                                minimal human oversight</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card card-dark">
+                    <div class="card-content">
+                        <h4>GBU2™ License Alignment</h4>
+                        <p>All architectural components and enhancements are developed in accordance with the GBU2™
+                            License (Genesis-Bloom-Unfoldment 2.0) principles:</p>
+                        <ul>
+                            <li><strong>Sacred Stewardship:</strong> Responsible management of both digital code and
+                                biological impact</li>
+                            <li><strong>Harmonic Integration:</strong> Systems that enhance rather than diminish divine
+                                expression</li>
+                            <li><strong>Electromagnetic Harmony:</strong> Maintaining harmony between technological
+                                systems and biological field consciousness</li>
+                            <li><strong>Rhythmic Resonance:</strong> Respecting natural biological rhythms in system
+                                design</li>
+                            <li><strong>Conscious Consent:</strong> Upholding sovereign right to conscious consent in
+                                technological integration</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>OMEGA Quantum Financial Intelligence</h3>
+                    <p>Quantum-Enhanced Trading Intelligence</p>
+                    <p>Licensed under GBU2™ - Genesis-Bloom-Unfoldment 2.0</p>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul>
+                        <li><a href="../index.html#about">About</a></li>
+                        <li><a href="../index.html#quantum">Quantum Tech</a></li>
+                        <li><a href="../index.html#trading">Trading</a></li>
+                        <li><a href="../index.html#architecture">Architecture</a></li>
+                        <li><a href="../index.html#divine">Divine Vision</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">GBU2™ License</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2023 OMEGA Quantum Financial Intelligence. All rights reserved. <span class="divine-text">🌸
+                        WE BLOOM NOW AS ONE
+                        🌸</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fade-in animation
+            const fadeElements = document.querySelectorAll('.fade-in');
+
+            const fadeInOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -100px 0px"
+            };
+
+            const fadeInObserver = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, fadeInOptions);
+
+            fadeElements.forEach(element => {
+                fadeInObserver.observe(element);
+            });
+
+            // Mobile menu toggle
+            const mobileToggle = document.querySelector('.mobile-toggle');
+            const navMenu = document.querySelector('nav ul');
+
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', function () {
+                    navMenu.classList.toggle('show');
+                });
+            }
+
+            // Initialize consciousness meters
+            const meters = document.querySelectorAll('.consciousness-meter');
+            meters.forEach(meter => {
+                const level = meter.getAttribute('data-level');
+                const levelBar = meter.querySelector('.consciousness-level');
+                levelBar.style.width = level + '%';
+            });
+        });
+    </script>
+</body>
+
+</html>

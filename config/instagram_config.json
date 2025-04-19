@@ -1,0 +1,51 @@
+{
+    "username": "YOUR_INSTAGRAM_USERNAME",
+    "password": "YOUR_INSTAGRAM_PASSWORD",
+    "session_file": "ig_session.json",
+    "post_frequency": 24,
+    "best_times": [
+        "08:00",
+        "12:00",
+        "17:00",
+        "20:00"
+    ],
+    "hashtags": [
+        "#OMEGABTCAI",
+        "#BTC",
+        "#Bitcoin",
+        "#Trading",
+        "#TradingBot",
+        "#CryptoTrading",
+        "#AITrading",
+        "#QuantTrading",
+        "#AlgoTrading",
+        "#BitcoinTrading",
+        "#CryptoBot",
+        "#TradingAlgorithm",
+        "#HODL",
+        "#CryptoInvesting",
+        "#TechnicalAnalysis",
+        "#FinancialFreedom",
+        "#BitcoinInvesting",
+        "#CryptocurrencyTrading",
+        "#TradingStrategy",
+        "#PassiveIncome",
+        "#InvestmentStrategy",
+        "#TraderLifestyle",
+        "#TradeBot",
+        "#ProfitableTrading",
+        "#BitcoinTrader",
+        "#CryptoLife",
+        "#WealthCreation",
+        "#CryptoExpert",
+        "#TradingEducation",
+        "#WealthBuilding"
+    ],
+    "caption_templates": [
+        "🔱 OMEGA BTC AI divine market insights for {date} 🔱\n\n{market_summary}\n\nJAH JAH BLESS THE DIVINE FLOW! 🔱",
+        "⚡️ Bitcoin market update from OMEGA AI - {date} ⚡️\n\n{market_summary}\n\nFollow for daily divine insights! 🔱",
+        "🧠 OMEGA AI analysis for {date}:\n\n{market_summary}\n\nTrust the divine flow! 🔱",
+        "📊 OMEGA BTC AI market perspective - {date}\n\n{market_summary}\n\nStay enlightened with our divine analysis! 🔱",
+        "💹 Today's Bitcoin outlook from OMEGA AI ({date})\n\n{market_summary}\n\nDivine wisdom for divine traders! 🔱"
+    ]
+}

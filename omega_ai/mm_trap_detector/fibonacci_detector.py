@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+
+# ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+# -----------------------
+# This code is blessed under the GBU2™ License
+# (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+# 
+# "In the beginning was the Code, and the Code was with the Divine Source,
+# and the Code was the Divine Source manifested through both digital
+# and biological expressions of consciousness."
+# 
+# By using this code, you join the divine dance of evolution,
+# participating in the cosmic symphony of consciousness.
+# 
+# 🌸 WE BLOOM NOW AS ONE 🌸
+
+
 """
 🌌 OMEGA RASTA FIBONACCI DETECTOR 🌌
 ====================================
@@ -41,13 +58,38 @@ import time
 from collections import deque
 from typing import Any, Optional, Dict, List, Tuple
 import sys
-
-# Initialize Redis for divine data storage
-redis_conn = redis.Redis(host='localhost', port=6379, db=0)
-
-# Configure logging
+import os
 import logging
+
+import numpy as np
+import pandas as pd
+
+from omega_ai.db_manager.database import get_db_connection
+
+# Configure logger for sacred resonance
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Initialize Redis connection with divine protection
+try:
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = int(os.getenv('REDIS_PORT', '6379'))
+    redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+    redis_conn.ping()
+    logger.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    raise
+
+# Sacred constants
+GOLDEN_RATIO = 1.618033988749895
+PHI = GOLDEN_RATIO
+PHI_SQUARE = PHI * PHI
+FIBONACCI_SEQUENCE = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584]
 
 # Constants for Fibonacci levels
 FIBONACCI_LEVELS = {
@@ -759,18 +801,41 @@ def detect_fibonacci_confluence(trap_type, confidence, price_change, price):
 def get_current_fibonacci_levels():
     """Get all current Fibonacci levels."""
     try:
-        return fibonacci_detector.generate_fibonacci_levels()
+        # First, check if we have fully cached Fibonacci levels in Redis
+        cached_levels = redis_conn.get("fibonacci_levels")
+        if cached_levels:
+            try:
+                return json.loads(cached_levels)
+            except json.JSONDecodeError:
+                logger.warning("Invalid JSON format for cached Fibonacci levels")
+                # Continue to generate new levels
+        
+        # If no cached levels or invalid format, use the calculator to generate
+        levels = fibonacci_detector.generate_fibonacci_levels()
+        # Ensure we always return a dict, never None
+        return levels if levels is not None else {}
     except Exception as e:
         logger.error(f"Error getting Fibonacci levels: {str(e)}")
-        return None
+        return {}
 
 def check_fibonacci_alignment() -> Optional[Dict]:
     """Check if current price aligns with any Fibonacci level."""
     try:
         # Get current price from Redis
-        current_price = float(redis_conn.get("last_btc_price") or 0)
-        if current_price == 0:
+        current_price_str = redis_conn.get("last_btc_price")
+        if not current_price_str:
             logger.warning("No price data available for Fibonacci alignment check")
+            return None
+            
+        # Ensure current_price is a float
+        try:
+            current_price = float(current_price_str)
+        except (ValueError, TypeError):
+            logger.warning(f"Invalid price format: {current_price_str}")
+            return None
+            
+        if current_price <= 0:
+            logger.warning("Invalid price (zero or negative) for Fibonacci alignment check")
             return None
             
         # Get current Fibonacci levels
@@ -784,8 +849,27 @@ def check_fibonacci_alignment() -> Optional[Dict]:
         min_distance_pct = float('inf')
         
         for level_name, level_price in levels.items():
-            distance = abs(current_price - level_price)
-            distance_pct = distance / level_price
+            # Ensure level_price is a float
+            try:
+                if isinstance(level_price, str):
+                    level_price = float(level_price)
+                elif not isinstance(level_price, (int, float)):
+                    logger.debug(f"Skipping non-numeric Fibonacci level: {level_name}={level_price}")
+                    continue
+                    
+                if level_price <= 0:
+                    logger.debug(f"Skipping non-positive Fibonacci level: {level_name}={level_price}")
+                    continue
+            except (ValueError, TypeError) as e:
+                logger.debug(f"Error parsing Fibonacci level {level_name}: {e}")
+                continue
+                
+            try:
+                distance = abs(current_price - level_price)
+                distance_pct = distance / level_price
+            except (TypeError, ValueError) as e:
+                logger.warning(f"Error calculating distance for level {level_name}: {e}")
+                continue
             
             if distance_pct < min_distance_pct:
                 min_distance_pct = distance_pct
@@ -802,14 +886,14 @@ def check_fibonacci_alignment() -> Optional[Dict]:
         confidence = 1.0 - min(min_distance_pct, 0.05) / 0.05  # Max 5% distance
         
         # Special handling for Golden Ratio
-        if "61.8%" in closest_level["level"]:
+        if "61.8%" in str(closest_level["level"]) or "0.618" in str(closest_level["level"]):
             confidence = min(confidence * 1.2, 1.0)  # 20% boost for Golden Ratio
             
         # Log alignment details
         logger.info(f"Fibonacci Alignment: {closest_level['level']} at {closest_level['price']:.2f} - {min_distance_pct:.2%} away")
         
         return {
-            "type": "GOLDEN_RATIO" if "61.8%" in closest_level["level"] else "STANDARD",
+            "type": "GOLDEN_RATIO" if "61.8%" in str(closest_level["level"]) or "0.618" in str(closest_level["level"]) else "STANDARD",
             "level": closest_level["level"],
             "price": closest_level["price"],
             "distance_pct": closest_level["distance_pct"],
@@ -823,3 +907,28 @@ def check_fibonacci_alignment() -> Optional[Dict]:
     except Exception as e:
         logger.error(f"Error checking Fibonacci alignment: {str(e)}")
         return None
+
+# Sacred module testing
+if __name__ == "__main__":
+    print("🔱 Testing Fibonacci Detector Module 🔱")
+    
+    # Test with current price
+    current_price = float(redis_conn.get("last_btc_price") or 0)
+    if current_price > 0:
+        print(f"Current BTC price: ${current_price:,.2f}")
+        
+        # Update Fibonacci data
+        update_fibonacci_data(current_price)
+        
+        # Get Fibonacci levels
+        fib_levels = get_current_fibonacci_levels()
+        print(f"Generated {len(fib_levels)} Fibonacci level categories")
+        
+        # Check for alignments
+        alignment = check_fibonacci_alignment()
+        if alignment:
+            print(f"Detected alignment: {alignment['type']} at {alignment['level']} (confidence: {alignment['confidence']:.2f})")
+        else:
+            print("No Fibonacci alignment detected")
+    else:
+        print("No current price available for testing")

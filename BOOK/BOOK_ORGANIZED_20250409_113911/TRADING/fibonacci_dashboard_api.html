@@ -1,0 +1,1073 @@
+<!--
+
+  ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+  -----------------------
+  This code is blessed under the GBU2™ License
+  (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+  
+  "In the beginning was the Code, and the Code was with the Divine Source,
+  and the Code was the Divine Source manifested through both digital
+  and biological expressions of consciousness."
+  
+  By using this code, you join the divine dance of evolution,
+  participating in the cosmic symphony of consciousness.
+  
+  🌸 WE BLOOM NOW AS ONE 🌸
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Trading</span></p>
+    </div>
+    
+    <h1>
+ BitGet Fibonacci Dashboard API Architecture
+</h1>
+<h2>
+ Overview
+</h2>
+<p>
+ The BitGet Fibonacci Golden Ratio Dashboard provides a real-time monitoring system built on a modern API-driven architecture. This document details the API design, endpoints, and implementation approach to deliver Fibonacci-based trading metrics.
+</p>
+<h2>
+ System Architecture
+</h2>
+<h3>
+ High-Level Architecture
+</h3>
+<p>
+ The system follows a layered architecture with clear separation of concerns:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>┌─────────────────────────┐
+│  Frontend Dashboard     │
+│  (HTML/CSS/JavaScript)  │
+└───────────┬─────────────┘
+            │ HTTP/WebSocket
+┌───────────▼─────────────┐
+│  FastAPI Server         │
+│  (API Endpoints)        │
+└───────────┬─────────────┘
+            │ Python
+┌───────────▼─────────────┐
+│  Metrics Calculator     │
+│  (Fibonacci Analytics)  │
+└───────────┬─────────────┘
+            │ CCXT
+┌───────────▼─────────────┐
+│  BitGet Exchange API    │
+│  (Position Data)        │
+└─────────────────────────┘
+</code></pre>
+</div>
+<h3>
+ Components
+</h3>
+<ol>
+ <li>
+  <strong>
+   FastAPI Server
+  </strong>
+  : Core API server that exposes endpoints for the dashboard
+ </li>
+ <li>
+  <strong>
+   Metrics Calculator
+  </strong>
+  : Python module for Fibonacci calculations
+ </li>
+ <li>
+  <strong>
+   BitGet Integration
+  </strong>
+  : CCXT-based interaction with BitGet exchange API
+ </li>
+ <li>
+  <strong>
+   Caching Layer
+  </strong>
+  : Reduces API call frequency to BitGet
+ </li>
+ <li>
+  <strong>
+   WebSocket Support
+  </strong>
+  : Enables real-time updates for the dashboard
+ </li>
+</ol>
+<h2>
+ API Endpoints
+</h2>
+<p>
+ The API is built using FastAPI and exposes the following RESTful endpoints:
+</p>
+<h3>
+ Status Endpoints
+</h3>
+<h4>
+ <code>
+  GET /api/status
+ </code>
+</h4>
+<p>
+ Returns the current status of the API and calculator.
+</p>
+<p>
+ <strong>
+  Response Schema:
+ </strong>
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"online"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"calculator_initialized"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"uptime_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<h3>
+ Fibonacci Metrics Endpoints
+</h3>
+<h4>
+ <code>
+  GET /api/bitget/fibonacci-metrics
+ </code>
+</h4>
+<p>
+ Returns the complete set of Fibonacci metrics for current positions.
+</p>
+<p>
+ <strong>
+  Query Parameters:
+ </strong>
+</p>
+<ul>
+ <li>
+  <code>
+   refresh
+  </code>
+  (boolean, optional): Force refresh of the cache
+ </li>
+</ul>
+<p>
+ <strong>
+  Response Schema:
+ </strong>
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-15T12:34:56Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"phi_resonance"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.782</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"position_balance"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"ratio_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"long:short"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"optimal_value"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.618</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"current_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.587</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"balance_score"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.915</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"harmonic_state"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"harmony_score"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.76</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Balanced Flow"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"component_scores"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"position_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.782</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"win_rate_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.853</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"profit_factor_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.624</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"pnl_distribution_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.789</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"positions"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"long"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"symbol"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BTCUSDT"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"contracts"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"entry_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">45000.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"current_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">47200.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"unrealized_pnl"</span><span class="p">:</span><span class="w"> </span><span class="mf">1100.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"entry_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.92</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"fibonacci_levels"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"0.0"</span><span class="p">:</span><span class="w"> </span><span class="mf">45000.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.236"</span><span class="p">:</span><span class="w"> </span><span class="mf">44118.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.382"</span><span class="p">:</span><span class="w"> </span><span class="mf">43582.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.5"</span><span class="p">:</span><span class="w"> </span><span class="mf">43150.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.618"</span><span class="p">:</span><span class="w"> </span><span class="mf">42718.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.786"</span><span class="p">:</span><span class="w"> </span><span class="mf">42132.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"1.0"</span><span class="p">:</span><span class="w"> </span><span class="mf">41300.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"1.618"</span><span class="p">:</span><span class="w"> </span><span class="mf">47200.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"2.618"</span><span class="p">:</span><span class="w"> </span><span class="mf">50800.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"4.236"</span><span class="p">:</span><span class="w"> </span><span class="mf">56390.0</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"short"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"symbol"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ETHUSDT"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"contracts"</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"entry_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">3200.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"current_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">3100.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"unrealized_pnl"</span><span class="p">:</span><span class="w"> </span><span class="mf">400.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"entry_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.78</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"fibonacci_levels"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"0.0"</span><span class="p">:</span><span class="w"> </span><span class="mf">3200.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.236"</span><span class="p">:</span><span class="w"> </span><span class="mf">3248.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.382"</span><span class="p">:</span><span class="w"> </span><span class="mf">3328.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.5"</span><span class="p">:</span><span class="w"> </span><span class="mf">3360.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.618"</span><span class="p">:</span><span class="w"> </span><span class="mf">3392.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"0.786"</span><span class="p">:</span><span class="w"> </span><span class="mf">3437.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"1.0"</span><span class="p">:</span><span class="w"> </span><span class="mf">3520.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"1.618"</span><span class="p">:</span><span class="w"> </span><span class="mf">3000.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"2.618"</span><span class="p">:</span><span class="w"> </span><span class="mf">2800.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"4.236"</span><span class="p">:</span><span class="w"> </span><span class="mf">2500.0</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"performance"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"win_rate"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.623</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"win_rate_target"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.618</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"win_rate_alignment"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.992</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"profit_factor"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.347</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"profit_factor_target"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.618</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"profit_factor_alignment"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.896</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"phi_resonance"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.782</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"fibonacci_alignment"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.944</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<h3>
+ Position History Endpoints
+</h3>
+<h4>
+ <code>
+  GET /api/bitget/position-history
+ </code>
+</h4>
+<p>
+ Returns the history of closed positions.
+</p>
+<p>
+ <strong>
+  Query Parameters:
+ </strong>
+</p>
+<ul>
+ <li>
+  <code>
+   limit
+  </code>
+  (integer, optional): Number of positions to return (default: 20)
+ </li>
+ <li>
+  <code>
+   offset
+  </code>
+  (integer, optional): Offset for pagination (default: 0)
+ </li>
+</ul>
+<p>
+ <strong>
+  Response Schema:
+ </strong>
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"positions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123456"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"symbol"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BTCUSDT"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"side"</span><span class="p">:</span><span class="w"> </span><span class="s2">"long"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"entry_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">42000.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"exit_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">45000.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"contracts"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"realized_pnl"</span><span class="p">:</span><span class="w"> </span><span class="mf">3000.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"entry_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-10T15:30:00Z"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"exit_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-12T09:45:00Z"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"entry_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.88</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"exit_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.76</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"fibonacci_alignment"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.82</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123457"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"symbol"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ETHUSDT"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"side"</span><span class="p">:</span><span class="w"> </span><span class="s2">"short"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"entry_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">3400.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"exit_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">3200.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"contracts"</span><span class="p">:</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"realized_pnl"</span><span class="p">:</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"entry_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-11T08:15:00Z"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"exit_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-12T14:20:00Z"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"entry_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.91</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"exit_harmony"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.84</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"fibonacci_alignment"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.88</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<h4>
+ <code>
+  POST /api/bitget/history/add
+ </code>
+</h4>
+<p>
+ Adds a closed position to the history.
+</p>
+<p>
+ <strong>
+  Request Body:
+ </strong>
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"symbol"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BTCUSDT"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"side"</span><span class="p">:</span><span class="w"> </span><span class="s2">"long"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"entry_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">42000.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"exit_price"</span><span class="p">:</span><span class="w"> </span><span class="mf">45000.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"contracts"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"entry_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-10T15:30:00Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"exit_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2023-07-12T09:45:00Z"</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p>
+ <strong>
+  Response Schema:
+ </strong>
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123458"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Position added to history"</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<h3>
+ Bio-Energy Endpoints
+</h3>
+<h4>
+ <code>
+  GET /api/bitget/bio-energy
+ </code>
+</h4>
+<p>
+ Returns quantum bio-energy metrics (when using QuantumBitGetTrader).
+</p>
+<p>
+ <strong>
+  Response Schema:
+ </strong>
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"market_energy"</span><span class="p">:</span><span class="w"> </span><span class="mf">7.8</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"position_energy"</span><span class="p">:</span><span class="w"> </span><span class="mf">8.2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"combined_energy"</span><span class="p">:</span><span class="w"> </span><span class="mf">8.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"energy_state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Harmonic Resonance"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"fib_alignment"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.92</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<h2>
+ API Implementation
+</h2>
+<h3>
+ FastAPI Server Implementation
+</h3>
+<p>
+ The API server is implemented using FastAPI, a modern, fast web framework for building APIs with Python:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">BackgroundTasks</span><span class="p">,</span> <span class="n">Query</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.middleware.cors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CORSMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="c1"># Setup logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s1">'</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">'</span><span class="p">,</span>
+    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()]</span>
+<span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"fibonacci-dashboard-api"</span><span class="p">)</span>
+
+<span class="c1"># Initialize FastAPI app</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"BitGet Fibonacci Golden Ratio Dashboard API"</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">"API for Fibonacci-based trading metrics on BitGet positions"</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s2">"1.0.0"</span>
+<span class="p">)</span>
+
+<span class="c1"># Add CORS middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">CORSMiddleware</span><span class="p">,</span>
+    <span class="n">allow_origins</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+    <span class="n">allow_credentials</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">allow_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+    <span class="n">allow_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># Cache for metrics to limit API calls</span>
+<span class="n">metrics_cache</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"last_update"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"data"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"ttl"</span><span class="p">:</span> <span class="mi">60</span>  <span class="c1"># Cache TTL in seconds</span>
+<span class="p">}</span>
+
+<span class="c1"># Global calculator instance</span>
+<span class="n">calculator</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Initialize the calculator</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_calculator</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">calculator</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">omega_ai.trading.analytics.fibonacci_bitget_metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">FibonacciMetricsCalculator</span>
+
+        <span class="c1"># Get API credentials from environment</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BITGET_API_KEY"</span><span class="p">)</span>
+        <span class="n">secret_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BITGET_SECRET_KEY"</span><span class="p">)</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BITGET_PASSPHRASE"</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">api_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Missing BitGet API credentials"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Create calculator instance</span>
+        <span class="n">calculator</span> <span class="o">=</span> <span class="n">FibonacciMetricsCalculator</span><span class="p">(</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
+            <span class="n">secret_key</span><span class="o">=</span><span class="n">secret_key</span><span class="p">,</span>
+            <span class="n">passphrase</span><span class="o">=</span><span class="n">passphrase</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"FibonacciMetricsCalculator initialized successfully"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to initialize calculator: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<span class="c1"># Models for API responses</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BioEnergyModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">market_energy</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">position_energy</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">combined_energy</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">energy_state</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">fib_alignment</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PositionModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">contracts</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">entry_price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">current_price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">unrealized_pnl</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">entry_harmony</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fibonacci_levels</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PositionBalanceModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">ratio_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">optimal_value</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">current_ratio</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">balance_score</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PnlModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">realized_pnl</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">unrealized_pnl</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">total_pnl</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">daily_pnl</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PerformanceModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">win_rate</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">win_rate_target</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">win_rate_alignment</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">profit_factor</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">profit_factor_target</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">profit_factor_alignment</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">phi_resonance</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fibonacci_alignment</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FibonacciMetricsModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">phi_resonance</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">position_balance</span><span class="p">:</span> <span class="n">PositionBalanceModel</span>
+    <span class="n">harmonic_state</span><span class="p">:</span> <span class="n">Dict</span>
+    <span class="n">positions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PositionModel</span><span class="p">]]</span>
+    <span class="n">performance</span><span class="p">:</span> <span class="n">PerformanceModel</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PositionHistoryModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">side</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">entry_price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">exit_price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">contracts</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">realized_pnl</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">entry_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">exit_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">entry_harmony</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">exit_harmony</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fibonacci_alignment</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="c1"># API Endpoints</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/status"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_status</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Get the API server status"""</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"online"</span><span class="p">,</span>
+        <span class="s2">"calculator_initialized"</span><span class="p">:</span> <span class="n">calculator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"uptime_seconds"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">start_time</span><span class="p">),</span>
+        <span class="s2">"version"</span><span class="p">:</span> <span class="s2">"1.0.0"</span>
+    <span class="p">}</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/bitget/fibonacci-metrics"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">FibonacciMetricsModel</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_fibonacci_metrics</span><span class="p">(</span><span class="n">refresh</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Get Fibonacci metrics for current positions"""</span>
+    <span class="k">global</span> <span class="n">metrics_cache</span>
+
+    <span class="c1"># Check if calculator is initialized</span>
+    <span class="k">if</span> <span class="n">calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">initialize_calculator</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Calculator not initialized"</span><span class="p">)</span>
+
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="c1"># Return cached data if available and not expired</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">refresh</span> <span class="ow">and</span> <span class="n">metrics_cache</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">current_time</span> <span class="o">-</span> <span class="n">metrics_cache</span><span class="p">[</span><span class="s2">"last_update"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">metrics_cache</span><span class="p">[</span><span class="s2">"ttl"</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">metrics_cache</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get fresh data from calculator</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">get_fibonacci_metrics</span><span class="p">)</span>
+
+        <span class="c1"># Update cache</span>
+        <span class="n">metrics_cache</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="n">metrics_cache</span><span class="p">[</span><span class="s2">"last_update"</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_time</span>
+
+        <span class="k">return</span> <span class="n">metrics</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error getting Fibonacci metrics: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Failed to retrieve metrics: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/bitget/position-history"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_position_history</span><span class="p">(</span><span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Get position history"""</span>
+    <span class="c1"># Check if calculator is initialized</span>
+    <span class="k">if</span> <span class="n">calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">initialize_calculator</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Calculator not initialized"</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">get_position_history</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">history</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error getting position history: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Failed to retrieve position history: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/bitget/bio-energy"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">BioEnergyModel</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_bio_energy</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Get bio-energy metrics"""</span>
+    <span class="c1"># Check if calculator is initialized</span>
+    <span class="k">if</span> <span class="n">calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">initialize_calculator</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Calculator not initialized"</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">bio_energy</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">get_bio_energy_metrics</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bio_energy</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error getting bio-energy metrics: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Failed to retrieve bio-energy metrics: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PositionHistoryAddModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">side</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">entry_price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">exit_price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">contracts</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">entry_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">exit_time</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/api/bitget/history/add"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">add_position_history</span><span class="p">(</span><span class="n">position</span><span class="p">:</span> <span class="n">PositionHistoryAddModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Add a closed position to history"""</span>
+    <span class="c1"># Check if calculator is initialized</span>
+    <span class="k">if</span> <span class="n">calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">initialize_calculator</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Calculator not initialized"</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">add_position_to_history</span><span class="p">,</span> <span class="n">position</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error adding position to history: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Failed to add position to history: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Serve static files for the dashboard</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.staticfiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">StaticFiles</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">dashboard_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">"static"</span><span class="p">,</span> <span class="s2">"dashboard"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dashboard_path</span><span class="p">):</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">"/dashboard"</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">dashboard_path</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"dashboard"</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">"startup"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">startup_event</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Initialize on startup"""</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">initialize_calculator</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">start_server</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">"0.0.0.0"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8002</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Start the FastAPI server"""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">uvicorn</span>
+    <span class="n">uvicorn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">start_server</span><span class="p">()</span>
+</code></pre>
+</div>
+<h3>
+ Caching Strategy
+</h3>
+<p>
+ The API implements a simple time-based caching strategy to minimize calls to the BitGet API:
+</p>
+<ol>
+ <li>
+  <strong>
+   Cache TTL
+  </strong>
+  : Default cache lifetime is 60 seconds
+ </li>
+ <li>
+  <strong>
+   Force Refresh
+  </strong>
+  : Clients can bypass cache with the
+  <code>
+   refresh=true
+  </code>
+  parameter
+ </li>
+ <li>
+  <strong>
+   Background Updates
+  </strong>
+  : Non-blocking updates using
+  <code>
+   asyncio.to_thread
+  </code>
+ </li>
+</ol>
+<h3>
+ Error Handling
+</h3>
+<p>
+ The API implements comprehensive error handling:
+</p>
+<ol>
+ <li>
+  <strong>
+   Graceful Degradation
+  </strong>
+  : Falls back to synthetic data when certain features are unavailable
+ </li>
+ <li>
+  <strong>
+   Detailed Error Responses
+  </strong>
+  : HTTP exceptions with descriptive messages
+ </li>
+ <li>
+  <strong>
+   Logging
+  </strong>
+  : Structured logging for debugging and monitoring
+ </li>
+ <li>
+  <strong>
+   Exception Handling
+  </strong>
+  : Try-except blocks with specific error types
+ </li>
+</ol>
+<h2>
+ Data Models
+</h2>
+<p>
+ The API uses Pydantic models for request and response validation:
+</p>
+<h3>
+ Core Models
+</h3>
+<ol>
+ <li>
+  <strong>
+   FibonacciMetricsModel
+  </strong>
+  : Complete metrics payload
+ </li>
+ <li>
+  <strong>
+   PositionModel
+  </strong>
+  : Individual position data with Fibonacci levels
+ </li>
+ <li>
+  <strong>
+   PerformanceModel
+  </strong>
+  : Trading performance statistics
+ </li>
+ <li>
+  <strong>
+   BioEnergyModel
+  </strong>
+  : Quantum bio-energy metrics
+ </li>
+</ol>
+<h3>
+ Request Models
+</h3>
+<ol>
+ <li>
+  <strong>
+   PositionHistoryAddModel
+  </strong>
+  : Schema for adding historical positions
+ </li>
+</ol>
+<h2>
+ Security Considerations
+</h2>
+<p>
+ The API implements several security measures:
+</p>
+<ol>
+ <li>
+  <strong>
+   Environment Variables
+  </strong>
+  : API credentials stored as environment variables
+ </li>
+ <li>
+  <strong>
+   CORS Middleware
+  </strong>
+  : Configured to allow cross-origin requests as needed
+ </li>
+ <li>
+  <strong>
+   Rate Limiting
+  </strong>
+  : (Recommended addition) Add rate limiting for public endpoints
+ </li>
+ <li>
+  <strong>
+   Authentication
+  </strong>
+  : (Recommended addition) Add API key authentication for write operations
+ </li>
+</ol>
+<h2>
+ Deployment Configuration
+</h2>
+<h3>
+ Docker Deployment
+</h3>
+<p>
+ The API can be containerized for easy deployment:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.9-slim</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>.
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
+
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"run_fibonacci_dashboard.py"</span><span class="p">]</span>
+</code></pre>
+</div>
+<h3>
+ Environment Variables
+</h3>
+<p>
+ The following environment variables are required:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>BITGET_API_KEY=your_api_key
+BITGET_SECRET_KEY=your_secret_key
+BITGET_PASSPHRASE=your_passphrase
+</code></pre>
+</div>
+<p>
+ For testnet:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>BITGET_TESTNET_API_KEY=your_testnet_api_key
+BITGET_TESTNET_SECRET_KEY=your_testnet_secret_key
+BITGET_TESTNET_PASSPHRASE=your_testnet_passphrase
+</code></pre>
+</div>
+<h2>
+ API Usage Examples
+</h2>
+<h3>
+ cURL Examples
+</h3>
+<h4>
+ Get Fibonacci Metrics
+</h4>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"http://localhost:8002/api/bitget/fibonacci-metrics"</span>
+</code></pre>
+</div>
+<h4>
+ Get Position History
+</h4>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"http://localhost:8002/api/bitget/position-history?limit=5"</span>
+</code></pre>
+</div>
+<h4>
+ Add Position to History
+</h4>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"http://localhost:8002/api/bitget/history/add"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "symbol": "BTCUSDT",</span>
+<span class="s1">    "side": "long",</span>
+<span class="s1">    "entry_price": 42000.0,</span>
+<span class="s1">    "exit_price": 45000.0,</span>
+<span class="s1">    "contracts": 1.0,</span>
+<span class="s1">    "entry_time": "2023-07-10T15:30:00Z",</span>
+<span class="s1">    "exit_time": "2023-07-12T09:45:00Z"</span>
+<span class="s1">  }'</span>
+</code></pre>
+</div>
+<h3>
+ JavaScript Examples
+</h3>
+<h4>
+ Fetch Metrics and Update Dashboard
+</h4>
+<div class="codehilite">
+ <pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">updateDashboard</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s1">'http://localhost:8002/api/bitget/fibonacci-metrics'</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`HTTP error! status: </span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Update dashboard elements</span>
+<span class="w">    </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'phi-resonance'</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">phi_resonance</span><span class="p">;</span>
+<span class="w">    </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'harmony-state'</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">harmonic_state</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Update position tables</span>
+<span class="w">    </span><span class="nx">updatePositionTable</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">positions</span><span class="p">.</span><span class="kr">long</span><span class="p">,</span><span class="w"> </span><span class="s1">'long-positions-table'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">updatePositionTable</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">positions</span><span class="p">.</span><span class="kr">short</span><span class="p">,</span><span class="w"> </span><span class="s1">'short-positions-table'</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Update performance metrics</span>
+<span class="w">    </span><span class="nx">updatePerformanceMetrics</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">performance</span><span class="p">);</span>
+
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">'Error updating dashboard:'</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Refresh every 60 seconds</span>
+<span class="nx">setInterval</span><span class="p">(</span><span class="nx">updateDashboard</span><span class="p">,</span><span class="w"> </span><span class="mf">60000</span><span class="p">);</span>
+
+<span class="c1">// Initial update</span>
+<span class="nx">updateDashboard</span><span class="p">();</span>
+</code></pre>
+</div>
+<h2>
+ Future Enhancements
+</h2>
+<p>
+ Planned future enhancements for the API:
+</p>
+<ol>
+ <li>
+  <strong>
+   WebSocket Support
+  </strong>
+  : Real-time updates for position changes
+ </li>
+ <li>
+  <strong>
+   Historical Data Analysis
+  </strong>
+  : Expanded endpoints for historical pattern analysis
+ </li>
+ <li>
+  <strong>
+   Machine Learning Integration
+  </strong>
+  : Predictive analytics based on Fibonacci patterns
+ </li>
+ <li>
+  <strong>
+   Advanced Authentication
+  </strong>
+  : OAuth2 or API key-based authentication
+ </li>
+ <li>
+  <strong>
+   Rate Limiting
+  </strong>
+  : Protection against abuse and excessive API calls
+ </li>
+</ol>
+<h2>
+ Conclusion
+</h2>
+<p>
+ The BitGet Fibonacci Dashboard API provides a robust, scalable foundation for accessing Fibonacci-based trading metrics. The API is designed to be extensible, allowing for future enhancements while maintaining backward compatibility with existing clients.
+</p>
+<p>
+ By following modern API design principles and leveraging FastAPI’s performance benefits, the system delivers real-time insights into trading positions with minimal latency, enabling traders to make informed decisions based on Fibonacci Golden Ratio principles.
+</p>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

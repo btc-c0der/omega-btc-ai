@@ -1,0 +1,2 @@
+include README.md
+recursive-include quantum_dashboard/assets * 

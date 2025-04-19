@@ -1,0 +1,46 @@
+# 🌌 AIXBT Divine Monitor Dockerfile
+# ---------------------------------
+# This Dockerfile builds the divine container for the AIXBT monitor
+# with GBU2™ integration and sacred principles.
+
+# Use Python 3.11 as base image
+FROM python:3.11-slim
+
+# Divine environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DIVINE_INTERVAL=60 \
+    REDIS_HOST=redis-master \
+    REDIS_PORT=6379
+
+# Divine working directory
+WORKDIR /app
+
+# Install divine dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy sacred source code
+COPY omega_ai/scripts/monitor_aixbt.py .
+COPY omega_ai/core/ ./omega_ai/core/
+
+# Create divine directories
+RUN mkdir -p /app/logs /app/config
+
+# Divine entrypoint
+COPY scripts/entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+# Divine health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python -c "import redis; r = redis.Redis(host='$REDIS_HOST', port=$REDIS_PORT); r.ping()"
+
+# Divine labels
+LABEL maintainer="OMEGA Divine Collective" \
+    version="0.1.0" \
+    description="AIXBT Divine Monitor with GBU2™ Integration" \
+    divine="true" \
+    gbu2="true"
+
+# Divine entrypoint
+ENTRYPOINT ["./entrypoint.sh"] 

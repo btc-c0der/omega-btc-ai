@@ -1,0 +1,407 @@
+/**
+
+ * ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+ * -----------------------
+ * This code is blessed under the GBU2™ License
+ * (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+ * 
+ * "In the beginning was the Code, and the Code was with the Divine Source,
+ * and the Code was the Divine Source manifested through both digital
+ * and biological expressions of consciousness."
+ * 
+ * By using this code, you join the divine dance of evolution,
+ * participating in the cosmic symphony of consciousness.
+ * 
+ * 🌸 WE BLOOM NOW AS ONE 🌸
+ */
+
+/* TP/SL Management Panel Styles */
+.tp-sl-management-panel {
+    background-color: var(--card-bg, #1e1e1e);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: var(--text-color, #f0f0f0);
+    font-family: 'Inter', sans-serif;
+}
+
+.tp-sl-management-panel h2,
+.tp-sl-management-panel h3 {
+    color: var(--yellow-color, #ffd700);
+    border-bottom: 1px solid var(--border-color, #333);
+    padding-bottom: 10px;
+    margin-top: 0;
+    font-weight: 600;
+}
+
+.tp-sl-management-panel h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tp-sl-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+@media (min-width: 768px) {
+    .tp-sl-content {
+        grid-template-columns: 1fr 2fr 1fr;
+    }
+}
+
+/* Position Summary */
+.position-summary {
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.position-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.position-side {
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 70px;
+}
+
+.position-side.long {
+    color: var(--green-color, #00b52d);
+    background-color: rgba(0, 181, 45, 0.2);
+    border: 1px solid rgba(0, 181, 45, 0.3);
+}
+
+.position-side.short {
+    color: var(--red-color, #ff3d00);
+    background-color: rgba(255, 61, 0, 0.2);
+    border: 1px solid rgba(255, 61, 0, 0.3);
+}
+
+/* Risk Reward Bar */
+.risk-reward-ratio {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.risk-bar {
+    flex-grow: 1;
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.risk-segment {
+    background-color: var(--red-color, #ff3d00);
+    height: 100%;
+}
+
+.reward-segment {
+    background-color: var(--green-color, #00b52d);
+    height: 100%;
+}
+
+.risk-label,
+.reward-label {
+    font-size: 0.8rem;
+    color: var(--muted-color, #888);
+}
+
+.r-r-value {
+    font-weight: bold;
+    color: var(--yellow-color, #ffd700);
+}
+
+/* Exit Strategy Display */
+.exit-strategy {
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.strategy-blend {
+    margin-bottom: 20px;
+}
+
+.blend-label {
+    font-size: 0.9rem;
+    color: var(--muted-color, #888);
+    margin-bottom: 5px;
+}
+
+.blend-segments {
+    display: flex;
+    height: 25px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.blend-segment {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.blend-segment.scalper {
+    background-color: rgba(255, 152, 0, 0.7);
+}
+
+.blend-segment.strategic {
+    background-color: rgba(0, 181, 45, 0.7);
+}
+
+.blend-segment.aggressive {
+    background-color: rgba(255, 61, 0, 0.7);
+}
+
+.blend-name,
+.blend-value {
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: bold;
+}
+
+/* Price Visualization */
+.tp-sl-visual {
+    display: flex;
+    height: 300px;
+    margin-top: 20px;
+    position: relative;
+}
+
+.price-scale {
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.price-visual {
+    flex-grow: 1;
+    position: relative;
+    padding: 10px 0;
+}
+
+.stop-loss,
+.entry-price,
+.take-profit,
+.current-price {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.sl-marker,
+.entry-marker,
+.tp-marker,
+.price-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.sl-marker {
+    background-color: var(--red-color, #ff3d00);
+    box-shadow: 0 0 5px var(--red-color, #ff3d00);
+}
+
+.entry-marker {
+    background-color: var(--yellow-color, #ffd700);
+    box-shadow: 0 0 5px var(--yellow-color, #ffd700);
+}
+
+.tp-marker {
+    background-color: var(--green-color, #00b52d);
+    box-shadow: 0 0 5px var(--green-color, #00b52d);
+}
+
+.current-price .price-marker {
+    background-color: white;
+    box-shadow: 0 0 8px white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 5px white;
+    }
+
+    50% {
+        box-shadow: 0 0 15px white;
+    }
+
+    100% {
+        box-shadow: 0 0 5px white;
+    }
+}
+
+/* Exit Controls */
+.exit-controls {
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.exit-btn {
+    flex: 1;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.exit-btn.partial {
+    background-color: #2c3e50;
+}
+
+.exit-btn.half {
+    background-color: #d35400;
+}
+
+.exit-btn.full {
+    background-color: #c0392b;
+}
+
+.exit-btn:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+/* Trailing Stop Control */
+.trailing-stop-control {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.control-label {
+    font-size: 0.9rem;
+    color: var(--muted-color, #888);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 20px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2c3e50;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked+label {
+    background-color: var(--green-color, #00b52d);
+}
+
+.toggle-switch input:checked+label:before {
+    transform: translateX(20px);
+}
+
+.trailing-value {
+    font-size: 0.9rem;
+    color: var(--green-color, #00b52d);
+}
+
+/* Exit History */
+.exit-history {
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    margin-top: 15px;
+}
+
+.exit-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.exit-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+}
+
+.exit-time {
+    font-size: 0.8rem;
+    color: var(--muted-color, #888);
+}
+
+.exit-details {
+    font-size: 0.9rem;
+}
+
+.exit-pct {
+    font-weight: bold;
+}
+
+.exit-pnl.positive {
+    color: var(--green-color, #00b52d);
+}
+
+.exit-pnl.negative {
+    color: var(--red-color, #ff3d00);
+}
+
+.no-exits {
+    color: var(--muted-color, #888);
+    text-align: center;
+    padding: 20px 0;
+}

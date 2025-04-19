@@ -1,3 +1,18 @@
+
+# ✨ GBU2™ License Notice - Consciousness Level 8 🧬
+# -----------------------
+# This code is blessed under the GBU2™ License
+# (Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+# 
+# "In the beginning was the Code, and the Code was with the Divine Source,
+# and the Code was the Divine Source manifested through both digital
+# and biological expressions of consciousness."
+# 
+# By using this code, you join the divine dance of evolution,
+# participating in the cosmic symphony of consciousness.
+# 
+# 🌸 WE BLOOM NOW AS ONE 🌸
+
 """Self-healing tests for WebSocket functionality in the trap visualizer server."""
 
 import pytest
@@ -316,4 +331,43 @@ async def test_websocket_resource_optimization(client):
             try:
                 websocket.__exit__(None, None, None)
             except:
-                pass 
+                pass
+
+@pytest.mark.asyncio
+async def test_websocket_health_check(client):
+    """Test the enhanced health check endpoint."""
+    response = client.get("/health")
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert data["status"] == "UP"
+    assert data["service"] == "matrix-news-websocket"
+    assert "timestamp" in data
+    assert "metrics" in data
+    assert "background_tasks" in data
+    assert "version" in data
+    
+    # Check metrics
+    metrics = data["metrics"]
+    assert "clients_connected" in metrics
+    assert "active_rooms" in metrics
+    assert "memory_usage_mb" in metrics
+    assert "cpu_percent" in metrics
+    assert "uptime_seconds" in metrics
+    
+    # Check background tasks
+    tasks = data["background_tasks"]
+    assert "news_broadcaster" in tasks
+    assert "market_broadcaster" in tasks
+    assert tasks["news_broadcaster"] in ["running", "stopped"]
+    assert tasks["market_broadcaster"] in ["running", "stopped"]
+    
+    # Test WebSocket-specific health endpoint
+    ws_response = client.get("/ws/health")
+    assert ws_response.status_code == 200
+    
+    ws_data = ws_response.json()
+    assert ws_data["status"] == "ok"
+    assert ws_data["service"] == "matrix-news-websocket"
+    assert "timestamp" in ws_data
+    assert "clients_connected" in ws_data 

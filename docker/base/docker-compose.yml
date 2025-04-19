@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  matrix-news-redis:
+    image: redis:alpine
+    container_name: matrix-news-redis
+    ports:
+      - "10079:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - matrix_news_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  matrix-news-websocket:
+    image: python:3.9-slim
+    container_name: matrix-news-websocket
+    working_dir: /app
+    volumes:
+      - ./temporal:/app/temporal
+      - ./web:/app/web
+      - ./src:/app/src
+      - ./omega_ai:/app/omega_ai
+    ports:
+      - "10095:10095"
+    environment:
+      - PORT=10095
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - REDIS_HOST=matrix-news-redis
+      - REDIS_PORT=6379
+    command: >
+      bash -c "pip install fastapi uvicorn python-socketio aiohttp websockets redis && python -m uvicorn temporal.websocket_minimal:app --host 0.0.0.0 --port 10095"
+    networks:
+      - matrix_news_network
+    depends_on:
+      matrix-news-redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10095/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  matrix-news-proxy:
+    image: nginx:alpine
+    container_name: matrix-news-proxy
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:rw
+      - ./web:/usr/share/nginx/html:ro
+    ports:
+      - "10083:80"
+    depends_on:
+      matrix-news-websocket:
+        condition: service_healthy
+    networks:
+      - matrix_news_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:80/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+
+
+networks:
+  matrix_news_network:
+    driver: bridge

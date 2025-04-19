@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qa-ai
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qa-ai-config
+  namespace: qa-ai
+data:
+  DASHBOARD_HOST: "0.0.0.0"
+  DASHBOARD_PORT: "3000"
+  METRICS_UPDATE_INTERVAL: "60"
+  LOG_LEVEL: "INFO"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qa-ai-dashboard
+  namespace: qa-ai
+spec:
+  selector:
+    app: qa-ai-dashboard
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-ai-dashboard
+  namespace: qa-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qa-ai-dashboard
+  template:
+    metadata:
+      labels:
+        app: qa-ai-dashboard
+    spec:
+      containers:
+        - name: qa-ai-dashboard
+          image: omega-btc-ai/qa-ai-dashboard:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: qa-ai-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-ai-metrics
+  namespace: qa-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qa-ai-metrics
+  template:
+    metadata:
+      labels:
+        app: qa-ai-metrics
+    spec:
+      containers:
+        - name: qa-ai-metrics
+          image: omega-btc-ai/qa-ai-metrics:latest
+          envFrom:
+            - configMapRef:
+                name: qa-ai-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-ai-personas
+  namespace: qa-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qa-ai-personas
+  template:
+    metadata:
+      labels:
+        app: qa-ai-personas
+    spec:
+      containers:
+        - name: qa-ai-personas
+          image: omega-btc-ai/qa-ai-personas:latest
+          envFrom:
+            - configMapRef:
+                name: qa-ai-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-ai-cli
+  namespace: qa-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qa-ai-cli
+  template:
+    metadata:
+      labels:
+        app: qa-ai-cli
+    spec:
+      containers:
+        - name: qa-ai-cli
+          image: omega-btc-ai/qa-ai-cli:latest
+          envFrom:
+            - configMapRef:
+                name: qa-ai-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi" 

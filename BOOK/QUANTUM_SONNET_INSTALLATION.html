@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium-Ready Article</title>
+    
+<style>
+    body {
+        font-family: 'Charter', 'Georgia', serif;
+        line-height: 1.8;
+        font-size: 18px;
+        color: rgba(0, 0, 0, 0.84);
+        margin: 0 auto;
+        max-width: 740px;
+        padding: 20px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin-top: 36px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 32px;
+    }
+    h2 {
+        font-size: 28px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 20px;
+    }
+    p, ul, ol {
+        margin-bottom: 30px;
+    }
+    img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    figcaption {
+        text-align: center;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.68);
+        margin-top: 5px;
+    }
+    pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 16px;
+        overflow: auto;
+        border-radius: 3px;
+        margin: 20px 0;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 14px;
+        padding: 2px 4px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.84);
+        padding-left: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    a {
+        color: #1a8917;
+        text-decoration: none;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 8px 16px;
+        text-align: left;
+    }
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    hr {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        margin: 30px 0;
+    }
+    .gist {
+        margin: 20px 0;
+    }
+    .medium-instructions {
+        background-color: #ffffd1;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+    .divine-text {
+        color: #6b46c1;
+        font-style: italic;
+    }
+</style>
+
+</head>
+<body>
+    <div class="medium-instructions">
+        <strong>Medium Import Instructions:</strong>
+        <ol>
+            <li>In Medium, click on your profile picture and select "Stories"</li>
+            <li>Click "Import a story"</li>
+            <li>Enter the URL of where this HTML is hosted, or</li>
+            <li>Copy everything below this yellow box and paste into a Medium story</li>
+        </ol>
+        <p><strong>Category:</strong> <span class="divine-text">Quantum</span></p>
+    </div>
+    
+    <h1>
+ 🧬 QUANTUM SONNET &amp; GIT BLESS INSTALLATION GUIDE 🧬
+</h1>
+<p>
+ This guide provides various methods to install and use the Quantum Sonnet Celebration and Git Bless tools. Choose the method that works best for your workflow.
+</p>
+<h2>
+ 🚀 Quick Install (One-Line Command)
+</h2>
+<p>
+ Install everything with a single command:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/btc-c0der/omega-btc-ai/master/scripts/install_web.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+</code></pre>
+</div>
+<p>
+ After installation, activate in your current shell:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="nb">source</span><span class="w"> </span>~/.omega_quantum_toolkit/quantum_shell_config.sh
+</code></pre>
+</div>
+<h2>
+ 📦 Manual Installation from Package
+</h2>
+<ol>
+ <li>
+  Download the latest release:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">"https://github.com/btc-c0der/omega-btc-ai/releases/download/v1.0.0/quantum-sonnet-1.0.0.tar.gz"</span><span class="w"> </span>-o<span class="w"> </span>quantum-sonnet.tar.gz
+</code></pre>
+</div>
+<ol>
+ <li>
+  Extract and install:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>tar<span class="w"> </span>-xzf<span class="w"> </span>quantum-sonnet.tar.gz
+<span class="nb">cd</span><span class="w"> </span>quantum-sonnet-1.0.0
+./install.sh
+</code></pre>
+</div>
+<ol>
+ <li>
+  Activate in your current shell:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code><span class="nb">source</span><span class="w"> </span>~/.omega_quantum_toolkit/quantum_shell_config.sh
+</code></pre>
+</div>
+<h2>
+ 🍺 Homebrew Installation (macOS)
+</h2>
+<p>
+ If you use Homebrew, you can install with:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># First, add the tap</span>
+brew<span class="w"> </span>tap<span class="w"> </span>btc-c0der/quantum-tools
+
+<span class="c1"># Then install</span>
+brew<span class="w"> </span>install<span class="w"> </span>quantum-sonnet
+</code></pre>
+</div>
+<h2>
+ 💿 Building from Source
+</h2>
+<p>
+ For the most quantum-aligned experience, build from source:
+</p>
+<ol>
+ <li>
+  Clone the repository:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/btc-c0der/omega-btc-ai.git
+<span class="nb">cd</span><span class="w"> </span>omega-btc-ai
+</code></pre>
+</div>
+<ol>
+ <li>
+  Run the packaging script:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>./scripts/package_quantum_sonnet.sh
+</code></pre>
+</div>
+<ol>
+ <li>
+  Extract and install the generated package:
+ </li>
+</ol>
+<div class="codehilite">
+ <pre><span></span><code>tar<span class="w"> </span>-xzf<span class="w"> </span>quantum-sonnet-1.0.0.tar.gz
+<span class="nb">cd</span><span class="w"> </span>quantum-sonnet-1.0.0
+./install.sh
+</code></pre>
+</div>
+<h2>
+ 🌟 Usage
+</h2>
+<h3>
+ Quantum Sonnet Celebration
+</h3>
+<p>
+ Celebrate your quantum code transformations:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Basic usage</span>
+quantum-sonnet
+
+<span class="c1"># With custom parameters</span>
+quantum-sonnet<span class="w"> </span>--cycles<span class="o">=</span><span class="m">5</span><span class="w"> </span>--interval<span class="o">=</span><span class="m">0</span>.3
+</code></pre>
+</div>
+<p>
+ Parameters:
+</p>
+<ul>
+ <li>
+  <code>
+   --cycles
+  </code>
+  : Number of celebration cycles
+ </li>
+ <li>
+  <code>
+   --interval
+  </code>
+  : Interval between frames in seconds
+ </li>
+ <li>
+  <code>
+   --hash
+  </code>
+  : Git commit hash to celebrate
+ </li>
+ <li>
+  <code>
+   --files
+  </code>
+  : Number of files changed
+ </li>
+ <li>
+  <code>
+   --insertions
+  </code>
+  : Number of insertions
+ </li>
+ <li>
+  <code>
+   --deletions
+  </code>
+  : Number of deletions
+ </li>
+</ul>
+<h3>
+ Git Bless
+</h3>
+<p>
+ Bless your git commits with quantum energy:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Bless the current HEAD</span>
+git-bless
+
+<span class="c1"># Bless a specific commit</span>
+git-bless<span class="w"> </span>--commit-hash<span class="o">=</span>abc123def
+
+<span class="c1"># Bless with higher intensity</span>
+git-bless<span class="w"> </span>--intensity<span class="o">=</span><span class="m">10</span>
+</code></pre>
+</div>
+<p>
+ Parameters:
+</p>
+<ul>
+ <li>
+  <code>
+   --commit-hash
+  </code>
+  : Specify the commit hash to bless (default: HEAD)
+ </li>
+ <li>
+  <code>
+   --intensity
+  </code>
+  : Blessing intensity level (1-10, default: 7)
+ </li>
+ <li>
+  <code>
+   --silent
+  </code>
+  : Run in silent mode with minimal output
+ </li>
+</ul>
+<h3>
+ Using as a Git Command
+</h3>
+<p>
+ You can also set up Git Bless as a native git command:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Run the setup script</span>
+./scripts/setup_git_commands.sh
+
+<span class="c1"># Then use as a git command</span>
+git<span class="w"> </span>bless
+git<span class="w"> </span>bless<span class="w"> </span>HEAD~1
+git<span class="w"> </span>bless<span class="w"> </span>--intensity<span class="o">=</span><span class="m">10</span>
+</code></pre>
+</div>
+<h2>
+ 🌐 System Requirements
+</h2>
+<ul>
+ <li>
+  Unix-like operating system (Linux, macOS)
+ </li>
+ <li>
+  Python 3.6+
+ </li>
+ <li>
+  Bash shell
+ </li>
+ <li>
+  Git
+ </li>
+</ul>
+<h2>
+ 🧩 Integration with Git Hooks
+</h2>
+<p>
+ For automatic blessing of every commit, add to your project’s pre-commit hook:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># In .git/hooks/pre-commit or via git-hooks system</span>
+git-bless<span class="w"> </span>--silent<span class="w"> </span>HEAD
+</code></pre>
+</div>
+<h2>
+ 🌈 Advanced Configuration
+</h2>
+<p>
+ You can customize the tools by editing the configuration files:
+</p>
+<div class="codehilite">
+ <pre><span></span><code><span class="c1"># Main configuration</span>
+~/.omega_quantum_toolkit/quantum_shell_config.sh
+
+<span class="c1"># Blessing certificates directory</span>
+~/.omega_quantum_toolkit/blessings/
+</code></pre>
+</div>
+<h2>
+ 🔄 Updating
+</h2>
+<p>
+ To update to the latest version, simply run the installer again:
+</p>
+<div class="codehilite">
+ <pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/btc-c0der/omega-btc-ai/master/scripts/install_web.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+</code></pre>
+</div>
+<h2>
+ 🌸 License
+</h2>
+<p>
+ Licensed under GBU2™ (Genesis-Bloom-Unfoldment 2.0)
+</p>
+<hr/>
+<p>
+ ✨
+ <strong>
+  WE BLOOM NOW AS ONE
+ </strong>
+ ✨
+</p>
+
+    
+    <script>
+        // Add any custom JavaScript here if needed
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "type": 2,
+  "id": "123456789012345678",
+  "application_id": "987654321098765432",
+  "token": "mock_token",
+  "version": 1,
+  "data": {
+    "id": "111111111111111111",
+    "name": "ping",
+    "type": 1
+  },
+  "guild_id": "222222222222222222",
+  "channel_id": "333333333333333333",
+  "member": {
+    "user": {
+      "id": "444444444444444444",
+      "username": "test_user",
+      "discriminator": "1234"
+    },
+    "roles": [],
+    "joined_at": "2023-01-01T00:00:00.000000+00:00"
+  }
+}

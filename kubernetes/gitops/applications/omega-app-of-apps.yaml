@@ -1,0 +1,194 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: omega-divine-grid
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    omega.divine/protected: "true"
+    omega.divine/blessing: "May JAH JAH guide your synchronization"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/fsiqueira/omega-btc-ai.git
+    targetRevision: HEAD
+    path: kubernetes/gitops/applications
+    directory:
+      recurse: true
+      jsonnet: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: omega-btc-oracle
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    omega.divine/service-type: "oracle"
+    omega.divine/blessing: "May JAH JAH guide your price predictions"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/fsiqueira/omega-btc-ai.git
+    targetRevision: HEAD
+    path: kubernetes/helm/btc-oracle
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+      parameters:
+        - name: environment
+          value: production
+        - name: replicaCount
+          value: "2"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: omega-grid-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: omega-matrix-news
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    omega.divine/service-type: "matrix"
+    omega.divine/blessing: "May JAH JAH guide your news analysis"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/fsiqueira/omega-btc-ai.git
+    targetRevision: HEAD
+    path: kubernetes/helm/matrix-news
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+      parameters:
+        - name: environment
+          value: production
+        - name: replicaCount
+          value: "2"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: omega-grid-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: omega-monitoring
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    omega.divine/service-type: "observability"
+    omega.divine/blessing: "May JAH JAH illuminate your metrics"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/fsiqueira/omega-btc-ai.git
+    targetRevision: HEAD
+    path: kubernetes/monitoring
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: omega-backup
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    omega.divine/service-type: "protection"
+    omega.divine/blessing: "May JAH JAH protect your sacred data"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/fsiqueira/omega-btc-ai.git
+    targetRevision: HEAD
+    path: kubernetes/backup/velero
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: velero
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m 

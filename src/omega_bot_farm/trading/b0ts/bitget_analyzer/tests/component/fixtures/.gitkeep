@@ -1,0 +1,2 @@
+# This file ensures that the fixtures directory is tracked by git
+# This directory will contain test fixtures for component tests 

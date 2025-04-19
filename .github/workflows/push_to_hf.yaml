@@ -1,0 +1,47 @@
+name: Push to Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - divine-book-dashboard-v3
+      - hf-space-setup
+    paths:
+      - 'divine_dashboard_v3/**'
+
+jobs:
+  sync-to-hf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "HF Space Sync Bot"
+          git config --global user.email "bot@example.com"
+
+      - name: Prepare Hugging Face Space files
+        run: |
+          # Create a fresh directory for HF Space
+          mkdir -p /tmp/hf-space
+          
+          # Copy important files from divine_dashboard_v3 to that directory
+          cp -r divine_dashboard_v3/app.py divine_dashboard_v3/.huggingface divine_dashboard_v3/HF_README.md divine_dashboard_v3/requirements.txt /tmp/hf-space/
+
+      - name: Push to Hugging Face Space
+        working-directory: /tmp/hf-space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Initialize git repo
+          git init
+          git add .
+          git commit -m "Update from GitHub Actions"
+          
+          # Add Hugging Face as remote and push
+          git remote add hf https://fartec0:$HF_TOKEN@huggingface.co/spaces/fartec0/divine-dashboard-v3
+          git push -f hf master:main 

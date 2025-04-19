@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prophecy-core
+spec:
+  selector:
+    matchLabels:
+      app: prophecy-core
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prophecy-core
+    spec:
+      containers:
+      - name: prophecy-core
+        image: ${PROPHECY_CORE_IMAGE:-prophecy-core:latest}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 10080
+        env:
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: LOG_LEVEL
+          value: INFO
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /logs
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 10080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 10080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prophecy-core
+spec:
+  selector:
+    app: prophecy-core
+  ports:
+  - port: 10080
+    targetPort: 10080
+  type: ClusterIP 

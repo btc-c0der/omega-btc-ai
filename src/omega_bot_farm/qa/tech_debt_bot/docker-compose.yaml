@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  tech-debt-v001d3r:
+    build:
+      context: ../../../..
+      dockerfile: src/omega_bot_farm/qa/tech_debt_bot/Dockerfile
+    image: omega-btc-ai/tech-debt-v001d3r:latest
+    container_name: tech-debt-v001d3r
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - TECH_DEBT_APP_ID=${TECH_DEBT_APP_ID}
+      - PYTHONPATH=/app
+    volumes:
+      - ../../../..:/app
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    networks:
+      - omega-network
+    restart: unless-stopped
+
+networks:
+  omega-network:
+    external: true

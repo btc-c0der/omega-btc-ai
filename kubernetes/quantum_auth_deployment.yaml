@@ -1,0 +1,221 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantum-auth
+  labels:
+    app: quantum-auth
+    component: quantum-security
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quantum-auth
+  template:
+    metadata:
+      labels:
+        app: quantum-auth
+        component: quantum-security
+    spec:
+      containers:
+      - name: auth-manager
+        image: quantum-pow:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "quantum_pow.security.quantum_auth_server"]
+        env:
+        - name: CONFIG_FILE
+          value: "/app/config/quantum_auth_config.json"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8083
+          name: auth-api
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: auth-api
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: auth-api
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: auth-config
+          mountPath: /app/config
+        - name: auth-data
+          mountPath: /app/data
+      volumes:
+      - name: auth-config
+        configMap:
+          name: quantum-auth-config
+      - name: auth-data
+        persistentVolumeClaim:
+          claimName: quantum-auth-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quantum-auth
+  labels:
+    app: quantum-auth
+spec:
+  selector:
+    app: quantum-auth
+  ports:
+  - port: 8083
+    targetPort: auth-api
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: quantum-auth-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: quantum-auth-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: quantum-auth
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          component: quantum-mining
+    - podSelector:
+        matchLabels:
+          component: quantum-security
+    ports:
+    - protocol: TCP
+      port: 8083
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          component: quantum-mining
+    - podSelector:
+        matchLabels:
+          component: quantum-security
+    ports:
+    - protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quantum-auth-config
+data:
+  quantum_auth_config.json: |
+    {
+      "default_scheme": "one_shot",
+      "token_expiration_seconds": 300,
+      "emergency_rotation": {
+        "enabled": true,
+        "threshold_alerts": 5,
+        "cooldown_hours": 24
+      },
+      "scheme_preferences": [
+        "one_shot",
+        "zk_ecdsa",
+        "dilithium",
+        "falcon",
+        "sphincs"
+      ],
+      "key_rotation": {
+        "schedule": "0 0 * * *",
+        "expiration_days": 7
+      },
+      "metrics": {
+        "enabled": true,
+        "retention_days": 30
+      }
+    }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: quantum-auth-token-cleanup
+spec:
+  schedule: "*/30 * * * *"  # Every 30 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: token-cleanup
+            image: quantum-pow:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "-m", "quantum_pow.security.quantum_auth_cleanup"]
+            args: ["--token-cleanup", "--config", "/app/config/quantum_auth_config.json"]
+            volumeMounts:
+            - name: auth-config
+              mountPath: /app/config
+            - name: auth-data
+              mountPath: /app/data
+          restartPolicy: OnFailure
+          volumes:
+          - name: auth-config
+            configMap:
+              name: quantum-auth-config
+          - name: auth-data
+            persistentVolumeClaim:
+              claimName: quantum-auth-pvc
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: quantum-auth-key-rotation
+spec:
+  schedule: "0 0 * * *"  # Daily at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: key-rotator
+            image: quantum-pow:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "-m", "quantum_pow.security.quantum_auth_rotation"]
+            args: ["--scheduled-rotation", "--config", "/app/config/quantum_auth_config.json"]
+            volumeMounts:
+            - name: auth-config
+              mountPath: /app/config
+            - name: auth-data
+              mountPath: /app/data
+          restartPolicy: OnFailure
+          volumes:
+          - name: auth-config
+            configMap:
+              name: quantum-auth-config
+          - name: auth-data
+            persistentVolumeClaim:
+              claimName: quantum-auth-pvc 

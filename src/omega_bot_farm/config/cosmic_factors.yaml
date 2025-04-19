@@ -1,0 +1,80 @@
+# Cosmic Factors Configuration
+#
+# This file controls how cosmic factors influence trading decisions.
+# Set enabled: false to turn off all cosmic factor influence.
+# Individual factors can be enabled/disabled and weighted.
+
+enabled: true  # Master switch for all cosmic factors
+
+# Individual cosmic factors
+factors:
+  # Lunar influence
+  moon_phase:
+    enabled: true
+    weight: 0.5  # Reduce moon influence by 50%
+    description: "Moon phases affecting trader psychology"
+  
+  # Schumann resonance (electromagnetic field)
+  schumann_resonance:
+    enabled: true
+    weight: 0.3  # Reduce Schumann influence by 70%
+    description: "Earth's electromagnetic resonance affecting decision-making"
+  
+  # Market liquidity conditions
+  market_liquidity:
+    enabled: true
+    weight: 1.0  # Full influence
+    description: "Market liquidity affecting trading risk"
+  
+  # Global market sentiment
+  global_sentiment:
+    enabled: true
+    weight: 1.0  # Full influence
+    description: "Market-wide sentiment affecting trading decisions"
+  
+  # Mercury retrograde
+  mercury_retrograde:
+    enabled: false  # Disabled
+    weight: 0.0
+    description: "Mercury retrograde affecting probability of trading mistakes"
+  
+  # Geographic influence (latitude/season)
+  geographic_influence:
+    enabled: true
+    weight: 0.2  # Minimal influence
+    description: "Geographic location and seasonal effects on trading"
+  
+  # Day/time cycle influences
+  time_cycle:
+    enabled: true
+    weight: 0.8
+    description: "Day of week and time of day effects on trading"
+  
+  # Circadian rhythm effects
+  circadian_rhythm:
+    enabled: true
+    weight: 0.6
+    description: "Trader alertness based on time of day"
+
+# Application of cosmic influences to trading decisions
+application:
+  # Risk appetite affects position sizing
+  risk_appetite: true
+  
+  # Confidence affects entry threshold
+  confidence: true
+  
+  # Insight level affects entry timing
+  insight_level: true
+  
+  # Emotional intensity affects exit decisions
+  emotional_intensity: true
+  
+  # Position size modifiers
+  position_size: true
+  
+  # Entry threshold modifiers
+  entry_threshold: true
+  
+  # Exit impulse modifiers
+  exit_impulse: true 

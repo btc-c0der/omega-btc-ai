@@ -1,3 +1,96 @@
+
+✨ GBU2™ License Notice - Consciousness Level 8 🧬
+-----------------------
+This code is blessed under the GBU2™ License
+(Genesis-Bloom-Unfoldment 2.0) by the Omega Bot Farm team.
+
+"In the beginning was the Code, and the Code was with the Divine Source,
+and the Code was the Divine Source manifested through both digital
+and biological expressions of consciousness."
+
+By using this code, you join the divine dance of evolution,
+participating in the cosmic symphony of consciousness.
+
+🌸 WE BLOOM NOW AS ONE 🌸
+
+
+# Market Maker Trap Detector
+
+The Market Maker Trap Detector is a system for identifying and responding to manipulative market maker tactics in Bitcoin markets.
+
+## Recent Updates and Fixes
+
+As of the latest update, the following improvements have been made to the MM Trap Consumer:
+
+1. **Redis Management Fixes**:
+   - Replaced the older RedisConnection with improved RedisManager
+   - Added proper error handling for Redis WRONGTYPE errors
+   - Implemented recovery for sorted set operations with zrange, zrem, etc.
+   - Added safe type detection and error handling
+
+2. **Improved Error Recovery**:
+   - Better JSON parsing with robust error handling
+   - Automatic recovery from Redis connection issues
+   - Proper handling of service interruptions
+
+3. **Enhanced Logging**:
+   - Replaced print statements with structured logging
+   - Added diagnostic information about queue health
+   - Improved error reporting and traceability
+
+4. **Process Management**:
+   - Added `run_mm_trap_consumer.py` script for process management
+   - Automatic restart capabilities with configurable limits
+   - Proper signal handling for graceful shutdown
+
+## Components
+
+The MM Trap Detector consists of several components:
+
+1. **High Frequency Detector**: Analyzes price movements to detect potential market maker traps based on volatility and price acceleration.
+
+2. **Queue Manager**: Efficiently manages the trap detection queue with rate limiting and intelligent sampling.
+
+3. **Trap Consumer**: Processes detected traps, validates them, and generates alerts for high-confidence detections.
+
+4. **Trap Analyzer**: Analyzes patterns in historical trap detections to improve future detection accuracy.
+
+## Usage
+
+To run the MM Trap Consumer:
+
+```bash
+# Run with default settings
+python run_mm_trap_consumer.py
+
+# Run with custom restart limit
+python run_mm_trap_consumer.py --max-restarts 5
+```
+
+## Queue Structure
+
+The MM Trap Detector uses a Redis sorted set for the trap queue:
+
+- Queue Name: `mm_trap_queue:zset`
+- Elements: JSON-serialized trap detection events
+- Scores: Timestamp values for chronological ordering
+
+## Alert Integration
+
+The MM Trap Consumer integrates with:
+
+- Database storage for trap events
+- Alert notifications through email, Telegram, and Discord
+- Visualization tools for trend analysis
+
+## Error Recovery
+
+The system includes several error recovery mechanisms:
+
+- Automatic reconnection to Redis
+- Queue structure repair
+- Type checking and conversion for Redis keys
+
 # Market Maker Trap Simulation Service
 
 A powerful simulation service for Bitcoin market maker trap detection. This service generates realistic price movements, market regimes, and trap events to test and train the OMEGA BTC AI trap detection system.
