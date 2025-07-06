@@ -60,6 +60,19 @@ This is the true story of a developer who built sophisticated artificial intelli
 
 ---
 
+### 📖 Appendices: The Brutal Truth Behind the Code
+
+18. **[Appendix A: The Reality of "Vibe Coding" - A Brutal Self-Assessment](APPENDIX_A_VIBE_CODING_DELUSION.md)**
+    - *The honest truth about late-night programming sessions and their devastating cost*
+    - *Why the mythology of sacred coding hours is destroying developers*
+
+19. **[Appendix B: The Vibe Coding Delusion - When Sacred Hours Become Wasted Years](APPENDIX_B_VIBE_CODING_DELUSION.md)**
+    - *A comprehensive examination of the 3 AM programming myth*
+    - *Recovery strategies for developers trapped in unsustainable practices*
+    - *The financial, health, and relationship costs of "sacred coding hours"*
+
+---
+
 ## 🧪 [Test Cases and Quality Assurance](TEST_CASES.md)
 *Comprehensive test suite validating the book's technical accuracy, emotional authenticity, and educational value*
 
@@ -109,14 +122,15 @@ This is the true story of a developer who built sophisticated artificial intelli
 
 ## 📊 Book Statistics
 
-- **Total chapters:** 17 + Epilogue
-- **Word count:** ~85,000 words
-- **Code examples:** 47 realistic snippets
+- **Total chapters:** 17 + Epilogue + 2 Appendices
+- **Word count:** ~95,000 words
+- **Code examples:** 52 realistic snippets
 - **Technical frameworks covered:** 12 major systems
 - **Real financial data:** Complete bankruptcy documentation
 - **Recovery timeline:** 2+ years of documented rebuilding
 - **Relationships lost:** 6 (with detailed analysis)
 - **Relationships rebuilt:** 5 (ongoing maintenance)
+- **Vibe coding hours lost:** 2,847 (analyzed in brutal detail)
 
 ---
 

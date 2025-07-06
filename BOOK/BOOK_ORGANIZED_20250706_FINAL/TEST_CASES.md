@@ -447,6 +447,48 @@ def run_all_tests():
     print()
     
     print("🎉 ALL TESTS PASSED! Book is ready for production release.")
+    
+def test_appendix_a_vibe_coding_reality():
+    """Test that Appendix A provides brutal honesty about late-night coding."""
+    appendix_a = load_appendix("APPENDIX_A_VIBE_CODING_DELUSION.md")
+    
+    # Test content accuracy
+    assert appendix_a.contains_specific_metrics()  # Hours lost, relationships damaged
+    assert appendix_a.debunks_programming_mythology()
+    assert appendix_a.provides_recovery_framework()
+    
+    # Test emotional impact
+    assert appendix_a.tone == "brutally_honest"
+    assert appendix_a.shows_real_consequences()
+    assert appendix_a.offers_hope_through_change()
+    
+    # Test practical value
+    assert appendix_a.includes_actionable_advice()
+    assert appendix_a.warns_current_vibe_coders()
+    
+    print("✅ Appendix A provides necessary brutal truth about vibe coding")
+
+def test_appendix_b_vibe_coding_delusion():
+    """Test that Appendix B thoroughly examines the mythology and costs."""
+    appendix_b = load_appendix("APPENDIX_B_VIBE_CODING_DELUSION.md")
+    
+    # Test comprehensive analysis
+    assert appendix_b.analyzes_sacred_hours_mythology()
+    assert appendix_b.provides_financial_cost_breakdown()
+    assert appendix_b.includes_health_impact_analysis()
+    assert appendix_b.documents_relationship_damage()
+    
+    # Test recovery framework
+    assert appendix_b.includes_withdrawal_process()
+    assert appendix_b.provides_sustainable_alternative()
+    assert appendix_b.offers_identity_reconstruction_path()
+    
+    # Test code examples
+    assert appendix_b.code_metaphors_support_message()
+    assert appendix_b.programming_analogies_are_effective()
+    
+    print("✅ Appendix B provides comprehensive vibe coding mythology analysis")
+
     print()
     print("📚 'The Coder's Fall: A Journey from Dreams to Bankruptcy' has been")
     print("   successfully validated against all quality criteria.")

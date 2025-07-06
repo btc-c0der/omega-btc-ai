@@ -93,6 +93,16 @@
 
 ---
 
+### 📖 APPENDICES
+
+**Appendix A: The Reality of "Vibe Coding" - A Brutal Self-Assessment**
+- *The brutal truth about late-night programming sessions and their real cost*
+
+**Appendix B: The Vibe Coding Delusion - When Sacred Hours Become Wasted Years**
+- *A deep dive into the mythology of 3 AM programming and why it's destroying us*
+
+---
+
 ## 💭 Author's Note
 
 This book is the raw, unfiltered story of how a brilliant AI trading system became my beautiful nightmare. It's about the fine line between genius and madness, between innovation and obsession, and the price of pursuing digital dreams at the expense of human reality.
