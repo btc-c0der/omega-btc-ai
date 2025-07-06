@@ -1,0 +1,9 @@
+# Requirements for The Storyteller's Portal
+gradio>=4.0.0
+matplotlib>=3.7.0
+numpy>=1.24.0
+
+# Optional enhancements
+plotly>=5.17.0
+markdown>=3.5.0
+pillow>=10.0.0
