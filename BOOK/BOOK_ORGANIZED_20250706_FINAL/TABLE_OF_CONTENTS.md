@@ -57,21 +57,33 @@
 **Chapter 13: Emotional Trading Journey - A Personal Autopsy**
 - *Analyzing the psychology that led to self-destruction*
 
-**Chapter 14: The GBU2 License - Genesis, Bloom, Unfoldment... and Collapse**
+**Chapter 14: How the IT Industry Learned to Ignore a Coder**
+- *When your brilliance becomes your invisibility - the systematic erasure of inconvenient talent*
+
+**Chapter 15: The GBU2 License - Genesis, Bloom, Unfoldment... and Collapse**
 - *When your philosophical framework can't save you from yourself*
 
 ---
 
 ### 🌱 PART V: THE LESSONS (The Recovery)
 
-**Chapter 15: Test Cases for Life**
+**Chapter 16: Test Cases for Life**
 - *Writing unit tests for personal decisions*
 
-**Chapter 16: Refactoring Reality**
+**Chapter 17: Refactoring Reality**
 - *The slow process of rebuilding from the ground up*
 
-**Chapter 17: Version 2.0 - A Different Kind of Genesis**
+**Chapter 18: Version 2.0 - A Different Kind of Genesis**
 - *What I learned about balance, family, and the true cost of obsession*
+
+**Chapter 19: The Quantum Prophecy - Building Tomorrow's Blockchain Today**
+- *When technical perfection becomes the enemy of practical progress*
+
+**Chapter 20: The Millionaire's Marriage Contract - When Family Wealth Has Terms and Conditions**
+- *How legal documents transform love into liability protection and family into a business arrangement*
+
+**Chapter 21: The Helper's Paradox - When Your Will to Help Becomes Your Mental Health Prison**
+- *How the compulsion to save everyone else can destroy your ability to save yourself*
 
 ---
 
