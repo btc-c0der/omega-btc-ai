@@ -1,0 +1,26 @@
+# MCP Server Requirements
+mcp>=0.9.0
+pydantic>=2.0.0
+uvloop>=0.17.0
+
+# Quantum Computing & Cryptography
+qiskit>=0.45.0
+pycryptodome>=3.19.0
+cryptography>=41.0.0
+
+# Machine Learning & Neural Networks  
+torch>=2.1.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Data Processing
+pandas>=2.0.0
+sympy>=1.12.0
+
+# Async & Networking
+asyncio-mqtt>=0.13.0
+websockets>=11.0.0
+
+# Logging & Monitoring
+structlog>=23.1.0
+prometheus-client>=0.17.0
